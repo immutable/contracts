@@ -73,7 +73,7 @@ describe("ERC721 Preset Test Cases", function () {
       await expect(erc721.connect(user).setOwner(user.address)).to.be.revertedWith("New owner is currently owner");
     });
 
-    it("Should allow the owner to revoke ownership", async function () {
+    it("Should allow the owner to renounce ownership", async function () {
       const adminRole = await erc721.DEFAULT_ADMIN_ROLE();
       await erc721.grantRole(adminRole, ethers.constants.AddressZero)
       await erc721.connect(user).setOwner(ethers.constants.AddressZero)

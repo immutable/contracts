@@ -51,10 +51,6 @@ describe("ERC721 Preset Test Cases", function () {
     it("Should set the contract owner", async function () {
       expect(await erc721.owner()).to.equal(owner.address);
     });
-
-    it("Should increment the tokenId counter", async function () {
-      expect(await erc721.getNextTokenId()).to.equal(1);
-    });
   });
   
   describe("Access Control", function () { 
@@ -76,6 +72,13 @@ describe("ERC721 Preset Test Cases", function () {
     it("Should revert when new owner is already owner", async function () {
       await expect(erc721.connect(user).setOwner(user.address)).to.be.revertedWith("New owner is currently owner");
     });
+
+    it("Should allow the owner to revoke ownership", async function () {
+      const adminRole = await erc721.DEFAULT_ADMIN_ROLE();
+      await erc721.grantRole(adminRole, ethers.constants.AddressZero)
+      await erc721.connect(user).setOwner(ethers.constants.AddressZero)
+      expect(await erc721.owner()).to.equal(ethers.constants.AddressZero);
+    });
   });
 
   describe("Minting", function () { 
@@ -88,7 +91,7 @@ describe("ERC721 Preset Test Cases", function () {
       for (let i = 0; i < mintCount; i++) {
         expect(await erc721.tokenOfOwnerByIndex(minter.address, i)).to.equal(i+1);
       } 
-      expect(await erc721.getNextTokenId()).to.equal(mintCount + 1);
+      expect(await erc721.totalSupply()).to.equal(mintCount);
     });
 
     it("Should revert when caller does not have minter role", async function () {
@@ -128,8 +131,7 @@ describe("ERC721 Preset Test Cases", function () {
 
     it("Should return an empty token URI when the base URI is not set", async function () {
       await erc721.setBaseURI("")
-      const currTokenId = await erc721.getNextTokenId();
-      const tokenId = currTokenId.toNumber() - 1;
+      const tokenId = await erc721.totalSupply();
       expect(await erc721.tokenURI(tokenId)).to.equal("");
     });
   });

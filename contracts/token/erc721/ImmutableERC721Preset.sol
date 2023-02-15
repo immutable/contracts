@@ -2,16 +2,16 @@
 pragma solidity ^0.8.0;
 
 // Token
-import "../../../openzeppelin-contracts/contracts/token/ERC721/ERC721.sol";
-import "../../../openzeppelin-contracts/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "../../../openzeppelin-contracts//contracts/token/ERC721/extensions/ERC721Burnable.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 
 // Access Control
-import "../../../openzeppelin-contracts//contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
 // Utils
-import "../../../openzeppelin-contracts//contracts/utils/math/SafeMath.sol";
-import "../../../openzeppelin-contracts/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract ERC721Preset is ERC721, ERC721Enumerable, ERC721Burnable, AccessControl {
     using SafeMath for uint256;
@@ -44,7 +44,6 @@ contract ERC721Preset is ERC721, ERC721Enumerable, ERC721Burnable, AccessControl
 
     /// @dev Owner of the contract (defined for interopability with applications, e.g. storefront marketplace)
     address private _owner;
-
 
     ///     =====   Constructor  =====
 
@@ -84,14 +83,9 @@ contract ERC721Preset is ERC721, ERC721Enumerable, ERC721Burnable, AccessControl
         return super.supportsInterface(interfaceId);
     }
 
-    /// @dev Returns the next tokenId to be minted
-    function getNextTokenId() public view returns (uint256) {
-        return nextTokenId.current();
-    }
-
     /// @dev Returns the current owner
     function owner() public view returns (address) {
-         return hasRole(DEFAULT_ADMIN_ROLE, _owner) ? _owner : address(0);
+        return _owner;
     }
 
     ///     =====  External functions  =====

@@ -2,11 +2,7 @@
 
 <p align="center"><img src="https://cdn.dribbble.com/users/1299339/screenshots/7133657/media/837237d447d36581ebd59ec36d30daea.gif" width="280"/></p>
 
-## TODO: impl. description
-
-## Contribution
-
-We aim to build robust and feature-rich standards to help all developers onboard and build their projects on StarkNet, and we welcome any and all feedback and contributions to this repository! See our [contribution guideline](CONTRIBUTING.md) for more details on opening Github issues, pull requests requesting features, and providing general feedback.
+## TODO: impl. description and remaining
 
 ## Disclaimers
 

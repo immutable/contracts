@@ -48,22 +48,22 @@ contract ERC721Preset is ERC721, ERC721Enumerable, ERC721Burnable, AccessControl
     ///     =====   Constructor  =====
 
     /**
-     * @dev Grants `DEFAULT_ADMIN_ROLE` to the supplied address
+     * @dev Grants `DEFAULT_ADMIN_ROLE` to the supplied `owner_` address
      * 
      * Sets the name and symbol for the collection
      * Sets the default admin to `owner`
      * Sets the `baseURI` and `tokenURI`
      */
     constructor (
-        address _defaultAdmin, 
+        address owner_, 
         string memory _name, 
         string memory _symbol, 
         string memory baseURI_ , 
         string memory _contractURI
         ) ERC721(_name, _symbol){
         // Initialize state variables
-        _grantRole(DEFAULT_ADMIN_ROLE, _defaultAdmin);
-        _owner = _defaultAdmin;
+        _grantRole(DEFAULT_ADMIN_ROLE, owner_);
+        _owner = owner_;
         baseURI = baseURI_;
         contractURI = _contractURI;
 

@@ -1,46 +1,30 @@
-# Advanced Sample Hardhat Project
+# Immutable X zkEVM Contracts
 
-This project demonstrates an advanced Hardhat use case, integrating other tools commonly used alongside Hardhat in the ecosystem.
+<p align="center"><img src="https://cdn.dribbble.com/users/1299339/screenshots/7133657/media/837237d447d36581ebd59ec36d30daea.gif" width="280"/></p>
 
-The project comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts. It also comes with a variety of other tools, preconfigured to work with the project code.
+## TODO: impl. description
 
-Try running some of the following tasks:
+## Contribution
 
-```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-npx hardhat help
-REPORT_GAS=true npx hardhat test
-npx hardhat coverage
-npx hardhat run scripts/deploy.ts
-TS_NODE_FILES=true npx ts-node scripts/deploy.ts
-npx eslint '**/*.{js,ts}'
-npx eslint '**/*.{js,ts}' --fix
-npx prettier '**/*.{json,sol,md}' --check
-npx prettier '**/*.{json,sol,md}' --write
-npx solhint 'contracts/**/*.sol'
-npx solhint 'contracts/**/*.sol' --fix
-```
+We aim to build robust and feature-rich standards to help all developers onboard and build their projects on StarkNet, and we welcome any and all feedback and contributions to this repository! See our [contribution guideline](CONTRIBUTING.md) for more details on opening Github issues, pull requests requesting features, and providing general feedback.
 
-# Etherscan verification
+## Disclaimers
 
-To try out Etherscan verification, you first need to deploy a contract to an Ethereum network that's supported by Etherscan, such as Ropsten.
+These Cairo contracts are in a very experimental stage and are subject to change without notice. The code has not yet been formally audited or reviewed and may have security vulnerabilities. Do not use in production. We take no responsibility for your implementation decisions and any security problems you might experience.
 
-In this project, copy the .env.example file to a file named .env, and then edit it to fill in the details. Enter your Etherscan API key, your Ropsten node URL (eg from Alchemy), and the private key of the account which will send the deployment transaction. With a valid .env file in place, first deploy your contract:
+## Security
 
-```shell
-hardhat run --network ropsten scripts/deploy.ts
-```
+Please responsibly disclose any security issues you find by reaching out to starknet-security@immutable.com
 
-Then, copy the deployment address and paste it in to replace `DEPLOYED_CONTRACT_ADDRESS` in this command:
+## License
 
-```shell
-npx hardhat verify --network ropsten DEPLOYED_CONTRACT_ADDRESS "Hello, Hardhat!"
-```
+Immutable X StarkNet contracts are released under the Apache-2.0 license. See [LICENSE.md](LICENSE.md) for more details.
 
-# Performance optimizations
+## Links
 
-For faster runs of your tests and scripts, consider skipping ts-node's type checking by setting the environment variable `TS_NODE_TRANSPILE_ONLY` to `1` in hardhat's environment. For more details see [the documentation](https://hardhat.org/guides/typescript.html#performance-optimizations).
+### Socials
+
+- [Twitter](https://twitter.com/Immutable)
+- [Discord](https://discord.gg/6GjgPkp464)
+- [Telegram](https://t.me/immutablex)
+- [Reddit](https://www.reddit.com/r/ImmutableX/)

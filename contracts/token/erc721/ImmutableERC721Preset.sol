@@ -15,17 +15,9 @@ import "../../access/IERC173.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract ERC721Preset is ERC721, ERC721Enumerable, ERC721Burnable, AccessControl, IERC173 {
+contract ImmutableERC721Preset is ERC721, ERC721Enumerable, ERC721Burnable, AccessControl, IERC173 {
     using SafeMath for uint256;
     using Counters for Counters.Counter;
-
-    ///     =====   Events  =====
-
-    /// @dev Emitted when admin updates `baseURI`.
-    event BaseURIUpdated(string oldContractURI, string newBaseURI);
-
-    /// @dev Emitted when admin updated `contractURI`.
-    event ContractURIUpdated(string oldContractURI, string newContractURI);
 
     ///     =====   State Variables  =====
 
@@ -70,8 +62,6 @@ contract ERC721Preset is ERC721, ERC721Enumerable, ERC721Burnable, AccessControl
         nextTokenId.increment();
 
         // Emit events
-        emit BaseURIUpdated("", baseURI_);
-        emit ContractURIUpdated("", contractURI_);
         emit OwnershipTransferred(address(0), _owner);
     }
 
@@ -96,19 +86,15 @@ contract ERC721Preset is ERC721, ERC721Enumerable, ERC721Burnable, AccessControl
 
     /// @dev Allows admin to set the base URI
     function setBaseURI(string memory baseURI_) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        string memory oldBaseURI = baseURI;
         baseURI = baseURI_;
-        emit BaseURIUpdated(oldBaseURI, baseURI);
     }
     
     /// @dev Allows admin to set the contract URI
     function setContractURI(string memory _contractURI) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        string memory oldContractURI = contractURI;
         contractURI = _contractURI;
-        emit ContractURIUpdated(oldContractURI, contractURI);
     }
 
-    /// @dev Allows minter to mint to `to` without cost
+    /// @dev Allows minter to mint `amountMint` to `to`
     function permissionedMint(address to, uint256 amountMint) external onlyRole(MINTER_ROLE) {
         for (uint256 i; i < amountMint; i++) {
             _safeMint(to, nextTokenId.current());

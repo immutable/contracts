@@ -4,7 +4,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 import { ERC721Preset__factory, ERC721Preset } from "../typechain";
 
-describe("ERC721 Preset Test Cases", function () {
+describe("Immutable ERC721 Preset Test Cases", function () {
   this.timeout(300_000); // 5 min
 
   let erc721 : ERC721Preset
@@ -22,7 +22,7 @@ describe("ERC721 Preset Test Cases", function () {
     [owner, user, minter] = await ethers.getSigners();
 
     // Get contract
-    const erc721PresetFactory = (await ethers.getContractFactory("ERC721Preset")) as ERC721Preset__factory;
+    const erc721PresetFactory = (await ethers.getContractFactory("ImmutableERC721Preset")) as ERC721Preset__factory;
 
     // Deploy ERC721 contract and intialize state
     erc721 = await erc721PresetFactory.deploy(owner.address, name, symbol, baseURI, contractURI);
@@ -126,7 +126,9 @@ describe("ERC721 Preset Test Cases", function () {
     });
 
     it("Should allow the default admin to update the base URI", async function () {
-      await expect(erc721.connect(owner).setBaseURI("New Base URI")).to.emit(erc721, "BaseURIUpdated").withArgs(baseURI, "New Base URI")
+      const newBaseURI = "New Base URI"
+      await erc721.connect(owner).setBaseURI(newBaseURI);
+      expect(await erc721.baseURI()).to.equal(newBaseURI);    
     });
 
     it("Should revert with a non-existent tokenId", async function () {
@@ -147,7 +149,7 @@ describe("ERC721 Preset Test Cases", function () {
   describe("Contract URI", function () {
     it("Should allow the default admin to update the base URI", async function () {
       const newContractURI = "New Contract URI";
-      await expect(erc721.connect(owner).setContractURI("New Contract URI")).to.emit(erc721, "ContractURIUpdated").withArgs(contractURI, "New Contract URI")
+      await erc721.connect(owner).setContractURI("New Contract URI")
       expect(await erc721.contractURI()).to.equal(newContractURI);
     });
 

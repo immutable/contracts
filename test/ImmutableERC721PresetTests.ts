@@ -63,6 +63,10 @@ describe("ERC721 Preset Test Cases", function () {
       await erc721.grantRole(adminRole, user.address)
       await expect(erc721.connect(owner).transferOwnership(user.address)).to.emit(erc721, "OwnershipTransferred").withArgs(owner.address, user.address);
       expect(await erc721.owner()).to.equal(user.address);
+
+      // Transfer again
+      await expect(erc721.connect(user).transferOwnership(owner.address)).to.emit(erc721, "OwnershipTransferred").withArgs(user.address, owner.address);
+      expect(await erc721.owner()).to.equal(owner.address);
     });
 
     it("Should revert when caller doesn't have admin role", async function () {
@@ -70,17 +74,17 @@ describe("ERC721 Preset Test Cases", function () {
     });
 
     it("Should revert when caller isn't current owner, even with have admin role", async function () {
-      await expect(erc721.connect(owner).transferOwnership(owner.address)).to.be.revertedWith("Caller must be current owner");
+      await expect(erc721.connect(user).transferOwnership(user.address)).to.be.revertedWith("Caller must be current owner");
     });
 
     it("Should revert when new owner is already owner", async function () {
-      await expect(erc721.connect(user).transferOwnership(user.address)).to.be.revertedWith("New owner is currently owner");
+      await expect(erc721.connect(owner).transferOwnership(owner.address)).to.be.revertedWith("New owner is currently owner");
     });
 
     it("Should allow the owner to renounce ownership", async function () {
       const adminRole = await erc721.DEFAULT_ADMIN_ROLE();
       await erc721.grantRole(adminRole, ethers.constants.AddressZero)
-      await erc721.connect(user).transferOwnership(ethers.constants.AddressZero)
+      await erc721.connect(owner).transferOwnership(ethers.constants.AddressZero)
       expect(await erc721.owner()).to.equal(ethers.constants.AddressZero);
     });
   });

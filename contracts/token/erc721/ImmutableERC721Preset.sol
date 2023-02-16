@@ -36,7 +36,7 @@ contract ERC721Preset is ERC721, ERC721Enumerable, ERC721Burnable, AccessControl
     string public contractURI;
 
     /// @dev Common URIs for individual token URIs.
-    string private baseURI;
+    string public baseURI;
 
     /// @dev the tokenId of the next NFT to be minted.
     Counters.Counter private nextTokenId;

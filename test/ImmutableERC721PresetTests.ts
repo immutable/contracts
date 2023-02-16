@@ -48,6 +48,10 @@ describe("ERC721 Preset Test Cases", function () {
       expect(await erc721.contractURI()).to.equal(contractURI);
     });
 
+    it("Should set base URI", async function () {
+      expect(await erc721.baseURI()).to.equal(baseURI);
+    });
+
     it("Should set the contract owner", async function () {
       expect(await erc721.owner()).to.equal(owner.address);
     });

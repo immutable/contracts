@@ -8,12 +8,14 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 
 // Access Control
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "../../access/IERC173.sol";
+
 
 // Utils
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract ERC721Preset is ERC721, ERC721Enumerable, ERC721Burnable, AccessControl {
+contract ERC721Preset is ERC721, ERC721Enumerable, ERC721Burnable, AccessControl, IERC173 {
     using SafeMath for uint256;
     using Counters for Counters.Counter;
 
@@ -24,9 +26,6 @@ contract ERC721Preset is ERC721, ERC721Enumerable, ERC721Burnable, AccessControl
 
     /// @dev Emitted when admin updated `contractURI`.
     event ContractURIUpdated(string oldContractURI, string newContractURI);
-
-    /// @dev Emitted when a new contract owner is set
-    event OwnerUpdated(address oldOwner, address newOwner);
 
     ///     =====   State Variables  =====
 
@@ -56,19 +55,24 @@ contract ERC721Preset is ERC721, ERC721Enumerable, ERC721Burnable, AccessControl
      */
     constructor (
         address owner_, 
-        string memory _name, 
-        string memory _symbol, 
+        string memory name_, 
+        string memory symbol_, 
         string memory baseURI_ , 
-        string memory _contractURI
-        ) ERC721(_name, _symbol){
+        string memory contractURI_
+        ) ERC721(name_, symbol_){
         // Initialize state variables
         _grantRole(DEFAULT_ADMIN_ROLE, owner_);
         _owner = owner_;
         baseURI = baseURI_;
-        contractURI = _contractURI;
+        contractURI = contractURI_;
 
         // Increment nextTokenId to start from 1 (default is 0)
         nextTokenId.increment();
+
+        // Emit events
+        emit BaseURIUpdated("", baseURI_);
+        emit ContractURIUpdated("", contractURI_);
+        emit OwnershipTransferred(address(0), _owner);
     }
 
     ///     =====   View functions  =====
@@ -79,12 +83,12 @@ contract ERC721Preset is ERC721, ERC721Enumerable, ERC721Burnable, AccessControl
     }
 
     /// @dev Returns the supported interfaces
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, ERC721Enumerable, AccessControl) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, ERC721Enumerable, AccessControl, IERC165) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
     /// @dev Returns the current owner
-    function owner() public view returns (address) {
+    function owner() view external override returns (address) {
         return _owner;
     }
 
@@ -113,13 +117,13 @@ contract ERC721Preset is ERC721, ERC721Enumerable, ERC721Burnable, AccessControl
     }
 
     /// @dev Allows admin to update contract owner. Required that new oner has admin role
-    function setOwner(address newOwner) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function transferOwnership(address newOwner) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         require(hasRole(DEFAULT_ADMIN_ROLE, newOwner), "New owner does not have default admin role");
         require(_owner != newOwner, "New owner is currently owner");
         require(msg.sender == _owner, "Caller must be current owner");
         address oldOwner = _owner;
         _owner = newOwner;
-        emit OwnerUpdated(oldOwner, newOwner);
+        emit OwnershipTransferred(oldOwner, newOwner);
     }
 
     /// @dev internal hook implemented in {ERC721Enumerable}, required for totalSupply()

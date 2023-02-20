@@ -2,19 +2,56 @@
 
 <p align="center"><img src="https://cdn.dribbble.com/users/1299339/screenshots/7133657/media/837237d447d36581ebd59ec36d30daea.gif" width="280"/></p>
 
-## TODO: impl. description and remaining
+zkEVM Contracts is a library of smart contracts targeted at developers who wish to quickly build and deploy their smart contracts on the Immutable zkEVM, a general-purpose permissionless L2 zero-knowledge rollup. The library allows developers to build on contracts curated by Immutable, including (but not limited to):
+
+* Token presets, e.g. ERC721
+
+* Bridging contracts
+
+* Marketplace and AMM contracts 
+
+* Smart Contract Wallets 
+
+These contracts are feature-rich and are the recommended standard on Immutable zkEVM intended for all users and partners within the ecosystem.
+
+## Setup
+
+### Installation
+
+```
+$ npm install @imtbl/zkevm-contracts
+```
+
+### Usage
+Once the `zkevm-contracts` package is installed, use the contracts from the library by importing them:
+
+```solidity
+pragma solidity ^0.8.0;
+
+import "@immutable-zkevm-contracts/contracts/token/ERC721/ImmutableERC721Presest.sol";
+
+contract MyERC721 is ImmutableERC721Presest {
+    constructor() ERC721("MyERC721", "MYERC") {
+    }
+}
+```
+
+## Contribution
+
+We aim to build robust and feature-rich standards to help all developers onboard and build their projects on Immuable zkEVM, and we welcome any and all feedback and contributions to this repository! See our [contribution guideline](CONTRIBUTING.md) for more details on opening Github issues, pull requests requesting features, and providing general feedback.
+
 
 ## Disclaimers
 
-These Cairo contracts are in a very experimental stage and are subject to change without notice. The code has not yet been formally audited or reviewed and may have security vulnerabilities. Do not use in production. We take no responsibility for your implementation decisions and any security problems you might experience.
+These contracts are in a very experimental stage and are subject to change without notice. The code has not yet been formally audited or reviewed and may have security vulnerabilities. Do not use it in production. We take no responsibility for your implementation decisions and any security problems you might experience.
 
 ## Security
 
-Please responsibly disclose any security issues you find by reaching out to starknet-security@immutable.com
+Please responsibly disclose any security issues you find by reaching out to [TODO: security email address]
 
 ## License
 
-Immutable X StarkNet contracts are released under the Apache-2.0 license. See [LICENSE.md](LICENSE.md) for more details.
+Immutable X `zkevm-contracts` contracts are released under the Apache-2.0 license. See [LICENSE.md](LICENSE.md) for more details.
 
 ## Links
 

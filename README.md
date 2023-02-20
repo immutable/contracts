@@ -1,4 +1,4 @@
-# Immutable X zkEVM Contracts
+# Immutable zkEVM Contracts
 
 <p align="center"><img src="https://cdn.dribbble.com/users/1299339/screenshots/7133657/media/837237d447d36581ebd59ec36d30daea.gif" width="280"/></p>
 
@@ -51,7 +51,7 @@ Please responsibly disclose any security issues you find by reaching out to [TOD
 
 ## License
 
-Immutable X zkEVM Contracts contracts are released under the Apache-2.0 license. See [LICENSE.md](LICENSE.md) for more details.
+Immutable zkEVM Contracts are released under the Apache-2.0 license. See [LICENSE.md](LICENSE.md) for more details.
 
 ## Links
 

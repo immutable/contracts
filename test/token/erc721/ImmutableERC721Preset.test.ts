@@ -2,12 +2,12 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
-import { ERC721Preset__factory, ERC721Preset } from "../typechain";
+import { ImmutableERC721Preset__factory, ImmutableERC721Preset } from "../../../typechain";
 
 describe("Immutable ERC721 Preset Test Cases", function () {
   this.timeout(300_000); // 5 min
 
-  let erc721 : ERC721Preset
+  let erc721 : ImmutableERC721Preset
   let owner: SignerWithAddress;
   let user: SignerWithAddress;
   let minter: SignerWithAddress;
@@ -22,15 +22,14 @@ describe("Immutable ERC721 Preset Test Cases", function () {
     [owner, user, minter] = await ethers.getSigners();
 
     // Get contract
-    const erc721PresetFactory = (await ethers.getContractFactory("ImmutableERC721Preset")) as ERC721Preset__factory;
+    const erc721PresetFactory = (await ethers.getContractFactory("ImmutableERC721Preset")) as ImmutableERC721Preset__factory;
 
     // Deploy ERC721 contract and intialize state
     erc721 = await erc721PresetFactory.deploy(owner.address, name, symbol, baseURI, contractURI);
     console.log("Deployed ERC721 to address: ", erc721.address);
 
     // Set up roles
-    const minterRole = await erc721.MINTER_ROLE();
-    await erc721.connect(owner).grantRole(minterRole, minter.address);
+    await erc721.connect(owner).grantMinterRole(minter.address);
   });
 
   describe("Contract Deployment", function () { 

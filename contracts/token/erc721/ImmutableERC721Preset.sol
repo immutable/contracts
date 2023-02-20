@@ -10,7 +10,6 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "../../access/IERC173.sol";
 
-
 // Utils
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
@@ -100,6 +99,11 @@ contract ImmutableERC721Preset is ERC721, ERC721Enumerable, ERC721Burnable, Acce
             _safeMint(to, nextTokenId.current());
             nextTokenId.increment();
         }
+    }
+
+    /// @dev Allows admin grant `user` `MINTER` role
+    function grantMinterRole(address user) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        grantRole(MINTER_ROLE, user);
     }
 
     /// @dev Allows admin to update contract owner. Required that new oner has admin role

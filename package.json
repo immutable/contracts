@@ -1,5 +1,16 @@
 {
-  "name": "hardhat-project",
+  "name": "@imtbl/zkevm-contracts",
+  "description": "Immutable zkEVM Smart Contracts",
+  "version": "1.0.0",
+  "files": [
+    "contracts"
+  ],
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test"
+  },
+  "author": "Immutable",
+  "license": "Apache-2.0",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.2.2",
     "@nomiclabs/hardhat-etherscan": "^3.1.6",

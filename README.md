@@ -38,7 +38,7 @@ contract MyERC721 is ImmutableERC721Presest {
 
 ## Contribution
 
-We aim to build robust and feature-rich standards to help all developers onboard and build their projects on Immuable zkEVM, and we welcome any and all feedback and contributions to this repository! See our [contribution guideline](CONTRIBUTING.md) for more details on opening Github issues, pull requests requesting features, and providing general feedback.
+We aim to build robust and feature-rich standards to help all developers onboard and build their projects on Immuable zkEVM, and we welcome any and all feedback and contributions to this repository! See our [contribution guideline](CONTRIBUTING.md) for more details on opening Github issues, pull requests requesting features, minor security vulnerabilities and providing general feedback.
 
 
 ## Disclaimers
@@ -47,7 +47,7 @@ These contracts are in a very experimental stage and are subject to change witho
 
 ## Security
 
-Please responsibly disclose any security issues you find by reaching out to [TODO: security email address]
+Please responsibly disclose any major security issues you find by reaching out to [TODO: security email address]
 
 ## License
 

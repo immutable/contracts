@@ -1,0 +1,52 @@
+//SPDX-License-Identifier: Apache 2.0
+pragma solidity ^0.8.0;
+
+// Token
+import "./ImmutableERC721Base.sol";
+
+contract ImmutableERC721PermissionedMintable is
+    ImmutableERC721Base
+{
+    ///     =====   State Variables  =====
+
+    /// @dev Only MINTER_ROLE can invoke permissioned mint.
+    bytes32 public constant MINTER_ROLE = bytes32("MINTER_ROLE");
+
+    ///     =====   Constructor  =====
+
+    /**
+     * @dev Grants `DEFAULT_ADMIN_ROLE` to the supplied `owner_` address
+     *
+     * Sets the name and symbol for the collection
+     * Sets the default admin to `owner`
+     * Sets the `baseURI` and `tokenURI`
+     */
+    constructor (
+        address owner_, 
+        string memory name_, 
+        string memory symbol_, 
+        string memory baseURI_ , 
+        string memory contractURI_
+        ) ImmutableERC721Base(owner_,name_, symbol_, baseURI_, contractURI_){
+    }
+
+    ///     =====  External functions  =====
+
+    /// @dev Allows minter to mint `amount` to `to`
+    function permissionedMint(address to, uint256 amount)
+        external
+        onlyRole(MINTER_ROLE)
+    {
+        for (uint256 i; i < amount; i++) {
+            _mintNextToken(to);
+        }
+    }
+
+    /// @dev Allows admin grant `user` `MINTER` role
+    function grantMinterRole(address user)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        grantRole(MINTER_ROLE, user);
+    }
+}

@@ -13,7 +13,7 @@ import "../../access/IERC173.sol";
 // Utils
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract ImmutableERC721Preset is
+contract ImmutableERC721Base is
     ERC721,
     ERC721Enumerable,
     ERC721Burnable,

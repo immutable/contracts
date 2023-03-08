@@ -4,7 +4,7 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
 import { ImmutableERC721PermissionedMintable__factory, ImmutableERC721PermissionedMintable } from "../../../typechain";
 
-describe("Immutable ERC721 Preset Minter Test Cases", function () {
+describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
   this.timeout(300_000); // 5 min
 
   let erc721 : ImmutableERC721PermissionedMintable

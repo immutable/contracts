@@ -2,12 +2,12 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 
-import { ImmutableERC721Preset__factory, ImmutableERC721Preset } from "../../../typechain";
+import { ImmutableERC721PresetMinter__factory, ImmutableERC721PresetMinter } from "../../../typechain";
 
-describe("Immutable ERC721 Preset Test Cases", function () {
+describe("Immutable ERC721 Preset Minter Test Cases", function () {
   this.timeout(300_000); // 5 min
 
-  let erc721 : ImmutableERC721Preset
+  let erc721 : ImmutableERC721PresetMinter
   let owner: SignerWithAddress;
   let user: SignerWithAddress;
   let minter: SignerWithAddress;
@@ -22,7 +22,7 @@ describe("Immutable ERC721 Preset Test Cases", function () {
     [owner, user, minter] = await ethers.getSigners();
 
     // Get contract
-    const erc721PresetFactory = (await ethers.getContractFactory("ImmutableERC721Preset")) as ImmutableERC721Preset__factory;
+    const erc721PresetFactory = (await ethers.getContractFactory("ImmutableERC721PresetMinter")) as ImmutableERC721PresetMinter__factory;
 
     // Deploy ERC721 contract and intialize state
     erc721 = await erc721PresetFactory.deploy(owner.address, name, symbol, baseURI, contractURI);

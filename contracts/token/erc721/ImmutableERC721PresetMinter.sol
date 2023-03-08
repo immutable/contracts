@@ -13,7 +13,7 @@ import "../../access/IERC173.sol";
 // Utils
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract ImmutableERC721Preset is
+contract ImmutableERC721PresetMinter is
     ERC721,
     ERC721Enumerable,
     ERC721Burnable,
@@ -23,6 +23,9 @@ contract ImmutableERC721Preset is
     using Counters for Counters.Counter;
 
     ///     =====   State Variables  =====
+
+    /// @dev Only MINTER_ROLE can invoke permissioned mint.
+    bytes32 public constant MINTER_ROLE = bytes32("MINTER_ROLE");
 
     /// @dev Contract level metadata.
     string public contractURI;
@@ -110,6 +113,24 @@ contract ImmutableERC721Preset is
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
         contractURI = _contractURI;
+    }
+
+    /// @dev Allows minter to mint `amount` to `to`
+    function permissionedMint(address to, uint256 amount)
+        external
+        onlyRole(MINTER_ROLE)
+    {
+        for (uint256 i; i < amount; i++) {
+            _mintNextToken(to);
+        }
+    }
+
+    /// @dev Allows admin grant `user` `MINTER` role
+    function grantMinterRole(address user)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        grantRole(MINTER_ROLE, user);
     }
 
     /// @dev Allows admin to update contract owner. Required that new oner has admin role

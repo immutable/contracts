@@ -118,9 +118,6 @@ abstract contract ImmutableERC721Base is
         contractURI = _contractURI;
     }
 
-    //@dev mint function to be overriden by inheriting contracts
-    function mint(address to, uint256 amount) external virtual{}
-
     /// @dev Allows admin to update contract owner. Required that new oner has admin role
     function transferOwnership(address newOwner)
         external

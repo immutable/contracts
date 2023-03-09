@@ -43,7 +43,7 @@ contract MyERC721 is ImmutableERC721PermissionedMintable {
       symbol, 
       baseURI, 
       contractURI
-      ) 
+    ) 
     {}
 }
 ```

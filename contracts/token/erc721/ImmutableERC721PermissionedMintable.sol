@@ -41,7 +41,6 @@ contract ImmutableERC721PermissionedMintable is
     /// @dev Allows minter to mint `amount` to `to`
     function mint(address to, uint256 amount)
         external
-        override
         onlyRole(MINTER_ROLE)
     {
         for (uint256 i; i < amount; i++) {

@@ -16,7 +16,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 /*
     ImmutableERC721Base is an abstract contract that offers minimum preset functionality without
     an opinionated form of minting. This contract is intended to be inherited and implement it's
-    own minting functionality meet the needs of the inheriting contract.
+    own minting functionality to meet the needs of the inheriting contract.
 */
 
 abstract contract ImmutableERC721Base is

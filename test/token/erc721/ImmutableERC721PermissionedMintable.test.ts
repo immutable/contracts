@@ -91,7 +91,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
   describe("Minting", function () { 
     const mintCount = 3;
     it("Should allow a member of the minter role to access permissioned mints", async function () {
-      await erc721.connect(minter).permissionedMint(minter.address, mintCount);
+      await erc721.connect(minter).mint(minter.address, mintCount);
       expect(await erc721.balanceOf(minter.address)).to.equal(mintCount);
       expect(await erc721.totalSupply()).to.equal(mintCount);
       // Verify tokenIds
@@ -102,11 +102,11 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
     });
 
     it("Should revert when caller does not have minter role", async function () {
-      await expect(erc721.connect(user).permissionedMint(user.address, 1)).to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x4d494e5445525f524f4c45000000000000000000000000000000000000000000");
+      await expect(erc721.connect(user).mint(user.address, 1)).to.be.revertedWith("AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x4d494e5445525f524f4c45000000000000000000000000000000000000000000");
     });
 
     it("Should mint no tokens with a mint amount of 0", async function () {
-      await erc721.connect(minter).permissionedMint(minter.address, 0);
+      await erc721.connect(minter).mint(minter.address, 0);
       expect(await erc721.totalSupply()).to.equal(mintCount);
     });
   });
@@ -154,6 +154,19 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
 
     it("Should revert with a caller does not have admin role", async function () {
       await expect(erc721.connect(minter).setContractURI("New Contract URI")).to.be.revertedWith("AccessControl: account 0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+    });
+  });
+
+  describe("Supported Interfaces", function () {
+    it("Should return true on supported interfaces", async function () {
+      // ERC165
+      expect(await erc721.supportsInterface("0x01ffc9a7")).to.equal(true);
+      // ERC721 
+      expect(await erc721.supportsInterface("0x80ac58cd")).to.equal(true);
+      // ERC721Metadata
+      expect(await erc721.supportsInterface("0x5b5e139f")).to.equal(true);
+      // ERC721Enumerable
+      expect(await erc721.supportsInterface("0x780e9d63")).to.equal(true);
     });
   });
 });

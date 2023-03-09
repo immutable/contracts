@@ -13,7 +13,13 @@ import "../../access/IERC173.sol";
 // Utils
 import "@openzeppelin/contracts/utils/Counters.sol";
 
-contract ImmutableERC721Base is
+/*
+    ImmutableERC721Base is an abstract contract that offers minimum preset functionality without
+    an opinionated form of minting. This contract is intended to be inherited and implement it's
+    own minting functionality to meet the needs of the inheriting contract.
+*/
+
+abstract contract ImmutableERC721Base is
     ERC721,
     ERC721Enumerable,
     ERC721Burnable,
@@ -122,11 +128,11 @@ contract ImmutableERC721Base is
             hasRole(DEFAULT_ADMIN_ROLE, newOwner),
             "New owner does not have default admin role"
         );
-        require(_owner != newOwner, "New owner is currently owner");
-        require(msg.sender == _owner, "Caller must be current owner");
-        address oldOwner = _owner;
+        address owner_ = _owner;
+        require(owner_ != newOwner, "New owner is currently owner");
+        require(msg.sender == owner_, "Caller must be current owner");
         _owner = newOwner;
-        emit OwnershipTransferred(oldOwner, newOwner);
+        emit OwnershipTransferred(owner_, newOwner);
     }
 
     /// @dev Internal hook implemented in {ERC721Enumerable}, required for totalSupply()

@@ -4,6 +4,12 @@ pragma solidity ^0.8.0;
 // Token
 import "./ImmutableERC721Base.sol";
 
+/*
+    ImmutableERC721PermissionedMintable is a preset contract that inherits from ImmutableERC721Base
+    and overrides the mint function to provide a permissioned mint function. The contract adds a
+    MINTER_ROLE that allows members of the role to access the `mint` function.
+*/
+
 contract ImmutableERC721PermissionedMintable is
     ImmutableERC721Base
 {
@@ -33,7 +39,7 @@ contract ImmutableERC721PermissionedMintable is
     ///     =====  External functions  =====
 
     /// @dev Allows minter to mint `amount` to `to`
-    function permissionedMint(address to, uint256 amount)
+    function mint(address to, uint256 amount)
         external
         onlyRole(MINTER_ROLE)
     {

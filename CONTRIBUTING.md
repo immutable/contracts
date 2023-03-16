@@ -1,6 +1,6 @@
 # Contributing to Immutable zkEVM Contracts
 
-We greatly appreciate all community feedback and contributions to this repository. This guide will walk you through the different ways you can contribute, including opening GitHub issues, pull requests, requesting features, and providing general feedback. For any security disclosures, please email [TODO-security@immutable.com]
+We greatly appreciate all community feedback and contributions to this repository. This guide will walk you through the different ways you can contribute, including opening GitHub issues, pull requests, requesting features, and providing general feedback. For any security disclosures, please email security@immutable.com.
 
 ## Opening an issue
 
@@ -10,14 +10,13 @@ You should create an issue to open discussions when:
 
 - **Before starting development on a significant pull request** - Use GitHub issues as a way to collaboratively propose, design, and discuss any development work you plan to do.
 - **Proposing new features or ideas** - If you just have an idea or feature you'd like to see, drop the details into a GitHub issue for us to keep track of. Be specific with any requests, and include descriptions of what you would like to be added and what problems it would solve.
-- **Reporting a bug or minor security vulnerability** - As above, opening an issue helps us keep track of and prioritize any bugs or minor security vulnerabilities vulnerabilities. Make sure to include all the relevant information, e.g. code snippets, error messages, stack traces, environment, reproduction steps, etc, to help us effectively diagnose and address the issue. Please also reach out to [TODO: security email address].
+- **Reporting a bug or minor security vulnerability** - As above, opening an issue helps us keep track of and prioritize any bugs or minor security vulnerabilities vulnerabilities. Make sure to include all the relevant information, e.g. code snippets, error messages, stack traces, environment, reproduction steps, etc, to help us effectively diagnose and address the issue. Please also reach out to security@immutable.com.
 
 There is usually no need to create an issue when:
 
 - **An issue or open PR for the topic already exists** - Please continue or reopen the existing thread to keep all the discussion in one place.
 - **The PR is relatively small and obvious (e.g. small fixes, typos, etc)** - If the changes do not require a discussion, simply filling out the PR description template will suffice.
-- **Requesting development help** - If you run into any issues and require help setting up or using our contracts, feel free to reach out on Discord [TODO: what channel?] channel where we or the rest of the dev community will be happy to answer questions.
-- **Providing comments or general feedback** - We generally use GitHub issues for actionable feedback or tasks (e.g. feature requests or bugs), but we welcome all forms of feedback. We would love to see you share your thoughts and comments in our [TODO: what channel?] Discord channel and engage with the rest of the community.
+- **Providing comments or general feedback** - Please use GitHub issues for actionable feedback or tasks (e.g. feature requests or bugs).
 
 ## Opening a Pull Request
 

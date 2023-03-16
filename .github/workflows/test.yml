@@ -1,0 +1,19 @@
+name: test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  hardhat-test:
+    name: Run Hardhat Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Install NPM Dependencies
+        run: npm install
+      - name: Run Tests
+        run: npm run test

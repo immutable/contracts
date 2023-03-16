@@ -55,7 +55,9 @@ We aim to build robust and feature-rich standards to help all developers onboard
 
 ## Disclaimers
 
-These contracts are in a very experimental stage and are subject to change without notice. The code has not yet been formally audited or reviewed and may have security vulnerabilities. Do not use it in production. We take no responsibility for your implementation decisions and any security problems you might experience.
+These contracts are in an experimental stage and are subject to change without notice. The code must still be formally audited or reviewed and may have security vulnerabilities. Do not use it in production. We take no responsibility for your implementation decisions and any security problems you might experience.
+
+We will audit these contracts before our mainnet launch.
 
 ## Security
 

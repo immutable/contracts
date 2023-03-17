@@ -2,7 +2,6 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/interfaces/IERC2981.sol";
-import "hardhat/console.sol";
 
 contract MockMarketplace {
     IERC721 public tokenAddress;
@@ -13,7 +12,7 @@ contract MockMarketplace {
         royaltyAddress = IERC2981(_tokenAddress);
     }
 
-    function executeTransfer(address recipient, uint256 _tokenId) public payable {
+    function executeTransfer(address recipient, uint256 _tokenId) public {
         tokenAddress.transferFrom(msg.sender, recipient, _tokenId);
     }
 

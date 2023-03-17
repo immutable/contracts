@@ -193,13 +193,16 @@ abstract contract ImmutableERC721Base is
 
     /// @dev Internal function to validate whether approval targets are whitelisted or EOA
     function _validateApproval(address targetApproval) internal view {
-        // Check for:
-        // 1. approval target is an EOA
-        // 2. approval target address is whitelisted or target address bytecode is whitelisted
-        if (targetApproval.code.length == 0 || royaltyWhitelist.isAddressWhitelisted(targetApproval)){
-            return;
+        // Only check if the registry is set
+        if(address(royaltyWhitelist).code.length > 0) {
+             // Check for:
+            // 1. approval target is an EOA
+            // 2. approval target address is whitelisted or target address bytecode is whitelisted
+            if (targetApproval.code.length == 0 || royaltyWhitelist.isAddressWhitelisted(targetApproval)){
+                return;
+            }
+            revert ApproveTargetNotInWhitelist(targetApproval);
         }
-        revert ApproveTargetNotInWhitelist(targetApproval);
     }
 
     /// @dev Override of internal transfer from {ERC721} function to include validation
@@ -214,14 +217,17 @@ abstract contract ImmutableERC721Base is
 
     /// @dev Internal function to validate whether the calling address is an EOA or whitelisted
     function _validateTransfer() internal view {
-        // Check for:
-        // 1. caller is an EOA
-        // 2. caller is whitelisted or is the calling address bytecode is whitelisted
-        if(msg.sender == tx.origin || royaltyWhitelist.isAddressWhitelisted(msg.sender))
-        {
-            return;
+        // Only check if the registry is set
+        if (address(royaltyWhitelist).code.length > 0) {
+            // Check for:
+            // 1. caller is an EOA
+            // 2. caller is whitelisted or is the calling address bytecode is whitelisted
+            if(msg.sender == tx.origin || royaltyWhitelist.isAddressWhitelisted(msg.sender))
+            {
+                return;
+            }
+            revert CallerNotInWhitelist(msg.sender);
         }
-        revert CallerNotInWhitelist(msg.sender);
     }
 
     /// @dev Internal function to mint a new token with the next token ID

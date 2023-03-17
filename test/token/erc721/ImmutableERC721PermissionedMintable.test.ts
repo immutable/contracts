@@ -20,6 +20,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
   let user: SignerWithAddress;
   let minter: SignerWithAddress;
   let registrar: SignerWithAddress;
+  let royaltyRecipient: SignerWithAddress;
   let buyer: SignerWithAddress;
   let seller: SignerWithAddress;
 
@@ -31,7 +32,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
 
   before(async function () {
     // Retrieve accounts
-    [owner, user, minter, registrar, buyer, seller] = await ethers.getSigners();
+    [owner, user, minter, registrar, royaltyRecipient, buyer, seller] = await ethers.getSigners();
 
     // Get contract
     const erc721PresetFactory = (await ethers.getContractFactory(
@@ -45,7 +46,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
       symbol,
       baseURI,
       contractURI,
-      owner.address,
+      royaltyRecipient.address,
       royalty
     );
     
@@ -241,7 +242,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
       const salePrice = ethers.utils.parseEther("1");
       const tokenInfo = await erc721.royaltyInfo(2, salePrice);
 
-      expect(tokenInfo[0]).to.be.equal(owner.address);
+      expect(tokenInfo[0]).to.be.equal(royaltyRecipient.address);
       // (10000*200)/10000 = 200
       expect(tokenInfo[1]).to.be.equal(ethers.utils.parseEther("0.2"));
     });
@@ -257,10 +258,24 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
     });
 
     it("Should enforce royalties on a marketplace trade", async function () {
+      // Get royalty info
+      const salePrice = ethers.utils.parseEther("1");
+      const tokenInfo = await erc721.royaltyInfo(2, salePrice);
+      // Mint Nft to seller
       await erc721.connect(minter).mint(seller.address, 1);
+      // Approve marketplace
       await erc721.connect(seller).setApprovalForAll(mockMarketplace.address, true);
-      await mockMarketplace.connect(buyer).executeTransferRoyalties(seller.address, buyer.address, 4, ethers.utils.parseEther("1"), {value: ethers.utils.parseEther("1")});
-      
+      // Get pre-trade balances
+      const recipientBal = await ethers.provider.getBalance(royaltyRecipient.address);
+      const sellerBal = await ethers.provider.getBalance(seller.address);
+      // Execute trade
+      await mockMarketplace.connect(buyer).executeTransferRoyalties(seller.address, buyer.address, 4, salePrice, {value: salePrice});
+      // Check if buyer recieved NFT
+      expect(await erc721.tokenOfOwnerByIndex(buyer.address, 0)).to.be.equal(4);
+      // Check if royalty recipient has increased balance newBal = oldBal + royaltyAmount
+      expect(await ethers.provider.getBalance(royaltyRecipient.address)).to.equal(recipientBal.add(tokenInfo[1]));
+      // Check if seller has increased balance newBal = oldBal + (salePrice - royaltyAmount)
+      expect(await ethers.provider.getBalance(seller.address)).to.equal(sellerBal.add(salePrice.sub(tokenInfo[1])));
     });
   });
 });

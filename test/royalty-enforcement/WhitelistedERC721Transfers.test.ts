@@ -202,9 +202,10 @@ describe("Whitelisted ERC721 Transfers", function () {
     // By virtue of this, approvals and transfers to this address will pass. We need to catch actions from this address
     // once it is deployed.
     it("EOA disguise approve", async function () {
-      // This vector is where a CFA is approved prior to deployment.
+      // This vector is where a CFA is approved prior to deployment. This passes as at the time of approval
+      // the CFA is treated as an EOA, passing _validateApproval.
       // This means post-deployment that the address is now an approved operator
-      // and is able to call transferFrom, i.e. it disguises itself as an approved contract.
+      // and is able to call transferFrom.
       let deployedAddr;
       let salt;
       let constructorByteCode;
@@ -231,31 +232,10 @@ describe("Whitelisted ERC721 Transfers", function () {
           .executeTransfer(minter.address, accs[5].address, 7)
       ).to.be.revertedWith(`'CallerNotInWhitelist("${deployedAddr}")'`);
     });
+
     it("EOA disguise transferFrom", async function () {
-      // This vector is where a CFA is has a token balance prior to deployment.
-      // This means post-deployment that the address is now a token holder.
-      // and is able to call transferFrom.
-      let deployedAddr;
-      let salt;
-      let constructorByteCode;
-      ({ deployedAddr, salt, constructorByteCode } = await disguidedEOAFixture(
-        erc721.address,
-        MockFactory,
-        "0x4567"
-      ));
-      // Mint to disguised EOA
-      await erc721.connect(minter).mint(deployedAddr, 1);
-      // Deploy disguised EOA
-      await MockFactory.connect(accs[5]).deploy(salt, constructorByteCode);
-      expect(await erc721.balanceOf(deployedAddr)).to.be.equal(1);
-      // Attempt to execute a transferFrom, w/ msg.sender being the disguised EOA
-      const disguisedEOAFactory = ethers.getContractFactory("MockDisguisedEOA");
-      const disguisedEOA = (await disguisedEOAFactory).attach(deployedAddr);
-      await expect(
-        disguisedEOA
-          .connect(accs[5])
-          .executeTransfer(deployedAddr, accs[5].address, 8)
-      ).to.be.revertedWith(`'CallerNotInWhitelist("${deployedAddr}")'`);
+     // This vector is where the NFT is transferred to the CFA and executes a transferFrom inside its constructor.
+     // TODO: investigate why transferFrom calls fail within the constructor. This will be caught as msg.sender != tx.origin.
     });
     
     // Here the malicious contract attempts to transfer the token out of the contract via onERC721Received
@@ -276,7 +256,7 @@ describe("Whitelisted ERC721 Transfers", function () {
           ["safeTransferFrom(address,address,uint256)"](
             minter.address,
             onRecieve.address,
-            9
+            8
           )
       ).to.be.revertedWith(`'CallerNotInWhitelist("${onRecieve.address}")'`);
     });

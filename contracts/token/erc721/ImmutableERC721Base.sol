@@ -34,13 +34,17 @@ abstract contract ImmutableERC721Base is
     IERC173
 {
     using Counters for Counters.Counter;
+    ///     =====     Errors         =====
 
+    /// @dev Error thrown when calling address is not whitelisted
     error CallerNotInWhitelist(address caller);
+
+    /// @dev Error thrown when approve target is not whitelisted
     error ApproveTargetNotInWhitelist(address target);
 
-    ///     =====   Events           =====
+    ///     =====     Events         =====
 
-    /// @dev Emitted whenever the contract owner changes the transfer whitelist registry
+    /// @dev Emitted whenever the transfer whitelist registry is updated
     event RoyaltytWhitelistRegistryUpdated(address oldRegistry, address newRegistry);
 
     ///     =====   State Variables  =====
@@ -68,6 +72,7 @@ abstract contract ImmutableERC721Base is
      * Sets the name and symbol for the collection
      * Sets the default admin to `owner`
      * Sets the `baseURI` and `tokenURI`
+     * Sets the royalty receiver and amount (this can not be changed once set)
      */
     constructor (
         address owner_, 
@@ -156,7 +161,7 @@ abstract contract ImmutableERC721Base is
         emit OwnershipTransferred(owner_, newOwner);
     }
 
-    /// @dev Allows admin to set or update the address of the royalty whitelist registry
+    /// @dev Allows admin to set or update the royalty whitelist registry
     function setRoyaltyWhitelistRegistry(address _royaltyWhitelist) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(IERC165(_royaltyWhitelist).supportsInterface(type(IRoyaltyWhitelist).interfaceId), "contract does not implement IRoyaltyWhitelist");
 
@@ -174,17 +179,19 @@ abstract contract ImmutableERC721Base is
         super._beforeTokenTransfer(from, to, tokenId, batchSize);
     }
 
+    /// @dev Override of setApprovalForAll from {ERC721}, with added whitelist approval validation
     function setApprovalForAll(address operator, bool approved) public override {
         _validateApproval(operator);
         super.setApprovalForAll(operator, approved);
     }
 
+    /// @dev Override of approve from {ERC721}, with added whitelist approval validation
     function approve(address to, uint256 tokenId) public override {
         _validateApproval(to);
         super.approve(to, tokenId);
     }
 
-    /// @dev Internal function to validate approval targets
+    /// @dev Internal function to validate whether approval targets are whitelisted or EOA
     function _validateApproval(address targetApproval) internal view {
         // Check for:
         // 1. approval target is an EOA
@@ -195,7 +202,7 @@ abstract contract ImmutableERC721Base is
         revert ApproveTargetNotInWhitelist(targetApproval);
     }
 
-    /// @dev Override of internal transfer function to include validation
+    /// @dev Override of internal transfer from {ERC721} function to include validation
        function _transfer(
         address from,
         address to,
@@ -205,11 +212,11 @@ abstract contract ImmutableERC721Base is
         super._transfer(from, to, tokenId);
     }
 
-    /// @dev Internal function to validate whether an address is whitelisted
+    /// @dev Internal function to validate whether the calling address is an EOA or whitelisted
     function _validateTransfer() internal view {
         // Check for:
         // 1. caller is an EOA
-        // 2. caller is an approved address or is the calling address' bytecode approved
+        // 2. caller is whitelisted or is the calling address bytecode is whitelisted
         if(msg.sender == tx.origin || royaltyWhitelist.isAddressWhitelisted(msg.sender))
         {
             return;

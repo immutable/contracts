@@ -6,8 +6,14 @@ import {
   MockMarketplace,
   MockFactory,
   RoyaltyWhitelist,
+  MockOnReceive,
+  MockOnReceive__factory,
 } from "../../typechain";
-import { whitelistFixture, walletSCFixture, disguidedEOAFixture } from "../utils/DeployFixtures";
+import {
+  whitelistFixture,
+  walletSCFixture,
+  disguidedEOAFixture,
+} from "../utils/DeployFixtures";
 
 describe("Whitelisted ERC721 Transfers", function () {
   this.timeout(300_000); // 5 min
@@ -15,7 +21,6 @@ describe("Whitelisted ERC721 Transfers", function () {
   let minter: SignerWithAddress;
   let accs: SignerWithAddress[];
   let registrar: SignerWithAddress;
-  let regsitrarTwo: SignerWithAddress;
   let scWallet: SignerWithAddress;
   let erc721: ImmutableERC721PermissionedMintable;
   let MockFactory: MockFactory;
@@ -24,7 +29,7 @@ describe("Whitelisted ERC721 Transfers", function () {
   let deployedSCWalletAddr: string;
 
   before(async function () {
-    [owner, minter, registrar, regsitrarTwo, scWallet, ...accs] =
+    [owner, minter, registrar, scWallet, ...accs] =
       await ethers.getSigners();
     ({ erc721, MockFactory, royaltyWhitelist, mockMarketPlace } =
       await whitelistFixture(owner));
@@ -42,14 +47,16 @@ describe("Whitelisted ERC721 Transfers", function () {
   describe("Royalty Whitelist Registry setting", function () {
     it("Should set the whitelist registry to a contract the implements the IRoyaltyWhitelist interface", async function () {
       // TODO: verify event here
-      await erc721
+      await expect(erc721
         .connect(owner)
-        .setRoyaltyWhitelistRegistry(royaltyWhitelist.address);
+        .setRoyaltyWhitelistRegistry(royaltyWhitelist.address)).to.emit(erc721, "RoyaltytWhitelistRegistryUpdated")
+        .withArgs(ethers.constants.AddressZero, royaltyWhitelist.address);
 
       expect(await erc721.royaltyWhitelist()).to.equal(
         royaltyWhitelist.address
       );
     });
+    
     it("Should not allow non-contract accounts to be set", async function () {
       // These should fail on the IERC165.supportsInterface call
       // Zero address
@@ -177,7 +184,7 @@ describe("Whitelisted ERC721 Transfers", function () {
 
     it("Should not block transfers from a whitelisted contract", async function () {
       expect(await erc721.balanceOf(accs[3].address)).to.be.equal(0);
-      await mockMarketPlace.connect(minter).executeTransfer(accs[3].address, 2);
+      await mockMarketPlace.connect(minter).executeTransfer(accs[3].address, 2, 0);
       expect(await erc721.balanceOf(accs[3].address)).to.be.equal(1);
     });
 
@@ -194,7 +201,7 @@ describe("Whitelisted ERC721 Transfers", function () {
   describe("Malicious Contracts", function () {
     // The EOA disguise vector is a where a pre-computed CREATE2 deterministic address is disguised as an EOA.
     // By virtue of this, approvals and transfers to this address will pass. We need to catch actions from this address
-    // once it is deployed. 
+    // once it is deployed.
     it("EOA disguise approve", async function () {
       // This vector is where a CFA is approved prior to deployment.
       // This means post-deployment that the address is now an approved operator
@@ -203,32 +210,41 @@ describe("Whitelisted ERC721 Transfers", function () {
       let salt;
       let constructorByteCode;
 
-      ({ deployedAddr, salt, constructorByteCode } =
-        await disguidedEOAFixture(erc721.address, MockFactory, "0x1234"));
+      ({ deployedAddr, salt, constructorByteCode } = await disguidedEOAFixture(
+        erc721.address,
+        MockFactory,
+        "0x1234"
+      ));
       // Approve disguised EOA
       await erc721.connect(minter).mint(minter.address, 1);
       await erc721.connect(minter).setApprovalForAll(deployedAddr, true);
       // Deploy disguised EOA
       await MockFactory.connect(accs[5]).deploy(salt, constructorByteCode);
-      expect(await erc721.isApprovedForAll(minter.address, deployedAddr)).to.be.equal(true);
+      expect(
+        await erc721.isApprovedForAll(minter.address, deployedAddr)
+      ).to.be.equal(true);
       // Attempt to execute a transferFrom, w/ msg.sender being the disguised EOA
       const disguisedEOAFactory = ethers.getContractFactory("MockDisguisedEOA");
       const disguisedEOA = (await disguisedEOAFactory).attach(deployedAddr);
       await expect(
-         disguisedEOA.connect(minter).executeTransfer(minter.address, accs[5].address, 7)
-      ).to.be.revertedWith(
-        `'CallerNotInWhitelist("${deployedAddr}")'`)
+        disguisedEOA
+          .connect(minter)
+          .executeTransfer(minter.address, accs[5].address, 7)
+      ).to.be.revertedWith(`'CallerNotInWhitelist("${deployedAddr}")'`);
     });
     it("EOA disguise transferFrom", async function () {
       // This vector is where a CFA is has a token balance prior to deployment.
-      // This means post-deployment that the address is now a token holder. 
+      // This means post-deployment that the address is now a token holder.
       // and is able to call transferFrom.
       let deployedAddr;
       let salt;
       let constructorByteCode;
-      ({ deployedAddr, salt, constructorByteCode } =
-        await disguidedEOAFixture(erc721.address, MockFactory, "0x4567"));
-      // Approve disguised EOA
+      ({ deployedAddr, salt, constructorByteCode } = await disguidedEOAFixture(
+        erc721.address,
+        MockFactory,
+        "0x4567"
+      ));
+      // Mint to disguised EOA
       await erc721.connect(minter).mint(deployedAddr, 1);
       // Deploy disguised EOA
       await MockFactory.connect(accs[5]).deploy(salt, constructorByteCode);
@@ -237,9 +253,33 @@ describe("Whitelisted ERC721 Transfers", function () {
       const disguisedEOAFactory = ethers.getContractFactory("MockDisguisedEOA");
       const disguisedEOA = (await disguisedEOAFactory).attach(deployedAddr);
       await expect(
-         disguisedEOA.connect(accs[5]).executeTransfer(deployedAddr, accs[5].address, 8)
-      ).to.be.revertedWith(
-        `'CallerNotInWhitelist("${deployedAddr}")'`)
+        disguisedEOA
+          .connect(accs[5])
+          .executeTransfer(deployedAddr, accs[5].address, 8)
+      ).to.be.revertedWith(`'CallerNotInWhitelist("${deployedAddr}")'`);
+    });
+    
+    // Here the malicious contract attempts to transfer the token out of the contract via onERC721Received
+    it("onRecieve transferFrom", async function () {
+      let onRecieve: MockOnReceive;
+      const mockOnReceiveFactory = (await ethers.getContractFactory(
+        "MockOnReceive"
+      )) as MockOnReceive__factory;
+      onRecieve = await mockOnReceiveFactory.deploy(
+        erc721.address,
+        accs[6].address
+      );
+      await erc721.connect(minter).mint(minter.address, 1);
+      console.log(onRecieve.address);
+      await expect(
+        erc721
+          .connect(minter)
+          ["safeTransferFrom(address,address,uint256)"](
+            minter.address,
+            onRecieve.address,
+            9
+          )
+      ).to.be.revertedWith(`'CallerNotInWhitelist("${onRecieve.address}")'`);
     });
   });
 });

@@ -160,8 +160,8 @@ abstract contract ImmutableERC721Base is
     function setRoyaltyWhitelistRegistry(address _royaltyWhitelist) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(IERC165(_royaltyWhitelist).supportsInterface(type(IRoyaltyWhitelist).interfaceId), "contract does not implement IRoyaltyWhitelist");
 
-        royaltyWhitelist = IRoyaltyWhitelist(_royaltyWhitelist);
         emit RoyaltytWhitelistRegistryUpdated(address(royaltyWhitelist), _royaltyWhitelist);
+        royaltyWhitelist = IRoyaltyWhitelist(_royaltyWhitelist);
     }
 
     /// @dev Internal hook implemented in {ERC721Enumerable}, required for totalSupply()

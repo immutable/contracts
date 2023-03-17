@@ -10,7 +10,8 @@ contract MockMarketplace {
         tokenAddress = _tokenAddress;
     }
 
-    function executeTransfer(address recipient, uint256 _tokenId) external {
+    function executeTransfer(address recipient, uint256 _tokenId, uint256 price) public payable {
+        require(msg.value == price, "insufficient msg.value");
         tokenAddress.transferFrom(msg.sender, recipient, _tokenId);
     }
 }

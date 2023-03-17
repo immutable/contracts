@@ -34,12 +34,11 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
     // Retrieve accounts
     [owner, user, minter, registrar, royaltyRecipient, buyer, seller] = await ethers.getSigners();
 
-    // Get contract
+    // Deploy ERC721 contract
     const erc721PresetFactory = (await ethers.getContractFactory(
       "ImmutableERC721PermissionedMintable"
     )) as ImmutableERC721PermissionedMintable__factory;
 
-    // Deploy ERC721 contract and intialize state
     erc721 = await erc721PresetFactory.deploy(
       owner.address,
       name,
@@ -243,7 +242,8 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
       const tokenInfo = await erc721.royaltyInfo(2, salePrice);
 
       expect(tokenInfo[0]).to.be.equal(royaltyRecipient.address);
-      // (10000*200)/10000 = 200
+      // (_salePrice * royalty.royaltyFraction) / _feeDenominator();
+      // (1e18 * 2000) / 10000 = 2e17 (0.2 eth)
       expect(tokenInfo[1]).to.be.equal(ethers.utils.parseEther("0.2"));
     });
 

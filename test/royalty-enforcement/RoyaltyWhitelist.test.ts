@@ -13,9 +13,7 @@ describe("Royalty Enforcement Test Cases", function () {
   this.timeout(300_000); // 5 min
 
   let owner: SignerWithAddress;
-  let minter: SignerWithAddress;
   let registrar: SignerWithAddress;
-  let regsitrarTwo: SignerWithAddress;
   let scWallet: SignerWithAddress;
   let erc721: ImmutableERC721PermissionedMintable;
   let MockFactory: MockFactory;
@@ -23,15 +21,15 @@ describe("Royalty Enforcement Test Cases", function () {
   let mockMarketPlace: MockMarketplace;
 
   before(async function () {
-    [owner, minter, registrar, regsitrarTwo, scWallet] =
+    [owner, registrar, scWallet] =
       await ethers.getSigners();
+
+    // Deploy all required contracts
     ({ erc721, MockFactory, royaltyWhitelist, mockMarketPlace } =
       await whitelistFixture(owner));
 
+    // Grant registrar role
     await royaltyWhitelist.connect(owner).grantRegistrarRole(registrar.address);
-    await royaltyWhitelist
-      .connect(owner)
-      .grantRegistrarRole(regsitrarTwo.address);
   });
 
   describe("Contract Deployment", function () {
@@ -79,7 +77,7 @@ describe("Royalty Enforcement Test Cases", function () {
     });
   });
 
-  describe("White listing", function () {
+  describe("Whitelisting of Bytecode and Addresses", function () {
     it("Should add the bytecode of a deployed CREATE2 contract to the whitelist and then remove it from the whitelist", async function () {
       // Deploy SC wallet and get deployed address
       const deployedAddr = await walletSCFixture(scWallet, erc721.address, MockFactory);
@@ -111,7 +109,7 @@ describe("Royalty Enforcement Test Cases", function () {
         .false;
     });
 
-    it("Should not allow already whitelisted bytecodes and EOA bytecodes to be added", async function () {
+    it("Should not allow already whitelisted bytecode and EOA bytecode to be added", async function () {
       // Approve random bytecode
       await expect(
         royaltyWhitelist

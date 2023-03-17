@@ -17,29 +17,34 @@ import {
 
 describe("Whitelisted ERC721 Transfers", function () {
   this.timeout(300_000); // 5 min
-  let owner: SignerWithAddress;
-  let minter: SignerWithAddress;
-  let accs: SignerWithAddress[];
-  let registrar: SignerWithAddress;
-  let scWallet: SignerWithAddress;
+
   let erc721: ImmutableERC721PermissionedMintable;
   let MockFactory: MockFactory;
   let royaltyWhitelist: RoyaltyWhitelist;
   let mockMarketPlace: MockMarketplace;
   let deployedSCWalletAddr: string;
+  let owner: SignerWithAddress;
+  let minter: SignerWithAddress;
+  let registrar: SignerWithAddress;
+  let scWallet: SignerWithAddress;
+  let accs: SignerWithAddress[];
 
   before(async function () {
     [owner, minter, registrar, scWallet, ...accs] =
       await ethers.getSigners();
+
+    // Get all required contracts
     ({ erc721, MockFactory, royaltyWhitelist, mockMarketPlace } =
       await whitelistFixture(owner));
 
+    // Deploy SC wallet
     deployedSCWalletAddr = await walletSCFixture(
       scWallet,
       erc721.address,
       MockFactory
     );
 
+    // Set up roles
     await erc721.connect(owner).grantMinterRole(minter.address);
     await royaltyWhitelist.connect(owner).grantRegistrarRole(registrar.address);
   });
@@ -70,6 +75,7 @@ describe("Whitelisted ERC721 Transfers", function () {
         erc721.connect(owner).setRoyaltyWhitelistRegistry(owner.address)
       ).to.be.revertedWith("function call to a non-contract account");
     });
+
     it("Should not allow contracts that do not implement the IRoyaltyWhitelist to be set", async function () {
       // Deploy another contract that implements IERC165, but not IRoyaltyWhitelist
       let erc721Two;
@@ -91,7 +97,7 @@ describe("Whitelisted ERC721 Transfers", function () {
       ).to.be.revertedWith("contract does not implement IRoyaltyWhitelist");
     });
 
-    it("Should not allow a non-admin to access the function", async function () {
+    it("Should not allow a non-admin to access the function to update the registry", async function () {
       await expect(
         erc721
           .connect(registrar)
@@ -120,6 +126,7 @@ describe("Whitelisted ERC721 Transfers", function () {
 
     it("Should allow EOAs to be approved", async function () {
       await erc721.connect(minter).mint(minter.address, 3);
+      // Approve EOA addr
       await erc721.connect(minter).approve(accs[0].address, 1);
       await erc721.connect(minter).setApprovalForAll(accs[0].address, true);
       expect(await erc721.getApproved(1)).to.be.equal(accs[0].address);
@@ -128,9 +135,11 @@ describe("Whitelisted ERC721 Transfers", function () {
     });
 
     it("Should allow whitelisted addresses to be approved", async function () {
+      // Add the mock marketplace to registry
       await royaltyWhitelist
         .connect(registrar)
         .whitelistAddress(mockMarketPlace.address);
+      // Approve marketplace on erc721 contract
       await erc721.connect(minter).approve(mockMarketPlace.address, 2);
       await erc721
         .connect(minter)
@@ -142,13 +151,16 @@ describe("Whitelisted ERC721 Transfers", function () {
     });
 
     it("Should allow whitelisted bytecode to be approved", async function () {
+      // Get bytecode at deployed SC wallet address
       const deployedBytecode = await ethers.provider.getCode(
         deployedSCWalletAddr
       );
+      // Whitelist the bytecode
       await royaltyWhitelist
         .connect(registrar)
         .whitelistBytecode(ethers.utils.keccak256(deployedBytecode));
       await erc721.connect(minter).approve(deployedSCWalletAddr, 3);
+      // Approve the address w/ implements approved bytecode
       await erc721
         .connect(minter)
         .setApprovalForAll(deployedSCWalletAddr, true);
@@ -165,34 +177,43 @@ describe("Whitelisted ERC721 Transfers", function () {
       await erc721.connect(owner).grantMinterRole(accs[1].address);
       await erc721.connect(accs[0]).mint(accs[0].address, 1);
       await erc721.connect(accs[1]).mint(accs[1].address, 1);
+      // Transfer 
       await erc721
         .connect(accs[0])
         .transferFrom(accs[0].address, accs[2].address, 4);
       await erc721
         .connect(accs[1])
         .transferFrom(accs[1].address, accs[2].address, 5);
+      // Check balance
       expect(await erc721.balanceOf(accs[2].address)).to.be.equal(2);
+      // Transfer again
       await erc721
         .connect(accs[2])
         .transferFrom(accs[2].address, accs[0].address, 4);
       await erc721
         .connect(accs[2])
         .transferFrom(accs[2].address, accs[1].address, 5);
+      // Check final balance
       expect(await erc721.balanceOf(accs[2].address)).to.be.equal(0);
     });
 
     it("Should not block transfers from a whitelisted contract", async function () {
+      // mock marketplace has already been approved
       expect(await erc721.balanceOf(accs[3].address)).to.be.equal(0);
       await mockMarketPlace.connect(minter).executeTransfer(accs[3].address, 2);
       expect(await erc721.balanceOf(accs[3].address)).to.be.equal(1);
     });
 
     it("Should not block transfers from a contract w/ whitelisted bytecode", async function () {
+      // Mint an NFT to SC wallet
       await erc721.connect(minter).mint(deployedSCWalletAddr, 1);
+      // Get code at deployed addr
       const walletMockFactory = ethers.getContractFactory("MockWallet");
       const wallet = (await walletMockFactory).attach(deployedSCWalletAddr);
+      // Mint NFT to SC wallet addr
       expect(await erc721.balanceOf(accs[4].address)).to.be.equal(0);
       await wallet.connect(scWallet).transferNFT(accs[4].address, 6);
+       // Transfer NFT from SC wallet
       expect(await erc721.balanceOf(accs[4].address)).to.be.equal(1);
     });
   });
@@ -202,7 +223,7 @@ describe("Whitelisted ERC721 Transfers", function () {
     // By virtue of this, approvals and transfers to this address will pass. We need to catch actions from this address
     // once it is deployed.
     it("EOA disguise approve", async function () {
-      // This vector is where a CFA is approved prior to deployment. This passes as at the time of approval
+      // This vector is where a CFA is approved prior to deployment. This passes as at the time of approval as
       // the CFA is treated as an EOA, passing _validateApproval.
       // This means post-deployment that the address is now an approved operator
       // and is able to call transferFrom.
@@ -226,6 +247,7 @@ describe("Whitelisted ERC721 Transfers", function () {
       // Attempt to execute a transferFrom, w/ msg.sender being the disguised EOA
       const disguisedEOAFactory = ethers.getContractFactory("MockDisguisedEOA");
       const disguisedEOA = (await disguisedEOAFactory).attach(deployedAddr);
+      // Catch transfer as msg.sender != tx.origin
       await expect(
         disguisedEOA
           .connect(minter)
@@ -238,8 +260,9 @@ describe("Whitelisted ERC721 Transfers", function () {
      // TODO: investigate why transferFrom calls fail within the constructor. This will be caught as msg.sender != tx.origin.
     });
     
-    // Here the malicious contract attempts to transfer the token out of the contract via onERC721Received
+    // Here the malicious contract attempts to transfer the token out of the contract by calling transferFrom in onERC721Received
     it("onRecieve transferFrom", async function () {
+      // Deploy contract
       let onRecieve: MockOnReceive;
       const mockOnReceiveFactory = (await ethers.getContractFactory(
         "MockOnReceive"
@@ -248,7 +271,9 @@ describe("Whitelisted ERC721 Transfers", function () {
         erc721.address,
         accs[6].address
       );
+      // Mint and transfer to receiver contract
       await erc721.connect(minter).mint(minter.address, 1);
+      // Fails as msg.sender != tx.origin
       await expect(
         erc721
           .connect(minter)

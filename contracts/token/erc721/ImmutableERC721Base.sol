@@ -6,9 +6,15 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 
+// Royalties
+import "@openzeppelin/contracts/token/common/ERC2981.sol";
+
 // Access Control
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "../../access/IERC173.sol";
+
+// Whitelist Registry
+import "../../royalty-enforcement/IRoyaltyWhitelist.sol";
 
 // Utils
 import "@openzeppelin/contracts/utils/Counters.sol";
@@ -23,17 +29,26 @@ abstract contract ImmutableERC721Base is
     ERC721,
     ERC721Enumerable,
     ERC721Burnable,
+    ERC2981,
     AccessControl,
     IERC173
 {
     using Counters for Counters.Counter;
 
+    error CallerNotInWhitelist(address caller);
+    error ApproveTargetNotInWhitelist(address target);
+
+    ///     =====   Events           =====
+
+    /// @dev Emitted whenever the contract owner changes the transfer whitelist registry
+    event RoyaltytWhitelistRegistryUpdated(address oldRegistry, address newRegistry);
+
     ///     =====   State Variables  =====
 
-    /// @dev Contract level metadata.
+    /// @dev Contract level metadata
     string public contractURI;
 
-    /// @dev Common URIs for individual token URIs.
+    /// @dev Common URIs for individual token URIs
     string public baseURI;
 
     /// @dev the tokenId of the next NFT to be minted.
@@ -41,6 +56,9 @@ abstract contract ImmutableERC721Base is
 
     /// @dev Owner of the contract (defined for interopability with applications, e.g. storefront marketplace)
     address private _owner;
+
+    /// @dev Interface that implements the `IRoyaltyWhitelist` interface
+    IRoyaltyWhitelist public royaltyWhitelist;
 
     ///     =====   Constructor  =====
 
@@ -56,9 +74,12 @@ abstract contract ImmutableERC721Base is
         string memory name_, 
         string memory symbol_, 
         string memory baseURI_ , 
-        string memory contractURI_
+        string memory contractURI_,
+        address _receiver, 
+        uint96 _feeNumerator
         ) ERC721(name_, symbol_){
         // Initialize state variables
+        _setDefaultRoyalty(_receiver, _feeNumerator);
         _grantRole(DEFAULT_ADMIN_ROLE, owner_);
         _owner = owner_;
         baseURI = baseURI_;
@@ -89,7 +110,7 @@ abstract contract ImmutableERC721Base is
         public
         view
         virtual
-        override(ERC721, ERC721Enumerable, AccessControl, IERC165)
+        override(ERC721, ERC721Enumerable, AccessControl, ERC2981, IERC165)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
@@ -135,6 +156,14 @@ abstract contract ImmutableERC721Base is
         emit OwnershipTransferred(owner_, newOwner);
     }
 
+    /// @dev Allows admin to set or update the address of the royalty whitelist registry
+    function setRoyaltyWhitelistRegistry(address _royaltyWhitelist) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(IERC165(_royaltyWhitelist).supportsInterface(type(IRoyaltyWhitelist).interfaceId), "contract does not implement IRoyaltyWhitelist");
+
+        royaltyWhitelist = IRoyaltyWhitelist(_royaltyWhitelist);
+        emit RoyaltytWhitelistRegistryUpdated(address(royaltyWhitelist), _royaltyWhitelist);
+    }
+
     /// @dev Internal hook implemented in {ERC721Enumerable}, required for totalSupply()
     function _beforeTokenTransfer(
         address from,
@@ -143,6 +172,49 @@ abstract contract ImmutableERC721Base is
         uint256 batchSize
     ) internal override(ERC721, ERC721Enumerable) {
         super._beforeTokenTransfer(from, to, tokenId, batchSize);
+    }
+
+    function setApprovalForAll(address operator, bool approved) public override {
+        _validateApproval(operator);
+        super.setApprovalForAll(operator, approved);
+    }
+
+    function approve(address to, uint256 tokenId) public override {
+        _validateApproval(to);
+        super.approve(to, tokenId);
+    }
+
+    /// @dev Internal function to validate approval targets
+    function _validateApproval(address targetApproval) internal view {
+        // Check for:
+        // 1. approval target is an EOA
+        // 2. approval target address is whitelisted or target address bytecode is whitelisted
+        if (targetApproval.code.length == 0 || royaltyWhitelist.isAddressWhitelisted(targetApproval)){
+            return;
+        }
+        revert ApproveTargetNotInWhitelist(targetApproval);
+    }
+
+    /// @dev Override of internal transfer function to include validation
+       function _transfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override(ERC721) {
+        _validateTransfer();
+        super._transfer(from, to, tokenId);
+    }
+
+    /// @dev Internal function to validate whether an address is whitelisted
+    function _validateTransfer() internal view {
+        // Check for:
+        // 1. caller is an EOA
+        // 2. caller is an approved address or is the calling address' bytecode approved
+        if(msg.sender == tx.origin || royaltyWhitelist.isAddressWhitelisted(msg.sender))
+        {
+            return;
+        }
+        revert CallerNotInWhitelist(msg.sender);
     }
 
     /// @dev Internal function to mint a new token with the next token ID

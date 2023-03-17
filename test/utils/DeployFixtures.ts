@@ -12,6 +12,11 @@ import {
   MockMarketplace,
 } from "../../typechain";
 
+// Helper function to deploy all required contracts for whitelist testing. Deploys:
+// - ERC721
+// - Mock Factory
+// - Whitelist registry
+// - Mock market place
 export const whitelistFixture = async (owner: SignerWithAddress) => {
   // ERC721
   let erc721: ImmutableERC721PermissionedMintable;
@@ -28,7 +33,7 @@ export const whitelistFixture = async (owner: SignerWithAddress) => {
     ethers.BigNumber.from("200")
   );
 
-  // Mock wallet factory
+  // Mock factory
   let MockFactory: MockFactory;
   const MockFactoryFactory = (await ethers.getContractFactory(
     "MockFactory"
@@ -57,6 +62,7 @@ export const whitelistFixture = async (owner: SignerWithAddress) => {
   };
 };
 
+// Helper function to deploy SC wallet via CREATE2 and return deterministic address
 export const walletSCFixture = async (
   scWallet: SignerWithAddress,
   erc721Addr: string,
@@ -88,12 +94,13 @@ export const walletSCFixture = async (
   return walletAddr;
 };
 
+// Helper function to return required artifacts to deploy disguised EOA via CREATE2
 export const disguidedEOAFixture = async (
   erc721Addr: string,
   MockFactory: MockFactory,
   saltInput: string
 ) => {
-  // Encode the wallets constructor params
+  // Encode the constructor params
   const encodedParams = defaultAbiCoder
     .encode(["address"], [erc721Addr])
     .slice(2);

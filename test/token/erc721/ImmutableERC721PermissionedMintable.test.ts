@@ -6,6 +6,8 @@ import {
   ImmutableERC721PermissionedMintable,
   RoyaltyWhitelist,
   RoyaltyWhitelist__factory,
+  MockMarketplace__factory,
+  MockMarketplace,
 } from "../../../typechain";
 
 describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
@@ -13,19 +15,23 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
 
   let erc721: ImmutableERC721PermissionedMintable;
   let royaltyWhitelist: RoyaltyWhitelist;
+  let mockMarketplace: MockMarketplace;
   let owner: SignerWithAddress;
   let user: SignerWithAddress;
   let minter: SignerWithAddress;
+  let registrar: SignerWithAddress;
+  let buyer: SignerWithAddress;
+  let seller: SignerWithAddress;
 
   const baseURI = "https://baseURI.com/";
   const contractURI = "https://contractURI.com";
   const name = "ERC721Preset";
   const symbol = "EP";
-  const royalty = ethers.BigNumber.from("200");
+  const royalty = ethers.BigNumber.from("2000");
 
   before(async function () {
     // Retrieve accounts
-    [owner, user, minter] = await ethers.getSigners();
+    [owner, user, minter, registrar, buyer, seller] = await ethers.getSigners();
 
     // Get contract
     const erc721PresetFactory = (await ethers.getContractFactory(
@@ -49,8 +55,15 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
     )) as RoyaltyWhitelist__factory;
     royaltyWhitelist = await royaltyWhitelistFactory.deploy(owner.address);
 
+    // Deploy mock marketplace
+    const mockMarketplaceFactory = (await ethers.getContractFactory(
+      "MockMarketplace"
+    )) as MockMarketplace__factory;
+    mockMarketplace = await mockMarketplaceFactory.deploy(erc721.address);
+
     // Set up roles
     await erc721.connect(owner).grantMinterRole(minter.address);
+    await royaltyWhitelist.connect(owner).grantRegistrarRole(registrar.address);
   });
 
   describe("Contract Deployment", function () {
@@ -225,17 +238,29 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
 
   describe("Royalties", function () {
     it("Should set the correct royalties", async function () {
-      const salePrice = ethers.BigNumber.from("10000");
+      const salePrice = ethers.utils.parseEther("1");
       const tokenInfo = await erc721.royaltyInfo(2, salePrice);
 
       expect(tokenInfo[0]).to.be.equal(owner.address);
       // (10000*200)/10000 = 200
-      expect(tokenInfo[1]).to.be.equal(ethers.BigNumber.from("200"));
+      expect(tokenInfo[1]).to.be.equal(ethers.utils.parseEther("0.2"));
     });
 
     it("Should set a valid royalty registry whitelist", async function () {
       await erc721.connect(owner).setRoyaltyWhitelistRegistry(royaltyWhitelist.address);
       expect(await erc721.royaltyWhitelist()).to.be.equal(royaltyWhitelist.address);
+    });
+
+    it("Should allow a marketplace contract to be whitelisted", async function () {
+      await royaltyWhitelist.connect(registrar).whitelistAddress(mockMarketplace.address);
+      expect(await royaltyWhitelist.isAddressWhitelisted(mockMarketplace.address)).to.be.equal(true);
+    });
+
+    it("Should enforce royalties on a marketplace trade", async function () {
+      await erc721.connect(minter).mint(seller.address, 1);
+      await erc721.connect(seller).setApprovalForAll(mockMarketplace.address, true);
+      await mockMarketplace.connect(buyer).executeTransferRoyalties(seller.address, buyer.address, 4, ethers.utils.parseEther("1"), {value: ethers.utils.parseEther("1")});
+      
     });
   });
 });

@@ -10,7 +10,11 @@ contract MockDisguisedEOA {
         tokenAddress = _tokenAddress;
     }
 
-    function executeTransfer(address from, address recipient, uint256 _tokenId) external {
+    function executeTransfer(
+        address from,
+        address recipient,
+        uint256 _tokenId
+    ) external {
         tokenAddress.transferFrom(from, recipient, _tokenId);
     }
 }

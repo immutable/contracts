@@ -12,8 +12,8 @@ import "./IRoyaltyWhitelist.sol";
 
 /*
     RoyaltyWhitelist is an implementation of a whitelist registry, storing addresses and bytecode
-    which are allowed to be approved operators and execute transfers of ERC721 tokens. The registry
-    will be a deployed contract that ERC721 tokens may interface with and point to.
+    which are allowed to be approved operators and execute transfers of interfacing tokens. The registry
+    will be a deployed contract that tokens may interface with and point to.
 */
 contract RoyaltyWhitelist is ERC165, AccessControl, IRoyaltyWhitelist {
     ///     =====       Events       =====
@@ -26,7 +26,7 @@ contract RoyaltyWhitelist is ERC165, AccessControl, IRoyaltyWhitelist {
 
     ///     =====   State Variables  =====
 
-    /// @dev Only REGISTRAR_ROLE can invoke white listing functionality.
+    /// @dev Only REGISTRAR_ROLE can invoke white listing registration and removal
     bytes32 public constant REGISTRAR_ROLE = bytes32("REGISTRAR_ROLE");
 
     /// @dev EOA codehash (see https://eips.ethereum.org/EIPS/eip-1052)
@@ -44,7 +44,6 @@ contract RoyaltyWhitelist is ERC165, AccessControl, IRoyaltyWhitelist {
      * @dev Grants `DEFAULT_ADMIN_ROLE` to the supplied `admin` address
      */
     constructor(address admin) {
-        // Initialize state variables
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
     }
 
@@ -59,7 +58,7 @@ contract RoyaltyWhitelist is ERC165, AccessControl, IRoyaltyWhitelist {
             super.supportsInterface(interfaceId);
     }
 
-    /// @dev Returns whether true if an address is whitelisted, false otherwise
+    /// @dev Returns true if an address is whitelisted, false otherwise
     function isAddressWhitelisted(
         address target
     ) external view override returns (bool) {
@@ -101,7 +100,7 @@ contract RoyaltyWhitelist is ERC165, AccessControl, IRoyaltyWhitelist {
     function whitelistBytecode(
         bytes32 target
     ) external onlyRole(REGISTRAR_ROLE) {
-        require(target != EOA_CODEHASH, "can't whitelist EOA code hash");
+        require(target != EOA_CODEHASH, "can't whitelist EOA bytecode");
         require(!bytecodeWhitelist[target], "bytecode already whitelisted");
         bytecodeWhitelist[target] = true;
         emit BytecodeWhitelistChanged(target, true);
@@ -116,7 +115,7 @@ contract RoyaltyWhitelist is ERC165, AccessControl, IRoyaltyWhitelist {
         emit BytecodeWhitelistChanged(target, false);
     }
 
-    /// @dev Allows admin grant `user` `REGISTRAR_ROLE` role
+    /// @dev Allows admin to grant `user` `REGISTRAR_ROLE` role
     function grantRegistrarRole(
         address user
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {

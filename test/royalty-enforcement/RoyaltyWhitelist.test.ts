@@ -136,7 +136,7 @@ describe("Royalty Enforcement Test Cases", function () {
           .whitelistBytecode(
             "0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"
           )
-      ).to.be.revertedWith("can't whitelist EOA code hash");
+      ).to.be.revertedWith("can't whitelist EOA bytecode");
     });
 
     it("Should add the address of a contract to the whitelist and then remove it from the whitelist", async function () {

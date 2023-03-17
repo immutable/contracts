@@ -249,7 +249,6 @@ describe("Whitelisted ERC721 Transfers", function () {
         accs[6].address
       );
       await erc721.connect(minter).mint(minter.address, 1);
-      console.log(onRecieve.address);
       await expect(
         erc721
           .connect(minter)

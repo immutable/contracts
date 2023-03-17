@@ -1,16 +1,18 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-
 import {
   ImmutableERC721PermissionedMintable__factory,
   ImmutableERC721PermissionedMintable,
+  RoyaltyWhitelist,
+  RoyaltyWhitelist__factory,
 } from "../../../typechain";
 
 describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
   this.timeout(300_000); // 5 min
 
   let erc721: ImmutableERC721PermissionedMintable;
+  let royaltyWhitelist: RoyaltyWhitelist;
   let owner: SignerWithAddress;
   let user: SignerWithAddress;
   let minter: SignerWithAddress;
@@ -40,6 +42,12 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
       owner.address,
       royalty
     );
+    
+    // Deploy royalty whitelist
+    const royaltyWhitelistFactory = (await ethers.getContractFactory(
+      "RoyaltyWhitelist"
+    )) as RoyaltyWhitelist__factory;
+    royaltyWhitelist = await royaltyWhitelistFactory.deploy(owner.address);
 
     // Set up roles
     await erc721.connect(owner).grantMinterRole(minter.address);
@@ -223,6 +231,11 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
       expect(tokenInfo[0]).to.be.equal(owner.address);
       // (10000*200)/10000 = 200
       expect(tokenInfo[1]).to.be.equal(ethers.BigNumber.from("200"));
+    });
+
+    it("Should set a valid royalty registry whitelist", async function () {
+      await erc721.connect(owner).setRoyaltyWhitelistRegistry(royaltyWhitelist.address);
+      expect(await erc721.royaltyWhitelist()).to.be.equal(royaltyWhitelist.address);
     });
   });
 });

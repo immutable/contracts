@@ -46,7 +46,6 @@ describe("Whitelisted ERC721 Transfers", function () {
 
   describe("Royalty Whitelist Registry setting", function () {
     it("Should set the whitelist registry to a contract the implements the IRoyaltyWhitelist interface", async function () {
-      // TODO: verify event here
       await expect(erc721
         .connect(owner)
         .setRoyaltyWhitelistRegistry(royaltyWhitelist.address)).to.emit(erc721, "RoyaltytWhitelistRegistryUpdated")
@@ -56,7 +55,7 @@ describe("Whitelisted ERC721 Transfers", function () {
         royaltyWhitelist.address
       );
     });
-    
+
     it("Should not allow non-contract accounts to be set", async function () {
       // These should fail on the IERC165.supportsInterface call
       // Zero address
@@ -184,7 +183,7 @@ describe("Whitelisted ERC721 Transfers", function () {
 
     it("Should not block transfers from a whitelisted contract", async function () {
       expect(await erc721.balanceOf(accs[3].address)).to.be.equal(0);
-      await mockMarketPlace.connect(minter).executeTransfer(accs[3].address, 2, 0);
+      await mockMarketPlace.connect(minter).executeTransfer(accs[3].address, 2);
       expect(await erc721.balanceOf(accs[3].address)).to.be.equal(1);
     });
 

@@ -1,17 +1,25 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import "hardhat/console.sol";
 
 contract MockMarketplace {
     IERC721 public tokenAddress;
+    IERC2981 public royaltyAddress;
 
-    constructor(IERC721 _tokenAddress) {
-        tokenAddress = _tokenAddress;
+    constructor(address _tokenAddress) {
+        tokenAddress = IERC721(_tokenAddress);
+        royaltyAddress = IERC2981(_tokenAddress);
     }
 
-    function executeTransfer(address recipient, uint256 _tokenId, uint256 price) public payable {
+    function executeTransfer(address recipient, uint256 _tokenId) public payable {
+        tokenAddress.transferFrom(msg.sender, recipient, _tokenId);
+    }
+
+    function executeTransferRoyalties(address recipient, uint256 _tokenId, uint256 price) public payable {
         require(msg.value == price, "insufficient msg.value");
+        royaltyAddress.royaltyInfo(_tokenId, price);
         tokenAddress.transferFrom(msg.sender, recipient, _tokenId);
     }
 }

@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { ethers, artifacts } from "hardhat";
+import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { whitelistFixture, walletSCFixture } from "../utils/DeployFixtures";
 import {
@@ -8,7 +8,6 @@ import {
   MockFactory,
   RoyaltyWhitelist,
 } from "../../typechain";
-import { defaultAbiCoder } from "ethers/lib/utils";
 
 describe("Royalty Enforcement Test Cases", function () {
   this.timeout(300_000); // 5 min

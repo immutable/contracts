@@ -73,4 +73,6 @@ git push origin <your-branch-name>
 
 8. Open a pull request into the original repository through GitHub in your web browser. Remember to fill out the PR template to the best of your ability to share any context with reviewers.
 
+**IMPORTANT**: Please make sure to read through the [cla](cla.txt) file as part of opening a pull request.
+
 9. We will review the pull requests and request any necessary changes. If all the checks (linting, compilation, tests) pass and everything looks good, your code will be merged into the original repository. Congratulations, and thank you for your contribution!

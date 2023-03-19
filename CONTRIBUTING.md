@@ -10,7 +10,7 @@ You should create an issue to open discussions when:
 
 - **Before starting development on a significant pull request** - Use GitHub issues as a way to collaboratively propose, design, and discuss any development work you plan to do.
 - **Proposing new features or ideas** - If you just have an idea or feature you'd like to see, drop the details into a GitHub issue for us to keep track of. Be specific with any requests, and include descriptions of what you would like to be added and what problems it would solve.
-- **Reporting a bug or minor security vulnerability** - As above, opening an issue helps us keep track of and prioritize any bugs or minor security vulnerabilities vulnerabilities. Make sure to include all the relevant information, e.g. code snippets, error messages, stack traces, environment, reproduction steps, etc, to help us effectively diagnose and address the issue. Please also reach out to security@immutable.com.
+- **Reporting a bug or minor security vulnerability** - As above, opening an issue helps us keep track of and prioritize any bugs or minor security vulnerabilities. Make sure to include all the relevant information, e.g. code snippets, error messages, stack traces, environment, reproduction steps, etc, to help us effectively diagnose and address the issue. Please also reach out to security@immutable.com.
 
 There is usually no need to create an issue when:
 
@@ -45,6 +45,7 @@ git clone https://GitHub.com/<your-GitHub-username>/<repository-name>.git
 cd <repository-name>
 git remote add upstream https://GitHub.com/immutable/<repository-name>.git
 ```
+
 4. Make sure your fork is up to date with the original repository (if necessary).
 
 ```

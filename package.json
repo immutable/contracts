@@ -10,6 +10,11 @@
     "test": "hardhat test",
     "prettier:solidity": "./node_modules/.bin/prettier --write contracts/**/*.sol"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/immutable/zkevm-contracts"
+  },
+  "homepage": "https://github.com/immutable/zkevm-contracts/blob/main/README.md",
   "author": "Immutable",
   "license": "Apache-2.0",
   "devDependencies": {

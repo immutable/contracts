@@ -61,7 +61,7 @@ describe("Whitelisted ERC721 Transfers", function () {
       );
     });
 
-    it("Should not allow non-contract accounts to be set", async function () {
+    it("Should not allow non-contract accounts to be set as whitelist registry", async function () {
       // These should fail on the IERC165.supportsInterface call
       // Zero address
       await expect(
@@ -138,7 +138,7 @@ describe("Whitelisted ERC721 Transfers", function () {
       // Add the mock marketplace to registry
       await royaltyWhitelist
         .connect(registrar)
-        .whitelistAddress(mockMarketPlace.address);
+        .addAddressToWhitelist(mockMarketPlace.address);
       // Approve marketplace on erc721 contract
       await erc721.connect(minter).approve(mockMarketPlace.address, 2);
       await erc721
@@ -158,7 +158,7 @@ describe("Whitelisted ERC721 Transfers", function () {
       // Whitelist the bytecode
       await royaltyWhitelist
         .connect(registrar)
-        .whitelistBytecode(ethers.utils.keccak256(deployedBytecode));
+        .addBytecodeToWhitelist(ethers.utils.keccak256(deployedBytecode));
       await erc721.connect(minter).approve(deployedSCWalletAddr, 3);
       // Approve the address w/ implements approved bytecode
       await erc721

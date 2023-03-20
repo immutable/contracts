@@ -78,39 +78,33 @@ contract RoyaltyWhitelist is ERC165, AccessControl, IRoyaltyWhitelist {
     ///     =====  External functions  =====
 
     /// @dev Add a target address to whitelist
-    function whitelistAddress(
+    function addAddressToWhitelist(
         address target
     ) external onlyRole(REGISTRAR_ROLE) {
-        require(target != address(0), "can't whitelist zero address");
-        require(!addressWhitelist[target], "address already whitelisted");
         addressWhitelist[target] = true;
         emit AddressWhitelistChanged(target, true);
     }
 
     /// @dev Remove a target address from whitelist
-    function unWhitelistAddress(
+    function removeAddressFromWhitelist(
         address target
     ) external onlyRole(REGISTRAR_ROLE) {
-        require(addressWhitelist[target], "address not whitelisted");
         delete addressWhitelist[target];
         emit AddressWhitelistChanged(target, false);
     }
 
     /// @dev Add a target bytecode to whitelist
-    function whitelistBytecode(
+    function addBytecodeToWhitelist(
         bytes32 target
     ) external onlyRole(REGISTRAR_ROLE) {
-        require(target != EOA_CODEHASH, "can't whitelist EOA bytecode");
-        require(!bytecodeWhitelist[target], "bytecode already whitelisted");
         bytecodeWhitelist[target] = true;
         emit BytecodeWhitelistChanged(target, true);
     }
 
     /// @dev Remove a target bytecode from whitelist
-    function unWhitelistBytecode(
+    function removeBytecodeFromWhitelist(
         bytes32 target
     ) external onlyRole(REGISTRAR_ROLE) {
-        require(bytecodeWhitelist[target], "target not whitelisted");
         delete bytecodeWhitelist[target];
         emit BytecodeWhitelistChanged(target, false);
     }
@@ -120,5 +114,12 @@ contract RoyaltyWhitelist is ERC165, AccessControl, IRoyaltyWhitelist {
         address user
     ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         grantRole(REGISTRAR_ROLE, user);
+    }
+
+    /// @dev Allows admin to revoke `REGISTRAR_ROLE` role from `user` 
+    function revokeRegistrarRole(
+        address user
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        revokeRole(REGISTRAR_ROLE, user);
     }
 }

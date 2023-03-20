@@ -58,4 +58,12 @@ contract ImmutableERC721PermissionedMintable is
     {
         grantRole(MINTER_ROLE, user);
     }
+
+    /// @dev Allows admin to revoke `MINTER_ROLE` role from `user` 
+    function revokeMinterRole(address user)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        revokeRole(MINTER_ROLE, user);
+    }
 }

@@ -253,7 +253,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
     });
 
     it("Should allow a marketplace contract to be whitelisted", async function () {
-      await royaltyWhitelist.connect(registrar).whitelistAddress(mockMarketplace.address);
+      await royaltyWhitelist.connect(registrar).addAddressToWhitelist(mockMarketplace.address);
       expect(await royaltyWhitelist.isAddressWhitelisted(mockMarketplace.address)).to.be.equal(true);
     });
 

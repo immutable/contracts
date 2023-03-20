@@ -2,7 +2,10 @@
 
 <p align="center"><img src="https://cdn.dribbble.com/users/1299339/screenshots/7133657/media/837237d447d36581ebd59ec36d30daea.gif" width="280"/></p>
 
-zkEVM Contracts is a library of smart contracts targeted at developers who wish to quickly build and deploy their smart contracts on the Immutable zkEVM, a general-purpose permissionless L2 zero-knowledge rollup. The library allows developers to build on contracts curated by Immutable, including (but not limited to):
+
+zkEVM Contracts is a library of smart contracts targeted at developers who wish to quickly build and deploy their smart contracts on the Immutable zkEVM, a general-purpose permissionless L2 zero-knowledge rollup. The repository can be found here at [github.com/immutable/zkevm-contracts](https://github.com/immutable/zkevm-contracts). For documentation on these contracts, please refer to [docs.immutable.com/](https://docs.immutable.com/).
+
+The library allows developers to build on contracts curated by Immutable, including (but not limited to):
 
 * Token presets, e.g. ERC721
 

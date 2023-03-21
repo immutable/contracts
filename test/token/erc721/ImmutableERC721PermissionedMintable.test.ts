@@ -24,7 +24,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
     // Get contract
     const erc721PresetFactory = (await ethers.getContractFactory("ImmutableERC721PermissionedMintable")) as ImmutableERC721PermissionedMintable__factory;
 
-    // Deploy ERC721 contract and intialize state
+    // Deploy ERC721 contract and initialize state
     erc721 = await erc721PresetFactory.deploy(owner.address, name, symbol, baseURI, contractURI);
     console.log("Deployed ERC721 to address: ", erc721.address);
 

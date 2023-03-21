@@ -15,7 +15,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 
 /*
     ImmutableERC721Base is an abstract contract that offers minimum preset functionality without
-    an opinionated form of minting. This contract is intended to be inherited and implement it's
+    an opinionated form of minting. This contract is intended to be inherited and implement its
     own minting functionality to meet the needs of the inheriting contract.
 */
 
@@ -39,7 +39,7 @@ abstract contract ImmutableERC721Base is
     /// @dev the tokenId of the next NFT to be minted.
     Counters.Counter private nextTokenId;
 
-    /// @dev Owner of the contract (defined for interopability with applications, e.g. storefront marketplace)
+    /// @dev Owner of the contract (defined for interoperability with applications, e.g. storefront marketplace)
     address private _owner;
 
     ///     =====   Constructor  =====

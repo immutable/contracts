@@ -78,7 +78,7 @@ describe("Royalty Enforcement Test Cases", function () {
     });
   });
 
-  describe("Allowlisting of Bytecode and Addresses", function () {
+  describe("Allowlisting of Addresses and Smart Contract Wallets", function () {
     it("Should add the bytecode of a deployed smart contract wallet's byte code and the implementation contract address to the Allowlist and then remove it from the Allowlist", async function () {
       // Deploy the wallet fixture
       const { deployedAddr, moduleAddress } = await walletSCFixture(
@@ -141,6 +141,19 @@ describe("Royalty Enforcement Test Cases", function () {
 
       expect(await royaltyAllowlist.isAllowlisted(marketPlace.address)).to.be
         .false;
+    });
+
+    it("Should not allowlist smart contract wallets with the same bytecode but a different implementation address", async function () {
+      // Deploy with different module
+      const salt = ethers.utils.keccak256("0x4567");
+      await walletFactory.connect(scWallet).deploy(erc721.address, salt);
+      const deployedAddr = await walletFactory.getAddress(
+        erc721.address,
+        salt
+      );
+
+      expect(await royaltyAllowlist.isAllowlisted(deployedAddr)).to.be
+      .false;
     });
   });
 });

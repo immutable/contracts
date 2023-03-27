@@ -16,7 +16,6 @@ interface IProxy {
     function PROXY_getImplementation() external view returns (address);
 }
 
-
 /*
     RoyaltyAllowlist is an implementation of a Allowlist registry, storing addresses and bytecode
     which are allowed to be approved operators and execute transfers of interfacing token contracts (e.g. ERC721/ERC1155). The registry
@@ -29,23 +28,22 @@ contract RoyaltyAllowlist is ERC165, AccessControl, IRoyaltyAllowlist {
     event AddressAllowlistChanged(address indexed target, bool added);
 
     /// @dev Emitted when a target smart contract wallet is added or removed from the Allowlist
-    event WalletAllowlistChanged(bytes32 indexed targetBytes, address indexed targetAddress, bool added);
+    event WalletAllowlistChanged(
+        bytes32 indexed targetBytes,
+        address indexed targetAddress,
+        bool added
+    );
 
     ///     =====   State Variables  =====
 
-    // /// @dev Bytecode hash of Minimal Proxy Contract (https://eips.ethereum.org/EIPS/eip-1167) 
-    // bytes32 private constant minimalProxyCodeHash = hex"363d3d373d3d3d363d30545af43d82803e903d91601857fd5bf3";
-
     /// @dev Only REGISTRAR_ROLE can invoke white listing registration and removal
     bytes32 public constant REGISTRAR_ROLE = bytes32("REGISTRAR_ROLE");
-
 
     /// @dev Mapping of Allowlisted addresses
     mapping(address => bool) private addressAllowlist;
 
     /// @dev Mapping of Allowlisted bytecodes
     mapping(bytes32 => bool) private bytecodeAllowlist;
-    
 
     ///     =====   Constructor  =====
 
@@ -85,7 +83,7 @@ contract RoyaltyAllowlist is ERC165, AccessControl, IRoyaltyAllowlist {
             address impl = IProxy(target).PROXY_getImplementation();
 
             return addressAllowlist[impl];
-        } 
+        }
 
         return false;
     }

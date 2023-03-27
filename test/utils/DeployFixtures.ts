@@ -79,12 +79,10 @@ export const walletSCFixture = async (
 ) => {
   // Deploy the implementation contract or wallet module
   const Module = await ethers.getContractFactory(
-    moduleArtifiact.abi,
-    moduleArtifiact.bytecode
+   "MockWallet"
   );
-  const module = await Module.connect(walletDeployer).deploy(
-    mockWalletFactory.address
-  );
+  
+  const module = await Module.connect(walletDeployer).deploy();
 
   const moduleAddress = module.address
 
@@ -92,7 +90,7 @@ export const walletSCFixture = async (
   const salt = ethers.utils.keccak256("0x1234");
 
   // Deploy wallet via factory
-  const tx = await mockWalletFactory
+  await mockWalletFactory
     .connect(walletDeployer)
     .deploy(module.address, salt);
   

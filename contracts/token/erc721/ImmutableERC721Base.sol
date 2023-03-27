@@ -2,19 +2,16 @@
 pragma solidity ^0.8.0;
 
 // Token
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 
 // Royalties
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
+import "./ImmutableERC721RoyaltyEnforced.sol";
 
 // Access Control
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "../../access/IERC173.sol";
-
-// Whitelist Registry
-import "../../royalty-enforcement/IRoyaltyWhitelist.sol";
 
 // Utils
 import "@openzeppelin/contracts/utils/Counters.sol";
@@ -26,7 +23,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 */
 
 abstract contract ImmutableERC721Base is
-    ERC721,
+    ImmutableERC721RoyaltyEnforced,
     ERC721Enumerable,
     ERC721Burnable,
     ERC2981,
@@ -34,18 +31,6 @@ abstract contract ImmutableERC721Base is
     IERC173
 {
     using Counters for Counters.Counter;
-    ///     =====     Errors         =====
-
-    /// @dev Error thrown when calling address is not whitelisted
-    error CallerNotInWhitelist(address caller);
-
-    /// @dev Error thrown when approve target is not whitelisted
-    error ApproveTargetNotInWhitelist(address target);
-
-    ///     =====     Events         =====
-
-    /// @dev Emitted whenever the transfer whitelist registry is updated
-    event RoyaltytWhitelistRegistryUpdated(address oldRegistry, address newRegistry);
 
     ///     =====   State Variables  =====
 
@@ -60,9 +45,6 @@ abstract contract ImmutableERC721Base is
 
     /// @dev Owner of the contract (defined for interopability with applications, e.g. storefront marketplace)
     address private _owner;
-
-    /// @dev Interface that implements the `IRoyaltyWhitelist` interface
-    IRoyaltyWhitelist public royaltyWhitelist;
 
     ///     =====   Constructor  =====
 
@@ -161,12 +143,29 @@ abstract contract ImmutableERC721Base is
         emit OwnershipTransferred(owner_, newOwner);
     }
 
-    /// @dev Allows admin to set or update the royalty whitelist registry
-    function setRoyaltyWhitelistRegistry(address _royaltyWhitelist) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(IERC165(_royaltyWhitelist).supportsInterface(type(IRoyaltyWhitelist).interfaceId), "contract does not implement IRoyaltyWhitelist");
+    /// @dev Allows admin to set or update the royalty Allowlist registry
+    function setRoyaltyAllowlistRegistry(address _royaltyAllowlist) public override(ImmutableERC721RoyaltyEnforced) onlyRole(DEFAULT_ADMIN_ROLE) {
+       super.setRoyaltyAllowlistRegistry(_royaltyAllowlist);
+    }
 
-        emit RoyaltytWhitelistRegistryUpdated(address(royaltyWhitelist), _royaltyWhitelist);
-        royaltyWhitelist = IRoyaltyWhitelist(_royaltyWhitelist);
+
+    /// @dev Override of setApprovalForAll from {ERC721}, with added Allowlist approval validation
+    function setApprovalForAll(address operator, bool approved) public override(ImmutableERC721RoyaltyEnforced, ERC721) {
+        super.setApprovalForAll(operator, approved);
+    }
+
+    /// @dev Override of approve from {ERC721}, with added Allowlist approval validation
+    function approve(address to, uint256 tokenId) public override(ImmutableERC721RoyaltyEnforced, ERC721) {
+        super.approve(to, tokenId);
+    }
+
+    /// @dev Override of internal transfer from {ERC721} function to include validation
+    function _transfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override(ImmutableERC721RoyaltyEnforced, ERC721) {
+        super._transfer(from, to, tokenId);
     }
 
     /// @dev Internal hook implemented in {ERC721Enumerable}, required for totalSupply()
@@ -179,57 +178,6 @@ abstract contract ImmutableERC721Base is
         super._beforeTokenTransfer(from, to, tokenId, batchSize);
     }
 
-    /// @dev Override of setApprovalForAll from {ERC721}, with added whitelist approval validation
-    function setApprovalForAll(address operator, bool approved) public override {
-        _validateApproval(operator);
-        super.setApprovalForAll(operator, approved);
-    }
-
-    /// @dev Override of approve from {ERC721}, with added whitelist approval validation
-    function approve(address to, uint256 tokenId) public override {
-        _validateApproval(to);
-        super.approve(to, tokenId);
-    }
-
-    /// @dev Internal function to validate whether approval targets are whitelisted or EOA
-    function _validateApproval(address targetApproval) internal view {
-        // Only check if the registry is set
-        if(address(royaltyWhitelist).code.length > 0) {
-             // Check for:
-            // 1. approval target is an EOA
-            // 2. approval target address is whitelisted or target address bytecode is whitelisted
-            if (targetApproval.code.length == 0 || royaltyWhitelist.isAddressWhitelisted(targetApproval)){
-                return;
-            }
-            revert ApproveTargetNotInWhitelist(targetApproval);
-        }
-    }
-
-    /// @dev Override of internal transfer from {ERC721} function to include validation
-       function _transfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal override(ERC721) {
-        _validateTransfer();
-        super._transfer(from, to, tokenId);
-    }
-
-    /// @dev Internal function to validate whether the calling address is an EOA or whitelisted
-    function _validateTransfer() internal view {
-        // Only check if the registry is set
-        if (address(royaltyWhitelist).code.length > 0) {
-            // Check for:
-            // 1. caller is an EOA
-            // 2. caller is whitelisted or is the calling address bytecode is whitelisted
-            if(msg.sender == tx.origin || royaltyWhitelist.isAddressWhitelisted(msg.sender))
-            {
-                return;
-            }
-            revert CallerNotInWhitelist(msg.sender);
-        }
-    }
-
     /// @dev Internal function to mint a new token with the next token ID
     function _mintNextToken(address to) internal virtual returns (uint256){
         uint256 newTokenId = nextTokenId.current();
@@ -237,4 +185,5 @@ abstract contract ImmutableERC721Base is
         nextTokenId.increment();
         return newTokenId;
     }
+
 }

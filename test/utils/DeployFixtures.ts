@@ -2,22 +2,26 @@ import { ethers, artifacts } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import {
-  RoyaltyWhitelist__factory,
-  RoyaltyWhitelist,
+  RoyaltyAllowlist__factory,
+  RoyaltyAllowlist,
   ImmutableERC721PermissionedMintable__factory,
   ImmutableERC721PermissionedMintable,
   MockFactory__factory,
   MockFactory,
   MockMarketplace__factory,
   MockMarketplace,
+  MockWalletFactory,
+  MockWalletFactory__factory,
 } from "../../typechain";
+import moduleArtifiact from "./walletModuleArtifact.json";
 
-// Helper function to deploy all required contracts for whitelist testing. Deploys:
+// Helper function to deploy all required contracts for Allowlist testing. Deploys:
 // - ERC721
-// - Mock Factory
-// - Whitelist registry
+// - Mock factory
+// - Mock wallet factory
+// - Allowlist registry
 // - Mock market place
-export const whitelistFixture = async (owner: SignerWithAddress) => {
+export const AllowlistFixture = async (owner: SignerWithAddress) => {
   // ERC721
   let erc721: ImmutableERC721PermissionedMintable;
   const erc721PresetFactory = (await ethers.getContractFactory(
@@ -33,65 +37,69 @@ export const whitelistFixture = async (owner: SignerWithAddress) => {
     ethers.BigNumber.from("200")
   );
 
-  // Mock factory
-  let MockFactory: MockFactory;
-  const MockFactoryFactory = (await ethers.getContractFactory(
+  // Mock Wallet factory
+  const WalletFactory = (await ethers.getContractFactory(
+    "MockWalletFactory"
+  )) as MockWalletFactory__factory;
+  const walletFactory = await WalletFactory.deploy();
+
+  // Mock  factory
+  const Factory = (await ethers.getContractFactory(
     "MockFactory"
   )) as MockFactory__factory;
-  MockFactory = await MockFactoryFactory.deploy();
+  const factory = await Factory.deploy();
 
-  // Whitelist registry
-  let royaltyWhitelist: RoyaltyWhitelist;
-  const RoyaltyWhitelist = (await ethers.getContractFactory(
-    "RoyaltyWhitelist"
-  )) as RoyaltyWhitelist__factory;
-  royaltyWhitelist = await RoyaltyWhitelist.deploy(owner.address);
+  // Allowlist registry
+  let royaltyAllowlist: RoyaltyAllowlist;
+  const RoyaltyAllowlist = (await ethers.getContractFactory(
+    "RoyaltyAllowlist"
+  )) as RoyaltyAllowlist__factory;
+  royaltyAllowlist = await RoyaltyAllowlist.deploy(owner.address);
 
   // Mock market place
-  let mockMarketPlace: MockMarketplace;
+  let marketPlace: MockMarketplace;
   const mockMarketplaceFactory = (await ethers.getContractFactory(
     "MockMarketplace"
   )) as MockMarketplace__factory;
-  mockMarketPlace = await mockMarketplaceFactory.deploy(erc721.address);
+  marketPlace = await mockMarketplaceFactory.deploy(erc721.address);
 
   return {
     erc721,
-    MockFactory,
-    royaltyWhitelist,
-    mockMarketPlace,
+    walletFactory,
+    factory,
+    royaltyAllowlist,
+    marketPlace,
   };
 };
 
 // Helper function to deploy SC wallet via CREATE2 and return deterministic address
 export const walletSCFixture = async (
-  scWallet: SignerWithAddress,
-  erc721Addr: string,
-  MockFactory: MockFactory
+  walletDeployer: SignerWithAddress,
+  mockWalletFactory: MockWalletFactory
 ) => {
-  // Encode the wallets constructor params
-  const encodedParams = defaultAbiCoder
-    .encode(["address", "address"], [scWallet.address, erc721Addr])
-    .slice(2);
+  // Deploy the implementation contract or wallet module
+  const Module = await ethers.getContractFactory(
+    moduleArtifiact.abi,
+    moduleArtifiact.bytecode
+  );
+  const module = await Module.connect(walletDeployer).deploy(
+    mockWalletFactory.address
+  );
+
+  const moduleAddress = module.address
 
   // Calculate salt
   const salt = ethers.utils.keccak256("0x1234");
 
-  // Get the artifact for bytecode
-  const walletMockArtifact = await artifacts.readArtifact("MockWallet");
+  // Deploy wallet via factory
+  const tx = await mockWalletFactory
+    .connect(walletDeployer)
+    .deploy(module.address, salt);
+  
 
-  // Append bytecode and constructor params
-  const constructorByteCode = `${walletMockArtifact.bytecode}${encodedParams}`;
-
-  // Calulate address of deployed contract
-  const walletAddr = await MockFactory.computeAddress(
-    salt,
-    ethers.utils.keccak256(constructorByteCode)
-  );
-
-  // Deploy contract
-  await MockFactory.connect(scWallet).deploy(salt, constructorByteCode);
-
-  return walletAddr;
+  const deployedAddr = await mockWalletFactory.getAddress(module.address, salt);
+  
+  return {deployedAddr, moduleAddress};
 };
 
 // Helper function to return required artifacts to deploy disguised EOA via CREATE2
@@ -109,7 +117,9 @@ export const disguidedEOAFixture = async (
   const salt = ethers.utils.keccak256(saltInput);
 
   // Get the artifact for bytecode
-  const mockDisguisedEOAArtifact = await artifacts.readArtifact("MockDisguisedEOA");
+  const mockDisguisedEOAArtifact = await artifacts.readArtifact(
+    "MockDisguisedEOA"
+  );
 
   // Append bytecode and constructor params
   const constructorByteCode = `${mockDisguisedEOAArtifact.bytecode}${encodedParams}`;
@@ -120,5 +130,5 @@ export const disguidedEOAFixture = async (
     ethers.utils.keccak256(constructorByteCode)
   );
 
-  return {deployedAddr, salt, constructorByteCode};
+  return { deployedAddr, salt, constructorByteCode };
 };

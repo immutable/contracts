@@ -10,9 +10,6 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 // Interfaces
 import "./IRoyaltyAllowlist.sol";
 
-import "hardhat/console.sol";
-
-
 // Interface to retrieve the implemention stored inside the Proxy contract
 interface IProxy {
     // Returns the current implementation address used by the proxy contract
@@ -31,8 +28,8 @@ contract RoyaltyAllowlist is ERC165, AccessControl, IRoyaltyAllowlist {
     /// @dev Emitted when a target address is added or removed from the Allowlist
     event AddressAllowlistChanged(address indexed target, bool added);
 
-    /// @dev Emitted when a target bytecode is added or removed from the Allowlist
-    event BytecodeAllowlistChanged(bytes32 indexed target, bool added);
+    /// @dev Emitted when a target smart contract wallet is added or removed from the Allowlist
+    event WalletAllowlistChanged(bytes32 indexed targetBytes, address indexed targetAddress, bool added);
 
     ///     =====   State Variables  =====
 
@@ -116,7 +113,7 @@ contract RoyaltyAllowlist is ERC165, AccessControl, IRoyaltyAllowlist {
     }
 
     /// @dev Add a smart contract wallet to the Allowlist
-    function addSCWalletToAllowlist(
+    function addWalletToAllowlist(
         address walletAddr
     ) external onlyRole(REGISTRAR_ROLE) {
         // get bytecode of minimal proxy
@@ -129,12 +126,11 @@ contract RoyaltyAllowlist is ERC165, AccessControl, IRoyaltyAllowlist {
         address impl = IProxy(walletAddr).PROXY_getImplementation();
         addressAllowlist[impl] = true;
 
-        emit BytecodeAllowlistChanged(codeHash, true);
-        emit AddressAllowlistChanged(impl, true);
+        emit WalletAllowlistChanged(codeHash, walletAddr, true);
     }
 
     /// @dev Remove  a smart contract wallet from the Allowlist
-    function removeSCWalletFromAllowlist(
+    function removeWalletFromAllowlist(
         address walletAddr
     ) external onlyRole(REGISTRAR_ROLE) {
         // get bytecode of minimal proxy
@@ -147,29 +143,7 @@ contract RoyaltyAllowlist is ERC165, AccessControl, IRoyaltyAllowlist {
         address impl = IProxy(walletAddr).PROXY_getImplementation();
         delete addressAllowlist[impl];
 
-
-        emit BytecodeAllowlistChanged(codeHash, false);
-        emit AddressAllowlistChanged(impl, false);
-    }
-
-    /// @dev Add a target bytecode to Allowlist
-    function addBytecodeToAllowlist(
-        bytes32[] calldata bytecode
-    ) external onlyRole(REGISTRAR_ROLE) {
-        for (uint256 i; i < bytecode.length; i++) {
-            bytecodeAllowlist[bytecode[i]] = true;
-            emit BytecodeAllowlistChanged(bytecode[i], true);
-        }
-    }
-
-    /// @dev Remove a target bytecode from Allowlist
-    function removeBytecodeFromAllowlist(
-        bytes32[] calldata bytecode
-    ) external onlyRole(REGISTRAR_ROLE) {
-        for (uint256 i; i < bytecode.length; i++) {
-            delete bytecodeAllowlist[bytecode[i]];
-            emit BytecodeAllowlistChanged(bytecode[i], false);
-        }
+        emit WalletAllowlistChanged(codeHash, walletAddr, false);
     }
 
     /// @dev Allows admin to grant `user` `REGISTRAR_ROLE` role

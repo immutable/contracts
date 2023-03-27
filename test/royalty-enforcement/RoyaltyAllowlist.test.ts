@@ -67,13 +67,13 @@ describe("Royalty Enforcement Test Cases", function () {
       await expect(
         royaltyAllowlist
           .connect(owner)
-          .addBytecodeToAllowlist([ethers.utils.keccak256("0x1234")])
+          .addWalletToAllowlist(royaltyAllowlist.address)
       ).to.be.revertedWith(revertStr);
       // removeBytecodeFromAllowlist
       await expect(
         royaltyAllowlist
           .connect(owner)
-          .removeBytecodeFromAllowlist([ethers.utils.keccak256("0x1234")])
+          .removeWalletFromAllowlist(royaltyAllowlist.address)
       ).to.be.revertedWith(revertStr);
     });
   });
@@ -94,50 +94,27 @@ describe("Royalty Enforcement Test Cases", function () {
       const proxy = (await Proxy).attach(deployedAddr);
       expect(await proxy.PROXY_getImplementation()).to.be.equal(moduleAddress);
 
-      // Add the wallet to the allow list. This will add the wallets bytecode and the implementation address
-      const tx = await royaltyAllowlist
-        .connect(registrar)
-        .addSCWalletToAllowlist(deployedAddr);
-
       // Get the deployed bytecode
-      const deployedBytecode = await ethers.provider.getCode(deployedAddr)
+      const deployedBytecode = await ethers.provider.getCode(deployedAddr);
 
-      // Get event from receipt logs
-      const receipt = await tx.wait();
+      // Add the wallet to the allow list. This will add the wallets bytecode and the implementation address
+      await expect(
+        royaltyAllowlist.connect(registrar).addWalletToAllowlist(deployedAddr)
+      )
+        .to.emit(royaltyAllowlist, "WalletAllowlistChanged")
+        .withArgs(ethers.utils.keccak256(deployedBytecode), deployedAddr, true);
 
-      // Define expected topics
-      const abi = [
-        "event BytecodeAllowlistChanged(bytes32 indexed target, bool added)",
-        "event AddressAllowlistChanged(address indexed target, bool added)",
-      ];
-      const iface = new ethers.utils.Interface(abi);
-      // Parse events
-      const events = receipt.logs.map((log) => iface.parseLog(log))
-      // BytecodeAllowlistChanged
-      expect(events[0].args[0]).to.equal(ethers.utils.keccak256(deployedBytecode));
-      expect(events[0].args[1]).to.equal(true);
-      // AddressAllowlistChanged
-      expect(events[1].args[0]).to.equal(moduleAddress);
-      expect(events[1].args[1]).to.equal(true);
 
-      expect(await royaltyAllowlist.isAllowlisted(deployedAddr)).to.be
-      .true;
+      expect(await royaltyAllowlist.isAllowlisted(deployedAddr)).to.be.true;
 
       // Remove the wallet from the allowlist
-      const txRm = await royaltyAllowlist
-      .connect(registrar)
-      .removeSCWalletFromAllowlist(deployedAddr);
-      const receiptRm = await txRm.wait();
-      const eventsRm = receiptRm.logs.map((log) => iface.parseLog(log))
-      // BytecodeAllowlistChanged
-      expect(eventsRm[0].args[0]).to.equal(ethers.utils.keccak256(deployedBytecode));
-      expect(eventsRm[0].args[1]).to.equal(false);
-      // AddressAllowlistChanged
-      expect(eventsRm[1].args[0]).to.equal(moduleAddress);
-      expect(eventsRm[1].args[1]).to.equal(false);
+      await expect(
+        royaltyAllowlist.connect(registrar).removeWalletFromAllowlist(deployedAddr)
+      )
+        .to.emit(royaltyAllowlist, "WalletAllowlistChanged")
+        .withArgs(ethers.utils.keccak256(deployedBytecode), deployedAddr, false);
 
-      expect(await royaltyAllowlist.isAllowlisted(deployedAddr)).to.be
-      .false;
+      expect(await royaltyAllowlist.isAllowlisted(deployedAddr)).to.be.false;
     });
 
     it("Should add the address of a contract to the Allowlist and then remove it from the Allowlist", async function () {

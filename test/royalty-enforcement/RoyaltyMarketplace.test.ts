@@ -31,7 +31,8 @@ describe("Marketplace Royalty Enforcement", function () {
 
   before(async function () {
     // Retrieve accounts
-    [owner, minter, registrar, royaltyRecipient, buyer, seller] = await ethers.getSigners();
+    [owner, minter, registrar, royaltyRecipient, buyer, seller] =
+      await ethers.getSigners();
 
     // Deploy ERC721 contract
     const erc721PresetFactory = (await ethers.getContractFactory(
@@ -47,7 +48,7 @@ describe("Marketplace Royalty Enforcement", function () {
       royaltyRecipient.address,
       royalty
     );
-    
+
     // Deploy royalty Allowlist
     const royaltyAllowlistFactory = (await ethers.getContractFactory(
       "RoyaltyAllowlist"
@@ -65,17 +66,23 @@ describe("Marketplace Royalty Enforcement", function () {
     await royaltyAllowlist.connect(owner).grantRegistrarRole(registrar.address);
   });
 
-
   describe("Royalties", function () {
-
     it("Should set a valid royalty registry Allowlist", async function () {
-      await erc721.connect(owner).setRoyaltyAllowlistRegistry(royaltyAllowlist.address);
-      expect(await erc721.royaltyAllowlist()).to.be.equal(royaltyAllowlist.address);
+      await erc721
+        .connect(owner)
+        .setRoyaltyAllowlistRegistry(royaltyAllowlist.address);
+      expect(await erc721.royaltyAllowlist()).to.be.equal(
+        royaltyAllowlist.address
+      );
     });
 
     it("Should allow a marketplace contract to be Allowlisted", async function () {
-      await royaltyAllowlist.connect(registrar).addAddressToAllowlist([mockMarketplace.address]);
-      expect(await royaltyAllowlist.isAllowlisted(mockMarketplace.address)).to.be.equal(true);
+      await royaltyAllowlist
+        .connect(registrar)
+        .addAddressToAllowlist([mockMarketplace.address]);
+      expect(
+        await royaltyAllowlist.isAllowlisted(mockMarketplace.address)
+      ).to.be.equal(true);
     });
 
     it("Should enforce royalties on a marketplace trade", async function () {
@@ -85,18 +92,30 @@ describe("Marketplace Royalty Enforcement", function () {
       // Mint Nft to seller
       await erc721.connect(minter).mint(seller.address, 1);
       // Approve marketplace
-      await erc721.connect(seller).setApprovalForAll(mockMarketplace.address, true);
+      await erc721
+        .connect(seller)
+        .setApprovalForAll(mockMarketplace.address, true);
       // Get pre-trade balances
-      const recipientBal = await ethers.provider.getBalance(royaltyRecipient.address);
+      const recipientBal = await ethers.provider.getBalance(
+        royaltyRecipient.address
+      );
       const sellerBal = await ethers.provider.getBalance(seller.address);
       // Execute trade
-      await mockMarketplace.connect(buyer).executeTransferRoyalties(seller.address, buyer.address, 1, salePrice, {value: salePrice});
+      await mockMarketplace
+        .connect(buyer)
+        .executeTransferRoyalties(seller.address, buyer.address, 1, salePrice, {
+          value: salePrice,
+        });
       // Check if buyer recieved NFT
       expect(await erc721.tokenOfOwnerByIndex(buyer.address, 0)).to.be.equal(1);
       // Check if royalty recipient has increased balance newBal = oldBal + royaltyAmount
-      expect(await ethers.provider.getBalance(royaltyRecipient.address)).to.equal(recipientBal.add(tokenInfo[1]));
+      expect(
+        await ethers.provider.getBalance(royaltyRecipient.address)
+      ).to.equal(recipientBal.add(tokenInfo[1]));
       // Check if seller has increased balance newBal = oldBal + (salePrice - royaltyAmount)
-      expect(await ethers.provider.getBalance(seller.address)).to.equal(sellerBal.add(salePrice.sub(tokenInfo[1])));
+      expect(await ethers.provider.getBalance(seller.address)).to.equal(
+        sellerBal.add(salePrice.sub(tokenInfo[1]))
+      );
     });
   });
 });

@@ -32,7 +32,8 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
 
   before(async function () {
     // Retrieve accounts
-    [owner, user, minter, registrar, royaltyRecipient, buyer, seller] = await ethers.getSigners();
+    [owner, user, minter, registrar, royaltyRecipient, buyer, seller] =
+      await ethers.getSigners();
 
     // Deploy ERC721 contract
     const erc721PresetFactory = (await ethers.getContractFactory(
@@ -48,7 +49,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
       royaltyRecipient.address,
       royalty
     );
-    
+
     // Deploy royalty Allowlist
     const royaltyAllowlistFactory = (await ethers.getContractFactory(
       "RoyaltyAllowlist"

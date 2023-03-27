@@ -79,7 +79,7 @@ contract RoyaltyAllowlist is ERC165, AccessControl, IRoyaltyAllowlist {
             codeHash := extcodehash(target)
         }
         if (bytecodeAllowlist[codeHash]) {
-            // If wallet proxy bytecode is approved, check addr of module
+            // If wallet proxy bytecode is approved, check addr of implementation contract
             address impl = IProxy(target).PROXY_getImplementation();
 
             return addressAllowlist[impl];
@@ -114,7 +114,7 @@ contract RoyaltyAllowlist is ERC165, AccessControl, IRoyaltyAllowlist {
     function addWalletToAllowlist(
         address walletAddr
     ) external onlyRole(REGISTRAR_ROLE) {
-        // get bytecode of minimal proxy
+        // get bytecode of wallet
         bytes32 codeHash;
         assembly {
             codeHash := extcodehash(walletAddr)
@@ -131,7 +131,7 @@ contract RoyaltyAllowlist is ERC165, AccessControl, IRoyaltyAllowlist {
     function removeWalletFromAllowlist(
         address walletAddr
     ) external onlyRole(REGISTRAR_ROLE) {
-        // get bytecode of minimal proxy
+        // get bytecode of wallet
         bytes32 codeHash;
         assembly {
             codeHash := extcodehash(walletAddr)

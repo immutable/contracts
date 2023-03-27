@@ -191,10 +191,7 @@ describe("Allowlisted ERC721 Transfers", function () {
       await walletFactory.connect(scWallet).deploy(moduleAddress, salt);
       await walletFactory.connect(scWallet).deploy(moduleAddress, saltTwo);
       await walletFactory.connect(scWallet).deploy(moduleAddress, saltThree);
-      const deployedAddr = await walletFactory.getAddress(
-        moduleAddress,
-        salt
-      );
+      const deployedAddr = await walletFactory.getAddress(moduleAddress, salt);
       const deployedAddrTwo = await walletFactory.getAddress(
         moduleAddress,
         saltTwo
@@ -206,20 +203,46 @@ describe("Allowlisted ERC721 Transfers", function () {
       // Mint NFTs to the wallets
       await erc721.connect(minter).mint(deployedAddr, 1);
       await erc721.connect(minter).mint(deployedAddrTwo, 1);
-      
+
       // Connect to wallets
       const wallet = await ethers.getContractAt("MockWallet", deployedAddr);
-      const walletTwo = await ethers.getContractAt("MockWallet", deployedAddrTwo);
-      const walletThree = await ethers.getContractAt("MockWallet", deployedAddrThree); 
+      const walletTwo = await ethers.getContractAt(
+        "MockWallet",
+        deployedAddrTwo
+      );
+      const walletThree = await ethers.getContractAt(
+        "MockWallet",
+        deployedAddrThree
+      );
 
       // Transfer between wallets
-      await wallet.transferNFT(erc721.address, deployedAddr, deployedAddrThree, 6)
-      await walletTwo.transferNFT(erc721.address, deployedAddrTwo, deployedAddrThree, 7)
+      await wallet.transferNFT(
+        erc721.address,
+        deployedAddr,
+        deployedAddrThree,
+        6
+      );
+      await walletTwo.transferNFT(
+        erc721.address,
+        deployedAddrTwo,
+        deployedAddrThree,
+        7
+      );
       expect(await erc721.balanceOf(deployedAddr)).to.be.equal(0);
       expect(await erc721.balanceOf(deployedAddrTwo)).to.be.equal(0);
       expect(await erc721.balanceOf(deployedAddrThree)).to.be.equal(2);
-      await walletThree.transferNFT(erc721.address, deployedAddrThree, deployedAddr, 6);
-      await walletThree.transferNFT(erc721.address, deployedAddrThree, deployedAddrTwo, 7);
+      await walletThree.transferNFT(
+        erc721.address,
+        deployedAddrThree,
+        deployedAddr,
+        6
+      );
+      await walletThree.transferNFT(
+        erc721.address,
+        deployedAddrThree,
+        deployedAddrTwo,
+        7
+      );
       expect(await erc721.balanceOf(deployedAddr)).to.be.equal(1);
       expect(await erc721.balanceOf(deployedAddrTwo)).to.be.equal(1);
       expect(await erc721.balanceOf(deployedAddrThree)).to.be.equal(0);

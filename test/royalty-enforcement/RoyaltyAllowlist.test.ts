@@ -5,7 +5,6 @@ import { walletSCFixture, AllowlistFixture } from "../utils/DeployFixtures";
 import {
   ImmutableERC721PermissionedMintable,
   MockMarketplace,
-  MockFactory,
   RoyaltyAllowlist,
   MockWalletFactory,
 } from "../../typechain";
@@ -104,15 +103,20 @@ describe("Royalty Enforcement Test Cases", function () {
         .to.emit(royaltyAllowlist, "WalletAllowlistChanged")
         .withArgs(ethers.utils.keccak256(deployedBytecode), deployedAddr, true);
 
-
       expect(await royaltyAllowlist.isAllowlisted(deployedAddr)).to.be.true;
 
       // Remove the wallet from the allowlist
       await expect(
-        royaltyAllowlist.connect(registrar).removeWalletFromAllowlist(deployedAddr)
+        royaltyAllowlist
+          .connect(registrar)
+          .removeWalletFromAllowlist(deployedAddr)
       )
         .to.emit(royaltyAllowlist, "WalletAllowlistChanged")
-        .withArgs(ethers.utils.keccak256(deployedBytecode), deployedAddr, false);
+        .withArgs(
+          ethers.utils.keccak256(deployedBytecode),
+          deployedAddr,
+          false
+        );
 
       expect(await royaltyAllowlist.isAllowlisted(deployedAddr)).to.be.false;
     });
@@ -147,13 +151,9 @@ describe("Royalty Enforcement Test Cases", function () {
       // Deploy with different module
       const salt = ethers.utils.keccak256("0x4567");
       await walletFactory.connect(scWallet).deploy(erc721.address, salt);
-      const deployedAddr = await walletFactory.getAddress(
-        erc721.address,
-        salt
-      );
+      const deployedAddr = await walletFactory.getAddress(erc721.address, salt);
 
-      expect(await royaltyAllowlist.isAllowlisted(deployedAddr)).to.be
-      .false;
+      expect(await royaltyAllowlist.isAllowlisted(deployedAddr)).to.be.false;
     });
   });
 });

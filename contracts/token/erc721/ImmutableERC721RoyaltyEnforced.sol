@@ -8,7 +8,8 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "../../royalty-enforcement/IRoyaltyAllowlist.sol";
 
 /*
-    TODO: top level contract comment
+    ImmutableERC721RoyaltyEnforced is an abstract contract extending the ERC721 contract to enforce royalties.
+    The contract has support to specify a whitelist registry and overrides transfers and approvals to enforce allow list validation.
 */
 
 abstract contract ImmutableERC721RoyaltyEnforced is
@@ -90,5 +91,4 @@ abstract contract ImmutableERC721RoyaltyEnforced is
             revert CallerNotInAllowlist(msg.sender);
         }
     }
-
 }

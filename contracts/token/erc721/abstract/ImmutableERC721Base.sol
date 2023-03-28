@@ -11,7 +11,7 @@ import "./ImmutableERC721RoyaltyEnforced.sol";
 
 // Access Control
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "../../access/IERC173.sol";
+import "../../../access/IERC173.sol";
 
 // Utils
 import "@openzeppelin/contracts/utils/Counters.sol";

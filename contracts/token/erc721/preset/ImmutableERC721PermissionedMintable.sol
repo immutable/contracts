@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 // Token
-import "./ImmutableERC721Base.sol";
+import "../abstract/ImmutableERC721Base.sol";
 
 /*
     ImmutableERC721PermissionedMintable is a preset contract that inherits from ImmutableERC721Base

@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
 // Allowlist Registry
-import "../../royalty-enforcement/IRoyaltyAllowlist.sol";
+import "../../../royalty-enforcement/IRoyaltyAllowlist.sol";
 
 /*
     ImmutableERC721RoyaltyEnforced is an abstract contract extending the ERC721 contract to enforce royalties.

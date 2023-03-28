@@ -2,7 +2,7 @@
 pragma solidity ^0.8.0;
 
 // Token
-import "./ImmutableERC721Base.sol";
+import "../abstract/ImmutableERC721Base.sol";
 
 /*
     ImmutableERC721PermissionedMintable is a preset contract that inherits from ImmutableERC721Base
@@ -26,14 +26,17 @@ contract ImmutableERC721PermissionedMintable is
      * Sets the name and symbol for the collection
      * Sets the default admin to `owner`
      * Sets the `baseURI` and `tokenURI`
+     * Sets the `reciever` and `feeNumerator`
      */
     constructor (
         address owner_, 
         string memory name_, 
         string memory symbol_, 
         string memory baseURI_ , 
-        string memory contractURI_
-        ) ImmutableERC721Base(owner_,name_, symbol_, baseURI_, contractURI_){
+        string memory contractURI_,
+        address _receiver, 
+        uint96 _feeNumerator
+        ) ImmutableERC721Base(owner_,name_, symbol_, baseURI_, contractURI_, _receiver, _feeNumerator){
     }
 
     ///     =====  External functions  =====
@@ -54,5 +57,13 @@ contract ImmutableERC721PermissionedMintable is
         onlyRole(DEFAULT_ADMIN_ROLE)
     {
         grantRole(MINTER_ROLE, user);
+    }
+
+    /// @dev Allows admin to revoke `MINTER_ROLE` role from `user` 
+    function revokeMinterRole(address user)
+        external
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        revokeRole(MINTER_ROLE, user);
     }
 }

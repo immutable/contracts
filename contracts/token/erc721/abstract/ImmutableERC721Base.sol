@@ -2,16 +2,20 @@
 pragma solidity ^0.8.0;
 
 // Token
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 
+// Royalties
+import "@openzeppelin/contracts/token/common/ERC2981.sol";
+import "./ImmutableERC721RoyaltyEnforced.sol";
+
 // Access Control
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "../../access/IERC173.sol";
+import "../../../access/IERC173.sol";
 
 // Utils
 import "@openzeppelin/contracts/utils/Counters.sol";
+
 
 /*
     ImmutableERC721Base is an abstract contract that offers minimum preset functionality without
@@ -20,9 +24,10 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 */
 
 abstract contract ImmutableERC721Base is
-    ERC721,
+    ImmutableERC721RoyaltyEnforced,
     ERC721Enumerable,
     ERC721Burnable,
+    ERC2981,
     AccessControl,
     IERC173
 {
@@ -30,10 +35,10 @@ abstract contract ImmutableERC721Base is
 
     ///     =====   State Variables  =====
 
-    /// @dev Contract level metadata.
+    /// @dev Contract level metadata
     string public contractURI;
 
-    /// @dev Common URIs for individual token URIs.
+    /// @dev Common URIs for individual token URIs
     string public baseURI;
 
     /// @dev the tokenId of the next NFT to be minted.
@@ -50,15 +55,19 @@ abstract contract ImmutableERC721Base is
      * Sets the name and symbol for the collection
      * Sets the default admin to `owner`
      * Sets the `baseURI` and `tokenURI`
+     * Sets the royalty receiver and amount (this can not be changed once set)
      */
     constructor (
         address owner_, 
         string memory name_, 
         string memory symbol_, 
         string memory baseURI_ , 
-        string memory contractURI_
+        string memory contractURI_,
+        address _receiver, 
+        uint96 _feeNumerator
         ) ERC721(name_, symbol_){
         // Initialize state variables
+        _setDefaultRoyalty(_receiver, _feeNumerator);
         _grantRole(DEFAULT_ADMIN_ROLE, owner_);
         _owner = owner_;
         baseURI = baseURI_;
@@ -89,7 +98,7 @@ abstract contract ImmutableERC721Base is
         public
         view
         virtual
-        override(ERC721, ERC721Enumerable, AccessControl, IERC165)
+        override(ERC721, ERC721Enumerable, AccessControl, ERC2981, IERC165)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
@@ -135,6 +144,31 @@ abstract contract ImmutableERC721Base is
         emit OwnershipTransferred(owner_, newOwner);
     }
 
+    /// @dev Allows admin to set or update the royalty Allowlist registry
+    function setRoyaltyAllowlistRegistry(address _royaltyAllowlist) public override(ImmutableERC721RoyaltyEnforced) onlyRole(DEFAULT_ADMIN_ROLE) {
+       super.setRoyaltyAllowlistRegistry(_royaltyAllowlist);
+    }
+
+
+    /// @dev Override of setApprovalForAll from {ERC721}, with added Allowlist approval validation
+    function setApprovalForAll(address operator, bool approved) public override(ImmutableERC721RoyaltyEnforced, ERC721) {
+        super.setApprovalForAll(operator, approved);
+    }
+
+    /// @dev Override of approve from {ERC721}, with added Allowlist approval validation
+    function approve(address to, uint256 tokenId) public override(ImmutableERC721RoyaltyEnforced, ERC721) {
+        super.approve(to, tokenId);
+    }
+
+    /// @dev Override of internal transfer from {ERC721} function to include validation
+    function _transfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override(ImmutableERC721RoyaltyEnforced, ERC721) {
+        super._transfer(from, to, tokenId);
+    }
+
     /// @dev Internal hook implemented in {ERC721Enumerable}, required for totalSupply()
     function _beforeTokenTransfer(
         address from,
@@ -152,4 +186,5 @@ abstract contract ImmutableERC721Base is
         nextTokenId.increment();
         return newTokenId;
     }
+
 }

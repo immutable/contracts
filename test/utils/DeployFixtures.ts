@@ -13,7 +13,6 @@ import {
   MockWalletFactory,
   MockWalletFactory__factory,
 } from "../../typechain";
-import moduleArtifiact from "./walletModuleArtifact.json";
 
 // Helper function to deploy all required contracts for Allowlist testing. Deploys:
 // - ERC721

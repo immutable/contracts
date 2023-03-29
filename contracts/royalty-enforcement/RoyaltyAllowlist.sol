@@ -42,6 +42,9 @@ contract RoyaltyAllowlist is ERC165, AccessControl, IRoyaltyAllowlist {
     /// @dev Mapping of Allowlisted addresses
     mapping(address => bool) private addressAllowlist;
 
+    /// @dev Mapping of Allowlisted implementation addresses
+    mapping(address => bool) private addressImplementationAllowlist;
+
     /// @dev Mapping of Allowlisted bytecodes
     mapping(bytes32 => bool) private bytecodeAllowlist;
 
@@ -82,7 +85,7 @@ contract RoyaltyAllowlist is ERC165, AccessControl, IRoyaltyAllowlist {
             // If wallet proxy bytecode is approved, check addr of implementation contract
             address impl = IProxy(target).PROXY_getImplementation();
 
-            return addressAllowlist[impl];
+            return addressImplementationAllowlist[impl];
         }
 
         return false;
@@ -122,7 +125,7 @@ contract RoyaltyAllowlist is ERC165, AccessControl, IRoyaltyAllowlist {
         bytecodeAllowlist[codeHash] = true;
         // get address of wallet module
         address impl = IProxy(walletAddr).PROXY_getImplementation();
-        addressAllowlist[impl] = true;
+        addressImplementationAllowlist[impl] = true;
 
         emit WalletAllowlistChanged(codeHash, walletAddr, true);
     }
@@ -139,7 +142,7 @@ contract RoyaltyAllowlist is ERC165, AccessControl, IRoyaltyAllowlist {
         delete bytecodeAllowlist[codeHash];
         // get address of wallet module
         address impl = IProxy(walletAddr).PROXY_getImplementation();
-        delete addressAllowlist[impl];
+        delete addressImplementationAllowlist[impl];
 
         emit WalletAllowlistChanged(codeHash, walletAddr, false);
     }

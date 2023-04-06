@@ -136,7 +136,7 @@ contract RoyaltyAllowlist is ERC165, AccessControl, IRoyaltyAllowlist {
     }
 
     /// @dev Remove  a smart contract wallet from the Allowlist
-    // This will remove the proxy and implementation contract pair from the allowlist.
+    // This will remove the proxy bytecode hash and implementation contract address pair from the allowlist
     function removeWalletFromAllowlist(
         address walletAddr
     ) external onlyRole(REGISTRAR_ROLE) {

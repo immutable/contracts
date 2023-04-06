@@ -21,8 +21,8 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
   let minter: SignerWithAddress;
   let registrar: SignerWithAddress;
   let royaltyRecipient: SignerWithAddress;
-  let buyer: SignerWithAddress;
-  let seller: SignerWithAddress;
+  let adminOne: SignerWithAddress;
+  let adminTwo: SignerWithAddress;
 
   const baseURI = "https://baseURI.com/";
   const contractURI = "https://contractURI.com";
@@ -32,7 +32,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
 
   before(async function () {
     // Retrieve accounts
-    [owner, user, minter, registrar, royaltyRecipient, buyer, seller] =
+    [owner, user, minter, registrar, royaltyRecipient, adminOne, adminTwo] =
       await ethers.getSigners();
 
     // Deploy ERC721 contract
@@ -85,55 +85,26 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
     it("Should set base URI", async function () {
       expect(await erc721.baseURI()).to.equal(baseURI);
     });
-
-    it("Should set the contract owner", async function () {
-      expect(await erc721.owner()).to.equal(owner.address);
-    });
   });
 
-  describe("Access Control", function () {
-    it("Should allow the default admin to transfer contract ownership", async function () {
-      const adminRole = await erc721.DEFAULT_ADMIN_ROLE();
-      await erc721.grantRole(adminRole, user.address);
-      await expect(erc721.connect(owner).transferOwnership(user.address))
-        .to.emit(erc721, "OwnershipTransferred")
-        .withArgs(owner.address, user.address);
-      expect(await erc721.owner()).to.equal(user.address);
-
-      // Transfer again
-      await expect(erc721.connect(user).transferOwnership(owner.address))
-        .to.emit(erc721, "OwnershipTransferred")
-        .withArgs(user.address, owner.address);
-      expect(await erc721.owner()).to.equal(owner.address);
-    });
-
+  describe("Access Control", function () {;
     it("Should revert when caller doesn't have admin role", async function () {
       await expect(
-        erc721.connect(minter).transferOwnership(owner.address)
+        erc721.connect(minter).setBaseURI("BaseURI")
       ).to.be.revertedWith(
         "AccessControl: account 0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
       );
     });
 
-    it("Should revert when caller isn't current owner, even with have admin role", async function () {
-      await expect(
-        erc721.connect(user).transferOwnership(user.address)
-      ).to.be.revertedWith("Caller must be current owner");
-    });
-
-    it("Should revert when new owner is already owner", async function () {
-      await expect(
-        erc721.connect(owner).transferOwnership(owner.address)
-      ).to.be.revertedWith("New owner is currently owner");
-    });
-
-    it("Should allow the owner to renounce ownership", async function () {
+    it("Should return the correct admins", async function () {
       const adminRole = await erc721.DEFAULT_ADMIN_ROLE();
-      await erc721.grantRole(adminRole, ethers.constants.AddressZero);
-      await erc721
-        .connect(owner)
-        .transferOwnership(ethers.constants.AddressZero);
-      expect(await erc721.owner()).to.equal(ethers.constants.AddressZero);
+      await erc721.connect(owner).grantRole(adminRole, adminOne.address);
+      await erc721.connect(owner).grantRole(adminRole, adminTwo.address);
+      expect(await erc721.getAdmins()).to.include.members([owner.address, adminOne.address, adminTwo.address]);
+      // Renounce roles
+      await erc721.connect(adminOne).renounceRole(adminRole, adminOne.address);
+      await erc721.connect(adminTwo).renounceRole(adminRole, adminTwo.address);
+      expect(await erc721.getAdmins()).to.include.members([owner.address]);
     });
   });
 

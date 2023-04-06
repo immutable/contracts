@@ -9,13 +9,8 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "./ImmutableERC721RoyaltyEnforced.sol";
 
-// Access Control
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "../../../access/IERC173.sol";
-
 // Utils
 import "@openzeppelin/contracts/utils/Counters.sol";
-
 
 /*
     ImmutableERC721Base is an abstract contract that offers minimum preset functionality without
@@ -27,9 +22,7 @@ abstract contract ImmutableERC721Base is
     ImmutableERC721RoyaltyEnforced,
     ERC721Enumerable,
     ERC721Burnable,
-    ERC2981,
-    AccessControl,
-    IERC173
+    ERC2981
 {
     using Counters for Counters.Counter;
 
@@ -44,13 +37,10 @@ abstract contract ImmutableERC721Base is
     /// @dev the tokenId of the next NFT to be minted.
     Counters.Counter private nextTokenId;
 
-    /// @dev Owner of the contract (defined for interopability with applications, e.g. storefront marketplace)
-    address private _owner;
-
     ///     =====   Constructor  =====
 
     /**
-     * @dev Grants `DEFAULT_ADMIN_ROLE` to the supplied `owner_` address
+     * @dev Grants `DEFAULT_ADMIN_ROLE` to the supplied `owner` address
      *
      * Sets the name and symbol for the collection
      * Sets the default admin to `owner`
@@ -58,7 +48,7 @@ abstract contract ImmutableERC721Base is
      * Sets the royalty receiver and amount (this can not be changed once set)
      */
     constructor (
-        address owner_, 
+        address owner, 
         string memory name_, 
         string memory symbol_, 
         string memory baseURI_ , 
@@ -68,16 +58,12 @@ abstract contract ImmutableERC721Base is
         ) ERC721(name_, symbol_){
         // Initialize state variables
         _setDefaultRoyalty(_receiver, _feeNumerator);
-        _grantRole(DEFAULT_ADMIN_ROLE, owner_);
-        _owner = owner_;
+        _grantRole(DEFAULT_ADMIN_ROLE, owner);
         baseURI = baseURI_;
         contractURI = contractURI_;
 
         // Increment nextTokenId to start from 1 (default is 0)
         nextTokenId.increment();
-
-        // Emit events
-        emit OwnershipTransferred(address(0), _owner);
     }
 
     ///     =====   View functions  =====
@@ -98,15 +84,21 @@ abstract contract ImmutableERC721Base is
         public
         view
         virtual
-        override(ERC721, ERC721Enumerable, AccessControl, ERC2981, IERC165)
+        override(ImmutableERC721RoyaltyEnforced, ERC721, ERC721Enumerable, ERC2981)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
     }
 
-    /// @dev Returns the current owner
-    function owner() external view override returns (address) {
-        return _owner;
+    /// @dev Returns the addresses which have DEFAULT_ADMIN_ROLE
+    function getAdmins() public view returns (address[] memory) {
+        uint256 adminCount = getRoleMemberCount(DEFAULT_ADMIN_ROLE);
+        address[] memory admins = new address[](adminCount);
+        for (uint256 i; i < adminCount; i++) {
+            admins[i] = getRoleMember(DEFAULT_ADMIN_ROLE, i);
+        }
+
+        return admins;
     }
 
     ///     =====  External functions  =====
@@ -126,29 +118,6 @@ abstract contract ImmutableERC721Base is
     {
         contractURI = _contractURI;
     }
-
-    /// @dev Allows admin to update contract owner. Required that new oner has admin role
-    function transferOwnership(address newOwner)
-        external
-        override
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
-        require(
-            hasRole(DEFAULT_ADMIN_ROLE, newOwner),
-            "New owner does not have default admin role"
-        );
-        address owner_ = _owner;
-        require(owner_ != newOwner, "New owner is currently owner");
-        require(msg.sender == owner_, "Caller must be current owner");
-        _owner = newOwner;
-        emit OwnershipTransferred(owner_, newOwner);
-    }
-
-    /// @dev Allows admin to set or update the royalty Allowlist registry
-    function setRoyaltyAllowlistRegistry(address _royaltyAllowlist) public override(ImmutableERC721RoyaltyEnforced) onlyRole(DEFAULT_ADMIN_ROLE) {
-       super.setRoyaltyAllowlistRegistry(_royaltyAllowlist);
-    }
-
 
     /// @dev Override of setApprovalForAll from {ERC721}, with added Allowlist approval validation
     function setApprovalForAll(address operator, bool approved) public override(ImmutableERC721RoyaltyEnforced, ERC721) {

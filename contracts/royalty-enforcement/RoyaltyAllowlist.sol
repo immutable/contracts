@@ -21,6 +21,7 @@ interface IProxy {
     which are allowed to be approved operators and execute transfers of interfacing token contracts (e.g. ERC721/ERC1155). The registry
     will be a deployed contract that tokens may interface with and point to.
 */
+
 contract RoyaltyAllowlist is ERC165, AccessControl, IRoyaltyAllowlist {
     ///     =====       Events       =====
 
@@ -113,7 +114,11 @@ contract RoyaltyAllowlist is ERC165, AccessControl, IRoyaltyAllowlist {
         }
     }
 
-    /// @dev Add a smart contract wallet to the Allowlist
+    /// @dev Add a smart contract wallet to the Allowlist.
+    // This will allowlist the proxy and implementation contract pair.
+    // First, the bytecode of the proxy is added to the bytecode allowlist.
+    // Second, the implementation address stored in the proxy is stored in the
+    // implementation address allowlist.
     function addWalletToAllowlist(
         address walletAddr
     ) external onlyRole(REGISTRAR_ROLE) {
@@ -131,6 +136,7 @@ contract RoyaltyAllowlist is ERC165, AccessControl, IRoyaltyAllowlist {
     }
 
     /// @dev Remove  a smart contract wallet from the Allowlist
+    // This will remove the proxy and implementation contract pair from the allowlist.
     function removeWalletFromAllowlist(
         address walletAddr
     ) external onlyRole(REGISTRAR_ROLE) {

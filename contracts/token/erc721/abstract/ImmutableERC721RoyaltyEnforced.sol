@@ -7,13 +7,16 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 // Allowlist Registry
 import "../../../royalty-enforcement/IRoyaltyAllowlist.sol";
 
+// Access Control
+import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
+
 /*
     ImmutableERC721RoyaltyEnforced is an abstract contract extending the ERC721 contract to enforce royalties.
-    The contract has support to specify a whitelist registry and overrides transfers and approvals to enforce allow list validation.
+    The contract has support to specify a allowlist registry and overrides transfers and approvals to enforce allow list validation.
 */
 
 abstract contract ImmutableERC721RoyaltyEnforced is
-    ERC721
+    ERC721, AccessControlEnumerable
 {
     ///     =====     Errors         =====
 
@@ -29,12 +32,25 @@ abstract contract ImmutableERC721RoyaltyEnforced is
     event RoyaltytAllowlistRegistryUpdated(address oldRegistry, address newRegistry);
 
     ///     =====   State Variables  =====
-
+    
     /// @dev Interface that implements the `IRoyaltyAllowlist` interface
     IRoyaltyAllowlist public royaltyAllowlist;
 
+    ///     =====  External functions  =====
+
+    /// @dev Returns the supported interfaces
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ERC721,  AccessControlEnumerable)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
+    }
+
     /// @dev Allows admin to set or update the royalty Allowlist registry
-    function setRoyaltyAllowlistRegistry(address _royaltyAllowlist) public virtual {
+    function setRoyaltyAllowlistRegistry(address _royaltyAllowlist) public onlyRole(DEFAULT_ADMIN_ROLE) {
         require(IERC165(_royaltyAllowlist).supportsInterface(type(IRoyaltyAllowlist).interfaceId), "contract does not implement IRoyaltyAllowlist");
 
         emit RoyaltytAllowlistRegistryUpdated(address(royaltyAllowlist), _royaltyAllowlist);
@@ -56,7 +72,7 @@ abstract contract ImmutableERC721RoyaltyEnforced is
     /// @dev Internal function to validate whether approval targets are Allowlisted or EOA
     function _validateApproval(address targetApproval) internal view {
         // Only check if the registry is set
-        if(address(royaltyAllowlist).code.length > 0) {
+        if(address(royaltyAllowlist) != address(0)) {
              // Check for:
             // 1. approval target is an EOA
             // 2. approval target address is Allowlisted or target address bytecode is Allowlisted
@@ -66,6 +82,8 @@ abstract contract ImmutableERC721RoyaltyEnforced is
             revert ApproveTargetNotInAllowlist(targetApproval);
         }
     }
+
+    ///     =====  Internal functions  =====
 
     /// @dev Override of internal transfer from {ERC721} function to include validation
        function _transfer(
@@ -80,7 +98,7 @@ abstract contract ImmutableERC721RoyaltyEnforced is
     /// @dev Internal function to validate whether the calling address is an EOA or Allowlisted
     function _validateTransfer() internal view {
         // Only check if the registry is set
-        if (address(royaltyAllowlist).code.length > 0) {
+        if (address(royaltyAllowlist) != address(0)) {
             // Check for:
             // 1. caller is an EOA
             // 2. caller is Allowlisted or is the calling address bytecode is Allowlisted

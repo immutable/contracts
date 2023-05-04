@@ -120,12 +120,12 @@ abstract contract ImmutableERC721Base is
     }
 
     /// @dev Override of setApprovalForAll from {ERC721}, with added Allowlist approval validation
-    function setApprovalForAll(address operator, bool approved) public override(ImmutableERC721RoyaltyEnforced, ERC721) {
+    function setApprovalForAll(address operator, bool approved) public override(ImmutableERC721RoyaltyEnforced, ERC721, IERC721) {
         super.setApprovalForAll(operator, approved);
     }
 
     /// @dev Override of approve from {ERC721}, with added Allowlist approval validation
-    function approve(address to, uint256 tokenId) public override(ImmutableERC721RoyaltyEnforced, ERC721) {
+    function approve(address to, uint256 tokenId) public override(ImmutableERC721RoyaltyEnforced, ERC721, IERC721) {
         super.approve(to, tokenId);
     }
 

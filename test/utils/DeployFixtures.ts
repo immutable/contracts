@@ -22,19 +22,19 @@ import {
 // - Mock market place
 export const AllowlistFixture = async (owner: SignerWithAddress) => {
   // ERC721
-  let erc721: ImmutableERC721PermissionedMintable;
   const erc721PresetFactory = (await ethers.getContractFactory(
     "ImmutableERC721PermissionedMintable"
   )) as ImmutableERC721PermissionedMintable__factory;
-  erc721 = await erc721PresetFactory.deploy(
-    owner.address,
-    "ERC721Preset",
-    "EP",
-    "https://baseURI.com/",
-    "https://contractURI.com",
-    owner.address,
-    ethers.BigNumber.from("200")
-  );
+  const erc721: ImmutableERC721PermissionedMintable =
+    await erc721PresetFactory.deploy(
+      owner.address,
+      "ERC721Preset",
+      "EP",
+      "https://baseURI.com/",
+      "https://contractURI.com",
+      owner.address,
+      ethers.BigNumber.from("200")
+    );
 
   // Mock Wallet factory
   const WalletFactory = (await ethers.getContractFactory(
@@ -49,18 +49,20 @@ export const AllowlistFixture = async (owner: SignerWithAddress) => {
   const factory = await Factory.deploy();
 
   // Allowlist registry
-  let royaltyAllowlist: RoyaltyAllowlist;
   const RoyaltyAllowlist = (await ethers.getContractFactory(
     "RoyaltyAllowlist"
   )) as RoyaltyAllowlist__factory;
-  royaltyAllowlist = await RoyaltyAllowlist.deploy(owner.address);
+  const royaltyAllowlist: RoyaltyAllowlist = await RoyaltyAllowlist.deploy(
+    owner.address
+  );
 
   // Mock market place
-  let marketPlace: MockMarketplace;
   const mockMarketplaceFactory = (await ethers.getContractFactory(
     "MockMarketplace"
   )) as MockMarketplace__factory;
-  marketPlace = await mockMarketplaceFactory.deploy(erc721.address);
+  const marketPlace: MockMarketplace = await mockMarketplaceFactory.deploy(
+    erc721.address
+  );
 
   return {
     erc721,

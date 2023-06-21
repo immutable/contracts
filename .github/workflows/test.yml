@@ -17,3 +17,20 @@ jobs:
         run: npm install
       - name: Run Tests
         run: npm run test
+
+  eslint:
+    needs: hardhat-test
+    name: eslint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: install node v12
+      uses: actions/setup-node@v1
+      with:
+        node-version: 16
+    - name: yarn install
+      run: yarn install
+    - name: eslint
+      uses: icrawl/action-eslint@v1
+      with:
+        custom-glob: test # only if a different glob is needed, default: src

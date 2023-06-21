@@ -35,14 +35,17 @@ describe("Royalty Enforcement Test Cases", function () {
   describe("Contract Deployment", function () {
     it("Should set the admin role to the owner", async function () {
       const adminRole = await royaltyAllowlist.DEFAULT_ADMIN_ROLE();
-      expect(await royaltyAllowlist.hasRole(adminRole, owner.address)).to.be
-        .true;
+      expect(
+        await royaltyAllowlist.hasRole(adminRole, owner.address)
+      ).to.be.equal(true);
     });
   });
 
   describe("Interface Support", function () {
     it("Should support the royalty Allowlist interface", async function () {
-      expect(await royaltyAllowlist.supportsInterface("0x05a3b809")).to.be.true;
+      expect(
+        await royaltyAllowlist.supportsInterface("0x05a3b809")
+      ).to.be.equal(true);
     });
   });
 
@@ -103,7 +106,9 @@ describe("Royalty Enforcement Test Cases", function () {
         .to.emit(royaltyAllowlist, "WalletAllowlistChanged")
         .withArgs(ethers.utils.keccak256(deployedBytecode), deployedAddr, true);
 
-      expect(await royaltyAllowlist.isAllowlisted(deployedAddr)).to.be.true;
+      expect(await royaltyAllowlist.isAllowlisted(deployedAddr)).to.be.equal(
+        true
+      );
 
       // Remove the wallet from the allowlist
       await expect(
@@ -118,7 +123,9 @@ describe("Royalty Enforcement Test Cases", function () {
           false
         );
 
-      expect(await royaltyAllowlist.isAllowlisted(deployedAddr)).to.be.false;
+      expect(await royaltyAllowlist.isAllowlisted(deployedAddr)).to.be.equal(
+        false
+      );
     });
 
     it("Should add the address of a contract to the Allowlist and then remove it from the Allowlist", async function () {
@@ -131,8 +138,9 @@ describe("Royalty Enforcement Test Cases", function () {
         .to.emit(royaltyAllowlist, "AddressAllowlistChanged")
         .withArgs(marketPlace.address, true);
 
-      expect(await royaltyAllowlist.isAllowlisted(marketPlace.address)).to.be
-        .true;
+      expect(
+        await royaltyAllowlist.isAllowlisted(marketPlace.address)
+      ).to.be.equal(true);
 
       // Remove address
       await expect(
@@ -143,8 +151,9 @@ describe("Royalty Enforcement Test Cases", function () {
         .to.emit(royaltyAllowlist, "AddressAllowlistChanged")
         .withArgs(marketPlace.address, false);
 
-      expect(await royaltyAllowlist.isAllowlisted(marketPlace.address)).to.be
-        .false;
+      expect(
+        await royaltyAllowlist.isAllowlisted(marketPlace.address)
+      ).to.be.equal(false);
     });
 
     it("Should not allowlist smart contract wallets with the same bytecode but a different implementation address", async function () {
@@ -153,7 +162,9 @@ describe("Royalty Enforcement Test Cases", function () {
       await walletFactory.connect(scWallet).deploy(erc721.address, salt);
       const deployedAddr = await walletFactory.getAddress(erc721.address, salt);
 
-      expect(await royaltyAllowlist.isAllowlisted(deployedAddr)).to.be.false;
+      expect(await royaltyAllowlist.isAllowlisted(deployedAddr)).to.be.equal(
+        false
+      );
     });
   });
 });

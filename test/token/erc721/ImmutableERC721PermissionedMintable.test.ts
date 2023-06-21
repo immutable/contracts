@@ -6,8 +6,6 @@ import {
   ImmutableERC721PermissionedMintable,
   RoyaltyAllowlist,
   RoyaltyAllowlist__factory,
-  MockMarketplace__factory,
-  MockMarketplace,
 } from "../../../typechain";
 
 describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
@@ -15,7 +13,6 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
 
   let erc721: ImmutableERC721PermissionedMintable;
   let royaltyAllowlist: RoyaltyAllowlist;
-  let mockMarketplace: MockMarketplace;
   let owner: SignerWithAddress;
   let user: SignerWithAddress;
   let minter: SignerWithAddress;
@@ -56,12 +53,6 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
     )) as RoyaltyAllowlist__factory;
     royaltyAllowlist = await royaltyAllowlistFactory.deploy(owner.address);
 
-    // Deploy mock marketplace
-    const mockMarketplaceFactory = (await ethers.getContractFactory(
-      "MockMarketplace"
-    )) as MockMarketplace__factory;
-    mockMarketplace = await mockMarketplaceFactory.deploy(erc721.address);
-
     // Set up roles
     await erc721.connect(owner).grantMinterRole(minter.address);
     await royaltyAllowlist.connect(owner).grantRegistrarRole(registrar.address);
@@ -70,7 +61,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
   describe("Contract Deployment", function () {
     it("Should set the admin role to the owner", async function () {
       const adminRole = await erc721.DEFAULT_ADMIN_ROLE();
-      expect(await erc721.hasRole(adminRole, owner.address)).to.be.true;
+      expect(await erc721.hasRole(adminRole, owner.address)).to.be.equal(true);
     });
 
     it("Should set the name and symbol of the collection", async function () {
@@ -87,7 +78,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
     });
   });
 
-  describe("Access Control", function () {;
+  describe("Access Control", function () {
     it("Should revert when caller doesn't have admin role", async function () {
       await expect(
         erc721.connect(minter).setBaseURI("BaseURI")
@@ -100,7 +91,11 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
       const adminRole = await erc721.DEFAULT_ADMIN_ROLE();
       await erc721.connect(owner).grantRole(adminRole, adminOne.address);
       await erc721.connect(owner).grantRole(adminRole, adminTwo.address);
-      expect(await erc721.getAdmins()).to.include.members([owner.address, adminOne.address, adminTwo.address]);
+      expect(await erc721.getAdmins()).to.include.members([
+        owner.address,
+        adminOne.address,
+        adminTwo.address,
+      ]);
       // Renounce roles
       await erc721.connect(adminOne).renounceRole(adminRole, adminOne.address);
       await erc721.connect(adminTwo).renounceRole(adminRole, adminTwo.address);

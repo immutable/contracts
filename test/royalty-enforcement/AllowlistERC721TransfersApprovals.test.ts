@@ -67,11 +67,10 @@ describe("Allowlisted ERC721 Transfers", function () {
 
     it("Should not allow contracts that do not implement the IRoyaltyAllowlist to be set", async function () {
       // Deploy another contract that implements IERC165, but not IRoyaltyAllowlist
-      let erc721Two;
       const factory = await ethers.getContractFactory(
         "ImmutableERC721PermissionedMintable"
       );
-      erc721Two = await factory.deploy(
+      const erc721Two = await factory.deploy(
         owner.address,
         "",
         "",
@@ -119,8 +118,9 @@ describe("Allowlisted ERC721 Transfers", function () {
       await erc721.connect(minter).approve(accs[0].address, 1);
       await erc721.connect(minter).setApprovalForAll(accs[0].address, true);
       expect(await erc721.getApproved(1)).to.be.equal(accs[0].address);
-      expect(await erc721.isApprovedForAll(minter.address, accs[0].address)).to
-        .be.true;
+      expect(
+        await erc721.isApprovedForAll(minter.address, accs[0].address)
+      ).to.be.equal(true);
     });
 
     it("Should allow Allowlisted addresses to be approved", async function () {
@@ -132,8 +132,9 @@ describe("Allowlisted ERC721 Transfers", function () {
       await erc721.connect(minter).approve(marketPlace.address, 2);
       await erc721.connect(minter).setApprovalForAll(marketPlace.address, true);
       expect(await erc721.getApproved(2)).to.be.equal(marketPlace.address);
-      expect(await erc721.isApprovedForAll(minter.address, marketPlace.address))
-        .to.be.true;
+      expect(
+        await erc721.isApprovedForAll(minter.address, marketPlace.address)
+      ).to.be.equal(true);
     });
 
     it("Should allow Allowlisted smart contract wallets to be approved", async function () {
@@ -145,8 +146,9 @@ describe("Allowlisted ERC721 Transfers", function () {
       // Approve the smart contract wallet
       await erc721.connect(minter).setApprovalForAll(deployedAddr, true);
       expect(await erc721.getApproved(3)).to.be.equal(deployedAddr);
-      expect(await erc721.isApprovedForAll(minter.address, deployedAddr)).to.be
-        .true;
+      expect(
+        await erc721.isApprovedForAll(minter.address, deployedAddr)
+      ).to.be.to.be.equal(true);
     });
   });
 
@@ -258,15 +260,8 @@ describe("Allowlisted ERC721 Transfers", function () {
       // the CFA is treated as an EOA, passing _validateApproval.
       // This means post-deployment that the address is now an approved operator
       // and is able to call transferFrom.
-      let deployedAddr;
-      let salt;
-      let constructorByteCode;
-
-      ({ deployedAddr, salt, constructorByteCode } = await disguidedEOAFixture(
-        erc721.address,
-        factory,
-        "0x1234"
-      ));
+      const { deployedAddr, salt, constructorByteCode } =
+        await disguidedEOAFixture(erc721.address, factory, "0x1234");
       // Approve disguised EOA
       await erc721.connect(minter).mint(minter.address, 1);
       await erc721.connect(minter).setApprovalForAll(deployedAddr, true);
@@ -294,11 +289,10 @@ describe("Allowlisted ERC721 Transfers", function () {
     // Here the malicious contract attempts to transfer the token out of the contract by calling transferFrom in onERC721Received
     it("onRecieve transferFrom", async function () {
       // Deploy contract
-      let onRecieve: MockOnReceive;
       const mockOnReceiveFactory = (await ethers.getContractFactory(
         "MockOnReceive"
       )) as MockOnReceive__factory;
-      onRecieve = await mockOnReceiveFactory.deploy(
+      const onRecieve: MockOnReceive = await mockOnReceiveFactory.deploy(
         erc721.address,
         accs[6].address
       );

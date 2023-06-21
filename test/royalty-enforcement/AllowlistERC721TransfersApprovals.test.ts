@@ -118,8 +118,9 @@ describe("Allowlisted ERC721 Transfers", function () {
       await erc721.connect(minter).approve(accs[0].address, 1);
       await erc721.connect(minter).setApprovalForAll(accs[0].address, true);
       expect(await erc721.getApproved(1)).to.be.equal(accs[0].address);
-      expect(await erc721.isApprovedForAll(minter.address, accs[0].address)).to
-        .be.true;
+      expect(
+        await erc721.isApprovedForAll(minter.address, accs[0].address)
+      ).to.be.equal(true);
     });
 
     it("Should allow Allowlisted addresses to be approved", async function () {
@@ -131,8 +132,9 @@ describe("Allowlisted ERC721 Transfers", function () {
       await erc721.connect(minter).approve(marketPlace.address, 2);
       await erc721.connect(minter).setApprovalForAll(marketPlace.address, true);
       expect(await erc721.getApproved(2)).to.be.equal(marketPlace.address);
-      expect(await erc721.isApprovedForAll(minter.address, marketPlace.address))
-        .to.be.true;
+      expect(
+        await erc721.isApprovedForAll(minter.address, marketPlace.address)
+      ).to.be.equal(true);
     });
 
     it("Should allow Allowlisted smart contract wallets to be approved", async function () {
@@ -144,8 +146,9 @@ describe("Allowlisted ERC721 Transfers", function () {
       // Approve the smart contract wallet
       await erc721.connect(minter).setApprovalForAll(deployedAddr, true);
       expect(await erc721.getApproved(3)).to.be.equal(deployedAddr);
-      expect(await erc721.isApprovedForAll(minter.address, deployedAddr)).to.be
-        .true;
+      expect(
+        await erc721.isApprovedForAll(minter.address, deployedAddr)
+      ).to.be.to.be.equal(true);
     });
   });
 

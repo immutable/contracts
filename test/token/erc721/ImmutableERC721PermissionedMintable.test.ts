@@ -70,7 +70,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
   describe("Contract Deployment", function () {
     it("Should set the admin role to the owner", async function () {
       const adminRole = await erc721.DEFAULT_ADMIN_ROLE();
-      expect(await erc721.hasRole(adminRole, owner.address)).to.be.true;
+      expect(await erc721.hasRole(adminRole, owner.address)).to.be.equal(true);
     });
 
     it("Should set the name and symbol of the collection", async function () {

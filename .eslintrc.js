@@ -6,9 +6,12 @@ module.exports = {
     node: true,
   },
   plugins: ["@typescript-eslint"],
-  extends: ["plugin:prettier/recommended"],
+  extends: ["standard", "plugin:prettier/recommended"],
   parser: "@typescript-eslint/parser",
   parserOptions: {
     ecmaVersion: 12,
+  },
+  rules: {
+    camelcase: "off", // Disable the camelcase rule
   },
 };

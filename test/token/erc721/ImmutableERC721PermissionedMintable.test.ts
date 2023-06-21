@@ -87,7 +87,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
     });
   });
 
-  describe("Access Control", function () {;
+  describe("Access Control", function () {
     it("Should revert when caller doesn't have admin role", async function () {
       await expect(
         erc721.connect(minter).setBaseURI("BaseURI")
@@ -100,7 +100,11 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
       const adminRole = await erc721.DEFAULT_ADMIN_ROLE();
       await erc721.connect(owner).grantRole(adminRole, adminOne.address);
       await erc721.connect(owner).grantRole(adminRole, adminTwo.address);
-      expect(await erc721.getAdmins()).to.include.members([owner.address, adminOne.address, adminTwo.address]);
+      expect(await erc721.getAdmins()).to.include.members([
+        owner.address,
+        adminOne.address,
+        adminTwo.address,
+      ]);
       // Renounce roles
       await erc721.connect(adminOne).renounceRole(adminRole, adminOne.address);
       await erc721.connect(adminTwo).renounceRole(adminRole, adminTwo.address);

@@ -77,26 +77,21 @@ export const walletSCFixture = async (
   mockWalletFactory: MockWalletFactory
 ) => {
   // Deploy the implementation contract or wallet module
-  const Module = await ethers.getContractFactory(
-   "MockWallet"
-  );
-  
+  const Module = await ethers.getContractFactory("MockWallet");
+
   const module = await Module.connect(walletDeployer).deploy();
 
-  const moduleAddress = module.address
+  const moduleAddress = module.address;
 
   // Calculate salt
   const salt = ethers.utils.keccak256("0x1234");
 
   // Deploy wallet via factory
-  await mockWalletFactory
-    .connect(walletDeployer)
-    .deploy(module.address, salt);
-  
+  await mockWalletFactory.connect(walletDeployer).deploy(module.address, salt);
 
   const deployedAddr = await mockWalletFactory.getAddress(module.address, salt);
-  
-  return {deployedAddr, moduleAddress};
+
+  return { deployedAddr, moduleAddress };
 };
 
 // Helper function to return required artifacts to deploy disguised EOA via CREATE2

@@ -6,8 +6,6 @@ import {
   ImmutableERC721PermissionedMintable,
   RoyaltyAllowlist,
   RoyaltyAllowlist__factory,
-  MockMarketplace__factory,
-  MockMarketplace,
 } from "../../../typechain";
 
 describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
@@ -15,7 +13,6 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
 
   let erc721: ImmutableERC721PermissionedMintable;
   let royaltyAllowlist: RoyaltyAllowlist;
-  let mockMarketplace: MockMarketplace;
   let owner: SignerWithAddress;
   let user: SignerWithAddress;
   let minter: SignerWithAddress;
@@ -55,12 +52,6 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
       "RoyaltyAllowlist"
     )) as RoyaltyAllowlist__factory;
     royaltyAllowlist = await royaltyAllowlistFactory.deploy(owner.address);
-
-    // Deploy mock marketplace
-    const mockMarketplaceFactory = (await ethers.getContractFactory(
-      "MockMarketplace"
-    )) as MockMarketplace__factory;
-    mockMarketplace = await mockMarketplaceFactory.deploy(erc721.address);
 
     // Set up roles
     await erc721.connect(owner).grantMinterRole(minter.address);

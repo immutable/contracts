@@ -16,6 +16,18 @@ contract MockMarketplace {
         tokenAddress.transferFrom(msg.sender, recipient, _tokenId);
     }
 
+    function executeTransferFrom(
+        address from,
+        address to,
+        uint256 _tokenId
+    ) public {
+        tokenAddress.transferFrom(from, to, _tokenId);
+    }
+
+    function executeApproveForAll(address operator, bool approved) public {
+        tokenAddress.setApprovalForAll(operator, approved);
+    }
+
     function executeTransferRoyalties(
         address from,
         address recipient,

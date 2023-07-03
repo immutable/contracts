@@ -112,6 +112,25 @@ describe("Allowlisted ERC721 Transfers", function () {
       );
     });
 
+    it("Not allowlisted should not be approvable", async function () {
+      // TODO: REZ
+    });
+
+    it("Not allowlisted should not be able to approve", async function () {
+      // TODO: REZ
+    });
+
+    it("Should not allow a non-Allowlisted operator to approve", async function () {
+      await erc721.connect(minter).mint(minter.address, 3);
+      // Approve EOA addr
+      await erc721.connect(minter).approve(accs[0].address, 1);
+      await erc721.connect(minter).setApprovalForAll(accs[0].address, true);
+      expect(await erc721.getApproved(1)).to.be.equal(accs[0].address);
+      expect(
+        await erc721.isApprovedForAll(minter.address, accs[0].address)
+      ).to.be.equal(true);
+    });
+
     it("Should allow EOAs to be approved", async function () {
       await erc721.connect(minter).mint(minter.address, 3);
       // Approve EOA addr
@@ -176,6 +195,13 @@ describe("Allowlisted ERC721 Transfers", function () {
         .transferFrom(accs[2].address, accs[1].address, 5);
       // Check final balance
       expect(await erc721.balanceOf(accs[2].address)).to.be.equal(0);
+    });
+
+    it("Should block transfers from a not allow listed address", async function () {
+      // REZ: TODO
+    });
+    it("Should block transfers to a not allow listed address", async function () {
+      // REZ: TODO
     });
 
     it("Should not block transfers from an allow listed contract", async function () {

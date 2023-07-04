@@ -32,7 +32,7 @@ describe("Allowlisted ERC721 Transfers", function () {
   let scWallet: SignerWithAddress;
   let accs: SignerWithAddress[];
 
-  before(async function () {
+  beforeEach(async function () {
     [owner, minter, registrar, scWallet, ...accs] = await ethers.getSigners();
 
     // Get all required contracts
@@ -97,6 +97,11 @@ describe("Allowlisted ERC721 Transfers", function () {
   });
 
   describe("Approvals", function () {
+    beforeEach(async function () {
+      await erc721
+        .connect(owner)
+        .setRoyaltyAllowlistRegistry(royaltyAllowlist.address);
+    });
     it("Should not allow a non-Allowlisted operator to be approved", async function () {
       // Approve for all
       await expect(
@@ -113,13 +118,12 @@ describe("Allowlisted ERC721 Transfers", function () {
     });
 
     it("Not allowlisted contracts should not be able to approve", async function () {
-      // TODO: REZ
-      this.skip();
-
       await erc721.connect(minter).mint(marketPlace.address, 1);
       await expect(
         marketPlace.connect(minter).executeApproveForAll(minter.address, true)
-      ).to.be.revertedWith("not allowed");
+      ).to.be.revertedWith(
+        `'ApproverNotInAllowlist("${marketPlace.address}")'`
+      );
     });
 
     it("Should allow EOAs to be approved", async function () {
@@ -139,6 +143,7 @@ describe("Allowlisted ERC721 Transfers", function () {
         .connect(registrar)
         .addAddressToAllowlist([marketPlace.address]);
       // Approve marketplace on erc721 contract
+      await erc721.connect(minter).mint(minter.address, 3);
       await erc721.connect(minter).approve(marketPlace.address, 2);
       await erc721.connect(minter).setApprovalForAll(marketPlace.address, true);
       expect(await erc721.getApproved(2)).to.be.equal(marketPlace.address);
@@ -152,6 +157,7 @@ describe("Allowlisted ERC721 Transfers", function () {
       await royaltyAllowlist
         .connect(registrar)
         .addWalletToAllowlist(deployedAddr);
+      await erc721.connect(minter).mint(minter.address, 3);
       await erc721.connect(minter).approve(deployedAddr, 3);
       // Approve the smart contract wallet
       await erc721.connect(minter).setApprovalForAll(deployedAddr, true);
@@ -163,6 +169,11 @@ describe("Allowlisted ERC721 Transfers", function () {
   });
 
   describe("Transfers", function () {
+    beforeEach(async function () {
+      await erc721
+        .connect(owner)
+        .setRoyaltyAllowlistRegistry(royaltyAllowlist.address);
+    });
     it("Should freely allow transfers between EOAs", async function () {
       await erc721.connect(owner).grantMinterRole(accs[0].address);
       await erc721.connect(owner).grantMinterRole(accs[1].address);
@@ -171,19 +182,19 @@ describe("Allowlisted ERC721 Transfers", function () {
       // Transfer
       await erc721
         .connect(accs[0])
-        .transferFrom(accs[0].address, accs[2].address, 4);
+        .transferFrom(accs[0].address, accs[2].address, 1);
       await erc721
         .connect(accs[1])
-        .transferFrom(accs[1].address, accs[2].address, 5);
+        .transferFrom(accs[1].address, accs[2].address, 2);
       // Check balance
       expect(await erc721.balanceOf(accs[2].address)).to.be.equal(2);
       // Transfer again
       await erc721
         .connect(accs[2])
-        .transferFrom(accs[2].address, accs[0].address, 4);
+        .transferFrom(accs[2].address, accs[0].address, 1);
       await erc721
         .connect(accs[2])
-        .transferFrom(accs[2].address, accs[1].address, 5);
+        .transferFrom(accs[2].address, accs[1].address, 2);
       // Check final balance
       expect(await erc721.balanceOf(accs[2].address)).to.be.equal(0);
     });
@@ -211,7 +222,11 @@ describe("Allowlisted ERC721 Transfers", function () {
     });
 
     it("Should not block transfers from an allow listed contract", async function () {
-      // mock marketplace has already been approved
+      await royaltyAllowlist
+        .connect(registrar)
+        .addAddressToAllowlist([marketPlace.address]);
+      await erc721.connect(minter).mint(minter.address, 3);
+      await erc721.connect(minter).setApprovalForAll(marketPlace.address, true);
       expect(await erc721.balanceOf(accs[3].address)).to.be.equal(0);
       await marketPlace.connect(minter).executeTransfer(accs[3].address, 2);
       expect(await erc721.balanceOf(accs[3].address)).to.be.equal(1);
@@ -226,6 +241,11 @@ describe("Allowlisted ERC721 Transfers", function () {
       await walletFactory.connect(scWallet).deploy(moduleAddress, saltTwo);
       await walletFactory.connect(scWallet).deploy(moduleAddress, saltThree);
       const deployedAddr = await walletFactory.getAddress(moduleAddress, salt);
+
+      await royaltyAllowlist
+        .connect(registrar)
+        .addWalletToAllowlist(deployedAddr);
+
       const deployedAddrTwo = await walletFactory.getAddress(
         moduleAddress,
         saltTwo
@@ -254,13 +274,13 @@ describe("Allowlisted ERC721 Transfers", function () {
         erc721.address,
         deployedAddr,
         deployedAddrThree,
-        6
+        1
       );
       await walletTwo.transferNFT(
         erc721.address,
         deployedAddrTwo,
         deployedAddrThree,
-        7
+        2
       );
       expect(await erc721.balanceOf(deployedAddr)).to.be.equal(0);
       expect(await erc721.balanceOf(deployedAddrTwo)).to.be.equal(0);
@@ -269,13 +289,13 @@ describe("Allowlisted ERC721 Transfers", function () {
         erc721.address,
         deployedAddrThree,
         deployedAddr,
-        6
+        1
       );
       await walletThree.transferNFT(
         erc721.address,
         deployedAddrThree,
         deployedAddrTwo,
-        7
+        2
       );
       expect(await erc721.balanceOf(deployedAddr)).to.be.equal(1);
       expect(await erc721.balanceOf(deployedAddrTwo)).to.be.equal(1);
@@ -284,6 +304,11 @@ describe("Allowlisted ERC721 Transfers", function () {
   });
 
   describe("Malicious Contracts", function () {
+    beforeEach(async function () {
+      await erc721
+        .connect(owner)
+        .setRoyaltyAllowlistRegistry(royaltyAllowlist.address);
+    });
     // The EOA disguise attack vector is a where a pre-computed CREATE2 deterministic address is disguised as an EOA.
     // By virtue of this, approvals and transfers to this address will pass. We need to catch actions from this address
     // once it is deployed.
@@ -309,7 +334,7 @@ describe("Allowlisted ERC721 Transfers", function () {
       await expect(
         disguisedEOA
           .connect(minter)
-          .executeTransfer(minter.address, accs[5].address, 8)
+          .executeTransfer(minter.address, accs[5].address, 1)
       ).to.be.revertedWith(`'CallerNotInAllowlist("${deployedAddr}")'`);
     });
 
@@ -337,7 +362,7 @@ describe("Allowlisted ERC721 Transfers", function () {
           ["safeTransferFrom(address,address,uint256)"](
             minter.address,
             onRecieve.address,
-            8
+            1
           )
       ).to.be.revertedWith(`'CallerNotInAllowlist("${onRecieve.address}")'`);
     });

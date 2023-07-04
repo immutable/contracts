@@ -96,15 +96,24 @@ abstract contract ImmutableERC721RoyaltyEnforced is
         // Only check if the registry is set
         if (address(royaltyAllowlist) != address(0)) {
             // Check for:
+            // 1. approver is an EOA
+            // 2. approver is address or bytecode is allowlisted
+            if (
+                msg.sender.code.length != 0 &&
+                !royaltyAllowlist.isAllowlisted(msg.sender)
+            ) {
+                revert ApproverNotInAllowlist(msg.sender);
+            }
+
+            // Check for:
             // 1. approval target is an EOA
             // 2. approval target address is Allowlisted or target address bytecode is Allowlisted
             if (
-                targetApproval.code.length == 0 ||
-                royaltyAllowlist.isAllowlisted(targetApproval)
+                targetApproval.code.length != 0 &&
+                !royaltyAllowlist.isAllowlisted(targetApproval)
             ) {
-                return;
+                revert ApproveTargetNotInAllowlist(targetApproval);
             }
-            revert ApproveTargetNotInAllowlist(targetApproval);
         }
     }
 

@@ -197,28 +197,33 @@ describe("Allowlisted ERC721 Transfers", function () {
         .transferFrom(accs[2].address, accs[1].address, 2);
       // Check final balance
       expect(await erc721.balanceOf(accs[2].address)).to.be.equal(0);
+
+      // Approved EOA account should be able to transfer
+      await erc721.connect(accs[0]).setApprovalForAll(accs[2].address, true);
+      await erc721
+        .connect(accs[2])
+        .transferFrom(accs[0].address, accs[2].address, 1);
+      expect(await erc721.balanceOf(accs[2].address)).to.be.equal(1);
     });
 
     it("Should block transfers from a not allow listed contracts", async function () {
-      // REZ: TODO
-      this.skip();
       await erc721.connect(minter).mint(marketPlace.address, 1);
       await expect(
         marketPlace
           .connect(minter)
           .executeTransferFrom(marketPlace.address, minter.address, 1)
-      ).to.be.revertedWith("not allowed");
+      ).to.be.revertedWith(`CallerNotInAllowlist("${marketPlace.address}")`);
     });
 
     it("Should block transfers to a not allow listed address", async function () {
-      // REZ: TODO
-      this.skip();
       await erc721.connect(minter).mint(minter.address, 1);
       await expect(
         erc721
           .connect(minter)
           .transferFrom(minter.address, marketPlace.address, 1)
-      ).to.be.revertedWith("not allowed");
+      ).to.be.revertedWith(
+        `TransferToNotInAllowlist("${marketPlace.address}")`
+      );
     });
 
     it("Should not block transfers from an allow listed contract", async function () {
@@ -344,6 +349,7 @@ describe("Allowlisted ERC721 Transfers", function () {
     });
 
     // Here the malicious contract attempts to transfer the token out of the contract by calling transferFrom in onERC721Received
+    // However, sending to the contract will fail as the contract is not in the allowlist.
     it("onRecieve transferFrom", async function () {
       // Deploy contract
       const mockOnReceiveFactory = (await ethers.getContractFactory(
@@ -355,7 +361,7 @@ describe("Allowlisted ERC721 Transfers", function () {
       );
       // Mint and transfer to receiver contract
       await erc721.connect(minter).mint(minter.address, 1);
-      // Fails as msg.sender != tx.origin
+      // Fails as transfer 'to' is now allowlisted
       await expect(
         erc721
           .connect(minter)
@@ -364,7 +370,9 @@ describe("Allowlisted ERC721 Transfers", function () {
             onRecieve.address,
             1
           )
-      ).to.be.revertedWith(`'CallerNotInAllowlist("${onRecieve.address}")'`);
+      ).to.be.revertedWith(
+        `'TransferToNotInAllowlist("${onRecieve.address}")'`
+      );
     });
   });
 });

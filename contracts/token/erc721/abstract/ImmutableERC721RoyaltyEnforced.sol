@@ -24,6 +24,12 @@ abstract contract ImmutableERC721RoyaltyEnforced is
     /// @dev Error thrown when calling address is not Allowlisted
     error CallerNotInAllowlist(address caller);
 
+    /// @dev Error thrown when 'from' address is not Allowlisted
+    error TransferFromNotInAllowlist(address from);
+
+    /// @dev Error thrown when 'to' address is not Allowlisted
+    error TransferToNotInAllowlist(address to);
+
     /// @dev Error thrown when approve target is not Allowlisted
     error ApproveTargetNotInAllowlist(address target);
 
@@ -96,7 +102,7 @@ abstract contract ImmutableERC721RoyaltyEnforced is
         // Only check if the registry is set
         if (address(royaltyAllowlist) != address(0)) {
             // Check for:
-            // 1. approver is an EOA
+            // 1. approver is an EOA. Contract constructor is handled as transfers 'from' are blocked
             // 2. approver is address or bytecode is allowlisted
             if (
                 msg.sender.code.length != 0 &&
@@ -125,24 +131,39 @@ abstract contract ImmutableERC721RoyaltyEnforced is
         address to,
         uint256 tokenId
     ) internal virtual override(ERC721) {
-        _validateTransfer();
+        _validateTransfer(from, to);
         super._transfer(from, to, tokenId);
     }
 
     /// @dev Internal function to validate whether the calling address is an EOA or Allowlisted
-    function _validateTransfer() internal view {
+    function _validateTransfer(address from, address to) internal view {
         // Only check if the registry is set
         if (address(royaltyAllowlist) != address(0)) {
             // Check for:
             // 1. caller is an EOA
             // 2. caller is Allowlisted or is the calling address bytecode is Allowlisted
             if (
-                msg.sender == tx.origin ||
-                royaltyAllowlist.isAllowlisted(msg.sender)
+                msg.sender != tx.origin &&
+                !royaltyAllowlist.isAllowlisted(msg.sender)
             ) {
-                return;
+                revert CallerNotInAllowlist(msg.sender);
             }
-            revert CallerNotInAllowlist(msg.sender);
+
+            // Check for:
+            // 1. from is an EOA
+            // 2. from is Allowlisted or from address bytecode is Allowlisted
+            if (
+                from.code.length != 0 && !royaltyAllowlist.isAllowlisted(from)
+            ) {
+                revert TransferFromNotInAllowlist(from);
+            }
+
+            // Check for:
+            // 1. to is an EOA
+            // 2. to is Allowlisted or to address bytecode is Allowlisted
+            if (to.code.length != 0 && !royaltyAllowlist.isAllowlisted(to)) {
+                revert TransferToNotInAllowlist(to);
+            }
         }
     }
 }

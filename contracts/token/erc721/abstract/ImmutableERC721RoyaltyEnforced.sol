@@ -16,7 +16,8 @@ import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 */
 
 abstract contract ImmutableERC721RoyaltyEnforced is
-    ERC721, AccessControlEnumerable
+    ERC721,
+    AccessControlEnumerable
 {
     ///     =====     Errors         =====
 
@@ -26,39 +27,60 @@ abstract contract ImmutableERC721RoyaltyEnforced is
     /// @dev Error thrown when approve target is not Allowlisted
     error ApproveTargetNotInAllowlist(address target);
 
+    /// @dev Error thrown when approve target is not Allowlisted
+    error ApproverNotInAllowlist(address approver);
+
     ///     =====     Events         =====
 
     /// @dev Emitted whenever the transfer Allowlist registry is updated
-    event RoyaltytAllowlistRegistryUpdated(address oldRegistry, address newRegistry);
+    event RoyaltytAllowlistRegistryUpdated(
+        address oldRegistry,
+        address newRegistry
+    );
 
     ///     =====   State Variables  =====
-    
+
     /// @dev Interface that implements the `IRoyaltyAllowlist` interface
     IRoyaltyAllowlist public royaltyAllowlist;
 
     ///     =====  External functions  =====
 
     /// @dev Returns the supported interfaces
-    function supportsInterface(bytes4 interfaceId)
+    function supportsInterface(
+        bytes4 interfaceId
+    )
         public
         view
         virtual
-        override(ERC721,  AccessControlEnumerable)
+        override(ERC721, AccessControlEnumerable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
     }
 
     /// @dev Allows admin to set or update the royalty Allowlist registry
-    function setRoyaltyAllowlistRegistry(address _royaltyAllowlist) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(IERC165(_royaltyAllowlist).supportsInterface(type(IRoyaltyAllowlist).interfaceId), "contract does not implement IRoyaltyAllowlist");
+    function setRoyaltyAllowlistRegistry(
+        address _royaltyAllowlist
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        require(
+            IERC165(_royaltyAllowlist).supportsInterface(
+                type(IRoyaltyAllowlist).interfaceId
+            ),
+            "contract does not implement IRoyaltyAllowlist"
+        );
 
-        emit RoyaltytAllowlistRegistryUpdated(address(royaltyAllowlist), _royaltyAllowlist);
+        emit RoyaltytAllowlistRegistryUpdated(
+            address(royaltyAllowlist),
+            _royaltyAllowlist
+        );
         royaltyAllowlist = IRoyaltyAllowlist(_royaltyAllowlist);
     }
 
     /// @dev Override of setApprovalForAll from {ERC721}, with added Allowlist approval validation
-    function setApprovalForAll(address operator, bool approved) public virtual override {
+    function setApprovalForAll(
+        address operator,
+        bool approved
+    ) public virtual override {
         _validateApproval(operator);
         super.setApprovalForAll(operator, approved);
     }
@@ -72,11 +94,14 @@ abstract contract ImmutableERC721RoyaltyEnforced is
     /// @dev Internal function to validate whether approval targets are Allowlisted or EOA
     function _validateApproval(address targetApproval) internal view {
         // Only check if the registry is set
-        if(address(royaltyAllowlist) != address(0)) {
-             // Check for:
+        if (address(royaltyAllowlist) != address(0)) {
+            // Check for:
             // 1. approval target is an EOA
             // 2. approval target address is Allowlisted or target address bytecode is Allowlisted
-            if (targetApproval.code.length == 0 || royaltyAllowlist.isAllowlisted(targetApproval)){
+            if (
+                targetApproval.code.length == 0 ||
+                royaltyAllowlist.isAllowlisted(targetApproval)
+            ) {
                 return;
             }
             revert ApproveTargetNotInAllowlist(targetApproval);
@@ -86,7 +111,7 @@ abstract contract ImmutableERC721RoyaltyEnforced is
     ///     =====  Internal functions  =====
 
     /// @dev Override of internal transfer from {ERC721} function to include validation
-       function _transfer(
+    function _transfer(
         address from,
         address to,
         uint256 tokenId
@@ -102,8 +127,10 @@ abstract contract ImmutableERC721RoyaltyEnforced is
             // Check for:
             // 1. caller is an EOA
             // 2. caller is Allowlisted or is the calling address bytecode is Allowlisted
-            if(msg.sender == tx.origin || royaltyAllowlist.isAllowlisted(msg.sender))
-            {
+            if (
+                msg.sender == tx.origin ||
+                royaltyAllowlist.isAllowlisted(msg.sender)
+            ) {
                 return;
             }
             revert CallerNotInAllowlist(msg.sender);

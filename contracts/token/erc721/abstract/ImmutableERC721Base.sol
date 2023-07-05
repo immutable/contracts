@@ -47,15 +47,15 @@ abstract contract ImmutableERC721Base is
      * Sets the `baseURI` and `tokenURI`
      * Sets the royalty receiver and amount (this can not be changed once set)
      */
-    constructor (
-        address owner, 
-        string memory name_, 
-        string memory symbol_, 
-        string memory baseURI_ , 
+    constructor(
+        address owner,
+        string memory name_,
+        string memory symbol_,
+        string memory baseURI_,
         string memory contractURI_,
-        address _receiver, 
+        address _receiver,
         uint96 _feeNumerator
-        ) ERC721(name_, symbol_){
+    ) ERC721(name_, symbol_) {
         // Initialize state variables
         _setDefaultRoyalty(_receiver, _feeNumerator);
         _grantRole(DEFAULT_ADMIN_ROLE, owner);
@@ -80,11 +80,18 @@ abstract contract ImmutableERC721Base is
     }
 
     /// @dev Returns the supported interfaces
-    function supportsInterface(bytes4 interfaceId)
+    function supportsInterface(
+        bytes4 interfaceId
+    )
         public
         view
         virtual
-        override(ImmutableERC721RoyaltyEnforced, ERC721, ERC721Enumerable, ERC2981)
+        override(
+            ImmutableERC721RoyaltyEnforced,
+            ERC721,
+            ERC721Enumerable,
+            ERC2981
+        )
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
@@ -104,28 +111,32 @@ abstract contract ImmutableERC721Base is
     ///     =====  External functions  =====
 
     /// @dev Allows admin to set the base URI
-    function setBaseURI(string memory baseURI_)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function setBaseURI(
+        string memory baseURI_
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         baseURI = baseURI_;
     }
 
     /// @dev Allows admin to set the contract URI
-    function setContractURI(string memory _contractURI)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function setContractURI(
+        string memory _contractURI
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         contractURI = _contractURI;
     }
 
     /// @dev Override of setApprovalForAll from {ERC721}, with added Allowlist approval validation
-    function setApprovalForAll(address operator, bool approved) public override(ImmutableERC721RoyaltyEnforced, ERC721, IERC721) {
+    function setApprovalForAll(
+        address operator,
+        bool approved
+    ) public override(ImmutableERC721RoyaltyEnforced, ERC721, IERC721) {
         super.setApprovalForAll(operator, approved);
     }
 
     /// @dev Override of approve from {ERC721}, with added Allowlist approval validation
-    function approve(address to, uint256 tokenId) public override(ImmutableERC721RoyaltyEnforced, ERC721, IERC721) {
+    function approve(
+        address to,
+        uint256 tokenId
+    ) public override(ImmutableERC721RoyaltyEnforced, ERC721, IERC721) {
         super.approve(to, tokenId);
     }
 
@@ -149,11 +160,10 @@ abstract contract ImmutableERC721Base is
     }
 
     /// @dev Internal function to mint a new token with the next token ID
-    function _mintNextToken(address to) internal virtual returns (uint256){
+    function _mintNextToken(address to) internal virtual returns (uint256) {
         uint256 newTokenId = nextTokenId.current();
         super._mint(to, newTokenId);
         nextTokenId.increment();
         return newTokenId;
     }
-
 }

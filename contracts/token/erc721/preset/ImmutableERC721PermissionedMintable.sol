@@ -10,9 +10,7 @@ import "../abstract/ImmutableERC721Base.sol";
     MINTER_ROLE that allows members of the role to access the `mint` function.
 */
 
-contract ImmutableERC721PermissionedMintable is
-    ImmutableERC721Base
-{
+contract ImmutableERC721PermissionedMintable is ImmutableERC721Base {
     ///     =====   State Variables  =====
 
     /// @dev Only MINTER_ROLE can invoke permissioned mint.
@@ -28,42 +26,46 @@ contract ImmutableERC721PermissionedMintable is
      * Sets the `baseURI` and `tokenURI`
      * Sets the `reciever` and `feeNumerator`
      */
-    constructor (
-        address owner_, 
-        string memory name_, 
-        string memory symbol_, 
-        string memory baseURI_ , 
+    constructor(
+        address owner_,
+        string memory name_,
+        string memory symbol_,
+        string memory baseURI_,
         string memory contractURI_,
-        address _receiver, 
+        address _receiver,
         uint96 _feeNumerator
-        ) ImmutableERC721Base(owner_,name_, symbol_, baseURI_, contractURI_, _receiver, _feeNumerator){
-    }
+    )
+        ImmutableERC721Base(
+            owner_,
+            name_,
+            symbol_,
+            baseURI_,
+            contractURI_,
+            _receiver,
+            _feeNumerator
+        )
+    {}
 
     ///     =====  External functions  =====
 
     /// @dev Allows minter to mint `amount` to `to`
-    function mint(address to, uint256 amount)
-        external
-        onlyRole(MINTER_ROLE)
-    {
+    function mint(address to, uint256 amount) external onlyRole(MINTER_ROLE) {
         for (uint256 i; i < amount; i++) {
             _mintNextToken(to);
         }
     }
 
     /// @dev Allows admin grant `user` `MINTER` role
-    function grantMinterRole(address user)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function grantMinterRole(
+        address user
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         grantRole(MINTER_ROLE, user);
     }
 
-    /// @dev Allows admin to revoke `MINTER_ROLE` role from `user` 
-    function revokeMinterRole(address user)
-        external
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    /// @dev Allows admin to revoke `MINTER_ROLE` role from `user`
+    function revokeMinterRole(
+        address user
+    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
         revokeRole(MINTER_ROLE, user);
     }
 }

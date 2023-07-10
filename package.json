@@ -7,8 +7,10 @@
   ],
   "scripts": {
     "compile": "hardhat compile",
-    "test": "hardhat test",
-    "prettier:solidity": "./node_modules/.bin/prettier --write contracts/**/*.sol"
+    "test": "hardhat test --zkevm",
+    "prettier:solidity": "./node_modules/.bin/prettier --write contracts/**/*.sol",
+    "deploy:zkevm": "npx hardhat run scripts/deploy.ts --network zkevm",
+    "addseaport:zkevm": "npx hardhat run scripts/addseaport.ts --network zkevm"
   },
   "repository": {
     "type": "git",

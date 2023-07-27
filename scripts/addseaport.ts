@@ -2,13 +2,29 @@ import {ethers} from "hardhat";
 import {RoyaltyAllowlist, RoyaltyAllowlist__factory} from "../typechain";
 
 
-const ROYALTY_ALLOWLIST_DEV = "0x449b19eebbe656AE033B64fF408459F501F4A678"
-const SEAPORT_DEV = "0x41388404Efb7a68Fd31d75CEf71dF91e2BDBa2fb"
+interface Env {
+  ROYALTY_ALLOWLIST_ADDRESS: string;
+  SEAPORT_ADDRESS: string;
+}
 
-const ROYALTY_ALLOWLIST_TESTNET = "0xE57661143ACef993BD2A0a6d01bb636625e6540B"
-const SEAPORT_TESTNET = "0x45E23dA18804F99Cf67408AeBE85F67c958381Ff"
+// eslint-disable-next-line no-unused-vars
+const DEVNET: Env = {
+  ROYALTY_ALLOWLIST_ADDRESS: "0x9A48B1B27743d807331d06eCF0bFb15c06fDb58D",
+  SEAPORT_ADDRESS: "0x41388404Efb7a68Fd31d75CEf71dF91e2BDBa2fb",
+};
 
-async function addseaport() {
+// eslint-disable-next-line no-unused-vars
+const TESTNET: Env = {
+  ROYALTY_ALLOWLIST_ADDRESS: "0x932038Fb3a308218C3BD2ee5979486897B80Fc28",
+  SEAPORT_ADDRESS: "0x474989C4D25DD41B0B9b1ECb4643B9Fe25f83B19",
+};
+
+addseaport(TESTNET).catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
+
+async function addseaport(env: Env) {
   // get deployer
   const [deployer] = await ethers.getSigners();
   console.log("Running script with the account:", deployer.address);
@@ -25,22 +41,24 @@ async function addseaport() {
   );
 
 
-  const contract = factory.attach(ROYALTY_ALLOWLIST_DEV);
-  //
-  // const tx1 = await contract.grantRegistrarRole(deployer.address)
-  // console.log(`Transaction for grantRegistrarRole: ${tx1}`);
+  const contract = factory.attach(env.ROYALTY_ALLOWLIST_ADDRESS);
 
+  const grantRegistrarRoleTransaction = await contract.grantRegistrarRole(
+    deployer.address
+  );
+  console.log(`Transaction for grantRegistrarRole: ${grantRegistrarRoleTransaction.hash}`);
+  await grantRegistrarRoleTransaction.wait(5);
 
-  // const role = await contract.REGISTRAR_ROLE()
-  // const tx1 = await contract.hasRole(role, deployer.address)
-  // console.log(`Transaction for grantRegistrarRole: ${tx1}`);
+  const role = await contract.REGISTRAR_ROLE();
+  const hasRoleTransaction = await contract.hasRole(role, deployer.address);
+  console.log(`Transaction for grantRegistrarRole: ${hasRoleTransaction}`);
 
-  const tx2 = await contract.addWalletToAllowlist(SEAPORT_DEV)
-  // log deployed contract address
-  console.log(`Transaction for addWalletToAllowlist: ${tx2}`);
+  const addAddressToAllowlistTransaction = await contract.addAddressToAllowlist(
+    [env.SEAPORT_ADDRESS]
+  );
+
+  console.log(
+    `Transaction for addWalletToAllowlist: ${addAddressToAllowlistTransaction.hash}`
+  );
 }
 
-addseaport().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});

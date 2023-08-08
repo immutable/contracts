@@ -3,7 +3,6 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import {
   RoyaltyAllowlist__factory,
-  RoyaltyAllowlist,
   ImmutableERC721PermissionedMintable__factory,
   ImmutableERC721PermissionedMintable,
   MockFactory__factory,

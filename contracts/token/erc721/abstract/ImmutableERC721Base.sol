@@ -36,7 +36,7 @@ abstract contract ImmutableERC721Base is
     bytes32 public constant MINTER_ROLE = bytes32("MINTER_ROLE");
 
     /// @dev Total amount of minted tokens to a non zero address
-    uint256 public _totalSupply = 0;
+    uint256 public _totalSupply;
 
     struct IDMint {
         address to;
@@ -49,7 +49,7 @@ abstract contract ImmutableERC721Base is
         uint256[] tokenIds;
     }
 
-    mapping (uint256 => bool) public _burnedTokens;
+    mapping(uint256 => bool) public _burnedTokens;
 
     ///     =====   Constructor  =====
 
@@ -97,11 +97,7 @@ abstract contract ImmutableERC721Base is
         public
         view
         virtual
-        override(
-            ERC721,
-            ERC2981,
-            RoyaltyEnforced
-        )
+        override(ERC721, ERC2981, RoyaltyEnforced)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
@@ -138,7 +134,7 @@ abstract contract ImmutableERC721Base is
     function setApprovalForAll(
         address operator,
         bool approved
-    ) public validateApproval(operator)  override(ERC721) {
+    ) public override(ERC721) validateApproval(operator) {
         super.setApprovalForAll(operator, approved);
     }
 
@@ -146,7 +142,7 @@ abstract contract ImmutableERC721Base is
     function approve(
         address to,
         uint256 tokenId
-    ) public validateApproval(to) override(ERC721) {
+    ) public override(ERC721) validateApproval(to) {
         super.approve(to, tokenId);
     }
 
@@ -155,7 +151,7 @@ abstract contract ImmutableERC721Base is
         address from,
         address to,
         uint256 tokenId
-    ) internal validateTransfer(from, to) override(ERC721) {
+    ) internal override(ERC721) validateTransfer(from, to) {
         super._transfer(from, to, tokenId);
     }
 
@@ -188,9 +184,7 @@ abstract contract ImmutableERC721Base is
     }
 
     /// @dev Allows admin grant `user` `MINTER` role
-    function grantMinterRole(
-        address user
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function grantMinterRole(address user) public onlyRole(DEFAULT_ADMIN_ROLE) {
         grantRole(MINTER_ROLE, user);
     }
 
@@ -202,7 +196,7 @@ abstract contract ImmutableERC721Base is
     }
 
     /// @dev returns total number of tokens available(minted - burned)
-    function totalSupply() public virtual view returns(uint256){
+    function totalSupply() public view virtual returns (uint256) {
         return _totalSupply;
     }
 
@@ -220,7 +214,7 @@ abstract contract ImmutableERC721Base is
     /// @dev mints specified token ids to specified address
     function _safeBatchMint(IDMint memory mintRequest) internal {
         require(mintRequest.to != address(0), "Address is zero");
-        for (uint256 j = 0; j < mintRequest.tokenIds.length; j++) {
+        for (uint256 j; j < mintRequest.tokenIds.length; j++) {
             _safeMint(mintRequest.to, mintRequest.tokenIds[j]);
         }
         _totalSupply = _totalSupply + mintRequest.tokenIds.length;
@@ -229,8 +223,16 @@ abstract contract ImmutableERC721Base is
     /// @dev mints specified token id to specified address
     function _mint(address to, uint256 tokenId) internal override(ERC721) {
         if (_burnedTokens[tokenId]) {
-            revert ("ERC721: token already burned");
+            revert("ERC721: token already burned");
         }
         super._mint(to, tokenId);
+    }
+
+    /// @dev mints specified token id to specified address
+    function _safeMint(address to, uint256 tokenId) internal override(ERC721) {
+        if (_burnedTokens[tokenId]) {
+            revert("ERC721: token already burned");
+        }
+        super._safeMint(to, tokenId);
     }
 }

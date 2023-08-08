@@ -6,9 +6,7 @@ import "../../../royalty-enforcement/RoyaltyEnforced.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 
-contract ImmutableERC721PermissionedMintable is
-    ImmutableERC721Base
-{
+contract ImmutableERC721PermissionedMintable is ImmutableERC721Base {
     ///     =====   Constructor  =====
 
     /**
@@ -28,7 +26,7 @@ contract ImmutableERC721PermissionedMintable is
         address _royaltyAllowlist,
         address _receiver,
         uint96 _feeNumerator
-    )   
+    )
         ImmutableERC721Base(
             owner,
             name_,
@@ -37,7 +35,7 @@ contract ImmutableERC721PermissionedMintable is
             contractURI_,
             _receiver,
             _feeNumerator
-        ) 
+        )
     {
         // Initialize state variables
         _setDefaultRoyalty(_receiver, _feeNumerator);
@@ -52,13 +50,7 @@ contract ImmutableERC721PermissionedMintable is
     /// @dev Returns the supported interfaces
     function supportsInterface(
         bytes4 interfaceId
-    )
-        public
-        view
-        virtual
-        override(ImmutableERC721Base)
-        returns (bool)
-    {
+    ) public view virtual override(ImmutableERC721Base) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
@@ -79,13 +71,17 @@ contract ImmutableERC721PermissionedMintable is
         _totalSupply++;
     }
 
-    function safeMintBatch(IDMint[] memory mintRequests) external onlyRole(MINTER_ROLE) {
+    function safeMintBatch(
+        IDMint[] memory mintRequests
+    ) external onlyRole(MINTER_ROLE) {
         for (uint256 i = 0; i < mintRequests.length; i++) {
             _safeBatchMint(mintRequests[i]);
         }
     }
 
-    function mintBatch(IDMint[] memory mintRequests) external onlyRole(MINTER_ROLE) {
+    function mintBatch(
+        IDMint[] memory mintRequests
+    ) external onlyRole(MINTER_ROLE) {
         for (uint256 i = 0; i < mintRequests.length; i++) {
             _batchMint(mintRequests[i]);
         }

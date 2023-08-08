@@ -5,67 +5,62 @@ import {
   ImmutableERC721PermissionedMintable__factory,
   ImmutableERC721PermissionedMintable,
   RoyaltyAllowlist,
-  RoyaltyAllowlist__factory
+  RoyaltyAllowlist__factory,
 } from "../../../typechain";
-import {
-    AllowlistFixture,
-} from "../../utils/DeployFixtures";
+import { AllowlistFixture } from "../../utils/DeployFixtures";
 
 describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
-    this.timeout(300_000); // 5 min
-  
-    let erc721: ImmutableERC721PermissionedMintable;
-    let royaltyAllowlist: RoyaltyAllowlist;
-    let owner: SignerWithAddress;
-    let user: SignerWithAddress;
-    let user2: SignerWithAddress;
-    let minter: SignerWithAddress;
-    let registrar: SignerWithAddress;
-    let royaltyRecipient: SignerWithAddress;
-    let adminOne: SignerWithAddress;
-    let adminTwo: SignerWithAddress;
-  
-    const baseURI = "https://baseURI.com/";
-    const contractURI = "https://contractURI.com";
-    const name = "ERC721Preset";
-    const symbol = "EP";
-    const royalty = ethers.BigNumber.from("2000");
-  
-    before(async function () {
-      // Retrieve accounts
-      [owner, user, minter, registrar, royaltyRecipient, adminOne, adminTwo, user2] =
-        await ethers.getSigners();
+  this.timeout(300_000); // 5 min
 
-      // Get all required contracts
-      ({ erc721, royaltyAllowlist } =
-        await AllowlistFixture(owner));
-        
-      // Deploy royalty Allowlist
-      const royaltyAllowlistFactory = (await ethers.getContractFactory(
-        "RoyaltyAllowlist"
-      )) as RoyaltyAllowlist__factory;
-      royaltyAllowlist = await royaltyAllowlistFactory.deploy(owner.address);
-  
-      // Deploy ERC721 contract
-      const erc721PresetFactory = (await ethers.getContractFactory(
-        "ImmutableERC721PermissionedMintable"
-      )) as ImmutableERC721PermissionedMintable__factory;
-  
-      erc721 = await erc721PresetFactory.deploy(
-        owner.address,
-        name,
-        symbol,
-        baseURI,
-        contractURI,
-        royaltyAllowlist.address,
-        royaltyRecipient.address,
-        royalty,
-      );
-  
-      // Set up roles
-      await erc721.connect(owner).grantMinterRole(minter.address);
-      await royaltyAllowlist.connect(owner).grantRegistrarRole(registrar.address);
-    });
+  let erc721: ImmutableERC721PermissionedMintable;
+  let royaltyAllowlist: RoyaltyAllowlist;
+  let owner: SignerWithAddress;
+  let user: SignerWithAddress;
+  let user2: SignerWithAddress;
+  let minter: SignerWithAddress;
+  let registrar: SignerWithAddress;
+  let royaltyRecipient: SignerWithAddress;
+
+  const baseURI = "https://baseURI.com/";
+  const contractURI = "https://contractURI.com";
+  const name = "ERC721Preset";
+  const symbol = "EP";
+  const royalty = ethers.BigNumber.from("2000");
+
+  before(async function () {
+    // Retrieve accounts
+    [owner, user, minter, registrar, royaltyRecipient, user2] =
+      await ethers.getSigners();
+
+    // Get all required contracts
+    ({ erc721, royaltyAllowlist } = await AllowlistFixture(owner));
+
+    // Deploy royalty Allowlist
+    const royaltyAllowlistFactory = (await ethers.getContractFactory(
+      "RoyaltyAllowlist"
+    )) as RoyaltyAllowlist__factory;
+    royaltyAllowlist = await royaltyAllowlistFactory.deploy(owner.address);
+
+    // Deploy ERC721 contract
+    const erc721PresetFactory = (await ethers.getContractFactory(
+      "ImmutableERC721PermissionedMintable"
+    )) as ImmutableERC721PermissionedMintable__factory;
+
+    erc721 = await erc721PresetFactory.deploy(
+      owner.address,
+      name,
+      symbol,
+      baseURI,
+      contractURI,
+      royaltyAllowlist.address,
+      royaltyRecipient.address,
+      royalty
+    );
+
+    // Set up roles
+    await erc721.connect(owner).grantMinterRole(minter.address);
+    await royaltyAllowlist.connect(owner).grantRegistrarRole(registrar.address);
+  });
 
   describe("Contract Deployment", function () {
     it("Should set the admin role to the owner", async function () {
@@ -95,7 +90,9 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
     });
 
     it("Should revert when caller does not have minter role", async function () {
-      await expect(erc721.connect(user).mint(user.address, 2)).to.be.revertedWith(
+      await expect(
+        erc721.connect(user).mint(user.address, 2)
+      ).to.be.revertedWith(
         "AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x4d494e5445525f524f4c45000000000000000000000000000000000000000000"
       );
     });
@@ -103,8 +100,8 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
     it("Should allow safe minting of batch tokens", async function () {
       const mintRequests = [
         { to: user.address, tokenIds: [2, 3, 4] },
-        { to: owner.address, tokenIds: [6, 7, 8] }
-      ]
+        { to: owner.address, tokenIds: [6, 7, 8] },
+      ];
       await erc721.connect(minter).safeMintBatch(mintRequests);
       expect(await erc721.balanceOf(user.address)).to.equal(4);
       expect(await erc721.balanceOf(owner.address)).to.equal(3);
@@ -117,7 +114,6 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
       expect(await erc721.ownerOf(8)).to.equal(owner.address);
     });
 
-
     it("Should allow owner or approved to burn a batch of tokens", async function () {
       expect(await erc721.balanceOf(user.address)).to.equal(4);
       await erc721.connect(user).burnBatch([1, 2]);
@@ -126,30 +122,28 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
     });
 
     it("Should prevent not approved to burn a batch of tokens", async function () {
-        await expect(erc721.connect(minter).burnBatch([3, 4])).to.be.revertedWith(
-            "ERC721: caller is not token owner or approved"
-        );
+      await expect(erc721.connect(minter).burnBatch([3, 4])).to.be.revertedWith(
+        "ERC721: caller is not token owner or approved"
+      );
     });
 
     it("Should prevent minting burned tokens", async function () {
-        const mintRequests = [
-            { to: user.address, tokenIds: [1, 2] }
-        ]
-        await expect(erc721.connect(minter).safeMintBatch(mintRequests)).to.be.revertedWith(
-            "ERC721: token already burned"
-        );
+      const mintRequests = [{ to: user.address, tokenIds: [1, 2] }];
+      await expect(
+        erc721.connect(minter).safeMintBatch(mintRequests)
+      ).to.be.revertedWith("ERC721: token already burned");
     });
   });
 
   describe("Base URI and Token URI", function () {
     it("Should return a non-empty tokenURI when the base URI is set", async function () {
-      const tokenId = 10
+      const tokenId = 10;
       await erc721.connect(minter).mint(user.address, tokenId);
       expect(await erc721.tokenURI(tokenId)).to.equal(`${baseURI}${tokenId}`);
     });
 
     it("Should revert with a burnt tokenId", async function () {
-      const tokenId = 10
+      const tokenId = 10;
       await erc721.connect(user).burn(tokenId);
       await expect(erc721.tokenURI(tokenId)).to.be.revertedWith(
         "ERC721: invalid token ID"
@@ -178,7 +172,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
 
     it("Should return an empty token URI when the base URI is not set", async function () {
       await erc721.setBaseURI("");
-      const tokenId = 12
+      const tokenId = 12;
       await erc721.connect(minter).mint(user.address, tokenId);
       expect(await erc721.tokenURI(tokenId)).to.equal("");
     });
@@ -223,7 +217,6 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
     });
   });
   describe("Transfers", function () {
-
     it("Should allow users to transfer tokens using safeTransferFromBatch", async function () {
       // Mint tokens for testing transfers
       const mintRequests = [
@@ -241,7 +234,11 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
           tos: [user.address, user.address, user2.address],
           tokenIds: [51, 52, 53],
         },
-        { from: user.address, tos: [minter.address, minter.address], tokenIds: [54, 55] },
+        {
+          from: user.address,
+          tos: [minter.address, minter.address],
+          tokenIds: [54, 55],
+        },
         { from: user2.address, tos: [minter.address], tokenIds: [57] },
       ];
 
@@ -267,4 +264,3 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
     });
   });
 });
-

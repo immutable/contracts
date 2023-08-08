@@ -28,19 +28,17 @@ describe("Allowlisted ERC721 Transfers", function () {
   let moduleAddress: string;
   let owner: SignerWithAddress;
   let minter: SignerWithAddress;
-  let user: SignerWithAddress;
   let registrar: SignerWithAddress;
   let scWallet: SignerWithAddress;
   let accs: SignerWithAddress[];
 
   beforeEach(async function () {
-    [owner, minter, registrar, scWallet, user, ...accs] = await ethers.getSigners();
+    [owner, minter, registrar, scWallet, ...accs] = await ethers.getSigners();
 
     // Get all required contracts
     ({ erc721, walletFactory, factory, royaltyAllowlist, marketPlace } =
       await AllowlistFixture(owner));
     // Deploy the wallet fixture
-
     ({ deployedAddr, moduleAddress } = await walletSCFixture(
       scWallet,
       walletFactory

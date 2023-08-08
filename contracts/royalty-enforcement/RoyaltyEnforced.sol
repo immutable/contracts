@@ -1,16 +1,13 @@
 //SPDX-License-Identifier: Apache 2.0
 pragma solidity ^0.8.0;
 
-// Token
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-
 // Allowlist Registry
 import "./IRoyaltyAllowlist.sol";
 
 // Access Control
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 
-abstract contract RoyaltyEnforced is AccessControlEnumerable{
+abstract contract RoyaltyEnforced is AccessControlEnumerable {
     ///     =====     Errors         =====
 
     /// @dev Error thrown when calling address is not Allowlisted
@@ -41,18 +38,12 @@ abstract contract RoyaltyEnforced is AccessControlEnumerable{
     /// @dev Interface that implements the `IRoyaltyAllowlist` interface
     IRoyaltyAllowlist public royaltyAllowlist;
 
-        ///     =====  External functions  =====
+    ///     =====  External functions  =====
 
     /// @dev Returns the supported interfaces
     function supportsInterface(
         bytes4 interfaceId
-    )
-        public
-        view
-        virtual
-        override
-        returns (bool)
-    {
+    ) public view virtual override returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 

@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 // Royalties
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "./ImmutableERC721RoyaltyEnforced.sol";
+import "../../../royalty-enforcement/RoyaltyEnforced.sol";
 
 // Utils
 import "@openzeppelin/contracts/utils/Counters.sol";
@@ -19,13 +20,10 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 */
 
 abstract contract ImmutableERC721Base is
-    ImmutableERC721RoyaltyEnforced,
-    ERC721Enumerable,
+    RoyaltyEnforced,
     ERC721Burnable,
     ERC2981
 {
-    using Counters for Counters.Counter;
-
     ///     =====   State Variables  =====
 
     /// @dev Contract level metadata
@@ -34,8 +32,24 @@ abstract contract ImmutableERC721Base is
     /// @dev Common URIs for individual token URIs
     string public baseURI;
 
-    /// @dev the tokenId of the next NFT to be minted.
-    Counters.Counter private nextTokenId;
+    /// @dev Only MINTER_ROLE can invoke permissioned mint.
+    bytes32 public constant MINTER_ROLE = bytes32("MINTER_ROLE");
+
+    /// @dev Total amount of minted tokens to a non zero address
+    uint256 public _totalSupply;
+
+    struct IDMint {
+        address to;
+        uint256[] tokenIds;
+    }
+
+    struct TransferRequest {
+        address from;
+        address[] tos;
+        uint256[] tokenIds;
+    }
+
+    mapping(uint256 => bool) public _burnedTokens;
 
     ///     =====   Constructor  =====
 
@@ -61,9 +75,6 @@ abstract contract ImmutableERC721Base is
         _grantRole(DEFAULT_ADMIN_ROLE, owner);
         baseURI = baseURI_;
         contractURI = contractURI_;
-
-        // Increment nextTokenId to start from 1 (default is 0)
-        nextTokenId.increment();
     }
 
     ///     =====   View functions  =====
@@ -86,12 +97,7 @@ abstract contract ImmutableERC721Base is
         public
         view
         virtual
-        override(
-            ImmutableERC721RoyaltyEnforced,
-            ERC721,
-            ERC721Enumerable,
-            ERC2981
-        )
+        override(ERC721, ERC2981, RoyaltyEnforced)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
@@ -108,19 +114,19 @@ abstract contract ImmutableERC721Base is
         return admins;
     }
 
-    ///     =====  External functions  =====
+    ///     =====  Public functions  =====
 
     /// @dev Allows admin to set the base URI
     function setBaseURI(
         string memory baseURI_
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
         baseURI = baseURI_;
     }
 
     /// @dev Allows admin to set the contract URI
     function setContractURI(
         string memory _contractURI
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
         contractURI = _contractURI;
     }
 
@@ -128,7 +134,7 @@ abstract contract ImmutableERC721Base is
     function setApprovalForAll(
         address operator,
         bool approved
-    ) public override(ImmutableERC721RoyaltyEnforced, ERC721, IERC721) {
+    ) public override(ERC721) validateApproval(operator) {
         super.setApprovalForAll(operator, approved);
     }
 
@@ -136,7 +142,7 @@ abstract contract ImmutableERC721Base is
     function approve(
         address to,
         uint256 tokenId
-    ) public override(ImmutableERC721RoyaltyEnforced, ERC721, IERC721) {
+    ) public override(ERC721) validateApproval(to) {
         super.approve(to, tokenId);
     }
 
@@ -145,25 +151,88 @@ abstract contract ImmutableERC721Base is
         address from,
         address to,
         uint256 tokenId
-    ) internal override(ImmutableERC721RoyaltyEnforced, ERC721) {
+    ) internal override(ERC721) validateTransfer(from, to) {
         super._transfer(from, to, tokenId);
     }
 
-    /// @dev Internal hook implemented in {ERC721Enumerable}, required for totalSupply()
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 tokenId,
-        uint256 batchSize
-    ) internal override(ERC721, ERC721Enumerable) {
-        super._beforeTokenTransfer(from, to, tokenId, batchSize);
+    /// @dev Set the default royalty receiver address
+    function setDefaultRoyaltyReceiver(
+        address receiver,
+        uint96 feeNumerator
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setDefaultRoyalty(receiver, feeNumerator);
     }
 
-    /// @dev Internal function to mint a new token with the next token ID
-    function _mintNextToken(address to) internal virtual returns (uint256) {
-        uint256 newTokenId = nextTokenId.current();
-        super._mint(to, newTokenId);
-        nextTokenId.increment();
-        return newTokenId;
+    /// @dev Set the royalty receiver address for a specific tokenId
+    function setNFTRoyaltyReceiver(
+        uint256 tokenId,
+        address receiver,
+        uint96 feeNumerator
+    ) public onlyRole(MINTER_ROLE) {
+        _setTokenRoyalty(tokenId, receiver, feeNumerator);
+    }
+
+    /// @dev Set the royalty receiver address for a list of tokenIDs
+    function setNFTRoyaltyReceiverBatch(
+        uint256[] calldata tokenIds,
+        address receiver,
+        uint96 feeNumerator
+    ) public onlyRole(MINTER_ROLE) {
+        for (uint i = 0; i < tokenIds.length; i++) {
+            _setTokenRoyalty(tokenIds[i], receiver, feeNumerator);
+        }
+    }
+
+    /// @dev Allows admin grant `user` `MINTER` role
+    function grantMinterRole(address user) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        grantRole(MINTER_ROLE, user);
+    }
+
+    /// @dev Allows admin to revoke `MINTER_ROLE` role from `user`
+    function revokeMinterRole(
+        address user
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        revokeRole(MINTER_ROLE, user);
+    }
+
+    /// @dev returns total number of tokens available(minted - burned)
+    function totalSupply() public view virtual returns (uint256) {
+        return _totalSupply;
+    }
+
+    ///     =====  Internal functions  =====
+
+    /// @dev mints specified token ids to specified address
+    function _batchMint(IDMint memory mintRequest) internal {
+        require(mintRequest.to != address(0), "Address is zero");
+        for (uint256 j = 0; j < mintRequest.tokenIds.length; j++) {
+            _mint(mintRequest.to, mintRequest.tokenIds[j]);
+        }
+        _totalSupply = _totalSupply + mintRequest.tokenIds.length;
+    }
+
+    /// @dev mints specified token ids to specified address
+    function _safeBatchMint(IDMint memory mintRequest) internal {
+        require(mintRequest.to != address(0), "Address is zero");
+        for (uint256 j; j < mintRequest.tokenIds.length; j++) {
+            _safeMint(mintRequest.to, mintRequest.tokenIds[j]);
+        }
+        _totalSupply = _totalSupply + mintRequest.tokenIds.length;
+    }
+
+    /// @dev mints specified token id to specified address
+    function _mint(address to, uint256 tokenId) internal override(ERC721) {
+        if (_burnedTokens[tokenId]) {
+            revert("ERC721: token already burned");
+        }
+        super._mint(to, tokenId);
+    }
+
+    /// @dev mints specified token id to specified address
+    function _safeMint(address to, uint256 tokenId) internal override(ERC721) {
+        if (_burnedTokens[tokenId]) {
+            revert("ERC721: token already burned");
+        }
+        super._safeMint(to, tokenId);
     }
 }

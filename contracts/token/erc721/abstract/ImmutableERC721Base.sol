@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 
 // Royalties
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
-import "./ImmutableERC721RoyaltyEnforced.sol";
 import "../../../royalty-enforcement/RoyaltyEnforced.sol";
 
 // Utils

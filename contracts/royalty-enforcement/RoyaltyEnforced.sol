@@ -28,7 +28,7 @@ abstract contract RoyaltyEnforced is AccessControlEnumerable {
     ///     =====     Events         =====
 
     /// @dev Emitted whenever the transfer Allowlist registry is updated
-    event RoyaltytAllowlistRegistryUpdated(
+    event RoyaltyAllowlistRegistryUpdated(
         address oldRegistry,
         address newRegistry
     );
@@ -57,7 +57,7 @@ abstract contract RoyaltyEnforced is AccessControlEnumerable {
             "contract does not implement IRoyaltyAllowlist"
         );
 
-        emit RoyaltytAllowlistRegistryUpdated(
+        emit RoyaltyAllowlistRegistryUpdated(
             address(royaltyAllowlist),
             _royaltyAllowlist
         );

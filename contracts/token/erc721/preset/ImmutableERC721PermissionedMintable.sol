@@ -71,6 +71,7 @@ contract ImmutableERC721PermissionedMintable is ImmutableERC721Base {
         _totalSupply++;
     }
 
+    /// @dev Allows minter to a batch of tokens to a specified list of addresses
     function safeMintBatch(
         IDMint[] memory mintRequests
     ) external onlyRole(MINTER_ROLE) {
@@ -79,6 +80,7 @@ contract ImmutableERC721PermissionedMintable is ImmutableERC721Base {
         }
     }
 
+    /// @dev Allows minter to a batch of tokens to a specified list of addresses
     function mintBatch(
         IDMint[] memory mintRequests
     ) external onlyRole(MINTER_ROLE) {
@@ -96,6 +98,7 @@ contract ImmutableERC721PermissionedMintable is ImmutableERC721Base {
         _totalSupply = _totalSupply - tokenIDs.length;
     }
 
+    // @dev allows owner or operator to burn a single token
     function burn(uint256 tokenId) public override(ERC721Burnable) {
         super.burn(tokenId);
         _burnedTokens[tokenId] = true;

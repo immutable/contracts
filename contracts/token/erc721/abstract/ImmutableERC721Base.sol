@@ -37,17 +37,20 @@ abstract contract ImmutableERC721Base is
     /// @dev Total amount of minted tokens to a non zero address
     uint256 public _totalSupply;
 
+    /// @dev A singular batch mint request
     struct IDMint {
         address to;
         uint256[] tokenIds;
     }
 
+    /// @dev A singular batch transfer request
     struct TransferRequest {
         address from;
         address[] tos;
         uint256[] tokenIds;
     }
 
+    /// @dev A mapping of tokens that have been burned to prevent re-minting
     mapping(uint256 => bool) public _burnedTokens;
 
     ///     =====   Constructor  =====

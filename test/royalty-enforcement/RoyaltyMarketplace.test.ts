@@ -33,6 +33,11 @@ describe("Marketplace Royalty Enforcement", function () {
     // Retrieve accounts
     [owner, minter, registrar, royaltyRecipient, buyer, seller] =
       await ethers.getSigners();
+    // Deploy royalty Allowlist
+    const royaltyAllowlistFactory = (await ethers.getContractFactory(
+      "RoyaltyAllowlist"
+    )) as RoyaltyAllowlist__factory;
+    royaltyAllowlist = await royaltyAllowlistFactory.deploy(owner.address);
 
     // Deploy ERC721 contract
     const erc721PresetFactory = (await ethers.getContractFactory(
@@ -45,15 +50,10 @@ describe("Marketplace Royalty Enforcement", function () {
       symbol,
       baseURI,
       contractURI,
+      royaltyAllowlist.address,
       royaltyRecipient.address,
       royalty
     );
-
-    // Deploy royalty Allowlist
-    const royaltyAllowlistFactory = (await ethers.getContractFactory(
-      "RoyaltyAllowlist"
-    )) as RoyaltyAllowlist__factory;
-    royaltyAllowlist = await royaltyAllowlistFactory.deploy(owner.address);
 
     // Deploy mock marketplace
     const mockMarketplaceFactory = (await ethers.getContractFactory(
@@ -107,7 +107,7 @@ describe("Marketplace Royalty Enforcement", function () {
           value: salePrice,
         });
       // Check if buyer recieved NFT
-      expect(await erc721.tokenOfOwnerByIndex(buyer.address, 0)).to.be.equal(1);
+      expect(await erc721.ownerOf(1)).to.be.equal(buyer.address);
       // Check if royalty recipient has increased balance newBal = oldBal + royaltyAmount
       expect(
         await ethers.provider.getBalance(royaltyRecipient.address)

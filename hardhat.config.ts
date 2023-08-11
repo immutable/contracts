@@ -33,7 +33,7 @@ const config: HardhatUserConfig = {
     },
   },
   paths: {
-    tests: "./test/batch-minting",
+    tests: "./test",
   },
   networks: {
     ropsten: {

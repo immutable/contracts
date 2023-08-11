@@ -67,7 +67,9 @@ We will audit these contracts before our mainnet launch.
 
 ## Security
 
-Please responsibly disclose any major security issues you find by reaching out to [TODO: security email address]
+Please responsibly disclose any major security issues you find by reaching out to [security@immutable.com][im-sec].
+
+[im-sec]: mailto:security@immutable.com
 
 ## License
 

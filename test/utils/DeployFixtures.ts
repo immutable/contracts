@@ -69,6 +69,57 @@ export const AllowlistFixture = async (owner: SignerWithAddress) => {
   };
 };
 
+export const ImmutableERC721AllowlistFixture = async (owner: SignerWithAddress) => {
+  const royaltyAllowlistFactory = (await ethers.getContractFactory(
+    "RoyaltyAllowlist"
+  )) as RoyaltyAllowlist__factory;
+  const royaltyAllowlist = await royaltyAllowlistFactory.deploy(owner.address);
+  // ERC721
+  const erc721PresetFactory = (await ethers.getContractFactory(
+    "ImmutableERC721"
+  )) as ImmutableERC721__factory;
+  const erc721: ImmutableERC721 =
+    await erc721PresetFactory.deploy(
+      owner.address,
+      "ERC721Preset",
+      "EP",
+      "https://baseURI.com/",
+      "https://contractURI.com",
+      royaltyAllowlist.address,
+      owner.address,
+      ethers.BigNumber.from("200")
+    );
+
+  // Mock Wallet factory
+  const WalletFactory = (await ethers.getContractFactory(
+    "MockWalletFactory"
+  )) as MockWalletFactory__factory;
+  const walletFactory = await WalletFactory.deploy();
+
+  // Mock  factory
+  const Factory = (await ethers.getContractFactory(
+    "MockFactory"
+  )) as MockFactory__factory;
+  const factory = await Factory.deploy();
+
+  // Mock market place
+  const mockMarketplaceFactory = (await ethers.getContractFactory(
+    "MockMarketplace"
+  )) as MockMarketplace__factory;
+  const marketPlace: MockMarketplace = await mockMarketplaceFactory.deploy(
+    erc721.address
+  );
+
+  return {
+    erc721,
+    walletFactory,
+    factory,
+    royaltyAllowlist,
+    marketPlace,
+  };
+};
+
+
 // Helper function to deploy SC wallet via CREATE2 and return deterministic address
 export const walletSCFixture = async (
   walletDeployer: SignerWithAddress,

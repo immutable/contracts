@@ -7,7 +7,7 @@ import {
   RoyaltyAllowlist,
   RoyaltyAllowlist__factory,
 } from "../../../typechain";
-import { ImmutableERC721AllowlistFixture } from "../../utils/DeployFixtures";
+import { AllowlistFixture } from "../../utils/DeployFixtures";
 
 describe.only("ImmutableERC721", function () {
   this.timeout(300_000); // 5 min
@@ -33,7 +33,7 @@ describe.only("ImmutableERC721", function () {
       await ethers.getSigners();
 
     // Get all required contracts
-    ({ erc721, royaltyAllowlist } = await ImmutableERC721AllowlistFixture(owner));
+    ({ erc721, royaltyAllowlist } = await AllowlistFixture(owner));
 
     // Deploy royalty Allowlist
     const royaltyAllowlistFactory = (await ethers.getContractFactory(
@@ -114,15 +114,42 @@ describe.only("ImmutableERC721", function () {
       expect(await erc721.ownerOf(8)).to.equal(owner.address);
     });
 
+    it("Should allow batch minting of tokens", async function () {
+      const qty = 5;
+      const first = await erc721.bulkMintThreshold();
+      const originalBalance = await erc721.balanceOf(user.address);
+      const originalSupply = await erc721.totalSupply();
+      await erc721.connect(minter).mintByQuantity(user.address, qty);
+      expect(await erc721.balanceOf(user.address)).to.equal(originalBalance.add(qty));
+      expect(await erc721.totalSupply()).to.equal(originalSupply.add(qty));
+      for (let i = 0; i < qty; i++) {
+        expect(await erc721.ownerOf(first.add(i))).to.equal(user.address);
+      }
+    });
+
     it("Should allow owner or approved to burn a batch of tokens", async function () {
-      expect(await erc721.balanceOf(user.address)).to.equal(4);
-      await erc721.connect(user).burnBatch([1, 2]);
-      expect(await erc721.balanceOf(user.address)).to.equal(2);
-      expect(await erc721.totalSupply()).to.equal(5);
+      const originalBalance = await erc721.balanceOf(user.address);
+      const originalSupply = await erc721.totalSupply();
+      const batch = [1, 2];
+      await erc721.connect(user).burnBatch(batch);
+      expect(await erc721.balanceOf(user.address)).to.equal(originalBalance.sub(batch.length));
+      expect(await erc721.totalSupply()).to.equal(originalSupply.sub(batch.length));
+    });
+
+    it("Should allow owner or approved to burn a batch of mixed ID/PSI tokens", async function () {
+      const originalBalance = await erc721.balanceOf(user.address);
+      const originalSupply = await erc721.totalSupply();
+      const first = await erc721.bulkMintThreshold();
+      const batch = [3, 4, first.toString(), first.add(1).toString()];
+      console.log(batch);
+      await erc721.connect(user).burnBatch(batch);
+      expect(await erc721.balanceOf(user.address)).to.equal(originalBalance.sub(batch.length));
+      expect(await erc721.totalSupply()).to.equal(originalSupply.sub(batch.length));
     });
 
     it("Should prevent not approved to burn a batch of tokens", async function () {
-      await expect(erc721.connect(minter).burnBatch([3, 4])).to.be.revertedWith(
+      const first = await erc721.bulkMintThreshold();
+      await expect(erc721.connect(minter).burnBatch([first.add(2), first.add(3)])).to.be.revertedWith(
         "ERC721: caller is not token owner or approved"
       );
     });

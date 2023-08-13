@@ -22,12 +22,12 @@ abstract contract ERC721HybridMinting is ERC721PsiBurnable, ERC721 {
         string memory symbol_
     ) ERC721(name_, symbol_) ERC721Psi(name_, symbol_) {}
 
-    function _bulkMintThreshold() internal pure virtual returns (uint256) {
+    function bulkMintThreshold() public pure virtual returns (uint256) {
         return 2**64;
     }
 
     function _startTokenId() internal pure override(ERC721Psi) returns (uint256) {
-        return _bulkMintThreshold();
+        return bulkMintThreshold();
     }
 
     // Optimised minting functions
@@ -48,7 +48,7 @@ abstract contract ERC721HybridMinting is ERC721PsiBurnable, ERC721 {
     }
 
     function _mintByID(address to, uint256 tokenId) internal {
-        require(tokenId < _bulkMintThreshold(), "must mint below threshold"); 
+        require(tokenId < bulkMintThreshold(), "must mint below threshold"); 
         ERC721._mint(to, tokenId);
         _idMintTotalSupply++;
     }
@@ -74,14 +74,14 @@ abstract contract ERC721HybridMinting is ERC721PsiBurnable, ERC721 {
     // Overwritten functions from ERC721/ERC721Psi with split routing
 
     function _exists(uint256 tokenId) internal view virtual override(ERC721, ERC721PsiBurnable) returns (bool) {
-        if (tokenId < _bulkMintThreshold()) {
+        if (tokenId < bulkMintThreshold()) {
             return ERC721._exists(tokenId);
         }
         return ERC721PsiBurnable._exists(tokenId);
     }
 
     function _transfer(address from, address to, uint256 tokenId) internal virtual override(ERC721, ERC721Psi) {
-        if (tokenId < _bulkMintThreshold()) {
+        if (tokenId < bulkMintThreshold()) {
             ERC721._transfer(from, to, tokenId);
         } else {
             ERC721Psi._transfer(from, to, tokenId);
@@ -89,14 +89,15 @@ abstract contract ERC721HybridMinting is ERC721PsiBurnable, ERC721 {
     }
 
     function ownerOf(uint256 tokenId) public view virtual override(ERC721, ERC721Psi) returns (address) {
-        if (tokenId < _bulkMintThreshold()) {
+        if (tokenId < bulkMintThreshold()) {
             return ERC721.ownerOf(tokenId);
         }
         return ERC721Psi.ownerOf(tokenId);
     }
 
     function _burn(uint256 tokenId) internal virtual override(ERC721, ERC721PsiBurnable) {
-        if (tokenId < _bulkMintThreshold()) {
+
+        if (tokenId < bulkMintThreshold()) {
             ERC721._burn(tokenId);
             _idMintTotalSupply--;
         } else {

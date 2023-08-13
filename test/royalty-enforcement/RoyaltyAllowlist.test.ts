@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { walletSCFixture, AllowlistFixture } from "../utils/DeployFixtures";
 import {
-  ImmutableERC721PermissionedMintable,
+  ImmutableERC721,
   MockMarketplace,
   RoyaltyAllowlist,
   MockWalletFactory,
@@ -16,7 +16,7 @@ describe("Royalty Enforcement Test Cases", function () {
   let owner: SignerWithAddress;
   let registrar: SignerWithAddress;
   let scWallet: SignerWithAddress;
-  let erc721: ImmutableERC721PermissionedMintable;
+  let erc721: ImmutableERC721;
   let walletFactory: MockWalletFactory;
   let royaltyAllowlist: RoyaltyAllowlist;
   let marketPlace: MockMarketplace;

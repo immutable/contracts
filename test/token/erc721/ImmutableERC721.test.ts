@@ -9,7 +9,7 @@ import {
 } from "../../../typechain";
 import { AllowlistFixture } from "../../utils/DeployFixtures";
 
-describe.only("ImmutableERC721", function () {
+describe("ImmutableERC721", function () {
 
   let erc721: ImmutableERC721;
   let royaltyAllowlist: RoyaltyAllowlist;

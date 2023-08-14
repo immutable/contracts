@@ -2,8 +2,8 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
-  ImmutableERC721PermissionedMintable__factory,
-  ImmutableERC721PermissionedMintable,
+  ImmutableERC721__factory,
+  ImmutableERC721,
   RoyaltyAllowlist,
   RoyaltyAllowlist__factory,
   MockMarketplace__factory,
@@ -11,9 +11,8 @@ import {
 } from "../../typechain";
 
 describe("Marketplace Royalty Enforcement", function () {
-  this.timeout(300_000); // 5 min
 
-  let erc721: ImmutableERC721PermissionedMintable;
+  let erc721: ImmutableERC721;
   let royaltyAllowlist: RoyaltyAllowlist;
   let mockMarketplace: MockMarketplace;
   let owner: SignerWithAddress;
@@ -41,8 +40,8 @@ describe("Marketplace Royalty Enforcement", function () {
 
     // Deploy ERC721 contract
     const erc721PresetFactory = (await ethers.getContractFactory(
-      "ImmutableERC721PermissionedMintable"
-    )) as ImmutableERC721PermissionedMintable__factory;
+      "ImmutableERC721"
+    )) as ImmutableERC721__factory;
 
     erc721 = await erc721PresetFactory.deploy(
       owner.address,
@@ -90,7 +89,7 @@ describe("Marketplace Royalty Enforcement", function () {
       const salePrice = ethers.utils.parseEther("1");
       const tokenInfo = await erc721.royaltyInfo(2, salePrice);
       // Mint Nft to seller
-      await erc721.connect(minter).mint(seller.address, 1);
+      await erc721.connect(minter).mintByID(seller.address, 1);
       // Approve marketplace
       await erc721
         .connect(seller)

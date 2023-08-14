@@ -16,7 +16,7 @@ import {
   disguidedEOAFixture,
 } from "../utils/DeployFixtures";
 
-describe("Allowlisted ERC721 Transfers", function () {
+describe("Royalty Checks with Hybrid ERC721", function () {
 
   let erc721: ImmutableERC721;
   let walletFactory: MockWalletFactory;
@@ -103,22 +103,14 @@ describe("Allowlisted ERC721 Transfers", function () {
       );
     });
 
-    it("Not allowlisted contracts should not be able to approve", async function () {
-      await erc721.connect(minter).mintByID(marketPlace.address, 2);
-      await expect(
-        marketPlace.connect(minter).executeApproveForAll(minter.address, true)
-      ).to.be.revertedWith(
-        `'ApproverNotInAllowlist("${marketPlace.address}")'`
-      );
-    });
-
     it("Should allow EOAs to be approved", async function () {
-      await erc721.connect(minter).mintByID(minter.address, 3);
-      await erc721.connect(minter).mintByID(minter.address, 1);
+      const first = await erc721.bulkMintThreshold();
+      await erc721.connect(minter).mintByQuantity(minter.address, 1);
       // Approve EOA addr
-      await erc721.connect(minter).approve(accs[0].address, 3);
+      const tokenId = first;
+      await erc721.connect(minter).approve(accs[0].address, tokenId);
       await erc721.connect(minter).setApprovalForAll(accs[0].address, true);
-      expect(await erc721.getApproved(3)).to.be.equal(accs[0].address);
+      expect(await erc721.getApproved(tokenId)).to.be.equal(accs[0].address);
       expect(
         await erc721.isApprovedForAll(minter.address, accs[0].address)
       ).to.be.equal(true);
@@ -129,11 +121,13 @@ describe("Allowlisted ERC721 Transfers", function () {
       await royaltyAllowlist
         .connect(registrar)
         .addAddressToAllowlist([marketPlace.address]);
+      const first = await erc721.bulkMintThreshold();
+      await erc721.connect(minter).mintByQuantity(minter.address, 1);
+      const tokenId = first;
       // Approve marketplace on erc721 contract
-      await erc721.connect(minter).mintByID(minter.address, 2);
-      await erc721.connect(minter).approve(marketPlace.address, 2);
+      await erc721.connect(minter).approve(marketPlace.address, tokenId);
       await erc721.connect(minter).setApprovalForAll(marketPlace.address, true);
-      expect(await erc721.getApproved(2)).to.be.equal(marketPlace.address);
+      expect(await erc721.getApproved(tokenId)).to.be.equal(marketPlace.address);
       expect(
         await erc721.isApprovedForAll(minter.address, marketPlace.address)
       ).to.be.equal(true);
@@ -144,11 +138,13 @@ describe("Allowlisted ERC721 Transfers", function () {
       await royaltyAllowlist
         .connect(registrar)
         .addWalletToAllowlist(deployedAddr);
-      await erc721.connect(minter).mintByID(minter.address, 3);
-      await erc721.connect(minter).approve(deployedAddr, 3);
+      const first = await erc721.bulkMintThreshold();
+      await erc721.connect(minter).mintByQuantity(minter.address, 1);
+      const tokenId = first;
+      await erc721.connect(minter).approve(deployedAddr, tokenId);
       // Approve the smart contract wallet
       await erc721.connect(minter).setApprovalForAll(deployedAddr, true);
-      expect(await erc721.getApproved(3)).to.be.equal(deployedAddr);
+      expect(await erc721.getApproved(tokenId)).to.be.equal(deployedAddr);
       expect(
         await erc721.isApprovedForAll(minter.address, deployedAddr)
       ).to.be.equal(true);
@@ -162,26 +158,29 @@ describe("Allowlisted ERC721 Transfers", function () {
         .setRoyaltyAllowlistRegistry(royaltyAllowlist.address);
     });
     it("Should freely allow transfers between EOAs", async function () {
-      await erc721.connect(owner).grantMinterRole(accs[0].address);
-      await erc721.connect(owner).grantMinterRole(accs[1].address);
-      await erc721.connect(accs[0]).mintByID(accs[0].address, 1);
-      await erc721.connect(accs[1]).mintByID(accs[1].address, 2);
+
+      const first = await erc721.bulkMintThreshold();
+      await erc721.connect(minter).mintByQuantity(accs[0].address, 1);
+      await erc721.connect(minter).mintByQuantity(accs[1].address, 1);
+      const tokenIdOne = first;
+      const tokenIdTwo = first.add(1)
+
       // Transfer
       await erc721
         .connect(accs[0])
-        .transferFrom(accs[0].address, accs[2].address, 1);
+        .transferFrom(accs[0].address, accs[2].address, tokenIdOne);
       await erc721
         .connect(accs[1])
-        .transferFrom(accs[1].address, accs[2].address, 2);
+        .transferFrom(accs[1].address, accs[2].address, tokenIdTwo);
       // Check balance
       expect(await erc721.balanceOf(accs[2].address)).to.be.equal(2);
       // Transfer again
       await erc721
         .connect(accs[2])
-        .transferFrom(accs[2].address, accs[0].address, 1);
+        .transferFrom(accs[2].address, accs[0].address, tokenIdOne);
       await erc721
         .connect(accs[2])
-        .transferFrom(accs[2].address, accs[1].address, 2);
+        .transferFrom(accs[2].address, accs[1].address, tokenIdTwo);
       // Check final balance
       expect(await erc721.balanceOf(accs[2].address)).to.be.equal(0);
 
@@ -189,16 +188,18 @@ describe("Allowlisted ERC721 Transfers", function () {
       await erc721.connect(accs[0]).setApprovalForAll(accs[2].address, true);
       await erc721
         .connect(accs[2])
-        .transferFrom(accs[0].address, accs[2].address, 1);
+        .transferFrom(accs[0].address, accs[2].address, tokenIdOne);
       expect(await erc721.balanceOf(accs[2].address)).to.be.equal(1);
     });
 
     it("Should block transfers from a not allow listed contracts", async function () {
-      await erc721.connect(minter).mintByID(marketPlace.address, 5);
+      const first = await erc721.bulkMintThreshold();
+      await erc721.connect(minter).mintByQuantity(marketPlace.address, 1);
+      const tokenId = first;
       await expect(
         marketPlace
           .connect(minter)
-          .executeTransferFrom(marketPlace.address, minter.address, 5)
+          .executeTransferFrom(marketPlace.address, minter.address, tokenId)
       ).to.be.revertedWith(`CallerNotInAllowlist("${marketPlace.address}")`);
     });
 

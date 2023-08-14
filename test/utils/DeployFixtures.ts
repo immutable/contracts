@@ -3,8 +3,8 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import {
   RoyaltyAllowlist__factory,
-  ImmutableERC721PermissionedMintable__factory,
-  ImmutableERC721PermissionedMintable,
+  ImmutableERC721__factory,
+  ImmutableERC721,
   MockFactory__factory,
   MockFactory,
   MockMarketplace__factory,
@@ -26,9 +26,9 @@ export const AllowlistFixture = async (owner: SignerWithAddress) => {
   const royaltyAllowlist = await royaltyAllowlistFactory.deploy(owner.address);
   // ERC721
   const erc721PresetFactory = (await ethers.getContractFactory(
-    "ImmutableERC721PermissionedMintable"
-  )) as ImmutableERC721PermissionedMintable__factory;
-  const erc721: ImmutableERC721PermissionedMintable =
+    "ImmutableERC721"
+  )) as ImmutableERC721__factory;
+  const erc721: ImmutableERC721 =
     await erc721PresetFactory.deploy(
       owner.address,
       "ERC721Preset",
@@ -68,6 +68,7 @@ export const AllowlistFixture = async (owner: SignerWithAddress) => {
     marketPlace,
   };
 };
+
 
 // Helper function to deploy SC wallet via CREATE2 and return deterministic address
 export const walletSCFixture = async (

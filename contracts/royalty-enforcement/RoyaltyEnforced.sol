@@ -7,7 +7,13 @@ import "./IRoyaltyAllowlist.sol";
 // Access Control
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 
-abstract contract RoyaltyEnforced is AccessControlEnumerable {
+// Errors
+import {RoyaltyEnforcementErrors} from "../errors/Errors.sol";
+
+abstract contract RoyaltyEnforced is
+    AccessControlEnumerable,
+    RoyaltyEnforcementErrors
+{
     ///     =====     Errors         =====
 
     /// @dev Error thrown when calling address is not Allowlisted
@@ -50,12 +56,13 @@ abstract contract RoyaltyEnforced is AccessControlEnumerable {
     function setRoyaltyAllowlistRegistry(
         address _royaltyAllowlist
     ) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(
-            IERC165(_royaltyAllowlist).supportsInterface(
+        if (
+            !IERC165(_royaltyAllowlist).supportsInterface(
                 type(IRoyaltyAllowlist).interfaceId
-            ),
-            "contract does not implement IRoyaltyAllowlist"
-        );
+            )
+        ) {
+            revert RoyaltyEnforcementDoesNotImplementRequiredInterface();
+        }
 
         emit RoyaltyAllowlistRegistryUpdated(
             address(royaltyAllowlist),

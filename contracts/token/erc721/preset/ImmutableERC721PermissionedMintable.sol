@@ -108,7 +108,7 @@ contract ImmutableERC721PermissionedMintable is ImmutableERC721Base {
     /// @dev Allows owner or operator to transfer a batch of tokens
     function safeTransferFromBatch(TransferRequest calldata tr) external {
         if (tr.tokenIds.length != tr.tos.length) {
-            revert("number of token ids not the same as number of receivers");
+            revert IImmutableERC721MismatchedTransferLengths();
         }
 
         for (uint i = 0; i < tr.tokenIds.length; i++) {

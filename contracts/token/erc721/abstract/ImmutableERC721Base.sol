@@ -12,6 +12,9 @@ import "../../../royalty-enforcement/RoyaltyEnforced.sol";
 // Utils
 import "@openzeppelin/contracts/utils/Counters.sol";
 
+// Errors
+import {IImmutableERC721Errors} from "../../../errors/Errors.sol";
+
 /*
     ImmutableERC721Base is an abstract contract that offers minimum preset functionality without
     an opinionated form of minting. This contract is intended to be inherited and implement it's
@@ -21,7 +24,8 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 abstract contract ImmutableERC721Base is
     RoyaltyEnforced,
     ERC721Burnable,
-    ERC2981
+    ERC2981,
+    IImmutableERC721Errors
 {
     ///     =====   State Variables  =====
 
@@ -206,7 +210,9 @@ abstract contract ImmutableERC721Base is
 
     /// @dev mints specified token ids to specified address
     function _batchMint(IDMint memory mintRequest) internal {
-        require(mintRequest.to != address(0), "Address is zero");
+        if (mintRequest.to != address(0)) {
+            revert IImmutableERC721SendingToZerothAddress();
+        }
         for (uint256 j = 0; j < mintRequest.tokenIds.length; j++) {
             _mint(mintRequest.to, mintRequest.tokenIds[j]);
         }
@@ -215,7 +221,9 @@ abstract contract ImmutableERC721Base is
 
     /// @dev mints specified token ids to specified address
     function _safeBatchMint(IDMint memory mintRequest) internal {
-        require(mintRequest.to != address(0), "Address is zero");
+        if (mintRequest.to == address(0)) {
+            revert IImmutableERC721SendingToZerothAddress();
+        }
         for (uint256 j; j < mintRequest.tokenIds.length; j++) {
             _safeMint(mintRequest.to, mintRequest.tokenIds[j]);
         }
@@ -225,7 +233,7 @@ abstract contract ImmutableERC721Base is
     /// @dev mints specified token id to specified address
     function _mint(address to, uint256 tokenId) internal override(ERC721) {
         if (_burnedTokens[tokenId]) {
-            revert("ERC721: token already burned");
+            revert IImmutableERC721TokenAlreadyBurned(tokenId);
         }
         super._mint(to, tokenId);
     }
@@ -233,7 +241,7 @@ abstract contract ImmutableERC721Base is
     /// @dev mints specified token id to specified address
     function _safeMint(address to, uint256 tokenId) internal override(ERC721) {
         if (_burnedTokens[tokenId]) {
-            revert("ERC721: token already burned");
+            revert IImmutableERC721TokenAlreadyBurned(tokenId);
         }
         super._safeMint(to, tokenId);
     }

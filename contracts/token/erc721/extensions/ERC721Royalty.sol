@@ -5,8 +5,9 @@ import { AccessControlEnumerable, ERC721AccessControl } from "./ERC721AccessCont
 import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import { ERC2981 } from "@openzeppelin/contracts/token/common/ERC2981.sol";
 import { RoyaltyEnforced } from "../../../royalty-enforcement/RoyaltyEnforced.sol";
+import { ERC721HybridMinting } from "./ERC721HybridMinting.sol";
 
-abstract contract ERC721Royalty is RoyaltyEnforced, ERC721AccessControl, ERC2981, ERC721 {
+abstract contract ERC721Royalty is RoyaltyEnforced, ERC721AccessControl, ERC2981, ERC721HybridMinting {
 
     constructor(
         address royaltyAllowlist_,
@@ -25,7 +26,7 @@ abstract contract ERC721Royalty is RoyaltyEnforced, ERC721AccessControl, ERC2981
         public
         view
         virtual
-        override(ERC721, ERC2981, RoyaltyEnforced, AccessControlEnumerable)
+        override(ERC721HybridMinting, ERC2981, RoyaltyEnforced, AccessControlEnumerable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
@@ -35,7 +36,7 @@ abstract contract ERC721Royalty is RoyaltyEnforced, ERC721AccessControl, ERC2981
     function setApprovalForAll(
         address operator,
         bool approved
-    ) public virtual override(ERC721) validateApproval(operator) {
+    ) public virtual override(ERC721HybridMinting) validateApproval(operator) {
         super.setApprovalForAll(operator, approved);
     }
 
@@ -43,7 +44,7 @@ abstract contract ERC721Royalty is RoyaltyEnforced, ERC721AccessControl, ERC2981
     function approve(
         address to,
         uint256 tokenId
-    ) public virtual override(ERC721) validateApproval(to) {
+    ) public virtual override(ERC721HybridMinting) validateApproval(to) {
         super.approve(to, tokenId);
     }
 
@@ -52,7 +53,7 @@ abstract contract ERC721Royalty is RoyaltyEnforced, ERC721AccessControl, ERC2981
         address from,
         address to,
         uint256 tokenId
-    ) internal virtual override(ERC721) validateTransfer(from, to) {
+    ) internal virtual override(ERC721HybridMinting) validateTransfer(from, to) {
         super._transfer(from, to, tokenId);
     }
 

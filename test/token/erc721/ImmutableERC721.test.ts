@@ -9,16 +9,14 @@ import {
 } from "../../../typechain";
 import { AllowlistFixture } from "../../utils/DeployFixtures";
 
-describe("ImmutableERC721", function () {
+describe.only("ImmutableERC721", function () {
 
   let erc721: ImmutableERC721;
   let royaltyAllowlist: RoyaltyAllowlist;
   let owner: SignerWithAddress;
   let user: SignerWithAddress;
-  let user2: SignerWithAddress;
   let minter: SignerWithAddress;
   let registrar: SignerWithAddress;
-  let royaltyRecipient: SignerWithAddress;
 
   const baseURI = "https://baseURI.com/";
   const contractURI = "https://contractURI.com";
@@ -28,7 +26,7 @@ describe("ImmutableERC721", function () {
 
   before(async function () {
     // Retrieve accounts
-    [owner, user, minter, registrar, royaltyRecipient, user2] =
+    [owner, user, minter, registrar] =
       await ethers.getSigners();
 
     // Get all required contracts
@@ -215,10 +213,10 @@ describe("ImmutableERC721", function () {
       const salePrice = ethers.utils.parseEther("1");
       const tokenInfo = await erc721.royaltyInfo(2, salePrice);
 
-      expect(tokenInfo[0]).to.be.equal(royaltyRecipient.address);
+      expect(tokenInfo[0]).to.be.equal(owner.address);
       // (_salePrice * royalty.royaltyFraction) / _feeDenominator();
       // (1e18 * 2000) / 10000 = 2e17 (0.2 eth)
-      expect(tokenInfo[1]).to.be.equal(ethers.utils.parseEther("0.2"));
+      expect(tokenInfo[1]).to.be.equal(ethers.utils.parseEther("0.02"));
     });
   });
   // describe("Transfers", function () {

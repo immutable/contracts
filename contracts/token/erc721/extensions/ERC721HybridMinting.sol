@@ -136,7 +136,6 @@ abstract contract ERC721HybridMinting is ERC721PsiBurnable, ERC721 {
         super._mint(to, quantity);
     }
 
-
     // Overwritten functions with combined implementations
 
     function balanceOf(address owner) public view virtual override(ERC721, ERC721Psi) returns (uint) {
@@ -170,7 +169,10 @@ abstract contract ERC721HybridMinting is ERC721PsiBurnable, ERC721 {
     }
 
     function _approve(address to, uint256 tokenId) internal virtual override(ERC721, ERC721Psi) {
-        return ERC721._approve(to, tokenId);
+        if (tokenId < bulkMintThreshold()) {
+            return ERC721._approve(to, tokenId);
+        }
+        return ERC721Psi._approve(to, tokenId);
     }
 
     function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual override(ERC721, ERC721Psi) returns (bool) {
@@ -181,8 +183,10 @@ abstract contract ERC721HybridMinting is ERC721PsiBurnable, ERC721 {
     }
 
     function _safeTransfer(address from, address to, uint256 tokenId, bytes memory _data) internal virtual override(ERC721, ERC721Psi) { 
-
-        return ERC721._safeTransfer(from, to, tokenId, _data);
+        if (tokenId < bulkMintThreshold()) {
+            return ERC721._safeTransfer(from, to, tokenId, _data);
+        }
+        return ERC721Psi._safeTransfer(from, to, tokenId, _data);
     }
 
     function setApprovalForAll(address operator, bool approved) public virtual override(ERC721, ERC721Psi) { 
@@ -190,11 +194,14 @@ abstract contract ERC721HybridMinting is ERC721PsiBurnable, ERC721 {
     }
 
     function safeTransferFrom(address from, address to, uint256 tokenId) public virtual override(ERC721, ERC721Psi) {
-        ERC721.safeTransferFrom(from, to, tokenId);
+        safeTransferFrom(from, to, tokenId, "");
     }
 
     function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public virtual override(ERC721, ERC721Psi) {
-        ERC721.safeTransferFrom(from, to, tokenId, _data);
+        if (tokenId < bulkMintThreshold()) {
+            return ERC721.safeTransferFrom(from, to, tokenId, _data);
+        }
+        return ERC721Psi.safeTransferFrom(from, to, tokenId, _data);
     }
 
     function isApprovedForAll(address owner, address operator) public view virtual override(ERC721, ERC721Psi) returns (bool) {
@@ -202,15 +209,24 @@ abstract contract ERC721HybridMinting is ERC721PsiBurnable, ERC721 {
     }
 
     function getApproved(uint256 tokenId) public view virtual override(ERC721, ERC721Psi) returns (address) {
-        return ERC721.getApproved(tokenId);
+        if (tokenId < bulkMintThreshold()) {
+            return ERC721.getApproved(tokenId);
+        }
+        return ERC721Psi.getApproved(tokenId);
     }
 
     function approve(address to, uint256 tokenId) public virtual override(ERC721, ERC721Psi) { 
-        ERC721.approve(to, tokenId);
+        if (tokenId < bulkMintThreshold()) {
+            return ERC721.approve(to, tokenId);
+        }
+        return ERC721Psi.approve(to, tokenId);
     }
 
     function transferFrom(address from, address to, uint256 tokenId) public virtual override(ERC721, ERC721Psi) {
-        ERC721.transferFrom(from, to, tokenId);
+        if (tokenId < bulkMintThreshold()) {
+            return ERC721.transferFrom(from, to, tokenId);
+        }
+        return ERC721Psi.transferFrom(from, to, tokenId);
     }
 
     // function safeTransferFromBatch(TransferRequest calldata tr) external {

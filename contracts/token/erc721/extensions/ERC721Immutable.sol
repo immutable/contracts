@@ -2,11 +2,10 @@ pragma solidity ^0.8.0;
 // SPDX-License-Identifier: MIT
 
 import { ERC721Royalty } from "../extensions/ERC721Royalty.sol";
-import { ERC721HybridMinting } from "../extensions/ERC721HybridMinting.sol";
 import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import { ERC721AccessControl } from "../extensions/ERC721AccessControl.sol";
 
-abstract contract ERC721Immutable is ERC721HybridMinting, ERC721Royalty {
+abstract contract ERC721Immutable is ERC721Royalty {
 
         /// @dev Contract level metadata
     string public contractURI;
@@ -22,6 +21,10 @@ abstract contract ERC721Immutable is ERC721HybridMinting, ERC721Royalty {
         contractURI = contractURI_;
     }
 
+    function _baseURI() internal view virtual override returns (string memory) {
+        return baseURI;
+    }
+
     /// @dev Allows admin to set the base URI
     function setBaseURI(
         string memory baseURI_
@@ -35,103 +38,5 @@ abstract contract ERC721Immutable is ERC721HybridMinting, ERC721Royalty {
     ) public onlyRole(DEFAULT_ADMIN_ROLE) {
         contractURI = _contractURI;
     }
-
-    // Overwritten
-
-    function _exists(uint256 tokenId) internal view override(ERC721, ERC721HybridMinting) returns (bool) {
-        return ERC721HybridMinting._exists(tokenId);
-    }
-
-    function _transfer(address from, address to, uint256 tokenId) internal override(ERC721Royalty, ERC721HybridMinting) {
-        ERC721HybridMinting._transfer(from, to, tokenId);
-    }
-
-    function ownerOf(uint256 tokenId) public view virtual override(ERC721, ERC721HybridMinting) returns (address) {
-        return ERC721HybridMinting.ownerOf(tokenId);
-    }
-
-    function _burn(uint256 tokenId) internal virtual override(ERC721, ERC721HybridMinting) {
-        return ERC721HybridMinting._burn(tokenId);
-    }
-
-    function balanceOf(address owner) public view virtual override(ERC721, ERC721HybridMinting) returns (uint) {
-        return ERC721HybridMinting.balanceOf(owner);
-    }
-
-    // 
-    function _safeMint(address to, uint256 quantity) internal virtual override(ERC721, ERC721HybridMinting) {
-        return _safeMint(to, quantity, "");
-    }
-
-    function _safeMint(address to, uint256 quantity, bytes memory _data) internal virtual override(ERC721, ERC721HybridMinting) {
-        return ERC721HybridMinting._safeMint(to, quantity, _data);
-    }
-
-    function _mint(address to, uint256 quantity) internal virtual override(ERC721, ERC721HybridMinting) { 
-        ERC721HybridMinting._mint(to, quantity);
-    }
-
-    // Overwritten functions with direct routing
-
-    function tokenURI(uint256 tokenId) public view virtual override(ERC721, ERC721HybridMinting) returns (string memory) {
-        return ERC721HybridMinting.tokenURI(tokenId);
-    }
-
-    function name() public view virtual override(ERC721, ERC721HybridMinting) returns (string memory) {
-        return ERC721HybridMinting.name();
-    }
-
-    function symbol() public view virtual override(ERC721, ERC721HybridMinting) returns (string memory) {
-        return ERC721HybridMinting.symbol();
-    }
-
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721HybridMinting, ERC721Royalty) returns (bool) {
-        return super.supportsInterface(interfaceId);
-    }
-
-    function _baseURI() internal view virtual override(ERC721HybridMinting, ERC721) returns (string memory) {
-        return baseURI;
-    }
-
-    function _approve(address to, uint256 tokenId) internal virtual override(ERC721, ERC721HybridMinting) {
-        return ERC721HybridMinting._approve(to, tokenId);
-    }
-
-    function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual override(ERC721, ERC721HybridMinting) returns (bool) {
-        return ERC721HybridMinting._isApprovedOrOwner(spender, tokenId);
-    }
-
-    function _safeTransfer(address from, address to, uint256 tokenId, bytes memory _data) internal virtual override(ERC721, ERC721HybridMinting) { 
-        return ERC721HybridMinting._safeTransfer(from, to, tokenId, _data);
-    }
-
-    function setApprovalForAll(address operator, bool approved) public virtual override(ERC721Royalty, ERC721HybridMinting) { 
-        return ERC721HybridMinting.setApprovalForAll(operator, approved);
-    }
-
-    function safeTransferFrom(address from, address to, uint256 tokenId) public virtual override(ERC721, ERC721HybridMinting) {
-        ERC721HybridMinting.safeTransferFrom(from, to, tokenId);
-    }
-
-    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public virtual override(ERC721, ERC721HybridMinting) {
-        ERC721HybridMinting.safeTransferFrom(from, to, tokenId, _data);
-    }
-
-    function isApprovedForAll(address owner, address operator) public view virtual override(ERC721, ERC721HybridMinting) returns (bool) {
-        return ERC721HybridMinting.isApprovedForAll(owner, operator);
-    }
-
-    function getApproved(uint256 tokenId) public view virtual override(ERC721, ERC721HybridMinting) returns (address) {
-        return ERC721HybridMinting.getApproved(tokenId);
-    }
-
-    function approve(address to, uint256 tokenId) public virtual override(ERC721Royalty, ERC721HybridMinting) { 
-        ERC721HybridMinting.approve(to, tokenId);
-    }
-
-    function transferFrom(address from, address to, uint256 tokenId) public virtual override(ERC721, ERC721HybridMinting) {
-        ERC721HybridMinting.transferFrom(from, to, tokenId);
-    }
-
 
 }

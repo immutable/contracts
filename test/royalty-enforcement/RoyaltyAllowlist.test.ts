@@ -11,7 +11,6 @@ import {
 import proxyArtfiact from "../../test/utils/proxyArtifact.json";
 
 describe("Royalty Enforcement Test Cases", function () {
-  this.timeout(300_000); // 5 min
 
   let owner: SignerWithAddress;
   let registrar: SignerWithAddress;

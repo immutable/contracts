@@ -10,7 +10,7 @@ const { ZERO_ADDRESS } = constants;
 const RECEIVER_MAGIC_VALUE = '0x150b7a02';
 const GAS_MAGIC_VALUE = 20000;
 
-describe.only('ERC721Psi', function () {
+describe('ERC721Psi', function () {
 
     let erc721: ImmutableERC721;
     let royaltyAllowlist: RoyaltyAllowlist;

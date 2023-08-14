@@ -71,7 +71,12 @@ abstract contract ERC721HybridMinting is ERC721PsiBurnable, ERC721 {
         }
     }
 
+    function exists(uint256 tokenId) public view virtual returns (bool) {
+        return _exists(tokenId);
+    }
+
     // Overwritten functions from ERC721/ERC721Psi with split routing
+
 
     function _exists(uint256 tokenId) internal view virtual override(ERC721, ERC721PsiBurnable) returns (bool) {
         if (tokenId < bulkMintThreshold()) {
@@ -169,10 +174,14 @@ abstract contract ERC721HybridMinting is ERC721PsiBurnable, ERC721 {
     }
 
     function _isApprovedOrOwner(address spender, uint256 tokenId) internal view virtual override(ERC721, ERC721Psi) returns (bool) {
-        return ERC721._isApprovedOrOwner(spender, tokenId);
+        if (tokenId < bulkMintThreshold()) {
+            return ERC721._isApprovedOrOwner(spender, tokenId);
+        }
+        return ERC721Psi._isApprovedOrOwner(spender, tokenId);
     }
 
     function _safeTransfer(address from, address to, uint256 tokenId, bytes memory _data) internal virtual override(ERC721, ERC721Psi) { 
+
         return ERC721._safeTransfer(from, to, tokenId, _data);
     }
 

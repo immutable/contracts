@@ -9,8 +9,7 @@ import {
 } from "../../../typechain";
 import { AllowlistFixture } from "../../utils/DeployFixtures";
 
-describe.only("ImmutableERC721", function () {
-  this.timeout(300_000); // 5 min
+describe("ImmutableERC721", function () {
 
   let erc721: ImmutableERC721;
   let royaltyAllowlist: RoyaltyAllowlist;
@@ -34,28 +33,6 @@ describe.only("ImmutableERC721", function () {
 
     // Get all required contracts
     ({ erc721, royaltyAllowlist } = await AllowlistFixture(owner));
-
-    // Deploy royalty Allowlist
-    const royaltyAllowlistFactory = (await ethers.getContractFactory(
-      "RoyaltyAllowlist"
-    )) as RoyaltyAllowlist__factory;
-    royaltyAllowlist = await royaltyAllowlistFactory.deploy(owner.address);
-
-    // Deploy ERC721 contract
-    const erc721PresetFactory = (await ethers.getContractFactory(
-      "ImmutableERC721"
-    )) as ImmutableERC721__factory;
-
-    erc721 = await erc721PresetFactory.deploy(
-      owner.address,
-      name,
-      symbol,
-      baseURI,
-      contractURI,
-      royaltyAllowlist.address,
-      royaltyRecipient.address,
-      royalty
-    );
 
     // Set up roles
     await erc721.connect(owner).grantMinterRole(minter.address);

@@ -74,7 +74,9 @@ describe("Allowlisted ERC721 Transfers", function () {
 
       await expect(
         erc721.connect(owner).setRoyaltyAllowlistRegistry(erc721Two.address)
-      ).to.be.revertedWith("contract does not implement IRoyaltyAllowlist");
+      ).to.be.revertedWith(
+        "RoyaltyEnforcementDoesNotImplementRequiredInterface()"
+      );
     });
 
     it("Should not allow a non-admin to access the function to update the registry", async function () {

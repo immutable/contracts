@@ -131,7 +131,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
       const mintRequests = [{ to: user.address, tokenIds: [1, 2] }];
       await expect(
         erc721.connect(minter).safeMintBatch(mintRequests)
-      ).to.be.revertedWith("ERC721: token already burned");
+      ).to.be.revertedWith("IImmutableERC721TokenAlreadyBurned(1)");
     });
   });
 

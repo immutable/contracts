@@ -73,12 +73,14 @@ abstract contract ImmutableERC721Base is
         string memory symbol_,
         string memory baseURI_,
         string memory contractURI_,
+        address _royaltyAllowlist,
         address _receiver,
         uint96 _feeNumerator
     ) ERC721(name_, symbol_) {
         // Initialize state variables
-        _setDefaultRoyalty(_receiver, _feeNumerator);
         _grantRole(DEFAULT_ADMIN_ROLE, owner);
+        _setDefaultRoyalty(_receiver, _feeNumerator);
+        setRoyaltyAllowlistRegistry(_royaltyAllowlist);
         baseURI = baseURI_;
         contractURI = contractURI_;
     }

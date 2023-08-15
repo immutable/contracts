@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { walletSCFixture, AllowlistFixture } from "../utils/DeployFixtures";
+import { walletSCFixture, RegularAllowlistFixture } from "../utils/DeployRegularFixtures";
 import {
   ImmutableERC721PermissionedMintable,
   MockMarketplace,
@@ -26,7 +26,7 @@ describe("Royalty Enforcement Test Cases", function () {
 
     // Deploy all required contracts
     ({ erc721, walletFactory, royaltyAllowlist, marketPlace } =
-      await AllowlistFixture(owner));
+      await RegularAllowlistFixture(owner));
 
     // Grant registrar role
     await royaltyAllowlist.connect(owner).grantRegistrarRole(registrar.address);

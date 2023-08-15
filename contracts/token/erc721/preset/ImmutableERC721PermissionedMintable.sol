@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "../abstract/ImmutableERC721Base.sol";
-import "../../../royalty-enforcement/RoyaltyEnforced.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 
@@ -33,9 +32,11 @@ contract ImmutableERC721PermissionedMintable is ImmutableERC721Base {
             symbol_,
             baseURI_,
             contractURI_,
+            _royaltyAllowlist,
             _receiver,
             _feeNumerator
         )
+<<<<<<< HEAD
     {
         // Initialize state variables
         _setDefaultRoyalty(_receiver, _feeNumerator);
@@ -44,6 +45,9 @@ contract ImmutableERC721PermissionedMintable is ImmutableERC721Base {
         baseURI = baseURI_;
         contractURI = contractURI_;
     }
+=======
+    {}
+>>>>>>> eea156b ([feature] hybrid erc721)
 
     ///     =====   View functions  =====
 

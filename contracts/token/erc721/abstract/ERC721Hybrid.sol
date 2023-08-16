@@ -1,8 +1,11 @@
 pragma solidity ^0.8.17;
 // SPDX-License-Identifier: MIT
 
-import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import { ERC721Psi, ERC721PsiBurnable } from "../erc721psi/ERC721PsiBurnable.sol";
+// Errors
+import {IImmutableERC721Errors} from "../../../errors/Errors.sol";
 
 /*
 This contract allows for minting with one of two strategies:
@@ -12,10 +15,23 @@ This contract allows for minting with one of two strategies:
 All other ERC721 functions are supported, with routing logic depending on the tokenId. 
 */
 
-abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721 {
+abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Errors {
+    using BitMaps for BitMaps.BitMap;
 
     // The total number of tokens minted by ID, used in totalSupply()
     uint256 private _idMintTotalSupply = 0;
+
+    /// @dev A mapping of tokens ids before the threshold that have been burned to prevent re-minting
+    //mapping(uint256 => bool) public _burnedTokens;
+
+    BitMaps.BitMap private _burnedTokens;
+
+    /// @dev A singular batch transfer request
+    struct TransferRequest {
+        address from;
+        address[] tos;
+        uint256[] tokenIds;
+    }
 
     constructor(
         string memory name_,
@@ -40,6 +56,10 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721 {
         ERC721Psi._mint(to, quantity);
     }
 
+    function _safeMintByQuantity(address to, uint256 quantity) internal  {
+        ERC721Psi._safeMint(to, quantity);
+    }
+
     function _batchMintByQuantity(Mint[] memory mints) internal  {
         for (uint i = 0; i < mints.length; i++) {
             Mint memory m = mints[i];
@@ -48,7 +68,13 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721 {
     }
 
     function _mintByID(address to, uint256 tokenId) internal {
-        require(tokenId < bulkMintThreshold(), "must mint below threshold"); 
+        if (tokenId >= bulkMintThreshold()){
+            revert IImmutableERC721IDAboveThreshold(tokenId);
+        }
+
+        if (_burnedTokens.get(tokenId)) {
+            revert IImmutableERC721TokenAlreadyBurned(tokenId);
+        }
         ERC721._mint(to, tokenId);
         _idMintTotalSupply++;
     }
@@ -80,7 +106,7 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721 {
 
     function _exists(uint256 tokenId) internal view virtual override(ERC721, ERC721PsiBurnable) returns (bool) {
         if (tokenId < bulkMintThreshold()) {
-            return ERC721._exists(tokenId);
+            return ERC721._ownerOf(tokenId) != address(0) && (!_burnedTokens.get(tokenId));
         }
         return ERC721PsiBurnable._exists(tokenId);
     }
@@ -101,9 +127,9 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721 {
     }
 
     function _burn(uint256 tokenId) internal virtual override(ERC721, ERC721PsiBurnable) {
-
         if (tokenId < bulkMintThreshold()) {
             ERC721._burn(tokenId);
+            _burnedTokens.set(tokenId);
             _idMintTotalSupply--;
         } else {
             ERC721PsiBurnable._burn(tokenId);
@@ -123,17 +149,17 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721 {
 
     // 
     function _safeMint(address to, uint256 quantity) internal virtual override(ERC721, ERC721Psi) {
-        return super._safeMint(to, quantity);
+        return ERC721Psi._safeMint(to, quantity);
     }
 
     function _safeMint(address to, uint256 quantity, bytes memory _data) internal virtual override(ERC721, ERC721Psi) {
-        return super._safeMint(to, quantity, _data);
+        return ERC721Psi._safeMint(to, quantity, _data);
     }
 
     //This function is used by BOTH
 
     function _mint(address to, uint256 quantity) internal virtual override(ERC721, ERC721Psi) { 
-        super._mint(to, quantity);
+        ERC721Psi._mint(to, quantity);
     }
 
     // Overwritten functions with combined implementations
@@ -228,15 +254,4 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721 {
         }
         return ERC721Psi.transferFrom(from, to, tokenId);
     }
-
-    // function safeTransferFromBatch(TransferRequest calldata tr) external {
-    //     if (tr.tokenIds.length != tr.tos.length) {
-    //         revert("number of token ids not the same as number of receivers");
-    //     }
-
-    //     for (uint i = 0; i < tr.tokenIds.length; i++) {
-    //         safeTransferFrom(tr.from, tr.tos[i], tr.tokenIds[i]);
-    //     }
-    // }
-
 }

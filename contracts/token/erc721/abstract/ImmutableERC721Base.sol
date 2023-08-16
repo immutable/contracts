@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "../../../royalty-enforcement/RoyaltyEnforced.sol";
 
 // Utils
-import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 
 // Errors
 import {IImmutableERC721Errors} from "../../../errors/Errors.sol";
@@ -27,6 +27,7 @@ abstract contract ImmutableERC721Base is
     ERC2981,
     IImmutableERC721Errors
 {
+    using BitMaps for BitMaps.BitMap;
     ///     =====   State Variables  =====
 
     /// @dev Contract level metadata
@@ -55,7 +56,7 @@ abstract contract ImmutableERC721Base is
     }
 
     /// @dev A mapping of tokens that have been burned to prevent re-minting
-    mapping(uint256 => bool) public _burnedTokens;
+    BitMaps.BitMap private _burnedTokens;
 
     ///     =====   Constructor  =====
 
@@ -208,6 +209,13 @@ abstract contract ImmutableERC721Base is
         return _totalSupply;
     }
 
+    // @dev allows owner or operator to burn a single token
+    function burn(uint256 tokenId) public override(ERC721Burnable) {
+        super.burn(tokenId);
+        _burnedTokens.set(tokenId);
+        _totalSupply--;
+    }
+
     ///     =====  Internal functions  =====
 
     /// @dev mints specified token ids to specified address
@@ -234,7 +242,7 @@ abstract contract ImmutableERC721Base is
 
     /// @dev mints specified token id to specified address
     function _mint(address to, uint256 tokenId) internal override(ERC721) {
-        if (_burnedTokens[tokenId]) {
+        if (_burnedTokens.get(tokenId)) {
             revert IImmutableERC721TokenAlreadyBurned(tokenId);
         }
         super._mint(to, tokenId);
@@ -242,7 +250,7 @@ abstract contract ImmutableERC721Base is
 
     /// @dev mints specified token id to specified address
     function _safeMint(address to, uint256 tokenId) internal override(ERC721) {
-        if (_burnedTokens[tokenId]) {
+        if (_burnedTokens.get(tokenId)) {
             revert IImmutableERC721TokenAlreadyBurned(tokenId);
         }
         super._safeMint(to, tokenId);

@@ -9,6 +9,9 @@ interface IImmutableERC721Errors {
 
     /// @dev Caller tried to mint an already burned token
     error IImmutableERC721MismatchedTransferLengths();
+
+    /// @dev Caller tried to mint a tokenid that is above the hybrid threshold
+    error IImmutableERC721IDAboveThreshold(uint256 tokenId);
 }
 
 interface RoyaltyEnforcementErrors {

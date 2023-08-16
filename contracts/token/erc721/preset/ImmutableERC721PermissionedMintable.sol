@@ -96,17 +96,8 @@ contract ImmutableERC721PermissionedMintable is ImmutableERC721Base {
     /// @dev Allows owner or operator to burn a batch of tokens
     function burnBatch(uint256[] calldata tokenIDs) external {
         for (uint i = 0; i < tokenIDs.length; i++) {
-            super.burn(tokenIDs[i]);
-            _burnedTokens[tokenIDs[i]] = true;
+            burn(tokenIDs[i]);
         }
-        _totalSupply = _totalSupply - tokenIDs.length;
-    }
-
-    // @dev allows owner or operator to burn a single token
-    function burn(uint256 tokenId) public override(ERC721Burnable) {
-        super.burn(tokenId);
-        _burnedTokens[tokenId] = true;
-        _totalSupply--;
     }
 
     /// @dev Allows owner or operator to transfer a batch of tokens

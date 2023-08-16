@@ -32,6 +32,10 @@ contract ImmutableERC721HybridPermissionedMintable is ImmutableERC721HybridBase 
     function mintByQuantity(address to, uint256 quantity) external onlyRole(MINTER_ROLE) {
         _mintByQuantity(to, quantity);
     }
+    
+    function safeMintByQuantity(address to, uint256 quantity) external onlyRole(MINTER_ROLE) {
+        _safeMintByQuantity(to, quantity);
+    }
 
     function batchMintByQuantity(Mint[] memory mints) external onlyRole(MINTER_ROLE) {
         _batchMintByQuantity(mints);
@@ -41,6 +45,14 @@ contract ImmutableERC721HybridPermissionedMintable is ImmutableERC721HybridBase 
         _batchMintByIDToMultiple(mints);
     }
 
-    
+    function safeTransferFromBatch(TransferRequest calldata tr) external {
+        if (tr.tokenIds.length != tr.tos.length) {
+            revert IImmutableERC721MismatchedTransferLengths();
+        }
+
+        for (uint i = 0; i < tr.tokenIds.length; i++) {
+            safeTransferFrom(tr.from, tr.tos[i], tr.tokenIds[i]);
+        }
+    }
 
 }

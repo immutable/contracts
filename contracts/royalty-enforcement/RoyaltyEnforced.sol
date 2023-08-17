@@ -10,8 +10,6 @@ import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 // Errors
 import {RoyaltyEnforcementErrors} from "../errors/Errors.sol";
 
-import "hardhat/console.sol";
-
 abstract contract RoyaltyEnforced is
     AccessControlEnumerable,
     RoyaltyEnforcementErrors
@@ -98,9 +96,7 @@ abstract contract RoyaltyEnforced is
         // Check for:
         // 1. from is an EOA
         // 2. from is Allowlisted or from address bytecode is Allowlisted
-        if (
-            from.code.length != 0 && !royaltyAllowlist.isAllowlisted(from)
-        ) {
+        if (from.code.length != 0 && !royaltyAllowlist.isAllowlisted(from)) {
             revert TransferFromNotInAllowlist(from);
         }
 
@@ -110,6 +106,6 @@ abstract contract RoyaltyEnforced is
         if (to.code.length != 0 && !royaltyAllowlist.isAllowlisted(to)) {
             revert TransferToNotInAllowlist(to);
         }
-    _;
+        _;
     }
 }

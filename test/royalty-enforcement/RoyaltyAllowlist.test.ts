@@ -1,7 +1,10 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { walletSCFixture, RegularAllowlistFixture } from "../utils/DeployRegularFixtures";
+import {
+  walletSCFixture,
+  RegularAllowlistFixture,
+} from "../utils/DeployRegularFixtures";
 import {
   ImmutableERC721PermissionedMintable,
   MockMarketplace,

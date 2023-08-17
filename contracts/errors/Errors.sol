@@ -12,13 +12,16 @@ interface IImmutableERC721Errors {
 
     /// @dev Caller tried to mint a tokenid that is above the hybrid threshold
     error IImmutableERC721IDAboveThreshold(uint256 tokenId);
+
+    /// @dev Caller is not approved or owner
+    error IImmutableERC721NotOwnerOrOperator(uint256 tokenId);
 }
 
 interface RoyaltyEnforcementErrors {
     /// @dev Caller tried to mint an already burned token
     error RoyaltyEnforcementDoesNotImplementRequiredInterface();
 
-        /// @dev Error thrown when calling address is not Allowlisted
+    /// @dev Error thrown when calling address is not Allowlisted
     error CallerNotInAllowlist(address caller);
 
     /// @dev Error thrown when 'from' address is not Allowlisted
@@ -33,4 +36,3 @@ interface RoyaltyEnforcementErrors {
     /// @dev Error thrown when approve target is not Allowlisted
     error ApproverNotInAllowlist(address approver);
 }
-

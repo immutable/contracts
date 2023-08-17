@@ -69,7 +69,6 @@ export const AllowlistFixture = async (owner: SignerWithAddress) => {
   };
 };
 
-
 // Helper function to deploy SC wallet via CREATE2 and return deterministic address
 export const walletSCFixture = async (
   walletDeployer: SignerWithAddress,

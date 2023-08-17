@@ -17,7 +17,6 @@ import {
 } from "../utils/DeployHybridFixtures";
 
 describe("Royalty Checks with Hybrid ERC721", function () {
-
   let erc721: ImmutableERC721HybridPermissionedMintable;
   let walletFactory: MockWalletFactory;
   let factory: MockFactory;
@@ -73,7 +72,9 @@ describe("Royalty Checks with Hybrid ERC721", function () {
 
       await expect(
         erc721.connect(owner).setRoyaltyAllowlistRegistry(erc721Two.address)
-      ).to.be.revertedWith("RoyaltyEnforcementDoesNotImplementRequiredInterface()");
+      ).to.be.revertedWith(
+        "RoyaltyEnforcementDoesNotImplementRequiredInterface()"
+      );
     });
 
     it("Should not allow a non-admin to access the function to update the registry", async function () {
@@ -127,7 +128,9 @@ describe("Royalty Checks with Hybrid ERC721", function () {
       // Approve marketplace on erc721 contract
       await erc721.connect(minter).approve(marketPlace.address, tokenId);
       await erc721.connect(minter).setApprovalForAll(marketPlace.address, true);
-      expect(await erc721.getApproved(tokenId)).to.be.equal(marketPlace.address);
+      expect(await erc721.getApproved(tokenId)).to.be.equal(
+        marketPlace.address
+      );
       expect(
         await erc721.isApprovedForAll(minter.address, marketPlace.address)
       ).to.be.equal(true);
@@ -158,12 +161,11 @@ describe("Royalty Checks with Hybrid ERC721", function () {
         .setRoyaltyAllowlistRegistry(royaltyAllowlist.address);
     });
     it("Should freely allow transfers between EOAs", async function () {
-
       const first = await erc721.bulkMintThreshold();
       await erc721.connect(minter).mintByQuantity(accs[0].address, 1);
       await erc721.connect(minter).mintByQuantity(accs[1].address, 1);
       const tokenIdOne = first;
-      const tokenIdTwo = first.add(1)
+      const tokenIdTwo = first.add(1);
 
       // Transfer
       await erc721

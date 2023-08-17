@@ -531,30 +531,6 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
     }
 
     /**
-     * @dev Returns an array of token IDs owned by `owner`.
-     *
-     * This function scans the ownership mapping and is O(`totalSupply`) in complexity.
-     * It is meant to be called off-chain.
-     *
-     * This function is compatiable with ERC721AQueryable.
-     */
-    function tokensOfOwner(address owner) external view virtual returns (uint256[] memory) {
-        unchecked {
-            uint256 tokenIdsIdx;
-            uint256 tokenIdsLength = balanceOf(owner);
-            uint256[] memory tokenIds = new uint256[](tokenIdsLength);
-            for (uint256 i = _startTokenId(); tokenIdsIdx != tokenIdsLength; ++i) {
-                if (_exists(i)) {
-                    if (ownerOf(i) == owner) {
-                        tokenIds[tokenIdsIdx++] = i;
-                    }
-                }
-            }
-            return tokenIds;   
-        }
-    }
-
-    /**
      * @dev Hook that is called before a set of serially-ordered token ids are about to be transferred. This includes minting.
      *
      * startTokenId - the first token id to be transferred

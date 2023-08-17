@@ -137,7 +137,9 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
     }
 
     function burn(uint256 tokenId) public virtual {
-        require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721: caller is not token owner or approved");
+        if (!_isApprovedOrOwner(_msgSender(), tokenId)) {
+            revert IImmutableERC721NotOwnerOrOperator(tokenId);
+        }
         _burn(tokenId);
     }
 

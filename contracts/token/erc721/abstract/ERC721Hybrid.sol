@@ -66,6 +66,13 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
             _mintByQuantity(m.to, m.quantity);
         }
     }
+    
+    function _batchSafeMintByQuantity(Mint[] memory mints) internal  {
+        for (uint i = 0; i < mints.length; i++) {
+            Mint memory m = mints[i];
+            _safeMintByQuantity(m.to, m.quantity);
+        }
+    }
 
     function _mintByID(address to, uint256 tokenId) internal {
         if (tokenId >= bulkMintThreshold()){
@@ -79,9 +86,27 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
         _idMintTotalSupply++;
     }
 
+    function _safeMintByID(address to, uint256 tokenId) internal {
+        if (tokenId >= bulkMintThreshold()){
+            revert IImmutableERC721IDAboveThreshold(tokenId);
+        }
+
+        if (_burnedTokens.get(tokenId)) {
+            revert IImmutableERC721TokenAlreadyBurned(tokenId);
+        }
+        ERC721._safeMint(to, tokenId);
+        _idMintTotalSupply++;
+    }
+
     function _batchMintByID(address to, uint256[] memory tokenIds) internal {
         for (uint i = 0; i < tokenIds.length; i++) {
             _mintByID(to, tokenIds[i]);
+        }
+    }
+
+    function _batchSafeMintByID(address to, uint256[] memory tokenIds) internal {
+        for (uint i = 0; i < tokenIds.length; i++) {
+            _safeMintByID(to, tokenIds[i]);
         }
     }
 
@@ -94,6 +119,13 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
         for (uint i = 0; i < mints.length; i++) {
             IDMint memory m = mints[i];
             _batchMintByID(m.to, m.tokenIds);
+        }
+    }
+
+    function _batchSafeMintByIDToMultiple(IDMint[] memory mints) internal  {
+        for (uint i = 0; i < mints.length; i++) {
+            IDMint memory m = mints[i];
+            _batchSafeMintByID(m.to, m.tokenIds);
         }
     }
 
@@ -149,19 +181,22 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
         }
     }
 
-    // 
-    function _safeMint(address to, uint256 quantity) internal virtual override(ERC721, ERC721Psi) {
-        return ERC721Psi._safeMint(to, quantity);
+    /// @dev overriding erc721 and erc721psi _safemint, super calls the `_safeMint` method of
+    /// the erc721 implementation due to inheritance linearisation
+    function _safeMint(address to, uint256 tokenId) internal virtual override(ERC721, ERC721Psi) {
+        super._safeMint(to, tokenId);
     }
 
-    function _safeMint(address to, uint256 quantity, bytes memory _data) internal virtual override(ERC721, ERC721Psi) {
-        return ERC721Psi._safeMint(to, quantity, _data);
+    /// @dev overriding erc721 and erc721psi _safemint, super calls the `_safeMint` method of
+    /// the erc721 implementation due to inheritance linearisation
+    function _safeMint(address to, uint256 tokenId, bytes memory _data) internal virtual override(ERC721, ERC721Psi) {
+        super._safeMint(to, tokenId, _data);
     }
 
-    //This function is used by BOTH
-
-    function _mint(address to, uint256 quantity) internal virtual override(ERC721, ERC721Psi) { 
-        ERC721Psi._mint(to, quantity);
+    /// @dev overriding erc721 and erc721psi _safemint, super calls the `_mint` method of
+    /// the erc721 implementation due to inheritance linearisation
+    function _mint(address to, uint256 tokenId) internal virtual override(ERC721, ERC721Psi) { 
+        super._mint(to, tokenId);
     }
 
     // Overwritten functions with combined implementations

@@ -24,7 +24,6 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/StorageSlot.sol";
 import "solidity-bits/contracts/BitMaps.sol";
 
-
 contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
     using Address for address;
     using Strings for uint256;
@@ -355,7 +354,7 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
      * Emits a {Transfer} event.
      */
     function _safeMint(address to, uint256 quantity) internal virtual {
-        _safeMint(to, quantity, "");
+        ERC721Psi._safeMint(to, quantity, "");
     }
 
     
@@ -365,7 +364,9 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
         bytes memory _data
     ) internal virtual {
         uint256 nextTokenId = _nextTokenId();
-        _mint(to, quantity);
+        // need to specify the specific implementation to avoid calling the
+        // mint method of erc721 due to matching func signatures
+        ERC721Psi._mint(to, quantity);
         require(
             _checkOnERC721Received(address(0), to, nextTokenId, quantity, _data),
             "ERC721Psi: transfer to non ERC721Receiver implementer"

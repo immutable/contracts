@@ -56,7 +56,7 @@ abstract contract ImmutableERC721Base is
     }
 
     /// @dev A mapping of tokens that have been burned to prevent re-minting
-    BitMaps.BitMap private _burnedTokens;
+    BitMaps.BitMap _burnedTokens;
 
     ///     =====   Constructor  =====
 
@@ -81,7 +81,7 @@ abstract contract ImmutableERC721Base is
         // Initialize state variables
         _grantRole(DEFAULT_ADMIN_ROLE, owner);
         _setDefaultRoyalty(_receiver, _feeNumerator);
-        setRoyaltyAllowlistRegistry(_royaltyAllowlist);
+        _setRoyaltyAllowlistRegistry(_royaltyAllowlist);
         baseURI = baseURI_;
         contractURI = contractURI_;
     }

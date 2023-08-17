@@ -56,6 +56,10 @@ abstract contract RoyaltyEnforced is
     function setRoyaltyAllowlistRegistry(
         address _royaltyAllowlist
     ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setRoyaltyAllowlistRegistry(_royaltyAllowlist);
+    }
+
+    function _setRoyaltyAllowlistRegistry(address _royaltyAllowlist) internal {
         if (
             !IERC165(_royaltyAllowlist).supportsInterface(
                 type(IRoyaltyAllowlist).interfaceId

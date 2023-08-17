@@ -40,7 +40,7 @@ contract ImmutableERC721PermissionedMintable is ImmutableERC721Base {
         // Initialize state variables
         _setDefaultRoyalty(_receiver, _feeNumerator);
         _grantRole(DEFAULT_ADMIN_ROLE, owner);
-        setRoyaltyAllowlistRegistry(_royaltyAllowlist);
+        _setRoyaltyAllowlistRegistry(_royaltyAllowlist);
         baseURI = baseURI_;
         contractURI = contractURI_;
     }

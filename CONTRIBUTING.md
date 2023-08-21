@@ -77,3 +77,6 @@ git push origin <your-branch-name>
 **IMPORTANT**: Please make sure to read through the [cla](cla.txt) file as part of opening a pull request.
 
 9. We will review the pull requests and request any necessary changes. If all the checks (linting, compilation, tests) pass and everything looks good, your code will be merged into the original repository. Congratulations, and thank you for your contribution!
+
+## Releasing
+To release the package to NPM, simply create a new GitHub release and the "Publish to NPM" GitHub action will release it to NPM.

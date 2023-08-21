@@ -1,0 +1,54 @@
+name: Publish to NPM
+run-name: Publish release ${{ github.event.release.tag_name }} to NPM
+
+on:
+  release:
+    types: [released] # A release was published, or a pre-release was changed to a release. https://docs.github.com/en/webhooks-and-events/webhooks/webhook-events-and-payloads?actionType=released#release
+
+jobs:
+  publish:
+    name: Publish to NPM
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Check Input
+        run: echo "Release Tag - ${{ github.event.release.tag_name }}"
+
+      - name: Validate Tag
+        run: |
+          if [[ "${{ github.event.release.tag_name }}" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Tag ${{ github.event.release.tag_name }} is valid"
+          else
+            echo "Tag is invalid"
+            exit 1
+          fi
+
+      - name: Clean Tag
+        id: clean-tag
+        run: |
+          echo "::set-output name=TAG::$(grep -Eo '[^v]?[0-9]+\.[0-9]+\.[0-9]+$' <<< '${{ github.event.release.tag_name }}')"
+
+      - name: Validated Tag
+        run: echo "package.json version - ${{ steps.clean-tag.outputs.TAG }}"
+
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: ".nvmrc"
+          registry-url: https://registry.npmjs.org/
+
+      - name: Update package.json version
+        run: |
+          tmp=$(mktemp)
+          jq '.version = "${{ steps.clean-tag.outputs.TAG }}"' ./package.json > "$tmp" && mv "$tmp" ./package.json
+
+      - name: Publish package
+        uses: JS-DevTools/npm-publish@v1
+        with:
+          token: ${{ secrets.PLATFORM_SA_NPM_TOKEN }}
+          access: public
+          tag: "latest"

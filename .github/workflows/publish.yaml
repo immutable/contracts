@@ -16,21 +16,24 @@ jobs:
           fetch-depth: 0
 
       - name: Check Input
-        run: echo "Version - ${{ github.event.release.tag_name }}"
-
-      - name: Clean Tag
-        id: clean-tag
-        run: |
-          echo "::set-output name=TAG::$(grep -o '^[^v][0-9]+.[0-9]+.[0-9]+$' <<< '${{ github.event.release.tag_name }}'"
+        run: echo "Release Tag - ${{ github.event.release.tag_name }}"
 
       - name: Validate Tag
         run: |
-          if [[ "${{ github.event.release.tag_name }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Tag is valid"
+          if [[ "${{ github.event.release.tag_name }}" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Tag ${{ github.event.release.tag_name }} is valid"
           else
             echo "Tag is invalid"
             exit 1
           fi
+
+      - name: Clean Tag
+        id: clean-tag
+        run: |
+          echo "::set-output name=TAG::$(grep -Eo '[^v]?[0-9]+\.[0-9]+\.[0-9]+$' <<< '${{ github.event.release.tag_name }}')"
+
+      - name: Validated Tag
+        run: echo "package.json version - ${{ steps.clean-tag.outputs.TAG }}"
 
       - name: Setup node
         uses: actions/setup-node@v3
@@ -41,7 +44,7 @@ jobs:
       - name: Update package.json version
         run: |
           tmp=$(mktemp)
-          jq '.version = "${{ github.event.release.tag_name }}"' ./package.json > "$tmp" && mv "$tmp" ./package.json
+          jq '.version = "${{ steps.clean-tag.outputs.TAG }}"' ./package.json > "$tmp" && mv "$tmp" ./package.json
 
       - name: Publish package
         uses: JS-DevTools/npm-publish@v1

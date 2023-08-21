@@ -1,15 +1,8 @@
 name: Publish to NPM
 
 on:
-  push:
-    tags:
-      - "v[0-9]+.[0-9]+.[0-9]+*"
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: "Tag to publish"
-        required: true
-        type: string
+  release:
+    types: [released] # A release was published, or a pre-release was changed to a release. https://docs.github.com/en/webhooks-and-events/webhooks/webhook-events-and-payloads?actionType=released#release
 
 jobs:
   packages:
@@ -22,27 +15,26 @@ jobs:
           fetch-depth: 0
 
       - name: Check Input
-        run: echo "Version - ${{github.event.inputs.tag}}"
+        run: echo "Version - ${{ github.event.release.tag_name }}"
 
       - name: Read .nvmrc
         run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
         id: nvm
 
       - name: Use Node.js ${{ steps.nvm.outputs.NODE_VERSION }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ steps.nvm.outputs.NODE_VERSION }}
           registry-url: https://registry.npmjs.org/
 
-      - name: Update package.json version for alpha, beta releases
-        if: ${{ contains(github.event.inputs.tag, 'alpha') || contains(github.event.inputs.tag, 'beta') }}
+      - name: Update package.json version
         run: |
           tmp=$(mktemp)
-          jq '.version = "${{github.event.inputs.tag}}"' ./package.json > "$tmp" && mv "$tmp" ./package.json
+          jq '.version = "${{ github.event.release.tag_name }}"' ./package.json > "$tmp" && mv "$tmp" ./package.json
 
       - name: Publish package
         uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.PLATFORM_SA_NPM_TOKEN }}
           access: public
-          tag: ${{ (contains(github.event.inputs.tag, 'alpha') && 'alpha') || (contains(github.event.inputs.tag, 'beta') && 'beta') || 'latest' }}
+          tag: "latest"

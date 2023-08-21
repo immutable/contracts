@@ -19,7 +19,7 @@ import {
 // - Mock wallet factory
 // - Allowlist registry
 // - Mock market place
-export const AllowlistFixture = async (owner: SignerWithAddress) => {
+export const RegularAllowlistFixture = async (owner: SignerWithAddress) => {
   const royaltyAllowlistFactory = (await ethers.getContractFactory(
     "RoyaltyAllowlist"
   )) as RoyaltyAllowlist__factory;

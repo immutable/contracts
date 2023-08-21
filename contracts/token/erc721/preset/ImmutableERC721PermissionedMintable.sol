@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "../abstract/ImmutableERC721Base.sol";
-import "../../../royalty-enforcement/RoyaltyEnforced.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 
@@ -33,17 +32,11 @@ contract ImmutableERC721PermissionedMintable is ImmutableERC721Base {
             symbol_,
             baseURI_,
             contractURI_,
+            _royaltyAllowlist,
             _receiver,
             _feeNumerator
         )
-    {
-        // Initialize state variables
-        _setDefaultRoyalty(_receiver, _feeNumerator);
-        _grantRole(DEFAULT_ADMIN_ROLE, owner);
-        _setRoyaltyAllowlistRegistry(_royaltyAllowlist);
-        baseURI = baseURI_;
-        contractURI = contractURI_;
-    }
+    {}
 
     ///     =====   View functions  =====
 
@@ -92,17 +85,8 @@ contract ImmutableERC721PermissionedMintable is ImmutableERC721Base {
     /// @dev Allows owner or operator to burn a batch of tokens
     function burnBatch(uint256[] calldata tokenIDs) external {
         for (uint i = 0; i < tokenIDs.length; i++) {
-            super.burn(tokenIDs[i]);
-            _burnedTokens[tokenIDs[i]] = true;
+            burn(tokenIDs[i]);
         }
-        _totalSupply = _totalSupply - tokenIDs.length;
-    }
-
-    // @dev allows owner or operator to burn a single token
-    function burn(uint256 tokenId) public override(ERC721Burnable) {
-        super.burn(tokenId);
-        _burnedTokens[tokenId] = true;
-        _totalSupply--;
     }
 
     /// @dev Allows owner or operator to transfer a batch of tokens

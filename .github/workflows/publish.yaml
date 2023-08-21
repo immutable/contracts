@@ -3,11 +3,11 @@ name: Publish to NPM
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+*'
+      - "v[0-9]+.[0-9]+.[0-9]+*"
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Tag to publish'
+        description: "Tag to publish"
         required: true
         type: string
 

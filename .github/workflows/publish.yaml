@@ -1,12 +1,13 @@
 name: Publish to NPM
+run-name: Publish release ${{ github.event.release.tag_name }} to NPM
 
 on:
   release:
     types: [released] # A release was published, or a pre-release was changed to a release. https://docs.github.com/en/webhooks-and-events/webhooks/webhook-events-and-payloads?actionType=released#release
 
 jobs:
-  packages:
-    name: Packages
+  publish:
+    name: Publish to NPM
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -17,14 +18,24 @@ jobs:
       - name: Check Input
         run: echo "Version - ${{ github.event.release.tag_name }}"
 
-      - name: Read .nvmrc
-        run: echo ::set-output name=NODE_VERSION::$(cat .nvmrc)
-        id: nvm
+      - name: Clean Tag
+        id: clean-tag
+        run: |
+          echo "::set-output name=TAG::$(grep -o '^[^v][0-9]+.[0-9]+.[0-9]+$' <<< '${{ github.event.release.tag_name }}'"
 
-      - name: Use Node.js ${{ steps.nvm.outputs.NODE_VERSION }}
+      - name: Validate Tag
+        run: |
+          if [[ "${{ github.event.release.tag_name }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Tag is valid"
+          else
+            echo "Tag is invalid"
+            exit 1
+          fi
+
+      - name: Setup node
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ steps.nvm.outputs.NODE_VERSION }}
+          node-version-file: ".nvmrc"
           registry-url: https://registry.npmjs.org/
 
       - name: Update package.json version

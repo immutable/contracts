@@ -12,9 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+          cache: 'npm'
       - name: Install NPM Dependencies
-        run: npm install
+        run: npm ci
       - name: Run Tests
         run: npm run test
   lint:
@@ -22,8 +27,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+          cache: 'npm'
       - name: Install NPM Dependencies
-        run: npm install
+        run: npm ci
       - name: Run eslint
         run: npm run lint

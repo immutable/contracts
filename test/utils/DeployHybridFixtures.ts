@@ -3,8 +3,8 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import {
   RoyaltyAllowlist__factory,
-  ImmutableERC721__factory,
-  ImmutableERC721,
+  ImmutableERC721i__factory,
+  ImmutableERC721i,
   MockFactory__factory,
   MockFactory,
   MockMarketplace__factory,
@@ -26,9 +26,9 @@ export const AllowlistFixture = async (owner: SignerWithAddress) => {
   const royaltyAllowlist = await royaltyAllowlistFactory.deploy(owner.address);
   // ERC721
   const erc721PresetFactory = (await ethers.getContractFactory(
-    "ImmutableERC721"
-  )) as ImmutableERC721__factory;
-  const erc721: ImmutableERC721 = await erc721PresetFactory.deploy(
+    "ImmutableERC721i"
+  )) as ImmutableERC721i__factory;
+  const erc721: ImmutableERC721i = await erc721PresetFactory.deploy(
     owner.address,
     "ERC721Preset",
     "EP",

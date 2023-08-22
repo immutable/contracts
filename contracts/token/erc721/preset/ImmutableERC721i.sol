@@ -6,7 +6,7 @@ import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import { MintingAccessControl } from "../abstract/MintingAccessControl.sol";
 import { ImmutableERC721HybridBase } from "../abstract/ImmutableERC721HybridBase.sol";
 
-contract ImmutableERC721 is ImmutableERC721HybridBase {
+contract ImmutableERC721i is ImmutableERC721HybridBase {
 
     constructor(
         address owner_,

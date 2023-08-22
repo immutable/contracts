@@ -1,11 +1,11 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { ImmutableERC721, RoyaltyAllowlist } from "../../../typechain";
+import { ImmutableERC721i, RoyaltyAllowlist } from "../../../typechain";
 import { AllowlistFixture } from "../../utils/DeployHybridFixtures";
 
-describe("ImmutableERC721", function () {
-  let erc721: ImmutableERC721;
+describe("ImmutableERC721i", function () {
+  let erc721: ImmutableERC721i;
   let royaltyAllowlist: RoyaltyAllowlist;
   let owner: SignerWithAddress;
   let user: SignerWithAddress;

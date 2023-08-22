@@ -28,9 +28,9 @@ Once the `zkevm-contracts` package is installed, use the contracts from the libr
 ```solidity
 pragma solidity ^0.8.0;
 
-import "@imtbl/zkevm-contracts/contracts/token/erc721/preset/ImmutableERC721PermissionedMintable.sol";
+import "@imtbl/zkevm-contracts/contracts/token/erc721/preset/ImmutableERC721Basic.sol";
 
-contract MyERC721 is ImmutableERC721PermissionedMintable {
+contract MyERC721 is ImmutableERC721Basic {
     constructor(
         address owner,
         string memory name,
@@ -40,7 +40,7 @@ contract MyERC721 is ImmutableERC721PermissionedMintable {
         address royaltyAllowlist,
         address receiver,
         uint96 feeNumerator
-    ) ImmutableERC721PermissionedMintable(
+    ) ImmutableERC721Basic(
       owner, 
       name, 
       symbol, 

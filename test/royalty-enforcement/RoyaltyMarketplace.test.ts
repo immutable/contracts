@@ -2,8 +2,8 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
-  ImmutableERC721Simple__factory,
-  ImmutableERC721Simple,
+  ImmutableERC721Basic__factory,
+  ImmutableERC721Basic,
   RoyaltyAllowlist,
   RoyaltyAllowlist__factory,
   MockMarketplace__factory,
@@ -13,7 +13,7 @@ import {
 describe("Marketplace Royalty Enforcement", function () {
   this.timeout(300_000); // 5 min
 
-  let erc721: ImmutableERC721Simple;
+  let erc721: ImmutableERC721Basic;
   let royaltyAllowlist: RoyaltyAllowlist;
   let mockMarketplace: MockMarketplace;
   let owner: SignerWithAddress;
@@ -41,8 +41,8 @@ describe("Marketplace Royalty Enforcement", function () {
 
     // Deploy ERC721 contract
     const erc721PresetFactory = (await ethers.getContractFactory(
-      "ImmutableERC721Simple"
-    )) as ImmutableERC721Simple__factory;
+      "ImmutableERC721Basic"
+    )) as ImmutableERC721Basic__factory;
 
     erc721 = await erc721PresetFactory.deploy(
       owner.address,

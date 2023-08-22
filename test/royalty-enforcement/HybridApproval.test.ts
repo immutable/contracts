@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
-  ImmutableERC721,
+  ImmutableERC721i,
   MockMarketplace,
   MockFactory,
   RoyaltyAllowlist,
@@ -17,7 +17,7 @@ import {
 } from "../utils/DeployHybridFixtures";
 
 describe("Royalty Checks with Hybrid ERC721", function () {
-  let erc721: ImmutableERC721;
+  let erc721: ImmutableERC721i;
   let walletFactory: MockWalletFactory;
   let factory: MockFactory;
   let royaltyAllowlist: RoyaltyAllowlist;
@@ -56,7 +56,7 @@ describe("Royalty Checks with Hybrid ERC721", function () {
 
     it("Should not allow contracts that do not implement the IRoyaltyAllowlist to be set", async function () {
       // Deploy another contract that implements IERC165, but not IRoyaltyAllowlist
-      const factory = await ethers.getContractFactory("ImmutableERC721");
+      const factory = await ethers.getContractFactory("ImmutableERC721i");
       const erc721Two = await factory.deploy(
         owner.address,
         "",

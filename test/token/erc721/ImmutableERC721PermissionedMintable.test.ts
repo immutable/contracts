@@ -2,8 +2,8 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
-  ImmutableERC721PermissionedMintable__factory,
-  ImmutableERC721PermissionedMintable,
+  ImmutableERC721Simple__factory,
+  ImmutableERC721Simple,
   RoyaltyAllowlist,
   RoyaltyAllowlist__factory,
 } from "../../../typechain";
@@ -12,7 +12,7 @@ import { RegularAllowlistFixture } from "../../utils/DeployRegularFixtures";
 describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
   this.timeout(300_000); // 5 min
 
-  let erc721: ImmutableERC721PermissionedMintable;
+  let erc721: ImmutableERC721Simple;
   let royaltyAllowlist: RoyaltyAllowlist;
   let owner: SignerWithAddress;
   let user: SignerWithAddress;
@@ -43,8 +43,8 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
 
     // Deploy ERC721 contract
     const erc721PresetFactory = (await ethers.getContractFactory(
-      "ImmutableERC721PermissionedMintable"
-    )) as ImmutableERC721PermissionedMintable__factory;
+      "ImmutableERC721Simple"
+    )) as ImmutableERC721Simple__factory;
 
     erc721 = await erc721PresetFactory.deploy(
       owner.address,

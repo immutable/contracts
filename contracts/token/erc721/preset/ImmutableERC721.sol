@@ -6,7 +6,7 @@ import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import { MintingAccessControl } from "../abstract/MintingAccessControl.sol";
 import { ImmutableERC721HybridBase } from "../abstract/ImmutableERC721HybridBase.sol";
 
-contract ImmutableERC721HybridPermissionedMintable is ImmutableERC721HybridBase {
+contract ImmutableERC721 is ImmutableERC721HybridBase {
 
     constructor(
         address owner_,
@@ -21,11 +21,11 @@ contract ImmutableERC721HybridPermissionedMintable is ImmutableERC721HybridBase 
     ImmutableERC721HybridBase(owner_, name_, symbol_, baseURI_, contractURI_, royaltyAllowlist_, royaltyReceiver_, feeNumerator_)
     {}
 
-    function mintByID(address to, uint256 tokenId) external onlyRole(MINTER_ROLE) {
+    function mint(address to, uint256 tokenId) external onlyRole(MINTER_ROLE) {
         _mintByID(to, tokenId);
     }
 
-    function safeMintByID(address to, uint256 tokenId) external onlyRole(MINTER_ROLE) {
+    function safeMint(address to, uint256 tokenId) external onlyRole(MINTER_ROLE) {
         _safeMintByID(to, tokenId);
     }
 
@@ -37,20 +37,20 @@ contract ImmutableERC721HybridPermissionedMintable is ImmutableERC721HybridBase 
         _safeMintByQuantity(to, quantity);
     }
 
-    function batchMintByQuantity(Mint[] memory mints) external onlyRole(MINTER_ROLE) {
-        _batchMintByQuantity(mints);
+    function mintBatchByQuantity(Mint[] memory mints) external onlyRole(MINTER_ROLE) {
+        _mintBatchByQuantity(mints);
     }
 
-    function batchSafeMintByQuantity(Mint[] memory mints) external onlyRole(MINTER_ROLE) {
-        _batchSafeMintByQuantity(mints);
+    function safeMintBatchByQuantity(Mint[] memory mints) external onlyRole(MINTER_ROLE) {
+        _safeMintBatchByQuantity(mints);
     }
 
-    function batchMintByIDToMultiple(IDMint[] memory mints) external onlyRole(MINTER_ROLE) {
-        _batchMintByIDToMultiple(mints);
+    function mintBatch(IDMint[] memory mints) external onlyRole(MINTER_ROLE) {
+        _mintBatchByIDToMultiple(mints);
     }
 
-    function batchSafeMintByIDToMultiple(IDMint[] memory mints) external onlyRole(MINTER_ROLE) {
-        _batchSafeMintByIDToMultiple(mints);
+    function safeMintBatch(IDMint[] memory mints) external onlyRole(MINTER_ROLE) {
+        _safeMintBatchByIDToMultiple(mints);
     }
 
     function safeTransferFromBatch(TransferRequest calldata tr) external {

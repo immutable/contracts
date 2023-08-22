@@ -5,7 +5,7 @@ import "../abstract/ImmutableERC721Base.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 
-contract ImmutableERC721PermissionedMintable is ImmutableERC721Base {
+contract ImmutableERC721Simple is ImmutableERC721Base {
     ///     =====   Constructor  =====
 
     /**

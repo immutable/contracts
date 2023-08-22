@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
-  ImmutableERC721HybridPermissionedMintable,
+  ImmutableERC721,
   MockMarketplace,
   MockFactory,
   RoyaltyAllowlist,
@@ -17,7 +17,7 @@ import {
 } from "../utils/DeployHybridFixtures";
 
 describe("Royalty Checks with Hybrid ERC721", function () {
-  let erc721: ImmutableERC721HybridPermissionedMintable;
+  let erc721: ImmutableERC721;
   let walletFactory: MockWalletFactory;
   let factory: MockFactory;
   let royaltyAllowlist: RoyaltyAllowlist;
@@ -56,9 +56,7 @@ describe("Royalty Checks with Hybrid ERC721", function () {
 
     it("Should not allow contracts that do not implement the IRoyaltyAllowlist to be set", async function () {
       // Deploy another contract that implements IERC165, but not IRoyaltyAllowlist
-      const factory = await ethers.getContractFactory(
-        "ImmutableERC721HybridPermissionedMintable"
-      );
+      const factory = await ethers.getContractFactory("ImmutableERC721");
       const erc721Two = await factory.deploy(
         owner.address,
         "",
@@ -206,7 +204,7 @@ describe("Royalty Checks with Hybrid ERC721", function () {
     });
 
     it("Should block transfers to a not allow listed address", async function () {
-      await erc721.connect(minter).mintByID(minter.address, 1);
+      await erc721.connect(minter).mint(minter.address, 1);
       await expect(
         erc721
           .connect(minter)
@@ -220,7 +218,7 @@ describe("Royalty Checks with Hybrid ERC721", function () {
       await royaltyAllowlist
         .connect(registrar)
         .addAddressToAllowlist([marketPlace.address]);
-      await erc721.connect(minter).mintByID(minter.address, 4);
+      await erc721.connect(minter).mint(minter.address, 4);
       await erc721.connect(minter).setApprovalForAll(marketPlace.address, true);
       expect(await erc721.balanceOf(accs[3].address)).to.be.equal(0);
       await marketPlace.connect(minter).executeTransfer(accs[3].address, 4);
@@ -250,8 +248,8 @@ describe("Royalty Checks with Hybrid ERC721", function () {
         saltThree
       );
       // Mint NFTs to the wallets
-      await erc721.connect(minter).mintByID(deployedAddr, 10);
-      await erc721.connect(minter).mintByID(deployedAddrTwo, 11);
+      await erc721.connect(minter).mint(deployedAddr, 10);
+      await erc721.connect(minter).mint(deployedAddrTwo, 11);
 
       // Connect to wallets
       const wallet = await ethers.getContractAt("MockWallet", deployedAddr);
@@ -315,7 +313,7 @@ describe("Royalty Checks with Hybrid ERC721", function () {
       const { deployedAddr, salt, constructorByteCode } =
         await disguidedEOAFixture(erc721.address, factory, "0x1234");
       // Approve disguised EOA
-      await erc721.connect(minter).mintByID(minter.address, 1);
+      await erc721.connect(minter).mint(minter.address, 1);
       await erc721.connect(minter).setApprovalForAll(deployedAddr, true);
       // Deploy disguised EOA
       await factory.connect(accs[5]).deploy(salt, constructorByteCode);
@@ -350,7 +348,7 @@ describe("Royalty Checks with Hybrid ERC721", function () {
         accs[6].address
       );
       // Mint and transfer to receiver contract
-      await erc721.connect(minter).mintByID(minter.address, 1);
+      await erc721.connect(minter).mint(minter.address, 1);
       // Fails as transfer 'to' is now allowlisted
       await expect(
         erc721

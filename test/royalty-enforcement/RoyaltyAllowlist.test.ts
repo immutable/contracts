@@ -6,7 +6,7 @@ import {
   RegularAllowlistFixture,
 } from "../utils/DeployRegularFixtures";
 import {
-  ImmutableERC721PermissionedMintable,
+  ImmutableERC721Simple,
   MockMarketplace,
   RoyaltyAllowlist,
   MockWalletFactory,
@@ -19,7 +19,7 @@ describe("Royalty Enforcement Test Cases", function () {
   let owner: SignerWithAddress;
   let registrar: SignerWithAddress;
   let scWallet: SignerWithAddress;
-  let erc721: ImmutableERC721PermissionedMintable;
+  let erc721: ImmutableERC721Simple;
   let walletFactory: MockWalletFactory;
   let royaltyAllowlist: RoyaltyAllowlist;
   let marketPlace: MockMarketplace;

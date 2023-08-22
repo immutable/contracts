@@ -3,8 +3,8 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import {
   RoyaltyAllowlist__factory,
-  ImmutableERC721HybridPermissionedMintable__factory,
-  ImmutableERC721HybridPermissionedMintable,
+  ImmutableERC721__factory,
+  ImmutableERC721,
   MockFactory__factory,
   MockFactory,
   MockMarketplace__factory,
@@ -26,19 +26,18 @@ export const AllowlistFixture = async (owner: SignerWithAddress) => {
   const royaltyAllowlist = await royaltyAllowlistFactory.deploy(owner.address);
   // ERC721
   const erc721PresetFactory = (await ethers.getContractFactory(
-    "ImmutableERC721HybridPermissionedMintable"
-  )) as ImmutableERC721HybridPermissionedMintable__factory;
-  const erc721: ImmutableERC721HybridPermissionedMintable =
-    await erc721PresetFactory.deploy(
-      owner.address,
-      "ERC721Preset",
-      "EP",
-      "https://baseURI.com/",
-      "https://contractURI.com",
-      royaltyAllowlist.address,
-      owner.address,
-      ethers.BigNumber.from("200")
-    );
+    "ImmutableERC721"
+  )) as ImmutableERC721__factory;
+  const erc721: ImmutableERC721 = await erc721PresetFactory.deploy(
+    owner.address,
+    "ERC721Preset",
+    "EP",
+    "https://baseURI.com/",
+    "https://contractURI.com",
+    royaltyAllowlist.address,
+    owner.address,
+    ethers.BigNumber.from("200")
+  );
 
   // Mock Wallet factory
   const WalletFactory = (await ethers.getContractFactory(

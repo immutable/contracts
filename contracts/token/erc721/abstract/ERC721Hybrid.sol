@@ -60,14 +60,14 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
         ERC721Psi._safeMint(to, quantity);
     }
 
-    function _batchMintByQuantity(Mint[] memory mints) internal  {
+    function _mintBatchByQuantity(Mint[] memory mints) internal  {
         for (uint i = 0; i < mints.length; i++) {
             Mint memory m = mints[i];
             _mintByQuantity(m.to, m.quantity);
         }
     }
     
-    function _batchSafeMintByQuantity(Mint[] memory mints) internal  {
+    function _safeMintBatchByQuantity(Mint[] memory mints) internal  {
         for (uint i = 0; i < mints.length; i++) {
             Mint memory m = mints[i];
             _safeMintByQuantity(m.to, m.quantity);
@@ -98,13 +98,13 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
         _idMintTotalSupply++;
     }
 
-    function _batchMintByID(address to, uint256[] memory tokenIds) internal {
+    function _mintBatchByID(address to, uint256[] memory tokenIds) internal {
         for (uint i = 0; i < tokenIds.length; i++) {
             _mintByID(to, tokenIds[i]);
         }
     }
 
-    function _batchSafeMintByID(address to, uint256[] memory tokenIds) internal {
+    function _safeMintBatchByID(address to, uint256[] memory tokenIds) internal {
         for (uint i = 0; i < tokenIds.length; i++) {
             _safeMintByID(to, tokenIds[i]);
         }
@@ -115,17 +115,17 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
         uint256[] tokenIds;
     }
 
-    function _batchMintByIDToMultiple(IDMint[] memory mints) internal  {
+    function _mintBatchByIDToMultiple(IDMint[] memory mints) internal  {
         for (uint i = 0; i < mints.length; i++) {
             IDMint memory m = mints[i];
-            _batchMintByID(m.to, m.tokenIds);
+            _mintBatchByID(m.to, m.tokenIds);
         }
     }
 
-    function _batchSafeMintByIDToMultiple(IDMint[] memory mints) internal  {
+    function _safeMintBatchByIDToMultiple(IDMint[] memory mints) internal  {
         for (uint i = 0; i < mints.length; i++) {
             IDMint memory m = mints[i];
-            _batchSafeMintByID(m.to, m.tokenIds);
+            _safeMintBatchByID(m.to, m.tokenIds);
         }
     }
 

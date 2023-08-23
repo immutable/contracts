@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
-  ImmutableERC721Simple,
+  ImmutableERC721MintByID,
   MockMarketplace,
   MockFactory,
   RoyaltyAllowlist,
@@ -19,7 +19,7 @@ import {
 describe("Allowlisted ERC721 Transfers", function () {
   this.timeout(300_000); // 5 min
 
-  let erc721: ImmutableERC721Simple;
+  let erc721: ImmutableERC721MintByID;
   let walletFactory: MockWalletFactory;
   let factory: MockFactory;
   let royaltyAllowlist: RoyaltyAllowlist;
@@ -58,7 +58,9 @@ describe("Allowlisted ERC721 Transfers", function () {
 
     it("Should not allow contracts that do not implement the IRoyaltyAllowlist to be set", async function () {
       // Deploy another contract that implements IERC165, but not IRoyaltyAllowlist
-      const factory = await ethers.getContractFactory("ImmutableERC721Simple");
+      const factory = await ethers.getContractFactory(
+        "ImmutableERC721MintByID"
+      );
       const erc721Two = await factory.deploy(
         owner.address,
         "",
@@ -73,7 +75,7 @@ describe("Allowlisted ERC721 Transfers", function () {
       await expect(
         erc721.connect(owner).setRoyaltyAllowlistRegistry(erc721Two.address)
       ).to.be.revertedWith(
-        "RoyaltyEnforcementDoesNotImplementRequiredInterface()"
+        "RoyaltyEnforcementDoesNotImplementRequiredInterface"
       );
     });
 
@@ -93,24 +95,22 @@ describe("Allowlisted ERC721 Transfers", function () {
       // Approve for all
       await expect(
         erc721.connect(minter).setApprovalForAll(marketPlace.address, true)
-      ).to.be.revertedWith(
-        `'ApproveTargetNotInAllowlist("${marketPlace.address}")'`
-      );
+      )
+        .to.be.revertedWith("ApproveTargetNotInAllowlist")
+        .withArgs(marketPlace.address);
       // Approve
-      await expect(
-        erc721.connect(minter).approve(marketPlace.address, 1)
-      ).to.be.revertedWith(
-        `'ApproveTargetNotInAllowlist("${marketPlace.address}")'`
-      );
+      await expect(erc721.connect(minter).approve(marketPlace.address, 1))
+        .to.be.revertedWith("ApproveTargetNotInAllowlist")
+        .withArgs(marketPlace.address);
     });
 
     it("Not allowlisted contracts should not be able to approve", async function () {
       await erc721.connect(minter).mint(marketPlace.address, 2);
       await expect(
         marketPlace.connect(minter).executeApproveForAll(minter.address, true)
-      ).to.be.revertedWith(
-        `'ApproverNotInAllowlist("${marketPlace.address}")'`
-      );
+      )
+        .to.be.revertedWith("ApproverNotInAllowlist")
+        .withArgs(marketPlace.address);
     });
 
     it("Should allow EOAs to be approved", async function () {
@@ -200,7 +200,9 @@ describe("Allowlisted ERC721 Transfers", function () {
         marketPlace
           .connect(minter)
           .executeTransferFrom(marketPlace.address, minter.address, 5)
-      ).to.be.revertedWith(`CallerNotInAllowlist("${marketPlace.address}")`);
+      )
+        .to.be.revertedWith("CallerNotInAllowlist")
+        .withArgs(marketPlace.address);
     });
 
     it("Should block transfers to a not allow listed address", async function () {
@@ -209,9 +211,9 @@ describe("Allowlisted ERC721 Transfers", function () {
         erc721
           .connect(minter)
           .transferFrom(minter.address, marketPlace.address, 1)
-      ).to.be.revertedWith(
-        `TransferToNotInAllowlist("${marketPlace.address}")`
-      );
+      )
+        .to.be.revertedWith("TransferToNotInAllowlist")
+        .withArgs(marketPlace.address);
     });
 
     it("Should not block transfers from an allow listed contract", async function () {
@@ -328,7 +330,9 @@ describe("Allowlisted ERC721 Transfers", function () {
         disguisedEOA
           .connect(minter)
           .executeTransfer(minter.address, accs[5].address, 1)
-      ).to.be.revertedWith(`'CallerNotInAllowlist("${deployedAddr}")'`);
+      )
+        .to.be.revertedWith("CallerNotInAllowlist")
+        .withArgs(deployedAddr);
     });
 
     it("EOA disguise transferFrom", async function () {
@@ -358,9 +362,9 @@ describe("Allowlisted ERC721 Transfers", function () {
             onRecieve.address,
             1
           )
-      ).to.be.revertedWith(
-        `'TransferToNotInAllowlist("${onRecieve.address}")'`
-      );
+      )
+        .to.be.revertedWith("TransferToNotInAllowlist")
+        .withArgs(onRecieve.address);
     });
   });
 });

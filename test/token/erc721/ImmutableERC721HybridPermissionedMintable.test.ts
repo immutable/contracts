@@ -167,25 +167,25 @@ describe("ImmutableERC721", function () {
       const first = await erc721.bulkMintThreshold();
       await expect(
         erc721.connect(minter).burnBatch([first.add(2), first.add(3)])
-      ).to.be.revertedWith(
-        `IImmutableERC721NotOwnerOrOperator(${first.add(2)})`
-      );
+      )
+        .to.be.revertedWith("IImmutableERC721NotOwnerOrOperator")
+        .withArgs(first.add(2));
     });
 
     // TODO: are we happy to allow minting burned tokens?
     it("Should prevent minting burned tokens", async function () {
       const mintRequests = [{ to: user.address, tokenIds: [1, 2] }];
-      await expect(
-        erc721.connect(minter).mintBatch(mintRequests)
-      ).to.be.revertedWith("IImmutableERC721TokenAlreadyBurned(1)");
+      await expect(erc721.connect(minter).mintBatch(mintRequests))
+        .to.be.revertedWith("IImmutableERC721TokenAlreadyBurned")
+        .withArgs(1);
     });
 
     it("Should revert if minting by id with id above threshold", async function () {
       const first = await erc721.bulkMintThreshold();
       const mintRequests = [{ to: user.address, tokenIds: [first] }];
-      await expect(
-        erc721.connect(minter).mintBatch(mintRequests)
-      ).to.be.revertedWith(`IImmutableERC721IDAboveThreshold(${first})`);
+      await expect(erc721.connect(minter).mintBatch(mintRequests))
+        .to.be.revertedWith("IImmutableERC721IDAboveThreshold")
+        .withArgs(first);
     });
   });
 

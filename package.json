@@ -1,6 +1,7 @@
 {
   "name": "@imtbl/zkevm-contracts",
   "description": "Immutable zkEVM Smart Contracts",
+  "version": "0.0.0",
   "files": [
     "contracts"
   ],

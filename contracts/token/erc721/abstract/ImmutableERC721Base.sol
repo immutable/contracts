@@ -48,6 +48,12 @@ abstract contract ImmutableERC721Base is
         uint256[] tokenIds;
     }
 
+    /// @dev A singular safe burn request.
+    struct IDBurn {
+        address owner;
+        uint256[] tokenIds;
+    }
+
     /// @dev A singular batch transfer request
     struct TransferRequest {
         address from;
@@ -214,6 +220,26 @@ abstract contract ImmutableERC721Base is
         super.burn(tokenId);
         _burnedTokens.set(tokenId);
         _totalSupply--;
+    }
+
+    /// @dev Burn a token, checking the owner of the token against the parameter first.
+    function safeBurn(address owner, uint256 tokenId) public virtual {
+        address currentOwner = ownerOf(tokenId);
+        if (currentOwner != owner) {
+            revert IImmutableERC721MismatchedTokenOwner(tokenId, currentOwner);
+        }
+
+        burn(tokenId);
+    }
+
+    /// @dev Burn a batch of tokens, checking the owner of each token first.
+    function _safeBurnBatch(IDBurn[] memory burns) public virtual {
+        for (uint i = 0; i < burns.length; i++) {
+            IDBurn memory b = burns[i];
+            for (uint j = 0; j < b.tokenIds.length; j++) {
+                safeBurn(b.owner, b.tokenIds[j]);
+            }
+        }
     }
 
     ///     =====  Internal functions  =====

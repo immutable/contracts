@@ -89,6 +89,11 @@ contract ImmutableERC721MintByID is ImmutableERC721Base {
         }
     }
 
+    /// @dev Burn a batch of tokens, checking the owner of each token first.
+    function safeBurnBatch(IDBurn[] memory burns) external {
+        _safeBurnBatch(burns);
+    }
+
     /// @dev Allows owner or operator to transfer a batch of tokens
     function safeTransferFromBatch(TransferRequest calldata tr) external {
         if (tr.tokenIds.length != tr.tos.length) {

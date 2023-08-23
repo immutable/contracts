@@ -53,6 +53,10 @@ contract ImmutableERC721 is ImmutableERC721HybridBase {
         _safeMintBatchByIDToMultiple(mints);
     }
 
+    function safeBurnBatch(IDBurn[] memory burns) external {
+        _safeBurnBatch(burns);
+    }
+
     function safeTransferFromBatch(TransferRequest calldata tr) external {
         if (tr.tokenIds.length != tr.tos.length) {
             revert IImmutableERC721MismatchedTransferLengths();

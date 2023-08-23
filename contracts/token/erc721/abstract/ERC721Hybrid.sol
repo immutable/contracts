@@ -181,6 +181,32 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
         }
     }
 
+    /// @dev Burn a token, checking the owner of the token against the parameter first.
+    function safeBurn(address owner, uint256 tokenId) public virtual {
+        address currentOwner = ownerOf(tokenId);
+        if (currentOwner != owner) {
+            revert IImmutableERC721MismatchedTokenOwner(tokenId, currentOwner);
+        }
+
+        burn(tokenId);
+    }
+
+    /// @dev A singular safe burn request.
+    struct IDBurn {
+        address owner;
+        uint256[] tokenIds;
+    }
+
+    /// @dev Burn a batch of tokens, checking the owner of each token first.
+    function _safeBurnBatch(IDBurn[] memory burns) internal {
+        for (uint i = 0; i < burns.length; i++) {
+            IDBurn memory b = burns[i];
+            for (uint j = 0; j < b.tokenIds.length; j++) {
+                safeBurn(b.owner, b.tokenIds[j]);
+            }
+        }
+    }
+
     /// @dev overriding erc721 and erc721psi _safemint, super calls the `_safeMint` method of
     /// the erc721 implementation due to inheritance linearisation
     function _safeMint(address to, uint256 tokenId) internal virtual override(ERC721, ERC721Psi) {

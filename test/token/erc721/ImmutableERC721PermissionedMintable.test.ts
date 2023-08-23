@@ -2,8 +2,8 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
-  ImmutableERC721Simple__factory,
-  ImmutableERC721Simple,
+  ImmutableERC721MintByID__factory,
+  ImmutableERC721MintByID,
   RoyaltyAllowlist,
   RoyaltyAllowlist__factory,
 } from "../../../typechain";
@@ -12,7 +12,7 @@ import { RegularAllowlistFixture } from "../../utils/DeployRegularFixtures";
 describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
   this.timeout(300_000); // 5 min
 
-  let erc721: ImmutableERC721Simple;
+  let erc721: ImmutableERC721MintByID;
   let royaltyAllowlist: RoyaltyAllowlist;
   let owner: SignerWithAddress;
   let user: SignerWithAddress;
@@ -43,8 +43,8 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
 
     // Deploy ERC721 contract
     const erc721PresetFactory = (await ethers.getContractFactory(
-      "ImmutableERC721Simple"
-    )) as ImmutableERC721Simple__factory;
+      "ImmutableERC721MintByID"
+    )) as ImmutableERC721MintByID__factory;
 
     erc721 = await erc721PresetFactory.deploy(
       owner.address,
@@ -129,9 +129,9 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
 
     it("Should prevent minting burned tokens", async function () {
       const mintRequests = [{ to: user.address, tokenIds: [1, 2] }];
-      await expect(
-        erc721.connect(minter).safeMintBatch(mintRequests)
-      ).to.be.revertedWith("IImmutableERC721TokenAlreadyBurned(1)");
+      await expect(erc721.connect(minter).safeMintBatch(mintRequests))
+        .to.be.revertedWith("IImmutableERC721TokenAlreadyBurned")
+        .withArgs(1);
     });
   });
 

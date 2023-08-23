@@ -17,7 +17,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: lts/*
-          cache: 'npm'
       - name: Install NPM Dependencies
         run: npm ci
       - name: Run Tests
@@ -32,7 +31,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: lts/*
-          cache: 'npm'
       - name: Install NPM Dependencies
         run: npm ci
       - name: Run eslint

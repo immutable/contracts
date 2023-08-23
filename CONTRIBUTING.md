@@ -64,7 +64,7 @@ git checkout -b <your-branch-name>
 npm test
 ```
 
-7. Add and commit your changes, including a comprehensive commit message summarising your changes, then push changes to your fork. (e.g. Fixed formatting issue with ImmutableERC721Simple.sol)
+7. Add and commit your changes, including a comprehensive commit message summarising your changes, then push changes to your fork. (e.g. Fixed formatting issue with ImmutableERC721MintByID.sol)
 
 ```
 git add *

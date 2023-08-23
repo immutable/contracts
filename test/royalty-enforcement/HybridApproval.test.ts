@@ -71,7 +71,7 @@ describe("Royalty Checks with Hybrid ERC721", function () {
       await expect(
         erc721.connect(owner).setRoyaltyAllowlistRegistry(erc721Two.address)
       ).to.be.revertedWith(
-        "RoyaltyEnforcementDoesNotImplementRequiredInterface()"
+        "RoyaltyEnforcementDoesNotImplementRequiredInterface"
       );
     });
 
@@ -89,17 +89,13 @@ describe("Royalty Checks with Hybrid ERC721", function () {
   describe("Approvals", function () {
     it("Should not allow a non-Allowlisted operator to be approved", async function () {
       // Approve for all
-      await expect(
-        erc721.connect(minter).setApprovalForAll(marketPlace.address, true)
-      ).to.be.revertedWith(
-        `'ApproveTargetNotInAllowlist("${marketPlace.address}")'`
-      );
+      await expect(erc721.connect(minter).approve(marketPlace.address, 1))
+        .to.be.revertedWith("ApproveTargetNotInAllowlist")
+        .withArgs(marketPlace.address);
       // Approve
-      await expect(
-        erc721.connect(minter).approve(marketPlace.address, 1)
-      ).to.be.revertedWith(
-        `'ApproveTargetNotInAllowlist("${marketPlace.address}")'`
-      );
+      await expect(erc721.connect(minter).approve(marketPlace.address, 1))
+        .to.be.revertedWith("ApproveTargetNotInAllowlist")
+        .withArgs(marketPlace.address);
     });
 
     it("Should allow EOAs to be approved", async function () {
@@ -200,7 +196,9 @@ describe("Royalty Checks with Hybrid ERC721", function () {
         marketPlace
           .connect(minter)
           .executeTransferFrom(marketPlace.address, minter.address, tokenId)
-      ).to.be.revertedWith(`CallerNotInAllowlist("${marketPlace.address}")`);
+      )
+        .to.be.revertedWith("CallerNotInAllowlist")
+        .withArgs(marketPlace.address);
     });
 
     it("Should block transfers to a not allow listed address", async function () {
@@ -209,9 +207,9 @@ describe("Royalty Checks with Hybrid ERC721", function () {
         erc721
           .connect(minter)
           .transferFrom(minter.address, marketPlace.address, 1)
-      ).to.be.revertedWith(
-        `TransferToNotInAllowlist("${marketPlace.address}")`
-      );
+      )
+        .to.be.revertedWith("TransferToNotInAllowlist")
+        .withArgs(marketPlace.address);
     });
 
     it("Should not block transfers from an allow listed contract", async function () {
@@ -328,7 +326,9 @@ describe("Royalty Checks with Hybrid ERC721", function () {
         disguisedEOA
           .connect(minter)
           .executeTransfer(minter.address, accs[5].address, 1)
-      ).to.be.revertedWith(`'CallerNotInAllowlist("${deployedAddr}")'`);
+      )
+        .to.be.revertedWith("CallerNotInAllowlist")
+        .withArgs(deployedAddr);
     });
 
     it("EOA disguise transferFrom", async function () {
@@ -358,9 +358,9 @@ describe("Royalty Checks with Hybrid ERC721", function () {
             onRecieve.address,
             1
           )
-      ).to.be.revertedWith(
-        `'TransferToNotInAllowlist("${onRecieve.address}")'`
-      );
+      )
+        .to.be.revertedWith("TransferToNotInAllowlist")
+        .withArgs(onRecieve.address);
     });
   });
 });

@@ -15,6 +15,12 @@ interface IImmutableERC721Errors {
 
     /// @dev Caller is not approved or owner
     error IImmutableERC721NotOwnerOrOperator(uint256 tokenId);
+
+    /// @dev Current token owner is not what was expected
+    error IImmutableERC721MismatchedTokenOwner(
+        uint256 tokenId,
+        address currentOwner
+    );
 }
 
 interface RoyaltyEnforcementErrors {

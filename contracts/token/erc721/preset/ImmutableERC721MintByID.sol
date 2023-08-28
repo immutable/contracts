@@ -38,15 +38,6 @@ contract ImmutableERC721MintByID is ImmutableERC721Base {
         )
     {}
 
-    ///     =====   View functions  =====
-
-    /// @dev Returns the supported interfaces
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view virtual override(ImmutableERC721Base) returns (bool) {
-        return super.supportsInterface(interfaceId);
-    }
-
     ///     =====   External functions  =====
 
     /// @dev Allows minter to mint `tokenID` to `to`

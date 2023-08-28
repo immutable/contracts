@@ -138,25 +138,23 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
         .withArgs(1);
     });
 
-    it("Should not allow owner or approved to safely burn a token when specifying the incorrect owner", async function() {
-      await expect(
-        erc721.connect(user).safeBurn(owner.address, 3)
-      ).to.be.revertedWith('IImmutableERC721MismatchedTokenOwner').withArgs(3, user.address);
+    it("Should not allow owner or approved to safely burn a token when specifying the incorrect owner", async function () {
+      await expect(erc721.connect(user).safeBurn(owner.address, 3))
+        .to.be.revertedWith("IImmutableERC721MismatchedTokenOwner")
+        .withArgs(3, user.address);
     });
 
-    it("Should allow owner or approved to safely burn a token when specifying the correct owner", async function() {
+    it("Should allow owner or approved to safely burn a token when specifying the correct owner", async function () {
       const originalBalance = await erc721.balanceOf(user.address);
       const originalSupply = await erc721.totalSupply();
       await erc721.connect(user).safeBurn(user.address, 3);
       expect(await erc721.balanceOf(user.address)).to.equal(
         originalBalance.sub(1)
       );
-      expect(await erc721.totalSupply()).to.equal(
-        originalSupply.sub(1)
-      );
+      expect(await erc721.totalSupply()).to.equal(originalSupply.sub(1));
     });
-    
-    it("Should not allow owner or approved to burn a batch of tokens when specifying the incorrect owners", async function() {
+
+    it("Should not allow owner or approved to burn a batch of tokens when specifying the incorrect owners", async function () {
       const burns = [
         {
           owner: user.address,
@@ -167,13 +165,13 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
           tokenIds: [4, 5, 6],
         },
       ];
-      
-      await expect(
-        erc721.connect(user).safeBurnBatch(burns)
-      ).to.be.revertedWith('IImmutableERC721MismatchedTokenOwner').withArgs(7, owner.address);
+
+      await expect(erc721.connect(user).safeBurnBatch(burns))
+        .to.be.revertedWith("IImmutableERC721MismatchedTokenOwner")
+        .withArgs(7, owner.address);
     });
 
-    it("Should allow owner or approved to safely burn a batch of tokens when specifying the correct owners", async function() {
+    it("Should allow owner or approved to safely burn a batch of tokens when specifying the correct owners", async function () {
       const originalUserBalance = await erc721.balanceOf(user.address);
       const originalOwnerBalance = await erc721.balanceOf(owner.address);
       const originalSupply = await erc721.totalSupply();
@@ -182,7 +180,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
       await erc721.connect(user).approve(owner.address, 4);
       await erc721.connect(user).approve(owner.address, 5);
       await erc721.connect(user).approve(owner.address, 6);
-      
+
       const burns = [
         {
           owner: owner.address,
@@ -200,9 +198,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
       expect(await erc721.balanceOf(owner.address)).to.equal(
         originalOwnerBalance.sub(3)
       );
-      expect(await erc721.totalSupply()).to.equal(
-        originalSupply.sub(6)
-      );
+      expect(await erc721.totalSupply()).to.equal(originalSupply.sub(6));
     });
   });
 

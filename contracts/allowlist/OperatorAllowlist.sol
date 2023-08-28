@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 // Interfaces
-import "./IRoyaltyAllowlist.sol";
+import "./IOperatorAllowlist.sol";
 
 // Interface to retrieve the implemention stored inside the Proxy contract
 interface IProxy {
@@ -17,12 +17,12 @@ interface IProxy {
 }
 
 /*
-    RoyaltyAllowlist is an implementation of a Allowlist registry, storing addresses and bytecode
+    OperatorAllowlist is an implementation of a Allowlist registry, storing addresses and bytecode
     which are allowed to be approved operators and execute transfers of interfacing token contracts (e.g. ERC721/ERC1155). The registry
     will be a deployed contract that tokens may interface with and point to.
 */
 
-contract RoyaltyAllowlist is ERC165, AccessControl, IRoyaltyAllowlist {
+contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
     ///     =====       Events       =====
 
     /// @dev Emitted when a target address is added or removed from the Allowlist
@@ -65,7 +65,7 @@ contract RoyaltyAllowlist is ERC165, AccessControl, IRoyaltyAllowlist {
         bytes4 interfaceId
     ) public view virtual override(ERC165, AccessControl) returns (bool) {
         return
-            interfaceId == type(IRoyaltyAllowlist).interfaceId ||
+            interfaceId == type(IOperatorAllowlist).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 

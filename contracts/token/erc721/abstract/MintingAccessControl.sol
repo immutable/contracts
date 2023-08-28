@@ -1,10 +1,9 @@
 //SPDX-License-Identifier: Apache 2.0
 pragma solidity ^0.8.0;
 
-import { AccessControlEnumerable } from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
+import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 
 abstract contract MintingAccessControl is AccessControlEnumerable {
-
     bytes32 public constant MINTER_ROLE = bytes32("MINTER_ROLE");
 
     /// @dev Returns the addresses which have DEFAULT_ADMIN_ROLE
@@ -23,8 +22,9 @@ abstract contract MintingAccessControl is AccessControlEnumerable {
     }
 
     /// @dev Allows admin to revoke `MINTER_ROLE` role from `user`
-    function revokeMinterRole(address user) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function revokeMinterRole(
+        address user
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
         revokeRole(MINTER_ROLE, user);
     }
-
 }

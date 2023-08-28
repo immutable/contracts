@@ -8,10 +8,10 @@ import {
 import {
   ImmutableERC721MintByID,
   MockMarketplace,
-  RoyaltyAllowlist,
+  OperatorAllowlist,
   MockWalletFactory,
 } from "../../typechain";
-import proxyArtfiact from "../../test/utils/proxyArtifact.json";
+import proxyArtfiact from "../utils/proxyArtifact.json";
 
 describe("Royalty Enforcement Test Cases", function () {
   this.timeout(300_000); // 5 min
@@ -21,25 +21,27 @@ describe("Royalty Enforcement Test Cases", function () {
   let scWallet: SignerWithAddress;
   let erc721: ImmutableERC721MintByID;
   let walletFactory: MockWalletFactory;
-  let royaltyAllowlist: RoyaltyAllowlist;
+  let operatorAllowlist: OperatorAllowlist;
   let marketPlace: MockMarketplace;
 
   before(async function () {
     [owner, registrar, scWallet] = await ethers.getSigners();
 
     // Deploy all required contracts
-    ({ erc721, walletFactory, royaltyAllowlist, marketPlace } =
+    ({ erc721, walletFactory, operatorAllowlist, marketPlace } =
       await RegularAllowlistFixture(owner));
 
     // Grant registrar role
-    await royaltyAllowlist.connect(owner).grantRegistrarRole(registrar.address);
+    await operatorAllowlist
+      .connect(owner)
+      .grantRegistrarRole(registrar.address);
   });
 
   describe("Contract Deployment", function () {
     it("Should set the admin role to the owner", async function () {
-      const adminRole = await royaltyAllowlist.DEFAULT_ADMIN_ROLE();
+      const adminRole = await operatorAllowlist.DEFAULT_ADMIN_ROLE();
       expect(
-        await royaltyAllowlist.hasRole(adminRole, owner.address)
+        await operatorAllowlist.hasRole(adminRole, owner.address)
       ).to.be.equal(true);
     });
   });
@@ -47,7 +49,7 @@ describe("Royalty Enforcement Test Cases", function () {
   describe("Interface Support", function () {
     it("Should support the royalty Allowlist interface", async function () {
       expect(
-        await royaltyAllowlist.supportsInterface("0x05a3b809")
+        await operatorAllowlist.supportsInterface("0x05a3b809")
       ).to.be.equal(true);
     });
   });
@@ -58,27 +60,27 @@ describe("Royalty Enforcement Test Cases", function () {
         "AccessControl: account 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 is missing role 0x5245474953545241525f524f4c45000000000000000000000000000000000000";
       // addAddressToAllowlist
       await expect(
-        royaltyAllowlist
+        operatorAllowlist
           .connect(owner)
-          .addAddressToAllowlist([royaltyAllowlist.address])
+          .addAddressToAllowlist([operatorAllowlist.address])
       ).to.be.revertedWith(revertStr);
       // removeAddressFromAllowlist
       await expect(
-        royaltyAllowlist
+        operatorAllowlist
           .connect(owner)
-          .removeAddressFromAllowlist([royaltyAllowlist.address])
+          .removeAddressFromAllowlist([operatorAllowlist.address])
       ).to.be.revertedWith(revertStr);
       // addBytecodeToAllowlist
       await expect(
-        royaltyAllowlist
+        operatorAllowlist
           .connect(owner)
-          .addWalletToAllowlist(royaltyAllowlist.address)
+          .addWalletToAllowlist(operatorAllowlist.address)
       ).to.be.revertedWith(revertStr);
       // removeBytecodeFromAllowlist
       await expect(
-        royaltyAllowlist
+        operatorAllowlist
           .connect(owner)
-          .removeWalletFromAllowlist(royaltyAllowlist.address)
+          .removeWalletFromAllowlist(operatorAllowlist.address)
       ).to.be.revertedWith(revertStr);
     });
   });
@@ -104,29 +106,29 @@ describe("Royalty Enforcement Test Cases", function () {
 
       // Add the wallet to the allow list. This will add the wallets bytecode and the implementation address
       await expect(
-        royaltyAllowlist.connect(registrar).addWalletToAllowlist(deployedAddr)
+        operatorAllowlist.connect(registrar).addWalletToAllowlist(deployedAddr)
       )
-        .to.emit(royaltyAllowlist, "WalletAllowlistChanged")
+        .to.emit(operatorAllowlist, "WalletAllowlistChanged")
         .withArgs(ethers.utils.keccak256(deployedBytecode), deployedAddr, true);
 
-      expect(await royaltyAllowlist.isAllowlisted(deployedAddr)).to.be.equal(
+      expect(await operatorAllowlist.isAllowlisted(deployedAddr)).to.be.equal(
         true
       );
 
       // Remove the wallet from the allowlist
       await expect(
-        royaltyAllowlist
+        operatorAllowlist
           .connect(registrar)
           .removeWalletFromAllowlist(deployedAddr)
       )
-        .to.emit(royaltyAllowlist, "WalletAllowlistChanged")
+        .to.emit(operatorAllowlist, "WalletAllowlistChanged")
         .withArgs(
           ethers.utils.keccak256(deployedBytecode),
           deployedAddr,
           false
         );
 
-      expect(await royaltyAllowlist.isAllowlisted(deployedAddr)).to.be.equal(
+      expect(await operatorAllowlist.isAllowlisted(deployedAddr)).to.be.equal(
         false
       );
     });
@@ -134,28 +136,28 @@ describe("Royalty Enforcement Test Cases", function () {
     it("Should add the address of a contract to the Allowlist and then remove it from the Allowlist", async function () {
       // Add address
       await expect(
-        royaltyAllowlist
+        operatorAllowlist
           .connect(registrar)
           .addAddressToAllowlist([marketPlace.address])
       )
-        .to.emit(royaltyAllowlist, "AddressAllowlistChanged")
+        .to.emit(operatorAllowlist, "AddressAllowlistChanged")
         .withArgs(marketPlace.address, true);
 
       expect(
-        await royaltyAllowlist.isAllowlisted(marketPlace.address)
+        await operatorAllowlist.isAllowlisted(marketPlace.address)
       ).to.be.equal(true);
 
       // Remove address
       await expect(
-        royaltyAllowlist
+        operatorAllowlist
           .connect(registrar)
           .removeAddressFromAllowlist([marketPlace.address])
       )
-        .to.emit(royaltyAllowlist, "AddressAllowlistChanged")
+        .to.emit(operatorAllowlist, "AddressAllowlistChanged")
         .withArgs(marketPlace.address, false);
 
       expect(
-        await royaltyAllowlist.isAllowlisted(marketPlace.address)
+        await operatorAllowlist.isAllowlisted(marketPlace.address)
       ).to.be.equal(false);
     });
 
@@ -165,7 +167,7 @@ describe("Royalty Enforcement Test Cases", function () {
       await walletFactory.connect(scWallet).deploy(erc721.address, salt);
       const deployedAddr = await walletFactory.getAddress(erc721.address, salt);
 
-      expect(await royaltyAllowlist.isAllowlisted(deployedAddr)).to.be.equal(
+      expect(await operatorAllowlist.isAllowlisted(deployedAddr)).to.be.equal(
         false
       );
     });

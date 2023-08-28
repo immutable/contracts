@@ -4,8 +4,8 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
   ImmutableERC721MintByID__factory,
   ImmutableERC721MintByID,
-  RoyaltyAllowlist,
-  RoyaltyAllowlist__factory,
+  OperatorAllowlist,
+  OperatorAllowlist__factory,
 } from "../../../typechain";
 import { RegularAllowlistFixture } from "../../utils/DeployRegularFixtures";
 
@@ -13,7 +13,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
   this.timeout(300_000); // 5 min
 
   let erc721: ImmutableERC721MintByID;
-  let royaltyAllowlist: RoyaltyAllowlist;
+  let operatorAllowlist: OperatorAllowlist;
   let owner: SignerWithAddress;
   let user: SignerWithAddress;
   let user2: SignerWithAddress;
@@ -33,13 +33,13 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
       await ethers.getSigners();
 
     // Get all required contracts
-    ({ erc721, royaltyAllowlist } = await RegularAllowlistFixture(owner));
+    ({ erc721, operatorAllowlist } = await RegularAllowlistFixture(owner));
 
     // Deploy royalty Allowlist
-    const royaltyAllowlistFactory = (await ethers.getContractFactory(
-      "RoyaltyAllowlist"
-    )) as RoyaltyAllowlist__factory;
-    royaltyAllowlist = await royaltyAllowlistFactory.deploy(owner.address);
+    const operatorAllowlistFactory = (await ethers.getContractFactory(
+      "OperatorAllowlist"
+    )) as OperatorAllowlist__factory;
+    operatorAllowlist = await operatorAllowlistFactory.deploy(owner.address);
 
     // Deploy ERC721 contract
     const erc721PresetFactory = (await ethers.getContractFactory(
@@ -52,14 +52,16 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
       symbol,
       baseURI,
       contractURI,
-      royaltyAllowlist.address,
+      operatorAllowlist.address,
       royaltyRecipient.address,
       royalty
     );
 
     // Set up roles
     await erc721.connect(owner).grantMinterRole(minter.address);
-    await royaltyAllowlist.connect(owner).grantRegistrarRole(registrar.address);
+    await operatorAllowlist
+      .connect(owner)
+      .grantRegistrarRole(registrar.address);
   });
 
   describe("Contract Deployment", function () {

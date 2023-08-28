@@ -1,12 +1,12 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { ImmutableERC721, RoyaltyAllowlist } from "../../../typechain";
+import { ImmutableERC721, OperatorAllowlist } from "../../../typechain";
 import { AllowlistFixture } from "../../utils/DeployHybridFixtures";
 
 describe("ImmutableERC721", function () {
   let erc721: ImmutableERC721;
-  let royaltyAllowlist: RoyaltyAllowlist;
+  let operatorAllowlist: OperatorAllowlist;
   let owner: SignerWithAddress;
   let user: SignerWithAddress;
   let user2: SignerWithAddress;
@@ -23,11 +23,13 @@ describe("ImmutableERC721", function () {
     [owner, user, minter, registrar, user2] = await ethers.getSigners();
 
     // Get all required contracts
-    ({ erc721, royaltyAllowlist } = await AllowlistFixture(owner));
+    ({ erc721, operatorAllowlist } = await AllowlistFixture(owner));
 
     // Set up roles
     await erc721.connect(owner).grantMinterRole(minter.address);
-    await royaltyAllowlist.connect(owner).grantRegistrarRole(registrar.address);
+    await operatorAllowlist
+      .connect(owner)
+      .grantRegistrarRole(registrar.address);
   });
 
   describe("Contract Deployment", function () {

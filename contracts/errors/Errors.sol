@@ -23,9 +23,9 @@ interface IImmutableERC721Errors {
     );
 }
 
-interface RoyaltyEnforcementErrors {
-    /// @dev Caller tried to mint an already burned token
-    error RoyaltyEnforcementDoesNotImplementRequiredInterface();
+interface EnforcementErrors {
+    /// @dev Error thrown when the operatorAllowlist address does not implement the IOperatorAllowlist interface
+    error AllowlistDoesNotImplementRequiredInterface();
 
     /// @dev Error thrown when calling address is not Allowlisted
     error CallerNotInAllowlist(address caller);

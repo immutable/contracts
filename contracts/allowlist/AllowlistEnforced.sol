@@ -2,30 +2,30 @@
 pragma solidity ^0.8.0;
 
 // Allowlist Registry
-import "./IRoyaltyAllowlist.sol";
+import "../allowlist/IOperatorAllowlist.sol";
 
 // Access Control
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 
 // Errors
-import {RoyaltyEnforcementErrors} from "../errors/Errors.sol";
+import {EnforcementErrors} from "../errors/Errors.sol";
 
-abstract contract RoyaltyEnforced is
+abstract contract AllowlistEnforced is
     AccessControlEnumerable,
-    RoyaltyEnforcementErrors
+    EnforcementErrors
 {
     ///     =====     Events         =====
 
     /// @dev Emitted whenever the transfer Allowlist registry is updated
-    event RoyaltyAllowlistRegistryUpdated(
+    event OperatorAllowlistRegistryUpdated(
         address oldRegistry,
         address newRegistry
     );
 
     ///     =====   State Variables  =====
 
-    /// @dev Interface that implements the `IRoyaltyAllowlist` interface
-    IRoyaltyAllowlist public royaltyAllowlist;
+    /// @dev Interface that implements the `IOperatorAllowlist` interface
+    IOperatorAllowlist public operatorAllowlist;
 
     ///     =====  External functions  =====
 
@@ -36,26 +36,28 @@ abstract contract RoyaltyEnforced is
         return super.supportsInterface(interfaceId);
     }
 
-    function setRoyaltyAllowlistRegistry(
-        address _royaltyAllowlist
+    function setOperatorAllowlistRegistry(
+        address _operatorAllowlist
     ) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        _setRoyaltyAllowlistRegistry(_royaltyAllowlist);
+        _setOperatorAllowlistRegistry(_operatorAllowlist);
     }
 
-    function _setRoyaltyAllowlistRegistry(address _royaltyAllowlist) internal {
+    function _setOperatorAllowlistRegistry(
+        address _operatorAllowlist
+    ) internal {
         if (
-            !IERC165(_royaltyAllowlist).supportsInterface(
-                type(IRoyaltyAllowlist).interfaceId
+            !IERC165(_operatorAllowlist).supportsInterface(
+                type(IOperatorAllowlist).interfaceId
             )
         ) {
-            revert RoyaltyEnforcementDoesNotImplementRequiredInterface();
+            revert AllowlistDoesNotImplementRequiredInterface();
         }
 
-        emit RoyaltyAllowlistRegistryUpdated(
-            address(royaltyAllowlist),
-            _royaltyAllowlist
+        emit OperatorAllowlistRegistryUpdated(
+            address(operatorAllowlist),
+            _operatorAllowlist
         );
-        royaltyAllowlist = IRoyaltyAllowlist(_royaltyAllowlist);
+        operatorAllowlist = IOperatorAllowlist(_operatorAllowlist);
     }
 
     modifier validateApproval(address targetApproval) {
@@ -64,7 +66,7 @@ abstract contract RoyaltyEnforced is
         // 2. approver is address or bytecode is allowlisted
         if (
             msg.sender.code.length != 0 &&
-            !royaltyAllowlist.isAllowlisted(msg.sender)
+            !operatorAllowlist.isAllowlisted(msg.sender)
         ) {
             revert ApproverNotInAllowlist(msg.sender);
         }
@@ -74,7 +76,7 @@ abstract contract RoyaltyEnforced is
         // 2. approval target address is Allowlisted or target address bytecode is Allowlisted
         if (
             targetApproval.code.length != 0 &&
-            !royaltyAllowlist.isAllowlisted(targetApproval)
+            !operatorAllowlist.isAllowlisted(targetApproval)
         ) {
             revert ApproveTargetNotInAllowlist(targetApproval);
         }
@@ -88,7 +90,7 @@ abstract contract RoyaltyEnforced is
         // 2. caller is Allowlisted or is the calling address bytecode is Allowlisted
         if (
             msg.sender != tx.origin &&
-            !royaltyAllowlist.isAllowlisted(msg.sender)
+            !operatorAllowlist.isAllowlisted(msg.sender)
         ) {
             revert CallerNotInAllowlist(msg.sender);
         }
@@ -96,14 +98,14 @@ abstract contract RoyaltyEnforced is
         // Check for:
         // 1. from is an EOA
         // 2. from is Allowlisted or from address bytecode is Allowlisted
-        if (from.code.length != 0 && !royaltyAllowlist.isAllowlisted(from)) {
+        if (from.code.length != 0 && !operatorAllowlist.isAllowlisted(from)) {
             revert TransferFromNotInAllowlist(from);
         }
 
         // Check for:
         // 1. to is an EOA
         // 2. to is Allowlisted or to address bytecode is Allowlisted
-        if (to.code.length != 0 && !royaltyAllowlist.isAllowlisted(to)) {
+        if (to.code.length != 0 && !operatorAllowlist.isAllowlisted(to)) {
             revert TransferToNotInAllowlist(to);
         }
         _;

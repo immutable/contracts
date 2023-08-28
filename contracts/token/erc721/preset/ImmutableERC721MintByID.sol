@@ -22,7 +22,7 @@ contract ImmutableERC721MintByID is ImmutableERC721Base {
         string memory symbol_,
         string memory baseURI_,
         string memory contractURI_,
-        address _royaltyAllowlist,
+        address _operatorAllowlist,
         address _receiver,
         uint96 _feeNumerator
     )
@@ -32,7 +32,7 @@ contract ImmutableERC721MintByID is ImmutableERC721Base {
             symbol_,
             baseURI_,
             contractURI_,
-            _royaltyAllowlist,
+            _operatorAllowlist,
             _receiver,
             _feeNumerator
         )

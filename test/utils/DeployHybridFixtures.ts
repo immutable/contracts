@@ -2,7 +2,7 @@ import { ethers, artifacts } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { defaultAbiCoder } from "ethers/lib/utils";
 import {
-  RoyaltyAllowlist__factory,
+  OperatorAllowlist__factory,
   ImmutableERC721__factory,
   ImmutableERC721,
   MockFactory__factory,
@@ -20,10 +20,12 @@ import {
 // - Allowlist registry
 // - Mock market place
 export const AllowlistFixture = async (owner: SignerWithAddress) => {
-  const royaltyAllowlistFactory = (await ethers.getContractFactory(
-    "RoyaltyAllowlist"
-  )) as RoyaltyAllowlist__factory;
-  const royaltyAllowlist = await royaltyAllowlistFactory.deploy(owner.address);
+  const operatorAllowlistFactory = (await ethers.getContractFactory(
+    "OperatorAllowlist"
+  )) as OperatorAllowlist__factory;
+  const operatorAllowlist = await operatorAllowlistFactory.deploy(
+    owner.address
+  );
   // ERC721
   const erc721PresetFactory = (await ethers.getContractFactory(
     "ImmutableERC721"
@@ -34,7 +36,7 @@ export const AllowlistFixture = async (owner: SignerWithAddress) => {
     "EP",
     "https://baseURI.com/",
     "https://contractURI.com",
-    royaltyAllowlist.address,
+    operatorAllowlist.address,
     owner.address,
     ethers.BigNumber.from("200")
   );
@@ -63,7 +65,7 @@ export const AllowlistFixture = async (owner: SignerWithAddress) => {
     erc721,
     walletFactory,
     factory,
-    royaltyAllowlist,
+    operatorAllowlist,
     marketPlace,
   };
 };

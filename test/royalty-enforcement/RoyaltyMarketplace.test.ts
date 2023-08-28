@@ -4,8 +4,8 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
   ImmutableERC721MintByID__factory,
   ImmutableERC721MintByID,
-  RoyaltyAllowlist,
-  RoyaltyAllowlist__factory,
+  OperatorAllowlist,
+  OperatorAllowlist__factory,
   MockMarketplace__factory,
   MockMarketplace,
 } from "../../typechain";
@@ -14,7 +14,7 @@ describe("Marketplace Royalty Enforcement", function () {
   this.timeout(300_000); // 5 min
 
   let erc721: ImmutableERC721MintByID;
-  let royaltyAllowlist: RoyaltyAllowlist;
+  let operatorAllowlist: OperatorAllowlist;
   let mockMarketplace: MockMarketplace;
   let owner: SignerWithAddress;
   let minter: SignerWithAddress;
@@ -34,10 +34,10 @@ describe("Marketplace Royalty Enforcement", function () {
     [owner, minter, registrar, royaltyRecipient, buyer, seller] =
       await ethers.getSigners();
     // Deploy royalty Allowlist
-    const royaltyAllowlistFactory = (await ethers.getContractFactory(
-      "RoyaltyAllowlist"
-    )) as RoyaltyAllowlist__factory;
-    royaltyAllowlist = await royaltyAllowlistFactory.deploy(owner.address);
+    const operatorAllowlistFactory = (await ethers.getContractFactory(
+      "OperatorAllowlist"
+    )) as OperatorAllowlist__factory;
+    operatorAllowlist = await operatorAllowlistFactory.deploy(owner.address);
 
     // Deploy ERC721 contract
     const erc721PresetFactory = (await ethers.getContractFactory(
@@ -50,7 +50,7 @@ describe("Marketplace Royalty Enforcement", function () {
       symbol,
       baseURI,
       contractURI,
-      royaltyAllowlist.address,
+      operatorAllowlist.address,
       royaltyRecipient.address,
       royalty
     );
@@ -63,25 +63,27 @@ describe("Marketplace Royalty Enforcement", function () {
 
     // Set up roles
     await erc721.connect(owner).grantMinterRole(minter.address);
-    await royaltyAllowlist.connect(owner).grantRegistrarRole(registrar.address);
+    await operatorAllowlist
+      .connect(owner)
+      .grantRegistrarRole(registrar.address);
   });
 
   describe("Royalties", function () {
     it("Should set a valid royalty registry Allowlist", async function () {
       await erc721
         .connect(owner)
-        .setRoyaltyAllowlistRegistry(royaltyAllowlist.address);
-      expect(await erc721.royaltyAllowlist()).to.be.equal(
-        royaltyAllowlist.address
+        .setOperatorAllowlistRegistry(operatorAllowlist.address);
+      expect(await erc721.operatorAllowlist()).to.be.equal(
+        operatorAllowlist.address
       );
     });
 
     it("Should allow a marketplace contract to be Allowlisted", async function () {
-      await royaltyAllowlist
+      await operatorAllowlist
         .connect(registrar)
         .addAddressToAllowlist([mockMarketplace.address]);
       expect(
-        await royaltyAllowlist.isAllowlisted(mockMarketplace.address)
+        await operatorAllowlist.isAllowlisted(mockMarketplace.address)
       ).to.be.equal(true);
     });
 

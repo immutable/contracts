@@ -5,7 +5,7 @@ import {
   ImmutableERC721MintByID,
   MockMarketplace,
   MockFactory,
-  RoyaltyAllowlist,
+  OperatorAllowlist,
   MockOnReceive,
   MockOnReceive__factory,
   MockWalletFactory,
@@ -22,7 +22,7 @@ describe("Allowlisted ERC721 Transfers", function () {
   let erc721: ImmutableERC721MintByID;
   let walletFactory: MockWalletFactory;
   let factory: MockFactory;
-  let royaltyAllowlist: RoyaltyAllowlist;
+  let operatorAllowlist: OperatorAllowlist;
   let marketPlace: MockMarketplace;
   let deployedAddr: string; // deployed SC wallet address
   let moduleAddress: string;
@@ -36,7 +36,7 @@ describe("Allowlisted ERC721 Transfers", function () {
     [owner, minter, registrar, scWallet, ...accs] = await ethers.getSigners();
 
     // Get all required contracts
-    ({ erc721, walletFactory, factory, royaltyAllowlist, marketPlace } =
+    ({ erc721, walletFactory, factory, operatorAllowlist, marketPlace } =
       await RegularAllowlistFixture(owner));
     // Deploy the wallet fixture
     ({ deployedAddr, moduleAddress } = await walletSCFixture(
@@ -46,18 +46,20 @@ describe("Allowlisted ERC721 Transfers", function () {
 
     // Set up roles
     await erc721.connect(owner).grantMinterRole(minter.address);
-    await royaltyAllowlist.connect(owner).grantRegistrarRole(registrar.address);
+    await operatorAllowlist
+      .connect(owner)
+      .grantRegistrarRole(registrar.address);
   });
 
   describe("Royalty Allowlist Registry setting", function () {
-    it("Should have royaltyAllowlist set upon deployment", async function () {
-      expect(await erc721.royaltyAllowlist()).to.equal(
-        royaltyAllowlist.address
+    it("Should have operatorAllowlist set upon deployment", async function () {
+      expect(await erc721.operatorAllowlist()).to.equal(
+        operatorAllowlist.address
       );
     });
 
-    it("Should not allow contracts that do not implement the IRoyaltyAllowlist to be set", async function () {
-      // Deploy another contract that implements IERC165, but not IRoyaltyAllowlist
+    it("Should not allow contracts that do not implement the IOperatorAllowlist to be set", async function () {
+      // Deploy another contract that implements IERC165, but not IOperatorAllowlist
       const factory = await ethers.getContractFactory(
         "ImmutableERC721MintByID"
       );
@@ -67,23 +69,21 @@ describe("Allowlisted ERC721 Transfers", function () {
         "",
         "",
         "",
-        royaltyAllowlist.address,
+        operatorAllowlist.address,
         owner.address,
         0
       );
 
       await expect(
-        erc721.connect(owner).setRoyaltyAllowlistRegistry(erc721Two.address)
-      ).to.be.revertedWith(
-        "RoyaltyEnforcementDoesNotImplementRequiredInterface"
-      );
+        erc721.connect(owner).setOperatorAllowlistRegistry(erc721Two.address)
+      ).to.be.revertedWith("AllowlistDoesNotImplementRequiredInterface");
     });
 
     it("Should not allow a non-admin to access the function to update the registry", async function () {
       await expect(
         erc721
           .connect(registrar)
-          .setRoyaltyAllowlistRegistry(royaltyAllowlist.address)
+          .setOperatorAllowlistRegistry(operatorAllowlist.address)
       ).to.be.revertedWith(
         "AccessControl: account 0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
       );
@@ -127,7 +127,7 @@ describe("Allowlisted ERC721 Transfers", function () {
 
     it("Should allow Allowlisted addresses to be approved", async function () {
       // Add the mock marketplace to registry
-      await royaltyAllowlist
+      await operatorAllowlist
         .connect(registrar)
         .addAddressToAllowlist([marketPlace.address]);
       // Approve marketplace on erc721 contract
@@ -142,7 +142,7 @@ describe("Allowlisted ERC721 Transfers", function () {
 
     it("Should allow Allowlisted smart contract wallets to be approved", async function () {
       // Allowlist the bytecode
-      await royaltyAllowlist
+      await operatorAllowlist
         .connect(registrar)
         .addWalletToAllowlist(deployedAddr);
       await erc721.connect(minter).mint(minter.address, 3);
@@ -160,7 +160,7 @@ describe("Allowlisted ERC721 Transfers", function () {
     beforeEach(async function () {
       await erc721
         .connect(owner)
-        .setRoyaltyAllowlistRegistry(royaltyAllowlist.address);
+        .setOperatorAllowlistRegistry(operatorAllowlist.address);
     });
     it("Should freely allow transfers between EOAs", async function () {
       await erc721.connect(owner).grantMinterRole(accs[0].address);
@@ -217,7 +217,7 @@ describe("Allowlisted ERC721 Transfers", function () {
     });
 
     it("Should not block transfers from an allow listed contract", async function () {
-      await royaltyAllowlist
+      await operatorAllowlist
         .connect(registrar)
         .addAddressToAllowlist([marketPlace.address]);
       await erc721.connect(minter).mint(minter.address, 4);
@@ -237,7 +237,7 @@ describe("Allowlisted ERC721 Transfers", function () {
       await walletFactory.connect(scWallet).deploy(moduleAddress, saltThree);
       const deployedAddr = await walletFactory.getAddress(moduleAddress, salt);
 
-      await royaltyAllowlist
+      await operatorAllowlist
         .connect(registrar)
         .addWalletToAllowlist(deployedAddr);
 
@@ -302,7 +302,7 @@ describe("Allowlisted ERC721 Transfers", function () {
     beforeEach(async function () {
       await erc721
         .connect(owner)
-        .setRoyaltyAllowlistRegistry(royaltyAllowlist.address);
+        .setOperatorAllowlistRegistry(operatorAllowlist.address);
     });
     // The EOA disguise attack vector is a where a pre-computed CREATE2 deterministic address is disguised as an EOA.
     // By virtue of this, approvals and transfers to this address will pass. We need to catch actions from this address

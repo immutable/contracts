@@ -5,9 +5,9 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 
-// Royalties
+// Allowlist
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
-import "../../../royalty-enforcement/RoyaltyEnforced.sol";
+import "../../../allowlist/AllowlistEnforced.sol";
 
 // Utils
 import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
@@ -22,7 +22,7 @@ import {IImmutableERC721Errors} from "../../../errors/Errors.sol";
 */
 
 abstract contract ImmutableERC721Base is
-    RoyaltyEnforced,
+    AllowlistEnforced,
     ERC721Burnable,
     ERC2981,
     IImmutableERC721Errors
@@ -80,14 +80,14 @@ abstract contract ImmutableERC721Base is
         string memory symbol_,
         string memory baseURI_,
         string memory contractURI_,
-        address _royaltyAllowlist,
+        address _operatorAllowlist,
         address _receiver,
         uint96 _feeNumerator
     ) ERC721(name_, symbol_) {
         // Initialize state variables
         _grantRole(DEFAULT_ADMIN_ROLE, owner);
         _setDefaultRoyalty(_receiver, _feeNumerator);
-        _setRoyaltyAllowlistRegistry(_royaltyAllowlist);
+        _setOperatorAllowlistRegistry(_operatorAllowlist);
         baseURI = baseURI_;
         contractURI = contractURI_;
     }
@@ -112,7 +112,7 @@ abstract contract ImmutableERC721Base is
         public
         view
         virtual
-        override(ERC721, ERC2981, RoyaltyEnforced)
+        override(ERC721, ERC2981, AllowlistEnforced)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

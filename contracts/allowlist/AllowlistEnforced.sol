@@ -2,10 +2,10 @@
 pragma solidity ^0.8.0;
 
 // Allowlist Registry
-import "../allowlist/IOperatorAllowlist.sol";
+import {IOperatorAllowlist} from "../allowlist/IOperatorAllowlist.sol";
 
 // Access Control
-import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
+import {AccessControlEnumerable, IERC165} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 
 // Errors
 import {EnforcementErrors} from "../errors/Errors.sol";
@@ -89,7 +89,7 @@ abstract contract AllowlistEnforced is
         // 1. caller is an EOA
         // 2. caller is Allowlisted or is the calling address bytecode is Allowlisted
         if (
-            msg.sender != tx.origin &&
+            msg.sender != tx.origin && // solhint-disable-line avoid-tx-origin
             !operatorAllowlist.isAllowlisted(msg.sender)
         ) {
             revert CallerNotInAllowlist(msg.sender);

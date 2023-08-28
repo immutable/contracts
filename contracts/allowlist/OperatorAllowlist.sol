@@ -2,13 +2,13 @@
 pragma solidity ^0.8.0;
 
 // Access Control
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
 // Introspection
-import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 // Interfaces
-import "./IOperatorAllowlist.sol";
+import {IOperatorAllowlist} from "./IOperatorAllowlist.sol";
 
 // Interface to retrieve the implemention stored inside the Proxy contract
 interface IProxy {

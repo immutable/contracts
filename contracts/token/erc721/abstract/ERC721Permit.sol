@@ -3,17 +3,13 @@ pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
 import "solidity-bytes-utils/contracts/BytesLib.sol";
 import "./IERC4494.sol";
+import "./ImmutableERC721Base.sol";
 
-contract ERC721Permit is ERC721, Ownable, IERC4494 {
-    error SignerCannotBeZeroAddress();
-    error PermitExpired();
-    error InvalidSignature();
-    error NotOwner();
+abstract contract ERC721Permit is ImmutableERC721Base, Ownable, IERC4494 {
 
     uint256 internal immutable _CHAIN_ID = block.chainid;
     bytes32 internal immutable _DOMAIN_SEPARATOR;
@@ -42,16 +38,28 @@ contract ERC721Permit is ERC721, Ownable, IERC4494 {
 
     mapping(uint256 => uint256) private _nonces;
 
-    constructor(string memory name, string memory symbol) ERC721(
-        name,
-        symbol
-    ) {
-        _NAME_HASH = keccak256(bytes(name));
+    constructor(
+        address owner,
+        string memory name_,
+        string memory symbol_,
+        string memory baseURI_,
+        string memory contractURI_,
+        address _royaltyAllowlist,
+        address _receiver,
+        uint96 _feeNumerator
+    )
+        ImmutableERC721Base(
+            owner,
+            name_,
+            symbol_,
+            baseURI_,
+            contractURI_,
+            _royaltyAllowlist,
+            _receiver,
+            _feeNumerator
+        ) {
+        _NAME_HASH = keccak256(bytes(name_));
         _DOMAIN_SEPARATOR = _deriveDomainSeparator();
-    }
-
-    function safeMint(address to, uint256 tokenId) public onlyOwner {
-        _safeMint(to, tokenId);
     }
 
     /**
@@ -90,17 +98,14 @@ contract ERC721Permit is ERC721, Ownable, IERC4494 {
         }
 
         if (recoveredSigner == address(0)) {
-            revert SignerCannotBeZeroAddress();
+            revert SignerCannotBeZerothAddress();
         }
 
         if (recoveredSigner != ownerOf(tokenId)) {
-            revert NotOwner();
+            revert NotOwner(tokenId);
         }
 
         _approve(spender, tokenId);
-
-        console.log("NFT: nft", tokenId, "approved for", getApproved(tokenId));
-        console.log("NFT: permit complete");
     }
 
     /**
@@ -168,13 +173,15 @@ contract ERC721Permit is ERC721, Ownable, IERC4494 {
             );
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override(ERC721, IERC165)
-        returns (bool)
-    {
-        return super.supportsInterface(0x5604e225);
-    }
+  function supportsInterface(bytes4 interfaceId)
+    public
+    view
+    virtual
+    override(IERC165, ImmutableERC721Base)
+    returns (bool)
+  {
+    return
+      interfaceId == type(IERC4494).interfaceId || // 0x5604e225
+      super.supportsInterface(interfaceId);
+  }
 }

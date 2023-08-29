@@ -61,7 +61,7 @@ describe("Allowlisted ERC721 Transfers", function () {
       );
 
       await expect(erc721.connect(owner).setOperatorAllowlistRegistry(erc721Two.address)).to.be.revertedWith(
-        "AllowlistDoesNotImplementRequiredInterface"
+        "AllowlistDoesNotImplementIOperatorAllowlist"
       );
     });
 

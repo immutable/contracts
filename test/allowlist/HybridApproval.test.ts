@@ -59,7 +59,7 @@ describe("Royalty Checks with Hybrid ERC721", function () {
       );
 
       await expect(erc721.connect(owner).setOperatorAllowlistRegistry(erc721Two.address)).to.be.revertedWith(
-        "AllowlistDoesNotImplementRequiredInterface"
+        "AllowlistDoesNotImplementIOperatorAllowlist"
       );
     });
 

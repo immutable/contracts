@@ -39,7 +39,7 @@ describe("Royalty Checks with Hybrid ERC721", function () {
     await operatorAllowlist.connect(owner).grantRegistrarRole(registrar.address);
   });
 
-  describe("Royalty Allowlist Registry setting", function () {
+  describe("Operator Allowlist Registry setting", function () {
     it("Should have operatorAllowlist set upon deployment", async function () {
       expect(await erc721.operatorAllowlist()).to.equal(operatorAllowlist.address);
     });

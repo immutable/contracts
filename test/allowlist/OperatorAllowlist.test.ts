@@ -34,7 +34,7 @@ describe("Royalty Enforcement Test Cases", function () {
   });
 
   describe("Interface Support", function () {
-    it("Should support the royalty Allowlist interface", async function () {
+    it("Should support the IOperatorAllowlist interface", async function () {
       expect(await operatorAllowlist.supportsInterface("0x05a3b809")).to.be.equal(true);
     });
   });

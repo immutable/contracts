@@ -32,7 +32,7 @@ describe("Marketplace Royalty Enforcement", function () {
   before(async function () {
     // Retrieve accounts
     [owner, minter, registrar, royaltyRecipient, buyer, seller] = await ethers.getSigners();
-    // Deploy royalty Allowlist
+    // Deploy operator Allowlist
     const operatorAllowlistFactory = (await ethers.getContractFactory(
       "OperatorAllowlist"
     )) as OperatorAllowlist__factory;
@@ -64,7 +64,7 @@ describe("Marketplace Royalty Enforcement", function () {
   });
 
   describe("Royalties", function () {
-    it("Should set a valid royalty registry Allowlist", async function () {
+    it("Should set a valid OperatorAllowlist registry", async function () {
       await erc721.connect(owner).setOperatorAllowlistRegistry(operatorAllowlist.address);
       expect(await erc721.operatorAllowlist()).to.be.equal(operatorAllowlist.address);
     });

@@ -27,7 +27,7 @@ abstract contract ImmutableERC721HybridBase is OperatorAllowlistEnforced, Mintin
         // Initialize state variables
         _grantRole(DEFAULT_ADMIN_ROLE, owner_);
         _setDefaultRoyalty(receiver_, feeNumerator_);
-        setOperatorAllowlistRegistry(operatorAllowlist_);
+        _setOperatorAllowlistRegistry(operatorAllowlist_);
         baseURI = baseURI_;
         contractURI = contractURI_;
     }

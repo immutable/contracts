@@ -29,11 +29,7 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
     event AddressAllowlistChanged(address indexed target, bool added);
 
     /// @dev Emitted when a target smart contract wallet is added or removed from the Allowlist
-    event WalletAllowlistChanged(
-        bytes32 indexed targetBytes,
-        address indexed targetAddress,
-        bool added
-    );
+    event WalletAllowlistChanged(bytes32 indexed targetBytes, address indexed targetAddress, bool added);
 
     ///     =====   State Variables  =====
 
@@ -61,18 +57,12 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
     ///     =====   View functions  =====
 
     /// @dev ERC-165 interface support
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view virtual override(ERC165, AccessControl) returns (bool) {
-        return
-            interfaceId == type(IOperatorAllowlist).interfaceId ||
-            super.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, AccessControl) returns (bool) {
+        return interfaceId == type(IOperatorAllowlist).interfaceId || super.supportsInterface(interfaceId);
     }
 
     /// @dev Returns true if an address is Allowlisted, false otherwise
-    function isAllowlisted(
-        address target
-    ) external view override returns (bool) {
+    function isAllowlisted(address target) external view override returns (bool) {
         if (addressAllowlist[target]) {
             return true;
         }
@@ -95,9 +85,7 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
     ///     =====  External functions  =====
 
     /// @dev Add a target address to Allowlist
-    function addAddressToAllowlist(
-        address[] calldata addressTargets
-    ) external onlyRole(REGISTRAR_ROLE) {
+    function addAddressToAllowlist(address[] calldata addressTargets) external onlyRole(REGISTRAR_ROLE) {
         for (uint256 i; i < addressTargets.length; i++) {
             addressAllowlist[addressTargets[i]] = true;
             emit AddressAllowlistChanged(addressTargets[i], true);
@@ -105,9 +93,7 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
     }
 
     /// @dev Remove a target address from Allowlist
-    function removeAddressFromAllowlist(
-        address[] calldata addressTargets
-    ) external onlyRole(REGISTRAR_ROLE) {
+    function removeAddressFromAllowlist(address[] calldata addressTargets) external onlyRole(REGISTRAR_ROLE) {
         for (uint256 i; i < addressTargets.length; i++) {
             delete addressAllowlist[addressTargets[i]];
             emit AddressAllowlistChanged(addressTargets[i], false);
@@ -119,9 +105,7 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
     // First, the bytecode of the proxy is added to the bytecode allowlist.
     // Second, the implementation address stored in the proxy is stored in the
     // implementation address allowlist.
-    function addWalletToAllowlist(
-        address walletAddr
-    ) external onlyRole(REGISTRAR_ROLE) {
+    function addWalletToAllowlist(address walletAddr) external onlyRole(REGISTRAR_ROLE) {
         // get bytecode of wallet
         bytes32 codeHash;
         assembly {
@@ -137,9 +121,7 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
 
     /// @dev Remove  a smart contract wallet from the Allowlist
     // This will remove the proxy bytecode hash and implementation contract address pair from the allowlist
-    function removeWalletFromAllowlist(
-        address walletAddr
-    ) external onlyRole(REGISTRAR_ROLE) {
+    function removeWalletFromAllowlist(address walletAddr) external onlyRole(REGISTRAR_ROLE) {
         // get bytecode of wallet
         bytes32 codeHash;
         assembly {
@@ -154,16 +136,12 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
     }
 
     /// @dev Allows admin to grant `user` `REGISTRAR_ROLE` role
-    function grantRegistrarRole(
-        address user
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function grantRegistrarRole(address user) external onlyRole(DEFAULT_ADMIN_ROLE) {
         grantRole(REGISTRAR_ROLE, user);
     }
 
     /// @dev Allows admin to revoke `REGISTRAR_ROLE` role from `user`
-    function revokeRegistrarRole(
-        address user
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function revokeRegistrarRole(address user) external onlyRole(DEFAULT_ADMIN_ROLE) {
         revokeRole(REGISTRAR_ROLE, user);
     }
 }

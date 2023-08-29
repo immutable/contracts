@@ -2,25 +2,19 @@
 pragma solidity ^0.8.0;
 
 // Allowlist Registry
-import {IOperatorAllowlist} from "../allowlist/IOperatorAllowlist.sol";
+import {IOperatorAllowlist} from "./IOperatorAllowlist.sol";
 
 // Access Control
 import {AccessControlEnumerable, IERC165} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 
 // Errors
-import {EnforcementErrors} from "../errors/Errors.sol";
+import {OperatorAllowlistEnforcementErrors} from "../errors/Errors.sol";
 
-abstract contract OperatorAllowlistEnforced is
-    AccessControlEnumerable,
-    EnforcementErrors
-{
+abstract contract OperatorAllowlistEnforced is AccessControlEnumerable, OperatorAllowlistEnforcementErrors {
     ///     =====     Events         =====
 
     /// @dev Emitted whenever the transfer Allowlist registry is updated
-    event OperatorAllowlistRegistryUpdated(
-        address oldRegistry,
-        address newRegistry
-    );
+    event OperatorAllowlistRegistryUpdated(address oldRegistry, address newRegistry);
 
     ///     =====   State Variables  =====
 
@@ -30,33 +24,20 @@ abstract contract OperatorAllowlistEnforced is
     ///     =====  External functions  =====
 
     /// @dev Returns the supported interfaces
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view virtual override returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
-    function setOperatorAllowlistRegistry(
-        address _operatorAllowlist
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setOperatorAllowlistRegistry(address _operatorAllowlist) public onlyRole(DEFAULT_ADMIN_ROLE) {
         _setOperatorAllowlistRegistry(_operatorAllowlist);
     }
 
-    function _setOperatorAllowlistRegistry(
-        address _operatorAllowlist
-    ) internal {
-        if (
-            !IERC165(_operatorAllowlist).supportsInterface(
-                type(IOperatorAllowlist).interfaceId
-            )
-        ) {
-            revert AllowlistDoesNotImplementRequiredInterface();
+    function _setOperatorAllowlistRegistry(address _operatorAllowlist) internal {
+        if (!IERC165(_operatorAllowlist).supportsInterface(type(IOperatorAllowlist).interfaceId)) {
+            revert AllowlistDoesNotImplementIOperatorAllowlist();
         }
 
-        emit OperatorAllowlistRegistryUpdated(
-            address(operatorAllowlist),
-            _operatorAllowlist
-        );
+        emit OperatorAllowlistRegistryUpdated(address(operatorAllowlist), _operatorAllowlist);
         operatorAllowlist = IOperatorAllowlist(_operatorAllowlist);
     }
 
@@ -64,20 +45,14 @@ abstract contract OperatorAllowlistEnforced is
         // Check for:
         // 1. approver is an EOA. Contract constructor is handled as transfers 'from' are blocked
         // 2. approver is address or bytecode is allowlisted
-        if (
-            msg.sender.code.length != 0 &&
-            !operatorAllowlist.isAllowlisted(msg.sender)
-        ) {
+        if (msg.sender.code.length != 0 && !operatorAllowlist.isAllowlisted(msg.sender)) {
             revert ApproverNotInAllowlist(msg.sender);
         }
 
         // Check for:
         // 1. approval target is an EOA
         // 2. approval target address is Allowlisted or target address bytecode is Allowlisted
-        if (
-            targetApproval.code.length != 0 &&
-            !operatorAllowlist.isAllowlisted(targetApproval)
-        ) {
+        if (targetApproval.code.length != 0 && !operatorAllowlist.isAllowlisted(targetApproval)) {
             revert ApproveTargetNotInAllowlist(targetApproval);
         }
         _;

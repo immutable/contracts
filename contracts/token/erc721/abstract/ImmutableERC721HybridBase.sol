@@ -7,12 +7,7 @@ import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
 import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnforced.sol";
 import {ERC721Hybrid} from "./ERC721Hybrid.sol";
 
-abstract contract ImmutableERC721HybridBase is
-    OperatorAllowlistEnforced,
-    MintingAccessControl,
-    ERC2981,
-    ERC721Hybrid
-{
+abstract contract ImmutableERC721HybridBase is OperatorAllowlistEnforced, MintingAccessControl, ERC2981, ERC721Hybrid {
     /// @dev Contract level metadata
     string public contractURI;
 
@@ -44,12 +39,7 @@ abstract contract ImmutableERC721HybridBase is
         public
         view
         virtual
-        override(
-            ERC721Hybrid,
-            ERC2981,
-            OperatorAllowlistEnforced,
-            AccessControlEnumerable
-        )
+        override(ERC721Hybrid, ERC2981, OperatorAllowlistEnforced, AccessControlEnumerable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
@@ -60,16 +50,12 @@ abstract contract ImmutableERC721HybridBase is
     }
 
     /// @dev Allows admin to set the base URI
-    function setBaseURI(
-        string memory baseURI_
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setBaseURI(string memory baseURI_) public onlyRole(DEFAULT_ADMIN_ROLE) {
         baseURI = baseURI_;
     }
 
     /// @dev Allows admin to set the contract URI
-    function setContractURI(
-        string memory _contractURI
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setContractURI(string memory _contractURI) public onlyRole(DEFAULT_ADMIN_ROLE) {
         contractURI = _contractURI;
     }
 
@@ -82,10 +68,7 @@ abstract contract ImmutableERC721HybridBase is
     }
 
     /// @dev Override of approve from {ERC721}, with added Allowlist approval validation
-    function approve(
-        address to,
-        uint256 tokenId
-    ) public virtual override(ERC721Hybrid) validateApproval(to) {
+    function approve(address to, uint256 tokenId) public virtual override(ERC721Hybrid) validateApproval(to) {
         super.approve(to, tokenId);
     }
 
@@ -99,10 +82,7 @@ abstract contract ImmutableERC721HybridBase is
     }
 
     /// @dev Set the default royalty receiver address
-    function setDefaultRoyaltyReceiver(
-        address receiver,
-        uint96 feeNumerator
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setDefaultRoyaltyReceiver(address receiver, uint96 feeNumerator) public onlyRole(DEFAULT_ADMIN_ROLE) {
         _setDefaultRoyalty(receiver, feeNumerator);
     }
 

@@ -46,9 +46,7 @@ abstract contract ERC721PsiBurnable is ERC721Psi {
      * Tokens start existing when they are minted (`_mint`),
      * and stop existing when they are burned (`_burn`).
      */
-    function _exists(
-        uint256 tokenId
-    ) internal view virtual override returns (bool) {
+    function _exists(uint256 tokenId) internal view virtual override returns (bool) {
         if (_burnedToken.get(tokenId)) {
             return false;
         }

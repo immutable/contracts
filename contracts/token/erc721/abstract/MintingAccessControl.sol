@@ -22,9 +22,7 @@ abstract contract MintingAccessControl is AccessControlEnumerable {
     }
 
     /// @dev Allows admin to revoke `MINTER_ROLE` role from `user`
-    function revokeMinterRole(
-        address user
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function revokeMinterRole(address user) public onlyRole(DEFAULT_ADMIN_ROLE) {
         revokeRole(MINTER_ROLE, user);
     }
 }

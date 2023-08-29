@@ -16,11 +16,7 @@ contract MockMarketplace {
         tokenAddress.transferFrom(msg.sender, recipient, _tokenId);
     }
 
-    function executeTransferFrom(
-        address from,
-        address to,
-        uint256 _tokenId
-    ) public {
+    function executeTransferFrom(address from, address to, uint256 _tokenId) public {
         tokenAddress.transferFrom(from, to, _tokenId);
     }
 
@@ -28,17 +24,9 @@ contract MockMarketplace {
         tokenAddress.setApprovalForAll(operator, approved);
     }
 
-    function executeTransferRoyalties(
-        address from,
-        address recipient,
-        uint256 _tokenId,
-        uint256 price
-    ) public payable {
+    function executeTransferRoyalties(address from, address recipient, uint256 _tokenId, uint256 price) public payable {
         require(msg.value == price, "insufficient msg.value");
-        (address receiver, uint256 royaltyAmount) = royaltyAddress.royaltyInfo(
-            _tokenId,
-            price
-        );
+        (address receiver, uint256 royaltyAmount) = royaltyAddress.royaltyInfo(_tokenId, price);
         uint256 sellerAmt = msg.value - royaltyAmount;
         payable(receiver).transfer(royaltyAmount);
         payable(from).transfer(sellerAmt);

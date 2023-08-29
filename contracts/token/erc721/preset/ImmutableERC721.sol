@@ -45,44 +45,31 @@ contract ImmutableERC721 is ImmutableERC721HybridBase {
     }
 
     /// @dev Allows minter to a token by ID to a specified address with hooks and checks
-    function safeMint(
-        address to,
-        uint256 tokenId
-    ) external onlyRole(MINTER_ROLE) {
+    function safeMint(address to, uint256 tokenId) external onlyRole(MINTER_ROLE) {
         _safeMintByID(to, tokenId);
     }
 
     /// @dev Allows minter to a number of tokens sequentially to a specified address
-    function mintByQuantity(
-        address to,
-        uint256 quantity
-    ) external onlyRole(MINTER_ROLE) {
+    function mintByQuantity(address to, uint256 quantity) external onlyRole(MINTER_ROLE) {
         _mintByQuantity(to, quantity);
     }
 
     /** @dev Allows minter to a number of tokens sequentially to a specified address with hooks
      *  and checks
      **/
-    function safeMintByQuantity(
-        address to,
-        uint256 quantity
-    ) external onlyRole(MINTER_ROLE) {
+    function safeMintByQuantity(address to, uint256 quantity) external onlyRole(MINTER_ROLE) {
         _safeMintByQuantity(to, quantity);
     }
 
     /// @dev Allows minter to a number of tokens sequentially to a number of specified addresses
-    function mintBatchByQuantity(
-        Mint[] memory mints
-    ) external onlyRole(MINTER_ROLE) {
+    function mintBatchByQuantity(Mint[] memory mints) external onlyRole(MINTER_ROLE) {
         _mintBatchByQuantity(mints);
     }
 
     /** @dev Allows minter to a number of tokens sequentially to a number of specified
      *  addresses with hooks and checks
      **/
-    function safeMintBatchByQuantity(
-        Mint[] memory mints
-    ) external onlyRole(MINTER_ROLE) {
+    function safeMintBatchByQuantity(Mint[] memory mints) external onlyRole(MINTER_ROLE) {
         _safeMintBatchByQuantity(mints);
     }
 
@@ -94,9 +81,7 @@ contract ImmutableERC721 is ImmutableERC721HybridBase {
     /** @dev Allows minter to a number of tokens by ID to a number of specified
      *  addresses with hooks and checks
      **/
-    function safeMintBatch(
-        IDMint[] memory mints
-    ) external onlyRole(MINTER_ROLE) {
+    function safeMintBatch(IDMint[] memory mints) external onlyRole(MINTER_ROLE) {
         _safeMintBatchByIDToMultiple(mints);
     }
 

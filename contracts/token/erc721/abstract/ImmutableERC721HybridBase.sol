@@ -28,7 +28,7 @@ abstract contract ImmutableERC721HybridBase is RoyaltyEnforced, MintingAccessCon
         // Initialize state variables
         _grantRole(DEFAULT_ADMIN_ROLE, owner_);
         _setDefaultRoyalty(receiver_, feeNumerator_);
-        setRoyaltyAllowlistRegistry(royaltyAllowlist_);
+        _setRoyaltyAllowlistRegistry(royaltyAllowlist_);
         baseURI = baseURI_;
         contractURI = contractURI_;
     }

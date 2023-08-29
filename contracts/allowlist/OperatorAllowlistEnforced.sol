@@ -10,7 +10,7 @@ import {AccessControlEnumerable, IERC165} from "@openzeppelin/contracts/access/A
 // Errors
 import {EnforcementErrors} from "../errors/Errors.sol";
 
-abstract contract AllowlistEnforced is
+abstract contract OperatorAllowlistEnforced is
     AccessControlEnumerable,
     EnforcementErrors
 {

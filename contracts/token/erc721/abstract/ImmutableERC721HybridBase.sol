@@ -4,11 +4,11 @@ pragma solidity ^0.8.0;
 import {AccessControlEnumerable, MintingAccessControl} from "./MintingAccessControl.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
-import {AllowlistEnforced} from "../../../allowlist/AllowlistEnforced.sol";
+import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnforced.sol";
 import {ERC721Hybrid} from "./ERC721Hybrid.sol";
 
 abstract contract ImmutableERC721HybridBase is
-    AllowlistEnforced,
+    OperatorAllowlistEnforced,
     MintingAccessControl,
     ERC2981,
     ERC721Hybrid
@@ -47,7 +47,7 @@ abstract contract ImmutableERC721HybridBase is
         override(
             ERC721Hybrid,
             ERC2981,
-            AllowlistEnforced,
+            OperatorAllowlistEnforced,
             AccessControlEnumerable
         )
         returns (bool)

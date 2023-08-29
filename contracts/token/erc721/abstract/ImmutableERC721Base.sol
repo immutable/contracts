@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 
 // Allowlist
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
-import "../../../allowlist/AllowlistEnforced.sol";
+import "../../../allowlist/OperatorAllowlistEnforced.sol";
 
 // Utils
 import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
@@ -22,7 +22,7 @@ import {IImmutableERC721Errors} from "../../../errors/Errors.sol";
 */
 
 abstract contract ImmutableERC721Base is
-    AllowlistEnforced,
+    OperatorAllowlistEnforced,
     ERC721Burnable,
     ERC2981,
     IImmutableERC721Errors
@@ -112,7 +112,7 @@ abstract contract ImmutableERC721Base is
         public
         view
         virtual
-        override(ERC721, ERC2981, AllowlistEnforced)
+        override(ERC721, ERC2981, OperatorAllowlistEnforced)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

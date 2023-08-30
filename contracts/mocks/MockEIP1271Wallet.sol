@@ -10,10 +10,7 @@ contract MockEIP1271Wallet is IERC1271 {
         owner = _owner;
     }
 
-    function isValidSignature(
-        bytes32 hash,
-        bytes memory signature
-    ) public view override returns (bytes4) {
+    function isValidSignature(bytes32 hash, bytes memory signature) public view override returns (bytes4) {
         address recoveredAddress = ECDSA.recover(hash, signature);
         if (recoveredAddress == owner) {
             return this.isValidSignature.selector;

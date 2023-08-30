@@ -90,25 +90,19 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
             revert InvalidSignature();
         }
 
-        bool isNotZerothAddr = recoveredSigner != address(0);
-
-        if (!isNotZerothAddr) {
+        if (recoveredSigner == address(0)) {
             revert SignerCannotBeZerothAddress();
         }
 
-        bool isApprovedOperator = _isApprovedOrOwner(recoveredSigner, tokenId);
-
-        bool isValidEOASig = isApprovedOperator && isNotZerothAddr;
-
-        if (!isValidEOASig) {
-            if (!_isValidERC1271Signature(getApproved(tokenId), digest, sig) &&
-                !_isValidERC1271Signature(ownerOf(tokenId), digest, sig)
-            ) {
-                revert InvalidSignature();
-            }
+        if (
+            _isApprovedOrOwner(recoveredSigner, tokenId) ||
+                _isValidERC1271Signature(getApproved(tokenId), digest, sig) ||
+                _isValidERC1271Signature(ownerOf(tokenId), digest, sig)
+        ) {
+            _approve(spender, tokenId);
+        } else {
+            revert InvalidSignature();
         }
-
-        _approve(spender, tokenId);
     }
 
     /**

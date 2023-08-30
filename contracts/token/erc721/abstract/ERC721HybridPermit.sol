@@ -8,7 +8,6 @@ import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import "solidity-bytes-utils/contracts/BytesLib.sol";
 import "./IERC4494.sol";
 import "./ERC721Hybrid.sol";
-import "hardhat/console.sol";
 
 /**
  * @title ERC721HybridPermit: An extension of the ERC721Hybrid NFT standard that supports off-chain approval via permits.
@@ -83,25 +82,20 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
             revert InvalidSignature();
         }
 
-        bool isNotZerothAddr = recoveredSigner != address(0);
-
-        if (!isNotZerothAddr) {
+        if (recoveredSigner == address(0)) {
             revert SignerCannotBeZerothAddress();
         }
 
-        bool isApprovedOperator = _isApprovedOrOwner(recoveredSigner, tokenId);
-
-        bool isValidEOASig = isApprovedOperator && isNotZerothAddr;
-
-        if (!isValidEOASig) {
-            if (!_isValidERC1271Signature(getApproved(tokenId), digest, sig) &&
-                !_isValidERC1271Signature(ownerOf(tokenId), digest, sig)
-            ) {
-                revert InvalidSignature();
-            }
+        if (
+            _isApprovedOrOwner(recoveredSigner, tokenId) ||
+                _isValidERC1271Signature(getApproved(tokenId), digest, sig) ||
+                _isValidERC1271Signature(ownerOf(tokenId), digest, sig)
+        ) {
+            _approve(spender, tokenId);
+        } else {
+            revert InvalidSignature();
         }
-
-        _approve(spender, tokenId);
+        
     }
 
     /**

@@ -1,17 +1,13 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import {
-  RoyaltyAllowlist,
-  MockEIP1271Wallet,
-  ImmutableERC721MintByID,
-} from "../../../typechain";
+import { OperatorAllowlist, MockEIP1271Wallet, ImmutableERC721MintByID } from "../../../typechain";
 import { RegularAllowlistFixture } from "../../utils/DeployRegularFixtures";
 import { BigNumberish } from "ethers";
 
 describe("ImmutableERC721Permit", function () {
   let erc721: ImmutableERC721MintByID;
-  let royaltyAllowlist: RoyaltyAllowlist;
+  let operatorAllowlist: OperatorAllowlist;
   let owner: SignerWithAddress;
   let user: SignerWithAddress;
   let operator: SignerWithAddress;
@@ -65,12 +61,11 @@ describe("ImmutableERC721Permit", function () {
     [owner, user, minter, registrar, operator] = await ethers.getSigners();
 
     // Get all required contracts
-    ({ erc721, royaltyAllowlist, eip1271Wallet } =
-      await RegularAllowlistFixture(owner));
+    ({ erc721, operatorAllowlist, eip1271Wallet } = await RegularAllowlistFixture(owner));
 
     // Set up roles
     await erc721.connect(owner).grantMinterRole(minter.address);
-    await royaltyAllowlist.connect(owner).grantRegistrarRole(registrar.address);
+    await operatorAllowlist.connect(owner).grantRegistrarRole(registrar.address);
     chainId = await ethers.provider.getNetwork().then((n) => n.chainId);
   });
 
@@ -89,19 +84,11 @@ describe("ImmutableERC721Permit", function () {
       expect(nonce).to.be.equal(0);
 
       const operatorAddress = await operator.getAddress();
-      const signature = await eoaSign(
-        user,
-        operatorAddress,
-        1,
-        nonce,
-        deadline
-      );
+      const signature = await eoaSign(user, operatorAddress, 1, nonce, deadline);
 
       expect(await erc721.getApproved(1)).to.not.equal(operatorAddress);
 
-      await erc721
-        .connect(operator)
-        .permit(operatorAddress, 1, deadline, signature);
+      await erc721.connect(operator).permit(operatorAddress, 1, deadline, signature);
 
       expect(await erc721.getApproved(1)).to.be.equal(operatorAddress);
     });
@@ -113,17 +100,11 @@ describe("ImmutableERC721Permit", function () {
       const nonce = await erc721.nonces(2);
 
       const operatorAddress = await operator.getAddress();
-      const signature = await eoaSign(
-        user,
-        operatorAddress,
-        2,
-        nonce,
-        deadline
-      );
+      const signature = await eoaSign(user, operatorAddress, 2, nonce, deadline);
 
-      await expect(
-        erc721.connect(operator).permit(operatorAddress, 2, deadline, signature)
-      ).to.be.revertedWith("PermitExpired");
+      await expect(erc721.connect(operator).permit(operatorAddress, 2, deadline, signature)).to.be.revertedWith(
+        "PermitExpired"
+      );
 
       expect(await erc721.getApproved(2)).to.not.equal(operatorAddress);
     });
@@ -136,25 +117,17 @@ describe("ImmutableERC721Permit", function () {
       expect(nonce).to.be.equal(0);
       const ownerAddr = await owner.getAddress();
       const operatorAddress = await operator.getAddress();
-      const signature = await eoaSign(
-        owner,
-        operatorAddress,
-        3,
-        nonce,
-        deadline
-      );
+      const signature = await eoaSign(owner, operatorAddress, 3, nonce, deadline);
 
-      await expect(
-        erc721.connect(operator).permit(operatorAddress, 3, deadline, signature)
-      ).to.be.revertedWith("InvalidSignature");
+      await expect(erc721.connect(operator).permit(operatorAddress, 3, deadline, signature)).to.be.revertedWith(
+        "InvalidSignature"
+      );
 
       expect(await erc721.getApproved(3)).to.not.equal(operatorAddress);
 
       await erc721.connect(user).approve(ownerAddr, 3);
 
-      await erc721
-        .connect(operator)
-        .permit(operatorAddress, 3, deadline, signature);
+      await erc721.connect(operator).permit(operatorAddress, 3, deadline, signature);
 
       expect(await erc721.getApproved(3)).to.be.equal(operatorAddress);
     });
@@ -165,38 +138,24 @@ describe("ImmutableERC721Permit", function () {
       const operatorAddress = await operator.getAddress();
       let nonce = await erc721.nonces(4);
       expect(nonce).to.be.equal(0);
-      const signature = await eoaSign(
-        user,
-        operatorAddress,
-        4,
-        nonce,
-        deadline
-      );
+      const signature = await eoaSign(user, operatorAddress, 4, nonce, deadline);
 
       await erc721
         .connect(user)
-        ["safeTransferFrom(address,address,uint256)"](
-          await user.getAddress(),
-          await owner.getAddress(),
-          4
-        );
+        ["safeTransferFrom(address,address,uint256)"](await user.getAddress(), await owner.getAddress(), 4);
 
       nonce = await erc721.nonces(4);
       expect(nonce).to.be.equal(1);
 
       await erc721
         .connect(owner)
-        ["safeTransferFrom(address,address,uint256)"](
-          await owner.getAddress(),
-          await user.getAddress(),
-          4
-        );
+        ["safeTransferFrom(address,address,uint256)"](await owner.getAddress(), await user.getAddress(), 4);
       nonce = await erc721.nonces(4);
       expect(nonce).to.be.equal(2);
 
-      await expect(
-        erc721.connect(operator).permit(operatorAddress, 4, deadline, signature)
-      ).to.be.revertedWith("InvalidSignature");
+      await expect(erc721.connect(operator).permit(operatorAddress, 4, deadline, signature)).to.be.revertedWith(
+        "InvalidSignature"
+      );
     });
 
     it("can not use a permit after a transfer of token minted by id due to bad owner", async function () {
@@ -206,26 +165,16 @@ describe("ImmutableERC721Permit", function () {
 
       await erc721
         .connect(user)
-        ["safeTransferFrom(address,address,uint256)"](
-          await user.getAddress(),
-          await owner.getAddress(),
-          5
-        );
+        ["safeTransferFrom(address,address,uint256)"](await user.getAddress(), await owner.getAddress(), 5);
 
       const nonce = await erc721.nonces(5);
       expect(nonce).to.be.equal(1);
 
-      const signature = await eoaSign(
-        user,
-        operatorAddress,
-        5,
-        nonce,
-        deadline
-      );
+      const signature = await eoaSign(user, operatorAddress, 5, nonce, deadline);
 
-      await expect(
-        erc721.connect(operator).permit(operatorAddress, 5, deadline, signature)
-      ).to.be.revertedWith("InvalidSignature");
+      await expect(erc721.connect(operator).permit(operatorAddress, 5, deadline, signature)).to.be.revertedWith(
+        "InvalidSignature"
+      );
     });
   });
 
@@ -239,19 +188,11 @@ describe("ImmutableERC721Permit", function () {
       expect(nonce).to.be.equal(0);
 
       const operatorAddress = await operator.getAddress();
-      const signature = await eoaSign(
-        owner,
-        operatorAddress,
-        6,
-        nonce,
-        deadline
-      );
+      const signature = await eoaSign(owner, operatorAddress, 6, nonce, deadline);
 
       expect(await erc721.getApproved(6)).to.not.equal(operatorAddress);
 
-      await erc721
-        .connect(operator)
-        .permit(operatorAddress, 6, deadline, signature);
+      await erc721.connect(operator).permit(operatorAddress, 6, deadline, signature);
 
       expect(await erc721.getApproved(6)).to.be.equal(operatorAddress);
     });
@@ -264,29 +205,19 @@ describe("ImmutableERC721Permit", function () {
       expect(nonce).to.be.equal(0);
 
       const operatorAddress = await operator.getAddress();
-      const signature = await eoaSign(
-        owner,
-        operatorAddress,
-        7,
-        nonce,
-        deadline
-      );
+      const signature = await eoaSign(owner, operatorAddress, 7, nonce, deadline);
 
-      await expect(
-        erc721.connect(operator).permit(operatorAddress, 7, deadline, signature)
-      ).to.be.revertedWith("InvalidSignature");
+      await expect(erc721.connect(operator).permit(operatorAddress, 7, deadline, signature)).to.be.revertedWith(
+        "InvalidSignature"
+      );
 
       expect(await erc721.getApproved(7)).to.not.equal(operatorAddress);
 
-      await royaltyAllowlist
-        .connect(registrar)
-        .addAddressToAllowlist([eip1271Wallet.address]);
+      await operatorAllowlist.connect(registrar).addAddressToAllowlist([eip1271Wallet.address]);
 
       await erc721.connect(user).approve(eip1271Wallet.address, 7);
 
-      await erc721
-        .connect(operator)
-        .permit(operatorAddress, 7, deadline, signature);
+      await erc721.connect(operator).permit(operatorAddress, 7, deadline, signature);
 
       expect(await erc721.getApproved(7)).to.be.equal(operatorAddress);
     });

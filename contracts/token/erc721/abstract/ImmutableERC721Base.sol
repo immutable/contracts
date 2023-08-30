@@ -5,9 +5,9 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 
-// Royalties
+// Allowlist
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
-import "../../../royalty-enforcement/RoyaltyEnforced.sol";
+import "../../../allowlist/OperatorAllowlistEnforced.sol";
 
 // Utils
 import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
@@ -21,12 +21,7 @@ import {IImmutableERC721Errors} from "../../../errors/Errors.sol";
     own minting functionality to meet the needs of the inheriting contract.
 */
 
-abstract contract ImmutableERC721Base is
-    RoyaltyEnforced,
-    ERC721Burnable,
-    ERC2981,
-    IImmutableERC721Errors
-{
+abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, ERC721Burnable, ERC2981, IImmutableERC721Errors {
     using BitMaps for BitMaps.BitMap;
     ///     =====   State Variables  =====
 
@@ -80,14 +75,14 @@ abstract contract ImmutableERC721Base is
         string memory symbol_,
         string memory baseURI_,
         string memory contractURI_,
-        address _royaltyAllowlist,
+        address _operatorAllowlist,
         address _receiver,
         uint96 _feeNumerator
     ) ERC721(name_, symbol_) {
         // Initialize state variables
         _grantRole(DEFAULT_ADMIN_ROLE, owner);
         _setDefaultRoyalty(_receiver, _feeNumerator);
-        _setRoyaltyAllowlistRegistry(_royaltyAllowlist);
+        _setOperatorAllowlistRegistry(_operatorAllowlist);
         baseURI = baseURI_;
         contractURI = contractURI_;
     }
@@ -95,26 +90,14 @@ abstract contract ImmutableERC721Base is
     ///     =====   View functions  =====
 
     /// @dev Returns the baseURI
-    function _baseURI()
-        internal
-        view
-        virtual
-        override(ERC721)
-        returns (string memory)
-    {
+    function _baseURI() internal view virtual override(ERC721) returns (string memory) {
         return baseURI;
     }
 
     /// @dev Returns the supported interfaces
     function supportsInterface(
         bytes4 interfaceId
-    )
-        public
-        view
-        virtual
-        override(ERC721, ERC2981, RoyaltyEnforced)
-        returns (bool)
-    {
+    ) public view virtual override(ERC721, ERC2981, OperatorAllowlistEnforced) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
@@ -132,49 +115,32 @@ abstract contract ImmutableERC721Base is
     ///     =====  Public functions  =====
 
     /// @dev Allows admin to set the base URI
-    function setBaseURI(
-        string memory baseURI_
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setBaseURI(string memory baseURI_) public onlyRole(DEFAULT_ADMIN_ROLE) {
         baseURI = baseURI_;
     }
 
     /// @dev Allows admin to set the contract URI
-    function setContractURI(
-        string memory _contractURI
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setContractURI(string memory _contractURI) public onlyRole(DEFAULT_ADMIN_ROLE) {
         contractURI = _contractURI;
     }
 
     /// @dev Override of setApprovalForAll from {ERC721}, with added Allowlist approval validation
-    function setApprovalForAll(
-        address operator,
-        bool approved
-    ) public override(ERC721) validateApproval(operator) {
+    function setApprovalForAll(address operator, bool approved) public override(ERC721) validateApproval(operator) {
         super.setApprovalForAll(operator, approved);
     }
 
     /// @dev Override of approve from {ERC721}, with added Allowlist approval validation
-    function approve(
-        address to,
-        uint256 tokenId
-    ) public override(ERC721) validateApproval(to) {
+    function approve(address to, uint256 tokenId) public override(ERC721) validateApproval(to) {
         super.approve(to, tokenId);
     }
 
     /// @dev Override of internal transfer from {ERC721} function to include validation
-    function _transfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal override(ERC721) validateTransfer(from, to) {
+    function _transfer(address from, address to, uint256 tokenId) internal override(ERC721) validateTransfer(from, to) {
         super._transfer(from, to, tokenId);
     }
 
     /// @dev Set the default royalty receiver address
-    function setDefaultRoyaltyReceiver(
-        address receiver,
-        uint96 feeNumerator
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setDefaultRoyaltyReceiver(address receiver, uint96 feeNumerator) public onlyRole(DEFAULT_ADMIN_ROLE) {
         _setDefaultRoyalty(receiver, feeNumerator);
     }
 
@@ -204,9 +170,7 @@ abstract contract ImmutableERC721Base is
     }
 
     /// @dev Allows admin to revoke `MINTER_ROLE` role from `user`
-    function revokeMinterRole(
-        address user
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function revokeMinterRole(address user) public onlyRole(DEFAULT_ADMIN_ROLE) {
         revokeRole(MINTER_ROLE, user);
     }
 

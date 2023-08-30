@@ -22,29 +22,17 @@ contract ImmutableERC721MintByID is ImmutableERC721Base {
         string memory symbol_,
         string memory baseURI_,
         string memory contractURI_,
-        address _royaltyAllowlist,
+        address _operatorAllowlist,
         address _receiver,
         uint96 _feeNumerator
     )
-        ImmutableERC721Base(
-            owner,
-            name_,
-            symbol_,
-            baseURI_,
-            contractURI_,
-            _royaltyAllowlist,
-            _receiver,
-            _feeNumerator
-        )
+        ImmutableERC721Base(owner, name_, symbol_, baseURI_, contractURI_, _operatorAllowlist, _receiver, _feeNumerator)
     {}
 
     ///     =====   External functions  =====
 
     /// @dev Allows minter to mint `tokenID` to `to`
-    function safeMint(
-        address to,
-        uint256 tokenID
-    ) external onlyRole(MINTER_ROLE) {
+    function safeMint(address to, uint256 tokenID) external onlyRole(MINTER_ROLE) {
         _safeMint(to, tokenID, "");
         _totalSupply++;
     }
@@ -56,18 +44,14 @@ contract ImmutableERC721MintByID is ImmutableERC721Base {
     }
 
     /// @dev Allows minter to a batch of tokens to a specified list of addresses
-    function safeMintBatch(
-        IDMint[] memory mintRequests
-    ) external onlyRole(MINTER_ROLE) {
+    function safeMintBatch(IDMint[] memory mintRequests) external onlyRole(MINTER_ROLE) {
         for (uint256 i = 0; i < mintRequests.length; i++) {
             _safeBatchMint(mintRequests[i]);
         }
     }
 
     /// @dev Allows minter to a batch of tokens to a specified list of addresses
-    function mintBatch(
-        IDMint[] memory mintRequests
-    ) external onlyRole(MINTER_ROLE) {
+    function mintBatch(IDMint[] memory mintRequests) external onlyRole(MINTER_ROLE) {
         for (uint256 i = 0; i < mintRequests.length; i++) {
             _batchMint(mintRequests[i]);
         }

@@ -1,10 +1,10 @@
 pragma solidity ^0.8.0;
 // SPDX-License-Identifier: MIT
 
-import { ERC721Hybrid } from "../abstract/ERC721Hybrid.sol";
-import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import { MintingAccessControl } from "../abstract/MintingAccessControl.sol";
-import { ImmutableERC721HybridBase } from "../abstract/ImmutableERC721HybridBase.sol";
+import {ERC721Hybrid} from "../abstract/ERC721Hybrid.sol";
+import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {MintingAccessControl} from "../abstract/MintingAccessControl.sol";
+import {ImmutableERC721HybridBase} from "../abstract/ImmutableERC721HybridBase.sol";
 
 contract ImmutableERC721 is ImmutableERC721HybridBase {
     ///     =====   Constructor  =====
@@ -23,11 +23,20 @@ contract ImmutableERC721 is ImmutableERC721HybridBase {
         string memory symbol_,
         string memory baseURI_,
         string memory contractURI_,
-        address royaltyAllowlist_,
+        address operatorAllowlist_,
         address royaltyReceiver_,
         uint96 feeNumerator_
-    ) 
-    ImmutableERC721HybridBase(owner_, name_, symbol_, baseURI_, contractURI_, royaltyAllowlist_, royaltyReceiver_, feeNumerator_)
+    )
+        ImmutableERC721HybridBase(
+            owner_,
+            name_,
+            symbol_,
+            baseURI_,
+            contractURI_,
+            operatorAllowlist_,
+            royaltyReceiver_,
+            feeNumerator_
+        )
     {}
 
     /// @dev Allows minter to a token by ID to a specified address
@@ -44,10 +53,10 @@ contract ImmutableERC721 is ImmutableERC721HybridBase {
     function mintByQuantity(address to, uint256 quantity) external onlyRole(MINTER_ROLE) {
         _mintByQuantity(to, quantity);
     }
-    
+
     /** @dev Allows minter to a number of tokens sequentially to a specified address with hooks
      *  and checks
-    **/
+     **/
     function safeMintByQuantity(address to, uint256 quantity) external onlyRole(MINTER_ROLE) {
         _safeMintByQuantity(to, quantity);
     }
@@ -59,7 +68,7 @@ contract ImmutableERC721 is ImmutableERC721HybridBase {
 
     /** @dev Allows minter to a number of tokens sequentially to a number of specified
      *  addresses with hooks and checks
-    **/
+     **/
     function safeMintBatchByQuantity(Mint[] memory mints) external onlyRole(MINTER_ROLE) {
         _safeMintBatchByQuantity(mints);
     }
@@ -70,8 +79,8 @@ contract ImmutableERC721 is ImmutableERC721HybridBase {
     }
 
     /** @dev Allows minter to a number of tokens by ID to a number of specified
-     *  addresses with hooks and checks 
-    **/
+     *  addresses with hooks and checks
+     **/
     function safeMintBatch(IDMint[] memory mints) external onlyRole(MINTER_ROLE) {
         _safeMintBatchByIDToMultiple(mints);
     }
@@ -83,7 +92,7 @@ contract ImmutableERC721 is ImmutableERC721HybridBase {
 
     /** @dev Allows caller to a transfer a number of tokens by ID from a specified
      *  address to a number of specified addresses
-    **/
+     **/
     function safeTransferFromBatch(TransferRequest calldata tr) external {
         if (tr.tokenIds.length != tr.tos.length) {
             revert IImmutableERC721MismatchedTransferLengths();
@@ -93,5 +102,4 @@ contract ImmutableERC721 is ImmutableERC721HybridBase {
             safeTransferFrom(tr.from, tr.tos[i], tr.tokenIds[i]);
         }
     }
-
 }

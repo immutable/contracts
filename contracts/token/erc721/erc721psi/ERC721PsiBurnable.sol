@@ -32,7 +32,7 @@ abstract contract ERC721PsiBurnable is ERC721Psi {
         address from = ownerOf(tokenId);
         _beforeTokenTransfers(from, address(0), tokenId, 1);
         _burnedToken.set(tokenId);
-        
+
         emit Transfer(from, address(0), tokenId);
 
         _afterTokenTransfers(from, address(0), tokenId, 1);
@@ -46,10 +46,10 @@ abstract contract ERC721PsiBurnable is ERC721Psi {
      * Tokens start existing when they are minted (`_mint`),
      * and stop existing when they are burned (`_burn`).
      */
-    function _exists(uint256 tokenId) internal view override virtual returns (bool){
-        if(_burnedToken.get(tokenId)) {
+    function _exists(uint256 tokenId) internal view virtual override returns (bool) {
+        if (_burnedToken.get(tokenId)) {
             return false;
-        } 
+        }
         return super._exists(tokenId);
     }
 
@@ -63,11 +63,11 @@ abstract contract ERC721PsiBurnable is ERC721Psi {
     /**
      * @dev Returns number of token burned.
      */
-    function _burned() internal view returns (uint256 burned){
+    function _burned() internal view returns (uint256 burned) {
         uint256 startBucket = _startTokenId() >> 8;
         uint256 lastBucket = (_nextTokenId() >> 8) + 1;
 
-        for(uint256 i=startBucket; i < lastBucket; i++) {
+        for (uint256 i = startBucket; i < lastBucket; i++) {
             uint256 bucket = _burnedToken.getBucket(i);
             burned += _popcount(bucket);
         }
@@ -77,9 +77,8 @@ abstract contract ERC721PsiBurnable is ERC721Psi {
      * @dev Returns number of set bits.
      */
     function _popcount(uint256 x) private pure returns (uint256 count) {
-        unchecked{
-            for (count=0; x!=0; count++)
-                x &= x - 1;
+        unchecked {
+            for (count = 0; x != 0; count++) x &= x - 1;
         }
     }
 }

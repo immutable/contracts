@@ -1,14 +1,13 @@
 //SPDX-License-Identifier: Apache 2.0
 pragma solidity ^0.8.0;
 
-import { AccessControlEnumerable, MintingAccessControl } from "./MintingAccessControl.sol";
-import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import { ERC2981 } from "@openzeppelin/contracts/token/common/ERC2981.sol";
-import { RoyaltyEnforced } from "../../../royalty-enforcement/RoyaltyEnforced.sol";
-import { ERC721Hybrid } from "./ERC721Hybrid.sol";
+import {AccessControlEnumerable, MintingAccessControl} from "./MintingAccessControl.sol";
+import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
+import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnforced.sol";
+import {ERC721Hybrid} from "./ERC721Hybrid.sol";
 
-abstract contract ImmutableERC721HybridBase is RoyaltyEnforced, MintingAccessControl, ERC2981, ERC721Hybrid {
-    
+abstract contract ImmutableERC721HybridBase is OperatorAllowlistEnforced, MintingAccessControl, ERC2981, ERC721Hybrid {
     /// @dev Contract level metadata
     string public contractURI;
 
@@ -16,19 +15,19 @@ abstract contract ImmutableERC721HybridBase is RoyaltyEnforced, MintingAccessCon
     string public baseURI;
 
     constructor(
-        address owner_, 
-        string memory name_, 
-        string memory symbol_, 
+        address owner_,
+        string memory name_,
+        string memory symbol_,
         string memory baseURI_,
         string memory contractURI_,
-        address royaltyAllowlist_,
+        address operatorAllowlist_,
         address receiver_,
         uint96 feeNumerator_
-    )ERC721Hybrid(name_, symbol_) {
+    ) ERC721Hybrid(name_, symbol_) {
         // Initialize state variables
         _grantRole(DEFAULT_ADMIN_ROLE, owner_);
         _setDefaultRoyalty(receiver_, feeNumerator_);
-        _setRoyaltyAllowlistRegistry(royaltyAllowlist_);
+        _setOperatorAllowlistRegistry(operatorAllowlist_);
         baseURI = baseURI_;
         contractURI = contractURI_;
     }
@@ -40,27 +39,23 @@ abstract contract ImmutableERC721HybridBase is RoyaltyEnforced, MintingAccessCon
         public
         view
         virtual
-        override(ERC721Hybrid, ERC2981, RoyaltyEnforced, AccessControlEnumerable)
+        override(ERC721Hybrid, ERC2981, OperatorAllowlistEnforced, AccessControlEnumerable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
     }
 
-        function _baseURI() internal view virtual override returns (string memory) {
+    function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
     }
 
     /// @dev Allows admin to set the base URI
-    function setBaseURI(
-        string memory baseURI_
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setBaseURI(string memory baseURI_) public onlyRole(DEFAULT_ADMIN_ROLE) {
         baseURI = baseURI_;
     }
 
     /// @dev Allows admin to set the contract URI
-    function setContractURI(
-        string memory _contractURI
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setContractURI(string memory _contractURI) public onlyRole(DEFAULT_ADMIN_ROLE) {
         contractURI = _contractURI;
     }
 
@@ -73,10 +68,7 @@ abstract contract ImmutableERC721HybridBase is RoyaltyEnforced, MintingAccessCon
     }
 
     /// @dev Override of approve from {ERC721}, with added Allowlist approval validation
-    function approve(
-        address to,
-        uint256 tokenId
-    ) public virtual override(ERC721Hybrid) validateApproval(to) {
+    function approve(address to, uint256 tokenId) public virtual override(ERC721Hybrid) validateApproval(to) {
         super.approve(to, tokenId);
     }
 
@@ -90,10 +82,7 @@ abstract contract ImmutableERC721HybridBase is RoyaltyEnforced, MintingAccessCon
     }
 
     /// @dev Set the default royalty receiver address
-    function setDefaultRoyaltyReceiver(
-        address receiver,
-        uint96 feeNumerator
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setDefaultRoyaltyReceiver(address receiver, uint96 feeNumerator) public onlyRole(DEFAULT_ADMIN_ROLE) {
         _setDefaultRoyalty(receiver, feeNumerator);
     }
 
@@ -116,5 +105,4 @@ abstract contract ImmutableERC721HybridBase is RoyaltyEnforced, MintingAccessCon
             _setTokenRoyalty(tokenIds[i], receiver, feeNumerator);
         }
     }
-
 }

@@ -2,9 +2,9 @@
 pragma solidity ^0.8.0;
 
 /**
- * @dev Required interface of an RoyaltyAllowlist compliant contract
+ * @dev Required interface of an OperatorAllowlist compliant contract
  */
-interface IRoyaltyAllowlist {
+interface IOperatorAllowlist {
     /// @dev Returns true if an address is Allowlisted false otherwise
     function isAllowlisted(address target) external view returns (bool);
 }

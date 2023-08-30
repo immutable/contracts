@@ -4,8 +4,8 @@ import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
   ImmutableERC721MintByID__factory,
   ImmutableERC721MintByID,
-  RoyaltyAllowlist,
-  RoyaltyAllowlist__factory,
+  OperatorAllowlist,
+  OperatorAllowlist__factory,
 } from "../../../typechain";
 import { RegularAllowlistFixture } from "../../utils/DeployRegularFixtures";
 
@@ -13,7 +13,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
   this.timeout(300_000); // 5 min
 
   let erc721: ImmutableERC721MintByID;
-  let royaltyAllowlist: RoyaltyAllowlist;
+  let operatorAllowlist: OperatorAllowlist;
   let owner: SignerWithAddress;
   let user: SignerWithAddress;
   let user2: SignerWithAddress;
@@ -29,17 +29,16 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
 
   before(async function () {
     // Retrieve accounts
-    [owner, user, minter, registrar, royaltyRecipient, user2] =
-      await ethers.getSigners();
+    [owner, user, minter, registrar, royaltyRecipient, user2] = await ethers.getSigners();
 
     // Get all required contracts
-    ({ erc721, royaltyAllowlist } = await RegularAllowlistFixture(owner));
+    ({ erc721, operatorAllowlist } = await RegularAllowlistFixture(owner));
 
-    // Deploy royalty Allowlist
-    const royaltyAllowlistFactory = (await ethers.getContractFactory(
-      "RoyaltyAllowlist"
-    )) as RoyaltyAllowlist__factory;
-    royaltyAllowlist = await royaltyAllowlistFactory.deploy(owner.address);
+    // Deploy operator Allowlist
+    const operatorAllowlistFactory = (await ethers.getContractFactory(
+      "OperatorAllowlist"
+    )) as OperatorAllowlist__factory;
+    operatorAllowlist = await operatorAllowlistFactory.deploy(owner.address);
 
     // Deploy ERC721 contract
     const erc721PresetFactory = (await ethers.getContractFactory(
@@ -52,14 +51,14 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
       symbol,
       baseURI,
       contractURI,
-      royaltyAllowlist.address,
+      operatorAllowlist.address,
       royaltyRecipient.address,
       royalty
     );
 
     // Set up roles
     await erc721.connect(owner).grantMinterRole(minter.address);
-    await royaltyAllowlist.connect(owner).grantRegistrarRole(registrar.address);
+    await operatorAllowlist.connect(owner).grantRegistrarRole(registrar.address);
   });
 
   describe("Contract Deployment", function () {
@@ -90,9 +89,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
     });
 
     it("Should revert when caller does not have minter role", async function () {
-      await expect(
-        erc721.connect(user).mint(user.address, 2)
-      ).to.be.revertedWith(
+      await expect(erc721.connect(user).mint(user.address, 2)).to.be.revertedWith(
         "AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x4d494e5445525f524f4c45000000000000000000000000000000000000000000"
       );
     });
@@ -148,9 +145,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
       const originalBalance = await erc721.balanceOf(user.address);
       const originalSupply = await erc721.totalSupply();
       await erc721.connect(user).safeBurn(user.address, 3);
-      expect(await erc721.balanceOf(user.address)).to.equal(
-        originalBalance.sub(1)
-      );
+      expect(await erc721.balanceOf(user.address)).to.equal(originalBalance.sub(1));
       expect(await erc721.totalSupply()).to.equal(originalSupply.sub(1));
     });
 
@@ -192,12 +187,8 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
         },
       ];
       await erc721.connect(owner).safeBurnBatch(burns);
-      expect(await erc721.balanceOf(user.address)).to.equal(
-        originalUserBalance.sub(3)
-      );
-      expect(await erc721.balanceOf(owner.address)).to.equal(
-        originalOwnerBalance.sub(3)
-      );
+      expect(await erc721.balanceOf(user.address)).to.equal(originalUserBalance.sub(3));
+      expect(await erc721.balanceOf(owner.address)).to.equal(originalOwnerBalance.sub(3));
       expect(await erc721.totalSupply()).to.equal(originalSupply.sub(6));
     });
   });
@@ -212,9 +203,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
     it("Should revert with a burnt tokenId", async function () {
       const tokenId = 100;
       await erc721.connect(user).burn(tokenId);
-      await expect(erc721.tokenURI(tokenId)).to.be.revertedWith(
-        "ERC721: invalid token ID"
-      );
+      await expect(erc721.tokenURI(tokenId)).to.be.revertedWith("ERC721: invalid token ID");
     });
 
     it("Should allow the default admin to update the base URI", async function () {
@@ -224,15 +213,11 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
     });
 
     it("Should revert with a non-existent tokenId", async function () {
-      await expect(erc721.tokenURI(1001)).to.be.revertedWith(
-        "ERC721: invalid token ID"
-      );
+      await expect(erc721.tokenURI(1001)).to.be.revertedWith("ERC721: invalid token ID");
     });
 
     it("Should revert with a caller does not have admin role", async function () {
-      await expect(
-        erc721.connect(user).setBaseURI("New Base URI")
-      ).to.be.revertedWith(
+      await expect(erc721.connect(user).setBaseURI("New Base URI")).to.be.revertedWith(
         "AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
       );
     });
@@ -253,9 +238,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
     });
 
     it("Should revert with a caller does not have admin role", async function () {
-      await expect(
-        erc721.connect(user).setContractURI("New Contract URI")
-      ).to.be.revertedWith(
+      await expect(erc721.connect(user).setContractURI("New Contract URI")).to.be.revertedWith(
         "AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
       );
     });
@@ -316,9 +299,7 @@ describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
 
       // Perform transfers
       for (const transferReq of transferRequests) {
-        await erc721
-          .connect(ethers.provider.getSigner(transferReq.from))
-          .safeTransferFromBatch(transferReq);
+        await erc721.connect(ethers.provider.getSigner(transferReq.from)).safeTransferFromBatch(transferReq);
       }
 
       // Verify ownership after transfer

@@ -2,15 +2,15 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import {
-  ImmutableERC721,
   RoyaltyAllowlist,
   MockEIP1271Wallet,
+  ImmutableERC721MintByID,
 } from "../../../typechain";
-import { AllowlistFixture } from "../../utils/DeployHybridFixtures";
+import { RegularAllowlistFixture } from "../../utils/DeployRegularFixtures";
 import { BigNumberish } from "ethers";
 
 describe("ImmutableERC721Permit", function () {
-  let erc721: ImmutableERC721;
+  let erc721: ImmutableERC721MintByID;
   let royaltyAllowlist: RoyaltyAllowlist;
   let owner: SignerWithAddress;
   let user: SignerWithAddress;
@@ -65,9 +65,8 @@ describe("ImmutableERC721Permit", function () {
     [owner, user, minter, registrar, operator] = await ethers.getSigners();
 
     // Get all required contracts
-    ({ erc721, royaltyAllowlist, eip1271Wallet } = await AllowlistFixture(
-      owner
-    ));
+    ({ erc721, royaltyAllowlist, eip1271Wallet } =
+      await RegularAllowlistFixture(owner));
 
     // Set up roles
     await erc721.connect(owner).grantMinterRole(minter.address);
@@ -105,32 +104,6 @@ describe("ImmutableERC721Permit", function () {
         .permit(operatorAddress, 1, deadline, signature);
 
       expect(await erc721.getApproved(1)).to.be.equal(operatorAddress);
-    });
-
-    it("can use permits to approve spender on token minted by quantity", async function () {
-      await erc721.connect(minter).mintByQuantity(user.address, 1);
-      const first = await erc721.bulkMintThreshold();
-
-      const deadline = Math.round(Date.now() / 1000 + 24 * 60 * 60);
-      const nonce = await erc721.nonces(first);
-      expect(nonce).to.be.equal(0);
-
-      const operatorAddress = await operator.getAddress();
-      const signature = await eoaSign(
-        user,
-        operatorAddress,
-        first,
-        nonce,
-        deadline
-      );
-
-      expect(await erc721.getApproved(first)).to.not.equal(operatorAddress);
-
-      await erc721
-        .connect(operator)
-        .permit(operatorAddress, first, deadline, signature);
-
-      expect(await erc721.getApproved(first)).to.be.equal(operatorAddress);
     });
 
     it("reverts on permit if deadline has passed", async function () {
@@ -254,38 +227,6 @@ describe("ImmutableERC721Permit", function () {
         erc721.connect(operator).permit(operatorAddress, 5, deadline, signature)
       ).to.be.revertedWith("InvalidSignature");
     });
-
-    it("can not use a permit after a transfer of token minted by quantity due to bad owner", async function () {
-      await erc721.connect(minter).mintByQuantity(user.address, 1);
-      const deadline = Math.round(Date.now() / 1000 + 24 * 60 * 60);
-      const operatorAddress = await operator.getAddress();
-      const tokenId = (await erc721.bulkMintThreshold()).add(1);
-
-      await erc721
-        .connect(user)
-        ["safeTransferFrom(address,address,uint256)"](
-          await user.getAddress(),
-          await owner.getAddress(),
-          tokenId
-        );
-
-      const nonce = await erc721.nonces(tokenId);
-      expect(nonce).to.be.equal(1);
-
-      const signature = await eoaSign(
-        user,
-        operatorAddress,
-        tokenId,
-        nonce,
-        deadline
-      );
-
-      await expect(
-        erc721
-          .connect(operator)
-          .permit(operatorAddress, tokenId, deadline, signature)
-      ).to.be.revertedWith("InvalidSignature");
-    });
   });
 
   describe("Smart Contract Permit", async function () {
@@ -316,41 +257,38 @@ describe("ImmutableERC721Permit", function () {
     });
 
     it("allows approved operators to create permits on behalf of token owner", async function () {
-      await erc721.connect(minter).mintByQuantity(user.address, 1);
+      await erc721.connect(minter).mint(user.address, 7);
       const deadline = Math.round(Date.now() / 1000 + 24 * 60 * 60);
 
-      const tokenId = (await erc721.bulkMintThreshold()).add(2);
-      const nonce = await erc721.nonces(tokenId);
+      const nonce = await erc721.nonces(7);
       expect(nonce).to.be.equal(0);
 
       const operatorAddress = await operator.getAddress();
       const signature = await eoaSign(
         owner,
         operatorAddress,
-        tokenId,
+        7,
         nonce,
         deadline
       );
 
       await expect(
-        erc721
-          .connect(operator)
-          .permit(operatorAddress, tokenId, deadline, signature)
+        erc721.connect(operator).permit(operatorAddress, 7, deadline, signature)
       ).to.be.revertedWith("InvalidSignature");
 
-      expect(await erc721.getApproved(tokenId)).to.not.equal(operatorAddress);
+      expect(await erc721.getApproved(7)).to.not.equal(operatorAddress);
 
       await royaltyAllowlist
         .connect(registrar)
         .addAddressToAllowlist([eip1271Wallet.address]);
 
-      await erc721.connect(user).approve(eip1271Wallet.address, tokenId);
+      await erc721.connect(user).approve(eip1271Wallet.address, 7);
 
       await erc721
         .connect(operator)
-        .permit(operatorAddress, tokenId, deadline, signature);
+        .permit(operatorAddress, 7, deadline, signature);
 
-      expect(await erc721.getApproved(tokenId)).to.be.equal(operatorAddress);
+      expect(await erc721.getApproved(7)).to.be.equal(operatorAddress);
     });
   });
 });

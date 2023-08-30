@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 // Token
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
+import "./ERC721Permit.sol";
 
 // Allowlist
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
@@ -12,8 +13,6 @@ import "../../../allowlist/OperatorAllowlistEnforced.sol";
 // Utils
 import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 
-// Errors
-import {IImmutableERC721Errors} from "../../../errors/Errors.sol";
 
 /*
     ImmutableERC721Base is an abstract contract that offers minimum preset functionality without
@@ -21,7 +20,11 @@ import {IImmutableERC721Errors} from "../../../errors/Errors.sol";
     own minting functionality to meet the needs of the inheriting contract.
 */
 
-abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, ERC721Burnable, ERC2981, IImmutableERC721Errors {
+abstract contract ImmutableERC721Base is
+    OperatorAllowlistEnforced,
+    ERC721Permit,
+    ERC2981
+{
     using BitMaps for BitMaps.BitMap;
     ///     =====   State Variables  =====
 
@@ -78,7 +81,7 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, ERC721Burnab
         address _operatorAllowlist,
         address _receiver,
         uint96 _feeNumerator
-    ) ERC721(name_, symbol_) {
+    ) ERC721Permit(name_, symbol_) {
         // Initialize state variables
         _grantRole(DEFAULT_ADMIN_ROLE, owner);
         _setDefaultRoyalty(_receiver, _feeNumerator);
@@ -97,7 +100,13 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, ERC721Burnab
     /// @dev Returns the supported interfaces
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(ERC721, ERC2981, OperatorAllowlistEnforced) returns (bool) {
+    )
+        public
+        view
+        virtual
+        override(ERC721Permit, ERC2981, OperatorAllowlistEnforced)
+        returns (bool)
+    {
         return super.supportsInterface(interfaceId);
     }
 
@@ -134,8 +143,12 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, ERC721Burnab
         super.approve(to, tokenId);
     }
 
-    /// @dev Override of internal transfer from {ERC721} function to include validation
-    function _transfer(address from, address to, uint256 tokenId) internal override(ERC721) validateTransfer(from, to) {
+    /// @dev Override of internal transfer from {ERC721Permit} function to include validation
+    function _transfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override(ERC721Permit) validateTransfer(from, to) {
         super._transfer(from, to, tokenId);
     }
 

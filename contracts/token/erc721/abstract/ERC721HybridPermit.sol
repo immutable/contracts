@@ -8,11 +8,22 @@ import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import "solidity-bytes-utils/contracts/BytesLib.sol";
 import "./IERC4494.sol";
 import "./ERC721Hybrid.sol";
+import "hardhat/console.sol";
 
-abstract contract ERC721HybridPermit is ERC721Hybrid, Ownable, IERC4494, EIP712 {
+/**
+ * @title ERC721HybridPermit: An extension of the ERC721Hybrid NFT standard that supports off-chain approval via permits.
+ * @dev This contract implements ERC-4494 as well, allowing tokens to be approved via off-chain signed messages.
+ */
 
+abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
+
+    /** @notice mapping used to keep track of nonces of each token ID for validating
+     *  signatures
+     */
     mapping(uint256 => uint256) private _nonces;
 
+    
+    /** @dev the unique identifier for the permit struct to be EIP 712 compliant */
     bytes32 private constant _PERMIT_TYPEHASH = keccak256(
         abi.encodePacked(
             "Permit(",
@@ -30,7 +41,7 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, Ownable, IERC4494, EIP712 
     {}
 
     /**
-     * @notice [ERC-4494] Function to approve by way of owner signature
+     * @notice Function to approve by way of owner signature
      * @param spender the address to approve
      * @param tokenId the index of the NFT to approve the spender on
      * @param deadline a timestamp expiry for the permit
@@ -41,7 +52,16 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, Ownable, IERC4494, EIP712 
         uint256 tokenId,
         uint256 deadline,
         bytes memory sig
-    ) external {
+    ) external override {
+        _permit(spender, tokenId, deadline, sig);
+    }
+
+    function _permit(
+        address spender,
+        uint256 tokenId,
+        uint256 deadline,
+        bytes memory sig
+    ) internal virtual {
         if (deadline < block.timestamp) {
             revert PermitExpired();
         }
@@ -71,10 +91,6 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, Ownable, IERC4494, EIP712 
 
         bool isApprovedOperator = _isApprovedOrOwner(recoveredSigner, tokenId);
 
-        if (!isApprovedOperator) {
-            revert NotOwner(tokenId);
-        }
-
         bool isValidEOASig = isApprovedOperator && isNotZerothAddr;
 
         if (!isValidEOASig) {
@@ -89,9 +105,9 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, Ownable, IERC4494, EIP712 
     }
 
     /**
-     * @notice [ERC-4494] Returns the nonce of an NFT - useful for creating permits
-     * @param tokenId the index of the NFT to get the nonce of
-     * @return the uint256 representation of the nonce
+     * @notice Returns the current nonce of a given token ID.
+     * @param tokenId The ID of the token for which to retrieve the nonce.
+     * @return Current nonce of the given token.
      */
     function nonces(
         uint256 tokenId
@@ -100,13 +116,20 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, Ownable, IERC4494, EIP712 
     }
 
     /**
-     * @notice [ERC-4494] Returns the domain separator used in the encoding of the signature for permits, as defined by EIP-712
+     * @notice Returns the domain separator used in the encoding of the signature for permits, as defined by EIP-712
      * @return the bytes32 domain separator
      */
     function DOMAIN_SEPARATOR() external view override returns (bytes32) {
         return _domainSeparatorV4();
     }
 
+    /**
+     * @notice Builds the EIP-712 compliant digest for the permit.
+     * @param spender The address which is approved to spend the token.
+     * @param tokenId The ID of the token for which the permit is being generated.
+     * @param deadline The deadline until which the permit is valid.
+     * @return A bytes32 digest, EIP-712 compliant, that serves as a unique identifier for the permit.
+     */
     function _buildPermitDigest(
         address spender,
         uint256 tokenId,
@@ -125,6 +148,13 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, Ownable, IERC4494, EIP712 
         );
     }
 
+    /**
+     * @notice Checks if a given signature is valid according to EIP-1271.
+     * @param spender The address which purports to have signed the message.
+     * @param digest The EIP-712 compliant digest that was signed.
+     * @param sig The actual signature bytes.
+     * @return True if the signature is valid according to EIP-1271, otherwise false.
+     */
     function _isValidERC1271Signature(address spender, bytes32 digest, bytes memory sig) private view returns(bool) {
         (bool success, bytes memory res) = spender.staticcall(
             abi.encodeWithSelector(
@@ -144,6 +174,11 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, Ownable, IERC4494, EIP712 
         return false;
     }
 
+    /**
+     * @notice Overrides supportsInterface from IERC165 and ERC721Hybrid to add support for IERC4494.
+     * @param interfaceId The interface identifier, which is a 4-byte selector.
+     * @return True if the contract implements `interfaceId` and the call doesn't revert, otherwise false.
+     */
     function supportsInterface(bytes4 interfaceId)
       public
       view
@@ -156,6 +191,12 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, Ownable, IERC4494, EIP712 
       super.supportsInterface(interfaceId);
     }
 
+    /**
+     * @notice Overrides the _transfer method from ERC721Hybrid to increment the nonce after a successful transfer.
+     * @param from The address from which the token is being transferred.
+     * @param to The address to which the token is being transferred.
+     * @param tokenId The ID of the token being transferred.
+     */
     function _transfer(
         address from,
         address to,

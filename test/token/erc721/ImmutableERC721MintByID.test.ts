@@ -9,7 +9,7 @@ import {
 } from "../../../typechain";
 import { RegularAllowlistFixture } from "../../utils/DeployRegularFixtures";
 
-describe("Immutable ERC721 Permissioned Mintable Test Cases", function () {
+describe("Immutable ERC721 Mint by ID Cases", function () {
   this.timeout(300_000); // 5 min
 
   let erc721: ImmutableERC721MintByID;

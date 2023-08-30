@@ -11,6 +11,8 @@ import {
   MockMarketplace,
   MockWalletFactory,
   MockWalletFactory__factory,
+  MockEIP1271Wallet,
+  MockEIP1271Wallet__factory,
 } from "../../typechain";
 
 // Helper function to deploy all required contracts for Allowlist testing. Deploys:
@@ -47,12 +49,22 @@ export const AllowlistFixture = async (owner: SignerWithAddress) => {
   const mockMarketplaceFactory = (await ethers.getContractFactory("MockMarketplace")) as MockMarketplace__factory;
   const marketPlace: MockMarketplace = await mockMarketplaceFactory.deploy(erc721.address);
 
+  // Mock EIP1271 Wallet
+
+  const mockEIP1271Wallet = (await ethers.getContractFactory(
+    "MockEIP1271Wallet"
+  )) as MockEIP1271Wallet__factory;
+  const eip1271Wallet: MockEIP1271Wallet = await mockEIP1271Wallet.deploy(
+    owner.address
+  );
+
   return {
     erc721,
     walletFactory,
     factory,
     operatorAllowlist,
     marketPlace,
+    eip1271Wallet,
   };
 };
 

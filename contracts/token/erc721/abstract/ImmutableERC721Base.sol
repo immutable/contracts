@@ -139,8 +139,8 @@ abstract contract ImmutableERC721Base is
     }
 
     /// @dev Override of approve from {ERC721}, with added Allowlist approval validation
-    function approve(address to, uint256 tokenId) public override(ERC721) validateApproval(to) {
-        super.approve(to, tokenId);
+    function _approve(address to, uint256 tokenId) internal override(ERC721) validateApproval(to) {
+        super._approve(to, tokenId);
     }
 
     /// @dev Override of internal transfer from {ERC721Permit} function to include validation

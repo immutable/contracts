@@ -5,7 +5,7 @@ import { OperatorAllowlist, MockEIP1271Wallet, ImmutableERC721MintByID } from ".
 import { RegularAllowlistFixture } from "../../utils/DeployRegularFixtures";
 import { BigNumberish } from "ethers";
 
-describe("ImmutableERC721Permit", function () {
+describe("ImmutableERC721MintByIDPermit", function () {
   let erc721: ImmutableERC721MintByID;
   let operatorAllowlist: OperatorAllowlist;
   let owner: SignerWithAddress;
@@ -217,9 +217,9 @@ describe("ImmutableERC721Permit", function () {
 
       await erc721.connect(user).approve(eip1271Wallet.address, 7);
 
-      await erc721.connect(operator).permit(operatorAddress, 7, deadline, signature);
-
-      expect(await erc721.getApproved(7)).to.be.equal(operatorAddress);
+      await expect(erc721.connect(operator).permit(operatorAddress, 7, deadline, signature)).to.be.revertedWith(
+        "InvalidSignature"
+      );
     });
   });
 });

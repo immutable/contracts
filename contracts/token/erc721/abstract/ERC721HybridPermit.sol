@@ -66,8 +66,16 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
         }
 
         bytes32 digest = _buildPermitDigest(spender, tokenId, deadline);
+        
+        // smart contract wallet signature validation
+        if (_isValidERC1271Signature(ownerOf(tokenId), digest, sig)) {
+            _approve(spender, tokenId);
+            return;
+        }
+
         address recoveredSigner;
 
+        // EOA signature validation
         if (sig.length == 64) {
             // ERC2098 Sig
             recoveredSigner = ECDSA.recover(
@@ -82,20 +90,11 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
             revert InvalidSignature();
         }
 
-        if (recoveredSigner == address(0)) {
-            revert SignerCannotBeZerothAddress();
-        }
-
-        if (
-            _isApprovedOrOwner(recoveredSigner, tokenId) ||
-                _isValidERC1271Signature(getApproved(tokenId), digest, sig) ||
-                _isValidERC1271Signature(ownerOf(tokenId), digest, sig)
-        ) {
+        if (_isValidEOASignature(recoveredSigner, tokenId)) {
             _approve(spender, tokenId);
         } else {
             revert InvalidSignature();
         }
-        
     }
 
     /**
@@ -140,6 +139,16 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
                 )
             )
         );
+    }
+
+    /**
+     * @notice Checks if a given signature is valid according to EIP-1271.
+     * @param recoveredSigner The address which purports to have signed the message.
+     * @param tokenId The token id.
+     * @return True if the signature is from an approved operator or owner, otherwise false.
+     */
+    function _isValidEOASignature(address recoveredSigner, uint256 tokenId) private view returns(bool) {
+        return recoveredSigner != address(0) && _isApprovedOrOwner(recoveredSigner, tokenId);
     }
 
     /**

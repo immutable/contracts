@@ -76,6 +76,7 @@ describe("Allowlisted ERC721 Transfers", function () {
 
   describe("Approvals", function () {
     it("Should not allow a non-Allowlisted operator to be approved", async function () {
+      await erc721.connect(minter).mint(minter.address, 1);
       // Approve for all
       await expect(erc721.connect(minter).setApprovalForAll(marketPlace.address, true))
         .to.be.revertedWith("ApproveTargetNotInAllowlist")

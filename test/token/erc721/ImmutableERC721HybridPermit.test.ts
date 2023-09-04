@@ -87,6 +87,7 @@ describe("ImmutableERC721Permit", function () {
       const signature = await eoaSign(user, operatorAddress, 1, nonce, deadline);
 
       expect(await erc721.getApproved(1)).to.not.equal(operatorAddress);
+      console.log("operator: ", operatorAddress);
 
       await erc721.connect(operator).permit(operatorAddress, 1, deadline, signature);
 
@@ -235,7 +236,7 @@ describe("ImmutableERC721Permit", function () {
       expect(await erc721.getApproved(6)).to.be.equal(operatorAddress);
     });
 
-    it("allows approved operators to create permits on behalf of token owner", async function () {
+    it("does not allow approved operators to create permits on behalf of token owner", async function () {
       await erc721.connect(minter).mintByQuantity(user.address, 1);
       const deadline = Math.round(Date.now() / 1000 + 24 * 60 * 60);
 
@@ -256,9 +257,9 @@ describe("ImmutableERC721Permit", function () {
 
       await erc721.connect(user).approve(eip1271Wallet.address, tokenId);
 
-      await erc721.connect(operator).permit(operatorAddress, tokenId, deadline, signature);
-
-      expect(await erc721.getApproved(tokenId)).to.be.equal(operatorAddress);
+      await expect(erc721.connect(operator).permit(operatorAddress, tokenId, deadline, signature)).to.be.revertedWith(
+        "InvalidSignature"
+      );
     });
   });
 });

@@ -23,6 +23,7 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
      */
     mapping(uint256 => uint256) private _nonces;
 
+    
     /** @dev the unique identifier for the permit struct to be EIP 712 compliant */
     bytes32 private constant _PERMIT_TYPEHASH = keccak256(
         abi.encodePacked(
@@ -39,7 +40,7 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
         ERC721(name, symbol)
         EIP712(name, "1")
     {}
-    
+
     /**
      * @notice Function to approve by way of owner signature
      * @param spender the address to approve
@@ -56,13 +57,6 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
         _permit(spender, tokenId, deadline, sig);
     }
 
-    /**
-     * @notice [ERC-4494] Function to approve by way of owner signature
-     * @param spender the address to approve
-     * @param tokenId the index of the NFT to approve the spender on
-     * @param deadline a timestamp expiry for the permit
-     * @param sig a traditional or EIP-2098 signature
-     */
     function _permit(
         address spender,
         uint256 tokenId,
@@ -74,8 +68,16 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
         }
 
         bytes32 digest = _buildPermitDigest(spender, tokenId, deadline);
+        
+        // smart contract signature validation
+        if (_isValidERC1271Signature(ownerOf(tokenId), digest, sig)) {
+            _approve(spender, tokenId);
+            return;
+        }
+
         address recoveredSigner;
 
+        // EOA signature validation
         if (sig.length == 64) {
             // ERC2098 Sig
             recoveredSigner = ECDSA.recover(
@@ -90,15 +92,7 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
             revert InvalidSignature();
         }
 
-        if (recoveredSigner == address(0)) {
-            revert SignerCannotBeZerothAddress();
-        }
-
-        if (
-            _isApprovedOrOwner(recoveredSigner, tokenId) ||
-                _isValidERC1271Signature(getApproved(tokenId), digest, sig) ||
-                _isValidERC1271Signature(ownerOf(tokenId), digest, sig)
-        ) {
+        if (_isValidEOASignature(recoveredSigner, tokenId)) {
             _approve(spender, tokenId);
         } else {
             revert InvalidSignature();
@@ -147,6 +141,16 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
                 )
             )
         );
+    }
+
+    /**
+     * @notice Checks if a given signature is valid according to EIP-1271.
+     * @param recoveredSigner The address which purports to have signed the message.
+     * @param tokenId The token id.
+     * @return True if the signature is from an approved operator or owner, otherwise false.
+     */
+    function _isValidEOASignature(address recoveredSigner, uint256 tokenId) private view returns(bool) {
+        return recoveredSigner != address(0) && _isApprovedOrOwner(recoveredSigner, tokenId);
     }
 
     /**

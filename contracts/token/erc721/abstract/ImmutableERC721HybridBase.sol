@@ -70,8 +70,8 @@ abstract contract ImmutableERC721HybridBase is OperatorAllowlistEnforced, Mintin
     }
 
     /// @dev Override of approve from {ERC721}, with added Allowlist approval validation
-    function approve(address to, uint256 tokenId) public virtual override(ERC721Hybrid) validateApproval(to) {
-        super.approve(to, tokenId);
+    function _approve(address to, uint256 tokenId) internal virtual override(ERC721Hybrid) validateApproval(to) {
+        super._approve(to, tokenId);
     }
 
     /// @dev Override of internal transfer from {ERC721} function to include validation

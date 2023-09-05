@@ -1,13 +1,15 @@
 //SPDX-License-Identifier: Apache 2.0
 pragma solidity ^0.8.0;
 
-import {AccessControlEnumerable, MintingAccessControl} from "./MintingAccessControl.sol";
-import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
-import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnforced.sol";
-import {ERC721Hybrid} from "./ERC721Hybrid.sol";
+import { AccessControlEnumerable, MintingAccessControl } from "./MintingAccessControl.sol";
+import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import { ERC2981 } from "@openzeppelin/contracts/token/common/ERC2981.sol";
+import { OperatorAllowlistEnforced } from "../../../allowlist/OperatorAllowlistEnforced.sol";
+import { ERC721HybridPermit } from "./ERC721HybridPermit.sol";
+import { ERC721Hybrid } from "./ERC721Hybrid.sol";
 
-abstract contract ImmutableERC721HybridBase is OperatorAllowlistEnforced, MintingAccessControl, ERC2981, ERC721Hybrid {
+abstract contract ImmutableERC721HybridBase is OperatorAllowlistEnforced, MintingAccessControl, ERC2981, ERC721HybridPermit {
+    
     /// @dev Contract level metadata
     string public contractURI;
 
@@ -23,7 +25,7 @@ abstract contract ImmutableERC721HybridBase is OperatorAllowlistEnforced, Mintin
         address operatorAllowlist_,
         address receiver_,
         uint96 feeNumerator_
-    ) ERC721Hybrid(name_, symbol_) {
+    )ERC721HybridPermit(name_, symbol_) {
         // Initialize state variables
         _grantRole(DEFAULT_ADMIN_ROLE, owner_);
         _setDefaultRoyalty(receiver_, feeNumerator_);
@@ -39,7 +41,7 @@ abstract contract ImmutableERC721HybridBase is OperatorAllowlistEnforced, Mintin
         public
         view
         virtual
-        override(ERC721Hybrid, ERC2981, OperatorAllowlistEnforced, AccessControlEnumerable)
+        override(ERC721HybridPermit, ERC2981, OperatorAllowlistEnforced, AccessControlEnumerable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
@@ -68,8 +70,8 @@ abstract contract ImmutableERC721HybridBase is OperatorAllowlistEnforced, Mintin
     }
 
     /// @dev Override of approve from {ERC721}, with added Allowlist approval validation
-    function approve(address to, uint256 tokenId) public virtual override(ERC721Hybrid) validateApproval(to) {
-        super.approve(to, tokenId);
+    function _approve(address to, uint256 tokenId) internal virtual override(ERC721Hybrid) validateApproval(to) {
+        super._approve(to, tokenId);
     }
 
     /// @dev Override of internal transfer from {ERC721} function to include validation
@@ -77,7 +79,7 @@ abstract contract ImmutableERC721HybridBase is OperatorAllowlistEnforced, Mintin
         address from,
         address to,
         uint256 tokenId
-    ) internal virtual override(ERC721Hybrid) validateTransfer(from, to) {
+    ) internal virtual override(ERC721HybridPermit) validateTransfer(from, to) {
         super._transfer(from, to, tokenId);
     }
 

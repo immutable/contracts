@@ -19,6 +19,15 @@ interface IImmutableERC721Errors {
 
     /// @dev Current token owner is not what was expected
     error IImmutableERC721MismatchedTokenOwner(uint256 tokenId, address currentOwner);
+
+    /// @dev Signer is zeroth address
+    error SignerCannotBeZerothAddress();
+
+    /// @dev Deadline exceeded for permit
+    error PermitExpired();
+
+    /// @dev Derived signature is invalid (EIP721 and EIP1271)
+    error InvalidSignature();
 }
 
 interface OperatorAllowlistEnforcementErrors {

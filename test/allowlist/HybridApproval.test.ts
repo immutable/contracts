@@ -74,6 +74,7 @@ describe("Royalty Checks with Hybrid ERC721", function () {
 
   describe("Approvals", function () {
     it("Should not allow a non-Allowlisted operator to be approved", async function () {
+      await erc721.connect(minter).mint(minter.address, 1);
       // Approve for all
       await expect(erc721.connect(minter).approve(marketPlace.address, 1))
         .to.be.revertedWith("ApproveTargetNotInAllowlist")

@@ -2,8 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "../abstract/ImmutableERC721Base.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
-import "@openzeppelin/contracts/token/common/ERC2981.sol";
 
 contract ImmutableERC721MintByID is ImmutableERC721Base {
     ///     =====   Constructor  =====

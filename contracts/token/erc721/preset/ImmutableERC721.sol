@@ -1,10 +1,8 @@
 pragma solidity ^0.8.0;
 // SPDX-License-Identifier: MIT
 
-import {ERC721Hybrid} from "../abstract/ERC721Hybrid.sol";
-import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import {MintingAccessControl} from "../abstract/MintingAccessControl.sol";
-import {ImmutableERC721HybridBase} from "../abstract/ImmutableERC721HybridBase.sol";
+import { MintingAccessControl } from "../abstract/MintingAccessControl.sol";
+import { ImmutableERC721HybridBase } from "../abstract/ImmutableERC721HybridBase.sol";
 
 contract ImmutableERC721 is ImmutableERC721HybridBase {
     ///     =====   Constructor  =====

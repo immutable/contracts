@@ -2,8 +2,6 @@
 pragma solidity ^0.8.0;
 
 // Token
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "./ERC721Permit.sol";
 
 // Allowlist

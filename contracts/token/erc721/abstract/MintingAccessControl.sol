@@ -4,6 +4,8 @@ pragma solidity ^0.8.0;
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 
 abstract contract MintingAccessControl is AccessControlEnumerable {
+
+    /// @dev Role to mint tokens
     bytes32 public constant MINTER_ROLE = bytes32("MINTER_ROLE");
 
     /// @dev Returns the addresses which have DEFAULT_ADMIN_ROLE

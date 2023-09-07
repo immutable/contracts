@@ -24,7 +24,9 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
     /// @dev A mapping of tokens ids before the threshold that have been burned to prevent re-minting
     BitMaps.BitMap private _burnedTokens;
 
-    /// @dev A singular batch transfer request
+    /** @dev A singular batch transfer request. The length of the tos and tokenIds must be matching
+     *  batch transfers will transfer the specified ids to their matching address via index.
+     **/
     struct TransferRequest {
         address from;
         address[] tos;
@@ -189,7 +191,6 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
      *  if the token id in the param is below the threshold the erc721 method is invoked. Else
      *  the erc721psi method is invoked. They then behave like their specified ancestors methods.
      **/
-
     function _exists(uint256 tokenId) internal view virtual override(ERC721, ERC721PsiBurnable) returns (bool) {
         if (tokenId < bulkMintThreshold()) {
             return ERC721._ownerOf(tokenId) != address(0) && (!_burnedTokens.get(tokenId));
@@ -295,7 +296,7 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
     }
 
     /** @dev methods below are overwritten to always invoke the erc721 equivalent due to linearisation
-    they do not get invoked by any minting methods in this contract and are only overwritten to satisfy
+    they do not get invoked explicitly by any external minting methods in this contract and are only overwritten to satisfy
     the compiler
     */
 

@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/interfaces/IERC165.sol";
 
 ///
-/// @dev Interface for token permits for ERC-721
+/// @dev Interface for token permits for ERC721
 ///
 interface IERC4494 is IERC165 {
   /// ERC165 bytes to add to interface array - set in parent contract

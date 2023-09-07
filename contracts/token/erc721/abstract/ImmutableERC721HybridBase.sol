@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import { AccessControlEnumerable, MintingAccessControl } from "./MintingAccessControl.sol";
-import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import { ERC2981 } from "@openzeppelin/contracts/token/common/ERC2981.sol";
 import { OperatorAllowlistEnforced } from "../../../allowlist/OperatorAllowlistEnforced.sol";
 import { ERC721HybridPermit } from "./ERC721HybridPermit.sol";
@@ -47,6 +46,7 @@ abstract contract ImmutableERC721HybridBase is OperatorAllowlistEnforced, Mintin
         return super.supportsInterface(interfaceId);
     }
 
+    /// @dev Returns the baseURI
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
     }

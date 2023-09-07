@@ -55,7 +55,7 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
      *  minted by quantity
      **/
     function bulkMintThreshold() public pure virtual returns (uint256) {
-        return 2 ** 64;
+        return 2 ** 128;
     }
 
     /// @dev returns the startTokenID for the minting by quantity section of the contract

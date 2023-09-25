@@ -46,6 +46,18 @@ jobs:
           tmp=$(mktemp)
           jq '.version = "${{ steps.clean-tag.outputs.TAG }}"' ./package.json > "$tmp" && mv "$tmp" ./package.json
 
+      - name: Install dependencies
+        run: |
+          npm install
+
+      - name: Compile contracts
+        run: |
+          npm run compile
+
+      - name: Build dist files
+        run: |
+          rm -rf dist && npm run build
+
       - name: Publish package
         uses: JS-DevTools/npm-publish@v1
         with:

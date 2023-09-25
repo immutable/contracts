@@ -6,6 +6,9 @@ typechain
 typechain-types
 node.json
 
-#Hardhat files
+# Hardhat files
 cache
 artifacts
+
+# Build files
+dist/

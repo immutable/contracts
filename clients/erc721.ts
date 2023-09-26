@@ -17,7 +17,7 @@ export type TransferRequest = ERC721Hybrid.TransferRequestStruct;
 // Struct for burning multiple tokens from the same address
 export type IDBurn = ERC721Hybrid.IDBurnStruct;
 
-export class ERC721 {
+export class ERC721Client {
   private readonly contract: ImmutableERC721;
 
   constructor(contractAddress: string) {

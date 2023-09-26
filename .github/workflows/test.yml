@@ -35,3 +35,22 @@ jobs:
         run: yarn install --frozen-lockfile
       - name: Run eslint
         run: yarn lint
+  publish:
+    name: Publish to NPM (dry run)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: ".nvmrc"
+          registry-url: https://registry.npmjs.org/
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Compile contracts
+        run: yarn compile
+      - name: Build dist files
+        run: rm -rf dist && yarn build
+      - name: Test publish
+        run: npm pack --dry-run

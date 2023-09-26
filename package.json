@@ -2,16 +2,21 @@
   "name": "@imtbl/zkevm-contracts",
   "description": "Immutable zkEVM Smart Contracts",
   "version": "0.0.0",
+  "main": "dist/clients/index.js",
+  "types": "dist/clients/index.d.ts",
   "files": [
-    "contracts"
+    "contracts",
+    "dist"
   ],
   "scripts": {
     "compile": "hardhat compile",
+    "build": "tsc",
     "test": "hardhat test",
     "prettier:solidity": "./node_modules/.bin/prettier --write contracts/**/*.sol",
     "lint": "eslint . --ext .ts,.tsx --fix && solhint --config ./.solhint.json  contracts/**/*.sol",
     "clean": "hardhat clean"
   },
+  "type": "commonjs",
   "repository": {
     "type": "git",
     "url": "https://github.com/immutable/zkevm-contracts"

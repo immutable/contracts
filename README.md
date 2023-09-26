@@ -4,13 +4,13 @@
 
 zkEVM Contracts is a library of smart contracts targeted at developers who wish to quickly build and deploy their smart contracts on the Immutable zkEVM, a general-purpose permissionless L2 zero-knowledge rollup. The library allows developers to build on contracts curated by Immutable, including (but not limited to):
 
-* Token presets, e.g. ERC721
+- Token presets, e.g. ERC721
 
-* Bridging contracts
+- Bridging contracts
 
-* Marketplace and AMM contracts 
+- Marketplace and AMM contracts
 
-* Smart Contract Wallets 
+- Smart Contract Wallets
 
 These contracts are feature-rich and are the recommended standard on Immutable zkEVM intended for all users and partners within the ecosystem.
 
@@ -23,6 +23,9 @@ $ npm install @imtbl/zkevm-contracts
 ```
 
 ### Usage
+
+#### Contracts
+
 Once the `zkevm-contracts` package is installed, use the contracts from the library by importing them:
 
 ```solidity
@@ -54,10 +57,29 @@ contract MyERC721 is ImmutableERC721 {
 }
 ```
 
+#### SDK client
+
+`zkevm-contracts` comes with a Typescript SDK client that can be used to interface with Immutable preset contracts:
+
+- ImmutableERC721
+- ImmutableERC721MintByID
+
+To import and use the ImmutableERC721 contract client:
+
+```typescript
+import { ERC721Client } from "@imtbl/zkevm-contracts";
+
+const contractAddress = YOUR_CONTRACT_ADDRESS;
+
+const client = new ERC721Client(contractAddress);
+
+const mintTransaction = await client.populateMint(receiver, 1);
+const tx = await signer.sendTransaction(mintTransaction);
+```
+
 ## Contribution
 
 We aim to build robust and feature-rich standards to help all developers onboard and build their projects on Immuable zkEVM, and we welcome any and all feedback and contributions to this repository! See our [contribution guideline](CONTRIBUTING.md) for more details on opening Github issues, pull requests requesting features, minor security vulnerabilities and providing general feedback.
-
 
 ## Disclaimers
 

@@ -61,7 +61,7 @@ git checkout -b <your-branch-name>
 6. Be sure to run the tests and set up the relevant linters to ensure all GitHub checks pass (see GitHub issues: https://docs.github.com/en/issues/tracking-your-work-with-issues/about-issues for more information).
 
 ```
-npm test
+yarn test
 ```
 
 7. Add and commit your changes, including a comprehensive commit message summarising your changes, then push changes to your fork. (e.g. Fixed formatting issue with ImmutableERC721MintByID.sol)
@@ -79,4 +79,5 @@ git push origin <your-branch-name>
 9. We will review the pull requests and request any necessary changes. If all the checks (linting, compilation, tests) pass and everything looks good, your code will be merged into the original repository. Congratulations, and thank you for your contribution!
 
 ## Releasing
+
 To release the package to NPM, simply create a new GitHub release and the "Publish to NPM" GitHub action will release it to NPM.

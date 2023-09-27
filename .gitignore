@@ -12,3 +12,6 @@ artifacts
 
 # Build files
 dist/
+
+# Forge files
+out/

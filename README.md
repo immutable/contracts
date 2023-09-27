@@ -1,107 +1,66 @@
-# Immutable zkEVM Contracts
+## Foundry
 
-<p align="center"><img src="https://cdn.dribbble.com/users/1299339/screenshots/7133657/media/837237d447d36581ebd59ec36d30daea.gif" width="280"/></p>
+**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
 
-zkEVM Contracts is a library of smart contracts targeted at developers who wish to quickly build and deploy their smart contracts on the Immutable zkEVM, a general-purpose permissionless L2 zero-knowledge rollup. The library allows developers to build on contracts curated by Immutable, including (but not limited to):
+Foundry consists of:
 
-- Token presets, e.g. ERC721
+-   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
+-   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
+-   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
+-   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
 
-- Bridging contracts
+## Documentation
 
-- Marketplace and AMM contracts
+https://book.getfoundry.sh/
 
-- Smart Contract Wallets
+## Usage
 
-These contracts are feature-rich and are the recommended standard on Immutable zkEVM intended for all users and partners within the ecosystem.
+### Build
 
-## Setup
-
-### Installation
-
-```
-$ npm install @imtbl/zkevm-contracts
-```
-
-### Usage
-
-#### Contracts
-
-Once the `zkevm-contracts` package is installed, use the contracts from the library by importing them:
-
-```solidity
-pragma solidity ^0.8.0;
-
-import "@imtbl/zkevm-contracts/contracts/token/erc721/preset/ImmutableERC721.sol";
-
-contract MyERC721 is ImmutableERC721 {
-    constructor(
-        address owner,
-        string memory name,
-        string memory symbol,
-        string memory baseURI,
-        string memory contractURI,
-        address operatorAllowlist,
-        address receiver,
-        uint96 feeNumerator
-    ) ImmutableERC721(
-        owner,
-        name,
-        symbol,
-        baseURI,
-        contractURI,
-        operatorAllowlist,
-        receiver,
-        feeNumerator
-    )
-    {}
-}
+```shell
+$ forge build
 ```
 
-#### SDK client
+### Test
 
-`zkevm-contracts` comes with a Typescript SDK client that can be used to interface with Immutable preset contracts:
-
-- ImmutableERC721
-- ImmutableERC721MintByID
-
-To import and use the ImmutableERC721 contract client:
-
-```typescript
-import { ERC721Client } from "@imtbl/zkevm-contracts";
-
-const contractAddress = YOUR_CONTRACT_ADDRESS;
-
-const client = new ERC721Client(contractAddress);
-
-const mintTransaction = await client.populateMint(receiver, 1);
-const tx = await signer.sendTransaction(mintTransaction);
+```shell
+$ forge test
 ```
 
-## Contribution
+### Format
 
-We aim to build robust and feature-rich standards to help all developers onboard and build their projects on Immuable zkEVM, and we welcome any and all feedback and contributions to this repository! See our [contribution guideline](CONTRIBUTING.md) for more details on opening Github issues, pull requests requesting features, minor security vulnerabilities and providing general feedback.
+```shell
+$ forge fmt
+```
 
-## Disclaimers
+### Gas Snapshots
 
-These contracts are in an experimental stage and are subject to change without notice. The code must still be formally audited or reviewed and may have security vulnerabilities. Do not use it in production. We take no responsibility for your implementation decisions and any security problems you might experience.
+```shell
+$ forge snapshot
+```
 
-We will audit these contracts before our mainnet launch.
+### Anvil
 
-## Security
+```shell
+$ anvil
+```
 
-Please responsibly disclose any major security issues you find by reaching out to [security@immutable.com][im-sec].
+### Deploy
 
-[im-sec]: mailto:security@immutable.com
+```shell
+$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+```
 
-## License
+### Cast
 
-Immutable zkEVM Contracts are released under the Apache-2.0 license. See [LICENSE.md](LICENSE.md) for more details.
+```shell
+$ cast <subcommand>
+```
 
-## Links
+### Help
 
-### Socials
-
-- [Twitter](https://twitter.com/Immutable)
-- [Discord](https://discord.gg/6GjgPkp464)
-- [Telegram](https://t.me/immutablex)
-- [Reddit](https://www.reddit.com/r/ImmutableX/)
+```shell
+$ forge --help
+$ anvil --help
+$ cast --help
+```

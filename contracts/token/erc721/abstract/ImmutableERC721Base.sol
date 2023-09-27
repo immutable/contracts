@@ -221,7 +221,7 @@ abstract contract ImmutableERC721Base is
 
     /// @dev mints specified token ids to specified address
     function _batchMint(IDMint memory mintRequest) internal {
-        if (mintRequest.to != address(0)) {
+        if (mintRequest.to == address(0)) {
             revert IImmutableERC721SendingToZerothAddress();
         }
         for (uint256 j = 0; j < mintRequest.tokenIds.length; j++) {

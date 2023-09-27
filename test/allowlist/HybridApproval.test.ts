@@ -86,7 +86,7 @@ describe("Royalty Checks with Hybrid ERC721", function () {
     });
 
     it("Should allow EOAs to be approved", async function () {
-      const first = await erc721.bulkMintThreshold();
+      const first = await erc721.mintBatchByQuantityThreshold();
       await erc721.connect(minter).mintByQuantity(minter.address, 1);
       // Approve EOA addr
       const tokenId = first;
@@ -99,7 +99,7 @@ describe("Royalty Checks with Hybrid ERC721", function () {
     it("Should allow Allowlisted addresses to be approved", async function () {
       // Add the mock marketplace to registry
       await operatorAllowlist.connect(registrar).addAddressToAllowlist([marketPlace.address]);
-      const first = await erc721.bulkMintThreshold();
+      const first = await erc721.mintBatchByQuantityThreshold();
       await erc721.connect(minter).mintByQuantity(minter.address, 1);
       const tokenId = first;
       // Approve marketplace on erc721 contract
@@ -112,7 +112,7 @@ describe("Royalty Checks with Hybrid ERC721", function () {
     it("Should allow Allowlisted smart contract wallets to be approved", async function () {
       // Allowlist the bytecode
       await operatorAllowlist.connect(registrar).addWalletToAllowlist(deployedAddr);
-      const first = await erc721.bulkMintThreshold();
+      const first = await erc721.mintBatchByQuantityThreshold();
       await erc721.connect(minter).mintByQuantity(minter.address, 1);
       const tokenId = first;
       await erc721.connect(minter).approve(deployedAddr, tokenId);
@@ -128,7 +128,7 @@ describe("Royalty Checks with Hybrid ERC721", function () {
       await erc721.connect(owner).setOperatorAllowlistRegistry(operatorAllowlist.address);
     });
     it("Should freely allow transfers between EOAs", async function () {
-      const first = await erc721.bulkMintThreshold();
+      const first = await erc721.mintBatchByQuantityThreshold();
       await erc721.connect(minter).mintByQuantity(accs[0].address, 1);
       await erc721.connect(minter).mintByQuantity(accs[1].address, 1);
       const tokenIdOne = first;
@@ -152,7 +152,7 @@ describe("Royalty Checks with Hybrid ERC721", function () {
     });
 
     it("Should block transfers from a not allow listed contracts", async function () {
-      const first = await erc721.bulkMintThreshold();
+      const first = await erc721.mintBatchByQuantityThreshold();
       await erc721.connect(minter).mintByQuantity(marketPlace.address, 1);
       const tokenId = first;
       await expect(marketPlace.connect(minter).executeTransferFrom(marketPlace.address, minter.address, tokenId))

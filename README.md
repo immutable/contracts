@@ -19,7 +19,7 @@ These contracts are feature-rich and are the recommended standard on Immutable z
 ### Installation
 
 ```
-$ npm install @imtbl/zkevm-contracts
+$ yarn install @imtbl/zkevm-contracts
 ```
 
 ### Usage

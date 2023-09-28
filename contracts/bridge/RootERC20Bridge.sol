@@ -59,6 +59,10 @@ contract RootERC20Bridge is
 
     /**
      * @inheritdoc IRootERC20Bridge
+     * TODO when this becomes part of the deposit flow on a token's first bridge, this logic will need to be mostly moved into an internal function.
+     *      Additionally, we need to investigate what the ordering guarantees are. i.e. if we send a map token message, then a bridge token message,
+     *      in the same TX (or even very close but separate transactions), is it possible the order gets reversed? This could potentially make some
+     *      first bridges break and we might then have to separate them and wait for the map to be confirmed.
      */
     function mapToken(IERC20Metadata rootToken) external payable override returns (address) {
         if (address(rootToken) == address(0)) {

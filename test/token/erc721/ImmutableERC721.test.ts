@@ -105,7 +105,7 @@ describe("ImmutableERC721", function () {
     it("Should allow batch minting of tokens by quantity", async function () {
       const qty = 5;
       const mintRequests = [{ to: user.address, quantity: qty }];
-      const first = await erc721.bulkMintThreshold();
+      const first = await erc721.mintBatchByQuantityThreshold();
       const originalBalance = await erc721.balanceOf(user.address);
       const originalSupply = await erc721.totalSupply();
       await erc721.connect(minter).mintBatchByQuantity(mintRequests);
@@ -119,7 +119,7 @@ describe("ImmutableERC721", function () {
     it("Should allow safe batch minting of tokens by quantity", async function () {
       const qty = 5;
       const mintRequests = [{ to: user2.address, quantity: qty }];
-      const first = await erc721.bulkMintThreshold();
+      const first = await erc721.mintBatchByQuantityThreshold();
       const originalBalance = await erc721.balanceOf(user2.address);
       const originalSupply = await erc721.totalSupply();
       await erc721.connect(minter).safeMintBatchByQuantity(mintRequests);
@@ -142,7 +142,7 @@ describe("ImmutableERC721", function () {
     it("Should allow owner or approved to burn a batch of mixed ID/PSI tokens", async function () {
       const originalBalance = await erc721.balanceOf(user.address);
       const originalSupply = await erc721.totalSupply();
-      const first = await erc721.bulkMintThreshold();
+      const first = await erc721.mintBatchByQuantityThreshold();
       const batch = [3, 4, first.toString(), first.add(1).toString()];
       await erc721.connect(user).burnBatch(batch);
       expect(await erc721.balanceOf(user.address)).to.equal(originalBalance.sub(batch.length));
@@ -206,7 +206,7 @@ describe("ImmutableERC721", function () {
     });
 
     it("Should prevent not approved to burn a batch of tokens", async function () {
-      const first = await erc721.bulkMintThreshold();
+      const first = await erc721.mintBatchByQuantityThreshold();
       await expect(erc721.connect(minter).burnBatch([first.add(2), first.add(3)]))
         .to.be.revertedWith("IImmutableERC721NotOwnerOrOperator")
         .withArgs(first.add(2));
@@ -221,7 +221,7 @@ describe("ImmutableERC721", function () {
     });
 
     it("Should revert if minting by id with id above threshold", async function () {
-      const first = await erc721.bulkMintThreshold();
+      const first = await erc721.mintBatchByQuantityThreshold();
       const mintRequests = [{ to: user.address, tokenIds: [first] }];
       await expect(erc721.connect(minter).mintBatch(mintRequests))
         .to.be.revertedWith("IImmutableERC721IDAboveThreshold")
@@ -293,7 +293,7 @@ describe("ImmutableERC721", function () {
 
   describe("exists", async function () {
     it("verifies valid tokens minted by quantity", async function () {
-      const first = await erc721.bulkMintThreshold();
+      const first = await erc721.mintBatchByQuantityThreshold();
       expect(await erc721.exists(first.add(3))).to.equal(true);
     });
 
@@ -302,7 +302,7 @@ describe("ImmutableERC721", function () {
     });
 
     it("verifies invalid tokens", async function () {
-      const first = await erc721.bulkMintThreshold();
+      const first = await erc721.mintBatchByQuantityThreshold();
       expect(await erc721.exists(first.add(10))).to.equal(false);
     });
   });
@@ -321,7 +321,7 @@ describe("ImmutableERC721", function () {
 
   describe("Transfers", function () {
     it("Should allow users to transfer tokens using safeTransferFromBatch", async function () {
-      const first = await erc721.bulkMintThreshold();
+      const first = await erc721.mintBatchByQuantityThreshold();
       // Mint tokens for testing transfers
       const mintRequests = [
         { to: minter.address, tokenIds: [51, 52, 53] },

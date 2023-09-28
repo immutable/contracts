@@ -12,7 +12,7 @@ This contract allows for minting with one of two strategies:
 - ERC721: minting with specified tokenIDs (inefficient)
 - ERC721Psi: minting in batches with consecutive tokenIDs (efficient)
 
-All other ERC721 functions are supported, with routing logic depending on the tokenId. 
+All other ERC721 functions are supported, with routing logic depending on the tokenId.
 */
 
 abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Errors {
@@ -56,13 +56,13 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
     /** @dev returns the threshold that divides tokens that are minted by id and
      *  minted by quantity
      **/
-    function bulkMintThreshold() public pure virtual returns (uint256) {
+    function mintBatchByQuantityThreshold() public pure virtual returns (uint256) {
         return 2 ** 128;
     }
 
     /// @dev returns the startTokenID for the minting by quantity section of the contract
     function _startTokenId() internal pure virtual override(ERC721Psi) returns (uint256) {
-        return bulkMintThreshold();
+        return mintBatchByQuantityThreshold();
     }
 
     /// @dev mints number of tokens specified to the address given via erc721psi
@@ -93,7 +93,7 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
 
     /// @dev mints by id to a specified address via erc721
     function _mintByID(address to, uint256 tokenId) internal {
-        if (tokenId >= bulkMintThreshold()) {
+        if (tokenId >= mintBatchByQuantityThreshold()) {
             revert IImmutableERC721IDAboveThreshold(tokenId);
         }
 
@@ -106,7 +106,7 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
 
     /// @dev safe mints by id to a specified address via erc721
     function _safeMintByID(address to, uint256 tokenId) internal {
-        if (tokenId >= bulkMintThreshold()) {
+        if (tokenId >= mintBatchByQuantityThreshold()) {
             revert IImmutableERC721IDAboveThreshold(tokenId);
         }
 
@@ -192,14 +192,14 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
      *  the erc721psi method is invoked. They then behave like their specified ancestors methods.
      **/
     function _exists(uint256 tokenId) internal view virtual override(ERC721, ERC721PsiBurnable) returns (bool) {
-        if (tokenId < bulkMintThreshold()) {
+        if (tokenId < mintBatchByQuantityThreshold()) {
             return ERC721._ownerOf(tokenId) != address(0) && (!_burnedTokens.get(tokenId));
         }
         return ERC721PsiBurnable._exists(tokenId);
     }
 
     function _transfer(address from, address to, uint256 tokenId) internal virtual override(ERC721, ERC721Psi) {
-        if (tokenId < bulkMintThreshold()) {
+        if (tokenId < mintBatchByQuantityThreshold()) {
             ERC721._transfer(from, to, tokenId);
         } else {
             ERC721Psi._transfer(from, to, tokenId);
@@ -207,7 +207,7 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
     }
 
     function ownerOf(uint256 tokenId) public view virtual override(ERC721, ERC721Psi) returns (address) {
-        if (tokenId < bulkMintThreshold()) {
+        if (tokenId < mintBatchByQuantityThreshold()) {
             return ERC721.ownerOf(tokenId);
         }
         return ERC721Psi.ownerOf(tokenId);
@@ -217,7 +217,7 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
      *  additional tracking is added for erc721 to prevent re-minting
      **/
     function _burn(uint256 tokenId) internal virtual override(ERC721, ERC721PsiBurnable) {
-        if (tokenId < bulkMintThreshold()) {
+        if (tokenId < mintBatchByQuantityThreshold()) {
             ERC721._burn(tokenId);
             _burnedTokens.set(tokenId);
             _idMintTotalSupply--;
@@ -227,7 +227,7 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
     }
 
     function _approve(address to, uint256 tokenId) internal virtual override(ERC721, ERC721Psi) {
-        if (tokenId < bulkMintThreshold()) {
+        if (tokenId < mintBatchByQuantityThreshold()) {
             return ERC721._approve(to, tokenId);
         }
         return ERC721Psi._approve(to, tokenId);
@@ -237,7 +237,7 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
         address spender,
         uint256 tokenId
     ) internal view virtual override(ERC721, ERC721Psi) returns (bool) {
-        if (tokenId < bulkMintThreshold()) {
+        if (tokenId < mintBatchByQuantityThreshold()) {
             return ERC721._isApprovedOrOwner(spender, tokenId);
         }
         return ERC721Psi._isApprovedOrOwner(spender, tokenId);
@@ -249,7 +249,7 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
         uint256 tokenId,
         bytes memory _data
     ) internal virtual override(ERC721, ERC721Psi) {
-        if (tokenId < bulkMintThreshold()) {
+        if (tokenId < mintBatchByQuantityThreshold()) {
             return ERC721._safeTransfer(from, to, tokenId, _data);
         }
         return ERC721Psi._safeTransfer(from, to, tokenId, _data);
@@ -261,7 +261,7 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
         uint256 tokenId,
         bytes memory _data
     ) public virtual override(ERC721, ERC721Psi) {
-        if (tokenId < bulkMintThreshold()) {
+        if (tokenId < mintBatchByQuantityThreshold()) {
             return ERC721.safeTransferFrom(from, to, tokenId, _data);
         }
         return ERC721Psi.safeTransferFrom(from, to, tokenId, _data);
@@ -275,21 +275,21 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
     }
 
     function getApproved(uint256 tokenId) public view virtual override(ERC721, ERC721Psi) returns (address) {
-        if (tokenId < bulkMintThreshold()) {
+        if (tokenId < mintBatchByQuantityThreshold()) {
             return ERC721.getApproved(tokenId);
         }
         return ERC721Psi.getApproved(tokenId);
     }
 
     function approve(address to, uint256 tokenId) public virtual override(ERC721, ERC721Psi) {
-        if (tokenId < bulkMintThreshold()) {
+        if (tokenId < mintBatchByQuantityThreshold()) {
             return ERC721.approve(to, tokenId);
         }
         return ERC721Psi.approve(to, tokenId);
     }
 
     function transferFrom(address from, address to, uint256 tokenId) public virtual override(ERC721, ERC721Psi) {
-        if (tokenId < bulkMintThreshold()) {
+        if (tokenId < mintBatchByQuantityThreshold()) {
             return ERC721.transferFrom(from, to, tokenId);
         }
         return ERC721Psi.transferFrom(from, to, tokenId);

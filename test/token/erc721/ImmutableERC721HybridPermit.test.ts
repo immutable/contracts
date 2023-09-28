@@ -96,7 +96,7 @@ describe("ImmutableERC721Permit", function () {
 
     it("can use permits to approve spender on token minted by quantity", async function () {
       await erc721.connect(minter).mintByQuantity(user.address, 1);
-      const first = await erc721.bulkMintThreshold();
+      const first = await erc721.mintBatchByQuantityThreshold();
 
       const deadline = Math.round(Date.now() / 1000 + 24 * 60 * 60);
       const nonce = await erc721.nonces(first);
@@ -200,7 +200,7 @@ describe("ImmutableERC721Permit", function () {
       await erc721.connect(minter).mintByQuantity(user.address, 1);
       const deadline = Math.round(Date.now() / 1000 + 24 * 60 * 60);
       const operatorAddress = await operator.getAddress();
-      const tokenId = (await erc721.bulkMintThreshold()).add(1);
+      const tokenId = (await erc721.mintBatchByQuantityThreshold()).add(1);
 
       await erc721
         .connect(user)
@@ -240,7 +240,7 @@ describe("ImmutableERC721Permit", function () {
       await erc721.connect(minter).mintByQuantity(user.address, 1);
       const deadline = Math.round(Date.now() / 1000 + 24 * 60 * 60);
 
-      const tokenId = (await erc721.bulkMintThreshold()).add(2);
+      const tokenId = (await erc721.mintBatchByQuantityThreshold()).add(2);
       const nonce = await erc721.nonces(tokenId);
       expect(nonce).to.be.equal(0);
 

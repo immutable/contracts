@@ -58,7 +58,9 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
+    "@axelar-network/axelar-gmp-sdk-solidity": "^5.3.3",
     "@openzeppelin/contracts": "^4.9.3",
+    "@openzeppelin/contracts-upgradeable": "^4.9.3",
     "solidity-bits": "^0.4.0",
     "solidity-bytes-utils": "^0.8.0"
   }

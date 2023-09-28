@@ -37,7 +37,7 @@ contract RootERC20Bridge is
 
     /**
      * @notice Initilization function for RootERC20Bridge.
-     * @param newBridgeAdaptor Address of StateSender to send deposit information to.
+     * @param newBridgeAdaptor Address of StateSender to send bridge messages to, and receive messages from.
      * @param newChildERC20Bridge Address of child ERC20 bridge to communicate with.
      * @param newChildTokenTemplate Address of child token template to clone.
      * @dev Can only be called once.

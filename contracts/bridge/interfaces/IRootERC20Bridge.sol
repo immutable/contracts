@@ -8,7 +8,7 @@ interface IRootERC20Bridge {
 }
 
 interface IRootERC20BridgeEvents {
-    event TokenMapped(address rootToken, address childToken);
+    event L1TokenMapped(address rootToken, address childToken);
 }
 
 interface IRootERC20BridgeErrors {

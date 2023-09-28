@@ -11,7 +11,6 @@ import {IAxelarBridgeAdaptorEvents, IAxelarBridgeAdaptorErrors} from "./interfac
 
 // TODO Note: this will have to be an AxelarExecutable contract in order to receive messages
 
-
 /**
  * @notice RootAxelarBridgeAdaptor is a bridge adaptor that allows the RootERC20Bridge to communicate with the Axelar Gateway.
  * @dev This is not an upgradeable contract, because it is trivial to deploy a new one if needed.

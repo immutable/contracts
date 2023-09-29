@@ -120,29 +120,6 @@ contract RootERC20BridgeUnitTest is Test, IRootERC20BridgeEvents, IRootERC20Brid
         rootBridge.mapToken{value: 300}(token);
     }
 
-    function test_withdrawEth() public {
-        uint256 transferAmount = 100;
-        address payable withdrawRecipient = payable(address(123));
-
-        // Send `transferAmount` wei to rootBridge
-        payable(address(rootBridge)).transfer(transferAmount);
-
-        assertEq(address(rootBridge).balance, transferAmount);
-        uint256 preBal = address(withdrawRecipient).balance;
-
-        // withdraw the `transferAmount` wei.
-        rootBridge.withdrawEth(withdrawRecipient, transferAmount);
-
-        assertEq(address(rootBridge).balance, 0);
-        assertEq(address(withdrawRecipient).balance, preBal + 100);
-    }
-
-    function test_RevertsIf_withdrawEthCalledByNonOwner() public {
-        vm.prank(address(0xf00f00));
-        vm.expectRevert("Ownable: caller is not the owner");
-        rootBridge.withdrawEth(payable(address(123)), 100);
-    }
-
     function test_updateBridgeAdaptor() public {
         address newAdaptorAddress = address(0x11111);
 

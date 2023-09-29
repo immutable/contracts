@@ -3,4 +3,7 @@ src = 'contracts'
 out = 'foundry-out'
 libs = ["lib", "node_modules"]
 
+[profile.ci]
+libs = ["lib", "node_modules"]
+
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

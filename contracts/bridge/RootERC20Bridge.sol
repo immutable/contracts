@@ -90,6 +90,7 @@ contract RootERC20Bridge is
             rootToken.symbol(),
             rootToken.decimals()
         );
+        // TODO investigate using delegatecall to keep the axelar message sender as the bridge contract, since adaptor can change.
         bridgeAdaptor.sendMessage{value: msg.value}(payload, msg.sender);
 
         emit L1TokenMapped(address(rootToken), childToken);

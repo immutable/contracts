@@ -108,6 +108,8 @@ contract ChildERC20Bridge is
         if (address(rootToken) == address(0)) {
             revert ZeroAddress();
         }
+        // TODO see if worthwhile validating decimals, maybe name and symbol too
+
         if (rootTokenToChildToken[address(rootToken)] != address(0)) {
             revert AlreadyMapped();
         }
@@ -117,6 +119,7 @@ contract ChildERC20Bridge is
         );
 
         rootTokenToChildToken[rootToken] = address(childToken);
+        // TODO investigate roles for child token
         childToken.initialize(rootToken, name, symbol, decimals);
 
         emit L2TokenMapped(address(rootToken), address(childToken));

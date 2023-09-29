@@ -4,7 +4,7 @@ pragma solidity ^0.8.17;
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 interface IChildERC20Bridge {
-    // function mapToken(IERC20Metadata rootToken) external payable returns (address);
+    function onMessageReceive(string calldata sourceChain, address sourceAddress, bytes calldata data) external;
 }
 
 interface IChildERC20BridgeEvents {
@@ -18,4 +18,5 @@ interface IChildERC20BridgeErrors {
 error InvalidData();
 error InvalidSourceChain();
 error InvalidSourceAddress();
+error InvalidRootChain();
 }

@@ -7,7 +7,7 @@ import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
-import { AxelarExecutable } from '@axelar-network/axelar-gmp-sdk-solidity/contracts/executable/AxelarExecutable.sol';
+import {AxelarExecutable} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/executable/AxelarExecutable.sol";
 import {IChildERC20BridgeEvents, IChildERC20BridgeErrors, IChildERC20Bridge, IERC20Metadata} from "./interfaces/IChildERC20Bridge.sol";
 import {IChildERC20BridgeAdaptor} from "./interfaces/IChildERC20BridgeAdaptor.sol";
 import {IChildERC20} from "./interfaces/IChildERC20.sol";
@@ -35,7 +35,7 @@ contract ChildERC20Bridge is
     /// @dev The address of the token template that will be cloned to create tokens.
     address public childTokenTemplate;
     /// @dev The name of the chain that this bridge is connected to.
-    string public sourceChain;
+    string public rootChain;
     mapping(address => address) public rootTokenToChildToken;
 
     bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
@@ -45,33 +45,44 @@ contract ChildERC20Bridge is
      * @param newBridgeAdaptor Address of StateSender to send deposit information to.
      * @param newRootERC20BridgeAdaptor Address of root ERC20 bridge adaptor to communicate with.
      * @param newChildTokenTemplate Address of child token template to clone.
+     * @param newRootChain A stringified representation of the chain that this bridge is connected to. Used for validation.
      * @dev Can only be called once.
      */
     function initialize(
         address newBridgeAdaptor,
         address newRootERC20BridgeAdaptor,
         address newChildTokenTemplate,
-        string storage newSourceChain
+        string memory newRootChain
     ) public initializer {
         if (
-            newBridgeAdaptor == address(0) || newRootERC20BridgeAdaptor == address(0) || newChildTokenTemplate == address(0)
+            newBridgeAdaptor == address(0) ||
+            newRootERC20BridgeAdaptor == address(0) ||
+            newChildTokenTemplate == address(0)
         ) {
             revert ZeroAddress();
         }
+        if (bytes(newRootChain).length == 0) {
+            revert InvalidRootChain();
+        }
+
         rootERC20BridgeAdaptor = newRootERC20BridgeAdaptor;
         childTokenTemplate = newChildTokenTemplate;
         bridgeAdaptor = IChildERC20BridgeAdaptor(newBridgeAdaptor);
-        sourceChain = newSourceChain;
+        rootChain = newRootChain;
     }
 
     /**
      * @inheritdoc IChildERC20Bridge
      */
-    function onMessageReceive(string calldata sourceChain, address sourceAddress, bytes calldata data) external override {
-        if (msg.sender != bridgeAdaptor) {
+    function onMessageReceive(
+        string calldata messageSourceChain,
+        address sourceAddress,
+        bytes calldata data
+    ) external override {
+        if (msg.sender != address(bridgeAdaptor)) {
             revert NotBridgeAdaptor();
         }
-        if (!Strings.equal(sourceChain, sourceChain)) {
+        if (!Strings.equal(messageSourceChain, rootChain)) {
             revert InvalidSourceChain();
         }
         if (sourceAddress != rootERC20BridgeAdaptor) {
@@ -88,8 +99,11 @@ contract ChildERC20Bridge is
         }
     }
 
-    function _mapToken(bytes calldata data) private override {
-        (bytes32 _, address rootToken, string memory name, string memory symbol, uint8 decimals) = abi.decode(data, (bytes32, address, string, string, uint8));
+    function _mapToken(bytes calldata data) private {
+        (, address rootToken, string memory name, string memory symbol, uint8 decimals) = abi.decode(
+            data,
+            (bytes32, address, string, string, uint8)
+        );
 
         if (address(rootToken) == address(0)) {
             revert ZeroAddress();
@@ -106,16 +120,6 @@ contract ChildERC20Bridge is
         childToken.initialize(rootToken, name, symbol, decimals);
 
         emit L2TokenMapped(address(rootToken), address(childToken));
-    }
-
-    /// @dev To receive ETH refunds from the bridge.
-    receive() external payable {}
-
-    /**
-     * @notice To withdraw any ETH from this contract which may have been given by the bridge network as refunds.
-     */
-    function withdrawEth(address payable recipient, uint256 amount) external onlyOwner {
-        Address.sendValue(recipient, amount);
     }
 
     function updateBridgeAdaptor(address newBridgeAdaptor) external onlyOwner {

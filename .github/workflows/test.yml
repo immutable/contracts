@@ -7,6 +7,20 @@ on:
     branches: [main]
 
 jobs:
+  forge-test:
+    name: Run Forge Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile && forge install
+      - name: Run Tests
+        run: forge test
   hardhat-test:
     name: Run Hardhat Tests
     runs-on: ubuntu-latest

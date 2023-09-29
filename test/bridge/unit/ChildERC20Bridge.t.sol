@@ -4,9 +4,9 @@ pragma solidity ^0.8.17;
 import {Test, console2} from "forge-std/Test.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {ChildERC20Bridge, IChildERC20BridgeEvents, IERC20Metadata, IChildERC20BridgeErrors } from "../../../contracts/bridge/ChildERC20Bridge.sol";
+import {ChildERC20Bridge, IChildERC20BridgeEvents, IERC20Metadata, IChildERC20BridgeErrors } from "../../../contracts/bridge/child/ChildERC20Bridge.sol";
+import {ChildERC20} from "../../../contracts/bridge/child/ChildERC20.sol";
 import {MockAdaptor} from "../../../contracts/bridge/test/MockAdaptor.sol";
-import {ChildERC20} from "../../../contracts/bridge/ChildERC20.sol";
 
 contract ChildERC20BridgeUnitTest is Test, IChildERC20BridgeEvents, IChildERC20BridgeErrors {
     address constant ROOT_BRIDGE = address(3);

@@ -8,9 +8,9 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {AxelarExecutable} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/executable/AxelarExecutable.sol";
-import {IChildERC20BridgeEvents, IChildERC20BridgeErrors, IChildERC20Bridge, IERC20Metadata} from "./interfaces/IChildERC20Bridge.sol";
-import {IChildERC20BridgeAdaptor} from "./interfaces/IChildERC20BridgeAdaptor.sol";
-import {IChildERC20} from "./interfaces/IChildERC20.sol";
+import {IChildERC20BridgeEvents, IChildERC20BridgeErrors, IChildERC20Bridge, IERC20Metadata} from "../interfaces/child/IChildERC20Bridge.sol";
+import {IChildERC20BridgeAdaptor} from "../interfaces/child/IChildERC20BridgeAdaptor.sol";
+import {IChildERC20} from "../interfaces/child/IChildERC20.sol";
 
 /**
  * @notice RootERC20Bridge is a bridge that allows ERC20 tokens to be transferred from the root chain to the child chain.
@@ -108,7 +108,6 @@ contract ChildERC20Bridge is
         if (address(rootToken) == address(0)) {
             revert ZeroAddress();
         }
-        // TODO see if worthwhile validating decimals, maybe name and symbol too
 
         if (rootTokenToChildToken[address(rootToken)] != address(0)) {
             revert AlreadyMapped();
@@ -119,7 +118,6 @@ contract ChildERC20Bridge is
         );
 
         rootTokenToChildToken[rootToken] = address(childToken);
-        // TODO investigate roles for child token
         childToken.initialize(rootToken, name, symbol, decimals);
 
         emit L2TokenMapped(address(rootToken), address(childToken));

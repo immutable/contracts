@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-interface IAxelarBridgeAdaptorErrors {
+interface IRootAxelarBridgeAdaptorErrors {
     error ZeroAddresses();
     error InvalidChildChain();
     error NoGas();
@@ -9,6 +9,6 @@ interface IAxelarBridgeAdaptorErrors {
     error InvalidArrayLengths();
 }
 
-interface IAxelarBridgeAdaptorEvents {
+interface IRootAxelarBridgeAdaptorEvents {
     event MapTokenAxelarMessage(string indexed childChain, string indexed childBridgeAdaptor, bytes indexed payload);
 }

@@ -7,9 +7,9 @@ import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {MockAxelarGateway} from "../../../contracts/bridge/test/MockAxelarGateway.sol";
 import {MockAxelarGasService} from "../../../contracts/bridge/test/MockAxelarGasService.sol";
-import {RootAxelarBridgeAdaptor, IAxelarBridgeAdaptorEvents, IAxelarBridgeAdaptorErrors} from "../../../contracts/bridge/RootAxelarBridgeAdaptor.sol";
+import {RootAxelarBridgeAdaptor, IRootAxelarBridgeAdaptorEvents, IRootAxelarBridgeAdaptorErrors} from "../../../contracts/bridge/root/RootAxelarBridgeAdaptor.sol";
 
-contract RootAxelarBridgeAdaptorTest is Test, IAxelarBridgeAdaptorEvents, IAxelarBridgeAdaptorErrors {
+contract RootAxelarBridgeAdaptorTest is Test, IRootAxelarBridgeAdaptorEvents, IRootAxelarBridgeAdaptorErrors {
     address constant CHILD_BRIDGE = address(3);
     address constant CHILD_BRIDGE_ADAPTOR = address(4);
     string constant CHILD_CHAIN_NAME = "test";

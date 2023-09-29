@@ -6,6 +6,7 @@ interface IAxelarBridgeAdaptorErrors {
     error InvalidChildChain();
     error NoGas();
     error CallerNotBridge();
+    error InvalidArrayLengths();
 }
 
 interface IAxelarBridgeAdaptorEvents {

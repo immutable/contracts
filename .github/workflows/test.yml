@@ -16,8 +16,10 @@ jobs:
           submodules: recursive
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
       - name: Run tests
-        run: FOUNDRY_PROFILE="default" forge test -vvv
+        run: forge test -vvv
   hardhat-test:
     name: Run Hardhat Tests
     runs-on: ubuntu-latest

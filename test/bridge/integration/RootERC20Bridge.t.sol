@@ -51,7 +51,7 @@ contract RootERC20BridgeIntegrationTest is Test, IRootERC20BridgeEvents, IAxelar
             address(axelarAdaptor),
             mapTokenFee,
             abi.encodeWithSelector(
-                axelarAdaptor.mapToken.selector, address(token), token.name(), token.symbol(), token.decimals()
+                axelarAdaptor.sendMessage.selector, payload, address(this)
             )
         );
 
@@ -65,7 +65,7 @@ contract RootERC20BridgeIntegrationTest is Test, IRootERC20BridgeEvents, IAxelar
                 CHILD_CHAIN_NAME,
                 Strings.toHexString(CHILD_BRIDGE_ADAPTOR),
                 payload,
-                address(rootBridge)
+                address(this)
             )
         );
 
@@ -80,7 +80,15 @@ contract RootERC20BridgeIntegrationTest is Test, IRootERC20BridgeEvents, IAxelar
             )
         );
 
+        // Check that we pay mapTokenFee to the axelarGasService.
+        uint256 thisPreBal = address(this).balance;
+        uint256 axelarGasServicePreBal = address(axelarGasService).balance;
+
         rootBridge.mapToken{value: mapTokenFee}(token);
+
+        // Should update ETH balances as gas payment for message.
+        assertEq(address(this).balance, thisPreBal - mapTokenFee);
+        assertEq(address(axelarGasService).balance, axelarGasServicePreBal + mapTokenFee);
 
         assertEq(rootBridge.rootTokenToChildToken(address(token)), childToken);
     }

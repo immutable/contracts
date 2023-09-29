@@ -65,7 +65,8 @@ contract RootAxelarBridgeAdaptorTest is Test, IAxelarBridgeAdaptorEvents, IAxela
     }
 
     /// @dev For this unit test we just want to make sure the correct functions are called on the Axelar Gateway and Gas Service.
-    function test_mapToken() public {
+    function test_sendMessage_CallsGasService() public {
+        address refundRecipient = address(123);
         bytes memory payload = abi.encode(MAP_TOKEN_SIG, address(token), token.name(), token.symbol(), token.decimals());
         uint256 callValue = 300;
 
@@ -78,9 +79,16 @@ contract RootAxelarBridgeAdaptorTest is Test, IAxelarBridgeAdaptorEvents, IAxela
                 CHILD_CHAIN_NAME,
                 Strings.toHexString(CHILD_BRIDGE_ADAPTOR),
                 payload,
-                address(this)
+                refundRecipient
             )
         );
+
+        axelarAdaptor.sendMessage{value: callValue}(payload, refundRecipient);
+    }
+
+    function test_sendMessage_CallsGateway() public {
+        bytes memory payload = abi.encode(MAP_TOKEN_SIG, address(token), token.name(), token.symbol(), token.decimals());
+        uint256 callValue = 300;
 
         vm.expectCall(
             address(mockAxelarGateway),
@@ -92,31 +100,71 @@ contract RootAxelarBridgeAdaptorTest is Test, IAxelarBridgeAdaptorEvents, IAxela
             )
         );
 
+        axelarAdaptor.sendMessage{value: callValue}(payload, address(123));
+    }
+
+    function test_sendMessage_EmitsMapTokenAxelarMessageEvent() public {
+        bytes memory payload = abi.encode(MAP_TOKEN_SIG, address(token), token.name(), token.symbol(), token.decimals());
+        uint256 callValue = 300;
+
         vm.expectEmit(true, true, true, false, address(axelarAdaptor));
         emit MapTokenAxelarMessage(CHILD_CHAIN_NAME, Strings.toHexString(CHILD_BRIDGE_ADAPTOR), payload);
 
-        axelarAdaptor.mapToken{value: callValue}(address(token), token.name(), token.symbol(), token.decimals());
+        axelarAdaptor.sendMessage{value: callValue}(payload, address(123));
+    }
+
+    function testFuzz_sendMessage_PaysGasToGasService(uint256 callValue) public {
+        vm.assume(callValue < address(this).balance);
+        vm.assume(callValue > 0);
+
+        bytes memory payload = abi.encode(MAP_TOKEN_SIG, address(token), token.name(), token.symbol(), token.decimals());
+
+        uint256 thisPreBal = address(this).balance;
+        uint256 axelarGasServicePreBal = address(axelarGasService).balance;
+
+        axelarAdaptor.sendMessage{value: callValue}(payload, address(123));
+
+        assertEq(address(this).balance, thisPreBal - callValue);
+        assertEq(address(axelarGasService).balance, axelarGasServicePreBal + callValue);
+    }
+
+    function test_sendMessage_GivesCorrectRefundRecipient() public {
+        address refundRecipient = address(0x3333);
+        uint256 callValue = 300;
+
+        bytes memory payload = abi.encode(MAP_TOKEN_SIG, address(token), token.name(), token.symbol(), token.decimals());
+
+        vm.expectCall(
+            address(axelarGasService),
+            callValue,
+            abi.encodeWithSelector(
+                axelarGasService.payNativeGasForContractCall.selector,
+                address(axelarAdaptor),
+                CHILD_CHAIN_NAME,
+                Strings.toHexString(CHILD_BRIDGE_ADAPTOR),
+                payload,
+                refundRecipient
+            )
+        );
+
+        axelarAdaptor.sendMessage{value: callValue}(payload, refundRecipient);
     }
 
     function test_RevertsIf_mapTokenCalledByNonRootBridge() public {
         address payable prankster = payable(address(0x33));
         uint256 value = 300;
+        bytes memory payload = abi.encode(MAP_TOKEN_SIG, address(token), token.name(), token.symbol(), token.decimals());
 
         // Have to call these above so the expectRevert works on the call to mapToken.
-        string memory name = token.name();
-        string memory symbol = token.symbol();
-        uint8 decimals = token.decimals();
         prankster.transfer(value);
         vm.prank(prankster);
         vm.expectRevert(CallerNotBridge.selector);
-        axelarAdaptor.mapToken{value: value}(address(token), name, symbol, decimals);
+        axelarAdaptor.sendMessage{value: value}(payload, address(123));
     }
 
     function test_RevertsIf_mapTokenCalledWithNoValue() public {
-        string memory name = token.name();
-        string memory symbol = token.symbol();
-        uint8 decimals = token.decimals();
+        bytes memory payload = abi.encode(MAP_TOKEN_SIG, address(token), token.name(), token.symbol(), token.decimals());
         vm.expectRevert(NoGas.selector);
-        axelarAdaptor.mapToken{value: 0}(address(token), name, symbol, decimals);
+        axelarAdaptor.sendMessage{value: 0}(payload, address(123));
     }
 }

@@ -25,8 +25,7 @@ contract RootAxelarBridgeAdaptor is IRootERC20BridgeAdaptor, IAxelarBridgeAdapto
     string public childChain;
     IAxelarGateway public immutable AXELAR_GATEWAY;
     IAxelarGasService public immutable GAS_SERVICE;
-
-    bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
+    mapping(uint256 => string) public chainIdToChainName;
 
     constructor(
         address _rootBridge,
@@ -56,22 +55,15 @@ contract RootAxelarBridgeAdaptor is IRootERC20BridgeAdaptor, IAxelarBridgeAdapto
 
     /**
      * @inheritdoc IRootERC20BridgeAdaptor
-     * @dev Send a map token message to the child chain via the Axelar Gateway.
+     * @notice Sends an arbitrary message to the child chain, via the Axelar network.
      */
-    function mapToken(
-        address rootToken,
-        string calldata name,
-        string calldata symbol,
-        uint8 decimals
-    ) external payable override {
+    function sendMessage(bytes calldata payload, address refundRecipient) external payable override {
         if (msg.value == 0) {
             revert NoGas();
         }
         if (msg.sender != ROOT_BRIDGE) {
             revert CallerNotBridge();
         }
-
-        bytes memory payload = abi.encode(MAP_TOKEN_SIG, rootToken, name, symbol, decimals);
 
         // Load from storage.
         string memory _childBridgeAdaptor = childBridgeAdaptor;
@@ -83,7 +75,7 @@ contract RootAxelarBridgeAdaptor is IRootERC20BridgeAdaptor, IAxelarBridgeAdapto
             _childChain,
             _childBridgeAdaptor,
             payload,
-            msg.sender
+            refundRecipient
         );
 
         AXELAR_GATEWAY.callContract(_childChain, _childBridgeAdaptor, payload);

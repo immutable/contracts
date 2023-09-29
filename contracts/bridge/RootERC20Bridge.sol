@@ -27,6 +27,7 @@ contract RootERC20Bridge is
     IRootERC20BridgeErrors
 {
     using SafeERC20 for IERC20Metadata;
+    bytes32 public constant MAP_TOKEN_SIG = keccak256("MAP_TOKEN");
 
     IRootERC20BridgeAdaptor public bridgeAdaptor;
     /// @dev The address that will be minting tokens on the child chain.
@@ -82,12 +83,14 @@ contract RootERC20Bridge is
 
         rootTokenToChildToken[address(rootToken)] = childToken;
 
-        bridgeAdaptor.mapToken{value: msg.value}(
-            address(rootToken),
+        bytes memory payload = abi.encode(
+            MAP_TOKEN_SIG,
+            rootToken,
             rootToken.name(),
             rootToken.symbol(),
             rootToken.decimals()
         );
+        bridgeAdaptor.sendMessage{value: msg.value}(payload, msg.sender);
 
         emit TokenMapped(address(rootToken), childToken);
         return childToken;

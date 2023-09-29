@@ -8,7 +8,7 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {MockAxelarGateway} from "../../../contracts/bridge/test/MockAxelarGateway.sol";
 import {MockAxelarGasService} from "../../../contracts/bridge/test/MockAxelarGasService.sol";
 import {RootERC20Bridge, IRootERC20BridgeEvents, IERC20Metadata, IRootERC20BridgeErrors } from "../../../contracts/bridge/RootERC20Bridge.sol";
-import {MockRootAxelarBridgeAdaptor} from "../../../contracts/bridge/test/MockRootAxelarBridgeAdaptor.sol";
+import {MockAdaptor} from "../../../contracts/bridge/test/MockAdaptor.sol";
 
 contract RootERC20BridgeUnitTest is Test, IRootERC20BridgeEvents, IRootERC20BridgeErrors {
     address constant CHILD_BRIDGE = address(3);
@@ -17,7 +17,7 @@ contract RootERC20BridgeUnitTest is Test, IRootERC20BridgeEvents, IRootERC20Brid
 
     ERC20PresetMinterPauser public token;
     RootERC20Bridge public rootBridge;
-    MockRootAxelarBridgeAdaptor public mockAxelarAdaptor;
+    MockAdaptor public mockAxelarAdaptor;
     MockAxelarGateway public mockAxelarGateway;
     MockAxelarGasService public axelarGasService;
 
@@ -28,7 +28,7 @@ contract RootERC20BridgeUnitTest is Test, IRootERC20BridgeEvents, IRootERC20Brid
         mockAxelarGateway = new MockAxelarGateway();
         axelarGasService = new MockAxelarGasService();
 
-        mockAxelarAdaptor = new MockRootAxelarBridgeAdaptor();
+        mockAxelarAdaptor = new MockAdaptor();
 
         // The specific ERC20 token template does not matter for these unit tests
         rootBridge.initialize(address(mockAxelarAdaptor), CHILD_BRIDGE, address(token));
@@ -51,24 +51,62 @@ contract RootERC20BridgeUnitTest is Test, IRootERC20BridgeEvents, IRootERC20Brid
         bridge.initialize(address(0), address(0), address(0));
     }
 
-    function test_mapToken() public {
+    function test_mapToken_EmitsTokenMappedEvent() public {
         uint256 mapTokenFee = 300;
         address childToken =
             Clones.predictDeterministicAddress(address(token), keccak256(abi.encodePacked(token)), CHILD_BRIDGE);
 
         vm.expectEmit(true, true, false, false, address(rootBridge));
         emit TokenMapped(address(token), childToken);
+
+        rootBridge.mapToken{value: mapTokenFee}(token);
+
+    }
+
+    function test_mapToken_CallsAdaptor() public {
+        uint256 mapTokenFee = 300;
+
+        bytes memory payload = abi.encode(rootBridge.MAP_TOKEN_SIG(), token, token.name(), token.symbol(), token.decimals());
+
         vm.expectCall(
             address(mockAxelarAdaptor),
             mapTokenFee,
             abi.encodeWithSelector(
-                mockAxelarAdaptor.mapToken.selector, address(token), token.name(), token.symbol(), token.decimals()
+                mockAxelarAdaptor.sendMessage.selector, payload, address(this)
             )
         );
 
         rootBridge.mapToken{value: mapTokenFee}(token);
+    }
+
+    function test_mapToken_SetsTokenMapping() public {
+        uint256 mapTokenFee = 300;
+        address childToken =
+            Clones.predictDeterministicAddress(address(token), keccak256(abi.encodePacked(token)), CHILD_BRIDGE);
+
+        rootBridge.mapToken{value: mapTokenFee}(token);
 
         assertEq(rootBridge.rootTokenToChildToken(address(token)), childToken);
+    }
+
+    function testFuzz_mapToken_UpdatesEthBalance(uint256 mapTokenFee) public {
+        vm.assume(mapTokenFee < address(this).balance);
+        vm.assume(mapTokenFee > 0);
+        uint256 thisPreBal = address(this).balance;
+        uint256 rootBridgePreBal = address(rootBridge).balance;
+        uint256 adaptorPreBal = address(mockAxelarAdaptor).balance;
+
+        rootBridge.mapToken{value: mapTokenFee}(token);
+
+        /*
+         * Because this is a unit test, the adaptor is mocked. This adaptor would typically
+         * pay the ETH to the gas service, but in this mocked case it will keep the ETH.
+         */
+
+        // User pays
+        assertEq(address(this).balance, thisPreBal - mapTokenFee);
+        assertEq(address(mockAxelarAdaptor).balance, adaptorPreBal + mapTokenFee);
+        assertEq(address(rootBridge).balance, rootBridgePreBal);
     }
 
     function test_RevertsIf_mapTokenCalledWithZeroAddress() public {

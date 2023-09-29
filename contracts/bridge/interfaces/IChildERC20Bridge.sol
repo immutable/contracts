@@ -15,4 +15,7 @@ interface IChildERC20BridgeErrors {
     error ZeroAddress();
     error AlreadyMapped();
     error NotBridgeAdaptor();
+error InvalidData();
+error InvalidSourceChain();
+error InvalidSourceAddress();
 }

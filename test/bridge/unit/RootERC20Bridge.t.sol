@@ -57,7 +57,7 @@ contract RootERC20BridgeUnitTest is Test, IRootERC20BridgeEvents, IRootERC20Brid
             Clones.predictDeterministicAddress(address(token), keccak256(abi.encodePacked(token)), CHILD_BRIDGE);
 
         vm.expectEmit(true, true, false, false, address(rootBridge));
-        emit TokenMapped(address(token), childToken);
+        emit L1TokenMapped(address(token), childToken);
 
         rootBridge.mapToken{value: mapTokenFee}(token);
 

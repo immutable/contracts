@@ -43,7 +43,7 @@ contract RootERC20BridgeIntegrationTest is Test, IRootERC20BridgeEvents, IAxelar
         emit MapTokenAxelarMessage(CHILD_CHAIN_NAME, Strings.toHexString(CHILD_BRIDGE_ADAPTOR), payload);
 
         vm.expectEmit(true, true, false, false, address(rootBridge));
-        emit TokenMapped(address(token), childToken);
+        emit L1TokenMapped(address(token), childToken);
 
         // Instead of using expectCalls, we could use expectEmit in combination with mock contracts emitting events.
         // expectCalls requires less boilerplate and is less dependant on mock code.

@@ -72,7 +72,6 @@ contract ChildERC20BridgeUnitTest is Test, IChildERC20BridgeEvents, IChildERC20B
         childBridge.onMessageReceive(ROOT_CHAIN_NAME, ROOT_BRIDGE_ADAPTOR, data);
 
     }
-    // TODO tests for invalid source chain etc.
 
     function test_onMessageReceive_SetsTokenMapping() public {
         address childToken =

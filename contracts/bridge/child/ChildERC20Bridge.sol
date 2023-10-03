@@ -76,6 +76,8 @@ contract ChildERC20Bridge is
 
     /**
      * @inheritdoc IChildERC20Bridge
+     * @dev This is only callable by the child chain bridge adaptor.
+     * @dev Validates `sourceAddress` is the root chain's bridgeAdaptor.
      */
     function onMessageReceive(
         string calldata messageSourceChain,
@@ -126,7 +128,7 @@ contract ChildERC20Bridge is
         emit L2TokenMapped(address(rootToken), address(childToken));
     }
 
-    function updateBridgeAdaptor(address newBridgeAdaptor) external onlyOwner {
+    function updateBridgeAdaptor(address newBridgeAdaptor) external override onlyOwner {
         if (newBridgeAdaptor == address(0)) {
             revert ZeroAddress();
         }

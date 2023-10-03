@@ -4,7 +4,6 @@ pragma solidity ^0.8.17;
 import {AxelarExecutable} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/executable/AxelarExecutable.sol";
 import {IChildERC20Bridge} from "../interfaces/child/IChildERC20Bridge.sol";
 import {IChildAxelarBridgeAdaptorErrors} from "../interfaces/child/IChildAxelarBridgeAdaptor.sol";
-import {console2} from "forge-std/Test.sol";
 
 contract ChildAxelarBridgeAdaptor is AxelarExecutable, IChildAxelarBridgeAdaptorErrors {
     /// @notice Address of bridge to relay messages to.
@@ -27,7 +26,6 @@ contract ChildAxelarBridgeAdaptor is AxelarExecutable, IChildAxelarBridgeAdaptor
         string calldata sourceAddress_,
         bytes calldata payload_
     ) internal override {
-        // address sourceAddress = address(bytes20(bytes(sourceAddress_)));
         CHILD_BRIDGE.onMessageReceive(sourceChain_, sourceAddress_, payload_);
     }
 }

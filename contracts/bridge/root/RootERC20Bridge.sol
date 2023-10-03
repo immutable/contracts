@@ -97,16 +97,6 @@ contract RootERC20Bridge is
         return childToken;
     }
 
-    /// @dev To receive ETH refunds from the bridge.
-    receive() external payable {}
-
-    /**
-     * @notice To withdraw any ETH from this contract which may have been given by the bridge network as refunds.
-     */
-    function withdrawEth(address payable recipient, uint256 amount) external onlyOwner {
-        Address.sendValue(recipient, amount);
-    }
-
     function updateBridgeAdaptor(address newBridgeAdaptor) external onlyOwner {
         if (newBridgeAdaptor == address(0)) {
             revert ZeroAddress();

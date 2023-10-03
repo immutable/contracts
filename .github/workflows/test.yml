@@ -7,6 +7,19 @@ on:
     branches: [main]
 
 jobs:
+  forge-test:
+    name: Run Forge Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Run tests
+        run: forge test -vvv
   hardhat-test:
     name: Run Hardhat Tests
     runs-on: ubuntu-latest

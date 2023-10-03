@@ -5,10 +5,10 @@ import {Test, console2} from "forge-std/Test.sol";
 import {ERC20PresetMinterPauser} from "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {RootERC20Bridge, IRootERC20BridgeEvents, IERC20Metadata, IRootERC20BridgeErrors } from "../../../contracts/bridge/root/RootERC20Bridge.sol";
-import {MockAxelarGateway} from "../../../contracts/bridge/test/MockAxelarGateway.sol";
-import {MockAxelarGasService} from "../../../contracts/bridge/test/MockAxelarGasService.sol";
-import {MockAdaptor} from "../../../contracts/bridge/test/MockAdaptor.sol";
+import {RootERC20Bridge, IRootERC20BridgeEvents, IERC20Metadata, IRootERC20BridgeErrors } from "../../../../contracts/bridge/root/RootERC20Bridge.sol";
+import {MockAxelarGateway} from "../../../../contracts/bridge/test/root/MockAxelarGateway.sol";
+import {MockAxelarGasService} from "../../../../contracts/bridge/test/root/MockAxelarGasService.sol";
+import {MockAdaptor} from "../../../../contracts/bridge/test/root/MockAdaptor.sol";
 
 contract RootERC20BridgeUnitTest is Test, IRootERC20BridgeEvents, IRootERC20BridgeErrors {
     address constant CHILD_BRIDGE = address(3);

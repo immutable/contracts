@@ -3,8 +3,8 @@ pragma solidity ^0.8.13;
 
 import {Test, console2} from "forge-std/Test.sol";
 import {ERC20PresetMinterPauser} from "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
-import {MockAxelarGateway} from "../../contracts/bridge/test/MockAxelarGateway.sol";
-import {MockAxelarGasService} from "../../contracts/bridge/test/MockAxelarGasService.sol";
+import {MockAxelarGateway} from "../../contracts/bridge/test/root/MockAxelarGateway.sol";
+import {MockAxelarGasService} from "../../contracts/bridge/test/root/MockAxelarGasService.sol";
 import {RootERC20Bridge} from "../../contracts/bridge/root/RootERC20Bridge.sol";
 import {RootAxelarBridgeAdaptor} from "../../contracts/bridge/root/RootAxelarBridgeAdaptor.sol";
 

@@ -7,7 +7,6 @@ import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
-import {AxelarExecutable} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/executable/AxelarExecutable.sol";
 import {IChildERC20BridgeEvents, IChildERC20BridgeErrors, IChildERC20Bridge, IERC20Metadata} from "../interfaces/child/IChildERC20Bridge.sol";
 import {IChildERC20BridgeAdaptor} from "../interfaces/child/IChildERC20BridgeAdaptor.sol";
 import {IChildERC20} from "../interfaces/child/IChildERC20.sol";
@@ -31,7 +30,7 @@ contract ChildERC20Bridge is
 
     IChildERC20BridgeAdaptor public bridgeAdaptor;
     /// @dev The address that will be sending messages to, and receiving messages from, the child chain.
-    address public rootERC20BridgeAdaptor;
+    string public rootERC20BridgeAdaptor;
     /// @dev The address of the token template that will be cloned to create tokens.
     address public childTokenTemplate;
     /// @dev The name of the chain that this bridge is connected to.
@@ -43,24 +42,28 @@ contract ChildERC20Bridge is
     /**
      * @notice Initilization function for RootERC20Bridge.
      * @param newBridgeAdaptor Address of StateSender to send deposit information to.
-     * @param newRootERC20BridgeAdaptor Address of root ERC20 bridge adaptor to communicate with.
+     * @param newRootERC20BridgeAdaptor Stringified address of root ERC20 bridge adaptor to communicate with.
      * @param newChildTokenTemplate Address of child token template to clone.
      * @param newRootChain A stringified representation of the chain that this bridge is connected to. Used for validation.
      * @dev Can only be called once.
      */
     function initialize(
         address newBridgeAdaptor,
-        address newRootERC20BridgeAdaptor,
+        string memory newRootERC20BridgeAdaptor,
         address newChildTokenTemplate,
         string memory newRootChain
     ) public initializer {
         if (
             newBridgeAdaptor == address(0) ||
-            newRootERC20BridgeAdaptor == address(0) ||
             newChildTokenTemplate == address(0)
         ) {
             revert ZeroAddress();
         }
+
+        if (bytes(newRootERC20BridgeAdaptor).length == 0) {
+            revert InvalidRootERC20BridgeAdaptor();
+        }
+
         if (bytes(newRootChain).length == 0) {
             revert InvalidRootChain();
         }
@@ -76,7 +79,7 @@ contract ChildERC20Bridge is
      */
     function onMessageReceive(
         string calldata messageSourceChain,
-        address sourceAddress,
+        string calldata sourceAddress,
         bytes calldata data
     ) external override {
         if (msg.sender != address(bridgeAdaptor)) {
@@ -85,7 +88,7 @@ contract ChildERC20Bridge is
         if (!Strings.equal(messageSourceChain, rootChain)) {
             revert InvalidSourceChain();
         }
-        if (sourceAddress != rootERC20BridgeAdaptor) {
+        if (!Strings.equal(sourceAddress, rootERC20BridgeAdaptor)) {
             revert InvalidSourceAddress();
         }
         if (data.length == 0) {

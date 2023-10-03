@@ -4,13 +4,13 @@ pragma solidity ^0.8.17;
 import {Test, console2} from "forge-std/Test.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {ChildERC20Bridge, IChildERC20BridgeEvents, IERC20Metadata, IChildERC20BridgeErrors } from "../../../contracts/bridge/child/ChildERC20Bridge.sol";
-import {ChildERC20} from "../../../contracts/bridge/child/ChildERC20.sol";
-import {MockAdaptor} from "../../../contracts/bridge/test/MockAdaptor.sol";
+import {ChildERC20Bridge, IChildERC20BridgeEvents, IERC20Metadata, IChildERC20BridgeErrors } from "../../../../contracts/bridge/child/ChildERC20Bridge.sol";
+import {ChildERC20} from "../../../../contracts/bridge/child/ChildERC20.sol";
+import {MockAdaptor} from "../../../../contracts/bridge/test/root/MockAdaptor.sol";
 
 contract ChildERC20BridgeUnitTest is Test, IChildERC20BridgeEvents, IChildERC20BridgeErrors {
     address constant ROOT_BRIDGE = address(3);
-    address constant ROOT_BRIDGE_ADAPTOR = address(4);
+    string public ROOT_BRIDGE_ADAPTOR = Strings.toHexString(address(4));
     string constant ROOT_CHAIN_NAME = "test";
 
     ChildERC20 public token;
@@ -44,10 +44,17 @@ contract ChildERC20BridgeUnitTest is Test, IChildERC20BridgeEvents, IChildERC20B
     function test_RevertIf_InitializeWithAZeroAddress() public {
         ChildERC20Bridge bridge = new ChildERC20Bridge();
         vm.expectRevert(ZeroAddress.selector);
-        bridge.initialize(address(0), address(0), address(0), ROOT_CHAIN_NAME);
+        bridge.initialize(address(0), ROOT_BRIDGE_ADAPTOR, address(0), ROOT_CHAIN_NAME);
     }
 
-    function test_RevertIf_InitializeWithAnEmptyString() public {
+    function test_RevertIf_InitializeWithAnEmptyBridgeAdaptorString() public {
+        ChildERC20Bridge bridge = new ChildERC20Bridge();
+        vm.expectRevert(InvalidRootERC20BridgeAdaptor.selector);
+        bridge.initialize(address(this), "", address(token), ROOT_CHAIN_NAME);
+    }
+
+
+    function test_RevertIf_InitializeWithAnEmptyChainNameString() public {
         ChildERC20Bridge bridge = new ChildERC20Bridge();
         vm.expectRevert(InvalidRootChain.selector);
         bridge.initialize(address(this), ROOT_BRIDGE_ADAPTOR, address(token), "");
@@ -107,7 +114,7 @@ contract ChildERC20BridgeUnitTest is Test, IChildERC20BridgeEvents, IChildERC20B
         bytes memory data = abi.encode(childBridge.MAP_TOKEN_SIG(), address(rootToken), rootToken.name(), rootToken.symbol(), rootToken.decimals());
         
         vm.expectRevert(InvalidSourceAddress.selector);
-        childBridge.onMessageReceive(ROOT_CHAIN_NAME, address(456), data);
+        childBridge.onMessageReceive(ROOT_CHAIN_NAME, Strings.toHexString(address(456)), data);
     }
 
     function test_RevertsIf_onMessageReceiveCalledWithDataLengthZero() public {

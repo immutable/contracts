@@ -7,9 +7,9 @@ import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 import {IAxelarGateway} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/interfaces/IAxelarGateway.sol";
-import {IRootERC20Bridge, IERC20Metadata} from "./interfaces/IRootERC20Bridge.sol";
-import {IRootERC20BridgeEvents, IRootERC20BridgeErrors} from "./interfaces/IRootERC20Bridge.sol";
-import {IRootERC20BridgeAdaptor} from "./interfaces/IRootERC20BridgeAdaptor.sol";
+import {IRootERC20Bridge, IERC20Metadata} from "../interfaces/root/IRootERC20Bridge.sol";
+import {IRootERC20BridgeEvents, IRootERC20BridgeErrors} from "../interfaces/root/IRootERC20Bridge.sol";
+import {IRootERC20BridgeAdaptor} from "../interfaces/root/IRootERC20BridgeAdaptor.sol";
 
 /**
  * @notice RootERC20Bridge is a bridge that allows ERC20 tokens to be transferred from the root chain to the child chain.
@@ -90,9 +90,10 @@ contract RootERC20Bridge is
             rootToken.symbol(),
             rootToken.decimals()
         );
+        // TODO investigate using delegatecall to keep the axelar message sender as the bridge contract, since adaptor can change.
         bridgeAdaptor.sendMessage{value: msg.value}(payload, msg.sender);
 
-        emit TokenMapped(address(rootToken), childToken);
+        emit L1TokenMapped(address(rootToken), childToken);
         return childToken;
     }
 

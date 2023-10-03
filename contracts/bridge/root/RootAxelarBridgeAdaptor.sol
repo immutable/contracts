@@ -6,8 +6,8 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IAxelarGateway} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/interfaces/IAxelarGateway.sol";
 import {IAxelarGasService} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/interfaces/IAxelarGasService.sol";
-import {IRootERC20BridgeAdaptor} from "./interfaces/IRootERC20BridgeAdaptor.sol";
-import {IAxelarBridgeAdaptorEvents, IAxelarBridgeAdaptorErrors} from "./interfaces/IAxelarBridgeAdaptor.sol";
+import {IRootERC20BridgeAdaptor} from "../interfaces/root/IRootERC20BridgeAdaptor.sol";
+import {IRootAxelarBridgeAdaptorEvents, IRootAxelarBridgeAdaptorErrors} from "../interfaces/root/IRootAxelarBridgeAdaptor.sol";
 
 // TODO Note: this will have to be an AxelarExecutable contract in order to receive messages
 
@@ -15,7 +15,7 @@ import {IAxelarBridgeAdaptorEvents, IAxelarBridgeAdaptorErrors} from "./interfac
  * @notice RootAxelarBridgeAdaptor is a bridge adaptor that allows the RootERC20Bridge to communicate with the Axelar Gateway.
  * @dev This is not an upgradeable contract, because it is trivial to deploy a new one if needed.
  */
-contract RootAxelarBridgeAdaptor is IRootERC20BridgeAdaptor, IAxelarBridgeAdaptorEvents, IAxelarBridgeAdaptorErrors {
+contract RootAxelarBridgeAdaptor is IRootERC20BridgeAdaptor, IRootAxelarBridgeAdaptorEvents, IRootAxelarBridgeAdaptorErrors {
     using SafeERC20 for IERC20Metadata;
 
     address public immutable ROOT_BRIDGE;

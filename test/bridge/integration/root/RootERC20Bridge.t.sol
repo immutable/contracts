@@ -5,13 +5,13 @@ import {Test, console2} from "forge-std/Test.sol";
 import {ERC20PresetMinterPauser} from "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {MockAxelarGateway} from "../../../contracts/bridge/test/MockAxelarGateway.sol";
-import {MockAxelarGasService} from "../../../contracts/bridge/test/MockAxelarGasService.sol";
-import {RootERC20Bridge, IRootERC20BridgeEvents, IERC20Metadata} from "../../../contracts/bridge/RootERC20Bridge.sol";
-import {RootAxelarBridgeAdaptor, IAxelarBridgeAdaptorEvents} from "../../../contracts/bridge/RootAxelarBridgeAdaptor.sol";
-import {Utils} from "../utils.t.sol";
+import {MockAxelarGateway} from "../../../../contracts/bridge/test/root/MockAxelarGateway.sol";
+import {MockAxelarGasService} from "../../../../contracts/bridge/test/root/MockAxelarGasService.sol";
+import {RootERC20Bridge, IRootERC20BridgeEvents, IERC20Metadata} from "../../../../contracts/bridge/root/RootERC20Bridge.sol";
+import {RootAxelarBridgeAdaptor, IRootAxelarBridgeAdaptorEvents} from "../../../../contracts/bridge/root/RootAxelarBridgeAdaptor.sol";
+import {Utils} from "../../utils.t.sol";
 
-contract RootERC20BridgeIntegrationTest is Test, IRootERC20BridgeEvents, IAxelarBridgeAdaptorEvents, Utils {
+contract RootERC20BridgeIntegrationTest is Test, IRootERC20BridgeEvents, IRootAxelarBridgeAdaptorEvents, Utils {
     address constant CHILD_BRIDGE = address(3);
     address constant CHILD_BRIDGE_ADAPTOR = address(4);
     string constant CHILD_CHAIN_NAME = "test";
@@ -43,7 +43,7 @@ contract RootERC20BridgeIntegrationTest is Test, IRootERC20BridgeEvents, IAxelar
         emit MapTokenAxelarMessage(CHILD_CHAIN_NAME, Strings.toHexString(CHILD_BRIDGE_ADAPTOR), payload);
 
         vm.expectEmit(true, true, false, false, address(rootBridge));
-        emit TokenMapped(address(token), childToken);
+        emit L1TokenMapped(address(token), childToken);
 
         // Instead of using expectCalls, we could use expectEmit in combination with mock contracts emitting events.
         // expectCalls requires less boilerplate and is less dependant on mock code.

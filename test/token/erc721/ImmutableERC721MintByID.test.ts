@@ -81,7 +81,7 @@ describe("Immutable ERC721 Mint by ID Cases", function () {
     });
   });
 
-  describe.only("Minting and burning", function () {
+  describe("Minting and burning", function () {
     it("Should allow a member of the minter role to mint", async function () {
       await erc721.connect(minter).mint(user.address, 1);
       expect(await erc721.balanceOf(user.address)).to.equal(1);
@@ -100,12 +100,12 @@ describe("Immutable ERC721 Mint by ID Cases", function () {
       expect(await erc721.totalSupply()).to.equal(2);
     });
 
-    it("Should allow safe minting of batch tokens", async function () {
+    it("Should allow minting of batch tokens", async function () {
       const mintRequests = [
         { to: user.address, tokenIds: [3, 4, 5, 6, 7] },
         { to: owner.address, tokenIds: [8, 9, 10, 11, 12] },
       ];
-      await erc721.connect(minter).safeMintBatch(mintRequests);
+      await erc721.connect(minter).mintBatch(mintRequests);
       expect(await erc721.balanceOf(user.address)).to.equal(7);
       expect(await erc721.balanceOf(owner.address)).to.equal(5);
       expect(await erc721.totalSupply()).to.equal(12);
@@ -121,11 +121,32 @@ describe("Immutable ERC721 Mint by ID Cases", function () {
       expect(await erc721.ownerOf(12)).to.equal(owner.address);
     });
 
+    it("Should allow safe minting of batch tokens", async function () {
+      const mintRequests = [
+        { to: user.address, tokenIds: [13, 14, 15, 16, 17] },
+        { to: owner.address, tokenIds: [18, 19, 20, 21, 22] },
+      ];
+      await erc721.connect(minter).safeMintBatch(mintRequests);
+      expect(await erc721.balanceOf(user.address)).to.equal(12);
+      expect(await erc721.balanceOf(owner.address)).to.equal(10);
+      expect(await erc721.totalSupply()).to.equal(22);
+      expect(await erc721.ownerOf(13)).to.equal(user.address);
+      expect(await erc721.ownerOf(14)).to.equal(user.address);
+      expect(await erc721.ownerOf(15)).to.equal(user.address);
+      expect(await erc721.ownerOf(16)).to.equal(user.address);
+      expect(await erc721.ownerOf(17)).to.equal(user.address);
+      expect(await erc721.ownerOf(18)).to.equal(owner.address);
+      expect(await erc721.ownerOf(19)).to.equal(owner.address);
+      expect(await erc721.ownerOf(20)).to.equal(owner.address);
+      expect(await erc721.ownerOf(21)).to.equal(owner.address);
+      expect(await erc721.ownerOf(22)).to.equal(owner.address);
+    });
+
     it("Should allow owner or approved to burn a batch of tokens", async function () {
-      expect(await erc721.balanceOf(user.address)).to.equal(7);
+      expect(await erc721.balanceOf(user.address)).to.equal(12);
       await erc721.connect(user).burnBatch([1, 2]);
-      expect(await erc721.balanceOf(user.address)).to.equal(5);
-      expect(await erc721.totalSupply()).to.equal(10);
+      expect(await erc721.balanceOf(user.address)).to.equal(10);
+      expect(await erc721.totalSupply()).to.equal(20);
     });
 
     it("Should prevent not approved to burn a batch of tokens", async function () {

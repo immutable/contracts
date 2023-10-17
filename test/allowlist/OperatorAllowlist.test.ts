@@ -2,7 +2,7 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { walletSCFixture, RegularAllowlistFixture } from "../utils/DeployRegularFixtures";
-import { ImmutableERC721MintByID, MockMarketplace, OperatorAllowlist, MockWalletFactory } from "../../typechain";
+import { ImmutableERC721MintByID, MockMarketplace, OperatorAllowlist, MockWalletFactory } from "../../typechain-types";
 import proxyArtfiact from "../utils/proxyArtifact.json";
 
 describe("Royalty Enforcement Test Cases", function () {

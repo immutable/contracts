@@ -13,7 +13,7 @@ import {
   MockWalletFactory__factory,
   MockEIP1271Wallet,
   MockEIP1271Wallet__factory,
-} from "../../typechain";
+} from "../../typechain-types";
 
 // Helper function to deploy all required contracts for Allowlist testing. Deploys:
 // - ERC721

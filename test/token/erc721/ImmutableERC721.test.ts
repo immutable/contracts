@@ -342,6 +342,20 @@ describe("ImmutableERC721", function () {
   });
 
   describe("Transfers", function () {
+    it("Should revert when TransferRequest contains mismatched array lengths", async function () {
+      const first = await erc721.mintBatchByQuantityThreshold();
+
+      const transferRequest = {
+        from: minter.address,
+        tos: [user.address, user.address, user2.address, user2.address, user2.address],
+        tokenIds: [51, 52, 53, first.add(11).toString()],
+      };
+
+      await expect(
+        erc721.connect(ethers.provider.getSigner(transferRequest.from)).safeTransferFromBatch(transferRequest)
+      ).to.be.revertedWith("IImmutableERC721MismatchedTransferLengths");
+    });
+
     it("Should allow users to transfer tokens using safeTransferFromBatch", async function () {
       const first = await erc721.mintBatchByQuantityThreshold();
       // Mint tokens for testing transfers

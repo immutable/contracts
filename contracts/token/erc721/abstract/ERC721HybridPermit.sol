@@ -2,8 +2,8 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import '@openzeppelin/contracts/utils/cryptography/ECDSA.sol';
-import '@openzeppelin/contracts/utils/cryptography/EIP712.sol';
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import "solidity-bytes-utils/contracts/BytesLib.sol";
 import "./IERC4494.sol";
@@ -15,29 +15,25 @@ import "./ERC721Hybrid.sol";
  */
 
 abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
-
     /** @notice mapping used to keep track of nonces of each token ID for validating
      *  signatures
      */
     mapping(uint256 => uint256) private _nonces;
 
-    
     /** @dev the unique identifier for the permit struct to be EIP 712 compliant */
-    bytes32 private constant _PERMIT_TYPEHASH = keccak256(
-        abi.encodePacked(
-            "Permit(",
+    bytes32 private constant _PERMIT_TYPEHASH =
+        keccak256(
+            abi.encodePacked(
+                "Permit(",
                 "address spender,"
                 "uint256 tokenId,"
                 "uint256 nonce,"
                 "uint256 deadline"
-            ")"
-        )
-    );
+                ")"
+            )
+        );
 
-    constructor(string memory name, string memory symbol)
-        ERC721Hybrid(name, symbol)
-        EIP712(name, "1")
-    {}
+    constructor(string memory name, string memory symbol) ERC721Hybrid(name, symbol) EIP712(name, "1") {}
 
     /**
      * @notice Function to approve by way of owner signature
@@ -46,27 +42,17 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
      * @param deadline a timestamp expiry for the permit
      * @param sig a traditional or EIP-2098 signature
      */
-    function permit(
-        address spender,
-        uint256 tokenId,
-        uint256 deadline,
-        bytes memory sig
-    ) external override {
+    function permit(address spender, uint256 tokenId, uint256 deadline, bytes memory sig) external override {
         _permit(spender, tokenId, deadline, sig);
     }
 
-    function _permit(
-        address spender,
-        uint256 tokenId,
-        uint256 deadline,
-        bytes memory sig
-    ) internal virtual {
+    function _permit(address spender, uint256 tokenId, uint256 deadline, bytes memory sig) internal virtual {
         if (deadline < block.timestamp) {
             revert PermitExpired();
         }
 
         bytes32 digest = _buildPermitDigest(spender, tokenId, deadline);
-        
+
         // smart contract wallet signature validation
         if (_isValidERC1271Signature(ownerOf(tokenId), digest, sig)) {
             _approve(spender, tokenId);
@@ -102,9 +88,7 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
      * @param tokenId The ID of the token for which to retrieve the nonce.
      * @return Current nonce of the given token.
      */
-    function nonces(
-        uint256 tokenId
-    ) external view returns (uint256) {
+    function nonces(uint256 tokenId) external view returns (uint256) {
         return _nonces[tokenId];
     }
 
@@ -123,22 +107,8 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
      * @param deadline The deadline until which the permit is valid.
      * @return A bytes32 digest, EIP-712 compliant, that serves as a unique identifier for the permit.
      */
-    function _buildPermitDigest(
-        address spender,
-        uint256 tokenId,
-        uint256 deadline
-    ) internal view returns (bytes32) {
-        return _hashTypedDataV4(
-            keccak256(
-                abi.encode(
-                    _PERMIT_TYPEHASH,
-                    spender,
-                    tokenId,
-                    _nonces[tokenId],
-                    deadline
-                )
-            )
-        );
+    function _buildPermitDigest(address spender, uint256 tokenId, uint256 deadline) internal view returns (bytes32) {
+        return _hashTypedDataV4(keccak256(abi.encode(_PERMIT_TYPEHASH, spender, tokenId, _nonces[tokenId], deadline)));
     }
 
     /**
@@ -147,7 +117,7 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
      * @param tokenId The token id.
      * @return True if the signature is from an approved operator or owner, otherwise false.
      */
-    function _isValidEOASignature(address recoveredSigner, uint256 tokenId) private view returns(bool) {
+    function _isValidEOASignature(address recoveredSigner, uint256 tokenId) private view returns (bool) {
         return recoveredSigner != address(0) && _isApprovedOrOwner(recoveredSigner, tokenId);
     }
 
@@ -158,13 +128,9 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
      * @param sig The actual signature bytes.
      * @return True if the signature is valid according to EIP-1271, otherwise false.
      */
-    function _isValidERC1271Signature(address spender, bytes32 digest, bytes memory sig) private view returns(bool) {
+    function _isValidERC1271Signature(address spender, bytes32 digest, bytes memory sig) private view returns (bool) {
         (bool success, bytes memory res) = spender.staticcall(
-            abi.encodeWithSelector(
-                IERC1271.isValidSignature.selector, 
-                digest, 
-                sig
-            )
+            abi.encodeWithSelector(IERC1271.isValidSignature.selector, digest, sig)
         );
 
         if (success && res.length == 32) {
@@ -173,7 +139,7 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -182,16 +148,10 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
      * @param interfaceId The interface identifier, which is a 4-byte selector.
      * @return True if the contract implements `interfaceId` and the call doesn't revert, otherwise false.
      */
-    function supportsInterface(bytes4 interfaceId)
-      public
-      view
-      virtual
-      override(IERC165, ERC721Hybrid)
-      returns (bool)
-    {
-     return
-      interfaceId == type(IERC4494).interfaceId || // 0x5604e225
-      super.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165, ERC721Hybrid) returns (bool) {
+        return
+            interfaceId == type(IERC4494).interfaceId || // 0x5604e225
+            super.supportsInterface(interfaceId);
     }
 
     /**
@@ -200,13 +160,8 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
      * @param to The address to which the token is being transferred.
      * @param tokenId The ID of the token being transferred.
      */
-    function _transfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal virtual override(ERC721Hybrid){
+    function _transfer(address from, address to, uint256 tokenId) internal virtual override(ERC721Hybrid) {
         _nonces[tokenId]++;
         super._transfer(from, to, tokenId);
     }
-
 }

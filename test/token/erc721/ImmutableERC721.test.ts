@@ -343,6 +343,23 @@ describe("ImmutableERC721", function () {
   });
 
   describe("Royalties", function () {
+    it("Should allow admin to set the default royalty receiver address", async function () {
+      await erc721.setDefaultRoyaltyReceiver(user.address, ethers.BigNumber.from("200"));
+
+      let salePrice = ethers.utils.parseEther("1");
+      let tokenInfo = await erc721.royaltyInfo(1, salePrice);
+
+      expect(tokenInfo[0]).to.be.equal(user.address);
+
+      // Revert test changes
+      await erc721.setDefaultRoyaltyReceiver(owner.address, ethers.BigNumber.from("200"));
+
+      salePrice = ethers.utils.parseEther("1");
+      tokenInfo = await erc721.royaltyInfo(1, salePrice);
+
+      expect(tokenInfo[0]).to.be.equal(owner.address);
+    });
+
     it("Should set the correct royalties", async function () {
       const salePrice = ethers.utils.parseEther("1");
       const tokenInfo = await erc721.royaltyInfo(2, salePrice);

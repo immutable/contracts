@@ -50,7 +50,6 @@ export const AllowlistFixture = async (owner: SignerWithAddress) => {
   const marketPlace: MockMarketplace = await mockMarketplaceFactory.deploy(erc721.address);
 
   // Mock EIP1271 Wallet
-
   const mockEIP1271Wallet = (await ethers.getContractFactory("MockEIP1271Wallet")) as MockEIP1271Wallet__factory;
   const eip1271Wallet: MockEIP1271Wallet = await mockEIP1271Wallet.deploy(owner.address);
 

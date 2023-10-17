@@ -343,31 +343,48 @@ describe("ImmutableERC721", function () {
   });
 
   describe("Royalties", function () {
-    it("Should allow admin to set the default royalty receiver address", async function () {
-      await erc721.setDefaultRoyaltyReceiver(user.address, ethers.BigNumber.from("200"));
-
-      let salePrice = ethers.utils.parseEther("1");
-      let tokenInfo = await erc721.royaltyInfo(1, salePrice);
-
-      expect(tokenInfo[0]).to.be.equal(user.address);
-
-      // Revert test changes
-      await erc721.setDefaultRoyaltyReceiver(owner.address, ethers.BigNumber.from("200"));
-
-      salePrice = ethers.utils.parseEther("1");
-      tokenInfo = await erc721.royaltyInfo(1, salePrice);
-
-      expect(tokenInfo[0]).to.be.equal(owner.address);
-    });
+    const salePrice = ethers.utils.parseEther("1");
+    const feeNumerator = ethers.BigNumber.from("200");
 
     it("Should set the correct royalties", async function () {
-      const salePrice = ethers.utils.parseEther("1");
       const tokenInfo = await erc721.royaltyInfo(2, salePrice);
 
       expect(tokenInfo[0]).to.be.equal(owner.address);
       // (_salePrice * royalty.royaltyFraction) / _feeDenominator();
       // (1e18 * 2000) / 10000 = 2e17 (0.2 eth)
       expect(tokenInfo[1]).to.be.equal(ethers.utils.parseEther("0.02"));
+    });
+
+    it("Should allow admin to set the default royalty receiver address", async function () {
+      await erc721.setDefaultRoyaltyReceiver(user.address, feeNumerator);
+      const tokenInfo = await erc721.royaltyInfo(1, salePrice);
+      expect(tokenInfo[0]).to.be.equal(user.address);
+    });
+
+    it("Should allow the minter to set the royalty receiver address for a specific token ID", async function () {
+      await erc721.connect(minter).setNFTRoyaltyReceiver(2, user2.address, feeNumerator);
+      const tokenInfo1 = await erc721.royaltyInfo(1, salePrice);
+      const tokenInfo2 = await erc721.royaltyInfo(2, salePrice);
+      expect(tokenInfo1[0]).to.be.equal(user.address);
+      expect(tokenInfo2[0]).to.be.equal(user2.address);
+    });
+
+    it("Should allow the minter to set the royalty receiver address for a list of token IDs", async function () {
+      let tokenInfo3 = await erc721.royaltyInfo(3, salePrice);
+      let tokenInfo4 = await erc721.royaltyInfo(4, salePrice);
+      let tokenInfo5 = await erc721.royaltyInfo(5, salePrice);
+      expect(tokenInfo3[0]).to.be.equal(user.address);
+      expect(tokenInfo4[0]).to.be.equal(user.address);
+      expect(tokenInfo5[0]).to.be.equal(user.address);
+
+      await erc721.connect(minter).setNFTRoyaltyReceiverBatch([3, 4, 5], user2.address, feeNumerator);
+
+      tokenInfo3 = await erc721.royaltyInfo(3, salePrice);
+      tokenInfo4 = await erc721.royaltyInfo(4, salePrice);
+      tokenInfo5 = await erc721.royaltyInfo(5, salePrice);
+      expect(tokenInfo3[0]).to.be.equal(user2.address);
+      expect(tokenInfo4[0]).to.be.equal(user2.address);
+      expect(tokenInfo5[0]).to.be.equal(user2.address);
     });
   });
 

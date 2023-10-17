@@ -82,6 +82,25 @@ describe("Immutable ERC721 Mint by ID Cases", function () {
   });
 
   describe("Minting and burning", function () {
+    it("Should return the addresses which have DEFAULT_ADMIN_ROLE", async function () {
+      const admins = await erc721.getAdmins();
+      expect(admins[0]).to.equal(owner.address);
+    });
+
+    it("Should allow an admin to grant and revoke MINTER_ROLE", async function () {
+      const minterRole = await erc721.MINTER_ROLE();
+
+      // Grant
+      await erc721.connect(owner).grantMinterRole(user.address);
+      let hasRole = await erc721.hasRole(minterRole, user.address);
+      expect(hasRole).to.equal(true);
+
+      // Revoke
+      await erc721.connect(owner).revokeMinterRole(user.address);
+      hasRole = await erc721.hasRole(minterRole, user.address);
+      expect(hasRole).to.equal(false);
+    });
+
     it("Should allow a member of the minter role to mint", async function () {
       await erc721.connect(minter).mint(user.address, 1);
       expect(await erc721.balanceOf(user.address)).to.equal(1);
@@ -307,14 +326,48 @@ describe("Immutable ERC721 Mint by ID Cases", function () {
   });
 
   describe("Royalties", function () {
+    const salePrice = ethers.utils.parseEther("1");
+    const feeNumerator = ethers.BigNumber.from("200");
+
     it("Should set the correct royalties", async function () {
-      const salePrice = ethers.utils.parseEther("1");
       const tokenInfo = await erc721.royaltyInfo(2, salePrice);
 
       expect(tokenInfo[0]).to.be.equal(royaltyRecipient.address);
       // (_salePrice * royalty.royaltyFraction) / _feeDenominator();
       // (1e18 * 2000) / 10000 = 2e17 (0.2 eth)
       expect(tokenInfo[1]).to.be.equal(ethers.utils.parseEther("0.2"));
+    });
+
+    it("Should allow admin to set the default royalty receiver address", async function () {
+      await erc721.setDefaultRoyaltyReceiver(user.address, feeNumerator);
+      const tokenInfo = await erc721.royaltyInfo(1, salePrice);
+      expect(tokenInfo[0]).to.be.equal(user.address);
+    });
+
+    it("Should allow the minter to set the royalty receiver address for a specific token ID", async function () {
+      await erc721.connect(minter).setNFTRoyaltyReceiver(2, user2.address, feeNumerator);
+      const tokenInfo1 = await erc721.royaltyInfo(1, salePrice);
+      const tokenInfo2 = await erc721.royaltyInfo(2, salePrice);
+      expect(tokenInfo1[0]).to.be.equal(user.address);
+      expect(tokenInfo2[0]).to.be.equal(user2.address);
+    });
+
+    it("Should allow the minter to set the royalty receiver address for a list of token IDs", async function () {
+      let tokenInfo3 = await erc721.royaltyInfo(3, salePrice);
+      let tokenInfo4 = await erc721.royaltyInfo(4, salePrice);
+      let tokenInfo5 = await erc721.royaltyInfo(5, salePrice);
+      expect(tokenInfo3[0]).to.be.equal(user.address);
+      expect(tokenInfo4[0]).to.be.equal(user.address);
+      expect(tokenInfo5[0]).to.be.equal(user.address);
+
+      await erc721.connect(minter).setNFTRoyaltyReceiverBatch([3, 4, 5], user2.address, feeNumerator);
+
+      tokenInfo3 = await erc721.royaltyInfo(3, salePrice);
+      tokenInfo4 = await erc721.royaltyInfo(4, salePrice);
+      tokenInfo5 = await erc721.royaltyInfo(5, salePrice);
+      expect(tokenInfo3[0]).to.be.equal(user2.address);
+      expect(tokenInfo4[0]).to.be.equal(user2.address);
+      expect(tokenInfo5[0]).to.be.equal(user2.address);
     });
   });
 

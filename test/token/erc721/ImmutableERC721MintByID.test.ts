@@ -6,7 +6,7 @@ import {
   ImmutableERC721MintByID,
   OperatorAllowlist,
   OperatorAllowlist__factory,
-} from "../../../typechain";
+} from "../../../typechain-types";
 import { RegularAllowlistFixture } from "../../utils/DeployRegularFixtures";
 
 describe("Immutable ERC721 Mint by ID Cases", function () {

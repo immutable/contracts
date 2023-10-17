@@ -1,7 +1,7 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { ImmutableERC721, OperatorAllowlist } from "../../../typechain";
+import { ImmutableERC721, OperatorAllowlist } from "../../../typechain-types";
 import { AllowlistFixture } from "../../utils/DeployHybridFixtures";
 
 describe("ImmutableERC721", function () {
@@ -50,6 +50,27 @@ describe("ImmutableERC721", function () {
     });
   });
 
+  describe("Minting access control", function () {
+    it("Should return the addresses which have DEFAULT_ADMIN_ROLE", async function () {
+      const admins = await erc721.getAdmins();
+      expect(admins[0]).to.equal(owner.address);
+    });
+
+    it("Should allow an admin to grant and revoke MINTER_ROLE", async function () {
+      const minterRole = await erc721.MINTER_ROLE();
+
+      // Grant
+      await erc721.connect(owner).grantMinterRole(user.address);
+      let hasRole = await erc721.hasRole(minterRole, user.address);
+      expect(hasRole).to.equal(true);
+
+      // Revoke
+      await erc721.connect(owner).revokeMinterRole(user.address);
+      hasRole = await erc721.hasRole(minterRole, user.address);
+      expect(hasRole).to.equal(false);
+    });
+  });
+
   describe("Minting and burning", function () {
     it("Should allow a member of the minter role to mint", async function () {
       await erc721.connect(minter).mint(user.address, 1);
@@ -85,6 +106,7 @@ describe("ImmutableERC721", function () {
       expect(await erc721.ownerOf(7)).to.equal(owner.address);
       expect(await erc721.ownerOf(8)).to.equal(owner.address);
     });
+
     it("Should allow minting of batch tokens", async function () {
       const mintRequests = [
         { to: user.address, tokenIds: [9, 10, 11, 20] },

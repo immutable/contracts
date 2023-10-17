@@ -100,6 +100,16 @@ describe("Immutable ERC721 Mint by ID Cases", function () {
       expect(await erc721.totalSupply()).to.equal(2);
     });
 
+    it("Should revert when minting a batch tokens to the zero address", async function () {
+      const mintRequests = [
+        { to: ethers.constants.AddressZero, tokenIds: [3, 4, 5, 6, 7] },
+        { to: owner.address, tokenIds: [8, 9, 10, 11, 12] },
+      ];
+      await expect(erc721.connect(minter).mintBatch(mintRequests)).to.be.revertedWith(
+        "IImmutableERC721SendingToZerothAddress"
+      );
+    });
+
     it("Should allow minting of batch tokens", async function () {
       const mintRequests = [
         { to: user.address, tokenIds: [3, 4, 5, 6, 7] },
@@ -119,6 +129,16 @@ describe("Immutable ERC721 Mint by ID Cases", function () {
       expect(await erc721.ownerOf(10)).to.equal(owner.address);
       expect(await erc721.ownerOf(11)).to.equal(owner.address);
       expect(await erc721.ownerOf(12)).to.equal(owner.address);
+    });
+
+    it("Should revert when safe minting a batch tokens to the zero address", async function () {
+      const mintRequests = [
+        { to: ethers.constants.AddressZero, tokenIds: [13, 14, 15, 16, 17] },
+        { to: owner.address, tokenIds: [18, 19, 20, 21, 22] },
+      ];
+      await expect(erc721.connect(minter).safeMintBatch(mintRequests)).to.be.revertedWith(
+        "IImmutableERC721SendingToZerothAddress"
+      );
     });
 
     it("Should allow safe minting of batch tokens", async function () {
@@ -158,6 +178,10 @@ describe("Immutable ERC721 Mint by ID Cases", function () {
     it("Should prevent minting burned tokens", async function () {
       const mintRequests = [{ to: user.address, tokenIds: [1, 2] }];
       await expect(erc721.connect(minter).safeMintBatch(mintRequests))
+        .to.be.revertedWith("IImmutableERC721TokenAlreadyBurned")
+        .withArgs(1);
+
+      await expect(erc721.connect(minter).mint(user.address, 1))
         .to.be.revertedWith("IImmutableERC721TokenAlreadyBurned")
         .withArgs(1);
     });

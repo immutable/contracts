@@ -5105,9 +5105,9 @@ hardhat-gas-reporter@^1.0.9:
     sha1 "^1.1.1"
 
 hardhat@^2.12.7:
-  version "2.17.3"
-  resolved "https://registry.yarnpkg.com/hardhat/-/hardhat-2.17.3.tgz#4cb15f2afdea5f108970ed72e5b81e6e53052cfb"
-  integrity sha512-SFZoYVXW1bWJZrIIKXOA+IgcctfuKXDwENywiYNT2dM3YQc4fXNaTbuk/vpPzHIF50upByx4zW5EqczKYQubsA==
+  version "2.18.1"
+  resolved "https://registry.yarnpkg.com/hardhat/-/hardhat-2.18.1.tgz#6339d656dbf0510b51457b0f0746e5b9cc7a1756"
+  integrity sha512-b55rW7Ka+fvJeg6oWuBTXoYQEUurevCCankjGNTwczwD3GnkhV9GEei7KUT+9IKmWx3lC+zyxlFxeDbg0gUoHw==
   dependencies:
     "@ethersproject/abi" "^5.1.2"
     "@metamask/eth-sig-util" "^4.0.0"

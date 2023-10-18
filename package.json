@@ -1,7 +1,7 @@
 {
-  "name": "@imtbl/zkevm-contracts",
-  "description": "Immutable zkEVM Smart Contracts",
-  "version": "0.0.0",
+  "name": "@imtbl/contracts",
+  "description": "Immutable Smart Contracts",
+  "version": "2.0.0-beta",
   "main": "dist/clients/index.js",
   "types": "dist/clients/index.d.ts",
   "files": [

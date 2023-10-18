@@ -14,7 +14,8 @@
     "test": "hardhat test",
     "prettier:solidity": "./node_modules/.bin/prettier --write contracts/**/*.sol",
     "lint": "eslint . --ext .ts,.tsx --fix && solhint --config ./.solhint.json  contracts/**/*.sol",
-    "clean": "hardhat clean"
+    "clean": "hardhat clean",
+    "coverage": "hardhat coverage"
   },
   "type": "commonjs",
   "repository": {

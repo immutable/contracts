@@ -9,7 +9,7 @@ import {
   MockOnReceive,
   MockOnReceive__factory,
   MockWalletFactory,
-} from "../../typechain";
+} from "../../typechain-types";
 import { AllowlistFixture, walletSCFixture, disguidedEOAFixture } from "../utils/DeployHybridFixtures";
 
 describe("Royalty Checks with Hybrid ERC721", function () {

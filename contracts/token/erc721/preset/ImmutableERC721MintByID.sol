@@ -41,14 +41,14 @@ contract ImmutableERC721MintByID is ImmutableERC721Base {
         _totalSupply++;
     }
 
-    /// @dev Allows minter to a batch of tokens to a specified list of addresses
+    /// @dev Allows minter to mint a batch of tokens to a specified list of addresses
     function safeMintBatch(IDMint[] memory mintRequests) external onlyRole(MINTER_ROLE) {
         for (uint256 i = 0; i < mintRequests.length; i++) {
             _safeBatchMint(mintRequests[i]);
         }
     }
 
-    /// @dev Allows minter to a batch of tokens to a specified list of addresses
+    /// @dev Allows minter to mint a batch of tokens to a specified list of addresses
     function mintBatch(IDMint[] memory mintRequests) external onlyRole(MINTER_ROLE) {
         for (uint256 i = 0; i < mintRequests.length; i++) {
             _batchMint(mintRequests[i]);

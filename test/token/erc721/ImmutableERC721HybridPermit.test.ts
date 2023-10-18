@@ -1,9 +1,9 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { ImmutableERC721, OperatorAllowlist, MockEIP1271Wallet } from "../../../typechain";
+import { ImmutableERC721, OperatorAllowlist, MockEIP1271Wallet } from "../../../typechain-types";
 import { AllowlistFixture } from "../../utils/DeployHybridFixtures";
-import { BigNumberish } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
 
 describe("ImmutableERC721Permit", function () {
   let erc721: ImmutableERC721;
@@ -20,7 +20,7 @@ describe("ImmutableERC721Permit", function () {
     signer: SignerWithAddress,
     spender: String,
     tokenId: BigNumberish,
-    nonce: ethers.BigNumber,
+    nonce: BigNumber,
     deadline: number
   ) {
     const typedData = {

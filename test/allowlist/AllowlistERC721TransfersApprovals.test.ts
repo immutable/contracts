@@ -9,7 +9,7 @@ import {
   MockOnReceive,
   MockOnReceive__factory,
   MockWalletFactory,
-} from "../../typechain";
+} from "../../typechain-types";
 import { RegularAllowlistFixture, walletSCFixture, disguidedEOAFixture } from "../utils/DeployRegularFixtures";
 
 describe("Allowlisted ERC721 Transfers", function () {

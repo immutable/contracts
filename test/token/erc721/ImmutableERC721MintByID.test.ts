@@ -6,7 +6,7 @@ import {
   ImmutableERC721MintByID,
   OperatorAllowlist,
   OperatorAllowlist__factory,
-} from "../../../typechain";
+} from "../../../typechain-types";
 import { RegularAllowlistFixture } from "../../utils/DeployRegularFixtures";
 
 describe("Immutable ERC721 Mint by ID Cases", function () {
@@ -82,6 +82,25 @@ describe("Immutable ERC721 Mint by ID Cases", function () {
   });
 
   describe("Minting and burning", function () {
+    it("Should return the addresses which have DEFAULT_ADMIN_ROLE", async function () {
+      const admins = await erc721.getAdmins();
+      expect(admins[0]).to.equal(owner.address);
+    });
+
+    it("Should allow an admin to grant and revoke MINTER_ROLE", async function () {
+      const minterRole = await erc721.MINTER_ROLE();
+
+      // Grant
+      await erc721.connect(owner).grantMinterRole(user.address);
+      let hasRole = await erc721.hasRole(minterRole, user.address);
+      expect(hasRole).to.equal(true);
+
+      // Revoke
+      await erc721.connect(owner).revokeMinterRole(user.address);
+      hasRole = await erc721.hasRole(minterRole, user.address);
+      expect(hasRole).to.equal(false);
+    });
+
     it("Should allow a member of the minter role to mint", async function () {
       await erc721.connect(minter).mint(user.address, 1);
       expect(await erc721.balanceOf(user.address)).to.equal(1);
@@ -94,32 +113,79 @@ describe("Immutable ERC721 Mint by ID Cases", function () {
       );
     });
 
-    it("Should allow safe minting of batch tokens", async function () {
+    it("Should allow safe minting", async function () {
+      await erc721.connect(minter).safeMint(user.address, 2);
+      expect(await erc721.balanceOf(user.address)).to.equal(2);
+      expect(await erc721.totalSupply()).to.equal(2);
+    });
+
+    it("Should revert when minting a batch tokens to the zero address", async function () {
       const mintRequests = [
-        { to: user.address, tokenIds: [2, 3, 4, 5, 6] },
-        { to: owner.address, tokenIds: [7, 8, 9, 10, 11] },
+        { to: ethers.constants.AddressZero, tokenIds: [3, 4, 5, 6, 7] },
+        { to: owner.address, tokenIds: [8, 9, 10, 11, 12] },
       ];
-      await erc721.connect(minter).safeMintBatch(mintRequests);
-      expect(await erc721.balanceOf(user.address)).to.equal(6);
+      await expect(erc721.connect(minter).mintBatch(mintRequests)).to.be.revertedWith(
+        "IImmutableERC721SendingToZerothAddress"
+      );
+    });
+
+    it("Should allow minting of batch tokens", async function () {
+      const mintRequests = [
+        { to: user.address, tokenIds: [3, 4, 5, 6, 7] },
+        { to: owner.address, tokenIds: [8, 9, 10, 11, 12] },
+      ];
+      await erc721.connect(minter).mintBatch(mintRequests);
+      expect(await erc721.balanceOf(user.address)).to.equal(7);
       expect(await erc721.balanceOf(owner.address)).to.equal(5);
-      expect(await erc721.totalSupply()).to.equal(11);
-      expect(await erc721.ownerOf(2)).to.equal(user.address);
+      expect(await erc721.totalSupply()).to.equal(12);
       expect(await erc721.ownerOf(3)).to.equal(user.address);
       expect(await erc721.ownerOf(4)).to.equal(user.address);
       expect(await erc721.ownerOf(5)).to.equal(user.address);
       expect(await erc721.ownerOf(6)).to.equal(user.address);
-      expect(await erc721.ownerOf(7)).to.equal(owner.address);
+      expect(await erc721.ownerOf(7)).to.equal(user.address);
       expect(await erc721.ownerOf(8)).to.equal(owner.address);
       expect(await erc721.ownerOf(9)).to.equal(owner.address);
       expect(await erc721.ownerOf(10)).to.equal(owner.address);
       expect(await erc721.ownerOf(11)).to.equal(owner.address);
+      expect(await erc721.ownerOf(12)).to.equal(owner.address);
+    });
+
+    it("Should revert when safe minting a batch tokens to the zero address", async function () {
+      const mintRequests = [
+        { to: ethers.constants.AddressZero, tokenIds: [13, 14, 15, 16, 17] },
+        { to: owner.address, tokenIds: [18, 19, 20, 21, 22] },
+      ];
+      await expect(erc721.connect(minter).safeMintBatch(mintRequests)).to.be.revertedWith(
+        "IImmutableERC721SendingToZerothAddress"
+      );
+    });
+
+    it("Should allow safe minting of batch tokens", async function () {
+      const mintRequests = [
+        { to: user.address, tokenIds: [13, 14, 15, 16, 17] },
+        { to: owner.address, tokenIds: [18, 19, 20, 21, 22] },
+      ];
+      await erc721.connect(minter).safeMintBatch(mintRequests);
+      expect(await erc721.balanceOf(user.address)).to.equal(12);
+      expect(await erc721.balanceOf(owner.address)).to.equal(10);
+      expect(await erc721.totalSupply()).to.equal(22);
+      expect(await erc721.ownerOf(13)).to.equal(user.address);
+      expect(await erc721.ownerOf(14)).to.equal(user.address);
+      expect(await erc721.ownerOf(15)).to.equal(user.address);
+      expect(await erc721.ownerOf(16)).to.equal(user.address);
+      expect(await erc721.ownerOf(17)).to.equal(user.address);
+      expect(await erc721.ownerOf(18)).to.equal(owner.address);
+      expect(await erc721.ownerOf(19)).to.equal(owner.address);
+      expect(await erc721.ownerOf(20)).to.equal(owner.address);
+      expect(await erc721.ownerOf(21)).to.equal(owner.address);
+      expect(await erc721.ownerOf(22)).to.equal(owner.address);
     });
 
     it("Should allow owner or approved to burn a batch of tokens", async function () {
-      expect(await erc721.balanceOf(user.address)).to.equal(6);
+      expect(await erc721.balanceOf(user.address)).to.equal(12);
       await erc721.connect(user).burnBatch([1, 2]);
-      expect(await erc721.balanceOf(user.address)).to.equal(4);
-      expect(await erc721.totalSupply()).to.equal(9);
+      expect(await erc721.balanceOf(user.address)).to.equal(10);
+      expect(await erc721.totalSupply()).to.equal(20);
     });
 
     it("Should prevent not approved to burn a batch of tokens", async function () {
@@ -131,6 +197,10 @@ describe("Immutable ERC721 Mint by ID Cases", function () {
     it("Should prevent minting burned tokens", async function () {
       const mintRequests = [{ to: user.address, tokenIds: [1, 2] }];
       await expect(erc721.connect(minter).safeMintBatch(mintRequests))
+        .to.be.revertedWith("IImmutableERC721TokenAlreadyBurned")
+        .withArgs(1);
+
+      await expect(erc721.connect(minter).mint(user.address, 1))
         .to.be.revertedWith("IImmutableERC721TokenAlreadyBurned")
         .withArgs(1);
     });
@@ -163,7 +233,7 @@ describe("Immutable ERC721 Mint by ID Cases", function () {
 
       await expect(erc721.connect(user).safeBurnBatch(burns))
         .to.be.revertedWith("IImmutableERC721MismatchedTokenOwner")
-        .withArgs(7, owner.address);
+        .withArgs(8, owner.address);
     });
 
     it("Should allow owner or approved to safely burn a batch of tokens when specifying the correct owners", async function () {
@@ -172,18 +242,18 @@ describe("Immutable ERC721 Mint by ID Cases", function () {
       const originalSupply = await erc721.totalSupply();
 
       // Set approval for owner to burn these tokens from user.
-      await erc721.connect(user).approve(owner.address, 4);
       await erc721.connect(user).approve(owner.address, 5);
       await erc721.connect(user).approve(owner.address, 6);
+      await erc721.connect(user).approve(owner.address, 7);
 
       const burns = [
         {
           owner: owner.address,
-          tokenIds: [7, 8, 9],
+          tokenIds: [8, 9, 10],
         },
         {
           owner: user.address,
-          tokenIds: [4, 5, 6],
+          tokenIds: [5, 6, 7],
         },
       ];
       await erc721.connect(owner).safeBurnBatch(burns);
@@ -256,8 +326,10 @@ describe("Immutable ERC721 Mint by ID Cases", function () {
   });
 
   describe("Royalties", function () {
+    const salePrice = ethers.utils.parseEther("1");
+    const feeNumerator = ethers.BigNumber.from("200");
+
     it("Should set the correct royalties", async function () {
-      const salePrice = ethers.utils.parseEther("1");
       const tokenInfo = await erc721.royaltyInfo(2, salePrice);
 
       expect(tokenInfo[0]).to.be.equal(royaltyRecipient.address);
@@ -265,8 +337,53 @@ describe("Immutable ERC721 Mint by ID Cases", function () {
       // (1e18 * 2000) / 10000 = 2e17 (0.2 eth)
       expect(tokenInfo[1]).to.be.equal(ethers.utils.parseEther("0.2"));
     });
+
+    it("Should allow admin to set the default royalty receiver address", async function () {
+      await erc721.setDefaultRoyaltyReceiver(user.address, feeNumerator);
+      const tokenInfo = await erc721.royaltyInfo(1, salePrice);
+      expect(tokenInfo[0]).to.be.equal(user.address);
+    });
+
+    it("Should allow the minter to set the royalty receiver address for a specific token ID", async function () {
+      await erc721.connect(minter).setNFTRoyaltyReceiver(2, user2.address, feeNumerator);
+      const tokenInfo1 = await erc721.royaltyInfo(1, salePrice);
+      const tokenInfo2 = await erc721.royaltyInfo(2, salePrice);
+      expect(tokenInfo1[0]).to.be.equal(user.address);
+      expect(tokenInfo2[0]).to.be.equal(user2.address);
+    });
+
+    it("Should allow the minter to set the royalty receiver address for a list of token IDs", async function () {
+      let tokenInfo3 = await erc721.royaltyInfo(3, salePrice);
+      let tokenInfo4 = await erc721.royaltyInfo(4, salePrice);
+      let tokenInfo5 = await erc721.royaltyInfo(5, salePrice);
+      expect(tokenInfo3[0]).to.be.equal(user.address);
+      expect(tokenInfo4[0]).to.be.equal(user.address);
+      expect(tokenInfo5[0]).to.be.equal(user.address);
+
+      await erc721.connect(minter).setNFTRoyaltyReceiverBatch([3, 4, 5], user2.address, feeNumerator);
+
+      tokenInfo3 = await erc721.royaltyInfo(3, salePrice);
+      tokenInfo4 = await erc721.royaltyInfo(4, salePrice);
+      tokenInfo5 = await erc721.royaltyInfo(5, salePrice);
+      expect(tokenInfo3[0]).to.be.equal(user2.address);
+      expect(tokenInfo4[0]).to.be.equal(user2.address);
+      expect(tokenInfo5[0]).to.be.equal(user2.address);
+    });
   });
+
   describe("Transfers", function () {
+    it("Should revert when TransferRequest contains mismatched array lengths", async function () {
+      const transferRequest = {
+        from: minter.address,
+        tos: [user.address, user.address],
+        tokenIds: [51, 52, 53],
+      };
+
+      await expect(
+        erc721.connect(ethers.provider.getSigner(transferRequest.from)).safeTransferFromBatch(transferRequest)
+      ).to.be.revertedWith("IImmutableERC721MismatchedTransferLengths");
+    });
+
     it("Should allow users to transfer tokens using safeTransferFromBatch", async function () {
       // Mint tokens for testing transfers
       const mintRequests = [

@@ -8,7 +8,7 @@ import {
   OperatorAllowlist__factory,
   MockMarketplace__factory,
   MockMarketplace,
-} from "../../typechain";
+} from "../../typechain-types";
 
 describe("Marketplace Royalty Enforcement", function () {
   this.timeout(300_000); // 5 min

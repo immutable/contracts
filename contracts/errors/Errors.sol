@@ -49,3 +49,11 @@ interface OperatorAllowlistEnforcementErrors {
     /// @dev Error thrown when approve target is not OperatorAllowlist
     error ApproverNotInAllowlist(address approver);
 }
+
+interface IImmutableERC1155Errors {
+    /// @dev Deadline exceeded for permit
+    error PermitExpired();
+
+    /// @dev Derived signature is invalid (EIP721 and EIP1271)
+    error InvalidSignature();
+}

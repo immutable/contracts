@@ -3,7 +3,7 @@ pragma solidity ^0.8.4;
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { IMintable } from "./IMintable.sol";
-import { Minting} from "./utils/Minting.sol";
+import { Minting } from "./utils/Minting.sol";
 
 abstract contract Mintable is Ownable, IMintable {
     address public imx;

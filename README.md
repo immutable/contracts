@@ -1,8 +1,8 @@
-# Immutable zkEVM Contracts
+# Immutable Contracts
 
 <p align="center"><img src="https://cdn.dribbble.com/users/1299339/screenshots/7133657/media/837237d447d36581ebd59ec36d30daea.gif" width="280"/></p>
 
-zkEVM Contracts is a library of smart contracts targeted at developers who wish to quickly build and deploy their smart contracts on the Immutable zkEVM, a general-purpose permissionless L2 zero-knowledge rollup. The library allows developers to build on contracts curated by Immutable, including (but not limited to):
+Immutable Contracts is a library of smart contracts targeted at developers who wish to quickly build and deploy their smart contracts on the Immutable X and Immutable zkEVM, a general-purpose permissionless L2 zero-knowledge rollup. The library allows developers to build on contracts curated by Immutable, including (but not limited to):
 
 - Token presets, e.g. ERC721
 
@@ -19,19 +19,19 @@ These contracts are feature-rich and are the recommended standard on Immutable z
 ### Installation
 
 ```
-$ yarn install @imtbl/zkevm-contracts
+$ yarn install @imtbl/contracts
 ```
 
 ### Usage
 
 #### Contracts
 
-Once the `zkevm-contracts` package is installed, use the contracts from the library by importing them:
+Once the `contracts` package is installed, use the contracts from the library by importing them:
 
 ```solidity
 pragma solidity ^0.8.0;
 
-import "@imtbl/zkevm-contracts/contracts/token/erc721/preset/ImmutableERC721.sol";
+import "@imtbl/contracts/contracts/token/erc721/preset/ImmutableERC721.sol";
 
 contract MyERC721 is ImmutableERC721 {
     constructor(
@@ -59,7 +59,7 @@ contract MyERC721 is ImmutableERC721 {
 
 #### SDK client
 
-`zkevm-contracts` comes with a Typescript SDK client that can be used to interface with Immutable preset contracts:
+`contracts` comes with a Typescript SDK client that can be used to interface with Immutable preset contracts:
 
 - ImmutableERC721
 - ImmutableERC721MintByID
@@ -67,7 +67,7 @@ contract MyERC721 is ImmutableERC721 {
 To import and use the ImmutableERC721 contract client:
 
 ```typescript
-import { ERC721Client } from "@imtbl/zkevm-contracts";
+import { ERC721Client } from "@imtbl/contracts";
 
 const contractAddress = YOUR_CONTRACT_ADDRESS;
 

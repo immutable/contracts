@@ -1,6 +1,6 @@
 {
-  "name": "@imtbl/zkevm-contracts",
-  "description": "Immutable zkEVM Smart Contracts",
+  "name": "@imtbl/contracts",
+  "description": "Immutable Smart Contracts",
   "version": "0.0.0",
   "main": "dist/clients/index.js",
   "types": "dist/clients/index.d.ts",
@@ -20,9 +20,9 @@
   "type": "commonjs",
   "repository": {
     "type": "git",
-    "url": "https://github.com/immutable/zkevm-contracts"
+    "url": "https://github.com/immutable/contracts"
   },
-  "homepage": "https://github.com/immutable/zkevm-contracts/blob/main/README.md",
+  "homepage": "https://github.com/immutable/contracts/blob/main/README.md",
   "author": "Immutable",
   "license": "Apache-2.0",
   "devDependencies": {

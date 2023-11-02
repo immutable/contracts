@@ -1,4 +1,4 @@
-# Contributing to Immutable zkEVM Contracts
+# Contributing to Immutable Contracts
 
 We greatly appreciate all community feedback and contributions to this repository. This guide will walk you through the different ways you can contribute, including opening GitHub issues, pull requests, requesting features, and providing general feedback. For any security disclosures, please email security@immutable.com.
 

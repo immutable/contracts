@@ -12,7 +12,7 @@ const deployAsset = task("deploy:x:asset", "Deploy the Asset contract")
 
     const owner = deployer.address;
     const { name, symbol } = taskArgs;
-    const allowedNetworks = ["mainnet", "sepolia"];
+    const allowedNetworks = ["mainnet", "sepolia", "devnet"];
 
     if (!allowedNetworks.includes(hre.network.name)) {
       throw new Error(`please pass a valid --network [ ${allowedNetworks.join(" | ")} ]`);

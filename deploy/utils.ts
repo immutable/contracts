@@ -4,6 +4,8 @@ export const getImmutableBridgeAddress = (network: string) => {
       return "0x2d5C349fD8464DA06a3f90b4B0E9195F3d1b7F98"; // sepolia
     case "mainnet":
       return "0x5FDCCA53617f4d2b9134B29090C87D01058e27e9";
+    case "devnet":
+      return "0x590C809bd5FF50DCb39e4320b60139B29B880174"; // sepolia
   }
   throw Error("Invalid network selected");
 };

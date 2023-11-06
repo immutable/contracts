@@ -1,4 +1,4 @@
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/interfaces/IERC165.sol";
 
@@ -16,7 +16,7 @@ interface IERC4494 is IERC165 {
   /// @param deadline a timestamp expiry for the permit
   /// @param sig a traditional or EIP-2098 signature
   function permit(address spender, uint256 tokenId, uint256 deadline, bytes memory sig) external;
-  
+
   /// @notice Returns the nonce of an NFT - useful for creating permits
   /// @param tokenId the index of the NFT to get the nonce of
   /// @return the uint256 representation of the nonce

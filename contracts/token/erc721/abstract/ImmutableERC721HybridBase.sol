@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: Apache 2.0
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 import { AccessControlEnumerable, MintingAccessControl } from "./MintingAccessControl.sol";
 import { ERC2981 } from "@openzeppelin/contracts/token/common/ERC2981.sol";
@@ -8,7 +8,7 @@ import { ERC721HybridPermit } from "./ERC721HybridPermit.sol";
 import { ERC721Hybrid } from "./ERC721Hybrid.sol";
 
 abstract contract ImmutableERC721HybridBase is OperatorAllowlistEnforced, MintingAccessControl, ERC2981, ERC721HybridPermit {
-    
+
     /// @dev Contract level metadata
     string public contractURI;
 

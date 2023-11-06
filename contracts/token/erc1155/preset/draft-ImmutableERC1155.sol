@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: Apache 2.0
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 import "../abstract/ImmutableERC1155Base.sol";
 
 /**
  * @title draft-ImmutableERC1155
- * @author 
+ * @author
  * @notice This contract is experimental and is in draft. It should be thoroughly reviewed before using.
  * It is possible for this contract to receive breaking changes, and backwards compatibility is not insured.
  */

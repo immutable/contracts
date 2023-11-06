@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: Apache 2.0
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 // Access Control
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";

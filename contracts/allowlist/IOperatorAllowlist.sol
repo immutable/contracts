@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: Apache 2.0
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 /**
  * @dev Required interface of an OperatorAllowlist compliant contract

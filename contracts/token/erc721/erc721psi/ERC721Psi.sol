@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: MIT
 /**
-  ______ _____   _____ ______ ___  __ _  _  _ 
+  ______ _____   _____ ______ ___  __ _  _  _
  |  ____|  __ \ / ____|____  |__ \/_ | || || |
  | |__  | |__) | |        / /   ) || | \| |/ |
- |  __| |  _  /| |       / /   / / | |\_   _/ 
- | |____| | \ \| |____  / /   / /_ | |  | |   
- |______|_|  \_\\_____|/_/   |____||_|  |_|   
+ |  __| |  _  /| |       / /   / / | |\_   _/
+ | |____| | \ \| |____  / /   / /_ | |  | |
+ |______|_|  \_\\_____|/_/   |____||_|  |_|
 
  - github: https://github.com/estarriolvetch/ERC721Psi
  - npm: https://www.npmjs.com/package/erc721psi
-                                          
+
  */
 
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";

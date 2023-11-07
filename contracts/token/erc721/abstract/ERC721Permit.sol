@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -23,7 +23,7 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
      */
     mapping(uint256 => uint256) private _nonces;
 
-    
+
     /** @dev the unique identifier for the permit struct to be EIP 712 compliant */
     bytes32 private constant _PERMIT_TYPEHASH = keccak256(
         abi.encodePacked(
@@ -68,7 +68,7 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
         }
 
         bytes32 digest = _buildPermitDigest(spender, tokenId, deadline);
-        
+
         // smart contract signature validation
         if (_isValidERC1271Signature(ownerOf(tokenId), digest, sig)) {
             _approve(spender, tokenId);
@@ -163,8 +163,8 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
     function _isValidERC1271Signature(address spender, bytes32 digest, bytes memory sig) private view returns(bool) {
         (bool success, bytes memory res) = spender.staticcall(
             abi.encodeWithSelector(
-                IERC1271.isValidSignature.selector, 
-                digest, 
+                IERC1271.isValidSignature.selector,
+                digest,
                 sig
             )
         );
@@ -175,7 +175,7 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
                 return true;
             }
         }
-        
+
         return false;
     }
 

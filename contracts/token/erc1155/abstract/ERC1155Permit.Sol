@@ -1,4 +1,4 @@
-pragma solidity ^0.8.17;
+pragma solidity 0.8.19;
 // SPDX-License-Identifier: MIT
 
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol";
@@ -111,8 +111,8 @@ abstract contract ERC1155Permit is ERC1155Burnable, EIP712, IERC1155Permit, IImm
     function _isValidERC1271Signature(address spender, bytes32 digest, bytes memory sig) private view returns(bool) {
         (bool success, bytes memory res) = spender.staticcall(
             abi.encodeWithSelector(
-                IERC1271.isValidSignature.selector, 
-                digest, 
+                IERC1271.isValidSignature.selector,
+                digest,
                 sig
             )
         );
@@ -123,7 +123,7 @@ abstract contract ERC1155Permit is ERC1155Burnable, EIP712, IERC1155Permit, IImm
                 return true;
             }
         }
-        
+
         return false;
     }
 

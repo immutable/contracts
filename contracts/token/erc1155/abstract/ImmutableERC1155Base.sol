@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: Apache 2.0
-pragma solidity ^0.8.17;
+pragma solidity 0.8.19;
 
 import "contracts/token/erc1155/abstract/ERC1155Permit.Sol";
 // Allowlist
@@ -71,7 +71,7 @@ abstract contract ImmutableERC1155Base is
      * This enables the following behaviors:
      *
      * - if `_tokenURIs[tokenId]` is set, then the result is the concatenation
-     *   of `super.uri()` and `_tokenURIs[tokenId]` 
+     *   of `super.uri()` and `_tokenURIs[tokenId]`
      *
      * - if `_tokenURIs[tokenId]` is NOT set then we fallback to `super.uri()`
      *   which in most cases will contain `ERC1155._uri`;
@@ -152,7 +152,7 @@ abstract contract ImmutableERC1155Base is
         return super.supportsInterface(interfaceId);
     }
 
-    /** 
+    /**
      * @notice Returns the addresses which have DEFAULT_ADMIN_ROLE
      * @return admins The addresses which have DEFAULT_ADMIN_ROLE
      */
@@ -165,7 +165,7 @@ abstract contract ImmutableERC1155Base is
         return admins;
     }
 
-    /** 
+    /**
      * @notice Override of setApprovalForAll from {ERC721}, with added Allowlist approval validation
      * @param operator The address to approve as an operator for the caller.
      * @param approved True if the operator is approved, false to revoke approval.
@@ -207,8 +207,8 @@ abstract contract ImmutableERC1155Base is
         _setDefaultRoyalty(receiver, feeNumerator);
     }
 
-    /** 
-     * @notice Set the royalty receiver address for a specific tokenId 
+    /**
+     * @notice Set the royalty receiver address for a specific tokenId
      * @param tokenId The token identifier to set the royalty receiver for.
      * @param receiver The address of the royalty receiver
      * @param feeNumerator The royalty fee numerator
@@ -221,8 +221,8 @@ abstract contract ImmutableERC1155Base is
         _setTokenRoyalty(tokenId, receiver, feeNumerator);
     }
 
-    /** 
-     * @notice Set the royalty receiver address for a list of tokenIDs 
+    /**
+     * @notice Set the royalty receiver address for a list of tokenIDs
      * @param tokenIds The token identifiers to set the royalty receiver for.
      * @param receiver The address of the royalty receiver
      * @param feeNumerator The royalty fee numerator
@@ -245,7 +245,7 @@ abstract contract ImmutableERC1155Base is
         grantRole(MINTER_ROLE, user);
     }
 
-    /** 
+    /**
      * @notice Allows admin to revoke `MINTER_ROLE` role from `user`
      * @param user The address to revoke the MINTER_ROLE from
      */

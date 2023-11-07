@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity 0.8.20;
+pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 import {ImmutableERC1155} from "../../../contracts/token/erc1155/preset/draft-ImmutableERC1155.sol";

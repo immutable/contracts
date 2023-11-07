@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.20;
+pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 
@@ -7,7 +7,7 @@ contract Sign {
     bytes32 private _DOMAIN_SEPARATOR;
     bytes32 private immutable _PERMIT_TYPEHASH =
         keccak256("Permit(address owner,address spender,bool approved,uint256 nonce,uint256 deadline)");
-        
+
     constructor(bytes32 DOMAIN_SEPARATOR_) {
         _DOMAIN_SEPARATOR = DOMAIN_SEPARATOR_;
     }

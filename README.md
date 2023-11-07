@@ -29,7 +29,7 @@ $ yarn install @imtbl/contracts
 Once the `contracts` package is installed, use the contracts from the library by importing them:
 
 ```solidity
-pragma solidity ^0.8.0;
+pragma solidity 0.8.19;
 
 import "@imtbl/contracts/contracts/token/erc721/preset/ImmutableERC721.sol";
 

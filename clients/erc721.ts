@@ -40,7 +40,7 @@ export class ERC721Client {
    * Returns the domain separator used in the encoding of the signature for permits, as defined by EIP-712
    * @return the bytes32 domain separator
    */
-  public async DOMAIN_SEPARATOR(provider: Provider, overrides?: CallOverrides): Promise<string> {
+  public async DOMAIN_SEPARATOR(provider: Provider, overrides: CallOverrides = {}): Promise<string> {
     return await this.contract.connect(provider).DOMAIN_SEPARATOR(overrides);
   }
 
@@ -82,7 +82,7 @@ export class ERC721Client {
    */
   public async eip712Domain(
     provider: Provider,
-    overrides?: CallOverrides
+    overrides: CallOverrides = {}
   ): Promise<
     [string, string, string, BigNumber, string, string, BigNumber[]] & {
       fields: string;
@@ -94,7 +94,7 @@ export class ERC721Client {
       extensions: BigNumber[];
     }
   > {
-    return await this.contract.eip712Domain(overrides);
+    return await this.contract.connect(provider).eip712Domain(overrides);
   }
 
   /**
@@ -199,7 +199,7 @@ export class ERC721Client {
   public async nonces(
     provider: Provider,
     tokenId: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
+    overrides: CallOverrides = {}
   ): Promise<BigNumber> {
     return await this.contract.connect(provider).nonces(tokenId, overrides);
   }

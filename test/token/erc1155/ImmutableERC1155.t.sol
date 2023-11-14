@@ -30,8 +30,8 @@ contract ImmutableERC1155Test is Test {
         immutableERC1155 = new ImmutableERC1155(
             owner,
             "test",
-            "test",
-            "test",
+            "test-base-uri",
+            "test-contract-uri",
             address(operatorAllowlist),
             feeReceiver,
             0
@@ -55,11 +55,49 @@ contract ImmutableERC1155Test is Test {
     }
 
     /*
-    Contract metadata
+    * Contract deployment
     */
+    function test_DeploymentShouldSetAdminRoleToOwner() public {
+        bytes32 adminRole = immutableERC1155.DEFAULT_ADMIN_ROLE();
+        assertTrue(immutableERC1155.hasRole(adminRole, owner));
+    }
+
+    function test_DeploymentShouldSetContractURI() public {
+        assertEq(immutableERC1155.contractURI(), "test-contract-uri");
+    }
+
+    // function test_DeploymentShouldSetBaseURI() public {
+    //     assertEq(immutableERC1155.baseURI(), "test-base-uri");
+    // }
 
     /*
-    Permits
+    * Metadata
+    */
+    function test_AdminRoleCanSetContractURI() public {
+        vm.prank(owner);
+        immutableERC1155.setContractURI("new-contract-uri");
+        assertEq(immutableERC1155.contractURI(), "new-contract-uri");
+    }
+
+    function test_RevertIfNonAdminAttemptsToSetContractURI() public {
+        vm.prank(vm.addr(anotherPrivateKey));
+        vm.expectRevert("AccessControl: account 0x1eff47bc3a10a45d4b230b5d10e37751fe6aa718 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+        immutableERC1155.setContractURI("new-contract-uri");
+    }
+
+    // function test_AdminRoleCanSetBaseURI() public {
+    //     bytes32 adminRole = immutableERC1155.DEFAULT_ADMIN_ROLE();
+    //     immutableERC1155.setBaseURI("new-base-uri");
+
+    //     assertTrue(immutableERC1155.hasRole(adminRole, owner));
+    // }
+
+    // function test_RevertIfNonAdminAttemptsToSetBaseURI() public {
+    //     assertEq(immutableERC1155.baseURI(), "test-contract-uri");
+    // }
+
+    /*
+    * Permits
     */
     function test_PermitSuccess() public {
         bytes memory sig = _sign(ownerPrivateKey, owner, spender, true, 0, 1 days);

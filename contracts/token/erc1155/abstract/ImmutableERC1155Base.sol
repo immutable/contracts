@@ -18,6 +18,9 @@ abstract contract ImmutableERC1155Base is
     /// @dev Contract level metadata
     string public contractURI;
 
+    /// @dev Common URIs for individual token URIs
+    string public baseURI;
+
     // Optional mapping for token URIs
     mapping(uint256 => string) private _tokenURIs;
 
@@ -49,6 +52,7 @@ abstract contract ImmutableERC1155Base is
         _setDefaultRoyalty(_receiver, _feeNumerator);
         _setOperatorAllowlistRegistry(_operatorAllowlist);
         contractURI = contractURI_;
+        baseURI = baseURI_;
     }
 
     /**
@@ -138,11 +142,12 @@ abstract contract ImmutableERC1155Base is
      */
     function setBaseURI(string memory baseURI_) public onlyRole(DEFAULT_ADMIN_ROLE) {
        _setURI(baseURI_);
+       baseURI = baseURI_;
     }
 
     /// @dev Allows admin to set the contract URI
-    function setContractURI(string memory _contractURI) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        contractURI = _contractURI;
+    function setContractURI(string memory contractURI_) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        contractURI = contractURI_;
     }
 
     /**

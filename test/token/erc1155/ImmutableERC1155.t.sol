@@ -94,7 +94,7 @@ contract ImmutableERC1155Test is Test {
     function test_RevertIfNonAdminAttemptsToSetBaseURI() public {
         vm.prank(vm.addr(anotherPrivateKey));
         vm.expectRevert("AccessControl: account 0x1eff47bc3a10a45d4b230b5d10e37751fe6aa718 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
-        immutableERC1155.setBaseURI("new-contract-uri");
+        immutableERC1155.setBaseURI("new-base-uri");
     }
 
     /*

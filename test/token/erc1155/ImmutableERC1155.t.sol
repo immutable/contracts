@@ -66,9 +66,9 @@ contract ImmutableERC1155Test is Test {
         assertEq(immutableERC1155.contractURI(), "test-contract-uri");
     }
 
-    // function test_DeploymentShouldSetBaseURI() public {
-    //     assertEq(immutableERC1155.baseURI(), "test-base-uri");
-    // }
+    function test_DeploymentShouldSetBaseURI() public {
+        assertEq(immutableERC1155.baseURI(), "test-base-uri");
+    }
 
     /*
     * Metadata
@@ -85,16 +85,17 @@ contract ImmutableERC1155Test is Test {
         immutableERC1155.setContractURI("new-contract-uri");
     }
 
-    // function test_AdminRoleCanSetBaseURI() public {
-    //     bytes32 adminRole = immutableERC1155.DEFAULT_ADMIN_ROLE();
-    //     immutableERC1155.setBaseURI("new-base-uri");
+    function test_AdminRoleCanSetBaseURI() public {
+        vm.prank(owner);
+        immutableERC1155.setBaseURI("new-base-uri");
+        assertEq(immutableERC1155.baseURI(), "new-base-uri");
+    }
 
-    //     assertTrue(immutableERC1155.hasRole(adminRole, owner));
-    // }
-
-    // function test_RevertIfNonAdminAttemptsToSetBaseURI() public {
-    //     assertEq(immutableERC1155.baseURI(), "test-contract-uri");
-    // }
+    function test_RevertIfNonAdminAttemptsToSetBaseURI() public {
+        vm.prank(vm.addr(anotherPrivateKey));
+        vm.expectRevert("AccessControl: account 0x1eff47bc3a10a45d4b230b5d10e37751fe6aa718 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+        immutableERC1155.setBaseURI("new-contract-uri");
+    }
 
     /*
     * Permits

@@ -1,7 +1,8 @@
 //SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
-import "contracts/token/erc1155/abstract/ERC1155Permit.Sol";
+import "../../../token/erc1155/abstract/ERC1155Permit.Sol";
+
 // Allowlist
 import "@openzeppelin/contracts/token/common/ERC2981.sol";
 import "../../../allowlist/OperatorAllowlistEnforced.sol";
@@ -14,6 +15,8 @@ abstract contract ImmutableERC1155Base is
     ERC1155Permit,
     ERC2981
 {
+    /// @dev Contract level metadata
+    string public contractURI;
 
     // Optional mapping for token URIs
     mapping(uint256 => string) private _tokenURIs;
@@ -36,6 +39,7 @@ abstract contract ImmutableERC1155Base is
         address owner,
         string memory name_,
         string memory baseURI_,
+        string memory contractURI_,
         address _operatorAllowlist,
         address _receiver,
         uint96 _feeNumerator
@@ -44,6 +48,7 @@ abstract contract ImmutableERC1155Base is
         _grantRole(DEFAULT_ADMIN_ROLE, owner);
         _setDefaultRoyalty(_receiver, _feeNumerator);
         _setOperatorAllowlistRegistry(_operatorAllowlist);
+        contractURI = contractURI_;
     }
 
     /**
@@ -133,6 +138,11 @@ abstract contract ImmutableERC1155Base is
      */
     function setBaseURI(string memory baseURI_) public onlyRole(DEFAULT_ADMIN_ROLE) {
        _setURI(baseURI_);
+    }
+
+    /// @dev Allows admin to set the contract URI
+    function setContractURI(string memory _contractURI) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        contractURI = _contractURI;
     }
 
     /**

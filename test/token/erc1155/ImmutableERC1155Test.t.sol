@@ -31,6 +31,7 @@ contract ImmutableERC1155Test is Test {
             owner,
             "test",
             "test",
+            "test",
             address(operatorAllowlist),
             feeReceiver,
             0
@@ -53,6 +54,13 @@ contract ImmutableERC1155Test is Test {
         sig = abi.encodePacked(r, s, v);
     }
 
+    /*
+    Contract metadata
+    */
+
+    /*
+    Permits
+    */
     function test_PermitSuccess() public {
         bytes memory sig = _sign(ownerPrivateKey, owner, spender, true, 0, 1 days);
 

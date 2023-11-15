@@ -25,11 +25,12 @@ contract ImmutableERC1155 is ImmutableERC1155Base {
         address owner,
         string memory name_,
         string memory baseURI_,
+        string memory contractURI_,
         address _operatorAllowlist,
         address _receiver,
         uint96 _feeNumerator
     )
-        ImmutableERC1155Base(owner, name_, baseURI_, _operatorAllowlist, _receiver, _feeNumerator)
+        ImmutableERC1155Base(owner, name_, baseURI_, contractURI_, _operatorAllowlist, _receiver, _feeNumerator)
     {}
 
     ///     =====   External functions  =====

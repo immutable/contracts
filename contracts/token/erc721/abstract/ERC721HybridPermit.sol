@@ -1,4 +1,5 @@
-// SPDX-License-Identifier: MIT
+// Copyright Immutable Pty Ltd 2018 - 2023
+// SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -46,6 +47,45 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
         _permit(spender, tokenId, deadline, sig);
     }
 
+    /**
+     * @notice Returns the current nonce of a given token ID.
+     * @param tokenId The ID of the token for which to retrieve the nonce.
+     * @return Current nonce of the given token.
+     */
+    function nonces(uint256 tokenId) external view returns (uint256) {
+        return _nonces[tokenId];
+    }
+
+    /**
+     * @notice Returns the domain separator used in the encoding of the signature for permits, as defined by EIP-712
+     * @return the bytes32 domain separator
+     */
+    function DOMAIN_SEPARATOR() external view override returns (bytes32) {
+        return _domainSeparatorV4();
+    }
+
+    /**
+     * @notice Overrides supportsInterface from IERC165 and ERC721Hybrid to add support for IERC4494.
+     * @param interfaceId The interface identifier, which is a 4-byte selector.
+     * @return True if the contract implements `interfaceId` and the call doesn't revert, otherwise false.
+     */
+    function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165, ERC721Hybrid) returns (bool) {
+        return
+            interfaceId == type(IERC4494).interfaceId || // 0x5604e225
+            super.supportsInterface(interfaceId);
+    }
+
+    /**
+     * @notice Overrides the _transfer method from ERC721Hybrid to increment the nonce after a successful transfer.
+     * @param from The address from which the token is being transferred.
+     * @param to The address to which the token is being transferred.
+     * @param tokenId The ID of the token being transferred.
+     */
+    function _transfer(address from, address to, uint256 tokenId) internal virtual override(ERC721Hybrid) {
+        _nonces[tokenId]++;
+        super._transfer(from, to, tokenId);
+    }
+
     function _permit(address spender, uint256 tokenId, uint256 deadline, bytes memory sig) internal virtual {
         if (deadline < block.timestamp) {
             revert PermitExpired();
@@ -81,23 +121,6 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
         } else {
             revert InvalidSignature();
         }
-    }
-
-    /**
-     * @notice Returns the current nonce of a given token ID.
-     * @param tokenId The ID of the token for which to retrieve the nonce.
-     * @return Current nonce of the given token.
-     */
-    function nonces(uint256 tokenId) external view returns (uint256) {
-        return _nonces[tokenId];
-    }
-
-    /**
-     * @notice Returns the domain separator used in the encoding of the signature for permits, as defined by EIP-712
-     * @return the bytes32 domain separator
-     */
-    function DOMAIN_SEPARATOR() external view override returns (bytes32) {
-        return _domainSeparatorV4();
     }
 
     /**
@@ -141,27 +164,5 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
         }
 
         return false;
-    }
-
-    /**
-     * @notice Overrides supportsInterface from IERC165 and ERC721Hybrid to add support for IERC4494.
-     * @param interfaceId The interface identifier, which is a 4-byte selector.
-     * @return True if the contract implements `interfaceId` and the call doesn't revert, otherwise false.
-     */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165, ERC721Hybrid) returns (bool) {
-        return
-            interfaceId == type(IERC4494).interfaceId || // 0x5604e225
-            super.supportsInterface(interfaceId);
-    }
-
-    /**
-     * @notice Overrides the _transfer method from ERC721Hybrid to increment the nonce after a successful transfer.
-     * @param from The address from which the token is being transferred.
-     * @param to The address to which the token is being transferred.
-     * @param tokenId The ID of the token being transferred.
-     */
-    function _transfer(address from, address to, uint256 tokenId) internal virtual override(ERC721Hybrid) {
-        _nonces[tokenId]++;
-        super._transfer(from, to, tokenId);
     }
 }

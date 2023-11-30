@@ -1,4 +1,5 @@
-//SPDX-License-Identifier: Apache 2.0
+// Copyright Immutable Pty Ltd 2018 - 2023
+// SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
 import { AccessControlEnumerable, MintingAccessControl } from "./MintingAccessControl.sol";
@@ -9,12 +10,25 @@ import { ERC721Hybrid } from "./ERC721Hybrid.sol";
 
 abstract contract ImmutableERC721HybridBase is OperatorAllowlistEnforced, MintingAccessControl, ERC2981, ERC721HybridPermit {
 
-    /// @dev Contract level metadata
+    /// @notice Contract level metadata
     string public contractURI;
 
-    /// @dev Common URIs for individual token URIs
+    /// @notice Common URIs for individual token URIs
     string public baseURI;
 
+    
+    /**
+     * @notice Grants `DEFAULT_ADMIN_ROLE` to the supplied `owner` address
+     * @param owner_ The address to grant the `DEFAULT_ADMIN_ROLE` to
+     * @param name_ The name of the collection
+     * @param symbol_ The symbol of the collection
+     * @param baseURI_ The base URI for the collection
+     * @param contractURI_ The contract URI for the collection
+     * @param operatorAllowlist_ The address of the operator allowlist
+     * @param receiver_ The address of the royalty receiver
+     * @param feeNumerator_ The royalty fee numerator
+     * @dev the royalty receiver and amount (this can not be changed once set)
+     */
     constructor(
         address owner_,
         string memory name_,
@@ -46,22 +60,30 @@ abstract contract ImmutableERC721HybridBase is OperatorAllowlistEnforced, Mintin
         return super.supportsInterface(interfaceId);
     }
 
-    /// @dev Returns the baseURI
+    /// @notice Returns the baseURI of the collection
     function _baseURI() internal view virtual override returns (string memory) {
         return baseURI;
     }
 
-    /// @dev Allows admin to set the base URI
+    /** @notice Allows admin to set the base URI
+     *  @param baseURI_ The base URI to set
+     */
     function setBaseURI(string memory baseURI_) public onlyRole(DEFAULT_ADMIN_ROLE) {
         baseURI = baseURI_;
     }
 
-    /// @dev Allows admin to set the contract URI
+    /**
+     * @notice sets the contract uri for the collection. Permissioned to only the admin role
+     * @param _contractURI the new baseURI to set
+     */
     function setContractURI(string memory _contractURI) public onlyRole(DEFAULT_ADMIN_ROLE) {
         contractURI = _contractURI;
     }
 
-    /// @dev Override of setApprovalForAll from {ERC721}, with added Allowlist approval validation
+    /**
+     * @inheritdoc ERC721Hybrid
+     * @dev Note it will validate the operator in the allowlist
+     */
     function setApprovalForAll(
         address operator,
         bool approved
@@ -69,12 +91,18 @@ abstract contract ImmutableERC721HybridBase is OperatorAllowlistEnforced, Mintin
         super.setApprovalForAll(operator, approved);
     }
 
-    /// @dev Override of approve from {ERC721}, with added Allowlist approval validation
+    /**
+     * @inheritdoc ERC721Hybrid
+     * @dev Note it will validate the to address in the allowlist
+     */
     function _approve(address to, uint256 tokenId) internal virtual override(ERC721Hybrid) validateApproval(to) {
         super._approve(to, tokenId);
     }
 
-    /// @dev Override of internal transfer from {ERC721} function to include validation
+    /**
+     * @inheritdoc ERC721HybridPermit
+     * @dev Note it will validate the from and to address in the allowlist
+     */
     function _transfer(
         address from,
         address to,
@@ -83,12 +111,21 @@ abstract contract ImmutableERC721HybridBase is OperatorAllowlistEnforced, Mintin
         super._transfer(from, to, tokenId);
     }
 
-    /// @dev Set the default royalty receiver address
+    /** @notice Set the default royalty receiver address
+     *  @param receiver the address to receive the royalty
+     *  @param feeNumerator the royalty fee numerator
+     *  @dev This can only be called by the an admin. See ERC2981 for more details on _setDefaultRoyalty
+     */
     function setDefaultRoyaltyReceiver(address receiver, uint96 feeNumerator) public onlyRole(DEFAULT_ADMIN_ROLE) {
         _setDefaultRoyalty(receiver, feeNumerator);
     }
-
-    /// @dev Set the royalty receiver address for a specific tokenId
+    
+    /** @notice Set the royalty receiver address for a specific tokenId
+     *  @param tokenId the token to set the royalty for
+     *  @param receiver the address to receive the royalty
+     *  @param feeNumerator the royalty fee numerator
+     *  @dev This can only be called by the a minter. See ERC2981 for more details on _setTokenRoyalty
+     */
     function setNFTRoyaltyReceiver(
         uint256 tokenId,
         address receiver,
@@ -97,7 +134,12 @@ abstract contract ImmutableERC721HybridBase is OperatorAllowlistEnforced, Mintin
         _setTokenRoyalty(tokenId, receiver, feeNumerator);
     }
 
-    /// @dev Set the royalty receiver address for a list of tokenIDs
+    /** @notice Set the royalty receiver address for a list of tokenId
+     *  @param tokenIds the list of tokens to set the royalty for
+     *  @param receiver the address to receive the royalty
+     *  @param feeNumerator the royalty fee numerator
+     *  @dev This can only be called by the a minter. See ERC2981 for more details on _setTokenRoyalty
+     */ 
     function setNFTRoyaltyReceiverBatch(
         uint256[] calldata tokenIds,
         address receiver,

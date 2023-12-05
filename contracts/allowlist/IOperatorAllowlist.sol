@@ -7,7 +7,7 @@ pragma solidity 0.8.19;
  */
 interface IOperatorAllowlist {
     /** @notice Returns true if an address is Allowlisted false otherwise
-     *  @param target_ the address to be checked against the Allowlist
+     *  @param target the address to be checked against the Allowlist
      */
-    function isAllowlisted(address target_) external view returns (bool);
+    function isAllowlisted(address target) external view returns (bool);
 }

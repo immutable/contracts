@@ -19,37 +19,38 @@ interface IProxy {
 
 /*
     OperatorAllowlist is an implementation of a Allowlist registry, storing addresses and bytecode
-    which are allowed to be approved operators and execute transfers of interfacing token contracts (e.g. ERC721/ERC1155). The registry
-    will be a deployed contract that tokens may interface with and point to.
+    which are allowed to be approved operators and execute transfers of interfacing token contracts (e.g. ERC721/ERC1155).
+    The registry will be a deployed contract that tokens may interface with and point to.
+    OperatorAllowlist is not designed to be upgradeable or extended.
 */
 
 contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
     ///     =====       Events       =====
 
-    /// @dev Emitted when a target address is added or removed from the Allowlist
+    /// @notice Emitted when a target address is added or removed from the Allowlist
     event AddressAllowlistChanged(address indexed target, bool added);
 
-    /// @dev Emitted when a target smart contract wallet is added or removed from the Allowlist
+    /// @notice Emitted when a target smart contract wallet is added or removed from the Allowlist
     event WalletAllowlistChanged(bytes32 indexed targetBytes, address indexed targetAddress, bool added);
 
     ///     =====   State Variables  =====
 
-    /// @dev Only REGISTRAR_ROLE can invoke white listing registration and removal
+    /// @notice Only REGISTRAR_ROLE can invoke white listing registration and removal
     bytes32 public constant REGISTRAR_ROLE = bytes32("REGISTRAR_ROLE");
 
-    /// @dev Mapping of Allowlisted addresses
+    /// @notice Mapping of Allowlisted addresses
     mapping(address => bool) private addressAllowlist;
 
-    /// @dev Mapping of Allowlisted implementation addresses
+    /// @notice Mapping of Allowlisted implementation addresses
     mapping(address => bool) private addressImplementationAllowlist;
 
-    /// @dev Mapping of Allowlisted bytecodes
+    /// @notice Mapping of Allowlisted bytecodes
     mapping(bytes32 => bool) private bytecodeAllowlist;
 
     ///     =====   Constructor  =====
 
     /**
-     * @dev Grants `DEFAULT_ADMIN_ROLE` to the supplied `admin` address
+     * @notice Grants `DEFAULT_ADMIN_ROLE` to the supplied `admin` address
      */
     constructor(address admin) {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
@@ -57,12 +58,12 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
 
     ///     =====   View functions  =====
 
-    /// @dev ERC-165 interface support
+    /// @notice ERC-165 interface support
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, AccessControl) returns (bool) {
         return interfaceId == type(IOperatorAllowlist).interfaceId || super.supportsInterface(interfaceId);
     }
 
-    /// @dev Returns true if an address is Allowlisted, false otherwise
+    /// @notice Returns true if an address is Allowlisted, false otherwise
     function isAllowlisted(address target) external view override returns (bool) {
         if (addressAllowlist[target]) {
             return true;
@@ -85,7 +86,7 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
 
     ///     =====  External functions  =====
 
-    /// @dev Add a target address to Allowlist
+    /// @notice Add a target address to Allowlist
     function addAddressToAllowlist(address[] calldata addressTargets) external onlyRole(REGISTRAR_ROLE) {
         for (uint256 i; i < addressTargets.length; i++) {
             addressAllowlist[addressTargets[i]] = true;
@@ -93,7 +94,7 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
         }
     }
 
-    /// @dev Remove a target address from Allowlist
+    /// @notice Remove a target address from Allowlist
     function removeAddressFromAllowlist(address[] calldata addressTargets) external onlyRole(REGISTRAR_ROLE) {
         for (uint256 i; i < addressTargets.length; i++) {
             delete addressAllowlist[addressTargets[i]];
@@ -101,7 +102,7 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
         }
     }
 
-    /// @dev Add a smart contract wallet to the Allowlist.
+    /// @notice Add a smart contract wallet to the Allowlist.
     // This will allowlist the proxy and implementation contract pair.
     // First, the bytecode of the proxy is added to the bytecode allowlist.
     // Second, the implementation address stored in the proxy is stored in the
@@ -120,7 +121,7 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
         emit WalletAllowlistChanged(codeHash, walletAddr, true);
     }
 
-    /// @dev Remove  a smart contract wallet from the Allowlist
+    /// @notice Remove  a smart contract wallet from the Allowlist
     // This will remove the proxy bytecode hash and implementation contract address pair from the allowlist
     function removeWalletFromAllowlist(address walletAddr) external onlyRole(REGISTRAR_ROLE) {
         // get bytecode of wallet
@@ -136,12 +137,12 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
         emit WalletAllowlistChanged(codeHash, walletAddr, false);
     }
 
-    /// @dev Allows admin to grant `user` `REGISTRAR_ROLE` role
+    /// @notice Allows admin to grant `user` `REGISTRAR_ROLE` role
     function grantRegistrarRole(address user) external onlyRole(DEFAULT_ADMIN_ROLE) {
         grantRole(REGISTRAR_ROLE, user);
     }
 
-    /// @dev Allows admin to revoke `REGISTRAR_ROLE` role from `user`
+    /// @notice Allows admin to revoke `REGISTRAR_ROLE` role from `user`
     function revokeRegistrarRole(address user) external onlyRole(DEFAULT_ADMIN_ROLE) {
         revokeRole(REGISTRAR_ROLE, user);
     }

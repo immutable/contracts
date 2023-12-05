@@ -15,22 +15,23 @@ import {OperatorAllowlistEnforcementErrors} from "../errors/Errors.sol";
     OperatorAllowlistEnforced is an abstract contract that token contracts can inherit in order to set the
     address of the OperatorAllowlist registry that it will interface with, so that the token contract may
     enable the restriction of approvals and transfers to allowlisted users.
+    OperatorAllowlistEnforced is not designed to be upgradeable or extended.
 */
 
 abstract contract OperatorAllowlistEnforced is AccessControlEnumerable, OperatorAllowlistEnforcementErrors {
     ///     =====     Events         =====
 
-    /// @dev Emitted whenever the transfer Allowlist registry is updated
+    /// @notice Emitted whenever the transfer Allowlist registry is updated
     event OperatorAllowlistRegistryUpdated(address oldRegistry, address newRegistry);
 
     ///     =====   State Variables  =====
 
-    /// @dev Interface that implements the `IOperatorAllowlist` interface
+    /// @notice Interface that implements the `IOperatorAllowlist` interface
     IOperatorAllowlist public operatorAllowlist;
 
     ///     =====  External functions  =====
 
-    /// @dev Returns the supported interfaces
+    /// @notice Returns the supported interfaces
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return super.supportsInterface(interfaceId);
     }
@@ -65,7 +66,7 @@ abstract contract OperatorAllowlistEnforced is AccessControlEnumerable, Operator
         _;
     }
 
-    /// @dev Internal function to validate whether the calling address is an EOA or Allowlisted
+    /// @notice Internal function to validate whether the calling address is an EOA or Allowlisted
     modifier validateTransfer(address from, address to) {
         // Check for:
         // 1. caller is an EOA

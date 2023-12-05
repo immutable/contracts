@@ -14,4 +14,4 @@ IOperatorAllowlist is an interface required for interacting with an OperatorAllo
 
 ## OperatorAllowlistEnforced
 
-OperatorAllowlistEnforced is an abstract contract that token contracts can inherit in order to to enable the restriction of approvals and transfers to allowlisted users, as well setting the address of the OperatorAllowlist registry that it will interface with.
+OperatorAllowlistEnforced is an abstract contract that token contracts can inherit in order to set the address of the OperatorAllowlist registry that it will interface with, so that the token contract may enable the restriction of approvals and transfers to allowlisted users.

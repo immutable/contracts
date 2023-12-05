@@ -7,8 +7,8 @@ import {IImmutableERC1155Errors} from "../../../contracts/errors/Errors.sol";
 import {OperatorAllowlistEnforcementErrors} from "../../../contracts/errors/Errors.sol";
 import {OperatorAllowlist} from "../../../contracts/allowlist/OperatorAllowlist.sol";
 import {Sign} from "../../utils/Sign.sol";
-import {MockWalletFactory} from "../../../contracts/mocks/MockWalletFactory.Sol";
 import {MockWallet} from "../../../contracts/mocks/MockWallet.sol";
+import {MockWalletFactory} from "../../../contracts/mocks/MockWalletFactory.Sol";
 
 contract ImmutableERC1155Test is Test {
     ImmutableERC1155 public immutableERC1155;

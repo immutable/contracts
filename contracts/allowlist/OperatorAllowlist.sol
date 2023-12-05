@@ -25,14 +25,6 @@ interface IProxy {
 */
 
 contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
-    ///     =====       Events       =====
-
-    /// @notice Emitted when a target address is added or removed from the Allowlist
-    event AddressAllowlistChanged(address indexed target, bool added);
-
-    /// @notice Emitted when a target smart contract wallet is added or removed from the Allowlist
-    event WalletAllowlistChanged(bytes32 indexed targetBytes, address indexed targetAddress, bool added);
-
     ///     =====   State Variables  =====
 
     /// @notice Only REGISTRAR_ROLE can invoke white listing registration and removal
@@ -47,6 +39,14 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
     /// @notice Mapping of Allowlisted bytecodes
     mapping(bytes32 => bool) private bytecodeAllowlist;
 
+    ///     =====       Events       =====
+
+    /// @notice Emitted when a target address is added or removed from the Allowlist
+    event AddressAllowlistChanged(address indexed target, bool added);
+
+    /// @notice Emitted when a target smart contract wallet is added or removed from the Allowlist
+    event WalletAllowlistChanged(bytes32 indexed targetBytes, address indexed targetAddress, bool added);
+
     ///     =====   Constructor  =====
 
     /**
@@ -54,34 +54,6 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
      */
     constructor(address admin) {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
-    }
-
-    ///     =====   View functions  =====
-
-    /// @notice ERC-165 interface support
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, AccessControl) returns (bool) {
-        return interfaceId == type(IOperatorAllowlist).interfaceId || super.supportsInterface(interfaceId);
-    }
-
-    /// @notice Returns true if an address is Allowlisted, false otherwise
-    function isAllowlisted(address target) external view override returns (bool) {
-        if (addressAllowlist[target]) {
-            return true;
-        }
-
-        // Check if caller is a Allowlisted smart contract wallet
-        bytes32 codeHash;
-        assembly {
-            codeHash := extcodehash(target)
-        }
-        if (bytecodeAllowlist[codeHash]) {
-            // If wallet proxy bytecode is approved, check addr of implementation contract
-            address impl = IProxy(target).PROXY_getImplementation();
-
-            return addressImplementationAllowlist[impl];
-        }
-
-        return false;
     }
 
     ///     =====  External functions  =====
@@ -145,5 +117,33 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
     /// @notice Allows admin to revoke `REGISTRAR_ROLE` role from `user`
     function revokeRegistrarRole(address user) external onlyRole(DEFAULT_ADMIN_ROLE) {
         revokeRole(REGISTRAR_ROLE, user);
+    }
+
+    ///     =====   View functions  =====
+
+    /// @notice Returns true if an address is Allowlisted, false otherwise
+    function isAllowlisted(address target) external view override returns (bool) {
+        if (addressAllowlist[target]) {
+            return true;
+        }
+
+        // Check if caller is a Allowlisted smart contract wallet
+        bytes32 codeHash;
+        assembly {
+            codeHash := extcodehash(target)
+        }
+        if (bytecodeAllowlist[codeHash]) {
+            // If wallet proxy bytecode is approved, check addr of implementation contract
+            address impl = IProxy(target).PROXY_getImplementation();
+
+            return addressImplementationAllowlist[impl];
+        }
+
+        return false;
+    }
+
+    /// @notice ERC-165 interface support
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, AccessControl) returns (bool) {
+        return interfaceId == type(IOperatorAllowlist).interfaceId || super.supportsInterface(interfaceId);
     }
 }

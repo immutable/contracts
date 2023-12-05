@@ -19,35 +19,17 @@ import {OperatorAllowlistEnforcementErrors} from "../errors/Errors.sol";
 */
 
 abstract contract OperatorAllowlistEnforced is AccessControlEnumerable, OperatorAllowlistEnforcementErrors {
-    ///     =====     Events         =====
-
-    /// @notice Emitted whenever the transfer Allowlist registry is updated
-    event OperatorAllowlistRegistryUpdated(address oldRegistry, address newRegistry);
-
     ///     =====   State Variables  =====
 
     /// @notice Interface that implements the `IOperatorAllowlist` interface
     IOperatorAllowlist public operatorAllowlist;
 
-    ///     =====  External functions  =====
+    ///     =====     Events         =====
 
-    /// @notice Returns the supported interfaces
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return super.supportsInterface(interfaceId);
-    }
+    /// @notice Emitted whenever the transfer Allowlist registry is updated
+    event OperatorAllowlistRegistryUpdated(address oldRegistry, address newRegistry);
 
-    function setOperatorAllowlistRegistry(address _operatorAllowlist) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        _setOperatorAllowlistRegistry(_operatorAllowlist);
-    }
-
-    function _setOperatorAllowlistRegistry(address _operatorAllowlist) internal {
-        if (!IERC165(_operatorAllowlist).supportsInterface(type(IOperatorAllowlist).interfaceId)) {
-            revert AllowlistDoesNotImplementIOperatorAllowlist();
-        }
-
-        emit OperatorAllowlistRegistryUpdated(address(operatorAllowlist), _operatorAllowlist);
-        operatorAllowlist = IOperatorAllowlist(_operatorAllowlist);
-    }
+    ///     =====     Modifiers      =====
 
     modifier validateApproval(address targetApproval) {
         // Check for:
@@ -92,5 +74,25 @@ abstract contract OperatorAllowlistEnforced is AccessControlEnumerable, Operator
             revert TransferToNotInAllowlist(to);
         }
         _;
+    }
+
+    ///     =====  External functions  =====
+
+    function setOperatorAllowlistRegistry(address _operatorAllowlist) public onlyRole(DEFAULT_ADMIN_ROLE) {
+        _setOperatorAllowlistRegistry(_operatorAllowlist);
+    }
+
+    /// @notice Returns the supported interfaces
+    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+        return super.supportsInterface(interfaceId);
+    }
+
+    function _setOperatorAllowlistRegistry(address _operatorAllowlist) internal {
+        if (!IERC165(_operatorAllowlist).supportsInterface(type(IOperatorAllowlist).interfaceId)) {
+            revert AllowlistDoesNotImplementIOperatorAllowlist();
+        }
+
+        emit OperatorAllowlistRegistryUpdated(address(operatorAllowlist), _operatorAllowlist);
+        operatorAllowlist = IOperatorAllowlist(_operatorAllowlist);
     }
 }

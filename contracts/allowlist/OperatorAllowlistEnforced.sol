@@ -11,6 +11,12 @@ import {AccessControlEnumerable, IERC165} from "@openzeppelin/contracts/access/A
 // Errors
 import {OperatorAllowlistEnforcementErrors} from "../errors/Errors.sol";
 
+/*
+    OperatorAllowlistEnforced is an abstract contract that token contracts can inherit in order to set the
+    address of the OperatorAllowlist registry that it will interface with, so that the token contract may
+    enable the restriction of approvals and transfers to allowlisted users.
+*/
+
 abstract contract OperatorAllowlistEnforced is AccessControlEnumerable, OperatorAllowlistEnforcementErrors {
     ///     =====     Events         =====
 

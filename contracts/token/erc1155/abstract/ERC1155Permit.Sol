@@ -1,7 +1,7 @@
 pragma solidity 0.8.19;
 // SPDX-License-Identifier: MIT
 
-import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol";
+import "./ERC1155Burnable.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import "solidity-bytes-utils/contracts/BytesLib.sol";
@@ -19,23 +19,6 @@ abstract contract ERC1155Permit is ERC1155Burnable, EIP712, IERC1155Permit, IImm
         ERC1155(uri)
         EIP712(name, "1")
     {}
-
-    /**
-     * @notice Overrides supportsInterface from IERC165 and ERC721Hybrid to add support for IERC4494.
-     * @param interfaceId The interface identifier, which is a 4-byte selector.
-     * @return True if the contract implements `interfaceId` and the call doesn't revert, otherwise false.
-     */
-    function supportsInterface(bytes4 interfaceId)
-      public
-      view
-      virtual
-      override(ERC1155)
-      returns (bool)
-    {
-     return
-      interfaceId == type(IERC1155Permit).interfaceId || // 0x5604e225
-      super.supportsInterface(interfaceId);
-    }
 
     function permit(address owner, address spender, bool approved, uint256 deadline, bytes memory sig) external {
         if (deadline < block.timestamp) {
@@ -72,6 +55,42 @@ abstract contract ERC1155Permit is ERC1155Burnable, EIP712, IERC1155Permit, IImm
         } else {
             revert InvalidSignature();
         }
+    }
+
+    /**
+     * @notice Returns the current nonce of a given token ID.
+     * @param owner The address for which to retrieve the nonce.
+     * @return Current nonce of the given token.
+     */
+    function nonces(
+        address owner
+    ) external view returns (uint256) {
+        return _nonces[owner];
+    }
+
+    /**
+     * @notice Returns the domain separator used in the encoding of the signature for permits, as defined by EIP-712
+     * @return the bytes32 domain separator
+     */
+    function DOMAIN_SEPARATOR() external view override returns (bytes32) {
+        return _domainSeparatorV4();
+    }
+
+    /**
+     * @notice Overrides supportsInterface from IERC165 and ERC721Hybrid to add support for IERC4494.
+     * @param interfaceId The interface identifier, which is a 4-byte selector.
+     * @return True if the contract implements `interfaceId` and the call doesn't revert, otherwise false.
+     */
+    function supportsInterface(bytes4 interfaceId)
+      public
+      view
+      virtual
+      override(ERC1155)
+      returns (bool)
+    {
+     return
+      interfaceId == type(IERC1155Permit).interfaceId || // 0x5604e225
+      super.supportsInterface(interfaceId);
     }
 
     /**
@@ -135,25 +154,6 @@ abstract contract ERC1155Permit is ERC1155Burnable, EIP712, IERC1155Permit, IImm
      */
     function _isValidEOASignature(address recoveredSigner, address owner) private pure returns(bool) {
         return recoveredSigner != address(0) && recoveredSigner == owner;
-    }
-
-    /**
-     * @notice Returns the current nonce of a given token ID.
-     * @param owner The address for which to retrieve the nonce.
-     * @return Current nonce of the given token.
-     */
-    function nonces(
-        address owner
-    ) external view returns (uint256) {
-        return _nonces[owner];
-    }
-
-    /**
-     * @notice Returns the domain separator used in the encoding of the signature for permits, as defined by EIP-712
-     * @return the bytes32 domain separator
-     */
-    function DOMAIN_SEPARATOR() external view override returns (bytes32) {
-        return _domainSeparatorV4();
     }
 
 }

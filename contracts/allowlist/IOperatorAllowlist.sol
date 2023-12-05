@@ -3,9 +3,11 @@
 pragma solidity 0.8.19;
 
 /**
- * @dev Required interface of an OperatorAllowlist compliant contract
+ * @notice Required interface of an OperatorAllowlist compliant contract
  */
 interface IOperatorAllowlist {
-    /// @dev Returns true if an address is Allowlisted false otherwise
-    function isAllowlisted(address target) external view returns (bool);
+    /** @notice Returns true if an address is Allowlisted false otherwise
+     *  @param target_ the address to be checked against the Allowlist
+     */
+    function isAllowlisted(address target_) external view returns (bool);
 }

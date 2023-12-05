@@ -51,7 +51,7 @@ export class ERC20Client {
   public async populateTransfer(
     to: PromiseOrValue<string>,
     amount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    overrides: Overrides & { from?: PromiseOrValue<string> } = {}
   ): Promise<PopulatedTransaction> {
     return this.contract.populateTransaction.transfer(to, amount, overrides);
   }

@@ -167,7 +167,7 @@ export class ERC721MintByIDClient {
   public async nonces(
     provider: Provider,
     tokenId: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
+    overrides: CallOverrides = {}
   ): Promise<BigNumber> {
     return await this.contract.connect(provider).nonces(tokenId, overrides);
   }

@@ -51,6 +51,7 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
 
     /**
      * @notice Grants `DEFAULT_ADMIN_ROLE` to the supplied `admin` address
+     * @param admin the address to grant `DEFAULT_ADMIN_ROLE` to
      */
     constructor(address admin) {
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
@@ -58,7 +59,10 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
 
     ///     =====  External functions  =====
 
-    /// @notice Add a target address to Allowlist
+    /**
+     * @notice Add a target address to Allowlist
+     * @param addressTargets the addresses to be added to the allowlist
+     */
     function addAddressToAllowlist(address[] calldata addressTargets) external onlyRole(REGISTRAR_ROLE) {
         for (uint256 i; i < addressTargets.length; i++) {
             addressAllowlist[addressTargets[i]] = true;
@@ -66,7 +70,10 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
         }
     }
 
-    /// @notice Remove a target address from Allowlist
+    /**
+     * @notice Remove a target address from Allowlist
+     * @param addressTargets the addresses to be removed from the allowlist
+     */
     function removeAddressFromAllowlist(address[] calldata addressTargets) external onlyRole(REGISTRAR_ROLE) {
         for (uint256 i; i < addressTargets.length; i++) {
             delete addressAllowlist[addressTargets[i]];
@@ -74,11 +81,14 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
         }
     }
 
-    /// @notice Add a smart contract wallet to the Allowlist.
-    // This will allowlist the proxy and implementation contract pair.
-    // First, the bytecode of the proxy is added to the bytecode allowlist.
-    // Second, the implementation address stored in the proxy is stored in the
-    // implementation address allowlist.
+    /**
+     * @notice Add a smart contract wallet to the Allowlist.
+     * This will allowlist the proxy and implementation contract pair.
+     * First, the bytecode of the proxy is added to the bytecode allowlist.
+     * Second, the implementation address stored in the proxy is stored in the
+     * implementation address allowlist.
+     * @param walletAddr the wallet address to be added to the allowlist
+     */
     function addWalletToAllowlist(address walletAddr) external onlyRole(REGISTRAR_ROLE) {
         // get bytecode of wallet
         bytes32 codeHash;
@@ -93,8 +103,11 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
         emit WalletAllowlistChanged(codeHash, walletAddr, true);
     }
 
-    /// @notice Remove  a smart contract wallet from the Allowlist
-    // This will remove the proxy bytecode hash and implementation contract address pair from the allowlist
+    /**
+     * @notice Remove  a smart contract wallet from the Allowlist
+     * This will remove the proxy bytecode hash and implementation contract address pair from the allowlist
+     * @param walletAddr the wallet address to be removed from the allowlist
+     */
     function removeWalletFromAllowlist(address walletAddr) external onlyRole(REGISTRAR_ROLE) {
         // get bytecode of wallet
         bytes32 codeHash;
@@ -109,19 +122,28 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
         emit WalletAllowlistChanged(codeHash, walletAddr, false);
     }
 
-    /// @notice Allows admin to grant `user` `REGISTRAR_ROLE` role
+    /**
+     * @notice Allows admin to grant `user` `REGISTRAR_ROLE` role
+     * @param user the address that `REGISTRAR_ROLE` will be granted to
+     */
     function grantRegistrarRole(address user) external onlyRole(DEFAULT_ADMIN_ROLE) {
         grantRole(REGISTRAR_ROLE, user);
     }
 
-    /// @notice Allows admin to revoke `REGISTRAR_ROLE` role from `user`
+    /**
+     * @notice Allows admin to revoke `REGISTRAR_ROLE` role from `user`
+     * @param user the address that `REGISTRAR_ROLE` will be revoked from
+     */
     function revokeRegistrarRole(address user) external onlyRole(DEFAULT_ADMIN_ROLE) {
         revokeRole(REGISTRAR_ROLE, user);
     }
 
     ///     =====   View functions  =====
 
-    /// @notice Returns true if an address is Allowlisted, false otherwise
+    /**
+     * @notice Returns true if an address is Allowlisted, false otherwise
+     * @param target the address that will be checked for presence in the allowlist
+     */
     function isAllowlisted(address target) external view override returns (bool) {
         if (addressAllowlist[target]) {
             return true;
@@ -142,7 +164,10 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
         return false;
     }
 
-    /// @notice ERC-165 interface support
+    /**
+     * @notice ERC-165 interface support
+     * @param interfaceId The interface identifier, which is a 4-byte selector.
+     */
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, AccessControl) returns (bool) {
         return interfaceId == type(IOperatorAllowlist).interfaceId || super.supportsInterface(interfaceId);
     }

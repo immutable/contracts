@@ -31,6 +31,10 @@ abstract contract OperatorAllowlistEnforced is AccessControlEnumerable, Operator
 
     ///     =====     Modifiers      =====
 
+    /**
+     * @notice Internal function to validate an approval, according to whether the target is an EOA or Allowlisted
+     * @param targetApproval the address of the approval target to be validated
+     */
     modifier validateApproval(address targetApproval) {
         // Check for:
         // 1. approver is an EOA. Contract constructor is handled as transfers 'from' are blocked
@@ -48,7 +52,12 @@ abstract contract OperatorAllowlistEnforced is AccessControlEnumerable, Operator
         _;
     }
 
-    /// @notice Internal function to validate whether the calling address is an EOA or Allowlisted
+    /**
+     * @notice Internal function to validate a transfer, according to whether the calling address,
+     * from address and to address is an EOA or Allowlisted
+     * @param from the address of the from target to be validated
+     * @param to the address of the to target to be validated
+     */
     modifier validateTransfer(address from, address to) {
         // Check for:
         // 1. caller is an EOA
@@ -78,15 +87,26 @@ abstract contract OperatorAllowlistEnforced is AccessControlEnumerable, Operator
 
     ///     =====  External functions  =====
 
+    /**
+     * @notice Allows admin to set the operator allowlist the calling contract will interface with
+     * @param _operatorAllowlist the address of the Allowlist registry
+     */
     function setOperatorAllowlistRegistry(address _operatorAllowlist) public onlyRole(DEFAULT_ADMIN_ROLE) {
         _setOperatorAllowlistRegistry(_operatorAllowlist);
     }
 
-    /// @notice Returns the supported interfaces
+    /**
+     * @notice ERC-165 interface support
+     * @param interfaceId The interface identifier, which is a 4-byte selector.
+     */
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
+    /**
+     * @notice Internal function to set the operator allowlist the calling contract will interface with
+     * @param _operatorAllowlist the address of the Allowlist registry
+     */
     function _setOperatorAllowlistRegistry(address _operatorAllowlist) internal {
         if (!IERC165(_operatorAllowlist).supportsInterface(type(IOperatorAllowlist).interfaceId)) {
             revert AllowlistDoesNotImplementIOperatorAllowlist();

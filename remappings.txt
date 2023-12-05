@@ -1,0 +1,1 @@
+@axelar-cgp-solidity=node_modules/@axelar-network/axelar-gmp-sdk-solidity

@@ -1,5 +1,3 @@
-# Contract Factory Threat Model
-
 ## Introduction
 This document is a thread model for two preset erc721 token contracts built by Immutable.
 

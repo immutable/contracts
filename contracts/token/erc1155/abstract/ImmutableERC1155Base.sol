@@ -1,4 +1,5 @@
-//SPDX-License-Identifier: Apache 2.0
+// Copyright Immutable Pty Ltd 2018 - 2023
+// SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
 import "../../../token/erc1155/abstract/ERC1155Permit.Sol";
@@ -106,7 +107,7 @@ abstract contract ImmutableERC1155Base is
     function revokeMinterRole(address user) public onlyRole(DEFAULT_ADMIN_ROLE) {
         revokeRole(MINTER_ROLE, user);
     }
-    
+
     /**
      * @notice Override of setApprovalForAll from {ERC721}, with added Allowlist approval validation
      * @param operator The address to approve as an operator for the caller.
@@ -176,7 +177,7 @@ abstract contract ImmutableERC1155Base is
     function baseURI() public view virtual returns (string memory) {
         return _baseURI;
     }
-    
+
     /**
      * @notice See {IERC1155MetadataURI-uri}.
      *
@@ -270,5 +271,5 @@ abstract contract ImmutableERC1155Base is
         super._safeBatchTransferFrom(from, to, ids, values, data);
     }
 
-    
+
 }

@@ -38,8 +38,8 @@ contract ImmutableERC721MintByID is ImmutableERC721Base {
      *  @param tokenID the ID of the token to mint
      */
     function safeMint(address to, uint256 tokenID) external onlyRole(MINTER_ROLE) {
-        _safeMint(to, tokenID, "");
         _totalSupply++;
+        _safeMint(to, tokenID, "");
     }
 
     /** @notice Allows minter to safe mint `tokenID` to `to`
@@ -47,8 +47,8 @@ contract ImmutableERC721MintByID is ImmutableERC721Base {
      *  @param tokenID the ID of the token to mint
      */
     function mint(address to, uint256 tokenID) external onlyRole(MINTER_ROLE) {
-        _mint(to, tokenID);
         _totalSupply++;
+        _mint(to, tokenID);
     }
 
     /**

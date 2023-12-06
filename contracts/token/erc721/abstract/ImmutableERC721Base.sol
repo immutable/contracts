@@ -240,10 +240,12 @@ abstract contract ImmutableERC721Base is
         if (mintRequest.to == address(0)) {
             revert IImmutableERC721SendingToZerothAddress();
         }
+        
+        _totalSupply = _totalSupply + mintRequest.tokenIds.length;
         for (uint256 j = 0; j < mintRequest.tokenIds.length; j++) {
             _mint(mintRequest.to, mintRequest.tokenIds[j]);
         }
-        _totalSupply = _totalSupply + mintRequest.tokenIds.length;
+        
     }
 
     /** @notice safe mints a batch of tokens with specified ids to a specified address

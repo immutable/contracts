@@ -262,8 +262,9 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
         if (_burnedTokens.get(tokenId)) {
             revert IImmutableERC721TokenAlreadyBurned(tokenId);
         }
-        ERC721._mint(to, tokenId);
+        
         _idMintTotalSupply++;
+        ERC721._mint(to, tokenId);
     }
 
     /** @notice safe mints number of tokens specified to a multiple specified addresses via erc721
@@ -278,8 +279,9 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
         if (_burnedTokens.get(tokenId)) {
             revert IImmutableERC721TokenAlreadyBurned(tokenId);
         }
-        ERC721._safeMint(to, tokenId);
+
         _idMintTotalSupply++;
+        ERC721._safeMint(to, tokenId);    
     }
 
     /** @notice mints multiple tokens by id to a specified address via erc721 

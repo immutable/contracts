@@ -1,0 +1,1 @@
+DO NOT MODIFY THESE CONTRACTS DIRECTLY. This folder has been automatically extracted from https://github.com/immutable/wallet-contracts via a submodule in this repository's forks directory. See the upstream repository for full context.

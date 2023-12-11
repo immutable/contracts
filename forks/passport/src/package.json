@@ -1,0 +1,29 @@
+{
+  "name": "@imtbl/wallet-contracts",
+  "version": "1.0.0",
+  "description": "Immutable Smart Wallet contracts",
+  "repository": "https://github.com/immutable/wallet-contracts",
+  "homepage": "https://www.immutable.com",
+  "license": "Apache-2.0",
+  "main": "gen/adapter/index.js",
+  "types": "gen/adapter/index.d.ts",
+  "scripts": {},
+  "optionalDependencies": {
+    "@ethersproject/abi": "^5.7.0",
+    "@ethersproject/providers": "^5.7.2",
+    "ethers": "^5.7.2"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "prettier": "^2.8.7",
+    "prettier-plugin-solidity": "^1.1.3"
+  },
+  "keywords": [
+    "Ethereum",
+    "Immutable",
+    "Sequence",
+    "Wallet",
+    "Smart Wallet",
+    "Meta Transactions"
+  ]
+}

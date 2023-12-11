@@ -1,0 +1,18 @@
+{
+ "FactoryAddress": "0x55b9d1cd803d5acA8ea23ccd96f6a756DED9f5a9",
+ "WalletImplLocatorAddress": "0x657d339B8616033FEE25F66eA1d00C3f30b14171",
+ "StartupWalletImplAddress": "0x8df826438e652f7124fe07F413fA3556cd57edB5",
+ "MainModuleDynamicAuthAddress": "0x9bF35E2E14878812909c86e67492e397068b57A7",
+ "ImmutableSignerContractAddress": "0x1B1D383526A2815d26550eb314B5d7e055132733",
+ "MultiCallDeployAddress": "0x04c7A8Eff5109a953f1DF1f83195b6eD3a7e04b6",
+ "DeployerAddress": "0x19b2680f8E79B9C21847e0f441DeEa259d124073",
+ "FactoryAdminAddress": "0xddb70ddcd14dbd57ae18ec591f47454e4fc818bb",
+ "FactoryDeployerAddress": "0xBC52cE84FceFd2D941D1127608D6Cf598f9633d3",
+ "WalletImplLocatorAdminAddress": "0xb49c99a17776c10350c2be790e13d4d8dfb1c578",
+ "WalletImplLocatorImplChangerAddress": "0xb49C99A17776C10350C2bE790e13d4d8dFB1C578",
+ "SignerRootAdminAddress": "0x65af83f71a05d7f6d06ef9a57c9294b4128ccc2c",
+ "SignerAdminAddress": "0x69d09644159e7327dbfd0af9a66f8e332c593e79",
+ "ImmutableSignerAddress": "0x1cE50560686b1297B6311F36B47dbe5d6E04D0f8",
+ "MultiCallAdminAddress": "0x575be326c482a487add43974e0eaf232e3366e13",
+ "MultiCallExecutorAddress": "0xBC52cE84FceFd2D941D1127608D6Cf598f9633d3"
+}

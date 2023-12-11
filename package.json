@@ -9,6 +9,7 @@
     "dist"
   ],
   "scripts": {
+    "compile": "hardhat compile",
     "build": "ts-node scripts/build.ts && yarn install && tsc",
     "test": "hardhat test",
     "prettier:solidity": "./node_modules/.bin/prettier --write contracts/**/*.sol",

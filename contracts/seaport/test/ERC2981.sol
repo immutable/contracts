@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts@seaport/interfaces/IERC2981.sol";
+import "@openzeppelin/contracts/seaport/interfaces/IERC2981.sol";
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 /**

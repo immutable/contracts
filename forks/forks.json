@@ -9,10 +9,12 @@
         "upstream": "https://github.com/immutable/seaport",
         "contracts": "seaport/contracts",
         "dependencies": [
+            "@rari-capital/solmate",
             "@openzeppelin/contracts",
             "seaport-core",
             "seaport-sol",
-            "seaport-types"
+            "seaport-types",
+            "solady"
         ]
     }
 ]

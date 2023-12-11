@@ -32,7 +32,7 @@ import {
     ERC721Interface,
     ERC1155Interface
 } from "seaport-types/src/interfaces/AbridgedTokenInterfaces.sol";
-import { IERC165 } from "@openzeppelin/contracts@seaport/interfaces/IERC165.sol";
+import { IERC165 } from "@openzeppelin/contracts/seaport/interfaces/IERC165.sol";
 import { IERC2981 } from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import {
     ErrorsAndWarnings,

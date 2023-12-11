@@ -1,5 +1,4 @@
 
-import { exec } from 'child_process';
 import fs from 'fs';
 import replace from 'replace-in-file';
 import forks from '../forks/forks.json';
@@ -17,17 +16,17 @@ forks.forEach(fork => {
     if (fork.dependencies) {
         const pkg = JSON.parse(fs.readFileSync(`forks/${fork.name}/package.json`));
         fork.dependencies.forEach(dep => {
-            const depVersion = pkg.dependencies[dep];
+            const depVersion = pkg.dependencies[dep] ? pkg.dependencies[dep] : pkg.devDependencies[dep];
 
             const mainDepVersion = (main.dependencies as any)[dep];
             // What happens if the version clashes!
             if (mainDepVersion && depVersion != mainDepVersion) {
-                // Create a custom name e.g. @openzeppelin/contracts@seaport
-                const customDepName = `${dep}@${fork.name}`;
+                // Create a custom name e.g. @openzeppelin/contracts/seaport
+                const customDepName = `${dep}/${fork.name}`;
                 (main.dependencies as any)[customDepName] = `npm:${dep}@${depVersion}`;
                 // Now replace all of the references to the dependency
                 // inside the fork's copied contracts folder
-                // e.g. '@openzeppelin/contracts/x/y.sol --> @openzeppelin/contracts@seaport/x/y.sol
+                // e.g. '@openzeppelin/contracts/x/y.sol --> @openzeppelin/contracts/seaport/x/y.sol
                 replace.sync({
                     from: dep,
                     to: customDepName,
@@ -35,17 +34,13 @@ forks.forEach(fork => {
                 });
             } else {
                 // No clash in the dependencies, just add it
-                (main.dependencies as any)[dep] = depVersion
+                (main.dependencies as any)[dep] = depVersion;
             }
         });
+
     }
 });
 
 // Update our main package.json
 fs.writeFileSync('package.json', JSON.stringify(main, null, 2), 'utf8');
-
-// Re-run to capture any new dependencies introduced by the forks
-exec(`yarn install`);
-// Compile typescript files
-exec(`tsc`);
 

@@ -7,7 +7,7 @@ import {
     ERC1155Interface
 } from "seaport-types/src/interfaces/AbridgedTokenInterfaces.sol";
 
-import { ERC165 } from "@openzeppelin/contracts@seaport/utils/introspection/ERC165.sol";
+import { ERC165 } from "@openzeppelin/contracts/seaport/utils/introspection/ERC165.sol";
 import {
     ReceivedItem,
     Schema,

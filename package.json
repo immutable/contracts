@@ -9,8 +9,8 @@
     "dist"
   ],
   "scripts": {
-    "compile": "sh scripts/install.sh && sh scripts/compile.sh",
-    "build": "ts-node scripts/build.ts",
+    "compile": "sh scripts/compile.sh",
+    "build": "ts-node scripts/build.ts && yarn install && tsc",
     "test": "sh scripts/test.sh",
     "prettier:solidity": "./node_modules/.bin/prettier --write contracts/**/*.sol",
     "lint": "eslint . --ext .ts,.tsx --fix && solhint --config ./.solhint.json  contracts/**/*.sol",
@@ -66,9 +66,11 @@
     "@openzeppelin/contracts": "^4.3.2",
     "solidity-bits": "^0.4.0",
     "solidity-bytes-utils": "^0.8.0",
-    "@openzeppelin/contracts@seaport": "npm:@openzeppelin/contracts@^4.9.2",
     "seaport-core": "immutable/seaport-core#1.5.0+im.1",
     "seaport-sol": "^1.5.0",
-    "seaport-types": "^0.0.1"
+    "seaport-types": "^0.0.1",
+    "@openzeppelin/contracts/seaport": "npm:@openzeppelin/contracts@^4.9.2",
+    "@rari-capital/solmate": "^6.2.0",
+    "solady": "^0.0.84"
   }
 }

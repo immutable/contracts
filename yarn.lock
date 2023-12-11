@@ -1142,6 +1142,11 @@
     find-up "^4.1.0"
     fs-extra "^8.1.0"
 
+"@openzeppelin/contracts/seaport@npm:@openzeppelin/contracts@^4.9.2":
+  version "4.9.5"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.9.5.tgz#1eed23d4844c861a1835b5d33507c1017fa98de8"
+  integrity sha512-ZK+W5mVhRppff9BE6YdR8CC52C8zAvsVAiWhEtQ5+oNxFE6h1WdeWo+FJSF8KKvtxxVYZ7MTP/5KoVpAU3aSWg==
+
 "@openzeppelin/contracts@^4.3.2":
   version "4.9.4"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.9.4.tgz#9241960f6aa5b9f73eb59452d6d85b9e7f21f393"
@@ -1162,6 +1167,11 @@
     semver "^5.6.0"
     web3 "^1.2.5"
     web3-utils "^1.2.5"
+
+"@rari-capital/solmate@^6.2.0":
+  version "6.4.0"
+  resolved "https://registry.yarnpkg.com/@rari-capital/solmate/-/solmate-6.4.0.tgz#c6ee4110c8075f14b415e420b13bd8bdbbc93d9e"
+  integrity sha512-BXWIHHbG5Zbgrxi0qVYe0Zs+bfx+XgOciVUACjuIApV0KzC0kY8XdO1higusIei/ZKCC+GUKdcdQZflxYPUTKQ==
 
 "@resolver-engine/core@^0.3.3":
   version "0.3.3"
@@ -7804,6 +7814,32 @@ scrypt-js@3.0.1, scrypt-js@^3.0.0, scrypt-js@^3.0.1:
   resolved "https://registry.yarnpkg.com/scrypt-js/-/scrypt-js-3.0.1.tgz#d314a57c2aef69d1ad98a138a21fe9eafa9ee312"
   integrity sha512-cdwTTnqPu0Hyvf5in5asVdZocVDTNRmR7XEcJuIzMjJeSHybHl7vpB66AzwTaIg6CLSbtjcxc8fqcySfnTkccA==
 
+seaport-core@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/seaport-core/-/seaport-core-0.0.1.tgz#99db0b605d0fbbfd43ca7a4724e64374ce47f6d4"
+  integrity sha512-fgdSIC0ru8xK+fdDfF4bgTFH8ssr6EwbPejC2g/JsWzxy+FvG7JfaX57yn/eIv6hoscgZL87Rm+kANncgwLH3A==
+  dependencies:
+    seaport-types "^0.0.1"
+
+seaport-core@immutable/seaport-core#1.5.0+im.1:
+  version "1.5.0"
+  resolved "https://codeload.github.com/immutable/seaport-core/tar.gz/33e9030f308500b422926a1be12d7a1e4d6adc06"
+  dependencies:
+    seaport-types "^0.0.1"
+
+seaport-sol@^1.5.0:
+  version "1.5.3"
+  resolved "https://registry.yarnpkg.com/seaport-sol/-/seaport-sol-1.5.3.tgz#ccb0047bcefb7d29bcd379faddf3a5a9902d0c3a"
+  integrity sha512-6g91hs15v4zBx/ZN9YD0evhQSDhdMKu83c2CgBgtc517D8ipaYaFO71ZD6V0Z6/I0cwNfuN/ZljcA1J+xXr65A==
+  dependencies:
+    seaport-core "^0.0.1"
+    seaport-types "^0.0.1"
+
+seaport-types@^0.0.1:
+  version "0.0.1"
+  resolved "https://registry.yarnpkg.com/seaport-types/-/seaport-types-0.0.1.tgz#e2a32fe8641853d7dadb1b0232d911d88ccc3f1a"
+  integrity sha512-m7MLa7sq3YPwojxXiVvoX1PM9iNVtQIn7AdEtBnKTwgxPfGRWUlbs/oMgetpjT/ZYTmv3X5/BghOcstWYvKqRA==
+
 secp256k1@4.0.3, secp256k1@^4.0.1:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/secp256k1/-/secp256k1-4.0.3.tgz#c4559ecd1b8d3c1827ed2d1b94190d69ce267303"
@@ -8026,6 +8062,11 @@ snake-case@^2.1.0:
   integrity sha512-FMR5YoPFwOLuh4rRz92dywJjyKYZNLpMn1R5ujVpIYkbA9p01fq8RMg0FkO4M+Yobt4MjHeLTJVm5xFFBHSV2Q==
   dependencies:
     no-case "^2.2.0"
+
+solady@^0.0.84:
+  version "0.0.84"
+  resolved "https://registry.yarnpkg.com/solady/-/solady-0.0.84.tgz#95476df1936ef349003e88d8a4853185eb0b7267"
+  integrity sha512-1ccuZWcMR+g8Ont5LUTqMSFqrmEC+rYAbo6DjZFzdL7AJAtLiaOzO25BKZR10h6YBZNaqO5zUOFy09R6/AzAKQ==
 
 solc@0.7.3:
   version "0.7.3"

@@ -10,7 +10,7 @@ import {
     ContractOffererInterface
 } from "seaport-types/src/interfaces/ContractOffererInterface.sol";
 
-import { ERC165 } from "@openzeppelin/contracts@seaport/utils/introspection/ERC165.sol";
+import { ERC165 } from "@openzeppelin/contracts/seaport/utils/introspection/ERC165.sol";
 import { ItemType } from "seaport-types/src/lib/ConsiderationEnums.sol";
 
 import {

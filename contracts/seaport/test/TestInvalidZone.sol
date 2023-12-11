@@ -6,7 +6,7 @@ import {
     Schema
 } from "seaport-types/src/lib/ConsiderationStructs.sol";
 
-import { ERC165 } from "@openzeppelin/contracts@seaport/utils/introspection/ERC165.sol";
+import { ERC165 } from "@openzeppelin/contracts/seaport/utils/introspection/ERC165.sol";
 import { ZoneInterface } from "seaport-types/src/interfaces/ZoneInterface.sol";
 
 contract TestInvalidZone is ERC165, ZoneInterface {

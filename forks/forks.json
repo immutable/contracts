@@ -15,7 +15,8 @@
             "@openzeppelin/contracts",
             "seaport-core",
             "seaport-sol",
-            "seaport-types"
+            "seaport-types",
+            "solady"
         ],
         "ignore": [
             "test"

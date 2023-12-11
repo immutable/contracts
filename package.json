@@ -9,9 +9,8 @@
     "dist"
   ],
   "scripts": {
-    "compile": "sh scripts/compile.sh",
     "build": "ts-node scripts/build.ts && yarn install && tsc",
-    "test": "sh scripts/test.sh",
+    "test": "hardhat test",
     "prettier:solidity": "./node_modules/.bin/prettier --write contracts/**/*.sol",
     "lint": "eslint . --ext .ts,.tsx --fix && solhint --config ./.solhint.json  contracts/**/*.sol",
     "clean": "hardhat clean",
@@ -69,6 +68,7 @@
     "seaport-core": "immutable/seaport-core#1.5.0+im.1",
     "seaport-sol": "^1.5.0",
     "seaport-types": "^0.0.1",
-    "@openzeppelin/contracts/seaport": "npm:@openzeppelin/contracts@^4.9.2"
+    "@openzeppelin/contracts/seaport": "npm:@openzeppelin/contracts@^4.9.2",
+    "solady": "^0.0.84"
   }
 }

@@ -32,7 +32,7 @@ const config: HardhatUserConfig = {
           optimizer: {
             enabled: true,
             runs: 200,
-          }
+          },
         },
       },
       {
@@ -41,10 +41,10 @@ const config: HardhatUserConfig = {
           optimizer: {
             enabled: true,
             runs: 200,
-          }
+          },
         },
-      }
-    ]
+      },
+    ],
   },
   paths: {
     tests: "./test",

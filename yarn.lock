@@ -1168,11 +1168,6 @@
     web3 "^1.2.5"
     web3-utils "^1.2.5"
 
-"@rari-capital/solmate@^6.2.0":
-  version "6.4.0"
-  resolved "https://registry.yarnpkg.com/@rari-capital/solmate/-/solmate-6.4.0.tgz#c6ee4110c8075f14b415e420b13bd8bdbbc93d9e"
-  integrity sha512-BXWIHHbG5Zbgrxi0qVYe0Zs+bfx+XgOciVUACjuIApV0KzC0kY8XdO1higusIei/ZKCC+GUKdcdQZflxYPUTKQ==
-
 "@resolver-engine/core@^0.3.3":
   version "0.3.3"
   resolved "https://registry.yarnpkg.com/@resolver-engine/core/-/core-0.3.3.tgz#590f77d85d45bc7ecc4e06c654f41345db6ca967"
@@ -8062,11 +8057,6 @@ snake-case@^2.1.0:
   integrity sha512-FMR5YoPFwOLuh4rRz92dywJjyKYZNLpMn1R5ujVpIYkbA9p01fq8RMg0FkO4M+Yobt4MjHeLTJVm5xFFBHSV2Q==
   dependencies:
     no-case "^2.2.0"
-
-solady@^0.0.84:
-  version "0.0.84"
-  resolved "https://registry.yarnpkg.com/solady/-/solady-0.0.84.tgz#95476df1936ef349003e88d8a4853185eb0b7267"
-  integrity sha512-1ccuZWcMR+g8Ont5LUTqMSFqrmEC+rYAbo6DjZFzdL7AJAtLiaOzO25BKZR10h6YBZNaqO5zUOFy09R6/AzAKQ==
 
 solc@0.7.3:
   version "0.7.3"

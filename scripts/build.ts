@@ -7,7 +7,14 @@ import main from '../package.json';
 forks.forEach(fork => {
     const dest = `contracts/${fork.name}`;
     fs.rmSync(dest, { recursive: true, force: true });
-    fs.cpSync(`forks/${fork.contracts}`, dest, {recursive: true});
+    fs.cpSync(`forks/${fork.contracts}`, dest, {
+        recursive: true,
+        filter: (src: string, dest: string) => {
+            const matches = fork.ignore.filter(ig => src.includes(`forks/${fork.contracts}/${ig}`));
+            // only include if there are no matches
+            return matches.length == 0;
+        }
+    });
 
     const rmTemplate = `DO NOT MODIFY THESE CONTRACTS DIRECTLY. This folder has been automatically extracted from ${fork.upstream} via a submodule in this repository's forks directory. See the upstream repository for full context.`
 

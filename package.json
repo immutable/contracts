@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "compile": "hardhat compile",
-    "build": "tsc",
+    "build": "git submodule update --remote && ts-node scripts/build.ts && yarn install && tsc",
     "test": "hardhat test",
     "prettier:solidity": "./node_modules/.bin/prettier --write contracts/**/*.sol",
     "lint": "eslint . --ext .ts,.tsx --fix && solhint --config ./.solhint.json  contracts/**/*.sol",
@@ -54,6 +54,7 @@
     "hardhat-gas-reporter": "^1.0.9",
     "prettier": "^2.8.8",
     "prettier-plugin-solidity": "^1.1.3",
+    "replace-in-file": "^7.0.2",
     "solhint": "^3.3.8",
     "solhint-plugin-prettier": "^0.0.5",
     "solidity-coverage": "^0.8.4",
@@ -62,8 +63,13 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.9.3",
+    "@openzeppelin/contracts": "^4.3.2",
     "solidity-bits": "^0.4.0",
-    "solidity-bytes-utils": "^0.8.0"
+    "solidity-bytes-utils": "^0.8.0",
+    "seaport-core": "immutable/seaport-core#1.5.0+im.1",
+    "seaport-sol": "^1.5.0",
+    "seaport-types": "^0.0.1",
+    "@openzeppelin/contracts/seaport": "npm:@openzeppelin/contracts@^4.9.2",
+    "solady": "^0.0.84"
   }
 }

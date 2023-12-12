@@ -1,0 +1,25 @@
+[
+    {
+        "name": "passport",
+        "contracts": "passport/src/contracts",
+        "upstream": "https://github.com/immutable/wallet-contracts",
+        "ignore": [
+            "mocks"
+        ]
+    },
+    {
+        "name": "seaport",
+        "upstream": "https://github.com/immutable/seaport",
+        "contracts": "seaport/contracts",
+        "dependencies": [
+            "@openzeppelin/contracts",
+            "seaport-core",
+            "seaport-sol",
+            "seaport-types",
+            "solady"
+        ],
+        "ignore": [
+            "test"
+        ]
+    }
+]

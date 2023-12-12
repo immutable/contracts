@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "compile": "hardhat compile",
-    "build": "ts-node scripts/build.ts && yarn install && tsc",
+    "build": "git submodule update --remote && ts-node scripts/build.ts && yarn install && tsc",
     "test": "hardhat test",
     "prettier:solidity": "./node_modules/.bin/prettier --write contracts/**/*.sol",
     "lint": "eslint . --ext .ts,.tsx --fix && solhint --config ./.solhint.json  contracts/**/*.sol",

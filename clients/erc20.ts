@@ -20,7 +20,7 @@ export class ERC20Client {
    * @returns a promise that resolves with a BigNumber that represents the amount of tokens in existence
    */
   public async totalSupply(provider: Provider, overrides: CallOverrides = {}): Promise<BigNumber> {
-    return this.contract.connect(provider).totalSupply({ ...defaultGasOverrides, ...overrides });
+    return this.contract.connect(provider).totalSupply(overrides);
   }
 
   /**
@@ -31,7 +31,7 @@ export class ERC20Client {
     account: PromiseOrValue<string>,
     overrides: CallOverrides = {}
   ): Promise<BigNumber> {
-    return this.contract.connect(provider).balanceOf(account, { ...defaultGasOverrides, ...overrides });
+    return this.contract.connect(provider).balanceOf(account, overrides);
   }
 
   /**
@@ -43,7 +43,7 @@ export class ERC20Client {
     spender: PromiseOrValue<string>,
     overrides: CallOverrides = {}
   ): Promise<BigNumber> {
-    return this.contract.connect(provider).allowance(owner, spender, { ...defaultGasOverrides, ...overrides });
+    return this.contract.connect(provider).allowance(owner, spender, overrides);
   }
 
   /**

@@ -34,7 +34,7 @@ export class ERC721Client {
    * @returns the DEFAULT_ADMIN_ROLE as a string.
    */
   public async DEFAULT_ADMIN_ROLE(provider: Provider, overrides: CallOverrides = {}): Promise<string> {
-    return await this.contract.connect(provider).DEFAULT_ADMIN_ROLE({ ...defaultGasOverrides, ...overrides });
+    return await this.contract.connect(provider).DEFAULT_ADMIN_ROLE(overrides);
   }
 
   /**
@@ -42,14 +42,14 @@ export class ERC721Client {
    * @return the bytes32 domain separator
    */
   public async DOMAIN_SEPARATOR(provider: Provider, overrides: CallOverrides = {}): Promise<string> {
-    return await this.contract.connect(provider).DOMAIN_SEPARATOR({ ...defaultGasOverrides, ...overrides });
+    return await this.contract.connect(provider).DOMAIN_SEPARATOR(overrides);
   }
 
   /**
    * @returns the MINTER_ROLE as a string.
    */
   public async MINTER_ROLE(provider: Provider, overrides: CallOverrides = {}): Promise<string> {
-    return await this.contract.connect(provider).MINTER_ROLE({ ...defaultGasOverrides, ...overrides });
+    return await this.contract.connect(provider).MINTER_ROLE(overrides);
   }
 
   /**
@@ -60,21 +60,21 @@ export class ERC721Client {
     owner: PromiseOrValue<string>,
     overrides: CallOverrides = {}
   ): Promise<BigNumber> {
-    return await this.contract.connect(provider).balanceOf(owner, { ...defaultGasOverrides, ...overrides });
+    return await this.contract.connect(provider).balanceOf(owner, overrides);
   }
 
   /**
    * @returns the baseURI as a string.
    */
   public async baseURI(provider: Provider, overrides: CallOverrides = {}): Promise<string> {
-    return await this.contract.connect(provider).baseURI({ ...defaultGasOverrides, ...overrides });
+    return await this.contract.connect(provider).baseURI(overrides);
   }
 
   /**
    * @returns the contractURI as a string.
    */
   public async contractURI(provider: Provider, overrides: CallOverrides = {}): Promise<string> {
-    return await this.contract.connect(provider).contractURI({ ...defaultGasOverrides, ...overrides });
+    return await this.contract.connect(provider).contractURI(overrides);
   }
 
   /**
@@ -95,14 +95,14 @@ export class ERC721Client {
       extensions: BigNumber[];
     }
   > {
-    return await this.contract.connect(provider).eip712Domain({ ...defaultGasOverrides, ...overrides });
+    return await this.contract.connect(provider).eip712Domain(overrides);
   }
 
   /**
    * @returns admin addresses as an array of strings.
    */
   public async getAdmins(provider: Provider, overrides: CallOverrides = {}): Promise<string[]> {
-    return await this.contract.connect(provider).getAdmins({ ...defaultGasOverrides, ...overrides });
+    return await this.contract.connect(provider).getAdmins(overrides);
   }
 
   /**
@@ -113,7 +113,7 @@ export class ERC721Client {
     tokenId: PromiseOrValue<BigNumberish>,
     overrides: CallOverrides = {}
   ): Promise<string> {
-    return await this.contract.connect(provider).getApproved(tokenId, { ...defaultGasOverrides, ...overrides });
+    return await this.contract.connect(provider).getApproved(tokenId, overrides);
   }
 
   /**
@@ -124,7 +124,7 @@ export class ERC721Client {
     role: PromiseOrValue<BytesLike>,
     overrides: CallOverrides = {}
   ): Promise<string> {
-    return await this.contract.connect(provider).getRoleAdmin(role, { ...defaultGasOverrides, ...overrides });
+    return await this.contract.connect(provider).getRoleAdmin(role, overrides);
   }
 
   /**
@@ -136,7 +136,7 @@ export class ERC721Client {
     index: PromiseOrValue<BigNumberish>,
     overrides: CallOverrides = {}
   ): Promise<string> {
-    return await this.contract.connect(provider).getRoleMember(role, index, { ...defaultGasOverrides, ...overrides });
+    return await this.contract.connect(provider).getRoleMember(role, index, overrides);
   }
 
   /**
@@ -147,7 +147,7 @@ export class ERC721Client {
     role: PromiseOrValue<BytesLike>,
     overrides: CallOverrides = {}
   ): Promise<BigNumber> {
-    return await this.contract.connect(provider).getRoleMemberCount(role, { ...defaultGasOverrides, ...overrides });
+    return await this.contract.connect(provider).getRoleMemberCount(role, overrides);
   }
 
   /**
@@ -159,7 +159,7 @@ export class ERC721Client {
     account: PromiseOrValue<string>,
     overrides: CallOverrides = {}
   ): Promise<boolean> {
-    return await this.contract.connect(provider).hasRole(role, account, { ...defaultGasOverrides, ...overrides });
+    return await this.contract.connect(provider).hasRole(role, account, overrides);
   }
 
   /**
@@ -171,16 +171,14 @@ export class ERC721Client {
     operator: PromiseOrValue<string>,
     overrides: CallOverrides = {}
   ): Promise<boolean> {
-    return await this.contract
-      .connect(provider)
-      .isApprovedForAll(owner, operator, { ...defaultGasOverrides, ...overrides });
+    return await this.contract.connect(provider).isApprovedForAll(owner, operator, overrides);
   }
 
   /**
    * @returns the name of the contract as a string.
    */
   public async name(provider: Provider, overrides: CallOverrides = {}): Promise<string> {
-    return await this.contract.connect(provider).name({ ...defaultGasOverrides, ...overrides });
+    return await this.contract.connect(provider).name(overrides);
   }
 
   /**
@@ -191,7 +189,7 @@ export class ERC721Client {
     tokenId: PromiseOrValue<BigNumberish>,
     overrides: CallOverrides = {}
   ): Promise<string> {
-    return await this.contract.connect(provider).ownerOf(tokenId, { ...defaultGasOverrides, ...overrides });
+    return await this.contract.connect(provider).ownerOf(tokenId, overrides);
   }
 
   /**
@@ -204,14 +202,14 @@ export class ERC721Client {
     tokenId: PromiseOrValue<BigNumberish>,
     overrides: CallOverrides = {}
   ): Promise<BigNumber> {
-    return await this.contract.connect(provider).nonces(tokenId, { ...defaultGasOverrides, ...overrides });
+    return await this.contract.connect(provider).nonces(tokenId, overrides);
   }
 
   /**
    * @returns the operator allowlist as a string.
    */
   public async operatorAllowlist(provider: Provider, overrides: CallOverrides = {}): Promise<string> {
-    return await this.contract.connect(provider).operatorAllowlist({ ...defaultGasOverrides, ...overrides });
+    return await this.contract.connect(provider).operatorAllowlist(overrides);
   }
 
   /**
@@ -223,16 +221,14 @@ export class ERC721Client {
     _salePrice: PromiseOrValue<BigNumberish>,
     overrides: CallOverrides = {}
   ): Promise<[string, BigNumber]> {
-    return await this.contract
-      .connect(provider)
-      .royaltyInfo(_tokenId, _salePrice, { ...defaultGasOverrides, ...overrides });
+    return await this.contract.connect(provider).royaltyInfo(_tokenId, _salePrice, overrides);
   }
 
   /**
    * @returns the symbol of the contract as a string.
    */
   public async symbol(provider: Provider, overrides: CallOverrides = {}): Promise<string> {
-    return await this.contract.connect(provider).symbol({ ...defaultGasOverrides, ...overrides });
+    return await this.contract.connect(provider).symbol(overrides);
   }
 
   /**
@@ -243,14 +239,14 @@ export class ERC721Client {
     tokenId: PromiseOrValue<BigNumberish>,
     overrides: CallOverrides = {}
   ): Promise<string> {
-    return await this.contract.connect(provider).tokenURI(tokenId, { ...defaultGasOverrides, ...overrides });
+    return await this.contract.connect(provider).tokenURI(tokenId, overrides);
   }
 
   /**
    * @returns returns the total amount of tokens stored by the contract.
    */
   public async totalSupply(provider: Provider, overrides: CallOverrides = {}): Promise<BigNumber> {
-    return await this.contract.connect(provider).totalSupply({ ...defaultGasOverrides, ...overrides });
+    return await this.contract.connect(provider).totalSupply(overrides);
   }
 
   /**

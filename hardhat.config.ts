@@ -25,13 +25,64 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 // Go to https://hardhat.org/config/ to learn more
 const config: HardhatUserConfig = {
   solidity: {
-    version: "0.8.19",
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 200,
+    compilers: [
+      {
+        version: "0.8.19",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
       },
-    },
+      {
+        version: "0.8.17",
+        settings: {
+          viaIR: true,
+          optimizer:  { enabled: true, runs: 4_294_967_295 },
+          metadata: {
+            bytecodeHash: "none",
+          },
+          outputSelection: {
+            "*": {
+              "*": ["evm.assembly", "irOptimized", "devdoc"],
+            },
+          },
+        },
+      },
+    ],
+    overrides: {
+      "contracts/trading/seaport/ImmutableSeaport.sol": {
+        version: "0.8.17",
+        settings: {
+          viaIR: true,
+          optimizer: {
+            enabled: true,
+            runs: 10,
+          },
+        }
+      },
+      "contracts/trading/seaport/conduit/Conduit.sol": {
+        version: "0.8.14",
+        settings: {
+          viaIR: true,
+          optimizer: {
+            enabled: true,
+            runs: 1000000,
+          },
+        },
+      },
+      "contracts/trading/seaport/conduit/ConduitController.sol": {
+        version: "0.8.14",
+        settings: {
+          viaIR: true,
+          optimizer: {
+            enabled: true,
+            runs: 1000000,
+          },
+        },
+      },
+    }
   },
   paths: {
     tests: "./test",

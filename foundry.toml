@@ -2,5 +2,6 @@
 src = 'contracts'
 out = 'foundry-out'
 libs = ["lib", "node_modules"]
+remappings = [ "node_modules/seaport:@rari-capital/solmate/=node_modules/@rari-capital/solmate/" ]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

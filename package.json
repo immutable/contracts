@@ -9,6 +9,7 @@
     "dist"
   ],
   "scripts": {
+    "postinstall": "rm -f node_modules/seaport/foundry.toml",
     "compile": "hardhat compile",
     "build": "tsc",
     "test": "hardhat test",
@@ -62,7 +63,9 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
+    "@rari-capital/solmate": "^6.4.0",
     "@openzeppelin/contracts": "^4.9.3",
+    "seaport": "https://github.com/immutable/seaport.git#1.5.0+im.1.3",
     "solidity-bits": "^0.4.0",
     "solidity-bytes-utils": "^0.8.0"
   }

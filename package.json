@@ -9,6 +9,7 @@
     "dist"
   ],
   "scripts": {
+    "postinstall": "rm -f node_modules/seaport/foundry.toml",
     "compile": "hardhat compile",
     "build": "tsc",
     "test": "hardhat test",

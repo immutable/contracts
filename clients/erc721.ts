@@ -1,8 +1,8 @@
 import type { BigNumber, BigNumberish, BytesLike, CallOverrides, Overrides, PopulatedTransaction } from "ethers";
 import type { Provider } from "@ethersproject/providers";
 
-import { ImmutableERC721, ImmutableERC721__factory } from "../typechain-types";
-import { ERC721Hybrid } from "../typechain-types/contracts/token/erc721/preset/ImmutableERC721";
+import { ImmutableERC721__factory } from "../typechain-types/factories/contracts/token/erc721/preset/ImmutableERC721__factory";
+import { ImmutableERC721, ERC721Hybrid } from "../typechain-types/contracts/token/erc721/preset/ImmutableERC721";
 import { PromiseOrValue } from "../typechain-types/common";
 import { defaultGasOverrides } from "./config/overrides";
 

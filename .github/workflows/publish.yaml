@@ -61,6 +61,6 @@ jobs:
       - name: Publish package
         uses: JS-DevTools/npm-publish@v1
         with:
-          token: ${{ secrets.PLATFORM_SA_NPM_TOKEN }}
+          token: ${{ secrets.CONTRACTS_NPM_TOKEN }}
           access: public
           tag: "latest"

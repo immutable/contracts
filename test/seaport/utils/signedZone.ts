@@ -23,9 +23,7 @@ export async function advanceBlockAtTime(time: number): Promise<void> {
   await ethers.provider.send("evm_mine", [time]);
 }
 
-export async function advanceBlockBySeconds(
-  secondsToAdd: number
-): Promise<void> {
+export async function advanceBlockBySeconds(secondsToAdd: number): Promise<void> {
   const newTimestamp = (await getCurrentTimeStamp()) + secondsToAdd;
   await ethers.provider.send("evm_mine", [newTimestamp]);
 }
@@ -36,9 +34,7 @@ export async function advanceTimeByDays(daysToAdd: number): Promise<void> {
   mine();
 }
 
-export async function mineBlocks(
-  blocksToMineInHex: string = "0x100"
-): Promise<void> {
+export async function mineBlocks(blocksToMineInHex: string = "0x100"): Promise<void> {
   await ethers.provider.send("hardhat_mine", [blocksToMineInHex]);
 }
 

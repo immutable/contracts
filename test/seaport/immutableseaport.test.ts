@@ -1,22 +1,14 @@
+/* eslint-disable no-unused-expressions */
 import { ethers, network } from "hardhat";
 import { randomBytes } from "crypto";
 
-import type {
-  ImmutableSeaport,
-  ImmutableSignedZone,
-  TestERC721,
-} from "../../typechain-types";
+import type { ImmutableSeaport, ImmutableSignedZone, TestERC721 } from "../../typechain-types";
 import { constants } from "ethers";
 import type { Wallet, BigNumber, BigNumberish } from "ethers";
 import { deployImmutableContracts } from "./utils/deploy-immutable-contracts";
 import { faucet } from "./utils/faucet";
 import { buildResolver, getItemETH, toBN, toKey } from "./utils/encoding";
-import {
-  deployERC721,
-  getTestItem721,
-  getTestItem721WithCriteria,
-  mintAndApprove721,
-} from "./utils/erc721";
+import { deployERC721, getTestItem721, getTestItem721WithCriteria, mintAndApprove721 } from "./utils/erc721";
 import { createOrder, generateSip7Signature } from "./utils/order";
 import { expect } from "chai";
 import { merkleTree } from "./utils/criteria";
@@ -37,11 +29,7 @@ describe(`ImmutableSeaport and ImmutableZone (Seaport v1.5)`, function () {
     return provider.getBalance(userAddress);
   }
 
-  async function userIsOwnerOfNft(
-    erc721: TestERC721,
-    tokenId: BigNumberish,
-    userAddress: string
-  ): Promise<boolean> {
+  async function userIsOwnerOfNft(erc721: TestERC721, tokenId: BigNumberish, userAddress: string): Promise<boolean> {
     const ownerOf = await erc721.ownerOf(tokenId);
     return ownerOf === userAddress;
   }
@@ -54,9 +42,7 @@ describe(`ImmutableSeaport and ImmutableZone (Seaport v1.5)`, function () {
 
   before(async () => {
     await faucet(owner.address, provider);
-    const immutableContracts = await deployImmutableContracts(
-      immutableSigner.address
-    );
+    const immutableContracts = await deployImmutableContracts(immutableSigner.address);
     immutableSeaport = immutableContracts.immutableSeaport;
     immutableSignedZone = immutableContracts.immutableSignedZone;
     conduitKey = immutableContracts.conduitKey;
@@ -92,9 +78,7 @@ describe(`ImmutableSeaport and ImmutableZone (Seaport v1.5)`, function () {
       const erc721 = await deployERC721();
       const nftId = await mintAndApprove721(erc721, seller, conduitAddress);
       const offer = await getTestItem721(erc721.address, nftId);
-      const consideration = [
-        getItemETH(parseEther("10"), parseEther("10"), seller.address),
-      ];
+      const consideration = [getItemETH(parseEther("10"), parseEther("10"), seller.address)];
       const { order, orderHash, value } = await createOrder(
         immutableSeaport,
         seller,
@@ -122,19 +106,15 @@ describe(`ImmutableSeaport and ImmutableZone (Seaport v1.5)`, function () {
       const sellerBalanceBefore = await getEthBalance(seller.address);
       const buyerBalanceBefore = await getEthBalance(seller.address);
 
-      const tx = await immutableSeaport
-        .connect(buyer)
-        .fulfillAdvancedOrder(order, [], conduitKey, buyer.address, {
-          value,
-        });
+      const tx = await immutableSeaport.connect(buyer).fulfillAdvancedOrder(order, [], conduitKey, buyer.address, {
+        value,
+      });
 
       await tx.wait();
 
       expect(await userIsOwnerOfNft(erc721, nftId, buyer.address)).to.be.true;
       expect(await userIsOwnerOfNft(erc721, nftId, seller.address)).to.be.false;
-      expect(await getEthBalance(seller.address)).to.equal(
-        sellerBalanceBefore.add(parseEther("10"))
-      );
+      expect(await getEthBalance(seller.address)).to.equal(sellerBalanceBefore.add(parseEther("10")));
 
       const currentBalance = await getEthBalance(buyer.address);
       const expectedBalance = buyerBalanceBefore.sub(parseEther("10"));
@@ -146,15 +126,9 @@ describe(`ImmutableSeaport and ImmutableZone (Seaport v1.5)`, function () {
 
     it("ImmutableSeaport can fulfill an Immutable-signed PARTIAL_RESTRICTED advanced order", async () => {
       const erc721 = await deployERC721();
-      const nftId = await mintAndApprove721(
-        erc721,
-        seller,
-        immutableSeaport.address
-      );
+      const nftId = await mintAndApprove721(erc721, seller, immutableSeaport.address);
       const offer = await getTestItem721(erc721.address, nftId);
-      const consideration = [
-        getItemETH(parseEther("10"), parseEther("10"), seller.address),
-      ];
+      const consideration = [getItemETH(parseEther("10"), parseEther("10"), seller.address)];
       const { order, orderHash, value } = await createOrder(
         immutableSeaport,
         seller,
@@ -178,34 +152,24 @@ describe(`ImmutableSeaport and ImmutableZone (Seaport v1.5)`, function () {
       const sellerBalanceBefore = await getEthBalance(seller.address);
       const buyerBalanceBefore = await getEthBalance(seller.address);
 
-      const tx = await immutableSeaport
-        .connect(buyer)
-        .fulfillAdvancedOrder(order, [], toKey(0), buyer.address, {
-          value,
-        });
+      const tx = await immutableSeaport.connect(buyer).fulfillAdvancedOrder(order, [], toKey(0), buyer.address, {
+        value,
+      });
 
       await tx.wait();
 
       expect(await userIsOwnerOfNft(erc721, nftId, buyer.address)).to.be.true;
       expect(await userIsOwnerOfNft(erc721, nftId, seller.address)).to.be.false;
-      expect(await getEthBalance(seller.address)).to.equal(
-        sellerBalanceBefore.add(parseEther("10"))
-      );
+      expect(await getEthBalance(seller.address)).to.equal(sellerBalanceBefore.add(parseEther("10")));
       // Balance is less than 10 because of gas fees
       expect((await getEthBalance(buyer.address)).lt(buyerBalanceBefore.sub(parseEther("10")))).to.be.true;
     });
 
     it("ImmutableSeaport rejects unsupported zones", async () => {
       const erc721 = await deployERC721();
-      const nftId = await mintAndApprove721(
-        erc721,
-        seller,
-        immutableSeaport.address
-      );
+      const nftId = await mintAndApprove721(erc721, seller, immutableSeaport.address);
       const offer = await getTestItem721(erc721.address, nftId);
-      const consideration = [
-        getItemETH(parseEther("10"), parseEther("10"), seller.address),
-      ];
+      const consideration = [getItemETH(parseEther("10"), parseEther("10"), seller.address)];
       const { order, orderHash, value } = await createOrder(
         immutableSeaport,
         seller,
@@ -230,30 +194,18 @@ describe(`ImmutableSeaport and ImmutableZone (Seaport v1.5)`, function () {
       await expect(
         immutableSeaport
           .connect(buyer)
-          .fulfillAdvancedOrder(
-            order,
-            [],
-            toKey(0),
-            ethers.constants.AddressZero,
-            {
-              value,
-            }
-          )
+          .fulfillAdvancedOrder(order, [], toKey(0), ethers.constants.AddressZero, {
+            value,
+          })
           .then((tx) => tx.wait())
       ).to.be.revertedWith("InvalidZone");
     });
 
     it("ImmutableSeaport rejects an Immutable-signed FULL_OPEN advanced order", async () => {
       const erc721 = await deployERC721();
-      const nftId = await mintAndApprove721(
-        erc721,
-        seller,
-        immutableSeaport.address
-      );
+      const nftId = await mintAndApprove721(erc721, seller, immutableSeaport.address);
       const offer = await getTestItem721(erc721.address, nftId);
-      const consideration = [
-        getItemETH(parseEther("10"), parseEther("10"), seller.address),
-      ];
+      const consideration = [getItemETH(parseEther("10"), parseEther("10"), seller.address)];
       const { order, orderHash, value } = await createOrder(
         immutableSeaport,
         seller,
@@ -277,38 +229,22 @@ describe(`ImmutableSeaport and ImmutableZone (Seaport v1.5)`, function () {
       await expect(
         immutableSeaport
           .connect(buyer)
-          .fulfillAdvancedOrder(
-            order,
-            [],
-            toKey(0),
-            ethers.constants.AddressZero,
-            {
-              value,
-            }
-          )
+          .fulfillAdvancedOrder(order, [], toKey(0), ethers.constants.AddressZero, {
+            value,
+          })
           .then((tx) => tx.wait())
       ).to.be.revertedWith("OrderNotRestricted");
     });
 
     it("ImmutableSeaport can fulfill an Immutable-signed FULL_RESTRICTED advanced order with criteria", async () => {
       const erc721 = await deployERC721();
-      const nftId = await mintAndApprove721(
-        erc721,
-        seller,
-        immutableSeaport.address
-      );
+      const nftId = await mintAndApprove721(erc721, seller, immutableSeaport.address);
 
       const { root, proofs } = merkleTree([nftId]);
 
-      const offer = [
-        getTestItem721WithCriteria(erc721.address, root, toBN(1), toBN(1)),
-      ];
-      const consideration = [
-        getItemETH(parseEther("10"), parseEther("10"), seller.address),
-      ];
-      const criteriaResolvers = [
-        buildResolver(0, 0, 0, nftId, proofs[nftId.toString()]),
-      ];
+      const offer = [getTestItem721WithCriteria(erc721.address, root, toBN(1), toBN(1))];
+      const consideration = [getItemETH(parseEther("10"), parseEther("10"), seller.address)];
+      const criteriaResolvers = [buildResolver(0, 0, 0, nftId, proofs[nftId.toString()])];
       const { order, orderHash, value } = await createOrder(
         immutableSeaport,
         seller,
@@ -334,38 +270,24 @@ describe(`ImmutableSeaport and ImmutableZone (Seaport v1.5)`, function () {
 
       const tx = await immutableSeaport
         .connect(buyer)
-        .fulfillAdvancedOrder(
-          order,
-          criteriaResolvers,
-          toKey(0),
-          buyer.address,
-          {
-            value,
-          }
-        );
+        .fulfillAdvancedOrder(order, criteriaResolvers, toKey(0), buyer.address, {
+          value,
+        });
 
       await tx.wait();
 
       expect(await userIsOwnerOfNft(erc721, nftId, buyer.address)).to.be.true;
       expect(await userIsOwnerOfNft(erc721, nftId, seller.address)).to.be.false;
-      expect(await getEthBalance(seller.address)).to.equal(
-        sellerBalanceBefore.add(parseEther("10"))
-      );
+      expect(await getEthBalance(seller.address)).to.equal(sellerBalanceBefore.add(parseEther("10")));
       // Balance is less than 10 because of gas fees
       expect((await getEthBalance(buyer.address)).lt(buyerBalanceBefore.sub(parseEther("10")))).to.be.true;
     });
 
     it("ImmutableSeaport can fulfill an Immutable-signed PARTIAL_RESTRICTED advanced order", async () => {
       const erc721 = await deployERC721();
-      const nftId = await mintAndApprove721(
-        erc721,
-        seller,
-        immutableSeaport.address
-      );
+      const nftId = await mintAndApprove721(erc721, seller, immutableSeaport.address);
       const offer = await getTestItem721(erc721.address, nftId);
-      const consideration = [
-        getItemETH(parseEther("10"), parseEther("10"), seller.address),
-      ];
+      const consideration = [getItemETH(parseEther("10"), parseEther("10"), seller.address)];
       const { order, orderHash, value } = await createOrder(
         immutableSeaport,
         seller,
@@ -389,19 +311,15 @@ describe(`ImmutableSeaport and ImmutableZone (Seaport v1.5)`, function () {
       const sellerBalanceBefore = await getEthBalance(seller.address);
       const buyerBalanceBefore = await getEthBalance(seller.address);
 
-      const tx = await immutableSeaport
-        .connect(buyer)
-        .fulfillAdvancedOrder(order, [], toKey(0), buyer.address, {
-          value,
-        });
+      const tx = await immutableSeaport.connect(buyer).fulfillAdvancedOrder(order, [], toKey(0), buyer.address, {
+        value,
+      });
 
       await tx.wait();
 
       expect(await userIsOwnerOfNft(erc721, nftId, buyer.address)).to.be.true;
       expect(await userIsOwnerOfNft(erc721, nftId, seller.address)).to.be.false;
-      expect(await getEthBalance(seller.address)).to.equal(
-        sellerBalanceBefore.add(parseEther("10"))
-      );
+      expect(await getEthBalance(seller.address)).to.equal(sellerBalanceBefore.add(parseEther("10")));
       // Balance is less than 10 because of gas fees
       expect((await getEthBalance(buyer.address)).lt(buyerBalanceBefore.sub(parseEther("10")))).to.be.true;
     });
@@ -409,21 +327,12 @@ describe(`ImmutableSeaport and ImmutableZone (Seaport v1.5)`, function () {
     it("Orders submitted against a zone that has been disabled are rejected", async () => {
       const contracts = await deployImmutableContracts(immutableSigner.address);
       const erc721 = await deployERC721();
-      const nftId = await mintAndApprove721(
-        erc721,
-        seller,
-        contracts.immutableSeaport.address
-      );
+      const nftId = await mintAndApprove721(erc721, seller, contracts.immutableSeaport.address);
       const offer = await getTestItem721(erc721.address, nftId);
-      const consideration = [
-        getItemETH(parseEther("10"), parseEther("10"), seller.address),
-      ];
+      const consideration = [getItemETH(parseEther("10"), parseEther("10"), seller.address)];
 
       // Disable the zone
-      await contracts.immutableSeaport.setAllowedZone(
-        contracts.immutableSignedZone.address,
-        false
-      );
+      await contracts.immutableSeaport.setAllowedZone(contracts.immutableSignedZone.address, false);
 
       const { order, orderHash, value } = await createOrder(
         contracts.immutableSeaport,
@@ -448,30 +357,18 @@ describe(`ImmutableSeaport and ImmutableZone (Seaport v1.5)`, function () {
       await expect(
         immutableSeaport
           .connect(buyer)
-          .fulfillAdvancedOrder(
-            order,
-            [],
-            toKey(0),
-            ethers.constants.AddressZero,
-            {
-              value,
-            }
-          )
+          .fulfillAdvancedOrder(order, [], toKey(0), ethers.constants.AddressZero, {
+            value,
+          })
           .then((tx) => tx.wait())
       ).to.be.revertedWith("InvalidZone");
     });
 
     it("Orders with extraData signed by the wrong signer are rejected", async () => {
       const erc721 = await deployERC721();
-      const nftId = await mintAndApprove721(
-        erc721,
-        seller,
-        immutableSeaport.address
-      );
+      const nftId = await mintAndApprove721(erc721, seller, immutableSeaport.address);
       const offer = await getTestItem721(erc721.address, nftId);
-      const consideration = [
-        getItemETH(parseEther("10"), parseEther("10"), seller.address),
-      ];
+      const consideration = [getItemETH(parseEther("10"), parseEther("10"), seller.address)];
       const { order, orderHash, value } = await createOrder(
         immutableSeaport,
         seller,
@@ -495,30 +392,18 @@ describe(`ImmutableSeaport and ImmutableZone (Seaport v1.5)`, function () {
       await expect(
         immutableSeaport
           .connect(buyer)
-          .fulfillAdvancedOrder(
-            order,
-            [],
-            toKey(0),
-            ethers.constants.AddressZero,
-            {
-              value,
-            }
-          )
+          .fulfillAdvancedOrder(order, [], toKey(0), ethers.constants.AddressZero, {
+            value,
+          })
           .then((tx) => tx.wait())
       ).to.be.revertedWith("SignerNotActive");
     });
 
     it("Orders with invalid extraData are rejected", async () => {
       const erc721 = await deployERC721();
-      const nftId = await mintAndApprove721(
-        erc721,
-        seller,
-        immutableSeaport.address
-      );
+      const nftId = await mintAndApprove721(erc721, seller, immutableSeaport.address);
       const offer = await getTestItem721(erc721.address, nftId);
-      const consideration = [
-        getItemETH(parseEther("10"), parseEther("10"), seller.address),
-      ];
+      const consideration = [getItemETH(parseEther("10"), parseEther("10"), seller.address)];
       const { order, value } = await createOrder(
         immutableSeaport,
         seller,
@@ -543,15 +428,9 @@ describe(`ImmutableSeaport and ImmutableZone (Seaport v1.5)`, function () {
       await expect(
         immutableSeaport
           .connect(buyer)
-          .fulfillAdvancedOrder(
-            order,
-            [],
-            toKey(0),
-            ethers.constants.AddressZero,
-            {
-              value,
-            }
-          )
+          .fulfillAdvancedOrder(order, [], toKey(0), ethers.constants.AddressZero, {
+            value,
+          })
           .then((tx) => tx.wait())
       ).to.be.revertedWith("SubstandardViolation");
     });

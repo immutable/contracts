@@ -36,9 +36,7 @@ describe("ImmutableSignedZone", function () {
     users = await ethers.getSigners();
     deployer = users[0];
     const factory = await ethers.getContractFactory("ImmutableSignedZone");
-    const tx = await factory
-      .connect(deployer)
-      .deploy("ImmutableSignedZone", "", "");
+    const tx = await factory.connect(deployer).deploy("ImmutableSignedZone", "", "");
 
     const address = (await tx.deployed()).address;
 
@@ -52,9 +50,7 @@ describe("ImmutableSignedZone", function () {
 
     it("transferOwnership and acceptOwnership works", async () => {
       assert((await contract.owner()) === deployer.address);
-      const transferTx = await contract
-        .connect(deployer)
-        .transferOwnership(users[2].address);
+      const transferTx = await contract.connect(deployer).transferOwnership(users[2].address);
       await transferTx.wait(1);
 
       const acceptTx = await contract.connect(users[2]).acceptOwnership();
@@ -64,21 +60,21 @@ describe("ImmutableSignedZone", function () {
 
     it("non owner cannot transfer ownership", async () => {
       assert((await contract.owner()) === deployer.address);
-      await expect(
-        contract.connect(users[1]).transferOwnership(users[1].address)
-      ).to.be.revertedWith("Ownable: caller is not the owner");
+      await expect(contract.connect(users[1]).transferOwnership(users[1].address)).to.be.revertedWith(
+        "Ownable: caller is not the owner"
+      );
     });
 
     it("non owner cannot add signer", async () => {
-      await expect(
-        contract.connect(users[1]).addSigner(users[1].address)
-      ).to.be.revertedWith("Ownable: caller is not the owner");
+      await expect(contract.connect(users[1]).addSigner(users[1].address)).to.be.revertedWith(
+        "Ownable: caller is not the owner"
+      );
     });
 
     it("non owner cannot remove signer", async () => {
-      await expect(
-        contract.connect(users[1]).removeSigner(users[1].address)
-      ).to.be.revertedWith("Ownable: caller is not the owner");
+      await expect(contract.connect(users[1]).removeSigner(users[1].address)).to.be.revertedWith(
+        "Ownable: caller is not the owner"
+      );
     });
   });
 
@@ -98,9 +94,7 @@ describe("ImmutableSignedZone", function () {
 
       (await contract.removeSigner(users[1].address)).wait(1);
 
-      await expect(
-        contract.addSigner(users[1].address)
-      ).to.be.revertedWith("SignerCannotBeReauthorized");
+      await expect(contract.addSigner(users[1].address)).to.be.revertedWith("SignerCannotBeReauthorized");
     });
 
     it("already active signer cannot be added", async () => {
@@ -108,9 +102,7 @@ describe("ImmutableSignedZone", function () {
       const tx = await contract.connect(deployer).addSigner(users[1].address);
       await tx.wait(1);
 
-      await expect(
-        contract.addSigner(users[1].address)
-      ).to.be.revertedWith("SignerAlreadyActive");
+      await expect(contract.addSigner(users[1].address)).to.be.revertedWith("SignerAlreadyActive");
     });
   });
 
@@ -124,15 +116,11 @@ describe("ImmutableSignedZone", function () {
     });
 
     it("validateOrder reverts without extraData", async function () {
-      await expect(
-        contract.validateOrder(mockZoneParameter([]))
-      ).to.be.revertedWith("InvalidExtraData");
+      await expect(contract.validateOrder(mockZoneParameter([]))).to.be.revertedWith("InvalidExtraData");
     });
 
     it("validateOrder reverts with invalid extraData", async function () {
-      await expect(
-        contract.validateOrder(mockZoneParameter([1, 2, 3]))
-      ).to.be.revertedWith("InvalidExtraData");
+      await expect(contract.validateOrder(mockZoneParameter([1, 2, 3]))).to.be.revertedWith("InvalidExtraData");
     });
 
     it("validateOrder reverts with expired timestamp", async function () {
@@ -165,9 +153,7 @@ describe("ImmutableSignedZone", function () {
       );
 
       await advanceBlockBySeconds(100);
-      await expect(
-        contract.validateOrder(mockZoneParameter(extraData))
-      ).to.be.revertedWith("SignatureExpired");
+      await expect(contract.validateOrder(mockZoneParameter(extraData))).to.be.revertedWith("SignatureExpired");
     });
 
     it("validateOrder reverts with invalid fulfiller", async function () {
@@ -199,9 +185,7 @@ describe("ImmutableSignedZone", function () {
         ]
       );
 
-      await expect(
-        contract.validateOrder(mockZoneParameter(extraData))
-      ).to.be.revertedWith("InvalidFulfiller");
+      await expect(contract.validateOrder(mockZoneParameter(extraData))).to.be.revertedWith("InvalidFulfiller");
     });
 
     it("validateOrder reverts with non 0 SIP6 version", async function () {
@@ -233,9 +217,9 @@ describe("ImmutableSignedZone", function () {
         ]
       );
 
-      await expect(
-        contract.validateOrder(mockZoneParameter(extraData))
-      ).to.be.revertedWith("UnsupportedExtraDataVersion");
+      await expect(contract.validateOrder(mockZoneParameter(extraData))).to.be.revertedWith(
+        "UnsupportedExtraDataVersion"
+      );
     });
 
     it("validateOrder reverts with no context", async function () {
@@ -267,9 +251,7 @@ describe("ImmutableSignedZone", function () {
         ]
       );
 
-      await expect(
-        contract.validateOrder(mockZoneParameter(extraData))
-      ).to.be.revertedWith("InvalidExtraData");
+      await expect(contract.validateOrder(mockZoneParameter(extraData))).to.be.revertedWith("InvalidExtraData");
     });
 
     it("validateOrder reverts with wrong consideration", async function () {
@@ -277,10 +259,7 @@ describe("ImmutableSignedZone", function () {
       const expiration = (await getCurrentTimeStamp()) + 100;
       const fulfiller = constants.AddressZero;
       const consideration = mockConsideration();
-      const context: BytesLike = ethers.utils.solidityPack(
-        ["bytes"],
-        [constants.HashZero]
-      );
+      const context: BytesLike = ethers.utils.solidityPack(["bytes"], [constants.HashZero]);
       const signedOrder = {
         fulfiller,
         expiration,
@@ -305,9 +284,9 @@ describe("ImmutableSignedZone", function () {
         ]
       );
 
-      await expect(
-        contract.validateOrder(mockZoneParameter(extraData, consideration))
-      ).to.be.revertedWith("SubstandardViolation");
+      await expect(contract.validateOrder(mockZoneParameter(extraData, consideration))).to.be.revertedWith(
+        "SubstandardViolation"
+      );
     });
 
     it("validates correct signature with context", async function () {
@@ -315,18 +294,11 @@ describe("ImmutableSignedZone", function () {
       const expiration = (await getCurrentTimeStamp()) + 100;
       const fulfiller = constants.AddressZero;
       const consideration = mockConsideration();
-      const considerationHash = ethers.utils._TypedDataEncoder.hashStruct(
-        "Consideration",
-        CONSIDERATION_EIP712_TYPE,
-        {
-          consideration,
-        }
-      );
+      const considerationHash = ethers.utils._TypedDataEncoder.hashStruct("Consideration", CONSIDERATION_EIP712_TYPE, {
+        consideration,
+      });
 
-      const context: BytesLike = ethers.utils.solidityPack(
-        ["bytes", "bytes[]"],
-        [considerationHash, [orderHash]]
-      );
+      const context: BytesLike = ethers.utils.solidityPack(["bytes", "bytes[]"], [considerationHash, [orderHash]]);
 
       const signedOrder = {
         fulfiller,
@@ -343,13 +315,7 @@ describe("ImmutableSignedZone", function () {
 
       const extraData = ethers.utils.solidityPack(
         ["bytes1", "address", "uint64", "bytes", "bytes"],
-        [
-          0,
-          fulfiller,
-          expiration,
-          convertSignatureToEIP2098(signature),
-          context,
-        ]
+        [0, fulfiller, expiration, convertSignatureToEIP2098(signature), context]
       );
 
       // esimate gas
@@ -359,11 +325,7 @@ describe("ImmutableSignedZone", function () {
       //     )
       //   );
 
-      expect(
-        await contract.validateOrder(
-          mockZoneParameter(extraData, consideration)
-        )
-      ).to.be.equal("0x17b1f942"); // ZoneInterface.validateOrder.selector
+      expect(await contract.validateOrder(mockZoneParameter(extraData, consideration))).to.be.equal("0x17b1f942"); // ZoneInterface.validateOrder.selector
     });
 
     it("validateOrder reverts a valid order after expiration time passes ", async function () {
@@ -371,18 +333,11 @@ describe("ImmutableSignedZone", function () {
       const expiration = (await getCurrentTimeStamp()) + 90;
       const fulfiller = constants.AddressZero;
       const consideration = mockConsideration();
-      const considerationHash = ethers.utils._TypedDataEncoder.hashStruct(
-        "Consideration",
-        CONSIDERATION_EIP712_TYPE,
-        {
-          consideration,
-        }
-      );
+      const considerationHash = ethers.utils._TypedDataEncoder.hashStruct("Consideration", CONSIDERATION_EIP712_TYPE, {
+        consideration,
+      });
 
-      const context: BytesLike = ethers.utils.solidityPack(
-        ["bytes", "bytes[]"],
-        [considerationHash, [orderHash]]
-      );
+      const context: BytesLike = ethers.utils.solidityPack(["bytes", "bytes[]"], [considerationHash, [orderHash]]);
 
       const signedOrder = {
         fulfiller,
@@ -399,28 +354,18 @@ describe("ImmutableSignedZone", function () {
 
       const extraData = ethers.utils.solidityPack(
         ["bytes1", "address", "uint64", "bytes", "bytes"],
-        [
-          0,
-          fulfiller,
-          expiration,
-          convertSignatureToEIP2098(signature),
-          context,
-        ]
+        [0, fulfiller, expiration, convertSignatureToEIP2098(signature), context]
       );
 
-      const selector = await contract.validateOrder(
-        mockZoneParameter(extraData, consideration)
-      );
+      const selector = await contract.validateOrder(mockZoneParameter(extraData, consideration));
 
       expect(selector).to.equal("0x17b1f942"); // ZoneInterface.validateOrder.selector
 
       await advanceBlockBySeconds(900);
 
-      expect(
-        contract.validateOrder(
-          mockZoneParameter(extraData, consideration)
-        )
-      ).to.be.revertedWith("SignatureExpired"); // ZoneInterface.validateOrder.selector
+      expect(contract.validateOrder(mockZoneParameter(extraData, consideration))).to.be.revertedWith(
+        "SignatureExpired"
+      ); // ZoneInterface.validateOrder.selector
     });
 
     it("validateOrder validates correct context with multiple order hashes - equal arrays", async function () {
@@ -428,13 +373,9 @@ describe("ImmutableSignedZone", function () {
       const expiration = (await getCurrentTimeStamp()) + 90;
       const fulfiller = constants.AddressZero;
       const consideration = mockConsideration();
-      const considerationHash = ethers.utils._TypedDataEncoder.hashStruct(
-        "Consideration",
-        CONSIDERATION_EIP712_TYPE,
-        {
-          consideration,
-        }
-      );
+      const considerationHash = ethers.utils._TypedDataEncoder.hashStruct("Consideration", CONSIDERATION_EIP712_TYPE, {
+        consideration,
+      });
 
       const context: BytesLike = ethers.utils.solidityPack(
         ["bytes", "bytes[]"],
@@ -456,13 +397,7 @@ describe("ImmutableSignedZone", function () {
 
       const extraData = ethers.utils.solidityPack(
         ["bytes1", "address", "uint64", "bytes", "bytes"],
-        [
-          0,
-          fulfiller,
-          expiration,
-          convertSignatureToEIP2098(signature),
-          context,
-        ]
+        [0, fulfiller, expiration, convertSignatureToEIP2098(signature), context]
       );
 
       // gas estimation
@@ -473,9 +408,7 @@ describe("ImmutableSignedZone", function () {
       //   );
 
       expect(
-        await contract.validateOrder(
-          mockZoneParameter(extraData, consideration, mockBulkOrderHashes())
-        )
+        await contract.validateOrder(mockZoneParameter(extraData, consideration, mockBulkOrderHashes()))
       ).to.be.equal("0x17b1f942"); // ZoneInterface.validateOrder.selector
     });
 
@@ -484,13 +417,9 @@ describe("ImmutableSignedZone", function () {
       const expiration = (await getCurrentTimeStamp()) + 90;
       const fulfiller = constants.AddressZero;
       const consideration = mockConsideration();
-      const considerationHash = ethers.utils._TypedDataEncoder.hashStruct(
-        "Consideration",
-        CONSIDERATION_EIP712_TYPE,
-        {
-          consideration,
-        }
-      );
+      const considerationHash = ethers.utils._TypedDataEncoder.hashStruct("Consideration", CONSIDERATION_EIP712_TYPE, {
+        consideration,
+      });
 
       const context: BytesLike = ethers.utils.solidityPack(
         ["bytes", "bytes[]"],
@@ -512,19 +441,11 @@ describe("ImmutableSignedZone", function () {
 
       const extraData = ethers.utils.solidityPack(
         ["bytes1", "address", "uint64", "bytes", "bytes"],
-        [
-          0,
-          fulfiller,
-          expiration,
-          convertSignatureToEIP2098(signature),
-          context,
-        ]
+        [0, fulfiller, expiration, convertSignatureToEIP2098(signature), context]
       );
 
       expect(
-        await contract.validateOrder(
-          mockZoneParameter(extraData, consideration, mockBulkOrderHashes())
-        )
+        await contract.validateOrder(mockZoneParameter(extraData, consideration, mockBulkOrderHashes()))
       ).to.be.equal("0x17b1f942"); // ZoneInterface.validateOrder.selector
     });
 
@@ -534,13 +455,9 @@ describe("ImmutableSignedZone", function () {
       const expiration = (await getCurrentTimeStamp()) + 90;
       const fulfiller = constants.AddressZero;
       const consideration = mockConsideration();
-      const considerationHash = ethers.utils._TypedDataEncoder.hashStruct(
-        "Consideration",
-        CONSIDERATION_EIP712_TYPE,
-        {
-          consideration,
-        }
-      );
+      const considerationHash = ethers.utils._TypedDataEncoder.hashStruct("Consideration", CONSIDERATION_EIP712_TYPE, {
+        consideration,
+      });
 
       // context with 10 order hashes expected
       const context: BytesLike = ethers.utils.solidityPack(
@@ -563,23 +480,13 @@ describe("ImmutableSignedZone", function () {
 
       const extraData = ethers.utils.solidityPack(
         ["bytes1", "address", "uint64", "bytes", "bytes"],
-        [
-          0,
-          fulfiller,
-          expiration,
-          convertSignatureToEIP2098(signature),
-          context,
-        ]
+        [0, fulfiller, expiration, convertSignatureToEIP2098(signature), context]
       );
 
       await expect(
         contract.validateOrder(
           // only 8 order hashes actually filled
-          mockZoneParameter(
-            extraData,
-            consideration,
-            mockBulkOrderHashes().splice(0, 2)
-          )
+          mockZoneParameter(extraData, consideration, mockBulkOrderHashes().splice(0, 2))
         )
       ).to.be.revertedWith("SubstandardViolation");
     });
@@ -590,13 +497,9 @@ describe("ImmutableSignedZone", function () {
       const expiration = (await getCurrentTimeStamp()) + 90;
       const fulfiller = constants.AddressZero;
       const consideration = mockConsideration();
-      const considerationHash = ethers.utils._TypedDataEncoder.hashStruct(
-        "Consideration",
-        CONSIDERATION_EIP712_TYPE,
-        {
-          consideration,
-        }
-      );
+      const considerationHash = ethers.utils._TypedDataEncoder.hashStruct("Consideration", CONSIDERATION_EIP712_TYPE, {
+        consideration,
+      });
 
       // context with 10 order hashes expected
       const context: BytesLike = ethers.utils.solidityPack(
@@ -619,13 +522,7 @@ describe("ImmutableSignedZone", function () {
 
       const extraData = ethers.utils.solidityPack(
         ["bytes1", "address", "uint64", "bytes", "bytes"],
-        [
-          0,
-          fulfiller,
-          expiration,
-          convertSignatureToEIP2098(signature),
-          context,
-        ]
+        [0, fulfiller, expiration, convertSignatureToEIP2098(signature), context]
       );
 
       // remove two and add two random order hashes
@@ -645,18 +542,11 @@ describe("ImmutableSignedZone", function () {
       const expiration = (await getCurrentTimeStamp()) + 100;
       const fulfiller = constants.AddressZero;
       const consideration = mockConsideration();
-      const considerationHash = ethers.utils._TypedDataEncoder.hashStruct(
-        "Consideration",
-        CONSIDERATION_EIP712_TYPE,
-        {
-          consideration,
-        }
-      );
+      const considerationHash = ethers.utils._TypedDataEncoder.hashStruct("Consideration", CONSIDERATION_EIP712_TYPE, {
+        consideration,
+      });
 
-      const context: BytesLike = ethers.utils.solidityPack(
-        ["bytes"],
-        [considerationHash]
-      );
+      const context: BytesLike = ethers.utils.solidityPack(["bytes"], [considerationHash]);
 
       const signedOrder = {
         fulfiller,
@@ -674,18 +564,10 @@ describe("ImmutableSignedZone", function () {
 
       const extraData = ethers.utils.solidityPack(
         ["bytes1", "address", "uint64", "bytes", "bytes"],
-        [
-          0,
-          fulfiller,
-          expiration,
-          convertSignatureToEIP2098(signature),
-          context,
-        ]
+        [0, fulfiller, expiration, convertSignatureToEIP2098(signature), context]
       );
 
-      expect(
-        contract.validateOrder(mockZoneParameter(extraData, consideration))
-      ).to.be.revertedWith("SignerNotActive");
+      expect(contract.validateOrder(mockZoneParameter(extraData, consideration))).to.be.revertedWith("SignerNotActive");
     });
   });
 });

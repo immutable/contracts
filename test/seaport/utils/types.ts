@@ -1,4 +1,4 @@
-import { BigNumber } from 'ethers'
+import { BigNumber } from "ethers";
 
 export type ConsiderationItem = {
   itemType: number;
@@ -38,9 +38,6 @@ export type CriteriaResolver = {
   criteriaProof: string[];
 };
 
-export type OrderComponents = Omit<
-  OrderParameters,
-  "totalOriginalConsiderationItems"
-> & {
+export type OrderComponents = Omit<OrderParameters, "totalOriginalConsiderationItems"> & {
   counter: BigNumber;
 };

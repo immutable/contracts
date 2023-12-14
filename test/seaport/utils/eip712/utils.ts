@@ -8,15 +8,12 @@ export const makeArray = <T>(len: number, getValue: (i: number) => T) =>
     .map((_, i) => getValue(i));
 
 export const chunk = <T>(array: T[], size: number) => {
-  return makeArray(Math.ceil(array.length / size), (i) =>
-    array.slice(i * size, (i + 1) * size)
-  );
+  return makeArray(Math.ceil(array.length / size), (i) => array.slice(i * size, (i + 1) * size));
 };
 
 export const bufferToHex = (buf: Buffer) => hexlify(buf);
 
-export const hexToBuffer = (value: string) =>
-  Buffer.from(value.slice(2), "hex");
+export const hexToBuffer = (value: string) => Buffer.from(value.slice(2), "hex");
 
 export const bufferKeccak = (value: BytesLike) => hexToBuffer(keccak256(value));
 

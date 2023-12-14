@@ -39,7 +39,7 @@ const config: HardhatUserConfig = {
         version: "0.8.17",
         settings: {
           viaIR: true,
-          optimizer:  { enabled: true, runs: 4_294_967_295 },
+          optimizer: { enabled: true, runs: 4_294_967_295 },
           metadata: {
             bytecodeHash: "none",
           },
@@ -60,7 +60,7 @@ const config: HardhatUserConfig = {
             enabled: true,
             runs: 10,
           },
-        }
+        },
       },
       "contracts/trading/seaport/conduit/Conduit.sol": {
         version: "0.8.14",
@@ -82,7 +82,7 @@ const config: HardhatUserConfig = {
           },
         },
       },
-    }
+    },
   },
   paths: {
     tests: "./test",

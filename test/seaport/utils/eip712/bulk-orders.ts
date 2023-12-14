@@ -40,9 +40,7 @@ const bulkOrderType = {
 };
 function getBulkOrderTypes(height: number): EIP712TypeDefinitions {
   const types = { ...bulkOrderType };
-  types.BulkOrder = [
-    { name: "tree", type: `OrderComponents${`[2]`.repeat(height)}` },
-  ];
+  types.BulkOrder = [{ name: "tree", type: `OrderComponents${`[2]`.repeat(height)}` }];
   return types;
 }
 
@@ -60,18 +58,9 @@ export function getBulkOrderTree(
   let elements = [...orderComponents];
 
   if (startIndex > 0) {
-    elements = [
-      ...fillArray([] as OrderComponents[], startIndex, defaultNode),
-      ...orderComponents,
-    ];
+    elements = [...fillArray([] as OrderComponents[], startIndex, defaultNode), ...orderComponents];
   }
-  const tree = new Eip712MerkleTree(
-    types,
-    "BulkOrder",
-    "OrderComponents",
-    elements,
-    height
-  );
+  const tree = new Eip712MerkleTree(types, "BulkOrder", "OrderComponents", elements, height);
   return tree;
 }
 

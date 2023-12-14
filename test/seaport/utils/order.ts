@@ -1,20 +1,11 @@
 import { expect } from "chai";
 import { constants, utils } from "ethers";
 import { keccak256, recoverAddress } from "ethers/lib/utils";
-import { ethers } from 'hardhat'
+import { ethers } from "hardhat";
 
-import {
-  calculateOrderHash,
-  convertSignatureToEIP2098,
-  randomHex,
-  toBN,
-} from "./encoding";
+import { calculateOrderHash, convertSignatureToEIP2098, randomHex, toBN } from "./encoding";
 
-import type {
-  ConsiderationItem,
-  OfferItem,
-  OrderComponents,
-} from "./types";
+import type { ConsiderationItem, OfferItem, OrderComponents } from "./types";
 import type { Contract, Wallet } from "ethers";
 import { ImmutableSeaport, TestZone } from "../../../typechain-types";
 import { getBulkOrderTree } from "./eip712/bulk-orders";
@@ -57,23 +48,23 @@ export async function getAndVerifyOrderHash(marketplace: ImmutableSeaport, order
   const derivedOrderHash = calculateOrderHash(orderComponents);
   expect(orderHash).to.equal(derivedOrderHash);
   return orderHash;
-};
+}
 
 export function getDomainData(marketplaceAddress: string, chainId: string) {
   return {
     name: "ImmutableSeaport",
-    version: '1.5',
+    version: "1.5",
     chainId,
     verifyingContract: marketplaceAddress,
-  }
-} 
+  };
+}
 
 export async function signOrder(
   marketplace: ImmutableSeaport,
   orderComponents: OrderComponents,
-  signer: Wallet | Contract,
+  signer: Wallet | Contract
 ) {
-  const chainId = await signer.getChainId()
+  const chainId = await signer.getChainId();
   const signature = await signer._signTypedData(
     { ...getDomainData(marketplace.address, chainId), verifyingContract: marketplace.address },
     orderType,
@@ -83,15 +74,13 @@ export async function signOrder(
   const orderHash = await getAndVerifyOrderHash(marketplace, orderComponents);
 
   const { domainSeparator } = await marketplace.information();
-  const digest = keccak256(
-    `0x1901${domainSeparator.slice(2)}${orderHash.slice(2)}`
-  );
+  const digest = keccak256(`0x1901${domainSeparator.slice(2)}${orderHash.slice(2)}`);
   const recoveredAddress = recoverAddress(digest, signature);
 
   expect(recoveredAddress).to.equal(signer.address);
 
   return signature;
-};
+}
 
 const signBulkOrder = async (
   marketplace: ImmutableSeaport,
@@ -101,7 +90,7 @@ const signBulkOrder = async (
   height?: number,
   extraCheap?: boolean
 ) => {
-  const chainId = await signer.getChainId()
+  const chainId = await signer.getChainId();
   const tree = getBulkOrderTree(orderComponents, startIndex, height);
   const bulkOrderType = tree.types;
   const chunks = tree.getDataToSign();
@@ -113,17 +102,12 @@ const signBulkOrder = async (
     signature = convertSignatureToEIP2098(signature);
   }
 
-  const proofAndSignature = tree.getEncodedProofAndSignature(
-    startIndex,
-    signature
-  );
+  const proofAndSignature = tree.getEncodedProofAndSignature(startIndex, signature);
 
   const orderHash = tree.getBulkOrderHash();
 
   const { domainSeparator } = await marketplace.information();
-  const digest = keccak256(
-    `0x1901${domainSeparator.slice(2)}${orderHash.slice(2)}`
-  );
+  const digest = keccak256(`0x1901${domainSeparator.slice(2)}${orderHash.slice(2)}`);
   const recoveredAddress = recoverAddress(digest, signature);
 
   expect(recoveredAddress).to.equal(signer.address);
@@ -131,9 +115,7 @@ const signBulkOrder = async (
   // Verify each individual order
   for (const components of orderComponents) {
     const individualOrderHash = await getAndVerifyOrderHash(marketplace, components);
-    const digest = keccak256(
-      `0x1901${domainSeparator.slice(2)}${individualOrderHash.slice(2)}`
-    );
+    const digest = keccak256(`0x1901${domainSeparator.slice(2)}${individualOrderHash.slice(2)}`);
     const individualOrderSignature = await signer._signTypedData(
       getDomainData(marketplace.address, chainId),
       orderType,
@@ -146,14 +128,10 @@ const signBulkOrder = async (
   return proofAndSignature;
 };
 
-export async function createOrder (
+export async function createOrder(
   marketplace: ImmutableSeaport,
   offerer: Wallet | Contract,
-  zone:
-    | TestZone
-    | Wallet
-    | undefined
-    | string = undefined,
+  zone: TestZone | Wallet | undefined | string = undefined,
   offer: OfferItem[],
   consideration: ConsiderationItem[],
   orderType: number,
@@ -164,21 +142,17 @@ export async function createOrder (
   extraCheap = false,
   useBulkSignature = false,
   bulkSignatureIndex?: number,
-  bulkSignatureHeight?: number,
+  bulkSignatureHeight?: number
 ) {
   const counter = await marketplace.getCounter(offerer.address);
 
   const salt = !extraCheap ? randomHex() : constants.HashZero;
-  const startTime =
-    timeFlag !== "NOT_STARTED" ? 0 : toBN("0xee00000000000000000000000000");
-  const endTime =
-    timeFlag !== "EXPIRED" ? toBN("0xff00000000000000000000000000") : 1;
+  const startTime = timeFlag !== "NOT_STARTED" ? 0 : toBN("0xee00000000000000000000000000");
+  const endTime = timeFlag !== "EXPIRED" ? toBN("0xff00000000000000000000000000") : 1;
 
   const orderParameters = {
     offerer: offerer.address,
-    zone: !extraCheap
-      ? (zone as Wallet).address ?? zone
-      : constants.AddressZero,
+    zone: !extraCheap ? (zone as Wallet).address ?? zone : constants.AddressZero,
     offer,
     consideration,
     totalOriginalConsiderationItems: consideration.length,
@@ -197,8 +171,7 @@ export async function createOrder (
 
   const orderHash = await getAndVerifyOrderHash(marketplace, orderComponents);
 
-  const { isValidated, isCancelled, totalFilled, totalSize } =
-    await marketplace.getOrderStatus(orderHash);
+  const { isValidated, isCancelled, totalFilled, totalSize } = await marketplace.getOrderStatus(orderHash);
 
   expect(isCancelled).to.equal(false);
 
@@ -209,11 +182,7 @@ export async function createOrder (
     totalSize,
   };
 
-  const flatSig = await signOrder(
-    marketplace,
-    orderComponents,
-    signer ?? offerer,
-  );
+  const flatSig = await signOrder(marketplace, orderComponents, signer ?? offerer);
 
   const order = {
     parameters: orderParameters,
@@ -234,10 +203,7 @@ export async function createOrder (
     );
 
     // Verify bulk signature length
-    expect(
-      order.signature.slice(2).length / 2,
-      "bulk signature length should be valid (98 < length < 837)"
-    )
+    expect(order.signature.slice(2).length / 2, "bulk signature length should be valid (98 < length < 837)")
       .to.be.gt(98)
       .and.lt(837);
     expect(
@@ -248,23 +214,11 @@ export async function createOrder (
 
   // How much ether (at most) needs to be supplied when fulfilling the order
   const value = offer
-    .map((x) =>
-      x.itemType === 0
-        ? x.endAmount.gt(x.startAmount)
-          ? x.endAmount
-          : x.startAmount
-        : toBN(0)
-    )
+    .map((x) => (x.itemType === 0 ? (x.endAmount.gt(x.startAmount) ? x.endAmount : x.startAmount) : toBN(0)))
     .reduce((a, b) => a.add(b), toBN(0))
     .add(
       consideration
-        .map((x) =>
-          x.itemType === 0
-            ? x.endAmount.gt(x.startAmount)
-              ? x.endAmount
-              : x.startAmount
-            : toBN(0)
-        )
+        .map((x) => (x.itemType === 0 ? (x.endAmount.gt(x.startAmount) ? x.endAmount : x.startAmount) : toBN(0)))
         .reduce((a, b) => a.add(b), toBN(0))
     );
 
@@ -277,7 +231,7 @@ export async function createOrder (
     startTime,
     endTime,
   };
-};
+}
 
 export async function generateSip7Signature(
   consideration: ConsiderationItem[],
@@ -293,45 +247,32 @@ export async function generateSip7Signature(
       itemType: item.itemType,
       recipient: item.recipient,
       token: item.token,
-    }
-  })
-
-    const expiration = (await getCurrentTimeStamp()) + 100;
-    const considerationHash = utils._TypedDataEncoder.hashStruct(
-      "Consideration",
-      CONSIDERATION_EIP712_TYPE,
-      {
-        consideration: considerationAsReceivedItem,
-      }
-    );
-
-    const context = utils.solidityPack(
-      ["bytes", "bytes[]"],
-      [considerationHash, [orderHash]]
-    );
-
-    const signedOrder = {
-      fulfiller: fulfillerAddress,
-      expiration,
-      orderHash,
-      context,
     };
+  });
 
-    const chainId = (await ethers.provider.getNetwork()).chainId;
-    const signature = await immutableSigner._signTypedData(
-      EIP712_DOMAIN(chainId, immutableSignedZoneAddress),
-      SIGNED_ORDER_EIP712_TYPE,
-      signedOrder
-    );
+  const expiration = (await getCurrentTimeStamp()) + 100;
+  const considerationHash = utils._TypedDataEncoder.hashStruct("Consideration", CONSIDERATION_EIP712_TYPE, {
+    consideration: considerationAsReceivedItem,
+  });
 
-    return utils.solidityPack(
-      ["bytes1", "address", "uint64", "bytes", "bytes"],
-      [
-        0,
-        fulfillerAddress,
-        expiration,
-        convertSignatureToEIP2098(signature),
-        context,
-      ]
-    );
+  const context = utils.solidityPack(["bytes", "bytes[]"], [considerationHash, [orderHash]]);
+
+  const signedOrder = {
+    fulfiller: fulfillerAddress,
+    expiration,
+    orderHash,
+    context,
+  };
+
+  const chainId = (await ethers.provider.getNetwork()).chainId;
+  const signature = await immutableSigner._signTypedData(
+    EIP712_DOMAIN(chainId, immutableSignedZoneAddress),
+    SIGNED_ORDER_EIP712_TYPE,
+    signedOrder
+  );
+
+  return utils.solidityPack(
+    ["bytes1", "address", "uint64", "bytes", "bytes"],
+    [0, fulfillerAddress, expiration, convertSignatureToEIP2098(signature), context]
+  );
 }

@@ -21,8 +21,7 @@ const isNullish = (value: any): boolean => {
   return (
     value !== undefined &&
     value !== null &&
-    ((["string", "number"].includes(typeof value) &&
-      BigInt(value) === BigInt(0)) ||
+    ((["string", "number"].includes(typeof value) && BigInt(value) === BigInt(0)) ||
       (Array.isArray(value) && value.every(isNullish)) ||
       (typeof value === "object" && Object.values(value).every(isNullish)) ||
       (typeof value === "boolean" && value === false))
@@ -53,26 +52,16 @@ export class DefaultGetter<Types extends EIP712TypeDefinitions> {
       const defaultValue = this.getDefaultValue(name);
       this.defaultValues[name] = defaultValue;
       if (!isNullish(defaultValue)) {
-        logger.throwError(
-          `Got non-empty value for type ${name} in default generator: ${defaultValue}`
-        );
+        logger.throwError(`Got non-empty value for type ${name} in default generator: ${defaultValue}`);
       }
     }
   }
 
-  static from<Types extends EIP712TypeDefinitions>(
-    types: Types
-  ): DefaultMap<Types>;
+  static from<Types extends EIP712TypeDefinitions>(types: Types): DefaultMap<Types>;
 
-  static from<Types extends EIP712TypeDefinitions>(
-    types: Types,
-    type: keyof Types
-  ): any;
+  static from<Types extends EIP712TypeDefinitions>(types: Types, type: keyof Types): any;
 
-  static from<Types extends EIP712TypeDefinitions>(
-    types: Types,
-    type?: keyof Types
-  ): DefaultMap<Types> {
+  static from<Types extends EIP712TypeDefinitions>(types: Types, type?: keyof Types): DefaultMap<Types> {
     const { defaultValues } = new DefaultGetter(types);
     if (type) return defaultValues[type];
     return defaultValues;

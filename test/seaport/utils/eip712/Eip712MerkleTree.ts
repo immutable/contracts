@@ -1,29 +1,15 @@
 import { _TypedDataEncoder as TypedDataEncoder } from "@ethersproject/hash";
 import { expect } from "chai";
-import {
-  defaultAbiCoder,
-  hexConcat,
-  keccak256,
-  toUtf8Bytes,
-} from "ethers/lib/utils";
+import { defaultAbiCoder, hexConcat, keccak256, toUtf8Bytes } from "ethers/lib/utils";
 import { MerkleTree } from "merkletreejs";
 
 import { DefaultGetter } from "./defaults";
-import {
-  bufferKeccak,
-  bufferToHex,
-  chunk,
-  fillArray,
-  getRoot,
-  hexToBuffer,
-} from "./utils";
+import { bufferKeccak, bufferToHex, chunk, fillArray, getRoot, hexToBuffer } from "./utils";
 
 import type { OrderComponents } from "../types";
 import type { EIP712TypeDefinitions } from "./defaults";
 
-type BulkOrderElements =
-  | [OrderComponents, OrderComponents]
-  | [BulkOrderElements, BulkOrderElements];
+type BulkOrderElements = [OrderComponents, OrderComponents] | [BulkOrderElements, BulkOrderElements];
 
 const getTree = (leaves: string[], defaultLeafHash: string) =>
   new MerkleTree(leaves.map(hexToBuffer), bufferKeccak, {
@@ -33,11 +19,7 @@ const getTree = (leaves: string[], defaultLeafHash: string) =>
     fillDefaultHash: hexToBuffer(defaultLeafHash),
   });
 
-const encodeProof = (
-  key: number,
-  proof: string[],
-  signature = `0x${"ff".repeat(64)}`
-) => {
+const encodeProof = (key: number, proof: string[], signature = `0x${"ff".repeat(64)}`) => {
   return hexConcat([
     signature,
     `0x${key.toString(16).padStart(6, "0")}`,
@@ -106,9 +88,7 @@ export class Eip712MerkleTree<BaseType extends Record<string, any> = any> {
     const typeHash = keccak256(toUtf8Bytes(this.encoder._types.BulkOrder));
     const bulkOrderHash = keccak256(hexConcat([typeHash, rootHash]));
 
-    expect(bulkOrderHash, "derived bulk order hash should match").to.equal(
-      structHash
-    );
+    expect(bulkOrderHash, "derived bulk order hash should match").to.equal(structHash);
 
     return structHash;
   }

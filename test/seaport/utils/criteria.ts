@@ -6,21 +6,16 @@ type BufferElementPositionIndex = { [key: string]: number };
 
 export const merkleTree = (tokenIds: ethers.BigNumber[]) => {
   const elements = tokenIds
-    .map((tokenId) =>
-      Buffer.from(tokenId.toHexString().slice(2).padStart(64, "0"), "hex")
-    )
+    .map((tokenId) => Buffer.from(tokenId.toHexString().slice(2).padStart(64, "0"), "hex"))
     .sort(Buffer.compare)
     .filter((el, idx, arr) => {
       return idx === 0 || !arr[idx - 1].equals(el);
     });
 
-  const bufferElementPositionIndex = elements.reduce(
-    (memo: BufferElementPositionIndex, el, index) => {
-      memo["0x" + el.toString("hex")] = index;
-      return memo;
-    },
-    {}
-  );
+  const bufferElementPositionIndex = elements.reduce((memo: BufferElementPositionIndex, el, index) => {
+    memo["0x" + el.toString("hex")] = index;
+    return memo;
+  }, {});
 
   // Create layers
   const layers = getLayers(elements);
@@ -28,15 +23,10 @@ export const merkleTree = (tokenIds: ethers.BigNumber[]) => {
   const root = "0x" + layers[layers.length - 1][0].toString("hex");
 
   const proofs = Object.fromEntries(
-    elements.map((el) => [
-      ethers.BigNumber.from(el).toString(),
-      getHexProof(el, bufferElementPositionIndex, layers),
-    ])
+    elements.map((el) => [ethers.BigNumber.from(el).toString(), getHexProof(el, bufferElementPositionIndex, layers)])
   );
 
-  const maxProofLength = Math.max(
-    ...Object.values(proofs).map((i) => i.length)
-  );
+  const maxProofLength = Math.max(...Object.values(proofs).map((i) => i.length));
 
   return {
     root,
@@ -80,17 +70,10 @@ const combinedHash = (first: Buffer, second: Buffer) => {
     return first;
   }
 
-  return Buffer.from(
-    keccak256(Buffer.concat([first, second].sort(Buffer.compare))).slice(2),
-    "hex"
-  );
+  return Buffer.from(keccak256(Buffer.concat([first, second].sort(Buffer.compare))).slice(2), "hex");
 };
 
-const getHexProof = (
-  el: Buffer,
-  bufferElementPositionIndex: BufferElementPositionIndex,
-  layers: Buffer[][]
-) => {
+const getHexProof = (el: Buffer, bufferElementPositionIndex: BufferElementPositionIndex, layers: Buffer[][]) => {
   let idx = bufferElementPositionIndex["0x" + el.toString("hex")];
 
   if (typeof idx !== "number") {

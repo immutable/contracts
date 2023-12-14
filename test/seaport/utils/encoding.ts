@@ -1,11 +1,11 @@
-import { randomBytes } from 'crypto';
-import { BigNumber, constants, utils } from 'ethers';
+import { randomBytes } from "crypto";
+import { BigNumber, constants, utils } from "ethers";
 import type { BigNumberish } from "ethers";
-import { ConsiderationItem, CriteriaResolver, OfferItem, OrderComponents } from './types';
+import { ConsiderationItem, CriteriaResolver, OfferItem, OrderComponents } from "./types";
 import { keccak256, toUtf8Bytes } from "ethers/lib/utils";
-import { expect } from 'chai';
+import { expect } from "chai";
 
-export const randomHex = (bytes = 32) => `0x${randomBytes(bytes).toString('hex')}`;
+export const randomHex = (bytes = 32) => `0x${randomBytes(bytes).toString("hex")}`;
 export const toBN = (n: BigNumberish) => BigNumber.from(toHex(n));
 export const randomBN = (bytes: number = 16) => toBN(randomHex(bytes));
 export const toKey = (n: BigNumberish) => toHex(n, 32);
@@ -22,19 +22,8 @@ export const toHex = (n: BigNumberish, numBytes: number = 0) => {
 
 const hexRegex = /[A-Fa-fx]/g;
 
-export const getItemETH = (
-  startAmount: BigNumberish = 1,
-  endAmount: BigNumberish = 1,
-  recipient?: string
-) =>
-  getOfferOrConsiderationItem(
-    0,
-    constants.AddressZero,
-    0,
-    toBN(startAmount),
-    toBN(endAmount),
-    recipient
-  );
+export const getItemETH = (startAmount: BigNumberish = 1, endAmount: BigNumberish = 1, recipient?: string) =>
+  getOfferOrConsiderationItem(0, constants.AddressZero, 0, toBN(startAmount), toBN(endAmount), recipient);
 
 export const getItem721 = (
   token: string,
@@ -42,19 +31,9 @@ export const getItem721 = (
   startAmount: number = 1,
   endAmount: number = 1,
   recipient?: string
-) =>
-  getOfferOrConsiderationItem(
-    2,
-    token,
-    identifierOrCriteria,
-    startAmount,
-    endAmount,
-    recipient
-  );
+) => getOfferOrConsiderationItem(2, token, identifierOrCriteria, startAmount, endAmount, recipient);
 
-export const getOfferOrConsiderationItem = <
-  RecipientType extends string | undefined = undefined
->(
+export const getOfferOrConsiderationItem = <RecipientType extends string | undefined = undefined>(
   itemType: number = 0,
   token: string = constants.AddressZero,
   identifierOrCriteria: BigNumberish = 0,
@@ -98,9 +77,7 @@ export const calculateOrderHash = (orderComponents: OrderComponents) => {
   const orderTypeString = `${orderComponentsPartialTypeString}${considerationItemTypeString}${offerItemTypeString}`;
 
   const offerItemTypeHash = keccak256(toUtf8Bytes(offerItemTypeString));
-  const considerationItemTypeHash = keccak256(
-    toUtf8Bytes(considerationItemTypeString)
-  );
+  const considerationItemTypeHash = keccak256(toUtf8Bytes(considerationItemTypeString));
   const orderTypeHash = keccak256(toUtf8Bytes(orderTypeString));
 
   const offerHash = keccak256(
@@ -113,18 +90,9 @@ export const calculateOrderHash = (orderComponents: OrderComponents) => {
                 offerItemTypeHash.slice(2),
                 offerItem.itemType.toString().padStart(64, "0"),
                 offerItem.token.slice(2).padStart(64, "0"),
-                toBN(offerItem.identifierOrCriteria)
-                  .toHexString()
-                  .slice(2)
-                  .padStart(64, "0"),
-                toBN(offerItem.startAmount)
-                  .toHexString()
-                  .slice(2)
-                  .padStart(64, "0"),
-                toBN(offerItem.endAmount)
-                  .toHexString()
-                  .slice(2)
-                  .padStart(64, "0"),
+                toBN(offerItem.identifierOrCriteria).toHexString().slice(2).padStart(64, "0"),
+                toBN(offerItem.startAmount).toHexString().slice(2).padStart(64, "0"),
+                toBN(offerItem.endAmount).toHexString().slice(2).padStart(64, "0"),
               ].join("")
           ).slice(2);
         })
@@ -141,18 +109,9 @@ export const calculateOrderHash = (orderComponents: OrderComponents) => {
                 considerationItemTypeHash.slice(2),
                 considerationItem.itemType.toString().padStart(64, "0"),
                 considerationItem.token.slice(2).padStart(64, "0"),
-                toBN(considerationItem.identifierOrCriteria)
-                  .toHexString()
-                  .slice(2)
-                  .padStart(64, "0"),
-                toBN(considerationItem.startAmount)
-                  .toHexString()
-                  .slice(2)
-                  .padStart(64, "0"),
-                toBN(considerationItem.endAmount)
-                  .toHexString()
-                  .slice(2)
-                  .padStart(64, "0"),
+                toBN(considerationItem.identifierOrCriteria).toHexString().slice(2).padStart(64, "0"),
+                toBN(considerationItem.startAmount).toHexString().slice(2).padStart(64, "0"),
+                toBN(considerationItem.endAmount).toHexString().slice(2).padStart(64, "0"),
                 considerationItem.recipient.slice(2).padStart(64, "0"),
               ].join("")
           ).slice(2);
@@ -169,10 +128,7 @@ export const calculateOrderHash = (orderComponents: OrderComponents) => {
         offerHash.slice(2),
         considerationHash.slice(2),
         orderComponents.orderType.toString().padStart(64, "0"),
-        toBN(orderComponents.startTime)
-          .toHexString()
-          .slice(2)
-          .padStart(64, "0"),
+        toBN(orderComponents.startTime).toHexString().slice(2).padStart(64, "0"),
         toBN(orderComponents.endTime).toHexString().slice(2).padStart(64, "0"),
         orderComponents.zoneHash.slice(2),
         orderComponents.salt.slice(2).padStart(64, "0"),

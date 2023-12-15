@@ -1,3 +1,4 @@
+// Copyright Immutable Pty Ltd 2018 - 2023
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
@@ -39,8 +40,7 @@ contract ImmutableERC1155 is ImmutableERC1155Base {
         super._mint(to, id, value, data);
     }
 
-    function safeMintBatch(address to, uint256[] memory ids, uint256[] memory values, bytes memory data) external onlyRole(MINTER_ROLE) {
+    function safeMintBatch(address to, uint256[] calldata ids, uint256[] calldata values, bytes memory data) external onlyRole(MINTER_ROLE) {
         super._mintBatch(to, ids, values, data);
     }
-
 }

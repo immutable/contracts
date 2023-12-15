@@ -6,6 +6,7 @@ import { CallOverrides, PopulatedTransaction } from "@ethersproject/contracts";
 import { ERC20 } from "../typechain-types/@openzeppelin/contracts/token/ERC20";
 import { ERC20__factory } from "../typechain-types/factories/@openzeppelin/contracts/token/ERC20/ERC20__factory";
 import { PromiseOrValue } from "../typechain-types/common";
+import { defaultGasOverrides } from "./config/overrides";
 
 export class ERC20Client {
   private readonly contract: ERC20;
@@ -51,9 +52,9 @@ export class ERC20Client {
   public async populateTransfer(
     to: PromiseOrValue<string>,
     amount: PromiseOrValue<BigNumberish>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
+    overrides: Overrides & { from?: PromiseOrValue<string> } = {}
   ): Promise<PopulatedTransaction> {
-    return this.contract.populateTransaction.transfer(to, amount, overrides);
+    return this.contract.populateTransaction.transfer(to, amount, { ...defaultGasOverrides, ...overrides });
   }
 
   /**
@@ -64,7 +65,7 @@ export class ERC20Client {
     amount: PromiseOrValue<BigNumberish>,
     overrides: Overrides & { from?: PromiseOrValue<string> } = {}
   ): Promise<PopulatedTransaction> {
-    return this.contract.populateTransaction.approve(spender, amount, overrides);
+    return this.contract.populateTransaction.approve(spender, amount, { ...defaultGasOverrides, ...overrides });
   }
 
   /**
@@ -76,6 +77,6 @@ export class ERC20Client {
     amount: PromiseOrValue<BigNumberish>,
     overrides: Overrides & { from?: PromiseOrValue<string> } = {}
   ): Promise<PopulatedTransaction> {
-    return this.contract.populateTransaction.transferFrom(from, to, amount, overrides);
+    return this.contract.populateTransaction.transferFrom(from, to, amount, { ...defaultGasOverrides, ...overrides });
   }
 }

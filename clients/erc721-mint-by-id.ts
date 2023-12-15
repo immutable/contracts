@@ -1,9 +1,13 @@
 import type { BigNumber, BigNumberish, BytesLike, CallOverrides, Overrides, PopulatedTransaction } from "ethers";
 import type { Provider } from "@ethersproject/providers";
 
-import { ImmutableERC721MintByID, ImmutableERC721MintByID__factory } from "../typechain-types";
-import { ImmutableERC721Base } from "../typechain-types/contracts/token/erc721/preset/ImmutableERC721MintByID";
+import { ImmutableERC721MintByID__factory } from "../typechain-types/factories/contracts/token/erc721/preset/ImmutableERC721MintByID__factory";
+import {
+  ImmutableERC721Base,
+  ImmutableERC721MintByID,
+} from "../typechain-types/contracts/token/erc721/preset/ImmutableERC721MintByID";
 import { PromiseOrValue } from "../typechain-types/common";
+import { defaultGasOverrides } from "./config/overrides";
 
 // Struct for specifying token IDs to mint to an address.
 export type IDMint = ImmutableERC721Base.IDMintStruct;
@@ -167,7 +171,7 @@ export class ERC721MintByIDClient {
   public async nonces(
     provider: Provider,
     tokenId: PromiseOrValue<BigNumberish>,
-    overrides?: CallOverrides
+    overrides: CallOverrides = {}
   ): Promise<BigNumber> {
     return await this.contract.connect(provider).nonces(tokenId, overrides);
   }
@@ -230,7 +234,7 @@ export class ERC721MintByIDClient {
       from?: PromiseOrValue<string>;
     } = {}
   ): Promise<PopulatedTransaction> {
-    return await this.contract.populateTransaction.approve(to, tokenId, overrides);
+    return await this.contract.populateTransaction.approve(to, tokenId, { ...defaultGasOverrides, ...overrides });
   }
 
   /**
@@ -247,7 +251,10 @@ export class ERC721MintByIDClient {
     sig: PromiseOrValue<BytesLike>,
     overrides: CallOverrides = {}
   ): Promise<PopulatedTransaction> {
-    return await this.contract.populateTransaction.permit(spender, tokenId, deadline, sig, overrides);
+    return await this.contract.populateTransaction.permit(spender, tokenId, deadline, sig, {
+      ...defaultGasOverrides,
+      ...overrides,
+    });
   }
 
   /**
@@ -259,7 +266,7 @@ export class ERC721MintByIDClient {
       from?: PromiseOrValue<string>;
     } = {}
   ): Promise<PopulatedTransaction> {
-    return await this.contract.populateTransaction.burn(tokenId, overrides);
+    return await this.contract.populateTransaction.burn(tokenId, { ...defaultGasOverrides, ...overrides });
   }
 
   /**
@@ -271,7 +278,7 @@ export class ERC721MintByIDClient {
       from?: PromiseOrValue<string>;
     } = {}
   ): Promise<PopulatedTransaction> {
-    return await this.contract.populateTransaction.burnBatch(tokenIds, overrides);
+    return await this.contract.populateTransaction.burnBatch(tokenIds, { ...defaultGasOverrides, ...overrides });
   }
 
   /**
@@ -283,7 +290,7 @@ export class ERC721MintByIDClient {
       from?: PromiseOrValue<string>;
     } = {}
   ): Promise<PopulatedTransaction> {
-    return await this.contract.populateTransaction.grantMinterRole(user, overrides);
+    return await this.contract.populateTransaction.grantMinterRole(user, { ...defaultGasOverrides, ...overrides });
   }
 
   /**
@@ -296,7 +303,7 @@ export class ERC721MintByIDClient {
       from?: PromiseOrValue<string>;
     } = {}
   ): Promise<PopulatedTransaction> {
-    return await this.contract.populateTransaction.grantRole(role, account, overrides);
+    return await this.contract.populateTransaction.grantRole(role, account, { ...defaultGasOverrides, ...overrides });
   }
 
   /**
@@ -309,7 +316,7 @@ export class ERC721MintByIDClient {
       from?: PromiseOrValue<string>;
     } = {}
   ): Promise<PopulatedTransaction> {
-    return await this.contract.populateTransaction.mint(to, tokenId, overrides);
+    return await this.contract.populateTransaction.mint(to, tokenId, { ...defaultGasOverrides, ...overrides });
   }
 
   /**
@@ -321,7 +328,7 @@ export class ERC721MintByIDClient {
       from?: PromiseOrValue<string>;
     } = {}
   ): Promise<PopulatedTransaction> {
-    return await this.contract.populateTransaction.safeMintBatch(mints, overrides);
+    return await this.contract.populateTransaction.safeMintBatch(mints, { ...defaultGasOverrides, ...overrides });
   }
 
   /**
@@ -334,7 +341,7 @@ export class ERC721MintByIDClient {
       from?: PromiseOrValue<string>;
     } = {}
   ): Promise<PopulatedTransaction> {
-    return await this.contract.populateTransaction.safeBurn(owner, tokenId, overrides);
+    return await this.contract.populateTransaction.safeBurn(owner, tokenId, { ...defaultGasOverrides, ...overrides });
   }
 
   /**
@@ -346,7 +353,7 @@ export class ERC721MintByIDClient {
       from?: PromiseOrValue<string>;
     } = {}
   ): Promise<PopulatedTransaction> {
-    return await this.contract.populateTransaction.safeBurnBatch(burns, overrides);
+    return await this.contract.populateTransaction.safeBurnBatch(burns, { ...defaultGasOverrides, ...overrides });
   }
 
   /**
@@ -359,7 +366,10 @@ export class ERC721MintByIDClient {
       from?: PromiseOrValue<string>;
     } = {}
   ): Promise<PopulatedTransaction> {
-    return await this.contract.populateTransaction.renounceRole(role, account, overrides);
+    return await this.contract.populateTransaction.renounceRole(role, account, {
+      ...defaultGasOverrides,
+      ...overrides,
+    });
   }
 
   /**
@@ -371,7 +381,7 @@ export class ERC721MintByIDClient {
       from?: PromiseOrValue<string>;
     } = {}
   ): Promise<PopulatedTransaction> {
-    return await this.contract.populateTransaction.revokeMinterRole(user, overrides);
+    return await this.contract.populateTransaction.revokeMinterRole(user, { ...defaultGasOverrides, ...overrides });
   }
 
   /**
@@ -384,7 +394,7 @@ export class ERC721MintByIDClient {
       from?: PromiseOrValue<string>;
     } = {}
   ): Promise<PopulatedTransaction> {
-    return await this.contract.populateTransaction.revokeRole(role, account, overrides);
+    return await this.contract.populateTransaction.revokeRole(role, account, { ...defaultGasOverrides, ...overrides });
   }
 
   /**
@@ -396,7 +406,10 @@ export class ERC721MintByIDClient {
       from?: PromiseOrValue<string>;
     } = {}
   ): Promise<PopulatedTransaction> {
-    return await this.contract.populateTransaction.safeTransferFromBatch(transfers, overrides);
+    return await this.contract.populateTransaction.safeTransferFromBatch(transfers, {
+      ...defaultGasOverrides,
+      ...overrides,
+    });
   }
 
   /**
@@ -410,12 +423,10 @@ export class ERC721MintByIDClient {
       from?: PromiseOrValue<string>;
     } = {}
   ): Promise<PopulatedTransaction> {
-    return await this.contract.populateTransaction["safeTransferFrom(address,address,uint256)"](
-      from,
-      to,
-      tokenId,
-      overrides
-    );
+    return await this.contract.populateTransaction["safeTransferFrom(address,address,uint256)"](from, to, tokenId, {
+      ...defaultGasOverrides,
+      ...overrides,
+    });
   }
 
   /**
@@ -435,7 +446,7 @@ export class ERC721MintByIDClient {
       to,
       tokenId,
       data,
-      overrides
+      { ...defaultGasOverrides, ...overrides }
     );
   }
 
@@ -449,7 +460,10 @@ export class ERC721MintByIDClient {
       from?: PromiseOrValue<string>;
     } = {}
   ): Promise<PopulatedTransaction> {
-    return await this.contract.populateTransaction.setApprovalForAll(operator, approved, overrides);
+    return await this.contract.populateTransaction.setApprovalForAll(operator, approved, {
+      ...defaultGasOverrides,
+      ...overrides,
+    });
   }
 
   /**
@@ -461,7 +475,7 @@ export class ERC721MintByIDClient {
       from?: PromiseOrValue<string>;
     } = {}
   ): Promise<PopulatedTransaction> {
-    return await this.contract.populateTransaction.setBaseURI(baseURI_, overrides);
+    return await this.contract.populateTransaction.setBaseURI(baseURI_, { ...defaultGasOverrides, ...overrides });
   }
 
   /**
@@ -473,7 +487,10 @@ export class ERC721MintByIDClient {
       from?: PromiseOrValue<string>;
     } = {}
   ): Promise<PopulatedTransaction> {
-    return await this.contract.populateTransaction.setContractURI(_contractURI, overrides);
+    return await this.contract.populateTransaction.setContractURI(_contractURI, {
+      ...defaultGasOverrides,
+      ...overrides,
+    });
   }
 
   /**
@@ -486,7 +503,10 @@ export class ERC721MintByIDClient {
       from?: PromiseOrValue<string>;
     } = {}
   ): Promise<PopulatedTransaction> {
-    return await this.contract.populateTransaction.setDefaultRoyaltyReceiver(receiver, feeNumerator, overrides);
+    return await this.contract.populateTransaction.setDefaultRoyaltyReceiver(receiver, feeNumerator, {
+      ...defaultGasOverrides,
+      ...overrides,
+    });
   }
 
   /**
@@ -500,7 +520,10 @@ export class ERC721MintByIDClient {
       from?: PromiseOrValue<string>;
     } = {}
   ): Promise<PopulatedTransaction> {
-    return await this.contract.populateTransaction.setNFTRoyaltyReceiver(tokenId, receiver, feeNumerator, overrides);
+    return await this.contract.populateTransaction.setNFTRoyaltyReceiver(tokenId, receiver, feeNumerator, {
+      ...defaultGasOverrides,
+      ...overrides,
+    });
   }
 
   /**
@@ -514,12 +537,10 @@ export class ERC721MintByIDClient {
       from?: PromiseOrValue<string>;
     } = {}
   ): Promise<PopulatedTransaction> {
-    return await this.contract.populateTransaction.setNFTRoyaltyReceiverBatch(
-      tokenIds,
-      receiver,
-      feeNumerator,
-      overrides
-    );
+    return await this.contract.populateTransaction.setNFTRoyaltyReceiverBatch(tokenIds, receiver, feeNumerator, {
+      ...defaultGasOverrides,
+      ...overrides,
+    });
   }
 
   /**
@@ -531,6 +552,9 @@ export class ERC721MintByIDClient {
       from?: PromiseOrValue<string>;
     } = {}
   ): Promise<PopulatedTransaction> {
-    return await this.contract.populateTransaction.setOperatorAllowlistRegistry(_operatorAllowlist, overrides);
+    return await this.contract.populateTransaction.setOperatorAllowlistRegistry(_operatorAllowlist, {
+      ...defaultGasOverrides,
+      ...overrides,
+    });
   }
 }

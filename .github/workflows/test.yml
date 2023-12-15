@@ -11,13 +11,12 @@ jobs:
     name: Run Forge Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: recursive
+      - name: Checkout Code
+        uses: actions/checkout@v3
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile --network-concurrency 2
       - name: Run tests
         run: forge test -vvv
   hardhat-test:
@@ -30,8 +29,9 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: lts/*
+          cache: 'yarn'
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile --network-concurrency 2
       - name: Run Tests
         run: yarn test
   lint:
@@ -44,8 +44,9 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: lts/*
+          cache: 'yarn'
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile --network-concurrency 2
       - name: Run eslint
         run: yarn lint
   publish:
@@ -59,8 +60,9 @@ jobs:
         with:
           node-version-file: ".nvmrc"
           registry-url: https://registry.npmjs.org/
+          cache: 'yarn'
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn install --frozen-lockfile --network-concurrency 2
       - name: Compile contracts
         run: yarn compile
       - name: Build dist files

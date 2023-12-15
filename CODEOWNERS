@@ -1,2 +1,8 @@
-# Ensure that @immutable/assets owns all files eg. *
-* @immutable/assets
+/clients @immutable/assets
+
+/contracts/allowlist @immutable/assets
+/contracts/token @immutable/assets
+
+/tests/allowlist @immutable/assets
+/tests/royalty-enforcement @immutable/assets
+/tests/token @immutable/assets

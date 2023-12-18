@@ -14,7 +14,7 @@ import {
     OrderComponents
 } from "seaport-types/src/lib/ConsiderationStructs.sol";
 import { OrderType } from "seaport-types/src/lib/ConsiderationEnums.sol";
-import { Ownable2Step } from "@openzeppelin/contracts/access/Ownable2Step.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import {
     ImmutableSeaportEvents
 } from "./interfaces/ImmutableSeaportEvents.sol";
@@ -31,7 +31,7 @@ import {
  */
 contract ImmutableSeaport is
     Consideration,
-    Ownable2Step,
+    Ownable,
     ImmutableSeaportEvents
 {
     // Mapping to store valid ImmutableZones - this allows for multiple Zones
@@ -48,10 +48,16 @@ contract ImmutableSeaport is
      * @param conduitController A contract that deploys conduits, or proxies
      *                          that may optionally be used to transfer approved
      *                          ERC20/721/1155 tokens.
+     * @param owner             The address of the owner of this contract. Specified in the
+     *                          constructor to be CREATE2 / CREATE3 compatible.
      */
     constructor(
-        address conduitController
-    ) Consideration(conduitController) Ownable2Step() {}
+        address conduitController,
+        address owner
+    ) Consideration(conduitController) Ownable() {
+        // Transfer ownership to the address specified in the constructor
+        _transferOwnership(owner);
+    }
 
     /**
      * @dev Set the validity of a zone for use during fulfillment.

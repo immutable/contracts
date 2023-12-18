@@ -36,7 +36,7 @@ describe("ImmutableSignedZone", function () {
     users = await ethers.getSigners();
     deployer = users[0];
     const factory = await ethers.getContractFactory("ImmutableSignedZone");
-    const tx = await factory.connect(deployer).deploy("ImmutableSignedZone", "", "");
+    const tx = await factory.connect(deployer).deploy("ImmutableSignedZone", "", "", deployer.address);
 
     const address = (await tx.deployed()).address;
 
@@ -44,17 +44,15 @@ describe("ImmutableSignedZone", function () {
   });
 
   describe("Ownership", async function () {
-    it("deployer beomces owner", async () => {
+    it("deployer becomes owner", async () => {
       assert((await contract.owner()) === deployer.address);
     });
 
-    it("transferOwnership and acceptOwnership works", async () => {
+    it("transferOwnership works", async () => {
       assert((await contract.owner()) === deployer.address);
       const transferTx = await contract.connect(deployer).transferOwnership(users[2].address);
       await transferTx.wait(1);
 
-      const acceptTx = await contract.connect(users[2]).acceptOwnership();
-      await acceptTx.wait(1);
       assert((await contract.owner()) === users[2].address);
     });
 

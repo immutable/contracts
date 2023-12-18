@@ -12,7 +12,7 @@ import { SIP7Interface } from "./interfaces/SIP7Interface.sol";
 import { SIP7EventsAndErrors } from "./interfaces/SIP7EventsAndErrors.sol";
 import { SIP6EventsAndErrors } from "./interfaces/SIP6EventsAndErrors.sol";
 import { SIP5Interface } from "./interfaces/SIP5Interface.sol";
-import { Ownable2Step } from "@openzeppelin/contracts/access/Ownable2Step.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import { Strings } from "@openzeppelin/contracts/utils/Strings.sol";
 import { ERC165 } from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
@@ -40,7 +40,7 @@ contract ImmutableSignedZone is
     ZoneInterface,
     SIP5Interface,
     SIP7Interface,
-    Ownable2Step
+    Ownable
 {
     /// @dev The EIP-712 digest parameters.
     bytes32 internal immutable _VERSION_HASH = keccak256(bytes("1.0"));
@@ -115,11 +115,14 @@ contract ImmutableSignedZone is
      * @param apiEndpoint The API endpoint where orders for this zone can be
      *                    signed.
      *                    Request and response payloads are defined in SIP-7.
+     * @param owner       The address of the owner of this contract. Specified in the
+     *                    constructor to be CREATE2 / CREATE3 compatible.
      */
     constructor(
         string memory zoneName,
         string memory apiEndpoint,
-        string memory documentationURI
+        string memory documentationURI,
+        address owner
     ) {
         // Set the zone name.
         _ZONE_NAME = zoneName;
@@ -135,6 +138,9 @@ contract ImmutableSignedZone is
 
         // Emit an event to signal a SIP-5 contract has been deployed.
         emit SeaportCompatibleContractDeployed();
+
+        // Transfer ownership to the address specified in the constructor
+        _transferOwnership(owner);
     }
 
     /**

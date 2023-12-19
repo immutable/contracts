@@ -9,7 +9,8 @@ import {IOffchainRandomSource} from "./IOffchainRandomSource.sol";
 
 // TODO should be upgradeable
 contract RandomManager is AccessControl {
-    error INVALID_DEGREE_OF_RANDOMNESS(uint256 _degreeOfRandomness);
+    error InvalidSecurityLevel(uint256 _securityLevel);
+    error WaitForRandom();
 
 
     mapping (uint256 => bytes32) private randomOutput;
@@ -21,12 +22,12 @@ contract RandomManager is AccessControl {
 
     // TODO set-up access control
     constructor() {
-        randomOutput[0] = keccak256(block.chainid, block.number);
+        randomOutput[0] = keccak256(abi.encodePacked(block.chainid, block.number));
         nextRandomIndex = 1;
     }
 
     // TODO Access control
-    function setOffchainRandomSource(address _offchainRandomSource) {
+    function setOffchainRandomSource(address _offchainRandomSource) external {
         offchainRandomSource = IOffchainRandomSource(_offchainRandomSource);
     }
 
@@ -48,7 +49,7 @@ contract RandomManager is AccessControl {
             if (index != nextRandomIndex) {
                 return;
             }
-            randomOutput[nextRandomIndex++] = keccak256(chainId, prevRandomOutput, offchainRandom);
+            randomOutput[nextRandomIndex++] = keccak256(abi.encodePacked(prevRandomOutput, offchainRandom));
         }
         else {
             // If the off chain random provider has NOT been configured, use on-chain sources. 
@@ -78,7 +79,7 @@ contract RandomManager is AccessControl {
             uint256 prevRanDAO = block.prevrandao;
 
             // The new random value is a combination of 
-            randomOutput[nextRandomIndex++] = keccak256(chainId, blockHash, timestamp, prevRanDAO, prevRandomOutput);
+            randomOutput[nextRandomIndex++] = keccak256(abi.encodePacked(prevRandomOutput, blockHash, timestamp, prevRanDAO));
         }
     }
 
@@ -87,15 +88,28 @@ contract RandomManager is AccessControl {
      * @dev Note that the same _randomFulfillmentIndex will be returned to multiple games and even within
      *      the one game. Games must personalise this value to their own game, the the particular game player,
      *      and to the game player's request.
+     * @param _securityLevel The number of random number generations to wait. A higher value provides
+     *      better security. For most applications, a value of 1 or 2 is ideal. If the random number
+     *      is for a high value transaction, choose a high number, for instance 3 or 4. 
+     *      The reasoning behind a low value providing less security is that when the security level 
+     *      is set to one, the seed is derived from the next off-chain random value. However, this 
+     *      value could relate to an off-chain random value being supplied by a transaction that is currently 
+     *      in the transaction pool. Some game players may be able to see this value and hence guess the 
+     *      outcome for the random generation. Having a higher value means that the game player has to commit
+     *      before the off-chain random number is put into a transaction that is then put into the 
+     *      transaction pool.
      * @return _randomFulfillmentIndex The index for the game contract to present to fetch the next random value.
      */
-    function requestRandom() external returns(uint256 _randomFulfillmentIndex) {
+    function requestRandom(uint256 _securityLevel) external returns(uint256 _randomFulfillmentIndex) {
+        if (_securityLevel == 0 || _securityLevel > 10) {
+            revert InvalidSecurityLevel(_securityLevel);
+        }
         // Generate a new value now using offchain values that might be cached in the blockchain already.
         // Do this to ensure nafarious actors can't read the cached values and use them to determine
         // the next random value.
         generateNextRandom();
         // Indicate that the next generated random value can be used.
-        _randomFulfillmentIndex = nextRandomIndex + 1;
+        _randomFulfillmentIndex = nextRandomIndex + _securityLevel;
     }
 
 

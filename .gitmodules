@@ -13,3 +13,6 @@
 [submodule "lib/solidity-bits"]
 	path = lib/solidity-bits
 	url = https://github.com/estarriolvetch/solidity-bits
+[submodule "lib/solidity-bytes-utils"]
+	path = lib/solidity-bytes-utils
+	url = https://github.com/GNSPS/solidity-bytes-utils

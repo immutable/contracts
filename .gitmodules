@@ -10,3 +10,6 @@
 [submodule "lib/seaport"]
 	path = lib/seaport
 	url = https://github.com/ProjectOpenSea/seaport
+[submodule "lib/solidity-bits"]
+	path = lib/solidity-bits
+	url = https://github.com/estarriolvetch/solidity-bits

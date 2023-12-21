@@ -22,3 +22,6 @@
 [submodule "lib/seaport-types"]
 	path = lib/seaport-types
 	url = https://github.com/ProjectOpenSea/seaport-types
+[submodule "lib/seaport.git"]
+	path = lib/seaport.git
+	url = https://github.com/immutable/seaport.git

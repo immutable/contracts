@@ -4,4 +4,4 @@ solidity-bits/=lib/solidity-bits/
 solidity-bytes-utils/=lib/solidity-bytes-utils/
 seaport-core/=lib/seaport-core/
 seaport-types/=lib/seaport-types/
-seaport/contracts/=lib/seaport/contracts/
+seaport/contracts/=lib/seaport/contracts

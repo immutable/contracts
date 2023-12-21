@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache 2
 pragma solidity ^0.8.19;
 
-import {RandomManager} from "./RandomManager.sol";
+import {RandomSeedProvider} from "./RandomSeedProvider.sol";
 
 
 
@@ -13,11 +13,11 @@ abstract contract RandomValues {
     mapping (uint256 => uint256) private randCreationRequests;
     uint256 private nextNonce;
 
-    RandomManager public randomManager;
+    RandomSeedProvider public randomSeedProvider;
 
 
-    constructor(address _randomManager) {
-        randomManager = RandomManager(_randomManager);
+    constructor(address _randomSeedProvider) {
+        randomSeedProvider = RandomSeedProvider(_randomSeedProvider);
     }
 
 
@@ -31,7 +31,7 @@ abstract contract RandomValues {
      *      value with fetchRandom.
      */
     function requestRandomValueCreation(uint256 _securityLevel) internal returns (uint256 _randomRequestId) {
-        uint256 randomFulfillmentIndex = randomManager.requestRandom(_securityLevel);
+        uint256 randomFulfillmentIndex = randomSeedProvider.requestRandom(_securityLevel);
         _randomRequestId = nextNonce++;
         randCreationRequests[_randomRequestId] = randomFulfillmentIndex;
     }
@@ -46,7 +46,7 @@ abstract contract RandomValues {
      */
     function fetchRandom(uint256 _randomRequestId) internal returns(bytes32 _randomValue) {
         // Request the random seed. If not enough time has elapsed yet, this call will revert.
-        bytes32 randomSeed = randomManager.getRandomSeed(randCreationRequests[_randomRequestId]);
+        bytes32 randomSeed = randomSeedProvider.getRandomSeed(randCreationRequests[_randomRequestId]);
         // Generate the random value by combining:
         //  address(this): personalises the random seed to this game.
         //  msg.sender: personalises the random seed to the game player.

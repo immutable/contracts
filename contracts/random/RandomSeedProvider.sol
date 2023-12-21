@@ -6,35 +6,61 @@ import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgrad
 import {IOffchainRandomSource} from "./IOffchainRandomSource.sol";
 
 
-
-// TODO should be upgradeable
-contract RandomManager is AccessControlEnumerableUpgradeable {
+/**
+ * @notice Contract to provide random seed values to game contracts on the chain.
+ * @dev    The expectation is that there will only be one RandomSeedProvider per chain.
+ *         Game contracts will call this contract to obtain a seed value, from which 
+ *         they will generate random values.
+ *
+ *         The contract is upgradeable. It is expected to be operated behind an 
+ *         Open Zeppelin TransparentUpgradeProxy. 
+ */
+contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
+    // Security levels between 1 and 10 are allowed.
     error InvalidSecurityLevel(uint256 _securityLevel);
+    // The random seed value is not yet available.
     error WaitForRandom();
 
-    event OffchainRandomSourceSet(uint256 _offchainRandomSource);
+    // The offchain random source has been updated.
+    event OffchainRandomSourceSet(address _offchainRandomSource);
+
+    // The RanDAO source has been enabled. Note that this source will only be used if
+    // an offchain random source is not available.
     event RanDaoEnabled();
 
-    bytes32 public constant RANDOM_ADMIN_ROLE = keccak256("RANDOM_ROLE");
+    // Admin role that can enable RanDAO and offchain random sources.
+    bytes32 public constant RANDOM_ADMIN_ROLE = keccak256("RANDOM_ADMIN_ROLE");
 
-
+    // When random seeds are requested, a request id is returned. The id
+    // relates to a certain future random seed. This map holds all of the 
+    // random seeds that have been produced.
     mapping (uint256 => bytes32) private randomOutput;
+
+    // The index of the next seed value to be produced.
     uint256 private nextRandomIndex;
+
+    // The block number in which the last seed value was generated.
     uint256 private lastBlockRandomGenerated;
 
+    // Off-chain random source that is used to generate random seeds.
     IOffchainRandomSource public offchainRandomSource;
+
+    // True if RanDAO is being used as a source of random values (assuming
+    // the off-chain random source has not been enabled).
+    bool public ranDaoEnabled;
 
 
     /**
      * @notice Initialize the contract for use with a transparent proxy.
      * @param _roleAdmin is the account that can add and remove addresses that have 
-     *        RANDOM_ADMIN_ROLE priviledge..
-     * @param _randomAdmin is the account that has  RANDOM_ADMIN_ROLE priviledge.
+     *        RANDOM_ADMIN_ROLE privilege.
+     * @param _randomAdmin is the account that has RANDOM_ADMIN_ROLE privilege.
      */
     function initialize(address _roleAdmin, address _randomAdmin) public virtual initializer {
         _grantRole(DEFAULT_ADMIN_ROLE, _roleAdmin);
-        _grantRole(RANDOM_ROLE, _randomAdmin);
+        _grantRole(RANDOM_ADMIN_ROLE, _randomAdmin);
 
+        // Generate an initial "random" seed.
         // Use the chain id as an input into the random number generator to ensure
         // all random numbers are personalised to this chain.
         randomOutput[0] = keccak256(abi.encodePacked(block.chainid, block.number));
@@ -46,13 +72,18 @@ contract RandomManager is AccessControlEnumerableUpgradeable {
      * @dev Must have RANDOM_ROLE.
      * @param _offchainRandomSource Address of contract that is an offchain random source.
      */
-    function setOffchainRandomSource(address _offchainRandomSource) external hasRole(RANDOM_ROLE) {
+    function setOffchainRandomSource(address _offchainRandomSource) external onlyRole(RANDOM_ADMIN_ROLE) {
         offchainRandomSource = IOffchainRandomSource(_offchainRandomSource);
         emit OffchainRandomSourceSet(_offchainRandomSource);
     }
 
 
-    function enableRanDao() external hasRole(RANDOM_ROLE) {
+    /**
+     * @notice Enable the RanDAO source.
+     * @dev If the off-chain source has not been configured, and the consensus 
+     *      algorithm supports RanDAO, then let's use it.
+     */
+    function enableRanDao() external onlyRole(RANDOM_ADMIN_ROLE) {
         ranDaoEnabled = true;
         emit RanDaoEnabled();
     }

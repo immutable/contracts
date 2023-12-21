@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache 2
 pragma solidity ^0.8.19;
 
-import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/extensions/AccessControlEnumerableUpgradeable.sol";
+import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import {IOffchainRandomSource} from "./IOffchainRandomSource.sol";
 
 

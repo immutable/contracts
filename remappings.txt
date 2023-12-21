@@ -2,3 +2,5 @@
 @openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/
 solidity-bits/=lib/solidity-bits/
 solidity-bytes-utils/=lib/solidity-bytes-utils/
+seaport-core/=lib/seaport-core/
+seaport-types/=lib/seaport-types/

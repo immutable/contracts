@@ -9,7 +9,7 @@
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
 [submodule "lib/seaport"]
 	path = lib/seaport
-	url = https://github.com/ProjectOpenSea/seaport
+	url = https://github.com/immutable/seaport
 [submodule "lib/solidity-bits"]
 	path = lib/solidity-bits
 	url = https://github.com/estarriolvetch/solidity-bits

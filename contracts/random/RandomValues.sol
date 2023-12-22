@@ -12,7 +12,7 @@ abstract contract RandomValues {
     RandomSeedProvider public immutable randomSeedProvider;
 
     mapping (uint256 => uint256) private randCreationRequests;
-    mapping (uint256 => RandomSeedProvider.GenerationMethodology) private randCreationRequestsMethod;
+    mapping (uint256 => address) private randCreationRequestsSource;
 
     uint256 private nextNonce;
 
@@ -28,11 +28,11 @@ abstract contract RandomValues {
      */
     function _requestRandomValueCreation() internal returns (uint256 _randomRequestId) {
         uint256 randomFulfillmentIndex;
-        RandomSeedProvider.GenerationMethodology method;
-        (randomFulfillmentIndex, method) = randomSeedProvider.requestRandomSeed();
+        address randomSource;
+        (randomFulfillmentIndex, randomSource) = randomSeedProvider.requestRandomSeed();
         _randomRequestId = nextNonce++;
         randCreationRequests[_randomRequestId] = randomFulfillmentIndex;
-        randCreationRequestsMethod[_randomRequestId] = method;
+        randCreationRequestsSource[_randomRequestId] = randomSource;
     }
 
 
@@ -46,7 +46,7 @@ abstract contract RandomValues {
     function _fetchRandom(uint256 _randomRequestId) internal returns(bytes32 _randomValue) {
         // Request the random seed. If not enough time has elapsed yet, this call will revert.
         bytes32 randomSeed = randomSeedProvider.getRandomSeed(
-            randCreationRequests[_randomRequestId], randCreationRequestsMethod[_randomRequestId]);
+            randCreationRequests[_randomRequestId], randCreationRequestsSource[_randomRequestId]);
         // Generate the random value by combining:
         //  address(this): personalises the random seed to this game.
         //  msg.sender: personalises the random seed to the game player.

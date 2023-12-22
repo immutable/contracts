@@ -19,24 +19,22 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
     // The random seed value is not yet available.
     error WaitForRandom();
 
-    error UnknownMethodology();
-
     // The offchain random source has been updated.
-    event OffchainRandomSourceSet(address _offchainRandomSource);
+    event OffchainRandomSourceSet(address _offchainRandomSource, uint256 _offchainRequestRateLimit);
 
-    // The RanDAO source has been enabled. Note that this source will only be used if
-    // an offchain random source is not available.
+    // Indicates that new random values will be generated using the RanDAO source.
     event RanDaoEnabled();
 
-    enum GenerationMethodology {
-        TRADITIONAL,
-        RANDAO,
-        OFFCHAIN
-    }
-
+    // Indicates that new random values will be generated using the traditional on-chain source.
+    event TraditionalEnabled();
 
     // Admin role that can enable RanDAO and offchain random sources.
     bytes32 public constant RANDOM_ADMIN_ROLE = keccak256("RANDOM_ADMIN_ROLE");
+
+    // Indicates: Generate new random numbers using the traditional on-chain methodology.
+    address public constant TRADITIONAL = address(0);
+    // Indicates: Generate new random numbers using the RanDAO methodology.
+    address public constant RANDAO = address(1);
 
     // When random seeds are requested, a request id is returned. The id
     // relates to a certain future random seed. This map holds all of the 
@@ -53,11 +51,12 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
     uint256 public prevOffchainRandomRequest;
     uint256 public lastBlockOffchainRequest;
 
+    // @notice The source of new random numbers. This could be the special values for 
+    // @notice TRADITIONAL or RANDAO or the address of a Offchain Random Source contract.
+    // @dev This value is return with the request ids. This allows off-chain random sources
+    // @dev to be switched without stopping in-flight random values from being retrieved.
+    address public randomSource;
 
-    // Off-chain random source that is used to generate random seeds.
-    IOffchainRandomSource public offchainRandomSource;
-
-    GenerationMethodology public methodology;
 
 
     /**
@@ -76,7 +75,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
         randomOutput[0] = keccak256(abi.encodePacked(block.chainid, block.number));
         nextRandomIndex = 1;
 
-        methodology = GenerationMethodology.TRADITIONAL;
+        randomSource = TRADITIONAL;
     }
 
     /**
@@ -85,31 +84,112 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
      * @param _offchainRandomSource Address of contract that is an offchain random source.
      */
     function setOffchainRandomSource(address _offchainRandomSource, uint256 _offchainRequestRateLimit) external onlyRole(RANDOM_ADMIN_ROLE) {
-        offchainRandomSource = IOffchainRandomSource(_offchainRandomSource);
+        randomSource = _offchainRandomSource;
         offchainRequestRateLimit = _offchainRequestRateLimit;
-        methodology = GenerationMethodology.OFFCHAIN;
-        emit OffchainRandomSourceSet(_offchainRandomSource);
+        emit OffchainRandomSourceSet(_offchainRandomSource, _offchainRequestRateLimit);
     }
 
 
     /**
-     * @notice Enable the RanDAO source.
-     * @dev If the off-chain source has not been configured, and the consensus 
-     *      algorithm supports RanDAO, then let's use it.
+     * @notice Switch to the RanDAO source.
      */
     function enableRanDao() external onlyRole(RANDOM_ADMIN_ROLE) {
-        methodology = GenerationMethodology.RANDAO;
+        randomSource = RANDAO;
         emit RanDaoEnabled();
     }
 
     /**
+     * @notice Switch to the traditional on-chain random source.
+     */
+    function enableTraditional() external onlyRole(RANDOM_ADMIN_ROLE) {
+        randomSource = TRADITIONAL;
+        emit TraditionalEnabled();
+    }
+
+
+    /**
+     * @notice Request the index number to track when a random number will be produced.
+     * @dev Note that the same _randomFulfillmentIndex will be returned to multiple games and even within
+     *      the one game. Games must personalise this value to their own game, the the particular game player,
+     *      and to the game player's request.
+     * @return _randomFulfillmentIndex The index for the game contract to present to fetch the next random value.
+     */
+    function requestRandomSeed() external returns(uint256 _randomFulfillmentIndex, address _randomSource) {
+        if (randomSource == TRADITIONAL || randomSource == RANDAO) {
+            // Generate a value for this block, just in case there are historical requests 
+            // to be fulfilled in transactions later in this block.
+            generateNextRandom();
+
+            // Indicate that a value based on the next block will be fine.
+            _randomFulfillmentIndex = nextRandomIndex + 1;
+        }
+        else {
+            // Limit how often offchain random numbers are requested. If 
+            // offchainRequestRateLimit is 1, then a maximum of one request 
+            // per block is generated. If it 2, then a maximum of one request
+            // every two blocks is generated.
+            uint256 offchainRequestRateLimitCached = offchainRequestRateLimit;
+            uint256 blockNumberRateLimited = (block.number / offchainRequestRateLimitCached) * offchainRequestRateLimitCached;
+            if (lastBlockOffchainRequest == blockNumberRateLimited) {
+                _randomFulfillmentIndex = prevOffchainRandomRequest;
+            }
+            else {
+                _randomFulfillmentIndex = IOffchainRandomSource(randomSource).requestOffchainRandom();
+                prevOffchainRandomRequest = _randomFulfillmentIndex;
+                lastBlockOffchainRequest = block.number;
+            }
+        }
+        _randomSource = randomSource;
+    }
+
+
+    /**
+     * @notice Fetches a random seed value that was requested using requestRandom.
+     * @dev Note that the same _randomSeed will be returned to multiple games and even within
+     *      the one game. Games must personalise this value to their own game, the the particular game player,
+     *      and to the game player's request.
+     * @return _randomSeed The value from with random values can be derived.
+     */
+    function getRandomSeed(uint256 _randomFulfillmentIndex, address _randomSource) external returns (bytes32 _randomSeed) {
+        if (_randomSource == TRADITIONAL || _randomSource == RANDAO) {
+            generateNextRandom();
+            if (_randomFulfillmentIndex < nextRandomIndex) {
+                revert WaitForRandom();
+            }
+            return randomOutput[_randomFulfillmentIndex];
+        }
+        else {
+            return IOffchainRandomSource(randomSource).getOffchainRandom(_randomFulfillmentIndex); 
+        }
+    }
+
+    /**
+     * @notice Check whether a random seed is ready.
+     * @param _randomFulfillmentIndex Index when random seed will be ready.
+     */
+    function randomSeedIsReady(uint256 _randomFulfillmentIndex, address _randomSource) external view returns (bool) {
+        if (_randomSource == TRADITIONAL || _randomSource == RANDAO) {
+            if (lastBlockRandomGenerated == block.number) {
+                return _randomFulfillmentIndex <= nextRandomIndex;
+            }
+            else {
+                return _randomFulfillmentIndex <= nextRandomIndex+1;
+            }
+        }
+        else {
+            return bytes32(0x00) != IOffchainRandomSource(randomSource).getOffchainRandom(_randomFulfillmentIndex); 
+        }
+    }
+
+
+    /**
      * @notice Generate a random value using on-chain methodologies. 
      */
-    function generateNextRandom() public {
+    function _generateNextRandom() private {
         bytes32 prevRandomOutput = randomOutput[nextRandomIndex - 1];
         bytes32 newRandomOutput;
 
-        if (methodology == GenerationMethodology.TRADITIONAL) {
+        if (randomSource == TRADITIONAL) {
             // Random values for the TRADITIONAL methodology can only be generated once per block.
             if (lastBlockRandomGenerated == block.number) {
                 return;
@@ -132,7 +212,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
 
             newRandomOutput = keccak256(abi.encodePacked(prevRandomOutput, blockHash, timestamp));
         }
-        else if (methodology == GenerationMethodology.RANDAO) {
+        else if (randomSource == RANDAO) {
             // Random values for the RANDAO methodology can only be generated once per block.
             if (lastBlockRandomGenerated == block.number) {
                 return;
@@ -153,100 +233,14 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
 
             newRandomOutput = keccak256(abi.encodePacked(prevRandomOutput, prevRanDAO));
         }
-        else if (methodology == GenerationMethodology.OFFCHAIN) {
-            // Nothing to do here.
-        }
         else {
-            revert UnknownMethodology();
+            // Nothing to do here.
         }
 
         randomOutput[nextRandomIndex++] = newRandomOutput;
         lastBlockRandomGenerated = block.number;
     }
 
-    /**
-     * @notice Request the index number to track when a random number will be produced.
-     * @dev Note that the same _randomFulfillmentIndex will be returned to multiple games and even within
-     *      the one game. Games must personalise this value to their own game, the the particular game player,
-     *      and to the game player's request.
-     * @return _randomFulfillmentIndex The index for the game contract to present to fetch the next random value.
-     */
-    function requestRandomSeed() external returns(uint256 _randomFulfillmentIndex, GenerationMethodology _method) {
-        if (methodology == GenerationMethodology.TRADITIONAL || methodology == GenerationMethodology.RANDAO) {
-            // Generate a value for this block, just in case there are historical requests 
-            // to be fulfilled in transactions later in this block.
-            generateNextRandom();
-
-            // Indicate that a value based on the next block will be fine.
-            _randomFulfillmentIndex = nextRandomIndex + 1;
-            _method = methodology;
-        }
-        else if (methodology == GenerationMethodology.OFFCHAIN) {
-            // Limit how often offchain random numbers are requested. If 
-            // offchainRequestRateLimit is 1, then a maximum of one request 
-            // per block is generated. If it 2, then a maximum of one request
-            // every two blocks is generated.
-            uint256 offchainRequestRateLimitCached = offchainRequestRateLimit;
-            uint256 blockNumberRateLimited = (block.number / offchainRequestRateLimitCached) * offchainRequestRateLimitCached;
-            if (lastBlockOffchainRequest == blockNumberRateLimited) {
-                _randomFulfillmentIndex = prevOffchainRandomRequest;
-            }
-            else {
-                _randomFulfillmentIndex = offchainRandomSource.requestOffchainRandom();
-                prevOffchainRandomRequest = _randomFulfillmentIndex;
-                lastBlockOffchainRequest = block.number;
-            }
-            _method = GenerationMethodology.OFFCHAIN;
-        }
-        else {
-            revert UnknownMethodology();
-        }
-    }
-
-
-    /**
-     * @notice Fetches a random seed value that was requested using requestRandom.
-     * @dev Note that the same _randomSeed will be returned to multiple games and even within
-     *      the one game. Games must personalise this value to their own game, the the particular game player,
-     *      and to the game player's request.
-     * @return _randomSeed The value from with random values can be derived.
-     */
-    function getRandomSeed(uint256 _randomFulfillmentIndex, GenerationMethodology _method) external returns (bytes32 _randomSeed) {
-        if (_method == GenerationMethodology.TRADITIONAL || _method == GenerationMethodology.RANDAO) {
-            generateNextRandom();
-            if (_randomFulfillmentIndex < nextRandomIndex) {
-                revert WaitForRandom();
-            }
-            return randomOutput[_randomFulfillmentIndex];
-        }
-        else if (_method == GenerationMethodology.OFFCHAIN) {
-            return offchainRandomSource.getOffchainRandom(_randomFulfillmentIndex); 
-        }
-        else {
-            revert UnknownMethodology();
-        }
-    }
-
-    /**
-     * @notice Check whether a random seed is ready.
-     * @param _randomFulfillmentIndex Index when random seed will be ready.
-     */
-    function randomSeedIsReady(uint256 _randomFulfillmentIndex, GenerationMethodology _method) external view returns (bool) {
-        if (_method == GenerationMethodology.TRADITIONAL || _method == GenerationMethodology.RANDAO) {
-            if (lastBlockRandomGenerated == block.number) {
-                return _randomFulfillmentIndex <= nextRandomIndex;
-            }
-            else {
-                return _randomFulfillmentIndex <= nextRandomIndex+1;
-            }
-        }
-        else if (_method == GenerationMethodology.OFFCHAIN) {
-            return bytes32(0x00) != offchainRandomSource.getOffchainRandom(_randomFulfillmentIndex); 
-        }
-        else {
-            revert UnknownMethodology();
-        }
-    }
 
 
     // slither-disable-next-line unused-state,naming-convention

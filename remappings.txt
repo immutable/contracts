@@ -4,5 +4,6 @@ solidity-bits/=lib/solidity-bits/
 solidity-bytes-utils/=lib/solidity-bytes-utils/
 seaport-core/=lib/seaport-core/
 seaport-types/=lib/seaport-types/
+chainlink/contracts/=lib/chainlink/contracts/
 
 # seaport/contracts/=lib/seaportsdvdsfsfdsdfdgit/contracts/

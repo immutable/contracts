@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache 2
 pragma solidity 0.8.19;
 
-import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import {AccessControlEnumerableUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/access/AccessControlEnumerableUpgradeable.sol";
 import {IOffchainRandomSource} from "./IOffchainRandomSource.sol";
 
 
@@ -57,6 +57,8 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
     // @dev to be switched without stopping in-flight random values from being retrieved.
     address public randomSource;
 
+    // TODO add functions to modify this.
+    mapping (address => bool) public approvedForOffchainRandom;
 
 
     /**
@@ -115,19 +117,18 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
      * @return _randomFulfillmentIndex The index for the game contract to present to fetch the next random value.
      */
     function requestRandomSeed() external returns(uint256 _randomFulfillmentIndex, address _randomSource) {
-        if (randomSource == TRADITIONAL || randomSource == RANDAO) {
+        if (randomSource == TRADITIONAL || randomSource == RANDAO || !approvedForOffchainRandom[msg.sender]) {
             // Generate a value for this block, just in case there are historical requests 
             // to be fulfilled in transactions later in this block.
-            generateNextRandom();
+            _generateNextRandom();
 
             // Indicate that a value based on the next block will be fine.
             _randomFulfillmentIndex = nextRandomIndex + 1;
         }
         else {
-            // Limit how often offchain random numbers are requested. If 
-            // offchainRequestRateLimit is 1, then a maximum of one request 
-            // per block is generated. If it 2, then a maximum of one request
-            // every two blocks is generated.
+            // Limit how often offchain random numbers are requested. If offchainRequestRateLimit is 1, then a 
+            // maximum of one request per block is generated. If it 2, then a maximum of one request every two 
+            // blocks is generated.
             uint256 offchainRequestRateLimitCached = offchainRequestRateLimit;
             uint256 blockNumberRateLimited = (block.number / offchainRequestRateLimitCached) * offchainRequestRateLimitCached;
             if (lastBlockOffchainRequest == blockNumberRateLimited) {
@@ -152,7 +153,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
      */
     function getRandomSeed(uint256 _randomFulfillmentIndex, address _randomSource) external returns (bytes32 _randomSeed) {
         if (_randomSource == TRADITIONAL || _randomSource == RANDAO) {
-            generateNextRandom();
+            _generateNextRandom();
             if (_randomFulfillmentIndex < nextRandomIndex) {
                 revert WaitForRandom();
             }
@@ -167,7 +168,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
      * @notice Check whether a random seed is ready.
      * @param _randomFulfillmentIndex Index when random seed will be ready.
      */
-    function randomSeedIsReady(uint256 _randomFulfillmentIndex, address _randomSource) external view returns (bool) {
+    function isRandomSeedReady(uint256 _randomFulfillmentIndex, address _randomSource) external view returns (bool) {
         if (_randomSource == TRADITIONAL || _randomSource == RANDAO) {
             if (lastBlockRandomGenerated == block.number) {
                 return _randomFulfillmentIndex <= nextRandomIndex;
@@ -195,11 +196,13 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
                 return;
             }
 
-            // Block hash will be different for each block and difficult for game players
+            // Block hash will be different for each block and ---- easy ---- difficult for game players
             // to guess. The block producer could manipulate the block hash by crafting a 
             // transaction that included a number that the block producer controls. A
             // malicious block producer could produce many candidate blocks, in an attempt
             // to produce a specific value.
+
+            // TODO this will crash - can't get blockhash of this block.
             bytes32 blockHash = blockhash(block.number);
 
             // Timestamp when a block is produced in milli-seconds will be different for each

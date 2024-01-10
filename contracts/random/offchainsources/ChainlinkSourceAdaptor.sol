@@ -12,7 +12,7 @@ import "../IOffchainRandomSource.sol";
  * @notice Function (VRF).
  * @dev This contract is NOT upgradeable.
  */
-contract ChainlinkSource is VRFConsumerBaseV2, AccessControlEnumerable, IOffchainRandomSource {
+contract ChainlinkSourceAdaptor is VRFConsumerBaseV2, AccessControlEnumerable, IOffchainRandomSource {
     // The random seed value is not yet available.
     error WaitForRandom();
     
@@ -57,15 +57,12 @@ contract ChainlinkSource is VRFConsumerBaseV2, AccessControlEnumerable, IOffchai
     }
 
 
-
+// Call back
     function fulfillRandomWords(uint256 _requestId, uint256[] memory _randomWords) internal virtual override {
         // NOTE: This function call is not allowed to fail.
         // Only one word should be returned....
         if (_randomWords.length != 1) {
             emit UnexpectedRandomWordsLength(_randomWords.length);
-        }
-        else if (_randomWords.length != 1) {
-            return;
         }
 
         randomOutput[_requestId] = bytes32(_randomWords[0]);

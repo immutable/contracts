@@ -1,9 +1,10 @@
-@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/
-@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/
+@openzeppelin/contracts/=lib/openzeppelin-contracts-4.9.3/contracts/
+openzeppelin-contracts-4.9.3/=lib/openzeppelin-contracts-4.9.3/contracts/
+openzeppelin-contracts-upgradeable-4.9.3/=lib/openzeppelin-contracts-upgradeable-4.9.3/contracts/
+
 solidity-bits/=lib/solidity-bits/
 solidity-bytes-utils/=lib/solidity-bytes-utils/
+chainlink/contracts/=lib/chainlink/contracts/
 seaport-core/=lib/seaport-core/
 seaport-types/=lib/seaport-types/
-chainlink/contracts/=lib/chainlink/contracts/
-
-# seaport/contracts/=lib/seaportsdvdsfsfdsdfdgit/contracts/
+seaport/contracts/=lib/seaport/contracts/

@@ -13,8 +13,7 @@ import "../IOffchainRandomSource.sol";
  * @dev This contract is NOT upgradeable.
  */
 contract ChainlinkSourceAdaptor is VRFConsumerBaseV2, AccessControlEnumerable, IOffchainRandomSource {
-    // The random seed value is not yet available.
-    error WaitForRandom();
+
     
     event UnexpectedRandomWordsLength(uint256 _length);
 
@@ -76,4 +75,9 @@ contract ChainlinkSourceAdaptor is VRFConsumerBaseV2, AccessControlEnumerable, I
         }
         _randomValue = rand;
     }
+
+    function isOffchainRandomReady(uint256 _fulfillmentIndex) external view returns(bool) {
+        return randomOutput[_fulfillmentIndex] != bytes32(0);
+    }
+
 }

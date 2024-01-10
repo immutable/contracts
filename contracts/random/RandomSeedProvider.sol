@@ -76,6 +76,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
         // all random numbers are personalised to this chain.
         randomOutput[0] = keccak256(abi.encodePacked(block.chainid, block.number));
         nextRandomIndex = 1;
+        lastBlockRandomGenerated = block.number;
 
         randomSource = TRADITIONAL;
     }
@@ -178,7 +179,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
             }
         }
         else {
-            return bytes32(0x00) != IOffchainRandomSource(randomSource).getOffchainRandom(_randomFulfillmentIndex); 
+            return IOffchainRandomSource(randomSource).isOffchainRandomReady(_randomFulfillmentIndex); 
         }
     }
 

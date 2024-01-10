@@ -8,7 +8,8 @@ Initialize testing:
 
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|
-| testInit                        | Check that deployment + initialize work.          | Yes        | No          |
+| testInit                        | Check that deployment + initialize work.          | Yes        | Yes         |
+| testReinit                      | Calling initialise a second time fails.           | No         | Yes         |
 | testGetRandomSeedInitTraditional | getRandomSeed(), initial value, method TRADITIONAL | Yes      | No          |
 | testGetRandomSeedInitRandao     | getRandomSeed(), initial value, method RANDAO     | Yes        | No          |
 | testGetRandomSeedNotGenTraditional | getRandomSeed(), when value not generated      | No         | No          |

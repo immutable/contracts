@@ -15,7 +15,7 @@ abstract contract RandomValues {
     // does not need to be changed.
     RandomSeedProvider public immutable randomSeedProvider;
 
-    // Map of request id to fulfilment id.
+    // Map of request id to fulfillment id.
     mapping (uint256 => uint256) private randCreationRequests;
     // Map of request id to random source. Retaining the source allows for upgrade 
     // of sources inside the random seed provider contract.

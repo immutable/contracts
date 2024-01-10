@@ -37,7 +37,6 @@ contract MockOffchainSource is IOffchainRandomSource {
 
 contract UninitializedRandomSeedProviderTest is Test {
     address public constant TRADITIONAL = address(0);
-    // Indicates: Generate new random numbers using the RanDAO methodology.
     address public constant RANDAO = address(1);
 
     TransparentUpgradeableProxy public proxy;
@@ -70,6 +69,19 @@ contract UninitializedRandomSeedProviderTest is Test {
     function testReinit() public {
         vm.expectRevert();
         randomSeedProvider.initialize(roleAdmin, randomAdmin);
+    }
+
+
+    function testGetRandomSeedInitTraditional() public {
+        bytes32 seed = randomSeedProvider.getRandomSeed(0, TRADITIONAL);
+        bytes32 expectedInitialSeed = keccak256(abi.encodePacked(block.chainid, block.number));
+        assertEq(seed, expectedInitialSeed, "initial seed");
+    }
+
+    function testGetRandomSeedInitRandao() public {
+        bytes32 seed = randomSeedProvider.getRandomSeed(0, RANDAO);
+        bytes32 expectedInitialSeed = keccak256(abi.encodePacked(block.chainid, block.number));
+        assertEq(seed, expectedInitialSeed, "initial seed");
     }
 
 }

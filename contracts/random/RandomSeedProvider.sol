@@ -155,7 +155,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
     function getRandomSeed(uint256 _randomFulfillmentIndex, address _randomSource) external returns (bytes32 _randomSeed) {
         if (_randomSource == TRADITIONAL || _randomSource == RANDAO) {
             _generateNextRandom();
-            if (_randomFulfillmentIndex < nextRandomIndex) {
+            if (_randomFulfillmentIndex > nextRandomIndex) {
                 revert WaitForRandom();
             }
             return randomOutput[_randomFulfillmentIndex];

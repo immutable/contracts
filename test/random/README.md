@@ -33,8 +33,9 @@ Operational functions tests:
 
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|
-| testTradNextBlock               | Check request id is for next block                | Yes        | No          |
-| testRanDaoNextBlock             | Check request id is for next block                | Yes        | No          |
+| testTradNextBlock               | Check basic request flow                          | Yes        | Yes          |
+| testRanDaoNextBlock             | Check basic request flow                          | Yes        | No          |
+| testOffchainNextBlock           | Check basic request flow                          | Yes        | No          |
 | testTradTwoInOneBlock           | Two calls to requestRandomSeed in one block       | Yes        | No          |
 | testRanDaoTwoInOneBlock         | Two calls to requestRandomSeed in one block       | Yes        | No          |
 | testOffchainTwoInOneBlock       | Two calls to requestRandomSeed in one block       | Yes        | No          |

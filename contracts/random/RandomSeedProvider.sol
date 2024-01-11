@@ -18,25 +18,18 @@ import {IOffchainRandomSource} from "./IOffchainRandomSource.sol";
 contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
     // The random seed value is not yet available.
     error WaitForRandom();
-    // An error occurred calling an off-chain random provider.
-    error OffchainRandomSourceError(bytes _error);
 
     // The offchain random source has been updated.
-    event OffchainRandomSourceSet(address _offchainRandomSource, uint256 _offchainRequestRateLimit);
+    event OffchainRandomSourceSet(address _offchainRandomSource);
 
     // Indicates that new random values will be generated using the RanDAO source.
     event RanDaoEnabled();
 
-    // Indicates that new random values will be generated using the traditional on-chain source.
-    event TraditionalEnabled();
-
     // Admin role that can enable RanDAO and offchain random sources.
     bytes32 public constant RANDOM_ADMIN_ROLE = keccak256("RANDOM_ADMIN_ROLE");
 
-    // Indicates: Generate new random numbers using the traditional on-chain methodology.
-    address public constant TRADITIONAL = address(0);
-    // Indicates: Generate new random numbers using the RanDAO methodology.
-    address public constant RANDAO = address(1);
+    // Indicates: Generate new random numbers using on-chain methodology.
+    address public constant ONCHAIN = address(0);
 
     // When random seeds are requested, a request id is returned. The id
     // relates to a certain future random seed. This map holds all of the 
@@ -49,7 +42,6 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
     // The block number in which the last seed value was generated.
     uint256 public lastBlockRandomGenerated;
 
-    uint256 public offchainRequestRateLimit;
     uint256 public prevOffchainRandomRequest;
     uint256 public lastBlockOffchainRequest;
 
@@ -59,7 +51,11 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
     // @dev to be switched without stopping in-flight random values from being retrieved.
     address public randomSource;
 
-    // TODO add functions to modify this.
+    bool public ranDaoAvailable;
+
+    // Indicates an address is allow listed for the offchain random provider.
+    // Having an allow list prevents spammers from requesting one random number per block,
+    // thus incurring cost on Immutable for no benefit.
     mapping (address => bool) public approvedForOffchainRandom;
 
 
@@ -68,8 +64,9 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
      * @param _roleAdmin is the account that can add and remove addresses that have 
      *        RANDOM_ADMIN_ROLE privilege.
      * @param _randomAdmin is the account that has RANDOM_ADMIN_ROLE privilege.
+     * @param _ranDaoAvailable indicates if the chain supports the PRERANDAO opcode.
      */
-    function initialize(address _roleAdmin, address _randomAdmin) public virtual initializer {
+    function initialize(address _roleAdmin, address _randomAdmin, bool _ranDaoAvailable) public virtual initializer {
         _grantRole(DEFAULT_ADMIN_ROLE, _roleAdmin);
         _grantRole(RANDOM_ADMIN_ROLE, _randomAdmin);
 
@@ -80,7 +77,8 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
         nextRandomIndex = 1;
         lastBlockRandomGenerated = block.number;
 
-        randomSource = TRADITIONAL;
+        randomSource = ONCHAIN;
+        ranDaoAvailable = _ranDaoAvailable;
     }
 
     /**
@@ -88,27 +86,26 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
      * @dev Must have RANDOM_ROLE.
      * @param _offchainRandomSource Address of contract that is an offchain random source.
      */
-    function setOffchainRandomSource(address _offchainRandomSource, uint256 _offchainRequestRateLimit) external onlyRole(RANDOM_ADMIN_ROLE) {
+    function setOffchainRandomSource(address _offchainRandomSource) external onlyRole(RANDOM_ADMIN_ROLE) {
         randomSource = _offchainRandomSource;
-        offchainRequestRateLimit = _offchainRequestRateLimit;
-        emit OffchainRandomSourceSet(_offchainRandomSource, _offchainRequestRateLimit);
+        emit OffchainRandomSourceSet(_offchainRandomSource);
     }
 
 
     /**
-     * @notice Switch to the RanDAO source.
+     * @notice Call this when the blockchain supports the PREVRANDAO opcode.
      */
-    function enableRanDao() external onlyRole(RANDOM_ADMIN_ROLE) {
-        randomSource = RANDAO;
+    function setRanDaoAvailable() external onlyRole(RANDOM_ADMIN_ROLE) {
+        ranDaoAvailable = true;
         emit RanDaoEnabled();
     }
 
-    /**
-     * @notice Switch to the traditional on-chain random source.
-     */
-    function enableTraditional() external onlyRole(RANDOM_ADMIN_ROLE) {
-        randomSource = TRADITIONAL;
-        emit TraditionalEnabled();
+    function addOffchainRandomConsumer(address _consumer) external  onlyRole(RANDOM_ADMIN_ROLE) {
+        approvedForOffchainRandom[_consumer] = true;
+    }
+
+    function removeOffchainRandomConsumer(address _consumer) external  onlyRole(RANDOM_ADMIN_ROLE) {
+        approvedForOffchainRandom[_consumer] = false;
     }
 
 
@@ -120,21 +117,19 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
      * @return _randomFulfillmentIndex The index for the game contract to present to fetch the next random value.
      */
     function requestRandomSeed() external returns(uint256 _randomFulfillmentIndex, address _randomSource) {
-        if (randomSource == TRADITIONAL || randomSource == RANDAO || !approvedForOffchainRandom[msg.sender]) {
+        if (randomSource == ONCHAIN || !approvedForOffchainRandom[msg.sender]) {
             // Generate a value for this block, just in case there are historical requests 
             // to be fulfilled in transactions later in this block.
-            _generateNextRandom();
+            _generateNextRandomOnChain();
 
             // Indicate that a value based on the next block will be fine.
             _randomFulfillmentIndex = nextRandomIndex + 1;
+
+            _randomSource = ONCHAIN;
         }
         else {
-            // Limit how often offchain random numbers are requested. If offchainRequestRateLimit is 1, then a 
-            // maximum of one request per block is generated. If it 2, then a maximum of one request every two 
-            // blocks is generated.
-            uint256 offchainRequestRateLimitCached = offchainRequestRateLimit;
-            uint256 blockNumberRateLimited = (block.number / offchainRequestRateLimitCached) * offchainRequestRateLimitCached;
-            if (lastBlockOffchainRequest == blockNumberRateLimited) {
+            // Limit how often offchain random numbers are requested to a maximum of once per block.
+            if (lastBlockOffchainRequest == block.number) {
                 _randomFulfillmentIndex = prevOffchainRandomRequest;
             }
             else {
@@ -142,8 +137,8 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
                 prevOffchainRandomRequest = _randomFulfillmentIndex;
                 lastBlockOffchainRequest = block.number;
             }
+            _randomSource = randomSource;
         }
-        _randomSource = randomSource;
     }
 
 
@@ -155,15 +150,15 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
      * @return _randomSeed The value from with random values can be derived.
      */
     function getRandomSeed(uint256 _randomFulfillmentIndex, address _randomSource) external returns (bytes32 _randomSeed) {
-        if (_randomSource == TRADITIONAL || _randomSource == RANDAO) {
-            _generateNextRandom();
+        if (_randomSource == ONCHAIN) {
+            _generateNextRandomOnChain();
             if (_randomFulfillmentIndex > nextRandomIndex) {
                 revert WaitForRandom();
             }
             return randomOutput[_randomFulfillmentIndex];
         }
         else {
-            // If random source is not the address of a valid contract this will likely revert
+            // If random source is not the address of a valid contract this will revert
             // with no revert information returned.
             return IOffchainRandomSource(randomSource).getOffchainRandom(_randomFulfillmentIndex); 
         }
@@ -174,7 +169,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
      * @param _randomFulfillmentIndex Index when random seed will be ready.
      */
     function isRandomSeedReady(uint256 _randomFulfillmentIndex, address _randomSource) external view returns (bool) {
-        if (_randomSource == TRADITIONAL || _randomSource == RANDAO) {
+        if (_randomSource == ONCHAIN) {
             if (lastBlockRandomGenerated == block.number) {
                 return _randomFulfillmentIndex <= nextRandomIndex;
             }
@@ -191,41 +186,14 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
     /**
      * @notice Generate a random value using on-chain methodologies. 
      */
-    function _generateNextRandom() private {
-        bytes32 prevRandomOutput = randomOutput[nextRandomIndex - 1];
-        bytes32 newRandomOutput;
-
-        if (randomSource == TRADITIONAL) {
-            // Random values for the TRADITIONAL methodology can only be generated once per block.
-            if (lastBlockRandomGenerated == block.number) {
-                return;
-            }
-
-            // Block hash will be different for each block and ---- easy ---- difficult for game players
-            // to guess. The block producer could manipulate the block hash by crafting a 
-            // transaction that included a number that the block producer controls. A
-            // malicious block producer could produce many candidate blocks, in an attempt
-            // to produce a specific value.
-
-            // TODO this will crash - can't get blockhash of this block.
-            bytes32 blockHash = blockhash(block.number);
-
-            // Timestamp when a block is produced in milli-seconds will be different for each
-            // block. Game players could estimate the possible values for the timestamp.
-            // The block producer could manipulate the timestamp by changing the time recorded 
-            // as when the block was produced. The block will be deemed invalid if the value is 
-            // too far from the expected block time.
-            // slither-disable-next-line timestamp
-            uint256 timestamp = block.timestamp;
-
-            newRandomOutput = keccak256(abi.encodePacked(prevRandomOutput, blockHash, timestamp));
+    function _generateNextRandomOnChain() private {
+        // Onchain random values can only be generated once per block.
+        if (lastBlockRandomGenerated == block.number) {
+            return;
         }
-        else if (randomSource == RANDAO) {
-            // Random values for the RANDAO methodology can only be generated once per block.
-            if (lastBlockRandomGenerated == block.number) {
-                return;
-            }
 
+        uint256 entropy;
+        if (ranDaoAvailable) {
             // PrevRanDAO (previously known as DIFFICULTY) is the output of the RanDAO function
             // used as a part of consensus. The value posted is the value revealed in the previous 
             // block, not in this block. In this way, all parties know the value prior to it being 
@@ -235,16 +203,22 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
             // not produce a block. This limits the block producer's influence to one of two 
             // values.
             //
-            // Prior to the BFT fork (expected in the first half of 2024), this value will 
-            // be a predictable value related to the block number. 
-            uint256 prevRanDAO = block.prevrandao;
-
-            newRandomOutput = keccak256(abi.encodePacked(prevRandomOutput, prevRanDAO));
+            // Prior to the BFT fork (expected in 2024), this value will be a predictable value 
+            // related to the block number. 
+            entropy = block.prevrandao;
         }
         else {
-            // Nothing to do here.
+            // Block hash will be different for each block and difficult for game players
+            // to guess. However, game players can observe blocks as they are produced.
+            // The block producer could manipulate the block hash by crafting a 
+            // transaction that included a number that the block producer controls. A
+            // malicious block producer could produce many candidate blocks, in an attempt
+            // to produce a specific value.
+            entropy = uint256(blockhash(block.number - 1));
         }
 
+        bytes32 prevRandomOutput = randomOutput[nextRandomIndex - 1];
+        bytes32 newRandomOutput = keccak256(abi.encodePacked(prevRandomOutput, entropy));
         randomOutput[nextRandomIndex++] = newRandomOutput;
         lastBlockRandomGenerated = block.number;
     }

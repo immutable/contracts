@@ -1,21 +1,12 @@
 [submodule "lib/forge-std"]
 	path = lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
-[submodule "lib/seaport"]
-	path = lib/seaport
-	url = https://github.com/immutable/seaport
 [submodule "lib/solidity-bits"]
 	path = lib/solidity-bits
 	url = https://github.com/estarriolvetch/solidity-bits
 [submodule "lib/solidity-bytes-utils"]
 	path = lib/solidity-bytes-utils
 	url = https://github.com/GNSPS/solidity-bytes-utils
-[submodule "lib/seaport-core"]
-	path = lib/seaport-core
-	url = https://github.com/ProjectOpenSea/seaport-core
-[submodule "lib/seaport-types"]
-	path = lib/seaport-types
-	url = https://github.com/ProjectOpenSea/seaport-types
 [submodule "lib/chainlink"]
 	path = lib/chainlink
 	url = https://github.com/smartcontractkit/chainlink
@@ -25,3 +16,9 @@
 [submodule "lib/openzeppelin-contracts-upgradeable-4.9.3"]
 	path = lib/openzeppelin-contracts-upgradeable-4.9.3
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable
+[submodule "lib/immutable-seaport-1.5.0+im1.3"]
+	path = lib/immutable-seaport-1.5.0+im1.3
+	url = https://github.com/immutable/seaport
+[submodule "lib/immutable-seaport-core-1.5.0+im1"]
+	path = lib/immutable-seaport-core-1.5.0+im1
+	url = https://github.com/immutable/seaport-core

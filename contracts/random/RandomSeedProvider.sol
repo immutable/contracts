@@ -18,6 +18,8 @@ import {IOffchainRandomSource} from "./IOffchainRandomSource.sol";
 contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
     // The random seed value is not yet available.
     error WaitForRandom();
+    // An error occurred calling an off-chain random provider.
+    error OffchainRandomSourceError(bytes _error);
 
     // The offchain random source has been updated.
     event OffchainRandomSourceSet(address _offchainRandomSource, uint256 _offchainRequestRateLimit);
@@ -161,6 +163,8 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
             return randomOutput[_randomFulfillmentIndex];
         }
         else {
+            // If random source is not the address of a valid contract this will likely revert
+            // with no revert information returned.
             return IOffchainRandomSource(randomSource).getOffchainRandom(_randomFulfillmentIndex); 
         }
     }

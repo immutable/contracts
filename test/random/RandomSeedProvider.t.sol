@@ -36,6 +36,8 @@ contract MockOffchainSource is IOffchainRandomSource {
 }
 
 contract UninitializedRandomSeedProviderTest is Test {
+    error WaitForRandom();
+
     address public constant TRADITIONAL = address(0);
     address public constant RANDAO = address(1);
 
@@ -82,6 +84,21 @@ contract UninitializedRandomSeedProviderTest is Test {
         bytes32 seed = randomSeedProvider.getRandomSeed(0, RANDAO);
         bytes32 expectedInitialSeed = keccak256(abi.encodePacked(block.chainid, block.number));
         assertEq(seed, expectedInitialSeed, "initial seed");
+    }
+
+    function testGetRandomSeedNotGenTraditional() public {
+        vm.expectRevert(abi.encodeWithSelector(WaitForRandom.selector));
+        randomSeedProvider.getRandomSeed(2, TRADITIONAL);
+    }
+
+    function testGetRandomSeedNotGenRandao() public {
+        vm.expectRevert(abi.encodeWithSelector(WaitForRandom.selector));
+        randomSeedProvider.getRandomSeed(2, RANDAO);
+    }
+
+    function testGetRandomSeedNoOffchainSource() public {
+        vm.expectRevert();
+        randomSeedProvider.getRandomSeed(0, address(1000));
     }
 
 }

@@ -12,8 +12,8 @@ Initialize testing:
 | testReinit                      | Calling initialise a second time fails.           | No         | Yes         |
 | testGetRandomSeedInitTraditional | getRandomSeed(), initial value, method TRADITIONAL | Yes      | Yes         |
 | testGetRandomSeedInitRandao     | getRandomSeed(), initial value, method RANDAO     | Yes        | Yes         |
-| testGetRandomSeedNotGenTraditional | getRandomSeed(), when value not generated      | No         | No          |
-| testGetRandomSeedNotGenRandao   | getRandomSeed(), when value not generated         | No         | No          |
+| testGetRandomSeedNotGenTraditional | getRandomSeed(), when value not generated      | No         | Yes          |
+| testGetRandomSeedNotGenRandao   | getRandomSeed(), when value not generated         | No         | Yes         |
 | testGetRandomSeedNoOffchainSource | getRandomSeed(), when no offchain source configured | No     | No          |
 
 Control functions tests:

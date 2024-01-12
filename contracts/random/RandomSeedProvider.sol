@@ -115,6 +115,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
      *      the one game. Games must personalise this value to their own game, the the particular game player,
      *      and to the game player's request.
      * @return _randomFulfillmentIndex The index for the game contract to present to fetch the next random value.
+     * @return _randomSource Indicates that an on-chain source was used, or is the address of an offchain source.
      */
     function requestRandomSeed() external returns(uint256 _randomFulfillmentIndex, address _randomSource) {
         if (randomSource == ONCHAIN || !approvedForOffchainRandom[msg.sender]) {

@@ -1,6 +1,6 @@
 # Random Number Generation
 
-This directory contains contracts that provide on-chain random number generation.
+This directory contains contracts that provide random number generation.
 
 ## Architecture
 

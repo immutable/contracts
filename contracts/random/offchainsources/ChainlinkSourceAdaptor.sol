@@ -10,7 +10,8 @@ import "../IOffchainRandomSource.sol";
 /**
  * @notice Fetch random numbers from the Chainlink Verifiable Random 
  * @notice Function (VRF).
- * @dev This contract is NOT upgradeable.
+ * @dev This contract is NOT upgradeable. If there is an issue with this code, deploy a new
+ *      version of the code and have the random seed provider point to the new version.
  */
 contract ChainlinkSourceAdaptor is VRFConsumerBaseV2, AccessControlEnumerable, IOffchainRandomSource {
 

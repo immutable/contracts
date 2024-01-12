@@ -118,12 +118,13 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
      */
     function requestRandomSeed() external returns(uint256 _randomFulfillmentIndex, address _randomSource) {
         if (randomSource == ONCHAIN || !approvedForOffchainRandom[msg.sender]) {
-            // Generate a value for this block, just in case there are historical requests 
-            // to be fulfilled in transactions later in this block.
+            // Generate a value for this block if one has not been generated yet. This 
+            // is required because there may have been calls to requestRandomSeed 
+            // in previous blocks that are waiting for a random number to be produced.
             _generateNextRandomOnChain();
 
             // Indicate that a value based on the next block will be fine.
-            _randomFulfillmentIndex = nextRandomIndex + 1;
+            _randomFulfillmentIndex = nextRandomIndex;
 
             _randomSource = ONCHAIN;
         }
@@ -152,7 +153,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
     function getRandomSeed(uint256 _randomFulfillmentIndex, address _randomSource) external returns (bytes32 _randomSeed) {
         if (_randomSource == ONCHAIN) {
             _generateNextRandomOnChain();
-            if (_randomFulfillmentIndex > nextRandomIndex) {
+            if (_randomFulfillmentIndex >= nextRandomIndex) {
                 revert WaitForRandom();
             }
             return randomOutput[_randomFulfillmentIndex];
@@ -171,10 +172,10 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
     function isRandomSeedReady(uint256 _randomFulfillmentIndex, address _randomSource) external view returns (bool) {
         if (_randomSource == ONCHAIN) {
             if (lastBlockRandomGenerated == block.number) {
-                return _randomFulfillmentIndex <= nextRandomIndex;
+                return _randomFulfillmentIndex < nextRandomIndex;
             }
             else {
-                return _randomFulfillmentIndex <= nextRandomIndex+1;
+                return _randomFulfillmentIndex < nextRandomIndex+1;
             }
         }
         else {

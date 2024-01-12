@@ -33,15 +33,14 @@ Operational functions tests:
 
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|
-| testTradNextBlock               | Check basic request flow                          | Yes        | Yes          |
+| testTradNextBlock               | Check basic request flow                          | Yes        | Yes         |
 | testRanDaoNextBlock             | Check basic request flow                          | Yes        | No          |
 | testOffchainNextBlock           | Check basic request flow                          | Yes        | No          |
-| testTradTwoInOneBlock           | Two calls to requestRandomSeed in one block       | Yes        | No          |
+| testTradTwoInOneBlock           | Two calls to requestRandomSeed in one block       | Yes        | Yes         |
 | testRanDaoTwoInOneBlock         | Two calls to requestRandomSeed in one block       | Yes        | No          |
 | testOffchainTwoInOneBlock       | Two calls to requestRandomSeed in one block       | Yes        | No          |
-| testTradDelayedFulfillment      | Request then wait several blocks before fulfillment | Yes        | No          |
-| testRanDaoDelayedFulfillment    | Request then wait several blocks before fulfillment | Yes        | No          |
-| testOffchainRateLimit           | Check can limit requests to once every N blocks     | Yes        | No          |
+| testTradDelayedFulfillment      | Request then wait several blocks before fulfillment | Yes      | Yes         |
+| testRanDaoDelayedFulfillment    | Request then wait several blocks before fulfillment | Yes      | No          |
 
 Scenario: Generate some random numbers, switch random generation methodology, generate some more
 numbers, check that the numbers generated earlier are still available:
@@ -82,3 +81,8 @@ Operational functions tests:
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|
 | TODO                            | TODO          | Yes      | No          |
+
+
+## RandomValues.sol
+
+TODO

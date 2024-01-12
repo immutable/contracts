@@ -131,7 +131,7 @@ contract OperationalRandomSeedProviderTest is UninitializedRandomSeedProviderTes
         randomSeedProvider.getRandomSeed(fulfillmentIndex, source);
     }
 
-    function testMultiRequestSameBlock() public {
+    function testTradTwoInOneBlock() public {
         (uint256 randomRequestId1, ) = randomSeedProvider.requestRandomSeed();
         (uint256 randomRequestId2, ) = randomSeedProvider.requestRandomSeed();
         (uint256 randomRequestId3, ) = randomSeedProvider.requestRandomSeed();
@@ -141,7 +141,7 @@ contract OperationalRandomSeedProviderTest is UninitializedRandomSeedProviderTes
 
 
 
-    function testMultiRequestScenario() public {
+    function testTradDelayedFulfillment() public {
         (uint256 randomRequestId1, address source1) = randomSeedProvider.requestRandomSeed();
         vm.roll(block.number + 1);
 
@@ -167,4 +167,5 @@ contract OperationalRandomSeedProviderTest is UninitializedRandomSeedProviderTes
         assertEq(rand1a, rand1b, "rand1a, rand1b: Random Values not equal");
         assertEq(rand1a, rand1c, "rand1a, rand1c: Random Values not equal");
     }
+
 }

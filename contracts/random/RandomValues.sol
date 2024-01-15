@@ -59,16 +59,11 @@ abstract contract RandomValues {
      * @return _randomValue The random number that the game can use.
      */
     function _fetchRandom(uint256 _randomRequestId) internal returns(bytes32 _randomValue) {
-        // Request the random seed. If not enough time has elapsed yet, this call will revert.
-        bytes32 randomSeed = randomSeedProvider.getRandomSeed(
-            randCreationRequests[_randomRequestId], randCreationRequestsSource[_randomRequestId]);
-        // Generate the random value by combining:
-        //  address(this): personalises the random seed to this game.
-        //  msg.sender: personalises the random seed to the game player.
-        //  _randomRequestId: Ensures that even if the game player has requested multiple random values, 
-        //    they will get a different value for each request.
-        //  randomSeed: Value returned by the RandomManager.
-        _randomValue = keccak256(abi.encodePacked(address(this), msg.sender, _randomRequestId, randomSeed));
+        // Don't return the personalised seed directly. Otherwise there is a risk that
+        // the seed will be revealed, which would then compromise the security of calls
+        // to fetchRandomValues.
+        bytes32 seed = _fetchPersonalisedSeed(_randomRequestId);
+        _randomValue = keccak256(abi.encodePacked(seed, uint256(0)));
     }
 
     /**
@@ -81,11 +76,11 @@ abstract contract RandomValues {
      * @return _randomValues An array of random values derived from a single random value.
      */
     function _fetchRandomValues(uint256 _randomRequestId, uint256 _size) internal returns(bytes32[] memory _randomValues) {
-        bytes32 randomValue = _fetchRandom(_randomRequestId);
+        bytes32 seed = _fetchPersonalisedSeed(_randomRequestId);
 
         _randomValues = new bytes32[](_size);
         for (uint256 i = 0; i < _size; i++) {
-            _randomValues[i] = keccak256(abi.encodePacked(randomValue, i));
+            _randomValues[i] = keccak256(abi.encodePacked(seed, i + 1));
         }
     }
 
@@ -100,6 +95,26 @@ abstract contract RandomValues {
             randCreationRequests[_randomRequestId], randCreationRequestsSource[_randomRequestId]);
     }
 
+    /**
+     * @notice Fetch a seed from which random values can be generated, based on _requestRandomValueCreation.
+     * @dev The value is customised to this game, the game player, and the request by the game player.
+     *      This level of personalisation ensures that no two players end up with the same random value
+     *      and no game player will have the same random value twice.   
+     * @param _randomRequestId The value returned by _requestRandomValueCreation.
+     * @return _seed The seed value to base random numbers on.
+     */
+    function _fetchPersonalisedSeed(uint256 _randomRequestId) private returns(bytes32 _seed) {
+        // Request the random seed. If not enough time has elapsed yet, this call will revert.
+        bytes32 randomSeed = randomSeedProvider.getRandomSeed(
+            randCreationRequests[_randomRequestId], randCreationRequestsSource[_randomRequestId]);
+        // Generate the personlised seed by combining:
+        //  address(this): personalises the random seed to this game.
+        //  msg.sender: personalises the random seed to the game player.
+        //  _randomRequestId: Ensures that even if the game player has requested multiple random values, 
+        //    they will get a different value for each request.
+        //  randomSeed: Value returned by the RandomManager.
+        _seed = keccak256(abi.encodePacked(address(this), msg.sender, _randomRequestId, randomSeed));
+    }
 
     // slither-disable-next-line unused-state,naming-convention
     uint256[100] private __gapRandomValues;

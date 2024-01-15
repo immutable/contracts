@@ -87,9 +87,87 @@ contract UninitializedRandomSeedProviderTest is Test {
     }
 }
 
+
+contract ControlRandomSeedProviderTest is UninitializedRandomSeedProviderTest {
+    bytes32 public constant RANDOM_ADMIN_ROLE = keccak256("RANDOM_ADMIN_ROLE");
+    address public constant NEW_SOURCE = address(10001);
+    address public constant CONSUMER = address(10001);
+
+    function testRoleAdmin() public {
+        bytes32 role = RANDOM_ADMIN_ROLE;
+        address newAdmin = makeAddr("newAdmin");
+
+        vm.prank(roleAdmin);
+        randomSeedProvider.grantRole(role, newAdmin);
+        assertTrue(randomSeedProvider.hasRole(role, newAdmin));
+    }
+
+    function testRoleAdminBadAuth() public {
+        bytes32 role = RANDOM_ADMIN_ROLE;
+        address newAdmin = makeAddr("newAdmin");
+        vm.expectRevert();
+        randomSeedProvider.grantRole(role, newAdmin);
+    }
+
+    function testSetOffchainRandomSource() public {
+        vm.prank(randomAdmin);
+        randomSeedProvider.setOffchainRandomSource(NEW_SOURCE);
+        assertEq(randomSeedProvider.randomSource(), NEW_SOURCE);
+    }
+
+    function testSetOffchainRandomSourceBadAuth() public {
+        vm.expectRevert();
+        randomSeedProvider.setOffchainRandomSource(NEW_SOURCE);
+    }
+
+    function testSetRanDaoAvailable() public {
+        assertEq(randomSeedProvider.ranDaoAvailable(), false);
+        vm.prank(randomAdmin);
+        randomSeedProvider.setRanDaoAvailable();
+        assertEq(randomSeedProvider.ranDaoAvailable(), true);
+    }
+
+    function testSetRanDaoAvailableBadAuth() public {
+        assertEq(randomSeedProvider.ranDaoAvailable(), false);
+        vm.expectRevert();
+        randomSeedProvider.setRanDaoAvailable();
+        assertEq(randomSeedProvider.ranDaoAvailable(), false);
+    }
+
+    function testAddOffchainRandomConsumer() public {
+        assertEq(randomSeedProvider.approvedForOffchainRandom(CONSUMER), false);
+        vm.prank(randomAdmin);
+        randomSeedProvider.addOffchainRandomConsumer(CONSUMER);
+        assertEq(randomSeedProvider.approvedForOffchainRandom(CONSUMER), true);
+    }
+
+    function testAddOffchainRandomConsumerBadAuth() public {
+        vm.expectRevert();
+        randomSeedProvider.addOffchainRandomConsumer(CONSUMER);
+        assertEq(randomSeedProvider.approvedForOffchainRandom(CONSUMER), false);
+    }
+
+    function testRemoveOffchainRandomConsumer() public {
+        vm.prank(randomAdmin);
+        randomSeedProvider.addOffchainRandomConsumer(CONSUMER);
+        assertEq(randomSeedProvider.approvedForOffchainRandom(CONSUMER), true);
+        vm.prank(randomAdmin);
+        randomSeedProvider.removeOffchainRandomConsumer(CONSUMER);
+        assertEq(randomSeedProvider.approvedForOffchainRandom(CONSUMER), false);
+    }
+
+    function testRemoveOffchainRandomConsumerBadAuth() public {
+        vm.prank(randomAdmin);
+        randomSeedProvider.addOffchainRandomConsumer(CONSUMER);
+        vm.expectRevert();
+        randomSeedProvider.removeOffchainRandomConsumer(CONSUMER);
+        assertEq(randomSeedProvider.approvedForOffchainRandom(CONSUMER), true);
+    }
+}
+
+
 contract OperationalRandomSeedProviderTest is UninitializedRandomSeedProviderTest {
     MockOffchainSource public offchainSource = new MockOffchainSource();
-
 
     function testTradNextBlock () public {
         (uint256 fulfillmentIndex, address source) = randomSeedProvider.requestRandomSeed();

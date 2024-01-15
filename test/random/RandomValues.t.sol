@@ -50,6 +50,8 @@ contract UninitializedRandomValuesTest is Test {
 }
 
 contract SingleGameRandomValuesTest is UninitializedRandomValuesTest {
+    uint256 public constant NUM_VALUES = 3;
+
     function testFirstValue() public returns (bytes32) {
         uint256 randomRequestId = game1.requestRandomValueCreation();
         assertFalse(game1.isRandomValueReady(randomRequestId), "Ready in same block!");
@@ -68,7 +70,20 @@ contract SingleGameRandomValuesTest is UninitializedRandomValuesTest {
         assertNotEq(rand1, rand2, "Random Values equal");
     }
 
-    function testMultiRequestScenario() public {
+    function testMultiFetch() public {
+        uint256 randomRequestId1 = game1.requestRandomValueCreation();
+        vm.roll(block.number + 1);
+        bytes32 rand1a = game1.fetchRandom(randomRequestId1);
+        vm.roll(block.number + 1);
+        bytes32 rand1b = game1.fetchRandom(randomRequestId1);
+        vm.roll(block.number + 1);
+        bytes32 rand1c = game1.fetchRandom(randomRequestId1);
+
+        assertEq(rand1a, rand1b, "rand1a, rand1b: Random Values not equal");
+        assertEq(rand1a, rand1c, "rand1a, rand1c: Random Values not equal");
+    }
+
+    function testMultiInterleaved() public {
         uint256 randomRequestId1 = game1.requestRandomValueCreation();
         uint256 randomRequestId2 = game1.requestRandomValueCreation();
         uint256 randomRequestId3 = game1.requestRandomValueCreation();
@@ -91,4 +106,67 @@ contract SingleGameRandomValuesTest is UninitializedRandomValuesTest {
         assertEq(rand1a, rand1b, "rand1a, rand1b: Random Values not equal");
         assertEq(rand1a, rand1c, "rand1a, rand1c: Random Values not equal");
     }
+
+
+    function testFirstValues() public {
+        uint256 randomRequestId = game1.requestRandomValueCreation();
+        assertFalse(game1.isRandomValueReady(randomRequestId), "Ready in same block!");
+        vm.roll(block.number + 1);
+        assertTrue(game1.isRandomValueReady(randomRequestId), "Should be ready by next block!");
+
+        bytes32 randomValue = game1.fetchRandom(randomRequestId);
+        bytes32[] memory randomValues = game1.fetchRandomValues(randomRequestId, NUM_VALUES);
+        assertEq(randomValues.length, NUM_VALUES, "wrong length");
+        assertNotEq(randomValue, randomValues[0], "randomValue, values[0]: Random Values equal");
+        assertNotEq(randomValue, randomValues[1], "randomValue, values[0]: Random Values equal");
+        assertNotEq(randomValue, randomValues[2], "randomValue, values[0]: Random Values equal");
+    }
+
+    function testSecondValues() public {
+        uint256 randomRequestId1 = game1.requestRandomValueCreation();
+        uint256 randomRequestId2 = game1.requestRandomValueCreation();
+        vm.roll(block.number + 1);
+
+        bytes32[] memory randomValues1 = game1.fetchRandomValues(randomRequestId1, NUM_VALUES);
+        bytes32[] memory randomValues2 = game1.fetchRandomValues(randomRequestId2, NUM_VALUES);
+
+        assertNotEq(randomValues1[0], randomValues2[0], "values1[0], values2[0]: Random Values equal");
+        assertNotEq(randomValues1[1], randomValues2[1], "values1[1], values2[1]: Random Values equal");
+        assertNotEq(randomValues1[2], randomValues2[2], "values1[2], values2[2]: Random Values equal");
+    }
+
+    function testMultiFetchValues() public {
+        uint256 randomRequestId1 = game1.requestRandomValueCreation();
+        vm.roll(block.number + 1);
+        bytes32[] memory randomValues1 = game1.fetchRandomValues(randomRequestId1, NUM_VALUES);
+        vm.roll(block.number + 1);
+        bytes32[] memory randomValues2 = game1.fetchRandomValues(randomRequestId1, NUM_VALUES);
+        vm.roll(block.number + 1);
+        bytes32[] memory randomValues3 = game1.fetchRandomValues(randomRequestId1, NUM_VALUES);
+
+        assertEq(randomValues1[0], randomValues2[0], "values1[0], values2[0]: Random Values not equal");
+        assertEq(randomValues1[1], randomValues2[1], "values1[1], values2[1]: Random Values not equal");
+        assertEq(randomValues1[2], randomValues2[2], "values1[2], values2[2]: Random Values not equal");
+        assertEq(randomValues1[0], randomValues3[0], "values1[0], values3[0]: Random Values not equal");
+        assertEq(randomValues1[1], randomValues3[1], "values1[1], values3[1]: Random Values not equal");
+        assertEq(randomValues1[2], randomValues3[2], "values1[2], values3[2]: Random Values not equal");
+    }
+
+    function testMultipleGames() public {
+        MockGame game2 = new MockGame(address(randomSeedProvider));
+
+        uint256 randomRequestId1 = game1.requestRandomValueCreation();
+        uint256 randomRequestId2 = game2.requestRandomValueCreation();
+        assertFalse(game1.isRandomValueReady(randomRequestId1), "Ready in same block!");
+        assertFalse(game2.isRandomValueReady(randomRequestId2), "Ready in same block!");
+
+        vm.roll(block.number + 1);
+        assertTrue(game1.isRandomValueReady(randomRequestId1), "Should be ready by next block!");
+        assertTrue(game2.isRandomValueReady(randomRequestId2), "Should be ready by next block!");
+
+        bytes32 randomValue1 = game1.fetchRandom(randomRequestId1);
+        bytes32 randomValue2 = game2.fetchRandom(randomRequestId2);
+        assertNotEq(randomValue1, randomValue2, "Random Values equal");
+    }
+
 }

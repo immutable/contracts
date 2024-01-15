@@ -83,7 +83,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
 
     /**
      * @notice Change the offchain random source.
-     * @dev Must have RANDOM_ROLE.
+     * @dev Only RANDOM_ADMIN_ROLE can do this.
      * @param _offchainRandomSource Address of contract that is an offchain random source.
      */
     function setOffchainRandomSource(address _offchainRandomSource) external onlyRole(RANDOM_ADMIN_ROLE) {
@@ -94,16 +94,27 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
 
     /**
      * @notice Call this when the blockchain supports the PREVRANDAO opcode.
+     * @dev Only RANDOM_ADMIN_ROLE can do this.
      */
     function setRanDaoAvailable() external onlyRole(RANDOM_ADMIN_ROLE) {
         ranDaoAvailable = true;
         emit RanDaoEnabled();
     }
 
+    /**
+     * @notice Add a consumer that can use off-chain supplied random.
+     * @dev Only RANDOM_ADMIN_ROLE can do this.
+     * @param _consumer Game contract that inherits from RandomValues.sol that is authorised to use off-chain random.
+     */
     function addOffchainRandomConsumer(address _consumer) external  onlyRole(RANDOM_ADMIN_ROLE) {
         approvedForOffchainRandom[_consumer] = true;
     }
 
+    /**
+     * @notice Remove a consumer that can use off-chain supplied random.
+     * @dev Only RANDOM_ADMIN_ROLE can do this.
+     * @param _consumer Game contract that inherits from RandomValues.sol that is no longer authorised to use off-chain random.
+     */
     function removeOffchainRandomConsumer(address _consumer) external  onlyRole(RANDOM_ADMIN_ROLE) {
         approvedForOffchainRandom[_consumer] = false;
     }

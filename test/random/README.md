@@ -12,7 +12,7 @@ Initialize testing:
 | testReinit                      | Calling initialise a second time fails.           | No         | Yes         |
 | testGetRandomSeedInitTraditional | getRandomSeed(), initial value, method TRADITIONAL | Yes      | Yes         |
 | testGetRandomSeedInitRandao     | getRandomSeed(), initial value, method RANDAO     | Yes        | Yes         |
-| testGetRandomSeedNotGenTraditional | getRandomSeed(), when value not generated      | No         | Yes          |
+| testGetRandomSeedNotGenTraditional | getRandomSeed(), when value not generated      | No         | Yes         |
 | testGetRandomSeedNotGenRandao   | getRandomSeed(), when value not generated         | No         | Yes         |
 | testGetRandomSeedNoOffchainSource | getRandomSeed(), when no offchain source configured | No     | No          |
 
@@ -20,14 +20,16 @@ Control functions tests:
 
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|
-| testRoleAdmin                   | Check DEFAULT_ADMIN_ROLE can assign new roles.    | Yes        | No          |
-| testRoleAdminBadAuth            | Check auth for create new admins.                 | No        | No          |
-| testSetOffchainRandomSource     | setOffchainRandomSource().                        | Yes        | No          |
-| testSetOffchainRandomSourceBadAuth | setOffchainRandomSource() without authorization. | No       | No          |
-| testEnableRanDao                | enableRanDao().                                   | Yes        | No          |
-| testEnableRanDaoBadAuth         | enableRanDao() without authorization.             | No         | No          |
-| testEnableTraditional           | enableTraditional().                              | Yes        | No          |
-| testEnableTraditionalBadAuth    | enableTraditional() without authorization.        | No         | No          |
+| testRoleAdmin                   | Check DEFAULT_ADMIN_ROLE can assign new roles.    | Yes        | Yes         |
+| testRoleAdminBadAuth            | Check auth for create new admins.                 | No         | Yes         |
+| testSetOffchainRandomSource     | setOffchainRandomSource().                        | Yes        | Yes         |
+| testSetOffchainRandomSourceBadAuth | setOffchainRandomSource() without authorization. | No       | Yes         |
+| testSetRanDaoAvailable          | setRanDaoAvailable().                             | Yes        | Yes         |
+| testSetRanDaoAvailableBadAuth   | setRanDaoAvailable() without authorization.       | No         | Yes         |
+| testAddOffchainRandomConsumer   | addOffchainRandomConsumer().                      | Yes        | Yes         |
+| testAddOffchainRandomConsumerBadAuth | addOffchainRandomConsumer() without authorization.| No    | Yes         |
+| testRemoveOffchainRandomConsumer| removeOffchainRandomConsumer().                   | Yes        | Yes         |
+| testRemoveOffchainRandomConsumerBadAuth | removeOffchainRandomConsumer() without authorization.| No | Yes      |
 
 Operational functions tests:
 
@@ -85,4 +87,23 @@ Operational functions tests:
 
 ## RandomValues.sol
 
-TODO
+Initialize testing:
+
+| Test name                       |Description                                        | Happy Case | Implemented |
+|---------------------------------| --------------------------------------------------|------------|-------------|
+| testInit                        | Check that contructor worked.                     | Yes        | Yes         |
+
+
+Operational tests: 
+
+| Test name                       |Description                                        | Happy Case | Implemented |
+|---------------------------------| --------------------------------------------------|------------|-------------|
+| testFirstValue                  | Return a single value                             | Yes        | Yes         |
+| testSecondValue                 | Return two values                                 | Yes        | Yes         |
+| testMultiFetch                  | Fetch a generated number multiple times.          | Yes        | Yes         |
+| testMultiInterleaved            | Interleave multiple requests                      | Yes        | Yes         |
+| testFirstValues                 | Return a single set of values                     | Yes        | Yes         |
+| testSecondValues                | Return two sets of values                         | Yes        | Yes         |
+| testMultiFetchValues            | Fetch a generated set of numbers multiple times.  | Yes        | Yes         |
+| testMultipleGames               | Multiple games in parallel.                       | Yes        | Yes         |
+

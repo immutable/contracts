@@ -14,7 +14,7 @@ Initialize testing:
 | testGetRandomSeedInitRandao     | getRandomSeed(), initial value, method RANDAO     | Yes        | Yes         |
 | testGetRandomSeedNotGenTraditional | getRandomSeed(), when value not generated      | No         | Yes         |
 | testGetRandomSeedNotGenRandao   | getRandomSeed(), when value not generated         | No         | Yes         |
-| testGetRandomSeedNoOffchainSource | getRandomSeed(), when no offchain source configured | No     | No          |
+| testGetRandomSeedNoOffchainSource | getRandomSeed(), when no offchain source configured | No     | Yes         |
 
 Control functions tests:
 
@@ -36,26 +36,23 @@ Operational functions tests:
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|
 | testTradNextBlock               | Check basic request flow                          | Yes        | Yes         |
-| testRanDaoNextBlock             | Check basic request flow                          | Yes        | No          |
-| testOffchainNextBlock           | Check basic request flow                          | Yes        | No          |
+| testRanDaoNextBlock             | Check basic request flow                          | Yes        | Yes         |
+| testOffchainNextBlock           | Check basic request flow                          | Yes        | Yes         |
 | testTradTwoInOneBlock           | Two calls to requestRandomSeed in one block       | Yes        | Yes         |
-| testRanDaoTwoInOneBlock         | Two calls to requestRandomSeed in one block       | Yes        | No          |
-| testOffchainTwoInOneBlock       | Two calls to requestRandomSeed in one block       | Yes        | No          |
+| testRanDaoTwoInOneBlock         | Two calls to requestRandomSeed in one block       | Yes        | Yes         |
+| testOffchainTwoInOneBlock       | Two calls to requestRandomSeed in one block       | Yes        | Yes         |
 | testTradDelayedFulfillment      | Request then wait several blocks before fulfillment | Yes      | Yes         |
-| testRanDaoDelayedFulfillment    | Request then wait several blocks before fulfillment | Yes      | No          |
+| testRanDaoDelayedFulfillment    | Request then wait several blocks before fulfillment | Yes      | Yes         |
 
 Scenario: Generate some random numbers, switch random generation methodology, generate some more
 numbers, check that the numbers generated earlier are still available:
 
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|
-| testSwitchTraditionalRandao     | Traditional -> RanDAO.                            | Yes        | No          |
-| testSwitchTraditionalOffchain   | Traditional -> Off-chain.                         | Yes        | No          |
-| testSwitchRandaoOffchain        | RanDAO -> Traditional.                            | Yes        | No          |
-| testSwitchRandaoOffchain        | RanDAO -> Off-chain.                              | Yes        | No          |
-| testSwitchOffchainTraditional   | Off-chain -> Traditional.                         | Yes        | No          |
-| testSwitchOffchainRandao        | Off-chain -> RanDAO                               | Yes        | No          |
-| testSwitchOffchainOffchain      | Off-chain to another off-chain source.            | Yes        | No          |
+| testSwitchTraditionalOffchain   | Traditional -> Off-chain.                         | Yes        | Yes         |
+| testSwitchRandaoOffchain        | RanDAO -> Off-chain.                              | Yes        | Yes         |
+| testSwitchOffchainOffchain      | Off-chain to another off-chain source.            | Yes        | Yes         |
+| testSwitchOffchainTraditional   | Disable off-chain source.                         | Yes        | Yes         |
 
 
 

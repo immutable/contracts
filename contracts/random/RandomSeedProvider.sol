@@ -42,8 +42,13 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
     // The block number in which the last seed value was generated.
     uint256 public lastBlockRandomGenerated;
 
-    uint256 public prevOffchainRandomRequest;
-    uint256 public lastBlockOffchainRequest;
+    // The block when the last offchain random request occurred.
+    // This is used to limit off-chain random requests to once per block. 
+    uint256 private lastBlockOffchainRequest;
+
+    // The request id returned in the previous off-chain random request.
+    // This is used to limit off-chain random requests to once per block. 
+    uint256 private prevOffchainRandomRequest;
 
     // @notice The source of new random numbers. This could be the special values for 
     // @notice TRADITIONAL or RANDAO or the address of a Offchain Random Source contract.
@@ -51,6 +56,8 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
     // @dev to be switched without stopping in-flight random values from being retrieved.
     address public randomSource;
 
+    // Indicates that this blockchain supports the PREVRANDAO opcode and that
+    // PREVRANDAO should be used rather than block.hash for on-chain random values.
     bool public ranDaoAvailable;
 
     // Indicates an address is allow listed for the offchain random provider.
@@ -173,7 +180,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
         else {
             // If random source is not the address of a valid contract this will revert
             // with no revert information returned.
-            return IOffchainRandomSource(randomSource).getOffchainRandom(_randomFulfillmentIndex); 
+            return IOffchainRandomSource(_randomSource).getOffchainRandom(_randomFulfillmentIndex); 
         }
     }
 

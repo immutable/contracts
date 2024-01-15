@@ -13,6 +13,8 @@ import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.so
 
 contract UninitializedRandomSeedProviderTest is Test {
     error WaitForRandom();
+    event OffchainRandomSourceSet(address _offchainRandomSource);
+    event RanDaoEnabled();
 
     address public constant ONCHAIN = address(0);
 
@@ -48,9 +50,9 @@ contract UninitializedRandomSeedProviderTest is Test {
     function testInit() public {
         assertEq(randomSeedProvider.nextRandomIndex(), 1, "nextRandomIndex");
         assertEq(randomSeedProvider.lastBlockRandomGenerated(), block.number - 1, "lastBlockRandomGenerated");
-        assertEq(randomSeedProvider.prevOffchainRandomRequest(), 0, "prevOffchainRandomRequest");
-        assertEq(randomSeedProvider.lastBlockOffchainRequest(), 0, "lastBlockOffchainRequest");
         assertEq(randomSeedProvider.randomSource(), ONCHAIN, "randomSource");
+        assertFalse(randomSeedProvider.ranDaoAvailable(), "RAN DAO should not be available");
+        assertTrue(randomSeedProviderRanDao.ranDaoAvailable(), "RAN DAO should be available");
     }
 
     function testReinit() public {
@@ -111,6 +113,8 @@ contract ControlRandomSeedProviderTest is UninitializedRandomSeedProviderTest {
 
     function testSetOffchainRandomSource() public {
         vm.prank(randomAdmin);
+        vm.expectEmit(true, true, true, true);
+        emit OffchainRandomSourceSet(NEW_SOURCE);
         randomSeedProvider.setOffchainRandomSource(NEW_SOURCE);
         assertEq(randomSeedProvider.randomSource(), NEW_SOURCE);
     }
@@ -123,6 +127,8 @@ contract ControlRandomSeedProviderTest is UninitializedRandomSeedProviderTest {
     function testSetRanDaoAvailable() public {
         assertEq(randomSeedProvider.ranDaoAvailable(), false);
         vm.prank(randomAdmin);
+        vm.expectEmit(true, true, true, true);
+        emit RanDaoEnabled();
         randomSeedProvider.setRanDaoAvailable();
         assertEq(randomSeedProvider.ranDaoAvailable(), true);
     }
@@ -169,7 +175,7 @@ contract ControlRandomSeedProviderTest is UninitializedRandomSeedProviderTest {
 contract OperationalRandomSeedProviderTest is UninitializedRandomSeedProviderTest {
     MockOffchainSource public offchainSource = new MockOffchainSource();
 
-    function testTradNextBlock () public {
+    function testTradNextBlock() public {
         (uint256 fulfillmentIndex, address source) = randomSeedProvider.requestRandomSeed();
         assertEq(source, ONCHAIN, "source");
         assertEq(fulfillmentIndex, 2, "index");
@@ -182,10 +188,30 @@ contract OperationalRandomSeedProviderTest is UninitializedRandomSeedProviderTes
         available = randomSeedProvider.isRandomSeedReady(fulfillmentIndex, source);
         assertTrue(available, "Should be ready");
 
-        randomSeedProvider.getRandomSeed(fulfillmentIndex, source);
+        bytes32 seed = randomSeedProvider.getRandomSeed(fulfillmentIndex, source);
+        assertNotEq(seed, bytes32(0), "Should not be zero");
     }
 
-    function testOffchainNextBlock () public {
+    function testRanDaoNextBlock() public {
+        (uint256 fulfillmentIndex, address source) = randomSeedProviderRanDao.requestRandomSeed();
+        assertEq(source, ONCHAIN, "source");
+        assertEq(fulfillmentIndex, 2, "index");
+        assertTrue(randomSeedProviderRanDao.ranDaoAvailable());
+
+        bool available = randomSeedProviderRanDao.isRandomSeedReady(fulfillmentIndex, source);
+        assertFalse(available, "Should not be ready yet");
+
+        vm.roll(block.number + 1);
+
+        available = randomSeedProviderRanDao.isRandomSeedReady(fulfillmentIndex, source);
+        assertTrue(available, "Should be ready");
+
+        bytes32 seed = randomSeedProviderRanDao.getRandomSeed(fulfillmentIndex, source);
+        assertNotEq(seed, bytes32(0), "Should not be zero");
+    }
+
+
+    function testOffchainNextBlock() public {
         vm.prank(randomAdmin);
         randomSeedProvider.setOffchainRandomSource(address(offchainSource));
 
@@ -206,7 +232,8 @@ contract OperationalRandomSeedProviderTest is UninitializedRandomSeedProviderTes
         available = randomSeedProvider.isRandomSeedReady(fulfillmentIndex, source);
         assertTrue(available, "Should be ready");
 
-        randomSeedProvider.getRandomSeed(fulfillmentIndex, source);
+        bytes32 seed = randomSeedProvider.getRandomSeed(fulfillmentIndex, source);
+        assertNotEq(seed, bytes32(0), "Should not be zero");
     }
 
     function testTradTwoInOneBlock() public {
@@ -217,7 +244,28 @@ contract OperationalRandomSeedProviderTest is UninitializedRandomSeedProviderTes
         assertEq(randomRequestId1, randomRequestId3, "Request id 1 and request id 3");
     }
 
+    function testRanDaoTwoInOneBlock() public {
+        (uint256 randomRequestId1, ) = randomSeedProviderRanDao.requestRandomSeed();
+        (uint256 randomRequestId2, ) = randomSeedProviderRanDao.requestRandomSeed();
+        (uint256 randomRequestId3, ) = randomSeedProviderRanDao.requestRandomSeed();
+        assertEq(randomRequestId1, randomRequestId2, "Request id 1 and request id 2");
+        assertEq(randomRequestId1, randomRequestId3, "Request id 1 and request id 3");
+    }
 
+    function testOffchainTwoInOneBlock() public {
+        vm.prank(randomAdmin);
+        randomSeedProvider.setOffchainRandomSource(address(offchainSource));
+
+        address aConsumer = makeAddr("aConsumer");
+        vm.prank(randomAdmin);
+        randomSeedProvider.addOffchainRandomConsumer(aConsumer);
+
+        vm.prank(aConsumer);
+        (uint256 fulfillmentIndex1, ) = randomSeedProvider.requestRandomSeed();
+        vm.prank(aConsumer);
+        (uint256 fulfillmentIndex2, ) = randomSeedProvider.requestRandomSeed();
+        assertEq(fulfillmentIndex1, fulfillmentIndex2, "Request id 1 and request id 3");
+    }
 
     function testTradDelayedFulfillment() public {
         (uint256 randomRequestId1, address source1) = randomSeedProvider.requestRandomSeed();
@@ -246,4 +294,148 @@ contract OperationalRandomSeedProviderTest is UninitializedRandomSeedProviderTes
         assertEq(rand1a, rand1c, "rand1a, rand1c: Random Values not equal");
     }
 
+    function testRanDaoDelayedFulfillment() public {
+        (uint256 randomRequestId1, address source1) = randomSeedProviderRanDao.requestRandomSeed();
+        vm.roll(block.number + 1);
+
+        (uint256 randomRequestId2, address source2) = randomSeedProviderRanDao.requestRandomSeed();
+        bytes32 rand1a = randomSeedProviderRanDao.getRandomSeed(randomRequestId1, source1);
+        assertNotEq(rand1a, bytes32(0), "rand1a: Random Values is zero");
+        (uint256 randomRequestId3,) = randomSeedProviderRanDao.requestRandomSeed();
+        assertNotEq(randomRequestId1, randomRequestId2, "Request id 1 and request id 2");
+        assertEq(randomRequestId2, randomRequestId3, "Request id 2 and request id 3");
+
+        vm.roll(block.number + 1);
+        bytes32 rand1b = randomSeedProviderRanDao.getRandomSeed(randomRequestId1, source1);
+        assertNotEq(rand1b, bytes32(0), "rand1b: Random Values is zero");
+        {
+            bytes32 rand2 = randomSeedProviderRanDao.getRandomSeed(randomRequestId2, source2);
+            assertNotEq(rand2, bytes32(0), "rand2: Random Values is zero");
+            assertNotEq(rand1a, rand2, "rand1a, rand2: Random Values equal");
+        }
+        vm.roll(block.number + 1);
+        bytes32 rand1c = randomSeedProviderRanDao.getRandomSeed(randomRequestId1, source1);
+        assertNotEq(rand1c, bytes32(0), "rand1c: Random Values is zero");
+
+        assertEq(rand1a, rand1b, "rand1a, rand1b: Random Values not equal");
+        assertEq(rand1a, rand1c, "rand1a, rand1c: Random Values not equal");
+    }
 }
+
+contract SwitchingRandomSeedProviderTest is UninitializedRandomSeedProviderTest {
+    MockOffchainSource public offchainSource = new MockOffchainSource();
+    MockOffchainSource public offchainSource2 = new MockOffchainSource();
+
+    function testSwitchTraditionalOffchain() public {
+        address aConsumer = makeAddr("aConsumer");
+        vm.prank(randomAdmin);
+        randomSeedProvider.addOffchainRandomConsumer(aConsumer);
+
+        (uint256 fulfillmentIndex1, address source1) = randomSeedProvider.requestRandomSeed();
+        assertEq(source1, ONCHAIN, "source");
+        assertEq(fulfillmentIndex1, 2, "index");
+        vm.roll(block.number + 1);
+        bytes32 seed1 = randomSeedProvider.getRandomSeed(fulfillmentIndex1, source1);
+
+        vm.prank(randomAdmin);
+        randomSeedProvider.setOffchainRandomSource(address(offchainSource));
+
+        vm.prank(aConsumer);
+        (uint256 fulfillmentIndex2, address source2) = randomSeedProvider.requestRandomSeed();
+        assertEq(source2, address(offchainSource), "offchain source");
+        assertEq(fulfillmentIndex2, 1000, "index");
+
+        offchainSource.setIsReady(true);
+        bytes32 seed2 = randomSeedProvider.getRandomSeed(fulfillmentIndex2, source2);
+
+        bytes32 seed1a = randomSeedProvider.getRandomSeed(fulfillmentIndex1, source1);
+
+        assertEq(seed1, seed1a, "Seed still available");
+        assertNotEq(seed1, seed2, "Must be different");
+    }
+
+    function testSwitchRanDaoOffchain() public {
+        address aConsumer = makeAddr("aConsumer");
+        vm.prank(randomAdmin);
+        randomSeedProviderRanDao.addOffchainRandomConsumer(aConsumer);
+
+        (uint256 fulfillmentIndex1, address source1) = randomSeedProviderRanDao.requestRandomSeed();
+        assertEq(source1, ONCHAIN, "source");
+        assertEq(fulfillmentIndex1, 2, "index");
+        vm.roll(block.number + 1);
+        bytes32 seed1 = randomSeedProviderRanDao.getRandomSeed(fulfillmentIndex1, source1);
+
+        vm.prank(randomAdmin);
+        randomSeedProviderRanDao.setOffchainRandomSource(address(offchainSource));
+
+        vm.prank(aConsumer);
+        (uint256 fulfillmentIndex2, address source2) = randomSeedProviderRanDao.requestRandomSeed();
+        assertEq(source2, address(offchainSource), "offchain source");
+        assertEq(fulfillmentIndex2, 1000, "index");
+
+        offchainSource.setIsReady(true);
+        bytes32 seed2 = randomSeedProviderRanDao.getRandomSeed(fulfillmentIndex2, source2);
+
+        bytes32 seed1a = randomSeedProviderRanDao.getRandomSeed(fulfillmentIndex1, source1);
+
+        assertEq(seed1, seed1a, "Seed still available");
+        assertNotEq(seed1, seed2, "Must be different");
+    }
+
+    function testSwitchOffchainOffchain() public {
+        address aConsumer = makeAddr("aConsumer");
+        vm.prank(randomAdmin);
+        randomSeedProviderRanDao.addOffchainRandomConsumer(aConsumer);
+
+        vm.prank(randomAdmin);
+        randomSeedProviderRanDao.setOffchainRandomSource(address(offchainSource));
+
+        vm.prank(aConsumer);
+        (uint256 fulfillmentIndex1, address source1) = randomSeedProviderRanDao.requestRandomSeed();
+        assertEq(source1, address(offchainSource), "offchain source");
+        assertEq(fulfillmentIndex1, 1000, "index");
+
+        vm.prank(randomAdmin);
+        randomSeedProviderRanDao.setOffchainRandomSource(address(offchainSource2));
+
+        vm.prank(aConsumer);
+        (uint256 fulfillmentIndex2, address source2) = randomSeedProviderRanDao.requestRandomSeed();
+        assertEq(source2, address(offchainSource2), "offchain source 2");
+        assertEq(fulfillmentIndex2, 1000, "index");
+
+        offchainSource.setIsReady(true);
+        randomSeedProviderRanDao.getRandomSeed(fulfillmentIndex1, source1);
+        offchainSource2.setIsReady(true);
+        randomSeedProviderRanDao.getRandomSeed(fulfillmentIndex2, source2);
+    }
+
+
+    function testSwitchOffchainTraditional() public {
+        address aConsumer = makeAddr("aConsumer");
+        vm.prank(randomAdmin);
+        randomSeedProviderRanDao.addOffchainRandomConsumer(aConsumer);
+
+        vm.prank(randomAdmin);
+        randomSeedProviderRanDao.setOffchainRandomSource(address(offchainSource));
+
+        vm.prank(aConsumer);
+        (uint256 fulfillmentIndex1, address source1) = randomSeedProviderRanDao.requestRandomSeed();
+        assertEq(source1, address(offchainSource), "offchain source");
+        assertEq(fulfillmentIndex1, 1000, "index");
+
+        vm.prank(randomAdmin);
+        randomSeedProviderRanDao.setOffchainRandomSource(ONCHAIN);
+
+        vm.prank(aConsumer);
+        (uint256 fulfillmentIndex2, address source2) = randomSeedProviderRanDao.requestRandomSeed();
+        assertEq(source2, ONCHAIN, "on chain");
+        assertEq(fulfillmentIndex2, 2, "index");
+
+        offchainSource.setIsReady(true);
+        randomSeedProviderRanDao.getRandomSeed(fulfillmentIndex1, source1);
+
+        vm.roll(block.number + 1);
+        randomSeedProviderRanDao.getRandomSeed(fulfillmentIndex2, source2);
+    }
+}
+

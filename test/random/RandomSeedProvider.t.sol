@@ -18,6 +18,8 @@ contract UninitializedRandomSeedProviderTest is Test {
     event OffchainRandomConsumerAdded(address _consumer);
     event OffchainRandomConsumerRemoved(address _consumer);
 
+    bytes32 public constant DEFAULT_ADMIN_ROLE = bytes32(0);
+    bytes32 public constant RANDOM_ADMIN_ROLE = keccak256("RANDOM_ADMIN_ROLE");
 
     address public constant ONCHAIN = address(0);
 
@@ -51,12 +53,30 @@ contract UninitializedRandomSeedProviderTest is Test {
     }
 
     function testInit() public {
-        assertEq(randomSeedProvider.nextRandomIndex(), 1, "nextRandomIndex");
-        assertEq(randomSeedProvider.lastBlockRandomGenerated(), block.number - 1, "lastBlockRandomGenerated");
-        assertEq(randomSeedProvider.randomSource(), ONCHAIN, "randomSource");
-        assertFalse(randomSeedProvider.ranDaoAvailable(), "RAN DAO should not be available");
+        // This set-up mirrors what is in the setUp function. Have this code here
+        // so that the coverage tool picks up the use of the initialize function.
+        RandomSeedProvider impl1 = new RandomSeedProvider();
+        TransparentUpgradeableProxy proxy1 = new TransparentUpgradeableProxy(address(impl1), proxyAdmin, 
+            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, false));
+        RandomSeedProvider randomSeedProvider1 = RandomSeedProvider(address(proxy1));
+        vm.roll(block.number + 1);
+
+        // Check that the initialize funciton has worked correctly.
+        assertEq(randomSeedProvider1.nextRandomIndex(), 1, "nextRandomIndex");
+        assertEq(randomSeedProvider1.lastBlockRandomGenerated(), block.number - 1, "lastBlockRandomGenerated");
+        assertEq(randomSeedProvider1.randomSource(), ONCHAIN, "randomSource");
+        assertFalse(randomSeedProvider1.ranDaoAvailable(), "RAN DAO should not be available");
         assertTrue(randomSeedProviderRanDao.ranDaoAvailable(), "RAN DAO should be available");
+
+        assertTrue(randomSeedProvider1.hasRole(DEFAULT_ADMIN_ROLE, roleAdmin));
+        assertTrue(randomSeedProvider1.hasRole(RANDOM_ADMIN_ROLE, randomAdmin));
     }
+
+    // This test does nothing, except call initialize, which has been called in the setUp 
+    // function and tested in various functions. 
+    function testInit2() public virtual {
+    }
+
 
     function testReinit() public {
         vm.expectRevert();
@@ -94,7 +114,6 @@ contract UninitializedRandomSeedProviderTest is Test {
 
 
 contract ControlRandomSeedProviderTest is UninitializedRandomSeedProviderTest {
-    bytes32 public constant RANDOM_ADMIN_ROLE = keccak256("RANDOM_ADMIN_ROLE");
     address public constant NEW_SOURCE = address(10001);
     address public constant CONSUMER = address(10001);
 
@@ -242,6 +261,22 @@ contract OperationalRandomSeedProviderTest is UninitializedRandomSeedProviderTes
         bytes32 seed = randomSeedProvider.getRandomSeed(fulfillmentIndex, source);
         assertNotEq(seed, bytes32(0), "Should not be zero");
     }
+
+    function testOffchainNotReady() public {
+        vm.prank(randomAdmin);
+        randomSeedProvider.setOffchainRandomSource(address(offchainSource));
+
+        address aConsumer = makeAddr("aConsumer");
+        vm.prank(randomAdmin);
+        randomSeedProvider.addOffchainRandomConsumer(aConsumer);
+
+        vm.prank(aConsumer);
+        (uint256 fulfillmentIndex, address source) = randomSeedProvider.requestRandomSeed();
+
+        vm.expectRevert(abi.encodeWithSelector(WaitForRandom.selector));
+        randomSeedProvider.getRandomSeed(fulfillmentIndex, source);
+    }
+
 
     function testTradTwoInOneBlock() public {
         (uint256 randomRequestId1, ) = randomSeedProvider.requestRandomSeed();

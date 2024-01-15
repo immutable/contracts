@@ -38,6 +38,7 @@ Operational functions tests:
 | testTradNextBlock               | Check basic request flow                          | Yes        | Yes         |
 | testRanDaoNextBlock             | Check basic request flow                          | Yes        | Yes         |
 | testOffchainNextBlock           | Check basic request flow                          | Yes        | Yes         |
+| testOffchainNotReady            | Attempt to fetch offchain random when not ready   | No         | Yes         |
 | testTradTwoInOneBlock           | Two calls to requestRandomSeed in one block       | Yes        | Yes         |
 | testRanDaoTwoInOneBlock         | Two calls to requestRandomSeed in one block       | Yes        | Yes         |
 | testOffchainTwoInOneBlock       | Two calls to requestRandomSeed in one block       | Yes        | Yes         |

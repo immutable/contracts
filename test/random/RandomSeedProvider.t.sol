@@ -15,6 +15,9 @@ contract UninitializedRandomSeedProviderTest is Test {
     error WaitForRandom();
     event OffchainRandomSourceSet(address _offchainRandomSource);
     event RanDaoEnabled();
+    event OffchainRandomConsumerAdded(address _consumer);
+    event OffchainRandomConsumerRemoved(address _consumer);
+
 
     address public constant ONCHAIN = address(0);
 
@@ -143,6 +146,8 @@ contract ControlRandomSeedProviderTest is UninitializedRandomSeedProviderTest {
     function testAddOffchainRandomConsumer() public {
         assertEq(randomSeedProvider.approvedForOffchainRandom(CONSUMER), false);
         vm.prank(randomAdmin);
+        vm.expectEmit(true, true, true, true);
+        emit OffchainRandomConsumerAdded(CONSUMER);
         randomSeedProvider.addOffchainRandomConsumer(CONSUMER);
         assertEq(randomSeedProvider.approvedForOffchainRandom(CONSUMER), true);
     }
@@ -158,6 +163,8 @@ contract ControlRandomSeedProviderTest is UninitializedRandomSeedProviderTest {
         randomSeedProvider.addOffchainRandomConsumer(CONSUMER);
         assertEq(randomSeedProvider.approvedForOffchainRandom(CONSUMER), true);
         vm.prank(randomAdmin);
+        vm.expectEmit(true, true, true, true);
+        emit OffchainRandomConsumerRemoved(CONSUMER);
         randomSeedProvider.removeOffchainRandomConsumer(CONSUMER);
         assertEq(randomSeedProvider.approvedForOffchainRandom(CONSUMER), false);
     }

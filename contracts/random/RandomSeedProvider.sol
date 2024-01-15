@@ -25,6 +25,12 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
     // Indicates that new random values will be generated using the RanDAO source.
     event RanDaoEnabled();
 
+    // Indicates that a game contract that can consume off-chain random has been added.
+    event OffchainRandomConsumerAdded(address _consumer);
+
+    // Indicates that a game contract that can consume off-chain random has been removed.
+    event OffchainRandomConsumerRemoved(address _consumer);
+
     // Admin role that can enable RanDAO and offchain random sources.
     bytes32 public constant RANDOM_ADMIN_ROLE = keccak256("RANDOM_ADMIN_ROLE");
 
@@ -115,6 +121,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
      */
     function addOffchainRandomConsumer(address _consumer) external  onlyRole(RANDOM_ADMIN_ROLE) {
         approvedForOffchainRandom[_consumer] = true;
+        emit OffchainRandomConsumerAdded(_consumer);
     }
 
     /**
@@ -124,6 +131,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
      */
     function removeOffchainRandomConsumer(address _consumer) external  onlyRole(RANDOM_ADMIN_ROLE) {
         approvedForOffchainRandom[_consumer] = false;
+        emit OffchainRandomConsumerRemoved(_consumer);
     }
 
 

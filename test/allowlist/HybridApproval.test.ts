@@ -97,9 +97,6 @@ describe("Royalty Checks with Hybrid ERC721", function () {
   });
 
   describe("Transfers", function () {
-    beforeEach(async function () {
-      await erc721.connect(owner).setOperatorAllowlistRegistry(operatorAllowlist.address);
-    });
     it("Should freely allow transfers between EOAs", async function () {
       const first = await erc721.mintBatchByQuantityThreshold();
       await erc721.connect(minter).mintByQuantity(accs[0].address, 1);
@@ -187,9 +184,6 @@ describe("Royalty Checks with Hybrid ERC721", function () {
   });
 
   describe("Malicious Contracts", function () {
-    beforeEach(async function () {
-      await erc721.connect(owner).setOperatorAllowlistRegistry(operatorAllowlist.address);
-    });
     // The EOA disguise attack vector is a where a pre-computed CREATE2 deterministic address is disguised as an EOA.
     // By virtue of this, approvals and transfers to this address will pass. We need to catch actions from this address
     // once it is deployed.

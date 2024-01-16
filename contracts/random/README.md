@@ -2,22 +2,27 @@
 
 This directory contains contracts that provide random number generation capability using on-chain and off-chain sources. 
 
-The reason for using these contracts is that:
+The reasons for using these contracts are that:
 
-* Leverage the design created by Immutable's cryptographers.
-* Have a single API to build against.
-* The quality of the random numbers generated will improve as new capabilities are added to the platform.
+* Enables you to leverage Immutable's cryptographers' design for random number generation.
+* Allows you to build your game against an API that won't change.
+* The quality of the random numbers generated will improve as new capabilities are added to the platform. That is, the migration from ```block.hash``` to ```block.prevrandao``` when the BFT fork occurs will be seemless.
+* For off-chain random, allows you to leverage the random number provider that Immutable has agreements with.
 
 # Status
 
-Latest contract audit: Not audited yet.
+Contract audits:
+
+| Description               | Date             |Version Audited  | Link to Report |
+|---------------------------|------------------|-----------------|----------------|
+| Not audited               | -                | -               | -              |
 
 Deployments:
 
-| Location  | Version Deployed | Address |
-|-----------|------------------|---------|
-| Testnet   | Not deployed     |         |
-| Mainnet   | Not deployed     |         |
+| Location                  | Version Deployed | Address |
+|---------------------------|------------------|---------|
+| Immutable zkEVM Testnet   | Not deployed     | -       |
+| Immutable zkEVM Mainnet   | Not deployed     | -       |
 
 ## Architecture
 

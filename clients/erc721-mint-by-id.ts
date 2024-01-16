@@ -542,19 +542,4 @@ export class ERC721MintByIDClient {
       ...overrides,
     });
   }
-
-  /**
-   * @returns a populated transaction for the setOperatorAllowlistRegistry contract function
-   */
-  public async populateSetOperatorAllowlistRegistry(
-    _operatorAllowlist: PromiseOrValue<string>,
-    overrides: Overrides & {
-      from?: PromiseOrValue<string>;
-    } = {}
-  ): Promise<PopulatedTransaction> {
-    return await this.contract.populateTransaction.setOperatorAllowlistRegistry(_operatorAllowlist, {
-      ...defaultGasOverrides,
-      ...overrides,
-    });
-  }
 }

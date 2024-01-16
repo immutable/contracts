@@ -45,33 +45,6 @@ describe("Allowlisted ERC721 Transfers", function () {
     it("Should have operatorAllowlist set upon deployment", async function () {
       expect(await erc721.operatorAllowlist()).to.equal(operatorAllowlist.address);
     });
-
-    it("Should not allow contracts that do not implement the IOperatorAllowlist to be set", async function () {
-      // Deploy another contract that implements IERC165, but not IOperatorAllowlist
-      const factory = await ethers.getContractFactory("ImmutableERC721MintByID");
-      const erc721Two = await factory.deploy(
-        owner.address,
-        "",
-        "",
-        "",
-        "",
-        operatorAllowlist.address,
-        owner.address,
-        0
-      );
-
-      await expect(erc721.connect(owner).setOperatorAllowlistRegistry(erc721Two.address)).to.be.revertedWith(
-        "AllowlistDoesNotImplementIOperatorAllowlist"
-      );
-    });
-
-    it("Should not allow a non-admin to access the function to update the registry", async function () {
-      await expect(
-        erc721.connect(registrar).setOperatorAllowlistRegistry(operatorAllowlist.address)
-      ).to.be.revertedWith(
-        "AccessControl: account 0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
-      );
-    });
   });
 
   describe("Approvals", function () {
@@ -128,9 +101,6 @@ describe("Allowlisted ERC721 Transfers", function () {
   });
 
   describe("Transfers", function () {
-    beforeEach(async function () {
-      await erc721.connect(owner).setOperatorAllowlistRegistry(operatorAllowlist.address);
-    });
     it("Should freely allow transfers between EOAs", async function () {
       await erc721.connect(owner).grantMinterRole(accs[0].address);
       await erc721.connect(owner).grantMinterRole(accs[1].address);
@@ -214,9 +184,6 @@ describe("Allowlisted ERC721 Transfers", function () {
   });
 
   describe("Malicious Contracts", function () {
-    beforeEach(async function () {
-      await erc721.connect(owner).setOperatorAllowlistRegistry(operatorAllowlist.address);
-    });
     // The EOA disguise attack vector is a where a pre-computed CREATE2 deterministic address is disguised as an EOA.
     // By virtue of this, approvals and transfers to this address will pass. We need to catch actions from this address
     // once it is deployed.

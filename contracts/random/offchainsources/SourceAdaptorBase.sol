@@ -3,18 +3,16 @@
 pragma solidity 0.8.19;
 
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
-import "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
-import "./VRFCoordinatorV2Interface.sol";
 import "../IOffchainRandomSource.sol";
 
 /**
- * @notice Fetch random numbers from the Chainlink Verifiable Random 
- * @notice Function (VRF).
+ * @notice All Verifiable Random Function (VRF) source adaptors derive from this contract.
  * @dev This contract is NOT upgradeable. If there is an issue with this code, deploy a new
  *      version of the code and have the random seed provider point to the new version.
  */
-contract ChainlinkSourceAdaptor is VRFConsumerBaseV2, AccessControlEnumerable, IOffchainRandomSource {
+abstract contract SourceAdaptorBase is AccessControlEnumerable, IOffchainRandomSource {
 
+    error NotVrfContract();
     
     event UnexpectedRandomWordsLength(uint256 _length);
 
@@ -26,39 +24,27 @@ contract ChainlinkSourceAdaptor is VRFConsumerBaseV2, AccessControlEnumerable, I
     // We only need one word, and can expand that word in this system of contracts.
     uint32 public constant NUM_WORDS = 1;
 
-    VRFCoordinatorV2Interface private immutable vrfCoordinator;
-
-    bytes32 public keyHash;
-    uint64 public subId;
-    uint32 public callbackGasLimit;
-
+    // The values returned by the VRF.
     mapping (uint256 => bytes32) private randomOutput;
 
+    // VRF contract.
+    address internal vrfCoordinator;
 
-    constructor(address _roleAdmin, address _configAdmin, address _vrfCoordinator, bytes32 _keyHash, 
-        uint64 _subId, uint32 _callbackGasLimit) VRFConsumerBaseV2(_vrfCoordinator) {
+
+    constructor(address _roleAdmin, address _configAdmin, address _vrfCoordinator) {
         _grantRole(DEFAULT_ADMIN_ROLE, _roleAdmin);
         _grantRole(CONFIG_ADMIN_ROLE, _configAdmin);
-        vrfCoordinator = VRFCoordinatorV2Interface(_vrfCoordinator);
-
-        keyHash = _keyHash;
-        subId = _subId;
-        callbackGasLimit = _callbackGasLimit;
+        vrfCoordinator = _vrfCoordinator;
     }
 
-    function configureRequests(bytes32 _keyHash, uint64 _subId, uint32 _callbackGasLimit) external onlyRole(CONFIG_ADMIN_ROLE) {
-        keyHash = _keyHash;
-        subId = _subId;
-        callbackGasLimit = _callbackGasLimit;
-    }
-
-    function requestOffchainRandom() external returns(uint256 _requestId) {
-        return vrfCoordinator.requestRandomWords(keyHash, subId, MIN_CONFIRMATIONS, callbackGasLimit, NUM_WORDS);
-    }
 
 
 // Call back
-    function fulfillRandomWords(uint256 _requestId, uint256[] memory _randomWords) internal virtual override {
+    function _fulfillRandomWords(uint256 _requestId, uint256[] memory _randomWords) internal {
+        if (msg.sender != address(vrfCoordinator)) {
+            revert NotVrfContract();
+        }
+
         // NOTE: This function call is not allowed to fail.
         // Only one word should be returned....
         if (_randomWords.length != 1) {
@@ -80,5 +66,4 @@ contract ChainlinkSourceAdaptor is VRFConsumerBaseV2, AccessControlEnumerable, I
     function isOffchainRandomReady(uint256 _fulfillmentIndex) external view returns(bool) {
         return randomOutput[_fulfillmentIndex] != bytes32(0);
     }
-
 }

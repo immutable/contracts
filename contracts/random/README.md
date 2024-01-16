@@ -1,6 +1,23 @@
 # Random Number Generation
 
-This directory contains contracts that provide random number generation.
+This directory contains contracts that provide random number generation capability using on-chain and off-chain sources. 
+
+The reason for using these contracts is that:
+
+* Leverage the design created by Immutable's cryptographers.
+* Have a single API to build against.
+* The quality of the random numbers generated will improve as new capabilities are added to the platform.
+
+# Status
+
+Latest contract audit: Not audited yet.
+
+Deployments:
+
+| Location  | Version Deployed | Address |
+|-----------|------------------|---------|
+| Testnet   | Not deployed     |         |
+| Mainnet   | Not deployed     |         |
 
 ## Architecture
 
@@ -34,4 +51,6 @@ The ```_requestRandomValueCreation``` returns a value ```_randomRequestId```. Th
 * The game contract calls ```_fetchRandom```, passing in the ```_randomRequestId```. The random seed is returned to the RandomValue.sol, which then customises the value prior returning it to the game.
 
 
-Diagram source here: https://sequencediagram.org/index.html#initialData=title%20Random%20Number%20Generation%0A%0Aparticipant%20%22Game.sol%22%20as%20Game%0Aparticipant%20%22RandomValue.sol%22%20as%20RV%0Aparticipant%20%22RandomSeedProvider.sol%22%20as%20RM%0A%0Agroup%20Player%20purchases%20a%20random%20action%0AGame-%3ERV%3A%20_requestRandomValueCreation()%0ARV-%3ERM%3A%20requestRandomSeed()%0ARV%3C--RM%3A%20_seedRequestId%2C%20_source%0AGame%3C--RV%3A%20_randomRequestId%0Aend%0A%0Anote%20over%20Game%2CRM%3AWait%20for%20a%20block%20to%20be%20produced%20or%20an%20off-chain%20random%20to%20be%20delivered.%0A%0Agroup%20Check%20random%20value%20is%20ready%0AGame-%3ERV%3A%20isRandomValueReady(_randomRequestId)%0ARV-%3ERM%3A%20isRandomSeedReady(%5Cn_seedRequestId%2C%20_source)%0ARV%3C--RM%3A%20true%0AGame%3C--RV%3A%20true%0Aend%0A%0Agroup%20Game%20delivers%20%2F%20reveals%20random%20action%0AGame-%3ERV%3A%20fetchRandom(_randomRequestId)%0ARV-%3ERM%3A%20getRandomSeed(%5Cn_seedRequestId%2C%20_source)%0ARV%3C--RM%3A%20_randomSeed%0ARV-%3ERV%3A%20Personalise%20random%20number%20%5Cnby%20game%2C%20player%2C%20and%20request%5Cnnumber.%0AGame%3C--RV%3A%20_randomValue%0Aend%0A%0A%0A%0A%0A%0A
+# Notes
+
+Sequence diagram source [here](https://sequencediagram.org/index.html#initialData=title%20Random%20Number%20Generation%0A%0Aparticipant%20%22Game.sol%22%20as%20Game%0Aparticipant%20%22RandomValue.sol%22%20as%20RV%0Aparticipant%20%22RandomSeedProvider.sol%22%20as%20RM%0A%0Agroup%20Player%20purchases%20a%20random%20action%0AGame-%3ERV%3A%20_requestRandomValueCreation()%0ARV-%3ERM%3A%20requestRandomSeed()%0ARV%3C--RM%3A%20_seedRequestId%2C%20_source%0AGame%3C--RV%3A%20_randomRequestId%0Aend%0A%0Anote%20over%20Game%2CRM%3AWait%20for%20a%20block%20to%20be%20produced%20or%20an%20off-chain%20random%20to%20be%20delivered.%0A%0Agroup%20Check%20random%20value%20is%20ready%0AGame-%3ERV%3A%20isRandomValueReady(_randomRequestId)%0ARV-%3ERM%3A%20isRandomSeedReady(%5Cn_seedRequestId%2C%20_source)%0ARV%3C--RM%3A%20true%0AGame%3C--RV%3A%20true%0Aend%0A%0Agroup%20Game%20delivers%20%2F%20reveals%20random%20action%0AGame-%3ERV%3A%20fetchRandom(_randomRequestId)%0ARV-%3ERM%3A%20getRandomSeed(%5Cn_seedRequestId%2C%20_source)%0ARV%3C--RM%3A%20_randomSeed%0ARV-%3ERV%3A%20Personalise%20random%20number%20%5Cnby%20game%2C%20player%2C%20and%20request%5Cnnumber.%0AGame%3C--RV%3A%20_randomValue%0Aend%0A%0A%0A%0A%0A%0A).

@@ -72,12 +72,6 @@ contract UninitializedRandomSeedProviderTest is Test {
         assertTrue(randomSeedProvider1.hasRole(RANDOM_ADMIN_ROLE, randomAdmin));
     }
 
-    // This test does nothing, except call initialize, which has been called in the setUp 
-    // function and tested in various functions. 
-    function testInit2() public virtual {
-    }
-
-
     function testReinit() public {
         vm.expectRevert();
         randomSeedProvider.initialize(roleAdmin, randomAdmin, true);

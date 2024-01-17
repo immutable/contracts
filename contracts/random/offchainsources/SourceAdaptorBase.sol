@@ -11,8 +11,6 @@ import "../IOffchainRandomSource.sol";
  *      version of the code and have the random seed provider point to the new version.
  */
 abstract contract SourceAdaptorBase is AccessControlEnumerable, IOffchainRandomSource {
-
-    error NotVrfContract();
     
     event UnexpectedRandomWordsLength(uint256 _length);
 
@@ -28,7 +26,7 @@ abstract contract SourceAdaptorBase is AccessControlEnumerable, IOffchainRandomS
     mapping (uint256 => bytes32) private randomOutput;
 
     // VRF contract.
-    address internal vrfCoordinator;
+    address public vrfCoordinator;
 
 
     constructor(address _roleAdmin, address _configAdmin, address _vrfCoordinator) {
@@ -41,10 +39,6 @@ abstract contract SourceAdaptorBase is AccessControlEnumerable, IOffchainRandomS
 
 // Call back
     function _fulfillRandomWords(uint256 _requestId, uint256[] memory _randomWords) internal {
-        if (msg.sender != address(vrfCoordinator)) {
-            revert NotVrfContract();
-        }
-
         // NOTE: This function call is not allowed to fail.
         // Only one word should be returned....
         if (_randomWords.length != 1) {

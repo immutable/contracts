@@ -7,6 +7,8 @@ import "../SourceAdaptorBase.sol";
 
 
 contract SupraSourceAdaptor is SourceAdaptorBase {
+    error NotVrfContract();
+
     address public subscriptionAccount;
 
     constructor(address _roleAdmin, address _configAdmin, address _vrfCoordinator, address _subscription) 
@@ -20,6 +22,11 @@ contract SupraSourceAdaptor is SourceAdaptorBase {
     }
 
     function fulfillRandomWords(uint256 _requestId, uint256[] calldata _randomWords) external {
+        if (msg.sender != address(vrfCoordinator)) {
+            revert NotVrfContract();
+        }
+
+
         _fulfillRandomWords(_requestId, _randomWords);
     }
 }

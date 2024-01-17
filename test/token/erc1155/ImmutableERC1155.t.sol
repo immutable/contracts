@@ -1,4 +1,5 @@
-// SPDX-License-Identifier: UNLICENSED
+// Copyright Immutable Pty Ltd 2018 - 2024
+// SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
@@ -46,7 +47,7 @@ contract ImmutableERC1155Test is Test {
 
     function setUp() public {
         DeployOperatorAllowlist deployScript = new DeployOperatorAllowlist();
-        proxyAddr = deployScript.run(owner, owner);
+        proxyAddr = deployScript.run(owner, owner, owner);
         operatorAllowlist = OperatorAllowlistUpgradeable(proxyAddr);
 
         immutableERC1155 = new ImmutableERC1155(
@@ -60,11 +61,7 @@ contract ImmutableERC1155Test is Test {
         );
 
         operatorAddrs.push(minter);
-        vm.startPrank(owner);
-        bytes32 regiRole = operatorAllowlist.REGISTRAR_ROLE();
-        operatorAllowlist.grantRegistrarRole(owner);
-        assertTrue(operatorAllowlist.hasRole(regiRole, owner));
-        vm.stopPrank();
+        assertTrue(operatorAllowlist.hasRole(operatorAllowlist.REGISTRAR_ROLE(), owner));
 
         sign = new Sign(immutableERC1155.DOMAIN_SEPARATOR());
         vm.prank(owner);
@@ -101,7 +98,7 @@ contract ImmutableERC1155Test is Test {
 
     function _addAddrToAllowListAndApprove() private {
         vm.startPrank(owner);
-        operatorAllowlist.addAddressToAllowlist(operatorAddrs);
+        operatorAllowlist.addAddressesToAllowlist(operatorAddrs);
         immutableERC1155.setApprovalForAll(minter, true);
         vm.stopPrank();
     }

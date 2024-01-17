@@ -9,7 +9,7 @@ import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 // Interfaces
-import {IOperatorAllowlist} from "./IOperatorAllowlist.sol";
+import {IOperatorAllowlist} from "../../allowlist/IOperatorAllowlist.sol";
 
 // Interface to retrieve the implemention stored inside the Proxy contract
 interface IProxy {

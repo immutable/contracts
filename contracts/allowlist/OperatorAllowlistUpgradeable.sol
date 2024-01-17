@@ -1,30 +1,36 @@
-// Copyright Immutable Pty Ltd 2018 - 2023
+// Copyright Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {AccessControlEnumerableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 
 // Introspection
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 // Interfaces
 import {IOperatorAllowlist} from "./IOperatorAllowlist.sol";
-
-// Interface to retrieve the implemention stored inside the Proxy contract
-interface IProxy {
-    // Returns the current implementation address used by the proxy contract
-    function PROXY_getImplementation() external view returns (address);
-}
+import {IWalletProxy} from "./IWalletProxy.sol";
 
 /*
     OperatorAllowlist is an implementation of a Allowlist registry, storing addresses and bytecode
     which are allowed to be approved operators and execute transfers of interfacing token contracts (e.g. ERC721/ERC1155).
     The registry will be a deployed contract that tokens may interface with and point to.
-    OperatorAllowlist is not designed to be upgradeable or extended.
 */
 
-contract OperatorAllowlistUpgradeable is ERC165, AccessControlUpgradeable, UUPSUpgradeable, IOperatorAllowlist {
+contract OperatorAllowlistUpgradeable is
+    ERC165,
+    AccessControlEnumerableUpgradeable,
+    UUPSUpgradeable,
+    IOperatorAllowlist
+{
+    ///     =====       Events       =====
+
+    /// @notice Emitted when a target address is added or removed from the Allowlist
+    event AddressAllowlistChanged(address indexed target, bool added);
+
+    /// @notice Emitted when a target smart contract wallet is added or removed from the Allowlist
+    event WalletAllowlistChanged(bytes32 indexed targetBytes, address indexed targetAddress, bool added);
     ///     =====   State Variables  =====
 
     /// @notice Only REGISTRAR_ROLE can invoke white listing registration and removal
@@ -42,17 +48,6 @@ contract OperatorAllowlistUpgradeable is ERC165, AccessControlUpgradeable, UUPSU
     /// @notice Mapping of Allowlisted bytecodes
     mapping(bytes32 => bool) private bytecodeAllowlist;
 
-    /// @notice storage gap for additional variables for upgrades
-    uint256[20] __gap;
-
-    ///     =====       Events       =====
-
-    /// @notice Emitted when a target address is added or removed from the Allowlist
-    event AddressAllowlistChanged(address indexed target, bool added);
-
-    /// @notice Emitted when a target smart contract wallet is added or removed from the Allowlist
-    event WalletAllowlistChanged(bytes32 indexed targetBytes, address indexed targetAddress, bool added);
-
     ///     =====   Initializer  =====
 
     /**
@@ -60,20 +55,21 @@ contract OperatorAllowlistUpgradeable is ERC165, AccessControlUpgradeable, UUPSU
      * @param _roleAdmin the address to grant `DEFAULT_ADMIN_ROLE` to
      * @param _upgradeAdmin the address to grant `UPGRADE_ROLE` to
      */
-    function initialize(address _roleAdmin, address _upgradeAdmin) public initializer {
+    function initialize(address _roleAdmin, address _upgradeAdmin, address _registerarAdmin) public initializer {
         __UUPSUpgradeable_init();
         __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, _roleAdmin);
         _grantRole(UPGRADE_ROLE, _upgradeAdmin);
+        _grantRole(REGISTRAR_ROLE, _registerarAdmin);
     }
 
     ///     =====  External functions  =====
 
     /**
-     * @notice Add a target address to Allowlist
+     * @notice Adds a list of multiple addresses to Allowlist
      * @param addressTargets the addresses to be added to the allowlist
      */
-    function addAddressToAllowlist(address[] calldata addressTargets) external onlyRole(REGISTRAR_ROLE) {
+    function addAddressesToAllowlist(address[] calldata addressTargets) external onlyRole(REGISTRAR_ROLE) {
         for (uint256 i; i < addressTargets.length; i++) {
             addressAllowlist[addressTargets[i]] = true;
             emit AddressAllowlistChanged(addressTargets[i], true);
@@ -81,10 +77,10 @@ contract OperatorAllowlistUpgradeable is ERC165, AccessControlUpgradeable, UUPSU
     }
 
     /**
-     * @notice Remove a target address from Allowlist
+     * @notice Removes a list target address from Allowlist
      * @param addressTargets the addresses to be removed from the allowlist
      */
-    function removeAddressFromAllowlist(address[] calldata addressTargets) external onlyRole(REGISTRAR_ROLE) {
+    function removeAddressesFromAllowlist(address[] calldata addressTargets) external onlyRole(REGISTRAR_ROLE) {
         for (uint256 i; i < addressTargets.length; i++) {
             delete addressAllowlist[addressTargets[i]];
             emit AddressAllowlistChanged(addressTargets[i], false);
@@ -107,7 +103,7 @@ contract OperatorAllowlistUpgradeable is ERC165, AccessControlUpgradeable, UUPSU
         }
         bytecodeAllowlist[codeHash] = true;
         // get address of wallet module
-        address impl = IProxy(walletAddr).PROXY_getImplementation();
+        address impl = IWalletProxy(walletAddr).PROXY_getImplementation();
         addressImplementationAllowlist[impl] = true;
 
         emit WalletAllowlistChanged(codeHash, walletAddr, true);
@@ -126,26 +122,10 @@ contract OperatorAllowlistUpgradeable is ERC165, AccessControlUpgradeable, UUPSU
         }
         delete bytecodeAllowlist[codeHash];
         // get address of wallet module
-        address impl = IProxy(walletAddr).PROXY_getImplementation();
+        address impl = IWalletProxy(walletAddr).PROXY_getImplementation();
         delete addressImplementationAllowlist[impl];
 
         emit WalletAllowlistChanged(codeHash, walletAddr, false);
-    }
-
-    /**
-     * @notice Allows admin to grant `user` `REGISTRAR_ROLE` role
-     * @param user the address that `REGISTRAR_ROLE` will be granted to
-     */
-    function grantRegistrarRole(address user) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        grantRole(REGISTRAR_ROLE, user);
-    }
-
-    /**
-     * @notice Allows admin to revoke `REGISTRAR_ROLE` role from `user`
-     * @param user the address that `REGISTRAR_ROLE` will be revoked from
-     */
-    function revokeRegistrarRole(address user) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        revokeRole(REGISTRAR_ROLE, user);
     }
 
     ///     =====   View functions  =====
@@ -166,7 +146,7 @@ contract OperatorAllowlistUpgradeable is ERC165, AccessControlUpgradeable, UUPSU
         }
         if (bytecodeAllowlist[codeHash]) {
             // If wallet proxy bytecode is approved, check addr of implementation contract
-            address impl = IProxy(target).PROXY_getImplementation();
+            address impl = IWalletProxy(target).PROXY_getImplementation();
 
             return addressImplementationAllowlist[impl];
         }
@@ -180,10 +160,13 @@ contract OperatorAllowlistUpgradeable is ERC165, AccessControlUpgradeable, UUPSU
      */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(ERC165, AccessControlUpgradeable) returns (bool) {
+    ) public view virtual override(ERC165, AccessControlEnumerableUpgradeable) returns (bool) {
         return interfaceId == type(IOperatorAllowlist).interfaceId || super.supportsInterface(interfaceId);
     }
 
     // Override the _authorizeUpgrade function
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADE_ROLE) {}
+
+    /// @notice storage gap for additional variables for upgrades
+    uint256[20] __OperatorAllowlistUpgradeableGap;
 }

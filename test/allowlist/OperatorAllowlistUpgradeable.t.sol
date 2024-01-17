@@ -1,9 +1,11 @@
+// Copyright Immutable Pty Ltd 2018 - 2024
+// SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {OperatorAllowlistUpgradeable} from "../../contracts/allowlist/OperatorAllowlistUpgradeable.sol";
-import {MockOperatorAllowlistUpgradeable} from "../../contracts/mocks/MockOAL.sol";
+import {MockOperatorAllowlistUpgradeable} from "./MockOAL.sol";
 import {ImmutableERC721} from "../../contracts/token/erc721/preset/ImmutableERC721.sol";
 import {DeployOperatorAllowlist} from  "../utils/DeployAllowlistProxy.sol";
 
@@ -12,27 +14,22 @@ contract OperatorAllowlistTest is Test {
     OperatorAllowlistUpgradeable public allowlist;
     ImmutableERC721 public immutableERC721;
     MockOperatorAllowlistUpgradeable public oalV2;
-    
-    uint256 adminPrivateKey = 1;
-    uint256 upgraderPrivateKey = 2;
-    uint256 registerarPrivateKey = 3;
-    uint256 feeReceiverKey = 4;
 
-    address admin = vm.addr(adminPrivateKey);
-    address upgrader = vm.addr(upgraderPrivateKey);
-    address registerar = vm.addr(registerarPrivateKey);
+    uint256 feeReceiverKey = 1;
+
+    address public admin = makeAddr("roleAdmin");
+    address public upgrader = makeAddr("roleUpgrader");
+    address public registerar = makeAddr("roleRegisterar");
     address feeReceiver = vm.addr(feeReceiverKey);
     address proxyAddr;
+    address nonAuthorizedWallet;
     
 
     function setUp() public {
         DeployOperatorAllowlist deployScript = new DeployOperatorAllowlist();
-        proxyAddr = deployScript.run(admin, upgrader);
+        proxyAddr = deployScript.run(admin, upgrader, registerar);
 
         allowlist = OperatorAllowlistUpgradeable(proxyAddr);
-        vm.startPrank(admin);
-        allowlist.grantRegistrarRole(registerar);
-        vm.stopPrank();
 
         immutableERC721 = new ImmutableERC721(
             admin,
@@ -44,6 +41,8 @@ contract OperatorAllowlistTest is Test {
             feeReceiver,
             0
         );
+
+        nonAuthorizedWallet = address(0x2);
     }
 
     function testDeployment() public {
@@ -63,5 +62,12 @@ contract OperatorAllowlistTest is Test {
 
         uint256 mockVal = oalV2.mockInt();
         assertEq(mockVal, 50);
+    }
+
+    function testFailedUpgradeNoPerms() public {
+         MockOperatorAllowlistUpgradeable oalImplV2 = new MockOperatorAllowlistUpgradeable();
+        vm.prank(nonAuthorizedWallet);
+        vm.expectRevert("Must have upgrade role to upgrade");
+        allowlist.upgradeTo(address(oalImplV2));
     }
 }

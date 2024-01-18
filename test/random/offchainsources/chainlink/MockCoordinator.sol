@@ -15,9 +15,9 @@ contract MockCoordinator is VRFCoordinatorV2Interface {
         adaptor = ChainlinkSourceAdaptor(_adaptor);
     }
 
-    function sendFulfill(uint256 _requestId) external {
+    function sendFulfill(uint256 _requestId, uint256 _rand) external {
         uint256[] memory randomWords = new uint256[](1);
-        randomWords[0] = _requestId + 1;
+        randomWords[0] = _rand;
         adaptor.rawFulfillRandomWords(_requestId, randomWords);
     }
 

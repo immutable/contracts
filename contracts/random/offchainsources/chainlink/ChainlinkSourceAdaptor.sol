@@ -14,6 +14,9 @@ import {IOffchainRandomSource} from "../IOffchainRandomSource.sol";
  *      version of the code and have the random seed provider point to the new version.
  */
 contract ChainlinkSourceAdaptor is VRFConsumerBaseV2, SourceAdaptorBase {
+    // Log config changes.
+    event ConfigChanges( bytes32 _keyHash, uint64 _subId, uint32 _callbackGasLimit);
+
     // Relates to key that must sign the proof.
     bytes32 public keyHash;
 
@@ -58,6 +61,7 @@ contract ChainlinkSourceAdaptor is VRFConsumerBaseV2, SourceAdaptorBase {
         keyHash = _keyHash;
         subId = _subId;
         callbackGasLimit = _callbackGasLimit;
+        emit ConfigChanges(_keyHash, _subId, _callbackGasLimit);
     }
 
     /**

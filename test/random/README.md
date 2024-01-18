@@ -65,22 +65,23 @@ Initialize testing:
 
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|
-| testInit                        | Check that deployment and initialisation works.   | Yes        | No          |
-| TODO                            | TODO          | Yes      | No          |
+| testInit                        | Check that deployment and initialisation works.   | Yes        | Yes         |
 
 Control functions tests:
 
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|
 | testRoleAdmin                   | Check DEFAULT_ADMIN_ROLE can assign new roles.    | Yes        | No          |
-| testRoleAdminBadAuth            | Check auth for create new admins.                 | No        | No          |
-| TODO                            | TODO          | Yes      | No          |
+| testRoleAdminBadAuth            | Check auth for create new admins.                 | No         | No          |
+| testConfigureRequests           | Check configureRequests can be called.            | Yes        | No          |
+| testConfigureRequestsBadAuth    | Check configureRequests fails with bad auth.      | No         | No          |
+
 
 Operational functions tests:
 
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|
-| TODO                            | TODO          | Yes      | No          |
+| testRequestRandom               | Request a random value.                           | Yes      | No          |
 
 
 ## RandomValues.sol

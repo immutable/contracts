@@ -29,9 +29,17 @@ contract ImmutableERC721MintByID is ImmutableERC721Base {
         address royaltyReceiver_,
         uint96 feeNumerator_
     )
-        ImmutableERC721Base(owner_, name_, symbol_, baseURI_, contractURI_, operatorAllowlist_, royaltyReceiver_, feeNumerator_)
+        ImmutableERC721Base(
+            owner_,
+            name_,
+            symbol_,
+            baseURI_,
+            contractURI_,
+            operatorAllowlist_,
+            royaltyReceiver_,
+            feeNumerator_
+        )
     {}
-
 
     /** @notice Allows minter to mint `tokenID` to `to`
      *  @param to the address to mint the token to

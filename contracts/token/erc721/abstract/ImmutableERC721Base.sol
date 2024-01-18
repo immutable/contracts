@@ -11,8 +11,7 @@ import "../../../allowlist/OperatorAllowlistEnforced.sol";
 
 // Utils
 import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
-import { AccessControlEnumerable, MintingAccessControl } from "./MintingAccessControl.sol";
-
+import {AccessControlEnumerable, MintingAccessControl} from "./MintingAccessControl.sol";
 
 /*
     ImmutableERC721Base is an abstract contract that offers minimum preset functionality without
@@ -20,12 +19,7 @@ import { AccessControlEnumerable, MintingAccessControl } from "./MintingAccessCo
     own minting functionality to meet the needs of the inheriting contract.
 */
 
-abstract contract ImmutableERC721Base is
-    OperatorAllowlistEnforced,
-    MintingAccessControl,
-    ERC721Permit,
-    ERC2981
-{
+abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAccessControl, ERC721Permit, ERC2981 {
     using BitMaps for BitMaps.BitMap;
     ///     =====   State Variables  =====
 
@@ -96,7 +90,7 @@ abstract contract ImmutableERC721Base is
      *  @param receiver the address to receive the royalty
      *  @param feeNumerator the royalty fee numerator
      *  @dev This can only be called by the an admin. See ERC2981 for more details on _setDefaultRoyalty
-     */ 
+     */
     function setDefaultRoyaltyReceiver(address receiver, uint96 feeNumerator) public onlyRole(DEFAULT_ADMIN_ROLE) {
         _setDefaultRoyalty(receiver, feeNumerator);
     }
@@ -106,7 +100,7 @@ abstract contract ImmutableERC721Base is
      *  @param receiver the address to receive the royalty
      *  @param feeNumerator the royalty fee numerator
      *  @dev This can only be called by the a minter. See ERC2981 for more details on _setTokenRoyalty
-     */ 
+     */
     function setNFTRoyaltyReceiver(
         uint256 tokenId,
         address receiver,
@@ -120,7 +114,7 @@ abstract contract ImmutableERC721Base is
      *  @param receiver the address to receive the royalty
      *  @param feeNumerator the royalty fee numerator
      *  @dev This can only be called by the a minter. See ERC2981 for more details on _setTokenRoyalty
-     */ 
+     */
     function setNFTRoyaltyReceiverBatch(
         uint256[] calldata tokenIds,
         address receiver,
@@ -192,7 +186,7 @@ abstract contract ImmutableERC721Base is
 
     /** @notice Returns the supported interfaces
      *  @param interfaceId the interface to check for support
-     */ 
+     */
     function supportsInterface(
         bytes4 interfaceId
     )
@@ -240,12 +234,11 @@ abstract contract ImmutableERC721Base is
         if (mintRequest.to == address(0)) {
             revert IImmutableERC721SendingToZerothAddress();
         }
-        
+
         _totalSupply = _totalSupply + mintRequest.tokenIds.length;
         for (uint256 j = 0; j < mintRequest.tokenIds.length; j++) {
             _mint(mintRequest.to, mintRequest.tokenIds[j]);
         }
-        
     }
 
     /** @notice safe mints a batch of tokens with specified ids to a specified address
@@ -290,5 +283,4 @@ abstract contract ImmutableERC721Base is
     function _baseURI() internal view virtual override(ERC721) returns (string memory) {
         return baseURI;
     }
-
 }

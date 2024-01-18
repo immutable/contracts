@@ -65,7 +65,7 @@ Initialize testing:
 
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|
-| testInit                        | Check that deployment works.                      | Yes        | No          |
+| testInit                        | Check that deployment and initialisation works.   | Yes        | No          |
 | TODO                            | TODO          | Yes      | No          |
 
 Control functions tests:

@@ -43,29 +43,17 @@ interface SIP7EventsAndErrors {
     /**
      * @dev Revert with an error when the signature has expired.
      */
-    error SignatureExpired(
-        uint256 currentTimestamp,
-        uint256 expiration,
-        bytes32 orderHash
-    );
+    error SignatureExpired(uint256 currentTimestamp, uint256 expiration, bytes32 orderHash);
 
     /**
      * @dev Revert with an error if the fulfiller does not match.
      */
-    error InvalidFulfiller(
-        address expectedFulfiller,
-        address actualFulfiller,
-        bytes32 orderHash
-    );
+    error InvalidFulfiller(address expectedFulfiller, address actualFulfiller, bytes32 orderHash);
 
     /**
      * @dev Revert with an error if a substandard validation fails
      */
-    error SubstandardViolation(
-        uint256 substandardId,
-        string reason,
-        bytes32 orderHash
-    );
+    error SubstandardViolation(uint256 substandardId, string reason, bytes32 orderHash);
 
     /**
      * @dev Revert with an error if supplied order extraData is invalid

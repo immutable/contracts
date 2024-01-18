@@ -51,7 +51,13 @@ contract ChainlinkSourceTest is Test {
             roleAdmin, configAdmin, address(mockChainlinkCoordinator), KEY_HASH, SUB_ID, CALLBACK_GAS_LIMIT);
 
         assertEq(address(chainlinkSourceAdaptor.vrfCoordinator()), address(mockChainlinkCoordinator), "vrfCoord not set correctly");
+
+TODO check other public values
+
     }
+
+
+    
 }
 
 

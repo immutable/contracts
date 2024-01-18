@@ -5,6 +5,7 @@ pragma solidity 0.8.19;
 import {VRFConsumerBaseV2} from "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
 import {VRFCoordinatorV2Interface} from "./VRFCoordinatorV2Interface.sol";
 import {SourceAdaptorBase} from "../SourceAdaptorBase.sol";
+import {IOffchainRandomSource} from "../IOffchainRandomSource.sol";
 
 /**
  * @notice Fetch random numbers from the Chainlink Verifiable Random

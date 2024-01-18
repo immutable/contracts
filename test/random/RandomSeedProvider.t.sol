@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 
 import {MockOffchainSource} from "./MockOffchainSource.sol";
 import {RandomSeedProvider} from "contracts/random/RandomSeedProvider.sol";
-import {IOffchainRandomSource} from "contracts/random/IOffchainRandomSource.sol";
+import {IOffchainRandomSource} from "contracts/random/offchainsources/IOffchainRandomSource.sol";
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 

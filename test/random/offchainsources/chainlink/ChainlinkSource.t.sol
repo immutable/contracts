@@ -5,7 +5,7 @@ import "forge-std/Test.sol";
 
 import {MockCoordinator} from "./MockCoordinator.sol";
 import {RandomSeedProvider} from "contracts/random/RandomSeedProvider.sol";
-import {IOffchainRandomSource} from "contracts/random/IOffchainRandomSource.sol";
+import {IOffchainRandomSource} from "contracts/random/offchainsources/IOffchainRandomSource.sol";
 import {ChainlinkSourceAdaptor} from "contracts/random/offchainsources/chainlink/ChainlinkSourceAdaptor.sol";
 import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
@@ -51,13 +51,10 @@ contract ChainlinkSourceTest is Test {
             roleAdmin, configAdmin, address(mockChainlinkCoordinator), KEY_HASH, SUB_ID, CALLBACK_GAS_LIMIT);
 
         assertEq(address(chainlinkSourceAdaptor.vrfCoordinator()), address(mockChainlinkCoordinator), "vrfCoord not set correctly");
-
-TODO check other public values
-
+        assertEq(chainlinkSourceAdaptor.keyHash(), KEY_HASH, "keyHash not set correctly");
+        assertEq(chainlinkSourceAdaptor.subId(), SUB_ID, "subId not set correctly");
+        assertEq(chainlinkSourceAdaptor.callbackGasLimit(), CALLBACK_GAS_LIMIT, "callbackGasLimit not set correctly");
     }
-
-
-    
 }
 
 

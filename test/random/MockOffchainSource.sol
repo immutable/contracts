@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {IOffchainRandomSource} from "contracts/random/IOffchainRandomSource.sol";
+import {IOffchainRandomSource} from "contracts/random/offchainsources/IOffchainRandomSource.sol";
 
 
 contract MockOffchainSource is IOffchainRandomSource {

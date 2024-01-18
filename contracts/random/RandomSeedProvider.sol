@@ -3,7 +3,7 @@
 pragma solidity 0.8.19;
 
 import {AccessControlEnumerableUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/access/AccessControlEnumerableUpgradeable.sol";
-import {IOffchainRandomSource} from "./IOffchainRandomSource.sol";
+import {IOffchainRandomSource} from "./offchainsources/IOffchainRandomSource.sol";
 
 /**
  * @notice Contract to provide random seed values to game contracts on the chain.

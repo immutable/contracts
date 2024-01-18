@@ -3,7 +3,7 @@
 pragma solidity 0.8.19;
 
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
-import {IOffchainRandomSource} from "../IOffchainRandomSource.sol";
+import {IOffchainRandomSource} from "./IOffchainRandomSource.sol";
 
 /**
  * @notice All Verifiable Random Function (VRF) source adaptors derive from this contract.
@@ -13,12 +13,12 @@ import {IOffchainRandomSource} from "../IOffchainRandomSource.sol";
 abstract contract SourceAdaptorBase is AccessControlEnumerable, IOffchainRandomSource {
     event UnexpectedRandomWordsLength(uint256 _length);
 
-    bytes32 private constant CONFIG_ADMIN_ROLE = keccak256("CONFIG_ADMIN_ROLE");
+    bytes32 internal constant CONFIG_ADMIN_ROLE = keccak256("CONFIG_ADMIN_ROLE");
 
     // Immutable zkEVM has instant finality, so a single block confirmation is fine.
-    uint16 private constant MIN_CONFIRMATIONS = 1;
+    uint16 internal constant MIN_CONFIRMATIONS = 1;
     // We only need one word, and can expand that word in this system of contracts.
-    uint32 private constant NUM_WORDS = 1;
+    uint32 internal constant NUM_WORDS = 1;
 
     // The values returned by the VRF.
     mapping(uint256 _fulfilmentId => bytes32 randomValue) private randomOutput;
@@ -32,18 +32,27 @@ abstract contract SourceAdaptorBase is AccessControlEnumerable, IOffchainRandomS
         vrfCoordinator = _vrfCoordinator;
     }
 
-    // Call back
+    /**
+     * @notice Callback called when random words are returned by the VRF. 
+     * @dev Assumes external function that calls this checks that the random values are coming 
+     * @dev from the VRF.
+     * @dev NOTE that Chainlink assumes that this function will not fail.
+     * @param _requestId is the fulfilment index.
+     * @param _randomWords are the random values from the VRF.
+     */
     function _fulfillRandomWords(uint256 _requestId, uint256[] memory _randomWords) internal {
         // NOTE: This function call is not allowed to fail.
-        // Only one word should be returned....
+        // Only one word should be returned as only one word is ever requested.
         if (_randomWords.length != 1) {
             emit UnexpectedRandomWordsLength(_randomWords.length);
         }
-
         randomOutput[_requestId] = bytes32(_randomWords[0]);
     }
 
-    function getOffchainRandom(uint256 _fulfillmentIndex) external view returns (bytes32 _randomValue) {
+    /**
+     * @inheritdoc IOffchainRandomSource
+     */
+    function getOffchainRandom(uint256 _fulfillmentIndex) external override(IOffchainRandomSource) view returns (bytes32 _randomValue) {
         bytes32 rand = randomOutput[_fulfillmentIndex];
         if (rand == bytes32(0)) {
             revert WaitForRandom();
@@ -51,7 +60,10 @@ abstract contract SourceAdaptorBase is AccessControlEnumerable, IOffchainRandomS
         _randomValue = rand;
     }
 
-    function isOffchainRandomReady(uint256 _fulfillmentIndex) external view returns (bool) {
+    /**
+     * @inheritdoc IOffchainRandomSource
+     */
+    function isOffchainRandomReady(uint256 _fulfillmentIndex) external override(IOffchainRandomSource) view returns (bool) {
         return randomOutput[_fulfillmentIndex] != bytes32(0);
     }
 }

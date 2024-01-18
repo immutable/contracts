@@ -9,7 +9,7 @@
     "dist"
   ],
   "scripts": {
-    "postinstall": "rimraf ./node_modules/seaport/foundry.toml",
+    "postinstall": "npx rimraf ./node_modules/seaport/foundry.toml",
     "compile": "hardhat compile",
     "build": "tsc",
     "test": "hardhat test",

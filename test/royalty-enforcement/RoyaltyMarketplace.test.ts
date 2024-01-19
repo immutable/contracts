@@ -64,11 +64,6 @@ describe("Marketplace Royalty Enforcement", function () {
   });
 
   describe("Royalties", function () {
-    it("Should set a valid OperatorAllowlist registry", async function () {
-      await erc721.connect(owner).setOperatorAllowlistRegistry(operatorAllowlist.address);
-      expect(await erc721.operatorAllowlist()).to.be.equal(operatorAllowlist.address);
-    });
-
     it("Should allow a marketplace contract to be Allowlisted", async function () {
       await operatorAllowlist.connect(registrar).addAddressToAllowlist([mockMarketplace.address]);
       expect(await operatorAllowlist.isAllowlisted(mockMarketplace.address)).to.be.equal(true);

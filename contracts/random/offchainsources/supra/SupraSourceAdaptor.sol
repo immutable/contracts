@@ -4,6 +4,7 @@ pragma solidity 0.8.19;
 
 import {ISupraRouter} from "./ISupraRouter.sol";
 import {SourceAdaptorBase} from "../SourceAdaptorBase.sol";
+import {IOffchainRandomSource} from "../IOffchainRandomSource.sol";
 
 /**
  * @notice Fetch random numbers from the Supra Verifiable Random
@@ -50,7 +51,7 @@ contract SupraSourceAdaptor is SourceAdaptorBase {
     /**
      * @inheritdoc IOffchainRandomSource
      */
-    function requestOffchainRandom() external returns (uint256 _requestId) {
+    function requestOffchainRandom() external override(IOffchainRandomSource) returns (uint256 _requestId) {
         return
             ISupraRouter(vrfCoordinator).generateRequest(
                 "fulfillRandomWords(uint256,uint256[])",

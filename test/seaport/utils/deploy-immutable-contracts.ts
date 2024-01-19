@@ -31,7 +31,8 @@ export async function deployImmutableContracts(serverSignerAddress: string): Pro
   const immutableSignedZoneContract = (await immutableSignedZoneFactory.deploy(
     "ImmutableSignedZone",
     "",
-    ""
+    "",
+    accounts[0].address
   )) as ImmutableSignedZone;
   await immutableSignedZoneContract.deployed();
 
@@ -47,7 +48,8 @@ export async function deployImmutableContracts(serverSignerAddress: string): Pro
 
   const seaportContractFactory = await hre.ethers.getContractFactory("ImmutableSeaport");
   const seaportContract = (await seaportContractFactory.deploy(
-    seaportConduitControllerContract.address
+    seaportConduitControllerContract.address,
+    accounts[0].address
   )) as ImmutableSeaport;
   await seaportContract.deployed();
 

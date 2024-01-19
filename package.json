@@ -9,7 +9,7 @@
     "dist"
   ],
   "scripts": {
-    "postinstall": "rm -f node_modules/seaport/foundry.toml",
+    "postinstall": "npx rimraf ./node_modules/seaport/foundry.toml",
     "compile": "hardhat compile",
     "build": "tsc",
     "test": "hardhat test",
@@ -55,6 +55,7 @@
     "hardhat-gas-reporter": "^1.0.9",
     "prettier": "^3.2.4",
     "prettier-plugin-solidity": "^1.3.1",
+    "rimraf": "^5.0.5",
     "solhint": "^3.3.8",
     "solhint-community": "^3.7.0",
     "solhint-plugin-prettier": "^0.1.0",

@@ -30,6 +30,10 @@ Control functions tests:
 | testAddOffchainRandomConsumerBadAuth | addOffchainRandomConsumer() without authorization.| No    | Yes         |
 | testRemoveOffchainRandomConsumer| removeOffchainRandomConsumer().                   | Yes        | Yes         |
 | testRemoveOffchainRandomConsumerBadAuth | removeOffchainRandomConsumer() without authorization.| No | Yes      |
+| testUpgrade                     | Check that the contract can be upgraded.          | Yes        | Yes         |
+| testUpgradeBadAuth              | Check upgrade authorisation.                      | No         | Yes         |
+| testNoUpgrade                   | Upgrade from V0 to V0.                            | No         | Yes         |
+
 
 Operational functions tests:
 

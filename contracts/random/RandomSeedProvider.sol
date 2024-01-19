@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache 2
 pragma solidity 0.8.19;
 
+import {UUPSUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/proxy/utils/UUPSUpgradeable.sol";
 import {AccessControlEnumerableUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/access/AccessControlEnumerableUpgradeable.sol";
 import {IOffchainRandomSource} from "./offchainsources/IOffchainRandomSource.sol";
 
@@ -14,72 +15,89 @@ import {IOffchainRandomSource} from "./offchainsources/IOffchainRandomSource.sol
  *         The contract is upgradeable. It is expected to be operated behind an
  *         Open Zeppelin TransparentUpgradeProxy.
  */
-contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
-    // The random seed value is not yet available.
+contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
+    /// @notice Indicate that the requested upgrade is not possible.
+    error CanNotUpgradeFrom(uint256 _storageVersion, uint256 _codeVersion);
+
+    /// @notice The random seed value is not yet available.
     error WaitForRandom();
 
-    // The offchain random source has been updated.
+    /// @notice The offchain random source has been updated.
     event OffchainRandomSourceSet(address _offchainRandomSource);
 
-    // Indicates that new random values will be generated using the RanDAO source.
+    /// @notice Indicates that new random values will be generated using the RanDAO source.
     event RanDaoEnabled();
 
-    // Indicates that a game contract that can consume off-chain random has been added.
+    /// @notice Indicates that a game contract that can consume off-chain random has been added.
     event OffchainRandomConsumerAdded(address _consumer);
 
-    // Indicates that a game contract that can consume off-chain random has been removed.
+    /// @notice Indicates that a game contract that can consume off-chain random has been removed.
     event OffchainRandomConsumerRemoved(address _consumer);
 
-    // Admin role that can enable RanDAO and offchain random sources.
+    // Code and storage layout version number.
+    uint256 internal constant VERSION0 = 0;
+
+    /// @notice Admin role that can enable RanDAO and offchain random sources.
     bytes32 public constant RANDOM_ADMIN_ROLE = keccak256("RANDOM_ADMIN_ROLE");
 
-    // Indicates: Generate new random numbers using on-chain methodology.
+    /// @notice Only accounts with UPGRADE_ADMIN_ROLE can upgrade the contract.
+    bytes32 public constant UPGRADE_ADMIN_ROLE = bytes32("UPGRADE_ROLE");
+
+    /// @notice Indicates: Generate new random numbers using on-chain methodology.
     address public constant ONCHAIN = address(0);
 
-    // When random seeds are requested, a request id is returned. The id
-    // relates to a certain future random seed. This map holds all of the
-    // random seeds that have been produced.
+    /// @notice All historical random output.
+    /// @dev When random seeds are requested, a request id is returned. The id
+    /// @dev relates to a certain future random seed. This map holds all of the
+    /// @dev random seeds that have been produced.
     mapping(uint256 requestId => bytes32 randomValue) public randomOutput;
 
-    // The index of the next seed value to be produced.
+    /// @notice The index of the next seed value to be produced.
     uint256 public nextRandomIndex;
 
-    // The block number in which the last seed value was generated.
+    /// @notice The block number in which the last seed value was generated.
     uint256 public lastBlockRandomGenerated;
 
-    // The block when the last offchain random request occurred.
-    // This is used to limit off-chain random requests to once per block.
+    /// @notice The block when the last offchain random request occurred.
+    /// @dev This is used to limit off-chain random requests to once per block.
     uint256 private lastBlockOffchainRequest;
 
-    // The request id returned in the previous off-chain random request.
-    // This is used to limit off-chain random requests to once per block.
+    /// @notice The request id returned in the previous off-chain random request.
+    /// @dev This is used to limit off-chain random requests to once per block.
     uint256 private prevOffchainRandomRequest;
 
-    // @notice The source of new random numbers. This could be the special values for
-    // @notice TRADITIONAL or RANDAO or the address of a Offchain Random Source contract.
-    // @dev This value is return with the request ids. This allows off-chain random sources
-    // @dev to be switched without stopping in-flight random values from being retrieved.
+    /// @notice The source of new random numbers. This could be the special values for
+    /// @notice TRADITIONAL or RANDAO or the address of a Offchain Random Source contract.
+    /// @dev This value is return with the request ids. This allows off-chain random sources
+    /// @dev to be switched without stopping in-flight random values from being retrieved.
     address public randomSource;
 
-    // Indicates that this blockchain supports the PREVRANDAO opcode and that
-    // PREVRANDAO should be used rather than block.hash for on-chain random values.
+    /// @notice Indicates that this blockchain supports the PREVRANDAO opcode and that
+    /// @notice PREVRANDAO should be used rather than block.hash for on-chain random values.
     bool public ranDaoAvailable;
 
-    // Indicates an address is allow listed for the offchain random provider.
-    // Having an allow list prevents spammers from requesting one random number per block,
-    // thus incurring cost on Immutable for no benefit.
+    /// @notice Indicates an address is allow listed for the offchain random provider.
+    /// @dev Having an allow list prevents spammers from requesting one random number per block,
+    /// @dev thus incurring cost on Immutable for no benefit.
     mapping(address gameContract => bool approved) public approvedForOffchainRandom;
+
+    // @notice The version of the storage layout. 
+    // @dev This storage slot will be used during upgrades.
+    uint256 public version;
+
 
     /**
      * @notice Initialize the contract for use with a transparent proxy.
      * @param _roleAdmin is the account that can add and remove addresses that have
      *        RANDOM_ADMIN_ROLE privilege.
      * @param _randomAdmin is the account that has RANDOM_ADMIN_ROLE privilege.
+     * @param _upgradeAdmin is the account that has UPGRADE_ADMIN_ROLE privilege.
      * @param _ranDaoAvailable indicates if the chain supports the PRERANDAO opcode.
      */
-    function initialize(address _roleAdmin, address _randomAdmin, bool _ranDaoAvailable) public virtual initializer {
+    function initialize(address _roleAdmin, address _randomAdmin, address _upgradeAdmin, bool _ranDaoAvailable) public virtual initializer {
         _grantRole(DEFAULT_ADMIN_ROLE, _roleAdmin);
         _grantRole(RANDOM_ADMIN_ROLE, _randomAdmin);
+        _grantRole(UPGRADE_ADMIN_ROLE, _upgradeAdmin);
 
         // Generate an initial "random" seed.
         // Use the chain id as an input into the random number generator to ensure
@@ -90,6 +108,18 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
 
         randomSource = ONCHAIN;
         ranDaoAvailable = _ranDaoAvailable;
+    }
+
+    /**
+     * @notice Called during contract upgrade.
+     * @dev This function will be overridden in future versions of this contract.
+     */
+    function upgrade() external virtual {
+        // Revert in the following situations:
+        // - The function is called on the existing version.
+        // - This version of code is mistakenly deploy, for an upgrade from V2 to V3.
+        //   That is, we mistakenly attempt to downgrade the contract.
+        revert CanNotUpgradeFrom(version, VERSION0);
     }
 
     /**
@@ -134,8 +164,8 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
     /**
      * @notice Request the index number to track when a random number will be produced.
      * @dev Note that the same _randomFulfillmentIndex will be returned to multiple games and even within
-     *      the one game. Games must personalise this value to their own game, the the particular game player,
-     *      and to the game player's request.
+     * @dev the one game. Games must personalise this value to their own game, the the particular game player,
+     * @dev and to the game player's request.
      * @return _randomFulfillmentIndex The index for the game contract to present to fetch the next random value.
      * @return _randomSource Indicates that an on-chain source was used, or is the address of an offchain source.
      */
@@ -166,8 +196,8 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
     /**
      * @notice Fetches a random seed value that was requested using requestRandom.
      * @dev Note that the same _randomSeed will be returned to multiple games and even within
-     *      the one game. Games must personalise this value to their own game, the the particular game player,
-     *      and to the game player's request.
+     * @dev the one game. Games must personalise this value to their own game, the the particular game player,
+     * @dev and to the game player's request.
      * @return _randomSeed The value from with random values can be derived.
      */
     function getRandomSeed(
@@ -202,6 +232,15 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable {
             return IOffchainRandomSource(randomSource).isOffchainRandomReady(_randomFulfillmentIndex);
         }
     }
+
+
+    /**
+     * @notice Check that msg.sender is authorised to perform the contract upgrade.
+     */
+    function _authorizeUpgrade(address newImplementation) internal override(UUPSUpgradeable) onlyRole(UPGRADE_ADMIN_ROLE) {
+        // Nothing to do beyond upgrade authorisation check.
+    }
+
 
     /**
      * @notice Generate a random value using on-chain methodologies.

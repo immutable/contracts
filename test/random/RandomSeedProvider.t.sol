@@ -4,9 +4,10 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 
 import {MockOffchainSource} from "./MockOffchainSource.sol";
+import {MockRandomSeedProviderV2} from "./MockRandomSeedProviderV2.sol";
 import {RandomSeedProvider} from "contracts/random/RandomSeedProvider.sol";
 import {IOffchainRandomSource} from "contracts/random/offchainsources/IOffchainRandomSource.sol";
-import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import "@openzeppelin/contracts/proxy/erc1967/ERC1967Proxy.sol";
 
 
 
@@ -20,31 +21,32 @@ contract UninitializedRandomSeedProviderTest is Test {
 
     bytes32 public constant DEFAULT_ADMIN_ROLE = bytes32(0);
     bytes32 public constant RANDOM_ADMIN_ROLE = keccak256("RANDOM_ADMIN_ROLE");
+    bytes32 public constant UPGRADE_ADMIN_ROLE = bytes32("UPGRADE_ROLE");
 
     address public constant ONCHAIN = address(0);
 
-    TransparentUpgradeableProxy public proxy;
+    ERC1967Proxy public proxy;
     RandomSeedProvider public impl;
     RandomSeedProvider public randomSeedProvider;
-    TransparentUpgradeableProxy public proxyRanDao;
+    ERC1967Proxy public proxyRanDao;
     RandomSeedProvider public randomSeedProviderRanDao;
 
 
-    address public proxyAdmin;
     address public roleAdmin;
     address public randomAdmin;
+    address public upgradeAdmin;
 
     function setUp() public virtual {
-        proxyAdmin = makeAddr("proxyAdmin");
         roleAdmin = makeAddr("roleAdmin");
         randomAdmin = makeAddr("randomAdmin");
+        upgradeAdmin = makeAddr("upgradeAdmin");
         impl = new RandomSeedProvider();
-        proxy = new TransparentUpgradeableProxy(address(impl), proxyAdmin, 
-            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, false));
+        proxy = new ERC1967Proxy(address(impl), 
+            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, upgradeAdmin, false));
         randomSeedProvider = RandomSeedProvider(address(proxy));
 
-        proxyRanDao = new TransparentUpgradeableProxy(address(impl), proxyAdmin, 
-            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, true));
+        proxyRanDao = new ERC1967Proxy(address(impl), 
+            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, upgradeAdmin, true));
         randomSeedProviderRanDao = RandomSeedProvider(address(proxyRanDao));
 
         // Ensure we are on a new block number when we start the tests. In particular, don't 
@@ -56,8 +58,8 @@ contract UninitializedRandomSeedProviderTest is Test {
         // This set-up mirrors what is in the setUp function. Have this code here
         // so that the coverage tool picks up the use of the initialize function.
         RandomSeedProvider impl1 = new RandomSeedProvider();
-        TransparentUpgradeableProxy proxy1 = new TransparentUpgradeableProxy(address(impl1), proxyAdmin, 
-            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, false));
+        ERC1967Proxy proxy1 = new ERC1967Proxy(address(impl1), 
+            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, upgradeAdmin, false));
         RandomSeedProvider randomSeedProvider1 = RandomSeedProvider(address(proxy1));
         vm.roll(block.number + 1);
 
@@ -70,11 +72,12 @@ contract UninitializedRandomSeedProviderTest is Test {
 
         assertTrue(randomSeedProvider1.hasRole(DEFAULT_ADMIN_ROLE, roleAdmin));
         assertTrue(randomSeedProvider1.hasRole(RANDOM_ADMIN_ROLE, randomAdmin));
+        assertTrue(randomSeedProvider1.hasRole(UPGRADE_ADMIN_ROLE, upgradeAdmin));
     }
 
     function testReinit() public {
         vm.expectRevert();
-        randomSeedProvider.initialize(roleAdmin, randomAdmin, true);
+        randomSeedProvider.initialize(roleAdmin, randomAdmin, upgradeAdmin, true);
     }
 
 
@@ -108,6 +111,9 @@ contract UninitializedRandomSeedProviderTest is Test {
 
 
 contract ControlRandomSeedProviderTest is UninitializedRandomSeedProviderTest {
+    error CanNotUpgradeFrom(uint256 _storageVersion, uint256 _codeVersion);
+    event Upgraded(address indexed implementation);
+
     address public constant NEW_SOURCE = address(10001);
     address public constant CONSUMER = address(10001);
 
@@ -188,6 +194,62 @@ contract ControlRandomSeedProviderTest is UninitializedRandomSeedProviderTest {
         vm.expectRevert();
         randomSeedProvider.removeOffchainRandomConsumer(CONSUMER);
         assertEq(randomSeedProvider.approvedForOffchainRandom(CONSUMER), true);
+    }
+
+    function testUpgrade() public {
+        assertEq(randomSeedProvider.version(), 0);
+
+        MockRandomSeedProviderV2 randomSeedProviderV2 = new MockRandomSeedProviderV2();
+
+        vm.prank(upgradeAdmin);
+        vm.expectEmit(true, true, true, true);
+        emit Upgraded(address(randomSeedProviderV2));
+        randomSeedProvider.upgradeToAndCall(address(randomSeedProviderV2), 
+            abi.encodeWithSelector(randomSeedProviderV2.upgrade.selector));
+        assertEq(randomSeedProvider.version(), 2);
+    }
+
+    function testUpgradeBadAuth() public {
+        MockRandomSeedProviderV2 randomSeedProviderV2 = new MockRandomSeedProviderV2();
+
+        vm.expectRevert();
+        randomSeedProvider.upgradeToAndCall(address(randomSeedProviderV2), 
+            abi.encodeWithSelector(randomSeedProviderV2.upgrade.selector));
+    }
+
+    function testNoUpgrade() public {
+        vm.prank(upgradeAdmin);
+        vm.expectRevert(abi.encodeWithSelector(CanNotUpgradeFrom.selector, 0, 0));
+        randomSeedProvider.upgrade();
+    }
+
+    function testNoDowngrade() public {
+        MockRandomSeedProviderV2 randomSeedProviderV2 = new MockRandomSeedProviderV2();
+        RandomSeedProvider randomSeedProviderV0 = new RandomSeedProvider();
+
+        vm.prank(upgradeAdmin);
+        randomSeedProvider.upgradeToAndCall(address(randomSeedProviderV2), 
+            abi.encodeWithSelector(randomSeedProviderV2.upgrade.selector));
+
+        vm.prank(upgradeAdmin);
+        vm.expectRevert(abi.encodeWithSelector(CanNotUpgradeFrom.selector, 2, 0));
+        randomSeedProvider.upgradeToAndCall(address(randomSeedProviderV0), 
+            abi.encodeWithSelector(randomSeedProviderV0.upgrade.selector));
+    }
+
+    // Check that the downgrade code in MockRandomSeedProviderV2 works too.
+    function testV2NoDowngrade() public {
+        uint256 badVersion = 13;
+        uint256 versionStorageSlot = 308;
+        vm.store(address(randomSeedProvider), bytes32(versionStorageSlot), bytes32(badVersion));
+        assertEq(randomSeedProvider.version(), badVersion);
+
+        MockRandomSeedProviderV2 randomSeedProviderV2 = new MockRandomSeedProviderV2();
+
+        vm.prank(upgradeAdmin);
+        vm.expectRevert(abi.encodeWithSelector(CanNotUpgradeFrom.selector, badVersion, 2));
+        randomSeedProvider.upgradeToAndCall(address(randomSeedProviderV2), 
+            abi.encodeWithSelector(randomSeedProviderV2.upgrade.selector));
     }
 }
 

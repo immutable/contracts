@@ -6,7 +6,7 @@ import "forge-std/Test.sol";
 import {MockGame} from "./MockGame.sol";
 import {RandomSeedProvider} from "contracts/random/RandomSeedProvider.sol";
 import {IOffchainRandomSource} from "contracts/random/offchainsources/IOffchainRandomSource.sol";
-import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import "@openzeppelin/contracts/proxy/erc1967/ERC1967Proxy.sol";
 
 
 
@@ -16,25 +16,24 @@ contract UninitializedRandomValuesTest is Test {
 
     address public constant ONCHAIN = address(0);
 
-    TransparentUpgradeableProxy public proxy;
+    ERC1967Proxy public proxy;
     RandomSeedProvider public impl;
     RandomSeedProvider public randomSeedProvider;
-    TransparentUpgradeableProxy public proxyRanDao;
-    RandomSeedProvider public randomSeedProviderRanDao;
 
     MockGame public game1;
 
-    address public proxyAdmin;
     address public roleAdmin;
     address public randomAdmin;
+    address public upgradeAdmin;
 
     function setUp() public virtual {
-        proxyAdmin = makeAddr("proxyAdmin");
         roleAdmin = makeAddr("roleAdmin");
         randomAdmin = makeAddr("randomAdmin");
+        upgradeAdmin = makeAddr("upgradeAdmin");
+
         impl = new RandomSeedProvider();
-        proxy = new TransparentUpgradeableProxy(address(impl), proxyAdmin, 
-            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, false));
+        proxy = new ERC1967Proxy(address(impl), 
+            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, upgradeAdmin, false));
         randomSeedProvider = RandomSeedProvider(address(proxy));
 
         game1 = new MockGame(address(randomSeedProvider));

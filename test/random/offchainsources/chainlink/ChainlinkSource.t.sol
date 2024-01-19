@@ -8,7 +8,7 @@ import {MockGame} from "../../MockGame.sol";
 import {RandomSeedProvider} from "contracts/random/RandomSeedProvider.sol";
 import {IOffchainRandomSource} from "contracts/random/offchainsources/IOffchainRandomSource.sol";
 import {ChainlinkSourceAdaptor} from "contracts/random/offchainsources/chainlink/ChainlinkSourceAdaptor.sol";
-import "@openzeppelin/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
+import "@openzeppelin/contracts/proxy/erc1967/ERC1967Proxy.sol";
 
 contract ChainlinkInitTests is Test {
     event ConfigChanges( bytes32 _keyHash, uint64 _subId, uint32 _callbackGasLimit);
@@ -19,26 +19,27 @@ contract ChainlinkInitTests is Test {
     uint64 public constant SUB_ID = uint64(4);
     uint32 public constant CALLBACK_GAS_LIMIT = uint32(200000);
 
-    TransparentUpgradeableProxy public proxy;
+    ERC1967Proxy public proxy;
     RandomSeedProvider public impl;
     RandomSeedProvider public randomSeedProvider;
 
     MockCoordinator public mockChainlinkCoordinator;
     ChainlinkSourceAdaptor public chainlinkSourceAdaptor;
 
-    address public proxyAdmin;
     address public roleAdmin;
     address public randomAdmin;
     address public configAdmin;
+    address public upgradeAdmin;
 
     function setUp() public virtual {
-        proxyAdmin = makeAddr("proxyAdmin");
         roleAdmin = makeAddr("roleAdmin");
         randomAdmin = makeAddr("randomAdmin");
         configAdmin = makeAddr("configAdmin");
+        upgradeAdmin = makeAddr("upgradeAdmin");
+
         impl = new RandomSeedProvider();
-        proxy = new TransparentUpgradeableProxy(address(impl), proxyAdmin, 
-            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, false));
+        proxy = new ERC1967Proxy(address(impl), 
+            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, upgradeAdmin, false));
         randomSeedProvider = RandomSeedProvider(address(proxy));
 
         mockChainlinkCoordinator = new MockCoordinator();

@@ -2,11 +2,11 @@
 pragma solidity 0.8.19;
 
 /**
- * API for interacting with Supra's Verifiable Random Function.
- *
+ * @notice API for interacting with Supra's Verifiable Random Function.
  */
 
 interface ISupraRouter {
+    
     function generateRequest(
         string memory _functionSig,
         uint8 _rngCount,

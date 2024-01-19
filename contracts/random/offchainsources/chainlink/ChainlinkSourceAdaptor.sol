@@ -14,16 +14,16 @@ import {IOffchainRandomSource} from "../IOffchainRandomSource.sol";
  *      version of the code and have the random seed provider point to the new version.
  */
 contract ChainlinkSourceAdaptor is VRFConsumerBaseV2, SourceAdaptorBase {
-    // Log config changes.
+    /// @notice Log config changes.
     event ConfigChanges( bytes32 _keyHash, uint64 _subId, uint32 _callbackGasLimit);
 
-    // Relates to key that must sign the proof.
+    /// @notice Relates to key that must sign the proof.
     bytes32 public keyHash;
 
-    // Subscruption id.
+    /// @notice Subscruption id.
     uint64 public subId;
 
-    // Gas limit when executing the callback.
+    /// @notice Gas limit when executing the callback.
     uint32 public callbackGasLimit;
 
     /**

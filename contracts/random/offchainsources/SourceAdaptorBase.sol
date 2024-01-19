@@ -11,7 +11,7 @@ import {IOffchainRandomSource} from "./IOffchainRandomSource.sol";
  *      version of the code and have the random seed provider point to the new version.
  */
 abstract contract SourceAdaptorBase is AccessControlEnumerable, IOffchainRandomSource {
-    event UnexpectedRandomWordsLength(uint256 _length);
+    error UnexpectedRandomWordsLength(uint256 _length);
 
     bytes32 internal constant CONFIG_ADMIN_ROLE = keccak256("CONFIG_ADMIN_ROLE");
 
@@ -41,10 +41,12 @@ abstract contract SourceAdaptorBase is AccessControlEnumerable, IOffchainRandomS
      * @param _randomWords are the random values from the VRF.
      */
     function _fulfillRandomWords(uint256 _requestId, uint256[] memory _randomWords) internal {
-        // NOTE: This function call is not allowed to fail.
-        // Only one word should be returned as only one word is ever requested.
+        // NOTE: This function call is not allowed to fail. However, if one word is requested
+        // and some other number of words has been returned, then maybe the source has been 
+        // compromised. Reverting the call is more likely to draw attention to the issue than
+        // emitting an event.
         if (_randomWords.length != 1) {
-            emit UnexpectedRandomWordsLength(_randomWords.length);
+            revert UnexpectedRandomWordsLength(_randomWords.length);
         }
         randomOutput[_requestId] = bytes32(_randomWords[0]);
     }

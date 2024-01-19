@@ -10,6 +10,8 @@ contract MockCoordinator is VRFCoordinatorV2Interface {
     ChainlinkSourceAdaptor public adaptor;
     uint256 public nextIndex = 1000;
 
+    uint64 private subscriptionId = uint64(0);
+    bool private pending = false;
 
     function setAdaptor(address _adaptor) external {
         adaptor = ChainlinkSourceAdaptor(_adaptor);
@@ -20,6 +22,11 @@ contract MockCoordinator is VRFCoordinatorV2Interface {
         randomWords[0] = _rand;
         adaptor.rawFulfillRandomWords(_requestId, randomWords);
     }
+
+    function sendFulfillRaw(uint256 _requestId, uint256[] calldata _rand) external {
+        adaptor.rawFulfillRandomWords(_requestId, _rand);
+    }
+
 
 
     function requestRandomWords(bytes32,uint64,uint16,uint32,uint32) external returns (uint256 requestId) {
@@ -35,8 +42,8 @@ contract MockCoordinator is VRFCoordinatorV2Interface {
         return (uint16(0), uint32(0), a);
     }
 
-    function createSubscription() external pure returns (uint64 subId) {
-        return (uint64(0));
+    function createSubscription() external view returns (uint64 subId) {
+        return subscriptionId;
     }
 
     function getSubscription(uint64) external pure 
@@ -49,8 +56,8 @@ contract MockCoordinator is VRFCoordinatorV2Interface {
     function addConsumer(uint64, address) external {}
     function removeConsumer(uint64, address) external{}
     function cancelSubscription(uint64, address) external{}
-    function pendingRequestExists(uint64) external pure returns (bool) {
-        return false;
+    function pendingRequestExists(uint64) external view returns (bool) {
+        return pending;
     }
 }
 

@@ -71,17 +71,26 @@ Control functions tests:
 
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|
-| testRoleAdmin                   | Check DEFAULT_ADMIN_ROLE can assign new roles.    | Yes        | No          |
-| testRoleAdminBadAuth            | Check auth for create new admins.                 | No         | No          |
-| testConfigureRequests           | Check configureRequests can be called.            | Yes        | No          |
-| testConfigureRequestsBadAuth    | Check configureRequests fails with bad auth.      | No         | No          |
+| testRoleAdmin                   | Check DEFAULT_ADMIN_ROLE can assign new roles.    | Yes        | Yes         |
+| testRoleAdminBadAuth            | Check auth for create new admins.                 | No         | Yes         |
+| testConfigureRequests           | Check configureRequests can be called.            | Yes        | Yes         |
+| testConfigureRequestsBadAuth    | Check configureRequests fails with bad auth.      | No         | Yes         |
 
 
 Operational functions tests:
 
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|
-| testRequestRandom               | Request a random value.                           | Yes      | No          |
+| testRequestRandom               | Request a random value.                           | Yes        | Yes         |
+| testTwoRequests                 | Check that two requests return different values.  | Yes        | Yes         |
+| testBadFulfilment               | Return a set of random numbers rather than one.   | No         | Yes         |
+| testRequestTooEarly             | Request before ready.                             | No         | Yes         |
+
+Integration tests:
+
+| Test name                       |Description                                        | Happy Case | Implemented |
+|---------------------------------| --------------------------------------------------|------------|-------------|
+| testEndToEnd                    | Request a random value from randomValues.         | Yes        | Yes         |
 
 
 ## RandomValues.sol

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import {Mintable} from "./Mintable.sol";
+import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import { Mintable } from "./Mintable.sol";
 
 contract Asset is ERC721, Mintable {
     constructor(
@@ -12,7 +12,11 @@ contract Asset is ERC721, Mintable {
         address _imx
     ) ERC721(_name, _symbol) Mintable(_owner, _imx) {}
 
-    function _mintFor(address user, uint256 id, bytes memory) internal override {
+    function _mintFor(
+        address user,
+        uint256 id,
+        bytes memory
+    ) internal override {
         _safeMint(user, id);
     }
 }

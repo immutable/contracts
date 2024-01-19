@@ -2,11 +2,22 @@
 // SPDX-License-Identifier: Apache-2
 pragma solidity 0.8.17;
 
-import {Consideration} from "seaport-core/src/lib/Consideration.sol";
-import {AdvancedOrder, BasicOrderParameters, CriteriaResolver, Execution, Fulfillment, FulfillmentComponent, Order, OrderComponents} from "seaport-types/src/lib/ConsiderationStructs.sol";
-import {OrderType} from "seaport-types/src/lib/ConsiderationEnums.sol";
-import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
-import {ImmutableSeaportEvents} from "./interfaces/ImmutableSeaportEvents.sol";
+import { Consideration } from "seaport-core/src/lib/Consideration.sol";
+import {
+    AdvancedOrder,
+    BasicOrderParameters,
+    CriteriaResolver,
+    Execution,
+    Fulfillment,
+    FulfillmentComponent,
+    Order,
+    OrderComponents
+} from "seaport-types/src/lib/ConsiderationStructs.sol";
+import { OrderType } from "seaport-types/src/lib/ConsiderationEnums.sol";
+import { Ownable2Step } from "@openzeppelin/contracts/access/Ownable2Step.sol";
+import {
+    ImmutableSeaportEvents
+} from "./interfaces/ImmutableSeaportEvents.sol";
 
 /**
  * @title ImmutableSeaport
@@ -18,7 +29,11 @@ import {ImmutableSeaportEvents} from "./interfaces/ImmutableSeaportEvents.sol";
  *         spent (the "offer") along with an arbitrary number of items that must
  *         be received back by the indicated recipients (the "consideration").
  */
-contract ImmutableSeaport is Consideration, Ownable2Step, ImmutableSeaportEvents {
+contract ImmutableSeaport is
+    Consideration,
+    Ownable2Step,
+    ImmutableSeaportEvents
+{
     // Mapping to store valid ImmutableZones - this allows for multiple Zones
     // to be active at the same time, and can be expired or added on demand.
     mapping(address => bool) public allowedZones;
@@ -34,7 +49,9 @@ contract ImmutableSeaport is Consideration, Ownable2Step, ImmutableSeaportEvents
      *                          that may optionally be used to transfer approved
      *                          ERC20/721/1155 tokens.
      */
-    constructor(address conduitController) Consideration(conduitController) Ownable2Step() {}
+    constructor(
+        address conduitController
+    ) Consideration(conduitController) Ownable2Step() {}
 
     /**
      * @dev Set the validity of a zone for use during fulfillment.
@@ -104,7 +121,10 @@ contract ImmutableSeaport is Consideration, Ownable2Step, ImmutableSeaportEvents
         BasicOrderParameters calldata parameters
     ) public payable virtual override returns (bool fulfilled) {
         // All restricted orders are captured using this method
-        if (uint(parameters.basicOrderType) % 4 != 2 && uint(parameters.basicOrderType) % 4 != 3) {
+        if (
+            uint(parameters.basicOrderType) % 4 != 2 &&
+            uint(parameters.basicOrderType) % 4 != 3
+        ) {
             revert OrderNotRestricted();
         }
 
@@ -145,7 +165,10 @@ contract ImmutableSeaport is Consideration, Ownable2Step, ImmutableSeaportEvents
         BasicOrderParameters calldata parameters
     ) public payable virtual override returns (bool fulfilled) {
         // All restricted orders are captured using this method
-        if (uint(parameters.basicOrderType) % 4 != 2 && uint(parameters.basicOrderType) % 4 != 3) {
+        if (
+            uint(parameters.basicOrderType) % 4 != 2 &&
+            uint(parameters.basicOrderType) % 4 != 3
+        ) {
             revert OrderNotRestricted();
         }
 
@@ -259,7 +282,13 @@ contract ImmutableSeaport is Consideration, Ownable2Step, ImmutableSeaportEvents
 
         _rejectIfZoneInvalid(advancedOrder.parameters.zone);
 
-        return super.fulfillAdvancedOrder(advancedOrder, criteriaResolvers, fulfillerConduitKey, recipient);
+        return
+            super.fulfillAdvancedOrder(
+                advancedOrder,
+                criteriaResolvers,
+                fulfillerConduitKey,
+                recipient
+            );
     }
 
     /**
@@ -335,7 +364,10 @@ contract ImmutableSeaport is Consideration, Ownable2Step, ImmutableSeaportEvents
         payable
         virtual
         override
-        returns (bool[] memory, /* availableOrders */ Execution[] memory /* executions */)
+        returns (
+            bool[] memory,
+            /* availableOrders */ Execution[] memory /* executions */
+        )
     {
         for (uint256 i = 0; i < orders.length; i++) {
             Order memory order = orders[i];
@@ -461,13 +493,18 @@ contract ImmutableSeaport is Consideration, Ownable2Step, ImmutableSeaportEvents
         payable
         virtual
         override
-        returns (bool[] memory, /* availableOrders */ Execution[] memory /* executions */)
+        returns (
+            bool[] memory,
+            /* availableOrders */ Execution[] memory /* executions */
+        )
     {
         for (uint256 i = 0; i < advancedOrders.length; i++) {
             AdvancedOrder memory advancedOrder = advancedOrders[i];
             if (
-                advancedOrder.parameters.orderType != OrderType.FULL_RESTRICTED &&
-                advancedOrder.parameters.orderType != OrderType.PARTIAL_RESTRICTED
+                advancedOrder.parameters.orderType !=
+                OrderType.FULL_RESTRICTED &&
+                advancedOrder.parameters.orderType !=
+                OrderType.PARTIAL_RESTRICTED
             ) {
                 revert OrderNotRestricted();
             }
@@ -525,7 +562,13 @@ contract ImmutableSeaport is Consideration, Ownable2Step, ImmutableSeaportEvents
          * @custom:name fulfillments
          */
         Fulfillment[] calldata fulfillments
-    ) public payable virtual override returns (Execution[] memory /* executions */) {
+    )
+        public
+        payable
+        virtual
+        override
+        returns (Execution[] memory /* executions */)
+    {
         for (uint256 i = 0; i < orders.length; i++) {
             Order memory order = orders[i];
             if (
@@ -606,12 +649,20 @@ contract ImmutableSeaport is Consideration, Ownable2Step, ImmutableSeaportEvents
          */
         Fulfillment[] calldata fulfillments,
         address recipient
-    ) public payable virtual override returns (Execution[] memory /* executions */) {
+    )
+        public
+        payable
+        virtual
+        override
+        returns (Execution[] memory /* executions */)
+    {
         for (uint256 i = 0; i < advancedOrders.length; i++) {
             AdvancedOrder memory advancedOrder = advancedOrders[i];
             if (
-                advancedOrder.parameters.orderType != OrderType.FULL_RESTRICTED &&
-                advancedOrder.parameters.orderType != OrderType.PARTIAL_RESTRICTED
+                advancedOrder.parameters.orderType !=
+                OrderType.FULL_RESTRICTED &&
+                advancedOrder.parameters.orderType !=
+                OrderType.PARTIAL_RESTRICTED
             ) {
                 revert OrderNotRestricted();
             }
@@ -619,6 +670,12 @@ contract ImmutableSeaport is Consideration, Ownable2Step, ImmutableSeaportEvents
             _rejectIfZoneInvalid(advancedOrder.parameters.zone);
         }
 
-        return super.matchAdvancedOrders(advancedOrders, criteriaResolvers, fulfillments, recipient);
+        return
+            super.matchAdvancedOrders(
+                advancedOrders,
+                criteriaResolvers,
+                fulfillments,
+                recipient
+            );
     }
 }

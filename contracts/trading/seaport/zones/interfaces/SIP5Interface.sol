@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2
 pragma solidity 0.8.17;
 
-import {Schema} from "seaport-types/src/lib/ConsiderationStructs.sol";
+import { Schema } from "seaport-types/src/lib/ConsiderationStructs.sol";
 
 /**
  * @dev SIP-5: Contract Metadata Interface for Seaport Contracts
@@ -21,5 +21,8 @@ interface SIP5Interface {
      * @return name    The contract name
      * @return schemas The supported SIPs
      */
-    function getSeaportMetadata() external view returns (string memory name, Schema[] memory schemas);
+    function getSeaportMetadata()
+        external
+        view
+        returns (string memory name, Schema[] memory schemas);
 }

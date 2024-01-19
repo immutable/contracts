@@ -1,13 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import {Bytes} from "./Bytes.sol";
+import { Bytes } from "./Bytes.sol";
 
 library Minting {
     // Split the minting blob into token_id and blueprint portions
     // {token_id}:{blueprint}
 
-    function split(bytes calldata blob) internal pure returns (uint256, bytes memory) {
+    function split(bytes calldata blob)
+        internal
+        pure
+        returns (uint256, bytes memory)
+    {
         int256 index = Bytes.indexOf(blob, ":", 0);
         require(index >= 0, "Separator must exist");
         // Trim the { and } from the parameters

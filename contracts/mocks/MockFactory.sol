@@ -1,4 +1,3 @@
-// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
 import {Create2} from "@openzeppelin/contracts/utils/Create2.sol";

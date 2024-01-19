@@ -11,7 +11,11 @@ import "../../../allowlist/OperatorAllowlistEnforced.sol";
 // Utils
 import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 
-abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Permit, ERC2981 {
+abstract contract ImmutableERC1155Base is
+    OperatorAllowlistEnforced,
+    ERC1155Permit,
+    ERC2981
+{
     /// @dev Contract level metadata
     string public contractURI;
 
@@ -63,7 +67,7 @@ abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Perm
      * @param tokenId The token identifier to set the royalty receiver for.
      * @param receiver The address of the royalty receiver
      * @param feeNumerator The royalty fee numerator
-     */
+    */
     function setNFTRoyaltyReceiver(
         uint256 tokenId,
         address receiver,
@@ -77,7 +81,7 @@ abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Perm
      * @param tokenIds The token identifiers to set the royalty receiver for.
      * @param receiver The address of the royalty receiver
      * @param feeNumerator The royalty fee numerator
-     */
+    */
     function setNFTRoyaltyReceiverBatch(
         uint256[] calldata tokenIds,
         address receiver,
@@ -118,8 +122,8 @@ abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Perm
      * @param baseURI_ The base URI for all tokens
      */
     function setBaseURI(string memory baseURI_) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        _setURI(baseURI_);
-        _baseURI = baseURI_;
+       _setURI(baseURI_);
+       _baseURI = baseURI_;
     }
 
     /// @dev Allows admin to set the contract URI
@@ -150,7 +154,13 @@ abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Perm
      */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(ERC1155Permit, ERC2981, OperatorAllowlistEnforced) returns (bool) {
+    )
+        public
+        view
+        virtual
+        override(ERC1155Permit, ERC2981, OperatorAllowlistEnforced)
+        returns (bool)
+    {
         return super.supportsInterface(interfaceId);
     }
 
@@ -245,13 +255,7 @@ abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Perm
      * @param value The amount to transfer.
      * @param data Additional data with no specified format, sent in call to `to`.
      */
-    function _safeTransferFrom(
-        address from,
-        address to,
-        uint256 id,
-        uint256 value,
-        bytes memory data
-    ) internal override validateTransfer(from, to) {
+    function _safeTransferFrom(address from, address to, uint256 id, uint256 value, bytes memory data) internal override validateTransfer(from, to) {
         super._safeTransferFrom(from, to, id, value, data);
     }
 
@@ -263,13 +267,9 @@ abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Perm
      * @param values The amounts to transfer per token id.
      * @param data Additional data with no specified format, sent in call to `to`.
      */
-    function _safeBatchTransferFrom(
-        address from,
-        address to,
-        uint256[] memory ids,
-        uint256[] memory values,
-        bytes memory data
-    ) internal override validateTransfer(from, to) {
+    function _safeBatchTransferFrom(address from, address to, uint256[] memory ids, uint256[] memory values, bytes memory data) internal override validateTransfer(from, to) {
         super._safeBatchTransferFrom(from, to, ids, values, data);
     }
+
+
 }

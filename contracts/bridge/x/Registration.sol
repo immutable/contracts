@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.11;
 
-import {Core} from "./Core.sol";
+import { Core } from "./Core.sol";
 
 contract Registration {
     Core public imx;

@@ -186,6 +186,14 @@ contract ChainlinkOperationalTests is ChainlinkInitTests {
         vm.expectRevert(abi.encodeWithSelector(WaitForRandom.selector));
         chainlinkSourceAdaptor.getOffchainRandom(fulfilmentIndex);
     }
+
+    function testHackFulfilment() public {
+        uint256 fulfilmentIndex = chainlinkSourceAdaptor.requestOffchainRandom();
+
+        MockCoordinator hackChainlinkCoordinator = new MockCoordinator();
+        vm.expectRevert();
+        hackChainlinkCoordinator.sendFulfill(fulfilmentIndex, uint256(RAND1));
+    }
 }
 
 

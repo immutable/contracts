@@ -59,11 +59,33 @@ numbers, check that the numbers generated earlier are still available:
 | testSwitchOffchainOffchain      | Off-chain to another off-chain source.            | Yes        | Yes         |
 | testSwitchOffchainTraditional   | Disable off-chain source.                         | Yes        | Yes         |
 
+## RandomValues.sol
+
+Initialize testing:
+
+| Test name                       |Description                                        | Happy Case | Implemented |
+|---------------------------------| --------------------------------------------------|------------|-------------|
+| testInit                        | Check that contructor worked.                     | Yes        | Yes         |
+
+
+Operational tests: 
+
+| Test name                       |Description                                        | Happy Case | Implemented |
+|---------------------------------| --------------------------------------------------|------------|-------------|
+| testFirstValue                  | Return a single value                             | Yes        | Yes         |
+| testSecondValue                 | Return two values                                 | Yes        | Yes         |
+| testMultiFetch                  | Fetch a generated number multiple times.          | Yes        | Yes         |
+| testMultiInterleaved            | Interleave multiple requests                      | Yes        | Yes         |
+| testFirstValues                 | Return a single set of values                     | Yes        | Yes         |
+| testSecondValues                | Return two sets of values                         | Yes        | Yes         |
+| testMultiFetchValues            | Fetch a generated set of numbers multiple times.  | Yes        | Yes         |
+| testMultipleGames               | Multiple games in parallel.                       | Yes        | Yes         |
+
 
 
 ## ChainlinkSource.sol
-This section defines tests for contracts/random/ChainlinkSource.sol. 
-All of these tests are in test/random/ChainlinkSource.t.sol.
+This section defines tests for contracts/random/offchainsources/chainlink/ChainlinkSource.sol. 
+All of these tests are in test/random/offchainsources/chainlink/ChainlinkSource.t.sol.
 
 Initialize testing:
 
@@ -89,6 +111,7 @@ Operational functions tests:
 | testTwoRequests                 | Check that two requests return different values.  | Yes        | Yes         |
 | testBadFulfilment               | Return a set of random numbers rather than one.   | No         | Yes         |
 | testRequestTooEarly             | Request before ready.                             | No         | Yes         |
+| testHackFulfilment              | Attempt to maliciously fulfil from other address. | No         | Yes         |
 
 Integration tests:
 
@@ -97,25 +120,39 @@ Integration tests:
 | testEndToEnd                    | Request a random value from randomValues.         | Yes        | Yes         |
 
 
-## RandomValues.sol
+
+## SupraSource.sol
+This section defines tests for contracts/random/offchainsources/supra/SupraSource.sol. 
+All of these tests are in test/random/offchainsources/supra/SupraSource.t.sol.
 
 Initialize testing:
 
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|
-| testInit                        | Check that contructor worked.                     | Yes        | Yes         |
+| testInit                        | Check that deployment and initialisation works.   | Yes        | Yes         |
 
-
-Operational tests: 
+Control functions tests:
 
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|
-| testFirstValue                  | Return a single value                             | Yes        | Yes         |
-| testSecondValue                 | Return two values                                 | Yes        | Yes         |
-| testMultiFetch                  | Fetch a generated number multiple times.          | Yes        | Yes         |
-| testMultiInterleaved            | Interleave multiple requests                      | Yes        | Yes         |
-| testFirstValues                 | Return a single set of values                     | Yes        | Yes         |
-| testSecondValues                | Return two sets of values                         | Yes        | Yes         |
-| testMultiFetchValues            | Fetch a generated set of numbers multiple times.  | Yes        | Yes         |
-| testMultipleGames               | Multiple games in parallel.                       | Yes        | Yes         |
+| testRoleAdmin                   | Check DEFAULT_ADMIN_ROLE can assign new roles.    | Yes        | Yes         |
+| testRoleAdminBadAuth            | Check auth for create new admins.                 | No         | Yes         |
+| testSetSubcription              | Check setSubscription can be called.              | Yes        | Yes         |
+| testSetSubscriptionBadAuth      | Check setSubscription fails with bad auth.        | No         | Yes         |
 
+
+Operational functions tests:
+
+| Test name                       |Description                                        | Happy Case | Implemented |
+|---------------------------------| --------------------------------------------------|------------|-------------|
+| testRequestRandom               | Request a random value.                           | Yes        | Yes         |
+| testTwoRequests                 | Check that two requests return different values.  | Yes        | Yes         |
+| testBadFulfilment               | Return a set of random numbers rather than one.   | No         | Yes         |
+| testRequestTooEarly             | Request before ready.                             | No         | Yes         |
+| testHackFulfilment              | Attempt to maliciously fulfil from other address. | No         | Yes         |
+
+Integration tests:
+
+| Test name                       |Description                                        | Happy Case | Implemented |
+|---------------------------------| --------------------------------------------------|------------|-------------|
+| testEndToEnd                    | Request a random value from randomValues.         | Yes        | Yes         |

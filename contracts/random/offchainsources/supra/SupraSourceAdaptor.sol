@@ -8,6 +8,8 @@ import {SourceAdaptorBase} from "../SourceAdaptorBase.sol";
 contract SupraSourceAdaptor is SourceAdaptorBase {
     error NotVrfContract();
 
+    event SubscriptionChange(address _newSubscription);
+
     address public subscriptionAccount;
 
     constructor(
@@ -19,13 +21,19 @@ contract SupraSourceAdaptor is SourceAdaptorBase {
         subscriptionAccount = _subscription;
     }
 
+
+    function setSubscription(address _subscription) external onlyRole(CONFIG_ADMIN_ROLE) {
+        subscriptionAccount = _subscription;
+        emit SubscriptionChange(subscriptionAccount);
+    }
+
+
     function requestOffchainRandom() external returns (uint256 _requestId) {
         return
             ISupraRouter(vrfCoordinator).generateRequest(
                 "fulfillRandomWords(uint256,uint256[])",
                 uint8(NUM_WORDS),
                 MIN_CONFIRMATIONS,
-                123,
                 subscriptionAccount
             );
     }

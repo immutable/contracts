@@ -1,22 +1,8 @@
 [
     {
-        "Contract Name": "Zone Contract",
+        "Contract Name": "ImmutableSignedZoneContract",
         "Testnet Address": "0x8831867E347AB87FA30199C5B695F0A31604Bb52",
         "Mainnet Address": "0x00338b92Bec262078B3e49BF12bbEA058916BF91",
-        "Contract Code Link": "",
-        "Tags": ["traders"]
-    },
-    {
-        "Contract Name": "Zone Signer",
-        "Testnet Address": "0x539E1Aa6f2063D8674088fBb0b1aE247Ba1B096b",
-        "Mainnet Address": "0x71f83d1616d1E020053d5d9Ba5CBd385693C2955",
-        "Contract Code Link": "",
-        "Tags": ["traders"]
-    },
-    {
-        "Contract Name": "Read Only Order Validator",
-        "Testnet Address": "0x617F14b4695B8bD24F11e5d157B960786fe37F5D",
-        "Mainnet Address": "0x75DCc1226533A39d41C5578feeAdc37D57916c08",
         "Contract Code Link": "",
         "Tags": ["traders"]
     },
@@ -103,20 +89,6 @@
         "Mainnet Address": "",
         "Contract Code Link": "",
         "Tags": ["hub"]
-    },
-    {
-        "Contract Name": "",
-        "Testnet Address": "",
-        "Mainnet Address": "",
-        "Contract Code Link": "",
-        "Tags": [""]
-    },
-    {
-        "Contract Name": "",
-        "Testnet Address": "",
-        "Mainnet Address": "",
-        "Contract Code Link": "",
-        "Tags": [""]
     },
     {
         "Contract Name": "",

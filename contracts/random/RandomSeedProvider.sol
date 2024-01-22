@@ -229,7 +229,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
                 return _randomFulfillmentIndex < nextRandomIndex + 1;
             }
         } else {
-            return IOffchainRandomSource(randomSource).isOffchainRandomReady(_randomFulfillmentIndex);
+            return IOffchainRandomSource(_randomSource).isOffchainRandomReady(_randomFulfillmentIndex);
         }
     }
 

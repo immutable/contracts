@@ -492,6 +492,8 @@ contract SwitchingRandomSeedProviderTest is UninitializedRandomSeedProviderTest 
         (uint256 fulfillmentIndex1, address source1) = randomSeedProviderRanDao.requestRandomSeed();
         assertEq(source1, address(offchainSource), "offchain source");
         assertEq(fulfillmentIndex1, 1000, "index");
+        bool available = randomSeedProviderRanDao.isRandomSeedReady(fulfillmentIndex1, source1);
+        assertFalse(available, "Should not be ready1");
 
         vm.prank(randomAdmin);
         randomSeedProviderRanDao.setOffchainRandomSource(address(offchainSource2));
@@ -502,6 +504,8 @@ contract SwitchingRandomSeedProviderTest is UninitializedRandomSeedProviderTest 
         assertEq(fulfillmentIndex2, 1000, "index");
 
         offchainSource.setIsReady(true);
+        available = randomSeedProviderRanDao.isRandomSeedReady(fulfillmentIndex1, source1);
+        assertTrue(available, "Should be ready");
         randomSeedProviderRanDao.getRandomSeed(fulfillmentIndex1, source1);
         offchainSource2.setIsReady(true);
         randomSeedProviderRanDao.getRandomSeed(fulfillmentIndex2, source2);

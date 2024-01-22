@@ -13,10 +13,10 @@ contract MockOnReceive {
 
     // Attempt to transfer token to another address on receive
     function onERC721Received(
-        address /* operator */,
-        address /* from */,
+        address operator,
+        address from,
         uint256 tokenId,
-        bytes calldata /* data */
+        bytes calldata data
     ) public returns (bytes4) {
         tokenAddress.transferFrom(address(this), recipient, tokenId);
         return this.onERC721Received.selector;

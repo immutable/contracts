@@ -7,9 +7,6 @@
 [submodule "lib/solidity-bytes-utils"]
 	path = lib/solidity-bytes-utils
 	url = https://github.com/GNSPS/solidity-bytes-utils
-[submodule "lib/chainlink"]
-	path = lib/chainlink
-	url = https://github.com/smartcontractkit/chainlink
 [submodule "lib/openzeppelin-contracts-4.9.3"]
 	path = lib/openzeppelin-contracts-4.9.3
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts

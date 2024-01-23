@@ -6,7 +6,7 @@ import "forge-std/Test.sol";
 import {MockGame} from "./MockGame.sol";
 import {RandomSeedProvider} from "contracts/random/RandomSeedProvider.sol";
 import {IOffchainRandomSource} from "contracts/random/offchainsources/IOffchainRandomSource.sol";
-import "@openzeppelin/contracts/proxy/erc1967/ERC1967Proxy.sol";
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 
 

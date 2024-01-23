@@ -8,7 +8,7 @@ import {MockGame} from "../../MockGame.sol";
 import {RandomSeedProvider} from "contracts/random/RandomSeedProvider.sol";
 import {IOffchainRandomSource} from "contracts/random/offchainsources/IOffchainRandomSource.sol";
 import {ChainlinkSourceAdaptor} from "contracts/random/offchainsources/chainlink/ChainlinkSourceAdaptor.sol";
-import "@openzeppelin/contracts/proxy/erc1967/ERC1967Proxy.sol";
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract ChainlinkInitTests is Test {
     event ConfigChanges( bytes32 _keyHash, uint64 _subId, uint32 _callbackGasLimit);

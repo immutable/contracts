@@ -18,7 +18,7 @@ jobs:
       - name: Show Forge Version
         run: forge --version
       - name: Run tests and install dependancies
-      continue-on-error: true
+        continue-on-error: true
         run: forge test -vvv
       - name: Debug Info
         run: |

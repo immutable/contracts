@@ -18,14 +18,22 @@ jobs:
       - name: Show Forge Version
         run: forge --version
       - name: Run tests and install dependancies
-        continue-on-error: true
         run: forge test -vvv
-      - name: Debug Info
-        run: |
-          pwd
-          ls -al
-          ls -al lib
-          ls -al lib/openzeppelin-contracts-4.9.3
+      - name: Debug Info1
+        if: '!cancelled()'
+        run: pwd
+      - name: Debug Info2
+        if: '!cancelled()'
+        run: ls -al
+      - name: Debug Info3
+        if: '!cancelled()'
+        run: ls -al lib/openzeppelin-contracts-4.9.3
+      - name: Debug Info4
+        if: '!cancelled()'
+        run: ls -al lib/openzeppelin-contracts-4.9.3/contracts
+      - name: Debug Info5
+        if: '!cancelled()'
+        run: ls -al lib/openzeppelin-contracts-4.9.3/contracts/proxy
   hardhat-test:
     name: Run Hardhat Tests
     runs-on: ubuntu-latest

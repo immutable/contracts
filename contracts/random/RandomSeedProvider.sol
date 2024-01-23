@@ -81,10 +81,9 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
     /// @dev thus incurring cost on Immutable for no benefit.
     mapping(address gameContract => bool approved) public approvedForOffchainRandom;
 
-    // @notice The version of the storage layout. 
+    // @notice The version of the storage layout.
     // @dev This storage slot will be used during upgrades.
     uint256 public version;
-
 
     /**
      * @notice Initialize the contract for use with a transparent proxy.
@@ -94,7 +93,12 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
      * @param _upgradeAdmin is the account that has UPGRADE_ADMIN_ROLE privilege.
      * @param _ranDaoAvailable indicates if the chain supports the PRERANDAO opcode.
      */
-    function initialize(address _roleAdmin, address _randomAdmin, address _upgradeAdmin, bool _ranDaoAvailable) public virtual initializer {
+    function initialize(
+        address _roleAdmin,
+        address _randomAdmin,
+        address _upgradeAdmin,
+        bool _ranDaoAvailable
+    ) public virtual initializer {
         _grantRole(DEFAULT_ADMIN_ROLE, _roleAdmin);
         _grantRole(RANDOM_ADMIN_ROLE, _randomAdmin);
         _grantRole(UPGRADE_ADMIN_ROLE, _upgradeAdmin);
@@ -233,14 +237,16 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
         }
     }
 
-
     /**
      * @notice Check that msg.sender is authorised to perform the contract upgrade.
      */
-    function _authorizeUpgrade(address newImplementation) internal override(UUPSUpgradeable) onlyRole(UPGRADE_ADMIN_ROLE) {
+    // solhint-disable no-empty-blocks
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal override(UUPSUpgradeable) onlyRole(UPGRADE_ADMIN_ROLE) {
         // Nothing to do beyond upgrade authorisation check.
     }
-
+    // solhint-enable no-empty-blocks
 
     /**
      * @notice Generate a random value using on-chain methodologies.

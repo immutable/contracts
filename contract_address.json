@@ -29,9 +29,9 @@
         ]
     },
     {
-        "Contract Name": "Operator Allowlist",
-        "Testnet Address": "",
-        "Mainnet Address": "",
+        "Contract Name": "Operator Allowlist (OAL)",
+        "Testnet Address": "0x6b969FD89dE634d8DE3271EbE97734FEFfcd58eE",
+        "Mainnet Address": "0x5F5EBa8133f68ea22D712b0926e2803E78D89221",
         "Contract Code Link": "",
         "Tags": [
             "assets"
@@ -39,20 +39,13 @@
     },
     {
         "Contract Name": "Contract Factory",
-        "Testnet Address": "",
-        "Mainnet Address": "",
+        "Testnet Address": "0x3CC6ee9c987458a0D9f69e49c87816F7DAcA2c19",
+        "Mainnet Address": "0x612D0C4b92a079D7603C2D898128a72262A141B3",
         "Contract Code Link": "",
         "Tags": [
-            "hub"
-        ]
-    },
-    {
-        "Contract Name": "ERC721 Preset",
-        "Testnet Address": "",
-        "Mainnet Address": "",
-        "Contract Code Link": "",
-        "Tags": [
-            "hub"
+            "hub",
+            "oal",
+            "allowlist"
         ]
     },
     {

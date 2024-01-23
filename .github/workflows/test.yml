@@ -52,7 +52,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile --network-concurrency 1
       - name: Run eslint
-        run: eslint . --ext .ts,.tsx --fix
+        run: yarn run eslint . --ext .ts,.tsx
   solhint:
     name: Run solhint
     runs-on: ubuntu-latest
@@ -67,7 +67,7 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile --network-concurrency 1
       - name: Run solhint
-        run: solhint --config ./.solhint.json  contracts/**/*.sol
+        run: yarn run solhint contracts/**/*.sol
   publish:
     name: Publish to NPM (dry run)
     runs-on: ubuntu-latest

@@ -19,6 +19,12 @@ jobs:
         run: forge --version
       - name: Run tests
         run: forge test -vvv
+      - name: Debug Info
+        run: |
+          pwd
+          ls -al
+          ls -al lib
+          ls -al lib/openzeppelin-contracts-4.9.3
   hardhat-test:
     name: Run Hardhat Tests
     runs-on: ubuntu-latest

@@ -2,6 +2,5 @@
 openzeppelin-contracts-upgradeable-4.9.3/=lib/openzeppelin-contracts-upgradeable-4.9.3/contracts/
 solidity-bits/=lib/solidity-bits/
 solidity-bytes-utils/=lib/solidity-bytes-utils/
-@chainlink/contracts/=lib/chainlink/contracts/
 seaport/contracts/=lib/immutable-seaport-1.5.0+im1.3/contracts/
 seaport-core/=lib/immutable-seaport-core-1.5.0+im1/

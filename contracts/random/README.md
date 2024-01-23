@@ -4,10 +4,10 @@ This directory contains contracts that provide random number generation capabili
 
 The reasons for using these contracts are that:
 
-* Enables you to leverage Immutable's cryptographers' design for random number generation.
+* Enables you to leverage a random number generation system designed by Immutable's cryptographers.
 * Allows you to build your game against an API that won't change.
 * The quality of the random numbers generated will improve as new capabilities are added to the platform. That is, the migration from ```block.hash``` to ```block.prevrandao``` when the BFT fork occurs will be seemless.
-* For off-chain random, allows you to leverage the random number provider that Immutable has agreements with.
+* For off-chain randomness, allows you to leverage the random number provider that Immutable has agreements with.
 
 # Status
 

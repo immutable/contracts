@@ -6,6 +6,6 @@ pragma solidity 0.8.19;
 /// Interface for Passport Wallet's proxy contract.
 interface IWalletProxy {
     // Returns the current implementation address used by the proxy contract
-    // solhint-disable-next-line var-name-mixedcase
+    // solhint-disable-next-line func-name-mixedcase
     function PROXY_getImplementation() external view returns (address);
 }

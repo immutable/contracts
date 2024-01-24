@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/interfaces/IERC2981.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 
 contract MockMarketplace {
     IERC721 public tokenAddress;
@@ -26,6 +26,7 @@ contract MockMarketplace {
     }
 
     function executeTransferRoyalties(address from, address recipient, uint256 _tokenId, uint256 price) public payable {
+        // solhint-disable-next-line custom-errors
         require(msg.value == price, "insufficient msg.value");
         (address receiver, uint256 royaltyAmount) = royaltyAddress.royaltyInfo(_tokenId, price);
         uint256 sellerAmt = msg.value - royaltyAmount;

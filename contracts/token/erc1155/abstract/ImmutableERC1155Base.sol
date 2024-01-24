@@ -22,7 +22,7 @@ abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Perm
     bytes32 public constant MINTER_ROLE = bytes32("MINTER_ROLE");
 
     /// @dev mapping of each token id supply
-    mapping(uint256 => uint256) private _totalSupply;
+    mapping(uint256 tokenId => uint256 totalSupply) private _totalSupply;
 
     /**
      * @dev Grants `DEFAULT_ADMIN_ROLE` to the supplied `owner` address
@@ -229,6 +229,7 @@ abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Perm
                 uint256 id = ids[i];
                 uint256 amount = amounts[i];
                 uint256 supply = _totalSupply[id];
+                // solhint-disable-next-line custom-errors, reason-string
                 require(supply >= amount, "ERC1155: burn amount exceeds totalSupply");
                 unchecked {
                     _totalSupply[id] = supply - amount;

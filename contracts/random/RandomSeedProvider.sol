@@ -107,7 +107,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
         // Generate an initial "random" seed.
         // Use the chain id as an input into the random number generator to ensure
         // all random numbers are personalised to this chain.
-        randomOutput[0] = keccak256(abi.encodePacked(block.chainid, block.number));
+        randomOutput[0] = keccak256(abi.encodePacked(block.chainid, block.hash));
         nextRandomIndex = 1;
         lastBlockRandomGenerated = block.number;
 

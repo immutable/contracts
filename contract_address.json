@@ -1,5 +1,4 @@
 [
-    
     {
         "Contract Name": "ImmutableSigner",
         "Testnet Address": "0xcff469E561D9dCe5B1185CD2AC1Fa961F8fbDe61",
@@ -28,7 +27,7 @@
         ]
     },
     {
-        "Contract Name": "Factory",
+        "Contract Name": "Factory (Wallet Factory Contract)",
         "Testnet Address": "0x8Fa5088dF65855E0DaF87FA6591659893b24871d",
         "Mainnet Address": "0x8Fa5088dF65855E0DaF87FA6591659893b24871d",
         "Contract Code Link": "https://explorer.immutable.com/address/0x8Fa5088dF65855E0DaF87FA6591659893b24871d?tab=contract",

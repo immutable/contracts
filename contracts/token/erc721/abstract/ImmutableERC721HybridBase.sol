@@ -2,21 +2,24 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
-import { AccessControlEnumerable, MintingAccessControl } from "./MintingAccessControl.sol";
-import { ERC2981 } from "@openzeppelin/contracts/token/common/ERC2981.sol";
-import { OperatorAllowlistEnforced } from "../../../allowlist/OperatorAllowlistEnforced.sol";
-import { ERC721HybridPermit } from "./ERC721HybridPermit.sol";
-import { ERC721Hybrid } from "./ERC721Hybrid.sol";
+import {AccessControlEnumerable, MintingAccessControl} from "./MintingAccessControl.sol";
+import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
+import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnforced.sol";
+import {ERC721HybridPermit} from "./ERC721HybridPermit.sol";
+import {ERC721Hybrid} from "./ERC721Hybrid.sol";
 
-abstract contract ImmutableERC721HybridBase is OperatorAllowlistEnforced, MintingAccessControl, ERC2981, ERC721HybridPermit {
-
+abstract contract ImmutableERC721HybridBase is
+    OperatorAllowlistEnforced,
+    MintingAccessControl,
+    ERC2981,
+    ERC721HybridPermit
+{
     /// @notice Contract level metadata
     string public contractURI;
 
     /// @notice Common URIs for individual token URIs
     string public baseURI;
 
-    
     /**
      * @notice Grants `DEFAULT_ADMIN_ROLE` to the supplied `owner` address
      * @param owner_ The address to grant the `DEFAULT_ADMIN_ROLE` to
@@ -38,7 +41,7 @@ abstract contract ImmutableERC721HybridBase is OperatorAllowlistEnforced, Mintin
         address operatorAllowlist_,
         address receiver_,
         uint96 feeNumerator_
-    )ERC721HybridPermit(name_, symbol_) {
+    ) ERC721HybridPermit(name_, symbol_) {
         // Initialize state variables
         _grantRole(DEFAULT_ADMIN_ROLE, owner_);
         _setDefaultRoyalty(receiver_, feeNumerator_);
@@ -119,7 +122,7 @@ abstract contract ImmutableERC721HybridBase is OperatorAllowlistEnforced, Mintin
     function setDefaultRoyaltyReceiver(address receiver, uint96 feeNumerator) public onlyRole(DEFAULT_ADMIN_ROLE) {
         _setDefaultRoyalty(receiver, feeNumerator);
     }
-    
+
     /** @notice Set the royalty receiver address for a specific tokenId
      *  @param tokenId the token to set the royalty for
      *  @param receiver the address to receive the royalty
@@ -139,7 +142,7 @@ abstract contract ImmutableERC721HybridBase is OperatorAllowlistEnforced, Mintin
      *  @param receiver the address to receive the royalty
      *  @param feeNumerator the royalty fee numerator
      *  @dev This can only be called by the a minter. See ERC2981 for more details on _setTokenRoyalty
-     */ 
+     */
     function setNFTRoyaltyReceiverBatch(
         uint256[] calldata tokenIds,
         address receiver,

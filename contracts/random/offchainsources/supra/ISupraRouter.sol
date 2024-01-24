@@ -6,7 +6,6 @@ pragma solidity 0.8.19;
  */
 
 interface ISupraRouter {
-    
     function generateRequest(
         string memory _functionSig,
         uint8 _rngCount,

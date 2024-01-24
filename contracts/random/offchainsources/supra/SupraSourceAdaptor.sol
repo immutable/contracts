@@ -37,7 +37,6 @@ contract SupraSourceAdaptor is SourceAdaptorBase {
         subscriptionAccount = _subscription;
     }
 
-
     /**
      * @notice Change the subscription account address.
      * @param _subscription The address of the new subscription.
@@ -46,7 +45,6 @@ contract SupraSourceAdaptor is SourceAdaptorBase {
         subscriptionAccount = _subscription;
         emit SubscriptionChange(subscriptionAccount);
     }
-
 
     /**
      * @inheritdoc IOffchainRandomSource
@@ -62,7 +60,7 @@ contract SupraSourceAdaptor is SourceAdaptorBase {
     }
 
     /**
-     * @notice Callback called when random words are returned by the VRF. 
+     * @notice Callback called when random words are returned by the VRF.
      * @param _requestId is the fulfilment index.
      * @param _randomWords are the random values from the VRF.
      */

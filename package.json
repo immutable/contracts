@@ -13,7 +13,7 @@
     "compile": "hardhat compile",
     "build": "tsc",
     "test": "hardhat test",
-    "prettier:solidity": "./node_modules/.bin/prettier --write contracts/**/*.sol",
+    "prettier:solidity": "./node_modules/.bin/prettier --write --plugin=prettier-plugin-solidity contracts/**/*.sol",
     "lint": "eslint . --ext .ts,.tsx --fix && solhint --config ./.solhint.json  contracts/**/*.sol",
     "eslint": "eslint . --ext .ts,.tsx",
     "solhint": "solhint --config ./.solhint.json",

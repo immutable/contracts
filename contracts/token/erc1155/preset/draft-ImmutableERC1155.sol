@@ -12,7 +12,7 @@ import "../abstract/ImmutableERC1155Base.sol";
  */
 
 contract ImmutableERC1155 is ImmutableERC1155Base {
-        ///     =====   Constructor  =====
+    ///     =====   Constructor  =====
 
     /**
      * @notice Grants `DEFAULT_ADMIN_ROLE` to the supplied `owner` address
@@ -30,9 +30,7 @@ contract ImmutableERC1155 is ImmutableERC1155Base {
         address _operatorAllowlist,
         address _receiver,
         uint96 _feeNumerator
-    )
-        ImmutableERC1155Base(owner, name_, baseURI_, contractURI_, _operatorAllowlist, _receiver, _feeNumerator)
-    {}
+    ) ImmutableERC1155Base(owner, name_, baseURI_, contractURI_, _operatorAllowlist, _receiver, _feeNumerator) {}
 
     ///     =====   External functions  =====
 
@@ -40,7 +38,12 @@ contract ImmutableERC1155 is ImmutableERC1155Base {
         super._mint(to, id, value, data);
     }
 
-    function safeMintBatch(address to, uint256[] calldata ids, uint256[] calldata values, bytes memory data) external onlyRole(MINTER_ROLE) {
+    function safeMintBatch(
+        address to,
+        uint256[] calldata ids,
+        uint256[] calldata values,
+        bytes memory data
+    ) external onlyRole(MINTER_ROLE) {
         super._mintBatch(to, ids, values, data);
     }
 }

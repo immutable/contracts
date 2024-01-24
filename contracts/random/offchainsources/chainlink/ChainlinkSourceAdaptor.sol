@@ -20,7 +20,7 @@ contract ChainlinkSourceAdaptor is VRFConsumerBaseV2, SourceAdaptorBase {
     /// @notice Relates to key that must sign the proof.
     bytes32 public keyHash;
 
-    /// @notice Subscruption id.
+    /// @notice Subscription id.
     uint64 public subId;
 
     /// @notice Gas limit when executing the callback.

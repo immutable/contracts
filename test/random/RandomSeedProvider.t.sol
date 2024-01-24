@@ -83,13 +83,13 @@ contract UninitializedRandomSeedProviderTest is Test {
 
     function testGetRandomSeedInitTraditional() public {
         bytes32 seed = randomSeedProvider.getRandomSeed(0, ONCHAIN);
-        bytes32 expectedInitialSeed = keccak256(abi.encodePacked(block.chainid, block.number - 1));
+        bytes32 expectedInitialSeed = keccak256(abi.encodePacked(block.chainid, blockhash(block.number - 2)));
         assertEq(seed, expectedInitialSeed, "initial seed");
     }
 
     function testGetRandomSeedInitRandao() public {
         bytes32 seed = randomSeedProviderRanDao.getRandomSeed(0, ONCHAIN);
-        bytes32 expectedInitialSeed = keccak256(abi.encodePacked(block.chainid, block.number - 1));
+        bytes32 expectedInitialSeed = keccak256(abi.encodePacked(block.chainid, blockhash(block.number - 2)));
         assertEq(seed, expectedInitialSeed, "initial seed");
     }
 

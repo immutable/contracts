@@ -74,7 +74,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
     address public randomSource;
 
     /// @notice Indicates that this blockchain supports the PREVRANDAO opcode and that
-    /// @notice PREVRANDAO should be used rather than block.hash for on-chain random values.
+    /// @notice PREVRANDAO should be used rather than block hash for on-chain random values.
     bool public ranDaoAvailable;
 
     /// @notice Indicates an address is allow listed for the off-chain random provider.
@@ -107,7 +107,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
         // Generate an initial "random" seed.
         // Use the chain id as an input into the random number generator to ensure
         // all random numbers are personalised to this chain.
-        randomOutput[0] = keccak256(abi.encodePacked(block.chainid, block.hash));
+        randomOutput[0] = keccak256(abi.encodePacked(block.chainid, blockhash(block.number - 1)));
         nextRandomIndex = 1;
         lastBlockRandomGenerated = block.number;
 
@@ -204,7 +204,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
      * @dev the one game. Games must personalise this value to their own game, the particular game player,
      * @dev and to the game player's request.
      * @param _randomFulfillmentIndex Index indicating which random seed to return.
-     * @return _randomSource The source to use when retrieving the random seed.
+     * @param _randomSource The source to use when retrieving the random seed.
      * @return _randomSeed The value from which random values can be derived.
      */
     function getRandomSeed(
@@ -227,7 +227,8 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
     /**
      * @notice Check whether a random seed is ready.
      * @param _randomFulfillmentIndex Index indicating which random seed to check the status of.
-     * @return _randomSource The source to use when retrieving the status of the random seed.
+     * @param _randomSource The source to use when retrieving the status of the random seed.
+     * @return bool indicates a random see is ready to be fetched.
      */
     function isRandomSeedReady(uint256 _randomFulfillmentIndex, address _randomSource) external view returns (bool) {
         if (_randomSource == ONCHAIN) {

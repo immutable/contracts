@@ -168,7 +168,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
     /**
      * @notice Request the index number to track when a random number will be produced.
      * @dev Note that the same _randomFulfillmentIndex will be returned to multiple games and even within
-     * @dev the one game. Games must personalise this value to their own game, the the particular game player,
+     * @dev the one game. Games must personalise this value to their own game, the particular game player,
      * @dev and to the game player's request.
      * @return _randomFulfillmentIndex The index for the game contract to present to fetch the next random value.
      * @return _randomSource Indicates that an on-chain source was used, or is the address of an offchain source.
@@ -198,11 +198,13 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
     }
 
     /**
-     * @notice Fetches a random seed value that was requested using requestRandom.
+     * @notice Fetches a random seed value that was requested using the requestRandomSeed function.
      * @dev Note that the same _randomSeed will be returned to multiple games and even within
-     * @dev the one game. Games must personalise this value to their own game, the the particular game player,
+     * @dev the one game. Games must personalise this value to their own game, the particular game player,
      * @dev and to the game player's request.
-     * @return _randomSeed The value from with random values can be derived.
+     * @param _randomFulfillmentIndex Index indicating which random seed to return.
+     * @return _randomSource The source to use when retrieving the random seed.
+     * @return _randomSeed The value from which random values can be derived.
      */
     function getRandomSeed(
         uint256 _randomFulfillmentIndex,
@@ -223,7 +225,8 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
 
     /**
      * @notice Check whether a random seed is ready.
-     * @param _randomFulfillmentIndex Index when random seed will be ready.
+     * @param _randomFulfillmentIndex Index indicating which random seed to check the status of.
+     * @return _randomSource The source to use when retrieving the status of the random seed.
      */
     function isRandomSeedReady(uint256 _randomFulfillmentIndex, address _randomSource) external view returns (bool) {
         if (_randomSource == ONCHAIN) {

@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// solhint-disable compiler-version
 pragma solidity ^0.8.4;
 
 library Bytes {
@@ -27,7 +28,7 @@ library Bytes {
         return string(buffer);
     }
 
-    bytes constant alphabet = "0123456789abcdef";
+    bytes private constant alphabet = "0123456789abcdef";
 
     /**
      * Index Of
@@ -80,6 +81,7 @@ library Bytes {
                 result = result * 10 + (val - 48);
             } else {
                 // invalid character, expecting integer input
+                // solhint-ignore-next-line custom-errors
                 revert("invalid input, only numbers allowed");
             }
         }

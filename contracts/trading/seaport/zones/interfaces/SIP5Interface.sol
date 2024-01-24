@@ -1,5 +1,6 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2023
 // SPDX-License-Identifier: Apache-2
+// solhint-disable compiler-version
 pragma solidity 0.8.17;
 
 import {Schema} from "seaport-types/src/lib/ConsiderationStructs.sol";

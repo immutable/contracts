@@ -1,9 +1,10 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2023
 // SPDX-License-Identifier: Apache-2
+// solhint-disable compiler-version
 pragma solidity 0.8.17;
 
 import {Consideration} from "seaport-core/src/lib/Consideration.sol";
-import {AdvancedOrder, BasicOrderParameters, CriteriaResolver, Execution, Fulfillment, FulfillmentComponent, Order, OrderComponents} from "seaport-types/src/lib/ConsiderationStructs.sol";
+import {AdvancedOrder, BasicOrderParameters, CriteriaResolver, Execution, Fulfillment, FulfillmentComponent, Order} from "seaport-types/src/lib/ConsiderationStructs.sol";
 import {OrderType} from "seaport-types/src/lib/ConsiderationEnums.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ImmutableSeaportEvents} from "./interfaces/ImmutableSeaportEvents.sol";
@@ -21,7 +22,7 @@ import {ImmutableSeaportEvents} from "./interfaces/ImmutableSeaportEvents.sol";
 contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
     // Mapping to store valid ImmutableZones - this allows for multiple Zones
     // to be active at the same time, and can be expired or added on demand.
-    mapping(address => bool) public allowedZones;
+    mapping(address zone => bool active) public allowedZones;
 
     error OrderNotRestricted();
     error InvalidZone(address zone);
@@ -109,7 +110,7 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
         BasicOrderParameters calldata parameters
     ) public payable virtual override returns (bool fulfilled) {
         // All restricted orders are captured using this method
-        if (uint(parameters.basicOrderType) % 4 != 2 && uint(parameters.basicOrderType) % 4 != 3) {
+        if (uint256(parameters.basicOrderType) % 4 != 2 && uint256(parameters.basicOrderType) % 4 != 3) {
             revert OrderNotRestricted();
         }
 
@@ -146,11 +147,12 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
      * @return fulfilled A boolean indicating whether the order has been
      *                   successfully fulfilled.
      */
+    // solhint-disable-next-line func-name-mixedcase
     function fulfillBasicOrder_efficient_6GL6yc(
         BasicOrderParameters calldata parameters
     ) public payable virtual override returns (bool fulfilled) {
         // All restricted orders are captured using this method
-        if (uint(parameters.basicOrderType) % 4 != 2 && uint(parameters.basicOrderType) % 4 != 3) {
+        if (uint256(parameters.basicOrderType) % 4 != 2 && uint256(parameters.basicOrderType) % 4 != 3) {
             revert OrderNotRestricted();
         }
 

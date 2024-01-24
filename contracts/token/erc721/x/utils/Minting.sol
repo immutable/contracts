@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+// solhint-disable compiler-version
 pragma solidity ^0.8.4;
 
 import {Bytes} from "./Bytes.sol";
@@ -9,6 +10,7 @@ library Minting {
 
     function split(bytes calldata blob) internal pure returns (uint256, bytes memory) {
         int256 index = Bytes.indexOf(blob, ":", 0);
+        // solhint-ignore-next-line custom-errors
         require(index >= 0, "Separator must exist");
         // Trim the { and } from the parameters
         uint256 tokenID = Bytes.toUint(blob[1:uint256(index) - 1]);

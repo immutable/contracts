@@ -1,5 +1,6 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2023
 // SPDX-License-Identifier: Apache-2
+// solhint-disable compiler-version
 pragma solidity 0.8.17;
 
 import {ZoneParameters, Schema, ReceivedItem} from "seaport-types/src/lib/ConsiderationStructs.sol";
@@ -10,7 +11,6 @@ import {SIP6EventsAndErrors} from "./interfaces/SIP6EventsAndErrors.sol";
 import {SIP5Interface} from "./interfaces/SIP5Interface.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 /**
@@ -88,12 +88,14 @@ contract ImmutableSignedZone is
     uint8 internal immutable _ACCEPTED_SIP6_VERSION = 0;
 
     /// @dev The name for this zone returned in getSeaportMetadata().
+    // solhint-disable-next-line var-name-mixedcase
     string private _ZONE_NAME;
 
+    // solhint-disable-next-line var-name-mixedcase
     bytes32 internal _NAME_HASH;
 
     /// @dev The allowed signers.
-    mapping(address => SignerInfo) private _signers;
+    mapping(address signer => SignerInfo info) private _signers;
 
     /// @dev The API endpoint where orders for this zone can be signed.
     ///      Request and response payloads are defined in SIP-7.
@@ -231,7 +233,9 @@ contract ImmutableSignedZone is
         bytes calldata context = extraData[93:];
 
         // Revert if expired.
+        // solhint-disable-next-line not-rely-on-time
         if (block.timestamp > expiration) {
+            // solhint-disable-next-line not-rely-on-time
             revert SignatureExpired(block.timestamp, expiration, orderHash);
         }
 

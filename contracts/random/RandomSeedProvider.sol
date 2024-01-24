@@ -168,13 +168,13 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
 
     /**
      * @notice Request the index number to track when a random number will be produced.
-     * @dev Note that the same _randomFulfillmentIndex will be returned to multiple games and even within
+     * @dev Note that the same _randomFulfilmentIndex will be returned to multiple games and even within
      * @dev the one game. Games must personalise this value to their own game, the particular game player,
      * @dev and to the game player's request.
-     * @return _randomFulfillmentIndex The index for the game contract to present to fetch the next random value.
+     * @return _randomFulfilmentIndex The index for the game contract to present to fetch the next random value.
      * @return _randomSource Indicates that an on-chain source was used, or is the address of an off-chain source.
      */
-    function requestRandomSeed() external returns (uint256 _randomFulfillmentIndex, address _randomSource) {
+    function requestRandomSeed() external returns (uint256 _randomFulfilmentIndex, address _randomSource) {
         if (randomSource == ONCHAIN || !approvedForOffchainRandom[msg.sender]) {
             // Generate a value for this block if one has not been generated yet. This
             // is required because there may have been calls to requestRandomSeed
@@ -182,16 +182,16 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
             _generateNextRandomOnChain();
 
             // Indicate that a value based on the next block will be fine.
-            _randomFulfillmentIndex = nextRandomIndex;
+            _randomFulfilmentIndex = nextRandomIndex;
 
             _randomSource = ONCHAIN;
         } else {
             // Limit how often off-chain random numbers are requested to a maximum of once per block.
             if (lastBlockOffchainRequest == block.number) {
-                _randomFulfillmentIndex = prevOffchainRandomRequest;
+                _randomFulfilmentIndex = prevOffchainRandomRequest;
             } else {
-                _randomFulfillmentIndex = IOffchainRandomSource(randomSource).requestOffchainRandom();
-                prevOffchainRandomRequest = _randomFulfillmentIndex;
+                _randomFulfilmentIndex = IOffchainRandomSource(randomSource).requestOffchainRandom();
+                prevOffchainRandomRequest = _randomFulfilmentIndex;
                 lastBlockOffchainRequest = block.number;
             }
             _randomSource = randomSource;
@@ -203,42 +203,42 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
      * @dev Note that the same _randomSeed will be returned to multiple games and even within
      * @dev the one game. Games must personalise this value to their own game, the particular game player,
      * @dev and to the game player's request.
-     * @param _randomFulfillmentIndex Index indicating which random seed to return.
+     * @param _randomFulfilmentIndex Index indicating which random seed to return.
      * @param _randomSource The source to use when retrieving the random seed.
      * @return _randomSeed The value from which random values can be derived.
      */
     function getRandomSeed(
-        uint256 _randomFulfillmentIndex,
+        uint256 _randomFulfilmentIndex,
         address _randomSource
     ) external returns (bytes32 _randomSeed) {
         if (_randomSource == ONCHAIN) {
             _generateNextRandomOnChain();
-            if (_randomFulfillmentIndex >= nextRandomIndex) {
+            if (_randomFulfilmentIndex >= nextRandomIndex) {
                 revert WaitForRandom();
             }
-            return randomOutput[_randomFulfillmentIndex];
+            return randomOutput[_randomFulfilmentIndex];
         } else {
             // If random source is not the address of a valid contract this will revert
             // with no revert information returned.
-            return IOffchainRandomSource(_randomSource).getOffchainRandom(_randomFulfillmentIndex);
+            return IOffchainRandomSource(_randomSource).getOffchainRandom(_randomFulfilmentIndex);
         }
     }
 
     /**
      * @notice Check whether a random seed is ready.
-     * @param _randomFulfillmentIndex Index indicating which random seed to check the status of.
+     * @param _randomFulfilmentIndex Index indicating which random seed to check the status of.
      * @param _randomSource The source to use when retrieving the status of the random seed.
      * @return bool indicates a random see is ready to be fetched.
      */
-    function isRandomSeedReady(uint256 _randomFulfillmentIndex, address _randomSource) external view returns (bool) {
+    function isRandomSeedReady(uint256 _randomFulfilmentIndex, address _randomSource) external view returns (bool) {
         if (_randomSource == ONCHAIN) {
             if (lastBlockRandomGenerated == block.number) {
-                return _randomFulfillmentIndex < nextRandomIndex;
+                return _randomFulfilmentIndex < nextRandomIndex;
             } else {
-                return _randomFulfillmentIndex < nextRandomIndex + 1;
+                return _randomFulfilmentIndex < nextRandomIndex + 1;
             }
         } else {
-            return IOffchainRandomSource(_randomSource).isOffchainRandomReady(_randomFulfillmentIndex);
+            return IOffchainRandomSource(_randomSource).isOffchainRandomReady(_randomFulfilmentIndex);
         }
     }
 

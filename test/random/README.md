@@ -46,8 +46,8 @@ Operational functions tests:
 | testTradTwoInOneBlock           | Two calls to requestRandomSeed in one block       | Yes        | Yes         |
 | testRanDaoTwoInOneBlock         | Two calls to requestRandomSeed in one block       | Yes        | Yes         |
 | testOffchainTwoInOneBlock       | Two calls to requestRandomSeed in one block       | Yes        | Yes         |
-| testTradDelayedFulfillment      | Request then wait several blocks before fulfillment | Yes      | Yes         |
-| testRanDaoDelayedFulfillment    | Request then wait several blocks before fulfillment | Yes      | Yes         |
+| testTradDelayedFulfilment       | Request then wait several blocks before fulfilment | Yes       | Yes         |
+| testRanDaoDelayedFulfilment     | Request then wait several blocks before fulfilment | Yes       | Yes         |
 
 Scenario: Generate some random numbers, switch random generation methodology, generate some more
 numbers, check that the numbers generated earlier are still available:

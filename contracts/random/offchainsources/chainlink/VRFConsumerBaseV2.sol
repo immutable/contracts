@@ -26,7 +26,7 @@ pragma solidity 0.8.19;
  * @dev The purpose of this contract is to make it easy for unrelated contracts
  * @dev to talk to Vera the verifier about the work Reggie is doing, to provide
  * @dev simple access to a verifiable source of randomness. It ensures 2 things:
- * @dev 1. The fulfillment came from the VRFCoordinator
+ * @dev 1. The fulfilment came from the VRFCoordinator
  * @dev 2. The consumer contract implements fulfillRandomWords.
  * *****************************************************************************
  * @dev USAGE

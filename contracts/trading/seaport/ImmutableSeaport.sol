@@ -22,7 +22,8 @@ import {ImmutableSeaportEvents} from "./interfaces/ImmutableSeaportEvents.sol";
 contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
     // Mapping to store valid ImmutableZones - this allows for multiple Zones
     // to be active at the same time, and can be expired or added on demand.
-    mapping(address zone => bool active) public allowedZones;
+    // solhint-disable-next-line named-parameters-mapping
+    mapping(address => bool) public allowedZones;
 
     error OrderNotRestricted();
     error InvalidZone(address zone);

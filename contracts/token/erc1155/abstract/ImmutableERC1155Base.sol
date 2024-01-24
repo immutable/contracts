@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
-import "../../../token/erc1155/abstract/ERC1155Permit.Sol";
+import {ERC1155, ERC1155Permit} from "../../../token/erc1155/abstract/ERC1155Permit.Sol";
 
 // Allowlist
-import "@openzeppelin/contracts/token/common/ERC2981.sol";
-import "../../../allowlist/OperatorAllowlistEnforced.sol";
+import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
+import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnforced.sol";
 
 // Utils
-import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
+import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 
 abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Permit, ERC2981 {
     /// @dev Contract level metadata
@@ -83,7 +83,7 @@ abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Perm
         address receiver,
         uint96 feeNumerator
     ) public onlyRole(MINTER_ROLE) {
-        for (uint i = 0; i < tokenIds.length; i++) {
+        for (uint256 i = 0; i < tokenIds.length; i++) {
             _setTokenRoyalty(tokenIds[i], receiver, feeNumerator);
         }
     }

@@ -3,14 +3,14 @@
 pragma solidity 0.8.19;
 
 // Token
-import "./ERC721Permit.sol";
+import {ERC721Permit, ERC721, ERC721Burnable} from "./ERC721Permit.sol";
 
 // Allowlist
-import "@openzeppelin/contracts/token/common/ERC2981.sol";
-import "../../../allowlist/OperatorAllowlistEnforced.sol";
+import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
+import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnforced.sol";
 
 // Utils
-import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
+import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import {AccessControlEnumerable, MintingAccessControl} from "./MintingAccessControl.sol";
 
 /*
@@ -120,7 +120,7 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
         address receiver,
         uint96 feeNumerator
     ) public onlyRole(MINTER_ROLE) {
-        for (uint i = 0; i < tokenIds.length; i++) {
+        for (uint256 i = 0; i < tokenIds.length; i++) {
             _setTokenRoyalty(tokenIds[i], receiver, feeNumerator);
         }
     }
@@ -152,9 +152,9 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
      *  @param burns list of burn requests including token id and owner address
      */
     function _safeBurnBatch(IDBurn[] calldata burns) public virtual {
-        for (uint i = 0; i < burns.length; i++) {
+        for (uint256 i = 0; i < burns.length; i++) {
             IDBurn calldata b = burns[i];
-            for (uint j = 0; j < b.tokenIds.length; j++) {
+            for (uint256 j = 0; j < b.tokenIds.length; j++) {
                 safeBurn(b.owner, b.tokenIds[j]);
             }
         }

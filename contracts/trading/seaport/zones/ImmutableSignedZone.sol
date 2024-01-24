@@ -95,7 +95,8 @@ contract ImmutableSignedZone is
     bytes32 internal _NAME_HASH;
 
     /// @dev The allowed signers.
-    mapping(address signer => SignerInfo info) private _signers;
+    // solhint-disable-next-line named-parameters-mapping
+    mapping(address => SignerInfo) private _signers;
 
     /// @dev The API endpoint where orders for this zone can be signed.
     ///      Request and response payloads are defined in SIP-7.

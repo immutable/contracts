@@ -148,7 +148,7 @@ abstract contract ImmutableERC721HybridBase is
         address receiver,
         uint96 feeNumerator
     ) public onlyRole(MINTER_ROLE) {
-        for (uint i = 0; i < tokenIds.length; i++) {
+        for (uint256 i = 0; i < tokenIds.length; i++) {
             _setTokenRoyalty(tokenIds[i], receiver, feeNumerator);
         }
     }

@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
-import "@openzeppelin/contracts/interfaces/IERC1271.sol";
-import "solidity-bytes-utils/contracts/BytesLib.sol";
-import "./IERC4494.sol";
-import "./ERC721Hybrid.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
+import {IERC4494} from "./IERC4494.sol";
+import {ERC721Hybrid} from "./ERC721Hybrid.sol";
 
 /**
  * @title ERC721HybridPermit: An extension of the ERC721Hybrid NFT standard that supports off-chain approval via permits.
@@ -19,7 +20,7 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
     /** @notice mapping used to keep track of nonces of each token ID for validating
      *  signatures
      */
-    mapping(uint256 => uint256) private _nonces;
+    mapping(uint256 tokenId => uint256 nonce) private _nonces;
 
     /** @dev the unique identifier for the permit struct to be EIP 712 compliant */
     bytes32 private constant _PERMIT_TYPEHASH =
@@ -60,6 +61,7 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
      * @notice Returns the domain separator used in the encoding of the signature for permits, as defined by EIP-712
      * @return the bytes32 domain separator
      */
+    // solhint-disable-next-line func-name-mixedcase
     function DOMAIN_SEPARATOR() external view override returns (bytes32) {
         return _domainSeparatorV4();
     }
@@ -87,6 +89,7 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
     }
 
     function _permit(address spender, uint256 tokenId, uint256 deadline, bytes memory sig) internal virtual {
+        // solhint-disable-next-line not-rely-on-time
         if (deadline < block.timestamp) {
             revert PermitExpired();
         }

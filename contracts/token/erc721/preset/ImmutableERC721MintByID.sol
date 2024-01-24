@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
-import "../abstract/ImmutableERC721Base.sol";
+import {ImmutableERC721Base} from "../abstract/ImmutableERC721Base.sol";
 
 contract ImmutableERC721MintByID is ImmutableERC721Base {
     ///     =====   Constructor  =====
@@ -84,7 +84,7 @@ contract ImmutableERC721MintByID is ImmutableERC721Base {
      * @param tokenIDs an array of token IDs to burn
      */
     function burnBatch(uint256[] calldata tokenIDs) external {
-        for (uint i = 0; i < tokenIDs.length; i++) {
+        for (uint256 i = 0; i < tokenIDs.length; i++) {
             burn(tokenIDs[i]);
         }
     }
@@ -106,7 +106,7 @@ contract ImmutableERC721MintByID is ImmutableERC721Base {
             revert IImmutableERC721MismatchedTransferLengths();
         }
 
-        for (uint i = 0; i < tr.tokenIds.length; i++) {
+        for (uint256 i = 0; i < tr.tokenIds.length; i++) {
             safeTransferFrom(tr.from, tr.tos[i], tr.tokenIds[i]);
         }
     }

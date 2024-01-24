@@ -11,7 +11,7 @@
  - npm: https://www.npmjs.com/package/erc721psi
 
  */
-
+// solhint-disable
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -450,6 +450,7 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
      * transferred to `to`.
      * - When `from` is zero, `tokenId` will be minted for `to`.
      */
+    // solhint-disable-next-line no-empty-blocks
     function _beforeTokenTransfers(address from, address to, uint256 startTokenId, uint256 quantity) internal virtual {}
 
     /**
@@ -464,5 +465,6 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
      * - when `from` and `to` are both non-zero.
      * - `from` and `to` are never both zero.
      */
+    // solhint-disable-next-line no-empty-blocks
     function _afterTokenTransfers(address from, address to, uint256 startTokenId, uint256 quantity) internal virtual {}
 }

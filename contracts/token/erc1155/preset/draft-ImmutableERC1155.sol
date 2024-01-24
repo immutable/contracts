@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
-import "../abstract/ImmutableERC1155Base.sol";
+import {ImmutableERC1155Base} from "../abstract/ImmutableERC1155Base.sol";
 
 /**
  * @title draft-ImmutableERC1155

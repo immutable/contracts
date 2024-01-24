@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/utils/structs/BitMaps.sol";
+import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import {ERC721Psi, ERC721PsiBurnable} from "../erc721psi/ERC721PsiBurnable.sol";
 // Errors
 import {IImmutableERC721Errors} from "../../../errors/Errors.sol";
@@ -58,7 +58,7 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
      *  @param tokenIDs an array of token ids
      */
     function burnBatch(uint256[] calldata tokenIDs) external {
-        for (uint i = 0; i < tokenIDs.length; i++) {
+        for (uint256 i = 0; i < tokenIDs.length; i++) {
             burn(tokenIDs[i]);
         }
     }
@@ -103,7 +103,7 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
     /** @notice Overwritten functions with combined implementations, supply for the collection is summed as they
      *  are tracked differently by each minting strategy
      */
-    function balanceOf(address owner) public view virtual override(ERC721, ERC721Psi) returns (uint) {
+    function balanceOf(address owner) public view virtual override(ERC721, ERC721Psi) returns (uint256) {
         return ERC721.balanceOf(owner) + ERC721Psi.balanceOf(owner);
     }
 
@@ -233,7 +233,7 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
      *  @param mints an array of mint requests
      */
     function _mintBatchByQuantity(Mint[] calldata mints) internal {
-        for (uint i = 0; i < mints.length; i++) {
+        for (uint256 i = 0; i < mints.length; i++) {
             Mint calldata m = mints[i];
             _mintByQuantity(m.to, m.quantity);
         }
@@ -243,7 +243,7 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
      *  @param mints an array of mint requests
      */
     function _safeMintBatchByQuantity(Mint[] calldata mints) internal {
-        for (uint i = 0; i < mints.length; i++) {
+        for (uint256 i = 0; i < mints.length; i++) {
             Mint calldata m = mints[i];
             _safeMintByQuantity(m.to, m.quantity);
         }
@@ -288,7 +288,7 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
      *  @param tokenIds the ids of the tokens to mint
      */
     function _mintBatchByID(address to, uint256[] calldata tokenIds) internal {
-        for (uint i = 0; i < tokenIds.length; i++) {
+        for (uint256 i = 0; i < tokenIds.length; i++) {
             _mintByID(to, tokenIds[i]);
         }
     }
@@ -298,7 +298,7 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
      *  @param tokenIds the ids of the tokens to mint
      **/
     function _safeMintBatchByID(address to, uint256[] calldata tokenIds) internal {
-        for (uint i = 0; i < tokenIds.length; i++) {
+        for (uint256 i = 0; i < tokenIds.length; i++) {
             _safeMintByID(to, tokenIds[i]);
         }
     }
@@ -307,7 +307,7 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
      *  @param mints an array of mint requests
      */
     function _mintBatchByIDToMultiple(IDMint[] calldata mints) internal {
-        for (uint i = 0; i < mints.length; i++) {
+        for (uint256 i = 0; i < mints.length; i++) {
             IDMint calldata m = mints[i];
             _mintBatchByID(m.to, m.tokenIds);
         }
@@ -317,7 +317,7 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
      *  @param mints an array of mint requests
      */
     function _safeMintBatchByIDToMultiple(IDMint[] calldata mints) internal {
-        for (uint i = 0; i < mints.length; i++) {
+        for (uint256 i = 0; i < mints.length; i++) {
             IDMint calldata m = mints[i];
             _safeMintBatchByID(m.to, m.tokenIds);
         }
@@ -327,9 +327,9 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
      *  @param burns array of burn requests
      */
     function _safeBurnBatch(IDBurn[] calldata burns) internal {
-        for (uint i = 0; i < burns.length; i++) {
+        for (uint256 i = 0; i < burns.length; i++) {
             IDBurn calldata b = burns[i];
-            for (uint j = 0; j < b.tokenIds.length; j++) {
+            for (uint256 j = 0; j < b.tokenIds.length; j++) {
                 safeBurn(b.owner, b.tokenIds[j]);
             }
         }

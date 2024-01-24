@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts/interfaces/IERC165.sol";
+import {IERC165} from "@openzeppelin/contracts/interfaces/IERC165.sol";
 
 ///
 /// @dev Interface for token permits for ERC721
@@ -26,5 +26,6 @@ interface IERC4494 is IERC165 {
 
     /// @notice Returns the domain separator used in the encoding of the signature for permits, as defined by EIP-712
     /// @return the bytes32 domain separator
+    // solhint-disable-next-line func-name-mixedcase
     function DOMAIN_SEPARATOR() external view returns (bytes32);
 }

@@ -17,15 +17,15 @@ interface IOffchainRandomSource {
 
     /**
      * @notice Fetch the latest off-chain generated random value.
-     * @param _fulfillmentIndex Number previously given when requesting a ramdon value.
+     * @param _fulfilmentIndex Number previously given when requesting a ramdon value.
      * @return _randomValue The value generated off-chain.
      */
-    function getOffchainRandom(uint256 _fulfillmentIndex) external view returns (bytes32 _randomValue);
+    function getOffchainRandom(uint256 _fulfilmentIndex) external view returns (bytes32 _randomValue);
 
     /**
      * @notice Check to see if the random value is available yet.
-     * @param _fulfillmentIndex Number previously given when requesting a ramdon value.
+     * @param _fulfilmentIndex Number previously given when requesting a ramdon value.
      * @return true if the value is available.
      */
-    function isOffchainRandomReady(uint256 _fulfillmentIndex) external view returns (bool);
+    function isOffchainRandomReady(uint256 _fulfilmentIndex) external view returns (bool);
 }

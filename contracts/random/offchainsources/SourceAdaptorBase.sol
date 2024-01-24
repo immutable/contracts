@@ -54,8 +54,8 @@ abstract contract SourceAdaptorBase is AccessControlEnumerable, IOffchainRandomS
     /**
      * @inheritdoc IOffchainRandomSource
      */
-    function getOffchainRandom(uint256 _fulfillmentIndex) external override(IOffchainRandomSource) view returns (bytes32 _randomValue) {
-        bytes32 rand = randomOutput[_fulfillmentIndex];
+    function getOffchainRandom(uint256 _fulfilmentIndex) external override(IOffchainRandomSource) view returns (bytes32 _randomValue) {
+        bytes32 rand = randomOutput[_fulfilmentIndex];
         if (rand == bytes32(0)) {
             revert WaitForRandom();
         }
@@ -65,7 +65,7 @@ abstract contract SourceAdaptorBase is AccessControlEnumerable, IOffchainRandomS
     /**
      * @inheritdoc IOffchainRandomSource
      */
-    function isOffchainRandomReady(uint256 _fulfillmentIndex) external override(IOffchainRandomSource) view returns (bool) {
-        return randomOutput[_fulfillmentIndex] != bytes32(0);
+    function isOffchainRandomReady(uint256 _fulfilmentIndex) external override(IOffchainRandomSource) view returns (bool) {
+        return randomOutput[_fulfilmentIndex] != bytes32(0);
     }
 }

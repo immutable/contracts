@@ -40,11 +40,11 @@ abstract contract RandomValues {
      *      value with fetchRandom.
      */
     function _requestRandomValueCreation() internal returns (uint256 _randomRequestId) {
-        uint256 randomFulfillmentIndex;
+        uint256 randomFulfilmentIndex;
         address randomSource;
-        (randomFulfillmentIndex, randomSource) = randomSeedProvider.requestRandomSeed();
+        (randomFulfilmentIndex, randomSource) = randomSeedProvider.requestRandomSeed();
         _randomRequestId = nextNonce++;
-        randCreationRequests[_randomRequestId] = randomFulfillmentIndex;
+        randCreationRequests[_randomRequestId] = randomFulfilmentIndex;
         randCreationRequestsSource[_randomRequestId] = randomSource;
     }
 

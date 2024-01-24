@@ -52,7 +52,6 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile --network-concurrency 1
       - name: Run eslint
-        continue-on-error: true
         run: yarn run eslint
   solhint:
     name: Run solhint
@@ -68,8 +67,17 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile --network-concurrency 1
       - name: Run solhint
-        continue-on-error: true
         run: yarn run solhint contracts/**/*.sol
+  slither:
+    name: Run slither
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Run slither
+        uses: crytic/slither-action@v0.3.0
+        with:
+          slither-args: --compile-force-framework forge  --foundry-out-directory foundry-out
   publish:
     name: Publish to NPM (dry run)
     runs-on: ubuntu-latest

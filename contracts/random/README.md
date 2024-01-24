@@ -34,7 +34,8 @@ Game contracts extend ```RandomValues.sol```. This contract interacts with the `
 
 There is one ```RandomSeedProvider.sol``` contract deployed per chain. Each game has its own instance of ```RandomValues.sol``` as this contract is integrated directly into the game contract. 
 
-The ```RandomSeedProvider.sol``` operates behind a transparent proxy, ```TransparentUpgradeProxy.sol``` that is controlled by ```ProxyAdmin.sol```. Using an upgradeable pattern allows the random manager contract to be upgraded to extend its feature set and resolve issues. 
+The ```RandomSeedProvider.sol``` operates behind a transparent proxy, ```ERC1967Proxy.sol```, with the upgrade
+logic included in the ```UUPSUpgradeable.sol``` contract that ```RandomSeedProvider.sol``` extends. Using an upgradeable pattern allows the random manager contract to be upgraded to extend its feature set and resolve issues. 
 
 The ```RandomSeedProvider.sol``` contract can be configured to use an off-chain random number source. This source is accessed via the ```IOffchainRandomSource.sol``` interface. To allow the flexibility to switch between off-chain random sources, there is an adaptor contract between the offchain random source contract and the random seed provider.
 

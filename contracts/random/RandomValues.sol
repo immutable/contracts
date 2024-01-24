@@ -57,11 +57,7 @@ abstract contract RandomValues {
      * @return _randomValue The random number that the game can use.
      */
     function _fetchRandom(uint256 _randomRequestId) internal returns (bytes32 _randomValue) {
-        // Don't return the personalised seed directly. Otherwise there is a risk that
-        // the seed will be revealed, which would then compromise the security of calls
-        // to fetchRandomValues.
-        bytes32 seed = _fetchPersonalisedSeed(_randomRequestId);
-        _randomValue = keccak256(abi.encodePacked(seed, uint256(0)));
+        return _fetchPersonalisedSeed(_randomRequestId);
     }
 
     /**

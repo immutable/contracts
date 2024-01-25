@@ -8,6 +8,7 @@ import {RandomSeedProvider} from "./RandomSeedProvider.sol";
  * @notice Game contracts that need random numbers should extend this contract.
  * @dev This contract can be used with UPGRADEABLE or NON-UNGRADEABLE contracts.
  */
+// slither-disable-start dead-code
 abstract contract RandomValues {
     // Address of random seed provider contract.
     // This value "immutable", and hence patched directly into bytecode when it is used.
@@ -39,6 +40,7 @@ abstract contract RandomValues {
      * @return _randomRequestId A value that needs to be presented when fetching the random
      *      value with fetchRandom.
      */
+    // slither-disable-next-line reentrancy-benign
     function _requestRandomValueCreation() internal returns (uint256 _randomRequestId) {
         uint256 randomFulfilmentIndex;
         address randomSource;
@@ -121,3 +123,4 @@ abstract contract RandomValues {
     // slither-disable-next-line unused-state,naming-convention
     uint256[100] private __gapRandomValues;
 }
+// slither-disable-end dead-code

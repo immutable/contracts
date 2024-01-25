@@ -2,6 +2,7 @@
 // solhint-disable compiler-version, custom-errors, reason-string
 pragma solidity ^0.8.4;
 
+// slither-disable-start dead-code
 library Bytes {
     /**
      * @dev Converts a `uint256` to a `string`.
@@ -85,3 +86,4 @@ library Bytes {
         return result;
     }
 }
+// slither-disable-end dead-code

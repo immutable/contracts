@@ -176,6 +176,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
      * @return _randomFulfilmentIndex The index for the game contract to present to fetch the next random value.
      * @return _randomSource Indicates that an on-chain source was used, or is the address of an off-chain source.
      */
+    // slither-disable-next-line reentrancy-benign
     function requestRandomSeed() external returns (uint256 _randomFulfilmentIndex, address _randomSource) {
         if (randomSource == ONCHAIN || !approvedForOffchainRandom[msg.sender]) {
             // Generate a value for this block if one has not been generated yet. This

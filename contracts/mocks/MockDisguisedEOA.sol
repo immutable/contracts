@@ -5,7 +5,7 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 // Used in CREATE2 vector
 contract MockDisguisedEOA {
-    IERC721 public tokenAddress;
+    IERC721 public immutable tokenAddress;
 
     constructor(IERC721 _tokenAddress) {
         tokenAddress = _tokenAddress;

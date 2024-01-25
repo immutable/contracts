@@ -4,8 +4,8 @@ pragma solidity 0.8.19;
 import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 contract MockOnReceive {
-    IERC721 public tokenAddress;
-    address private recipient;
+    IERC721 public immutable tokenAddress;
+    address private immutable recipient;
 
     constructor(IERC721 _tokenAddress, address _recipient) {
         tokenAddress = _tokenAddress;

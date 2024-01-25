@@ -1,4 +1,6 @@
 {
+  "detectors_to_exclude": "naming-convention,incorrect-versions-of-solidity",
+
   "filter_paths": "lib"
 }
 

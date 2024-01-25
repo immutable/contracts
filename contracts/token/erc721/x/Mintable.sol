@@ -7,7 +7,7 @@ import {IMintable} from "./IMintable.sol";
 import {Minting} from "./utils/Minting.sol";
 
 abstract contract Mintable is Ownable, IMintable {
-    address public imx;
+    address public immutable imx;
     mapping(uint256 id => bytes blueprint) public blueprints;
 
     event AssetMinted(address to, uint256 id, bytes blueprint);

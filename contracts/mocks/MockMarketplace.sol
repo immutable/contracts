@@ -5,8 +5,8 @@ import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 
 contract MockMarketplace {
-    IERC721 public tokenAddress;
-    IERC2981 public royaltyAddress;
+    IERC721 public immutable tokenAddress;
+    IERC2981 public immutable royaltyAddress;
 
     constructor(address _tokenAddress) {
         tokenAddress = IERC721(_tokenAddress);

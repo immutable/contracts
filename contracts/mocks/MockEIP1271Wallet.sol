@@ -5,7 +5,7 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 
 contract MockEIP1271Wallet is IERC1271 {
-    address public owner;
+    address public immutable owner;
 
     constructor(address _owner) {
         owner = _owner;

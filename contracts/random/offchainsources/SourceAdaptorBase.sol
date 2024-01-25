@@ -24,7 +24,7 @@ abstract contract SourceAdaptorBase is AccessControlEnumerable, IOffchainRandomS
     mapping(uint256 _fulfilmentId => bytes32 randomValue) private randomOutput;
 
     // VRF contract.
-    address public vrfCoordinator;
+    address public immutable vrfCoordinator;
 
     constructor(address _roleAdmin, address _configAdmin, address _vrfCoordinator) {
         _grantRole(DEFAULT_ADMIN_ROLE, _roleAdmin);

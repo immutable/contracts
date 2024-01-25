@@ -113,6 +113,8 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
 
         randomSource = ONCHAIN;
         ranDaoAvailable = _ranDaoAvailable;
+
+        version = VERSION0;
     }
 
     /**

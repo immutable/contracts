@@ -52,7 +52,7 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
     }
 
     /// @notice A mapping of tokens that have been burned to prevent re-minting
-    BitMaps.BitMap _burnedTokens;
+    BitMaps.BitMap private _burnedTokens;
 
     ///     =====   Constructor  =====
 

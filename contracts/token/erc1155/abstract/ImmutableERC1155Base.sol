@@ -8,9 +8,6 @@ import {ERC1155, ERC1155Permit} from "../../../token/erc1155/abstract/ERC1155Per
 import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
 import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnforced.sol";
 
-// Utils
-import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
-
 abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Permit, ERC2981 {
     /// @dev Contract level metadata
     string public contractURI;

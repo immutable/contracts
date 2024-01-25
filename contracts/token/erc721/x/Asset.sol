@@ -5,6 +5,7 @@ pragma solidity ^0.8.4;
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {Mintable} from "./Mintable.sol";
 
+// slither-disable-start missing-inheritance
 contract Asset is ERC721, Mintable {
     constructor(
         address _owner,
@@ -17,3 +18,4 @@ contract Asset is ERC721, Mintable {
         _safeMint(user, id);
     }
 }
+// slither-disable-end missing-inheritance

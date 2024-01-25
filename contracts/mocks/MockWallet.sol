@@ -9,7 +9,7 @@ contract MockWallet {
 
     event ReceivedBatch(address, address, uint256[], uint256[], bytes);
 
-    /// @notice This code is only for testing purposes. Do not use similar 
+    /// @notice This code is only for testing purposes. Do not use similar
     /// @notice constructions in production code as they are open to attack.
     /// @dev For details see: https://github.com/crytic/slither/wiki/Detector-Documentation#arbitrary-from-in-transferfrom
     function transferNFT(address token, address from, address to, uint256 tokenId) external {

@@ -91,8 +91,10 @@ contract ImmutableSignedZone is
     // solhint-disable-next-line var-name-mixedcase
     string private _ZONE_NAME;
 
+    // slither-disable-start immutable-states
     // solhint-disable-next-line var-name-mixedcase
     bytes32 internal _NAME_HASH;
+    // slither-disable-end immutable-states
 
     /// @dev The allowed signers.
     // solhint-disable-next-line named-parameters-mapping

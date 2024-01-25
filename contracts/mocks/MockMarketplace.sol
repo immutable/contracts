@@ -17,7 +17,7 @@ contract MockMarketplace {
         tokenAddress.transferFrom(msg.sender, recipient, _tokenId);
     }
 
-    /// @notice This code is only for testing purposes. Do not use similar 
+    /// @notice This code is only for testing purposes. Do not use similar
     /// @notice constructions in production code as they are open to attack.
     /// @dev For details see: https://github.com/crytic/slither/wiki/Detector-Documentation#arbitrary-from-in-transferfrom
     function executeTransferFrom(address from, address to, uint256 _tokenId) public {
@@ -29,7 +29,7 @@ contract MockMarketplace {
         tokenAddress.setApprovalForAll(operator, approved);
     }
 
-    /// @notice This code is only for testing purposes. Do not use similar 
+    /// @notice This code is only for testing purposes. Do not use similar
     /// @notice constructions in production code as they are open to attack.
     /// @dev For details see: https://github.com/crytic/slither/wiki/Detector-Documentation#arbitrary-from-in-transferfrom
     function executeTransferRoyalties(address from, address recipient, uint256 _tokenId, uint256 price) public payable {

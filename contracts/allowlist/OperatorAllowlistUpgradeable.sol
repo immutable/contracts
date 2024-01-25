@@ -172,6 +172,8 @@ contract OperatorAllowlistUpgradeable is
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADE_ROLE) {}
 
     /// @notice storage gap for additional variables for upgrades
+    // slither-disable-start unused-state
     // solhint-disable-next-line var-name-mixedcase
     uint256[20] private __OperatorAllowlistUpgradeableGap;
+    // slither-disable-end unused-state
 }

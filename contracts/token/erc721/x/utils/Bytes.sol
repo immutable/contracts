@@ -28,9 +28,6 @@ library Bytes {
         return string(buffer);
     }
 
-    // solhint-disable-next-line const-name-snakecase
-    bytes private constant alphabet = "0123456789abcdef";
-
     /**
      * Index Of
      *

@@ -154,6 +154,7 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
      * @return True if the signature is valid according to EIP-1271, otherwise false.
      */
     function _isValidERC1271Signature(address spender, bytes32 digest, bytes memory sig) private view returns (bool) {
+        // slither-disable-next-line low-level-calls
         (bool success, bytes memory res) = spender.staticcall(
             abi.encodeWithSelector(IERC1271.isValidSignature.selector, digest, sig)
         );

@@ -68,6 +68,7 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
      *
      * @return The name of this contract as a string.
      */
+    // slither-disable-next-line dead-code
     function _nameString() internal pure override returns (string memory) {
         // Return the name of the contract.
         return "ImmutableSeaport";

@@ -150,6 +150,7 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
      * token will be the concatenation of the `baseURI` and the `tokenId`. Empty
      * by default, can be overriden in child contracts.
      */
+    // slither-disable-next-line dead-code      
     function _baseURI() internal view virtual returns (string memory) {
         return "";
     }

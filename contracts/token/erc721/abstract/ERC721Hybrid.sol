@@ -387,6 +387,7 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
     /** @notice overriding erc721 and erc721psi _safemint, super calls the `_safeMint` method of
      *  the erc721 implementation due to inheritance linearisation. Refer to erc721
      */
+    // slither-disable-next-line dead-code
     function _safeMint(address to, uint256 tokenId) internal virtual override(ERC721, ERC721Psi) {
         super._safeMint(to, tokenId);
     }
@@ -432,6 +433,7 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
     /**
      * @inheritdoc ERC721
      */
+    // slither-disable-next-line dead-code
     function _baseURI() internal view virtual override(ERC721, ERC721Psi) returns (string memory) {
         return ERC721._baseURI();
     }

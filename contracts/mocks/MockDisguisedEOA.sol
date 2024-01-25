@@ -11,7 +11,11 @@ contract MockDisguisedEOA {
         tokenAddress = _tokenAddress;
     }
 
+    /// @notice This code is only for testing purposes. Do not use similar 
+    /// @notice constructions in production code as they are open to attack.
+    /// @dev For details see: https://github.com/crytic/slither/wiki/Detector-Documentation#arbitrary-from-in-transferfrom
     function executeTransfer(address from, address recipient, uint256 _tokenId) external {
+        // slither-disable-next-line arbitrary-send-erc20
         tokenAddress.transferFrom(from, recipient, _tokenId);
     }
 }

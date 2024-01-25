@@ -17,7 +17,11 @@ contract MockMarketplace {
         tokenAddress.transferFrom(msg.sender, recipient, _tokenId);
     }
 
+    /// @notice This code is only for testing purposes. Do not use similar 
+    /// @notice constructions in production code as they are open to attack.
+    /// @dev For details see: https://github.com/crytic/slither/wiki/Detector-Documentation#arbitrary-from-in-transferfrom
     function executeTransferFrom(address from, address to, uint256 _tokenId) public {
+        // slither-disable-next-line arbitrary-send-erc20
         tokenAddress.transferFrom(from, to, _tokenId);
     }
 
@@ -25,6 +29,9 @@ contract MockMarketplace {
         tokenAddress.setApprovalForAll(operator, approved);
     }
 
+    /// @notice This code is only for testing purposes. Do not use similar 
+    /// @notice constructions in production code as they are open to attack.
+    /// @dev For details see: https://github.com/crytic/slither/wiki/Detector-Documentation#arbitrary-from-in-transferfrom
     function executeTransferRoyalties(address from, address recipient, uint256 _tokenId, uint256 price) public payable {
         // solhint-disable-next-line custom-errors
         require(msg.value == price, "insufficient msg.value");
@@ -32,6 +39,7 @@ contract MockMarketplace {
         uint256 sellerAmt = msg.value - royaltyAmount;
         payable(receiver).transfer(royaltyAmount);
         payable(from).transfer(sellerAmt);
+        // slither-disable-next-line arbitrary-send-erc20
         tokenAddress.transferFrom(from, recipient, _tokenId);
     }
 }

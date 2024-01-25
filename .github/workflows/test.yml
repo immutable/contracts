@@ -74,12 +74,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-      - name: Setup Slither1
-        run: sudo apt install python3-setuptools
-      - name: Setup Slither2
-        run: sudo apt install python3-pip
-      - name: Setup Slither3
-        run: sudo pip3 install doge
+      - name: Setup Slither
+        run: sudo pip3 install slither-analyzer
       - name: Run slither
         run: slither --compile-force-framework forge  --foundry-out-directory foundry-out .
   publish:

@@ -74,8 +74,14 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-      - name: Setup Slither
+      - name: Install Slither
         run: sudo pip3 install slither-analyzer
+      - name: Show Slither Version
+        run: slither --version
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Show Forge Version
+        run: forge --version
       - name: Run slither
         run: slither --compile-force-framework forge  --foundry-out-directory foundry-out .
   publish:

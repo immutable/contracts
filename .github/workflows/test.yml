@@ -72,16 +72,16 @@ jobs:
     name: Run slither
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Slither1
-        uses: sudo apt install python3-setuptools
-      - name: Setup Slither2
-        uses: sudo apt install python3-pip
-      - name: Setup Slither3
-        uses: sudo pip3 install doge
       - name: Checkout Code
         uses: actions/checkout@v3
+      - name: Setup Slither1
+        run: sudo apt install python3-setuptools
+      - name: Setup Slither2
+        run: sudo apt install python3-pip
+      - name: Setup Slither3
+        run: sudo pip3 install doge
       - name: Run slither
-        uses: slither --compile-force-framework forge  --foundry-out-directory foundry-out .
+        run: slither --compile-force-framework forge  --foundry-out-directory foundry-out .
   publish:
     name: Publish to NPM (dry run)
     runs-on: ubuntu-latest

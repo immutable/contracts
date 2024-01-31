@@ -45,7 +45,7 @@ The architecture diagram shows a ChainLink VRF source and a Supra VRF source. Th
 
 ## Process of Requesting a Random Number
 
-The process for requesting a random number is shown below. Players do actions requiring a random number. They purchase, or commit to the random value, which is later revealed. 
+The process for requesting a random number is shown below. Players do actions requiring a random number or a set of random numbers. They purchase, or commit to the random value(s), which is later revealed. 
 
 ![Random number genration](./random-sequence.png)
 
@@ -53,10 +53,10 @@ The steps are:
 
 * The game contract calls ```_requestRandomValueCreation```.
 The ```_requestRandomValueCreation``` returns a value ```_randomRequestId```. This value is supplied later to fetch the random value once it has been generated. The function ```_requestRandomValueCreation``` executes a call to the ```RandomSeedProvider``` contract requesting a seed value be produced.
-* The game contract calls ```_isRandomValueReady```, passing in the ```_randomRequestId```. The returns ```true``` if the value is ready to be returned.
-* The game contract calls ```_fetchRandom```, passing in the ```_randomRequestId```. The random seed is returned to the RandomValue.sol, which then customises the value prior returning it to the game.
+* The game contract calls ```_isRandomValueReady```, passing in the ```_randomRequestId```. This returns ```READY``` if the value is ready to be returned.
+* The game contract calls ```_fetchRandomValues```, passing in the ```_randomRequestId```. The random seed is returned to the ```RandomValues``` contract, which then customises the value prior returning it to the game.
 
 
 # Notes
 
-Sequence diagram source [here](https://sequencediagram.org/index.html#initialData=title%20Random%20Number%20Generation%0A%0Aparticipant%20%22Game.sol%22%20as%20Game%0Aparticipant%20%22RandomValue.sol%22%20as%20RV%0Aparticipant%20%22RandomSeedProvider.sol%22%20as%20RM%0A%0Agroup%20Player%20purchases%20a%20random%20action%0AGame-%3ERV%3A%20_requestRandomValueCreation()%0ARV-%3ERM%3A%20requestRandomSeed()%0ARV%3C--RM%3A%20_seedRequestId%2C%20_source%0AGame%3C--RV%3A%20_randomRequestId%0Aend%0A%0Anote%20over%20Game%2CRM%3AWait%20for%20a%20block%20to%20be%20produced%20or%20an%20off-chain%20random%20to%20be%20delivered.%0A%0Agroup%20Check%20random%20value%20is%20ready%0AGame-%3ERV%3A%20isRandomValueReady(_randomRequestId)%0ARV-%3ERM%3A%20isRandomSeedReady(%5Cn_seedRequestId%2C%20_source)%0ARV%3C--RM%3A%20true%0AGame%3C--RV%3A%20true%0Aend%0A%0Agroup%20Game%20delivers%20%2F%20reveals%20random%20action%0AGame-%3ERV%3A%20fetchRandom(_randomRequestId)%0ARV-%3ERM%3A%20getRandomSeed(%5Cn_seedRequestId%2C%20_source)%0ARV%3C--RM%3A%20_randomSeed%0ARV-%3ERV%3A%20Personalise%20random%20number%20%5Cnby%20game%2C%20player%2C%20and%20request%5Cnnumber.%0AGame%3C--RV%3A%20_randomValue%0Aend%0A%0A%0A%0A%0A%0A).
+Sequence diagram source [here](https://sequencediagram.org/index.html#initialData=C4S2BsFMAICUEMB2ATA9gW2gOQK7oEaQBO0A4pIsfKKogFB0AO8RoAxiM4sAOZGo5G0AMTgQPABa8ikCtABU80vHSRFTFu05Jg0AETLV0ADKoeINgDoAzqnB7o8a2RWQNrC9u76EKDADV4cBxIaxs7Byc4fzoKZHctLmkBIVFxKXxgmEUASXR0HGB4TJgALwBrAFF-AFkAHUQcxAAzIidgIhw2YBwZdWYPDiSfJDR0AGVZZAAFfgA3EGRicPtHZ1ga2JQGPhToafB4AE9iaEZetgknUMdoNr9MeG6QWjpDSABaAD5YfwAuaAAfRkAEcQtZgL4xoEsgBhGTUF6IAAUgOsIFKkAAlHRft8NgDQeDIaMMJNIMhkTjfgAeD4fAlA5o4cDNEDgVTcHLIAA0QNsFzc7zpDP+QPuY1gkDBoWA3K28ToiFQwBgqDmp3ePIJAHV4GBoM1UCR4NBMqg2OVoMBUGaYIx+MguhToMbHIhXc1mh9LvqPRKMNbbYRoEsxBqZMhLDt+IJoLCJJBLXdSZg5kEQtAQM4Ecgjm9XPixYDs1CAhnIFL4HnUQH0FKZRDudT-PiagDS6nycgqzWGoDmaz2Zy5bz+QIiGxsbj-CLGR0QgXVHOxbBKgBBAAiAE0FTG9u9Q5Bw8RnAB6O6QDVBHOpxzPV7vIsAgeQYCXMvoGHg2uphvE5sZzbAEeDfT9u2RftBzZDkKFHPk0QnKcWzndtxS7KYgJ+MVplPWggmzGA62gRA8EIEgGnwI5oB4Vw+UYQ4TiIPlRkvRtdFIghliXSAVxfOtv1CPcGBEoA).

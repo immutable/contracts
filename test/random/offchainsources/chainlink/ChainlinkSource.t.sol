@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 
 import {MockCoordinator} from "./MockCoordinator.sol";
-import {MockGame} from "../../MockGame.sol";
+import {MockGame, RandomValues} from "../../MockGame.sol";
 import {RandomSeedProvider} from "contracts/random/RandomSeedProvider.sol";
 import {IOffchainRandomSource} from "contracts/random/offchainsources/IOffchainRandomSource.sol";
 import {ChainlinkSourceAdaptor} from "contracts/random/offchainsources/chainlink/ChainlinkSourceAdaptor.sol";
@@ -206,25 +206,28 @@ contract ChainlinkIntegrationTests is ChainlinkOperationalTests {
         randomSeedProvider.addOffchainRandomConsumer(address(game));
 
         vm.recordLogs();
-        uint256 randomRequestId = game.requestRandomValueCreation();
+        uint256 randomRequestId = game.requestRandomValueCreation(1);
         Vm.Log[] memory entries = vm.getRecordedLogs();
         assertEq(entries.length, 1, "Unexpected number of events emitted");
         assertEq(entries[0].topics[0], keccak256("RequestId(uint256)"));
         uint256 fulfilmentIndex = abi.decode(entries[0].data, (uint256));
 
-        assertFalse(game.isRandomValueReady(randomRequestId), "Should not be ready yet");
+        assertEq(uint256(game.isRandomValueReady(randomRequestId)), uint256(RandomValues.RequestStatus.IN_PROGRESS), "Should not be ready yet");
 
         mockChainlinkCoordinator.sendFulfill(fulfilmentIndex, uint256(RAND1));
 
-        assertTrue(game.isRandomValueReady(randomRequestId), "Should be ready");
+        assertEq(uint256(game.isRandomValueReady(randomRequestId)), uint256(RandomValues.RequestStatus.READY), "Should be ready");
 
-        bytes32 randomValue = game.fetchRandom(randomRequestId);
-        assertNotEq(randomValue, bytes32(0), "Random Value zero");
+        bytes32[] memory randomValue = game.fetchRandomValues(randomRequestId);
+        assertEq(randomValue.length, 1, "length");
+        assertNotEq(randomValue[0], bytes32(0), "Random Value zero");
     }
 }
 
 contract ChainlinkCoverageFakeTests is ChainlinkInitTests {
-        // Do calls to unused functions in MockCoordinator so that it doesn't impact the coverage results.
+    error OnlyCoordinatorCanFulfill(address have, address want);
+
+    // Do calls to unused functions in MockCoordinator so that it doesn't impact the coverage results.
     function testFixMockCoordinatorCoverage() public {
         mockChainlinkCoordinator = new MockCoordinator();
         mockChainlinkCoordinator.setAdaptor(address(chainlinkSourceAdaptor));
@@ -237,6 +240,14 @@ contract ChainlinkCoverageFakeTests is ChainlinkInitTests {
         mockChainlinkCoordinator.removeConsumer(subId, address(0));
         mockChainlinkCoordinator.cancelSubscription(subId, address(0));
         mockChainlinkCoordinator.pendingRequestExists(subId);
+    }
+
+    function testV2BaseChecksCoverage() public {
+        MockCoordinator mockChainlinkCoordinator2 = new MockCoordinator();
+        mockChainlinkCoordinator2.setAdaptor(address(chainlinkSourceAdaptor));
+        vm.expectRevert(abi.encodeWithSelector(
+            OnlyCoordinatorCanFulfill.selector, address(mockChainlinkCoordinator2), address(mockChainlinkCoordinator)));
+        mockChainlinkCoordinator2.sendFulfill(0, 0);
     }
 }
 

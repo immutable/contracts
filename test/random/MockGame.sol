@@ -7,19 +7,15 @@ contract MockGame is RandomValues {
     constructor(address _randomSeedProvider) RandomValues(_randomSeedProvider) {
     }
 
-    function requestRandomValueCreation() external returns (uint256 _randomRequestId) {
-        return _requestRandomValueCreation();
+    function requestRandomValueCreation(uint16 _size) external returns (uint256 _randomRequestId) {
+        return _requestRandomValueCreation(_size);
     }
 
-    function fetchRandom(uint256 _randomRequestId) external returns(bytes32 _randomValue) {
-        return _fetchRandom(_randomRequestId);
+    function fetchRandomValues(uint256 _randomRequestId) external returns(bytes32[] memory _randomValues) {
+        return _fetchRandomValues(_randomRequestId);
     }
 
-    function fetchRandomValues(uint256 _randomRequestId, uint256 _size) external returns(bytes32[] memory _randomValues) {
-        return _fetchRandomValues(_randomRequestId, _size);
-    }
-
-    function isRandomValueReady(uint256 _randomRequestId) external view returns(bool) {
+    function isRandomValueReady(uint256 _randomRequestId) external view returns(RequestStatus) {
         return _isRandomValueReady(_randomRequestId);
     }
 }

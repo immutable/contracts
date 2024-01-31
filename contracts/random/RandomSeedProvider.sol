@@ -45,7 +45,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
     bytes32 public constant UPGRADE_ADMIN_ROLE = bytes32("UPGRADE_ROLE");
 
     /// @notice Indicates: Generate new random numbers using on-chain methodology.
-    address public constant ONCHAIN = address(0);
+    address public constant ONCHAIN = address(1);
 
     /// @notice All historical random output.
     /// @dev When random seeds are requested, a request id is returned. The id

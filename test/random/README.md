@@ -72,13 +72,12 @@ Operational tests:
 
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|
+| testNoValue                     | Request zero bytes be returned                    | No         | Yes         |
 | testFirstValue                  | Return a single value                             | Yes        | Yes         |
 | testSecondValue                 | Return two values                                 | Yes        | Yes         |
-| testMultiFetch                  | Fetch a generated number multiple times.          | Yes        | Yes         |
-| testMultiInterleaved            | Interleave multiple requests                      | Yes        | Yes         |
+| testMultiFetch                  | Attempt to fetch a generated number twice.        | Yes        | Yes         |
 | testFirstValues                 | Return a single set of values                     | Yes        | Yes         |
 | testSecondValues                | Return two sets of values                         | Yes        | Yes         |
-| testMultiFetchValues            | Fetch a generated set of numbers multiple times.  | Yes        | Yes         |
 | testMultipleGames               | Multiple games in parallel.                       | Yes        | Yes         |
 
 

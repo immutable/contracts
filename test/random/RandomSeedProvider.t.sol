@@ -23,7 +23,7 @@ contract UninitializedRandomSeedProviderTest is Test {
     bytes32 public constant RANDOM_ADMIN_ROLE = keccak256("RANDOM_ADMIN_ROLE");
     bytes32 public constant UPGRADE_ADMIN_ROLE = bytes32("UPGRADE_ROLE");
 
-    address public constant ONCHAIN = address(0);
+    address public constant ONCHAIN = address(1);
 
     ERC1967Proxy public proxy;
     RandomSeedProvider public impl;

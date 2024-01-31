@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 
 import {MockSupraRouter} from "./MockSupraRouter.sol";
-import {MockGame} from "../../MockGame.sol";
+import {MockGame, RandomValues} from "../../MockGame.sol";
 import {RandomSeedProvider} from "contracts/random/RandomSeedProvider.sol";
 import {IOffchainRandomSource} from "contracts/random/offchainsources/IOffchainRandomSource.sol";
 import {SupraSourceAdaptor} from "contracts/random/offchainsources/supra/SupraSourceAdaptor.sol";
@@ -205,20 +205,21 @@ contract SupraIntegrationTests is SupraOperationalTests {
         randomSeedProvider.addOffchainRandomConsumer(address(game));
 
         vm.recordLogs();
-        uint256 randomRequestId = game.requestRandomValueCreation();
+        uint256 randomRequestId = game.requestRandomValueCreation(1);
         Vm.Log[] memory entries = vm.getRecordedLogs();
         assertEq(entries.length, 1, "Unexpected number of events emitted");
         assertEq(entries[0].topics[0], keccak256("RequestId(uint256)"));
         uint256 fulfilmentIndex = abi.decode(entries[0].data, (uint256));
 
-        assertFalse(game.isRandomValueReady(randomRequestId), "Should not be ready yet");
+        assertEq(uint256(game.isRandomValueReady(randomRequestId)), uint256(RandomValues.RequestStatus.IN_PROGRESS), "Should not be ready yet");
 
         mockSupraRouter.sendFulfill(fulfilmentIndex, uint256(RAND1));
 
-        assertTrue(game.isRandomValueReady(randomRequestId), "Should be ready");
+        assertEq(uint256(game.isRandomValueReady(randomRequestId)), uint256(RandomValues.RequestStatus.READY), "Should be ready");
 
-        bytes32 randomValue = game.fetchRandom(randomRequestId);
-        assertNotEq(randomValue, bytes32(0), "Random Value zero");
+        bytes32[] memory randomValue = game.fetchRandomValues(randomRequestId);
+        assertEq(randomValue.length, 1, "length");
+        assertNotEq(randomValue[0], bytes32(0), "Random Value zero");
     }
 }
 

@@ -2,7 +2,7 @@
 
 ## Install
 
-Install dependancies:
+Install dependencies:
 
 ```
 yarn install

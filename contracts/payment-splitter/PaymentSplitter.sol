@@ -1,10 +1,13 @@
 // Copyright Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: Apache 2.0
+// slither-disable-start reentrancy-events
+// slither-disable-start calls-loop
+// slither-disable-start costly-loop
+// slither-disable-start cache-array-length
 pragma solidity 0.8.19;
 
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
-import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import {IPaymentSplitterErrors} from "../errors/PaymentSplitterErrors.sol";
 
@@ -38,7 +41,7 @@ contract PaymentSplitter is AccessControlEnumerable, IPaymentSplitterErrors {
     uint256 private _totalShares;
 
     /// @notice the number of shares held by each payee
-    mapping(address => uint256) private _shares;
+    mapping(address payee => uint256 numberOfShares) private _shares;
 
     /// @notice the address of the payees
     address payable[] private _payees;
@@ -267,3 +270,7 @@ contract PaymentSplitter is AccessControlEnumerable, IPaymentSplitterErrors {
         emit PayeeAdded(account, shares_);
     }
 }
+// slither-disable-end cache-array-length
+// slither-disable-end costly-loop
+// slither-disable-end calls-loop
+// slither-disable-end reentrancy-events

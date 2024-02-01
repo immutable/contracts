@@ -512,7 +512,7 @@ contract SwitchingRandomSeedProviderTest is UninitializedRandomSeedProviderTest 
     }
 
 
-    function testSwitchOffchainTraditional() public {
+    function testSwitchOffchainOnchain() public {
         address aConsumer = makeAddr("aConsumer");
         vm.prank(randomAdmin);
         randomSeedProviderRanDao.addOffchainRandomConsumer(aConsumer);

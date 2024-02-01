@@ -57,7 +57,7 @@ numbers, check that the numbers generated earlier are still available:
 | testSwitchTraditionalOffchain   | Traditional -> Off-chain.                         | Yes        | Yes         |
 | testSwitchRandaoOffchain        | RanDAO -> Off-chain.                              | Yes        | Yes         |
 | testSwitchOffchainOffchain      | Off-chain to another off-chain source.            | Yes        | Yes         |
-| testSwitchOffchainTraditional   | Disable off-chain source.                         | Yes        | Yes         |
+| testSwitchOffchainOnchain       | Disable off-chain source.                         | Yes        | Yes         |
 
 ## RandomValues.sol
 
@@ -72,7 +72,7 @@ Operational tests:
 
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|
-| testNoValue                     | Request zero bytes be returned                    | No         | Yes         |
+| testNoValue                     | Request zero bytes be returned                    | No       | Yes         |
 | testFirstValue                  | Return a single value                             | Yes        | Yes         |
 | testSecondValue                 | Return two values                                 | Yes        | Yes         |
 | testMultiFetch                  | Attempt to fetch a generated number twice.        | Yes        | Yes         |

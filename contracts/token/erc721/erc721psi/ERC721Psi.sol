@@ -11,7 +11,7 @@
  - npm: https://www.npmjs.com/package/erc721psi
 
  */
-
+// solhint-disable
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -96,7 +96,7 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
     function balanceOf(address owner) public view virtual override returns (uint) {
         require(owner != address(0), "ERC721Psi: balance query for the zero address");
 
-        uint count;
+        uint count = 0;
         for (uint i = _startTokenId(); i < _nextTokenId(); ++i) {
             if (_exists(i)) {
                 if (owner == ownerOf(i)) {
@@ -150,6 +150,7 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
      * token will be the concatenation of the `baseURI` and the `tokenId`. Empty
      * by default, can be overriden in child contracts.
      */
+    // slither-disable-next-line dead-code
     function _baseURI() internal view virtual returns (string memory) {
         return "";
     }
@@ -412,6 +413,7 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
         if (to.isContract()) {
             r = true;
             for (uint256 tokenId = startTokenId; tokenId < startTokenId + quantity; tokenId++) {
+                // slither-disable-start calls-loop
                 try IERC721Receiver(to).onERC721Received(_msgSender(), from, tokenId, _data) returns (bytes4 retval) {
                     r = r && retval == IERC721Receiver.onERC721Received.selector;
                 } catch (bytes memory reason) {
@@ -423,6 +425,7 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
                         }
                     }
                 }
+                // slither-disable-end calls-loop
             }
             return r;
         } else {
@@ -450,6 +453,7 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
      * transferred to `to`.
      * - When `from` is zero, `tokenId` will be minted for `to`.
      */
+    // solhint-disable-next-line no-empty-blocks
     function _beforeTokenTransfers(address from, address to, uint256 startTokenId, uint256 quantity) internal virtual {}
 
     /**
@@ -464,5 +468,6 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
      * - when `from` and `to` are both non-zero.
      * - `from` and `to` are never both zero.
      */
+    // solhint-disable-next-line no-empty-blocks
     function _afterTokenTransfers(address from, address to, uint256 startTokenId, uint256 quantity) internal virtual {}
 }

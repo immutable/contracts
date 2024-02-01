@@ -33,8 +33,8 @@ abstract contract SourceAdaptorBase is AccessControlEnumerable, IOffchainRandomS
     }
 
     /**
-     * @notice Callback called when random words are returned by the VRF. 
-     * @dev Assumes external function that calls this checks that the random values are coming 
+     * @notice Callback called when random words are returned by the VRF.
+     * @dev Assumes external function that calls this checks that the random values are coming
      * @dev from the VRF.
      * @dev NOTE that Chainlink assumes that this function will not fail.
      * @param _requestId is the fulfilment index.
@@ -42,7 +42,7 @@ abstract contract SourceAdaptorBase is AccessControlEnumerable, IOffchainRandomS
      */
     function _fulfillRandomWords(uint256 _requestId, uint256[] memory _randomWords) internal {
         // NOTE: This function call is not allowed to fail. However, if one word is requested
-        // and some other number of words has been returned, then maybe the source has been 
+        // and some other number of words has been returned, then maybe the source has been
         // compromised. Reverting the call is more likely to draw attention to the issue than
         // emitting an event.
         if (_randomWords.length != 1) {
@@ -54,7 +54,9 @@ abstract contract SourceAdaptorBase is AccessControlEnumerable, IOffchainRandomS
     /**
      * @inheritdoc IOffchainRandomSource
      */
-    function getOffchainRandom(uint256 _fulfilmentIndex) external override(IOffchainRandomSource) view returns (bytes32 _randomValue) {
+    function getOffchainRandom(
+        uint256 _fulfilmentIndex
+    ) external view override(IOffchainRandomSource) returns (bytes32 _randomValue) {
         bytes32 rand = randomOutput[_fulfilmentIndex];
         if (rand == bytes32(0)) {
             revert WaitForRandom();
@@ -65,7 +67,9 @@ abstract contract SourceAdaptorBase is AccessControlEnumerable, IOffchainRandomS
     /**
      * @inheritdoc IOffchainRandomSource
      */
-    function isOffchainRandomReady(uint256 _fulfilmentIndex) external override(IOffchainRandomSource) view returns (bool) {
+    function isOffchainRandomReady(
+        uint256 _fulfilmentIndex
+    ) external view override(IOffchainRandomSource) returns (bool) {
         return randomOutput[_fulfilmentIndex] != bytes32(0);
     }
 }

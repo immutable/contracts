@@ -135,6 +135,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
      * @param _offchainRandomSource Address of contract that is an off-chain random source.
      */
     function setOffchainRandomSource(address _offchainRandomSource) external onlyRole(RANDOM_ADMIN_ROLE) {
+        // slither-disable-next-line missing-zero-check
         randomSource = _offchainRandomSource;
         emit OffchainRandomSourceSet(_offchainRandomSource);
     }
@@ -176,7 +177,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
      * @return _randomFulfilmentIndex The index for the game contract to present to fetch the next random value.
      * @return _randomSource Indicates that an on-chain source was used, or is the address of an off-chain source.
      */
-    // slither-disable-next-line reentrancy-benign
+    // slither-disable-next-line reentrancy-benign, reentrancy-no-eth
     function requestRandomSeed() external returns (uint256 _randomFulfilmentIndex, address _randomSource) {
         if (randomSource == ONCHAIN || !approvedForOffchainRandom[msg.sender]) {
             // Generate a value for this block if one has not been generated yet. This
@@ -190,12 +191,13 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
             _randomSource = ONCHAIN;
         } else {
             // Limit how often off-chain random numbers are requested to a maximum of once per block.
+            // slither-disable-next-line incorrect-equality
             if (lastBlockOffchainRequest == block.number) {
                 _randomFulfilmentIndex = prevOffchainRandomRequest;
             } else {
+                lastBlockOffchainRequest = block.number;
                 _randomFulfilmentIndex = IOffchainRandomSource(randomSource).requestOffchainRandom();
                 prevOffchainRandomRequest = _randomFulfilmentIndex;
-                lastBlockOffchainRequest = block.number;
             }
             _randomSource = randomSource;
         }
@@ -235,6 +237,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
      */
     function isRandomSeedReady(uint256 _randomFulfilmentIndex, address _randomSource) external view returns (bool) {
         if (_randomSource == ONCHAIN) {
+            // slither-disable-next-line incorrect-equality
             if (lastBlockRandomGenerated == block.number) {
                 return _randomFulfilmentIndex < nextRandomIndex;
             } else {
@@ -261,6 +264,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
      */
     function _generateNextRandomOnChain() private {
         // Onchain random values can only be generated once per block.
+        // slither-disable-next-line incorrect-equality
         if (lastBlockRandomGenerated == block.number) {
             return;
         }

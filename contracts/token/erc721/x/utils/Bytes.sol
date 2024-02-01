@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
+// solhint-disable compiler-version, custom-errors, reason-string
 pragma solidity ^0.8.4;
 
+// slither-disable-start dead-code
 library Bytes {
     /**
      * @dev Converts a `uint256` to a `string`.
@@ -27,8 +29,6 @@ library Bytes {
         return string(buffer);
     }
 
-    bytes constant alphabet = "0123456789abcdef";
-
     /**
      * Index Of
      *
@@ -45,11 +45,7 @@ library Bytes {
      * @return int The position of the needle starting from 0 and returning -1
      *             in the case of no matches found
      */
-    function indexOf(
-        bytes memory _base,
-        string memory _value,
-        uint256 _offset
-    ) internal pure returns (int256) {
+    function indexOf(bytes memory _base, string memory _value, uint256 _offset) internal pure returns (int256) {
         bytes memory _valueBytes = bytes(_value);
 
         assert(_valueBytes.length == 1);
@@ -90,3 +86,4 @@ library Bytes {
         return result;
     }
 }
+// slither-disable-end dead-code

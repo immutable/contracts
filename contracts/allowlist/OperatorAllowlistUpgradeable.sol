@@ -40,13 +40,13 @@ contract OperatorAllowlistUpgradeable is
     bytes32 public constant UPGRADE_ROLE = bytes32("UPGRADE_ROLE");
 
     /// @notice Mapping of Allowlisted addresses
-    mapping(address => bool) private addressAllowlist;
+    mapping(address aContract => bool allowed) private addressAllowlist;
 
     /// @notice Mapping of Allowlisted implementation addresses
-    mapping(address => bool) private addressImplementationAllowlist;
+    mapping(address impl => bool allowed) private addressImplementationAllowlist;
 
     /// @notice Mapping of Allowlisted bytecodes
-    mapping(bytes32 => bool) private bytecodeAllowlist;
+    mapping(bytes32 bytecodeHash => bool allowed) private bytecodeAllowlist;
 
     ///     =====   Initializer  =====
 
@@ -82,6 +82,7 @@ contract OperatorAllowlistUpgradeable is
      */
     function removeAddressesFromAllowlist(address[] calldata addressTargets) external onlyRole(REGISTRAR_ROLE) {
         for (uint256 i; i < addressTargets.length; i++) {
+            // slither-disable-next-line costly-loop
             delete addressAllowlist[addressTargets[i]];
             emit AddressAllowlistChanged(addressTargets[i], false);
         }
@@ -98,6 +99,7 @@ contract OperatorAllowlistUpgradeable is
     function addWalletToAllowlist(address walletAddr) external onlyRole(REGISTRAR_ROLE) {
         // get bytecode of wallet
         bytes32 codeHash;
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             codeHash := extcodehash(walletAddr)
         }
@@ -117,6 +119,7 @@ contract OperatorAllowlistUpgradeable is
     function removeWalletFromAllowlist(address walletAddr) external onlyRole(REGISTRAR_ROLE) {
         // get bytecode of wallet
         bytes32 codeHash;
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             codeHash := extcodehash(walletAddr)
         }
@@ -141,6 +144,7 @@ contract OperatorAllowlistUpgradeable is
 
         // Check if caller is a Allowlisted smart contract wallet
         bytes32 codeHash;
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             codeHash := extcodehash(target)
         }
@@ -165,8 +169,12 @@ contract OperatorAllowlistUpgradeable is
     }
 
     // Override the _authorizeUpgrade function
+    // solhint-disable-next-line no-empty-blocks
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADE_ROLE) {}
 
     /// @notice storage gap for additional variables for upgrades
-    uint256[20] __OperatorAllowlistUpgradeableGap;
+    // slither-disable-start unused-state
+    // solhint-disable-next-line var-name-mixedcase
+    uint256[20] private __OperatorAllowlistUpgradeableGap;
+    // slither-disable-end unused-state
 }

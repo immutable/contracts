@@ -11,8 +11,8 @@
  */
 pragma solidity 0.8.19;
 
-import "solidity-bits/contracts/BitMaps.sol";
-import "./ERC721Psi.sol";
+import {BitMaps} from "solidity-bits/contracts/BitMaps.sol";
+import {ERC721Psi} from "./ERC721Psi.sol";
 
 abstract contract ERC721PsiBurnable is ERC721Psi {
     using BitMaps for BitMaps.BitMap;

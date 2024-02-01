@@ -92,7 +92,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
      *        RANDOM_ADMIN_ROLE privilege.
      * @param _randomAdmin is the account that has RANDOM_ADMIN_ROLE privilege.
      * @param _upgradeAdmin is the account that has UPGRADE_ADMIN_ROLE privilege.
-     * @param _ranDaoAvailable indicates if the chain supports the PRERANDAO opcode.
+     * @param _ranDaoAvailable indicates if the chain supports the PREVRANDAO opcode.
      */
     function initialize(
         address _roleAdmin,

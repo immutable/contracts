@@ -1,15 +1,14 @@
 // Copyright Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: Apache 2.0
-// slither-disable-start reentrancy-events
 // slither-disable-start calls-loop
 // slither-disable-start costly-loop
-// slither-disable-start cache-array-length
 pragma solidity 0.8.19;
 
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import {IPaymentSplitterErrors} from "../errors/PaymentSplitterErrors.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 /**
  * @title PaymentSplitter
@@ -18,7 +17,7 @@ import {IPaymentSplitterErrors} from "../errors/PaymentSplitterErrors.sol";
  *
  * Implementation is based on openzeppelin/PaymentSplitter smart contract
  */
-contract PaymentSplitter is AccessControlEnumerable, IPaymentSplitterErrors {
+contract PaymentSplitter is AccessControlEnumerable, IPaymentSplitterErrors, ReentrancyGuard {
     /// @notice Emitted when the payees list is updated
     event PayeeAdded(address account, uint256 shares);
 
@@ -96,7 +95,8 @@ contract PaymentSplitter is AccessControlEnumerable, IPaymentSplitterErrors {
      * @param token The address of the ERC20 token to be removed
      */
     function removeFromAllowlist(IERC20 token) external onlyRole(TOKEN_REGISTRAR_ROLE) {
-        for (uint256 index; index < allowedERC20List.length; index++) {
+        uint256 allowlistLength = allowedERC20List.length;
+        for (uint256 index; index < allowlistLength; index++) {
             if (allowedERC20List[index] == token) {
                 allowedERC20List[index] = allowedERC20List[allowedERC20List.length - 1];
                 allowedERC20List.pop();
@@ -160,10 +160,11 @@ contract PaymentSplitter is AccessControlEnumerable, IPaymentSplitterErrors {
      * percentage of the total shares and their previous withdrawals. `token` must be the address of an IERC20
      * contract.
      */
-    function releaseAll() public virtual onlyRole(RELEASE_FUNDS_ROLE) {
+    function releaseAll() public virtual nonReentrant onlyRole(RELEASE_FUNDS_ROLE) {
+        uint256 numPayees = _payees.length;
         uint256 startBalance = address(this).balance;
         if (startBalance > 0) {
-            for (uint256 payeeIndex = 0; payeeIndex < _payees.length; payeeIndex++) {
+            for (uint256 payeeIndex = 0; payeeIndex < numPayees; payeeIndex++) {
                 address payable account = _payees[payeeIndex];
                 uint256 nativePaymentAmount = _pendingPayment(account, startBalance);
                 Address.sendValue(account, nativePaymentAmount);
@@ -175,7 +176,7 @@ contract PaymentSplitter is AccessControlEnumerable, IPaymentSplitterErrors {
             IERC20 erc20 = allowedERC20List[tokenIndex];
             uint256 startBalanceERC20 = erc20.balanceOf(address(this));
             if (startBalanceERC20 > 0) {
-                for (uint256 payeeIndex = 0; payeeIndex < _payees.length; payeeIndex++) {
+                for (uint256 payeeIndex = 0; payeeIndex < numPayees; payeeIndex++) {
                     address account = _payees[payeeIndex];
                     uint256 erc20PaymentAmount = _pendingPayment(account, startBalanceERC20);
                     SafeERC20.safeTransfer(erc20, account, erc20PaymentAmount);
@@ -202,16 +203,19 @@ contract PaymentSplitter is AccessControlEnumerable, IPaymentSplitterErrors {
             revert PaymentSplitterNoPayeesAdded();
         }
 
-        for (uint256 i = 0; i < _payees.length; i++) {
+        uint256 numPayees = _payees.length;
+        for (uint256 i = 0; i < numPayees; i++) {
             delete _shares[_payees[i]];
         }
 
         delete _payees;
-        _totalShares = 0;
 
+        uint256 localTotalShares = 0;
         for (uint256 i = 0; i < payees.length; i++) {
+            localTotalShares += shares_[i];
             _addPayee(payees[i], shares_[i]);
         }
+        _totalShares = localTotalShares;
     }
 
     /**
@@ -230,7 +234,8 @@ contract PaymentSplitter is AccessControlEnumerable, IPaymentSplitterErrors {
      * @param token The address of the ERC20 token to be added
      */
     function addToAllowlist(IERC20 token) internal onlyRole(TOKEN_REGISTRAR_ROLE) {
-        for (uint256 index; index < allowedERC20List.length; index++) {
+        uint256 allowListLength = allowedERC20List.length;
+        for (uint256 index; index < allowListLength; index++) {
             if (allowedERC20List[index] == token) {
                 return;
             }
@@ -266,11 +271,8 @@ contract PaymentSplitter is AccessControlEnumerable, IPaymentSplitterErrors {
 
         _payees.push(account);
         _shares[account] = shares_;
-        _totalShares = _totalShares + shares_;
         emit PayeeAdded(account, shares_);
     }
 }
-// slither-disable-end cache-array-length
-// slither-disable-end costly-loop
 // slither-disable-end calls-loop
-// slither-disable-end reentrancy-events
+// slither-disable-end costly-loop

@@ -1,9 +1,56 @@
 {
-  "extends": "solhint:recommended",
+  "plugins": ["prettier"],
+
   "rules": {
-    "prettier/prettier": "error",
-    "compiler-version": ["error", "^0.8.0"],
-    "func-visibility": ["warn", { "ignoreConstructors": true }]
-  },
-  "plugins": ["prettier"]
+    "code-complexity": ["warn", 7],
+    "custom-errors": "error",
+    "explicit-types": ["error"],
+    "function-max-lines": ["off", 50],
+    "max-line-length": ["off", 120],
+    "max-states-count": ["off", 15],
+    "no-console": "error",
+    "no-empty-blocks": "warn",
+    "no-global-import": "warn",
+    "no-unused-import": "warn",
+    "no-unused-vars": "warn",
+    "one-contract-per-file": "warn",
+    "payable-fallback": "warn",
+    "reason-string": ["warn", {"maxLength": 32}],
+    "constructor-syntax": "warn",
+
+    "comprehensive-interface": "off",
+    "quotes": ["error", "double"],
+
+    "const-name-snakecase": "warn",
+    "foundry-test-functions": ["off", ["setUp"]],
+    "func-name-mixedcase": "warn",
+    "modifier-name-mixedcase": "warn",
+    "named-parameters-mapping": "warn",
+    "named-return-values": "off",
+    "private-vars-leading-underscore": ["off", {"strict": false}],
+    "use-forbidden-name": "warn",
+    "var-name-mixedcase": "warn",
+    "imports-on-top": "warn",
+    "visibility-modifier-order": "warn",
+    
+    "avoid-call-value": "error",
+    "avoid-low-level-calls": "error",
+    "avoid-sha3": "error",
+    "avoid-suicide": "error",
+    "avoid-throw": "error",
+    "avoid-tx-origin": "error",
+    "check-send-result": "error",
+    "compiler-version": ["error", "0.8.19"],
+    "func-visibility": ["error", {"ignoreConstructors": true}],
+    "multiple-sends": "warn",
+    "no-complex-fallback": "warn",
+    "no-inline-assembly": "warn",
+    "not-rely-on-block-hash": "warn",
+    "not-rely-on-time": "warn",
+    "reentrancy": "warn",
+    "state-visibility": "warn",
+
+    "prettier/prettier": "error"
+  }
 }
+

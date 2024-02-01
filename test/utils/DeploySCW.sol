@@ -1,10 +1,10 @@
 
 // SPDX-License-Identifier: Apache 2.0
-pragma solidity ^0.8.19;
+pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
-import {MockWallet} from "../../../contracts/mocks/MockWallet.sol";
-import {MockWalletFactory} from "../../../contracts/mocks/MockWalletFactory.sol";
+import {MockWallet} from "../../contracts/mocks/MockWallet.sol";
+import {MockWalletFactory} from "../../contracts/mocks/MockWalletFactory.sol";
 
 contract DeploySCWallet is Test {
     MockWallet public mockWalletModule;

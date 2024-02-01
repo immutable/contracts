@@ -58,7 +58,7 @@ export class ERC721Client {
   public async balanceOf(
     provider: Provider,
     owner: PromiseOrValue<string>,
-    overrides: CallOverrides = {}
+    overrides: CallOverrides = {},
   ): Promise<BigNumber> {
     return await this.contract.connect(provider).balanceOf(owner, overrides);
   }
@@ -83,7 +83,7 @@ export class ERC721Client {
    */
   public async eip712Domain(
     provider: Provider,
-    overrides: CallOverrides = {}
+    overrides: CallOverrides = {},
   ): Promise<
     [string, string, string, BigNumber, string, string, BigNumber[]] & {
       fields: string;
@@ -111,7 +111,7 @@ export class ERC721Client {
   public async getApproved(
     provider: Provider,
     tokenId: PromiseOrValue<BigNumberish>,
-    overrides: CallOverrides = {}
+    overrides: CallOverrides = {},
   ): Promise<string> {
     return await this.contract.connect(provider).getApproved(tokenId, overrides);
   }
@@ -122,7 +122,7 @@ export class ERC721Client {
   public async getRoleAdmin(
     provider: Provider,
     role: PromiseOrValue<BytesLike>,
-    overrides: CallOverrides = {}
+    overrides: CallOverrides = {},
   ): Promise<string> {
     return await this.contract.connect(provider).getRoleAdmin(role, overrides);
   }
@@ -134,7 +134,7 @@ export class ERC721Client {
     provider: Provider,
     role: PromiseOrValue<BytesLike>,
     index: PromiseOrValue<BigNumberish>,
-    overrides: CallOverrides = {}
+    overrides: CallOverrides = {},
   ): Promise<string> {
     return await this.contract.connect(provider).getRoleMember(role, index, overrides);
   }
@@ -145,7 +145,7 @@ export class ERC721Client {
   public async getRoleMemberCount(
     provider: Provider,
     role: PromiseOrValue<BytesLike>,
-    overrides: CallOverrides = {}
+    overrides: CallOverrides = {},
   ): Promise<BigNumber> {
     return await this.contract.connect(provider).getRoleMemberCount(role, overrides);
   }
@@ -157,7 +157,7 @@ export class ERC721Client {
     provider: Provider,
     role: PromiseOrValue<BytesLike>,
     account: PromiseOrValue<string>,
-    overrides: CallOverrides = {}
+    overrides: CallOverrides = {},
   ): Promise<boolean> {
     return await this.contract.connect(provider).hasRole(role, account, overrides);
   }
@@ -169,7 +169,7 @@ export class ERC721Client {
     provider: Provider,
     owner: PromiseOrValue<string>,
     operator: PromiseOrValue<string>,
-    overrides: CallOverrides = {}
+    overrides: CallOverrides = {},
   ): Promise<boolean> {
     return await this.contract.connect(provider).isApprovedForAll(owner, operator, overrides);
   }
@@ -187,7 +187,7 @@ export class ERC721Client {
   public async ownerOf(
     provider: Provider,
     tokenId: PromiseOrValue<BigNumberish>,
-    overrides: CallOverrides = {}
+    overrides: CallOverrides = {},
   ): Promise<string> {
     return await this.contract.connect(provider).ownerOf(tokenId, overrides);
   }
@@ -200,7 +200,7 @@ export class ERC721Client {
   public async nonces(
     provider: Provider,
     tokenId: PromiseOrValue<BigNumberish>,
-    overrides: CallOverrides = {}
+    overrides: CallOverrides = {},
   ): Promise<BigNumber> {
     return await this.contract.connect(provider).nonces(tokenId, overrides);
   }
@@ -219,7 +219,7 @@ export class ERC721Client {
     provider: Provider,
     _tokenId: PromiseOrValue<BigNumberish>,
     _salePrice: PromiseOrValue<BigNumberish>,
-    overrides: CallOverrides = {}
+    overrides: CallOverrides = {},
   ): Promise<[string, BigNumber]> {
     return await this.contract.connect(provider).royaltyInfo(_tokenId, _salePrice, overrides);
   }
@@ -237,7 +237,7 @@ export class ERC721Client {
   public async tokenURI(
     provider: Provider,
     tokenId: PromiseOrValue<BigNumberish>,
-    overrides: CallOverrides = {}
+    overrides: CallOverrides = {},
   ): Promise<string> {
     return await this.contract.connect(provider).tokenURI(tokenId, overrides);
   }
@@ -261,7 +261,7 @@ export class ERC721Client {
     tokenId: PromiseOrValue<BigNumberish>,
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.approve(to, tokenId, { ...defaultGasOverrides, ...overrides });
   }
@@ -278,7 +278,7 @@ export class ERC721Client {
     tokenId: PromiseOrValue<BigNumberish>,
     deadline: PromiseOrValue<BigNumberish>,
     sig: PromiseOrValue<BytesLike>,
-    overrides: CallOverrides = {}
+    overrides: CallOverrides = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.permit(spender, tokenId, deadline, sig, {
       ...defaultGasOverrides,
@@ -293,7 +293,7 @@ export class ERC721Client {
     tokenId: PromiseOrValue<BigNumberish>,
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.burn(tokenId, { ...defaultGasOverrides, ...overrides });
   }
@@ -305,7 +305,7 @@ export class ERC721Client {
     tokenIds: PromiseOrValue<BigNumberish>[],
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.burnBatch(tokenIds, { ...defaultGasOverrides, ...overrides });
   }
@@ -318,7 +318,7 @@ export class ERC721Client {
     tokenId: PromiseOrValue<BigNumberish>,
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.safeBurn(owner, tokenId, { ...defaultGasOverrides, ...overrides });
   }
@@ -330,7 +330,7 @@ export class ERC721Client {
     burns: IDBurn[],
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.safeBurnBatch(burns, { ...defaultGasOverrides, ...overrides });
   }
@@ -342,7 +342,7 @@ export class ERC721Client {
     user: PromiseOrValue<string>,
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.grantMinterRole(user, { ...defaultGasOverrides, ...overrides });
   }
@@ -355,7 +355,7 @@ export class ERC721Client {
     account: PromiseOrValue<string>,
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.grantRole(role, account, { ...defaultGasOverrides, ...overrides });
   }
@@ -368,7 +368,7 @@ export class ERC721Client {
     tokenId: PromiseOrValue<BigNumberish>,
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.mint(to, tokenId, { ...defaultGasOverrides, ...overrides });
   }
@@ -381,7 +381,7 @@ export class ERC721Client {
     tokenId: PromiseOrValue<BigNumberish>,
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.safeMint(to, tokenId, { ...defaultGasOverrides, ...overrides });
   }
@@ -394,7 +394,7 @@ export class ERC721Client {
     quantity: PromiseOrValue<BigNumberish>,
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.mintByQuantity(to, quantity, {
       ...defaultGasOverrides,
@@ -410,7 +410,7 @@ export class ERC721Client {
     quantity: PromiseOrValue<BigNumberish>,
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.safeMintByQuantity(to, quantity, {
       ...defaultGasOverrides,
@@ -425,7 +425,7 @@ export class ERC721Client {
     mints: Mint[],
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.mintBatchByQuantity(mints, { ...defaultGasOverrides, ...overrides });
   }
@@ -437,7 +437,7 @@ export class ERC721Client {
     mints: Mint[],
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.safeMintBatchByQuantity(mints, {
       ...defaultGasOverrides,
@@ -452,7 +452,7 @@ export class ERC721Client {
     mints: IDMint[],
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.mintBatch(mints, { ...defaultGasOverrides, ...overrides });
   }
@@ -464,7 +464,7 @@ export class ERC721Client {
     mints: IDMint[],
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.safeMintBatch(mints, { ...defaultGasOverrides, ...overrides });
   }
@@ -477,7 +477,7 @@ export class ERC721Client {
     account: PromiseOrValue<string>,
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.renounceRole(role, account, {
       ...defaultGasOverrides,
@@ -492,7 +492,7 @@ export class ERC721Client {
     user: PromiseOrValue<string>,
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.revokeMinterRole(user, { ...defaultGasOverrides, ...overrides });
   }
@@ -505,7 +505,7 @@ export class ERC721Client {
     account: PromiseOrValue<string>,
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.revokeRole(role, account, { ...defaultGasOverrides, ...overrides });
   }
@@ -517,7 +517,7 @@ export class ERC721Client {
     transfers: TransferRequest,
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.safeTransferFromBatch(transfers, {
       ...defaultGasOverrides,
@@ -534,7 +534,7 @@ export class ERC721Client {
     tokenId: PromiseOrValue<BigNumberish>,
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction["safeTransferFrom(address,address,uint256)"](from, to, tokenId, {
       ...defaultGasOverrides,
@@ -552,14 +552,14 @@ export class ERC721Client {
     data: PromiseOrValue<BytesLike>,
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction["safeTransferFrom(address,address,uint256,bytes)"](
       from,
       to,
       tokenId,
       data,
-      { ...defaultGasOverrides, ...overrides }
+      { ...defaultGasOverrides, ...overrides },
     );
   }
 
@@ -571,7 +571,7 @@ export class ERC721Client {
     approved: PromiseOrValue<boolean>,
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.setApprovalForAll(operator, approved, {
       ...defaultGasOverrides,
@@ -586,7 +586,7 @@ export class ERC721Client {
     baseURI_: PromiseOrValue<string>,
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.setBaseURI(baseURI_, { ...defaultGasOverrides, ...overrides });
   }
@@ -598,7 +598,7 @@ export class ERC721Client {
     _contractURI: PromiseOrValue<string>,
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.setContractURI(_contractURI, {
       ...defaultGasOverrides,
@@ -614,7 +614,7 @@ export class ERC721Client {
     feeNumerator: PromiseOrValue<BigNumberish>,
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.setDefaultRoyaltyReceiver(receiver, feeNumerator, {
       ...defaultGasOverrides,
@@ -631,7 +631,7 @@ export class ERC721Client {
     feeNumerator: PromiseOrValue<BigNumberish>,
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.setNFTRoyaltyReceiver(tokenId, receiver, feeNumerator, {
       ...defaultGasOverrides,
@@ -648,7 +648,7 @@ export class ERC721Client {
     feeNumerator: PromiseOrValue<BigNumberish>,
     overrides: Overrides & {
       from?: PromiseOrValue<string>;
-    } = {}
+    } = {},
   ): Promise<PopulatedTransaction> {
     return await this.contract.populateTransaction.setNFTRoyaltyReceiverBatch(tokenIds, receiver, feeNumerator, {
       ...defaultGasOverrides,

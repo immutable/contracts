@@ -4,6 +4,24 @@ The OperatorAllowlist contracts provide functionality for enabling token contrac
 
 [Read more](https://docs.immutable.com/docs/zkEVM/products/minting/royalties/allowlist-spec)
 
+
+# Status
+
+Contract audits:
+
+| Description               | Date             |Version Audited  | Link to Report |
+|---------------------------|------------------|-----------------|----------------|
+| Has been audited          | -                | -               | -              |
+| We plan to move the audit document to the audits direcrory soon | -                | -               | -              |
+
+OperatorAllowlistUpgradeable Deployments: Note: the addresses are for the ERC 1967 Proxy that the implementation contract sits behind.
+
+| Location                  | Version Deployed | Address |
+|---------------------------|------------------|---------|
+| Immutable zkEVM Testnet   | [929cbb](https://github.com/immutable/contracts/blob/929cbbb9bfabdc854b2c21b1c7a8c7ab396f6676/contracts/allowlist/OperatorAllowlistUpgradeable.sol)     | [0x6b969FD89dE634d8DE3271EbE97734FEFfcd58eE](https://explorer.testnet.immutable.com/address/0x6b969FD89dE634d8DE3271EbE97734FEFfcd58eE)  |
+| Immutable zkEVM Mainnet   | [929cbb](https://github.com/immutable/contracts/blob/929cbbb9bfabdc854b2c21b1c7a8c7ab396f6676/contracts/allowlist/OperatorAllowlistUpgradeable.sol)    | [0x5F5EBa8133f68ea22D712b0926e2803E78D89221](https://explorer.immutable.com/address/0x5F5EBa8133f68ea22D712b0926e2803E78D89221?tab=contract)       |
+
+
 ## OperatorAllowlist
 
 OperatorAllowlist is a contract implementation of an Allowlist registry, storing addresses and bytecode which are allowed to be approved operators and execute transfers of interfacing token contracts (e.g. ERC721/ERC1155). The registry will be a deployed contract that tokens may interface with and point to.

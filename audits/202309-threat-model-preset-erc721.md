@@ -60,4 +60,4 @@ Potential Attacks:
 `npx hardhat test` will run all the related tests for the above mentioned repos. The test plan and cases are written in the test files describing the scenario is it testing for. 
 
 ## Diagram 
-![](./immutableERC721.png)
+![](./202309-threat-model-preset-erc721/immutableERC721.png)

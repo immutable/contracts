@@ -1,7 +1,5 @@
 // Copyright Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: Apache 2.0
-// slither-disable-start calls-loop
-// slither-disable-start costly-loop
 pragma solidity 0.8.19;
 
 import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -96,6 +94,7 @@ contract PaymentSplitter is AccessControlEnumerable, IPaymentSplitterErrors, Ree
      */
     function removeFromAllowlist(IERC20 token) external onlyRole(TOKEN_REGISTRAR_ROLE) {
         uint256 allowlistLength = allowedERC20List.length;
+        // slither-disable-start costly-loop
         for (uint256 index; index < allowlistLength; index++) {
             if (allowedERC20List[index] == token) {
                 allowedERC20List[index] = allowedERC20List[allowedERC20List.length - 1];
@@ -103,6 +102,7 @@ contract PaymentSplitter is AccessControlEnumerable, IPaymentSplitterErrors, Ree
                 break;
             }
         }
+        // slither-disable-end costly-loop
     }
 
     /**
@@ -163,6 +163,7 @@ contract PaymentSplitter is AccessControlEnumerable, IPaymentSplitterErrors, Ree
     function releaseAll() public virtual nonReentrant onlyRole(RELEASE_FUNDS_ROLE) {
         uint256 numPayees = _payees.length;
         uint256 startBalance = address(this).balance;
+        // slither-disable-start calls-loop
         if (startBalance > 0) {
             for (uint256 payeeIndex = 0; payeeIndex < numPayees; payeeIndex++) {
                 address payable account = _payees[payeeIndex];
@@ -184,6 +185,7 @@ contract PaymentSplitter is AccessControlEnumerable, IPaymentSplitterErrors, Ree
                 }
             }
         }
+        // slither-disable-end calls-loop
     }
 
     /**
@@ -204,9 +206,11 @@ contract PaymentSplitter is AccessControlEnumerable, IPaymentSplitterErrors, Ree
         }
 
         uint256 numPayees = _payees.length;
+        // slither-disable-start costly-loop
         for (uint256 i = 0; i < numPayees; i++) {
             delete _shares[_payees[i]];
         }
+        // slither-disable-end costly-loop
 
         delete _payees;
 
@@ -274,5 +278,3 @@ contract PaymentSplitter is AccessControlEnumerable, IPaymentSplitterErrors, Ree
         emit PayeeAdded(account, shares_);
     }
 }
-// slither-disable-end calls-loop
-// slither-disable-end costly-loop

@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
-import { IERC1155 } from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
-import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
+import {IERC1155} from "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 struct ERC1155Asset {
     uint256 tokenID;
@@ -31,7 +30,6 @@ struct ERC20Input {
 }
 
 interface IRecipe {
-
     function beforeTransfers(
         uint256 craftID,
         ERC20Input[] calldata erc20s,
@@ -41,5 +39,4 @@ interface IRecipe {
     ) external;
 
     function afterTransfers(uint256 craftID, bytes calldata data) external;
-
 }

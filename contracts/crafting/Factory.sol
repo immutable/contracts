@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
-import { IRecipe, ERC1155Input, ERC721Input, ERC20Input, ERC1155Asset } from "./IRecipe.sol";
+import {IRecipe, ERC1155Input, ERC721Input, ERC20Input, ERC1155Asset} from "./IRecipe.sol";
 
 contract Factory {
-
     uint256 public craftCounter;
 
     event CraftComplete(uint256 indexed craftID, IRecipe indexed recipe);
@@ -17,7 +16,6 @@ contract Factory {
         ERC1155Input[] calldata erc1155Inputs,
         bytes calldata data
     ) external {
-
         uint craftID = craftCounter++;
 
         recipe.beforeTransfers(craftID, erc20Inputs, erc721Inputs, erc1155Inputs, data);
@@ -26,7 +24,6 @@ contract Factory {
             ERC20Input memory input = erc20Inputs[i];
             input.erc20.transferFrom(msg.sender, input.destination, input.amount);
         }
-
 
         for (uint i = 0; i < erc721Inputs.length; i++) {
             ERC721Input memory input = erc721Inputs[i];
@@ -44,8 +41,7 @@ contract Factory {
         }
 
         recipe.afterTransfers(craftID, data);
-        
+
         emit CraftComplete(craftID, recipe);
     }
-
 }

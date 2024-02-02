@@ -8,6 +8,7 @@ import "@typechain/hardhat";
 import "hardhat-gas-reporter";
 import "solidity-coverage";
 import "./deploy/x/asset";
+import "./deploy/x/erc20capped";
 
 dotenv.config();
 

@@ -33,3 +33,17 @@ How to deploy the Asset contract to allow minting on Immutable X.
     ```
 
 The deploy task will deploy the contract to the specified network, wait 5 mins to allow time for the contract to deploy, then verify the contract.
+
+# ERC20 Contract Deployment
+
+How to deploy the ERC20 contract.
+
+Follow the steps 1-4 from the [Asset Contract Deployment](#asset-contract-deployment) section.
+
+5. Deploy the ERC20 contract
+
+    ```shell
+    yarn hardhat deploy:x:erc20capped --network sepolia --name "<token_name>" --symbol <symbol> --supply <supply>
+    ```
+
+Note about the supply number: The number should be in the smallest unit of the token. For example, if the token has 18 decimals, the supply should be a string with 18 zeros at the end. For example, for 1,000,000,000 tokens, the supply should be `1000000000000000000000000000`.

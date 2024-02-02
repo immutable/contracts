@@ -8,6 +8,7 @@ const deployAsset = task("deploy:x:asset", "Deploy the Asset contract")
   .addParam("name", "Contract name")
   .addParam("symbol", "Contract symbol")
   .setAction(async (taskArgs, hre) => {
+    // @ts-ignore - ethers
     const [deployer] = await hre.ethers.getSigners();
 
     const owner = deployer.address;
@@ -18,6 +19,7 @@ const deployAsset = task("deploy:x:asset", "Deploy the Asset contract")
       throw new Error(`please pass a valid --network [ ${allowedNetworks.join(" | ")} ]`);
     }
 
+    // @ts-ignore - ethers
     const Asset = await hre.ethers.getContractFactory("Asset");
     const immutableBridgeAddress = getImmutableBridgeAddress(hre.network.name);
     const asset = await Asset.deploy(owner, name, symbol, immutableBridgeAddress);

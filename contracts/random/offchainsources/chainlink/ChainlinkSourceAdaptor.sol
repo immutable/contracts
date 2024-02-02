@@ -15,7 +15,7 @@ import {IOffchainRandomSource} from "../IOffchainRandomSource.sol";
  */
 contract ChainlinkSourceAdaptor is VRFConsumerBaseV2, SourceAdaptorBase {
     /// @notice Log config changes.
-    event ConfigChanges( bytes32 _keyHash, uint64 _subId, uint32 _callbackGasLimit);
+    event ConfigChanges(bytes32 _keyHash, uint64 _subId, uint32 _callbackGasLimit);
 
     /// @notice Relates to key that must sign the proof.
     bytes32 public keyHash;

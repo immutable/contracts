@@ -1,5 +1,6 @@
 // Copyright Immutable Pty Ltd 2018 - 2023
 // SPDX-License-Identifier: Apache 2.0
+// slither-disable-start calls-loop
 pragma solidity 0.8.19;
 
 // Allowlist Registry
@@ -108,3 +109,4 @@ abstract contract OperatorAllowlistEnforced is AccessControlEnumerable, Operator
         operatorAllowlist = IOperatorAllowlist(_operatorAllowlist);
     }
 }
+// slither-disable-end calls-loop

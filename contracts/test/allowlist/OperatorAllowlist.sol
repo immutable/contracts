@@ -14,6 +14,7 @@ import {IOperatorAllowlist} from "../../allowlist/IOperatorAllowlist.sol";
 // Interface to retrieve the implemention stored inside the Proxy contract
 interface IProxy {
     // Returns the current implementation address used by the proxy contract
+    // solhint-disable-next-line func-name-mixedcase
     function PROXY_getImplementation() external view returns (address);
 }
 
@@ -31,13 +32,13 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
     bytes32 public constant REGISTRAR_ROLE = bytes32("REGISTRAR_ROLE");
 
     /// @notice Mapping of Allowlisted addresses
-    mapping(address => bool) private addressAllowlist;
+    mapping(address aContract => bool allowed) private addressAllowlist;
 
     /// @notice Mapping of Allowlisted implementation addresses
-    mapping(address => bool) private addressImplementationAllowlist;
+    mapping(address impl => bool allowed) private addressImplementationAllowlist;
 
     /// @notice Mapping of Allowlisted bytecodes
-    mapping(bytes32 => bool) private bytecodeAllowlist;
+    mapping(bytes32 bytecodeHash => bool allowed) private bytecodeAllowlist;
 
     ///     =====       Events       =====
 
@@ -92,6 +93,7 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
     function addWalletToAllowlist(address walletAddr) external onlyRole(REGISTRAR_ROLE) {
         // get bytecode of wallet
         bytes32 codeHash;
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             codeHash := extcodehash(walletAddr)
         }
@@ -111,6 +113,7 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
     function removeWalletFromAllowlist(address walletAddr) external onlyRole(REGISTRAR_ROLE) {
         // get bytecode of wallet
         bytes32 codeHash;
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             codeHash := extcodehash(walletAddr)
         }
@@ -151,6 +154,7 @@ contract OperatorAllowlist is ERC165, AccessControl, IOperatorAllowlist {
 
         // Check if caller is a Allowlisted smart contract wallet
         bytes32 codeHash;
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             codeHash := extcodehash(target)
         }

@@ -12,6 +12,8 @@ Immutable Contracts is a library of smart contracts targeted at developers who w
 
 - Smart Contract Wallets
 
+- Random Number Generation
+
 These contracts are feature-rich and are the recommended standard on Immutable zkEVM intended for all users and partners within the ecosystem.
 
 ## Setup
@@ -76,6 +78,10 @@ const client = new ERC721Client(contractAddress);
 const mintTransaction = await client.populateMint(receiver, 1);
 const tx = await signer.sendTransaction(mintTransaction);
 ```
+
+## Build and Test
+
+Information about how to build and test the contracts can be found in our [build information](BUILD.md).
 
 ## Contribution
 

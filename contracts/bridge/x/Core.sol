@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
+// solhint-disable compiler-version
 pragma solidity ^0.8.11;
 
 interface Core {
-
     function announceAvailabilityVerifierRemovalIntent(address) external;
     function announceVerifierRemovalIntent(address) external;
     function getRegisteredAvailabilityVerifiers() external;
@@ -84,12 +84,7 @@ interface Core {
         uint256 vaultId
     ) external view returns (uint256 balance);
 
-    function depositNft(
-        uint256 starkKey,
-        uint256 assetType,
-        uint256 vaultId,
-        uint256 tokenId
-    ) external;
+    function depositNft(uint256 starkKey, uint256 assetType, uint256 vaultId, uint256 tokenId) external;
 
     function getCancellationRequest(
         uint256 starkKey,
@@ -97,50 +92,19 @@ interface Core {
         uint256 vaultId
     ) external view returns (uint256 request);
 
-    function depositERC20(
-        uint256 starkKey,
-        uint256 assetType,
-        uint256 vaultId,
-        uint256 quantizedAmount
-    ) external;
+    function depositERC20(uint256 starkKey, uint256 assetType, uint256 vaultId, uint256 quantizedAmount) external;
 
-    function depositEth(
-        uint256 starkKey,
-        uint256 assetType,
-        uint256 vaultId
-    ) external payable;
+    function depositEth(uint256 starkKey, uint256 assetType, uint256 vaultId) external payable;
 
-    function deposit(
-        uint256 starkKey,
-        uint256 assetType,
-        uint256 vaultId,
-        uint256 quantizedAmount
-    ) external;
+    function deposit(uint256 starkKey, uint256 assetType, uint256 vaultId, uint256 quantizedAmount) external;
 
-    function deposit(
-        uint256 starkKey,
-        uint256 assetType,
-        uint256 vaultId
-    ) external payable;
+    function deposit(uint256 starkKey, uint256 assetType, uint256 vaultId) external payable;
 
-    function depositCancel(
-        uint256 starkKey,
-        uint256 assetId,
-        uint256 vaultId
-    ) external;
+    function depositCancel(uint256 starkKey, uint256 assetId, uint256 vaultId) external;
 
-    function depositReclaim(
-        uint256 starkKey,
-        uint256 assetId,
-        uint256 vaultId
-    ) external;
+    function depositReclaim(uint256 starkKey, uint256 assetId, uint256 vaultId) external;
 
-    function depositNftReclaim(
-        uint256 starkKey,
-        uint256 assetType,
-        uint256 vaultId,
-        uint256 tokenId
-    ) external;
+    function depositNftReclaim(uint256 starkKey, uint256 assetType, uint256 vaultId, uint256 tokenId) external;
 
     event LogWithdrawalPerformed(
         uint256 ownerKey,
@@ -177,24 +141,13 @@ interface Core {
 
     event LogMintableWithdrawalAllowed(uint256 ownerKey, uint256 assetId, uint256 quantizedAmount);
 
-    function getWithdrawalBalance(uint256 ownerKey, uint256 assetId)
-        external
-        view
-        returns (uint256 balance);
+    function getWithdrawalBalance(uint256 ownerKey, uint256 assetId) external view returns (uint256 balance);
 
     function withdraw(uint256 ownerKey, uint256 assetType) external;
 
-    function withdrawNft(
-        uint256 ownerKey,
-        uint256 assetType,
-        uint256 tokenId
-    ) external ;
+    function withdrawNft(uint256 ownerKey, uint256 assetType, uint256 tokenId) external;
 
-    function withdrawAndMint(
-        uint256 ownerKey,
-        uint256 assetType,
-        bytes calldata mintingBlob
-    ) external;
+    function withdrawAndMint(uint256 ownerKey, uint256 assetType, bytes calldata mintingBlob) external;
 
     function getVaultRoot() external view returns (uint256 root);
     function getVaultTreeHeight() external view returns (uint256 height);
@@ -224,12 +177,7 @@ interface Core {
 
     function getQuantum(uint256 presumedAssetType) external view returns (uint256 quantum);
 
-    function escape(
-        uint256 starkKey,
-        uint256 vaultId,
-        uint256 assetId,
-        uint256 quantizedAmount
-    ) external;
+    function escape(uint256 starkKey, uint256 vaultId, uint256 assetId, uint256 quantizedAmount) external;
 
     event LogFullWithdrawalRequest(uint256 starkKey, uint256 vaultId);
 
@@ -237,26 +185,13 @@ interface Core {
 
     function freezeRequest(uint256 starkKey, uint256 vaultId) external;
 
-    event LogRootUpdate(
-        uint256 sequenceNumber,
-        uint256 batchId,
-        uint256 vaultRoot,
-        uint256 orderRoot
-    );
+    event LogRootUpdate(uint256 sequenceNumber, uint256 batchId, uint256 vaultRoot, uint256 orderRoot);
 
     event LogStateTransitionFact(bytes32 stateTransitionFact);
 
-    event LogVaultBalanceChangeApplied(
-        address ethKey,
-        uint256 assetId,
-        uint256 vaultId,
-        int256 quantizedAmountChange
-    );
+    event LogVaultBalanceChangeApplied(address ethKey, uint256 assetId, uint256 vaultId, int256 quantizedAmountChange);
 
     function updateState(uint256[] calldata publicInput, uint256[] calldata applicationData) external;
 
-    function getFullWithdrawalRequest(uint256 starkKey, uint256 vaultId)
-        external
-        view
-        returns (uint256 res);
+    function getFullWithdrawalRequest(uint256 starkKey, uint256 vaultId) external view returns (uint256 res);
 }

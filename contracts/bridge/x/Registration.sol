@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
+// solhint-disable compiler-version
 pragma solidity ^0.8.11;
 
-import { Core } from "./Core.sol";
+import {Core} from "./Core.sol";
 
 contract Registration {
-    Core public imx;
+    Core public immutable imx;
 
     constructor(Core _imx) {
         imx = _imx;

@@ -20,13 +20,13 @@ abstract contract RandomValues {
     struct RandomRequest {
         // Id to match the random seed provider requests and responses.
         uint256 fulfilmentId;
-        // Number of words requested. Retaining the size ensures the correct 
+        // Number of words requested. Retaining the size ensures the correct
         // number of words are returned.
         uint16 size;
         // Source of the random value: which off-chain, or the on-chain provider
         // will provide the random values. Retaining the source allows for upgrade
-        // of sources inside the random seed provider contract. 
-        address source; 
+        // of sources inside the random seed provider contract.
+        address source;
     }
 
     /// @notice Status of a random request
@@ -92,13 +92,15 @@ abstract contract RandomValues {
      * @param _randomRequestId The value returned by _requestRandomValueCreation.
      * @return _randomValues An array of random values.
      */
-    function _fetchRandomValues(
-        uint256 _randomRequestId
-    ) internal returns (bytes32[] memory _randomValues) {
+    // slither-disable-next-line reentrancy-benign
+    function _fetchRandomValues(uint256 _randomRequestId) internal returns (bytes32[] memory _randomValues) {
         RandomRequest memory request = randCreationRequests[_randomRequestId];
         if (request.size == 0) {
             revert RandomValuesPreviouslyFetched();
         }
+        // Prevent random values from being re-fetched. This reduces the probability
+        // that a game will mistakenly re-use the same random values for two purposes.
+        delete randCreationRequests[_randomRequestId];
 
         // Request the random seed. If not enough time has elapsed yet, this call will revert.
         bytes32 randomSeed = randomSeedProvider.getRandomSeed(request.fulfilmentId, request.source);
@@ -115,17 +117,13 @@ abstract contract RandomValues {
         for (uint256 i = 0; i < request.size; i++) {
             _randomValues[i] = keccak256(abi.encodePacked(seed, i));
         }
-
-        // Prevent random values from being re-fetched. This reduces the probability
-        // that a game will mistakenly re-use the same random values for two purposes.
-        delete randCreationRequests[_randomRequestId];
     }
 
     /**
      * @notice Check whether a set of random values are ready to be fetched
      * @dev If this function returns true then it is safe to call _fetchRandom or _fetchRandomValues.
      * @param _randomRequestId The value returned by _requestRandomValueCreation.
-     * @return RequestStatus indicates whether the random values are still be generated, are ready 
+     * @return RequestStatus indicates whether the random values are still be generated, are ready
      *      to be fetched, or whether they have already been fetched and are no longer available.
      */
     function _isRandomValueReady(uint256 _randomRequestId) internal view returns (RequestStatus) {
@@ -133,8 +131,10 @@ abstract contract RandomValues {
         if (request.size == 0) {
             return RequestStatus.ALREADY_FETCHED;
         }
-        return randomSeedProvider.isRandomSeedReady(request.fulfilmentId, request.source) ?
-            RequestStatus.READY : RequestStatus.IN_PROGRESS;
+        return
+            randomSeedProvider.isRandomSeedReady(request.fulfilmentId, request.source)
+                ? RequestStatus.READY
+                : RequestStatus.IN_PROGRESS;
     }
 
     // slither-disable-next-line unused-state,naming-convention

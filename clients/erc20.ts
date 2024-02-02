@@ -29,7 +29,7 @@ export class ERC20Client {
   public async balanceOf(
     provider: Provider,
     account: PromiseOrValue<string>,
-    overrides: CallOverrides = {}
+    overrides: CallOverrides = {},
   ): Promise<BigNumber> {
     return this.contract.connect(provider).balanceOf(account, overrides);
   }
@@ -41,7 +41,7 @@ export class ERC20Client {
     provider: Provider,
     owner: PromiseOrValue<string>,
     spender: PromiseOrValue<string>,
-    overrides: CallOverrides = {}
+    overrides: CallOverrides = {},
   ): Promise<BigNumber> {
     return this.contract.connect(provider).allowance(owner, spender, overrides);
   }
@@ -52,7 +52,7 @@ export class ERC20Client {
   public async populateTransfer(
     to: PromiseOrValue<string>,
     amount: PromiseOrValue<BigNumberish>,
-    overrides: Overrides & { from?: PromiseOrValue<string> } = {}
+    overrides: Overrides & { from?: PromiseOrValue<string> } = {},
   ): Promise<PopulatedTransaction> {
     return this.contract.populateTransaction.transfer(to, amount, { ...defaultGasOverrides, ...overrides });
   }
@@ -63,7 +63,7 @@ export class ERC20Client {
   public async populateApprove(
     spender: PromiseOrValue<string>,
     amount: PromiseOrValue<BigNumberish>,
-    overrides: Overrides & { from?: PromiseOrValue<string> } = {}
+    overrides: Overrides & { from?: PromiseOrValue<string> } = {},
   ): Promise<PopulatedTransaction> {
     return this.contract.populateTransaction.approve(spender, amount, { ...defaultGasOverrides, ...overrides });
   }
@@ -75,7 +75,7 @@ export class ERC20Client {
     from: PromiseOrValue<string>,
     to: PromiseOrValue<string>,
     amount: PromiseOrValue<BigNumberish>,
-    overrides: Overrides & { from?: PromiseOrValue<string> } = {}
+    overrides: Overrides & { from?: PromiseOrValue<string> } = {},
   ): Promise<PopulatedTransaction> {
     return this.contract.populateTransaction.transferFrom(from, to, amount, { ...defaultGasOverrides, ...overrides });
   }

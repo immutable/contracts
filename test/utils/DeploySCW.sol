@@ -6,7 +6,7 @@ import "forge-std/Test.sol";
 import {MockWallet} from "../../contracts/mocks/MockWallet.sol";
 import {MockWalletFactory} from "../../contracts/mocks/MockWalletFactory.sol";
 
-contract DeploySCWallet is Test {
+contract DeploySCWallet {
     MockWallet public mockWalletModule;
     MockWallet public scw;
     MockWalletFactory public scmf;

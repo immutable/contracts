@@ -4,6 +4,7 @@ import "forge-std/Test.sol";
 
 import {MockWallet} from "../../contracts/mocks/MockWallet.sol";
 import {MockWalletFactory} from "../../contracts/mocks/MockWalletFactory.sol";
+import {MockFactory} from "../../contracts/mocks/MockFactory.sol";
 import {ImmutableERC721} from "../../contracts/token/erc721/preset/ImmutableERC721.sol";
 import {IImmutableERC721Errors} from "../../contracts/errors/Errors.sol";
 import {OperatorAllowlistEnforcementErrors} from "../../contracts/errors/Errors.sol";
@@ -12,16 +13,18 @@ import {Sign} from "../utils/Sign.sol";
 import {DeployOperatorAllowlist} from  "../utils/DeployAllowlistProxy.sol";
 import {DeploySCWallet} from "../utils/DeploySCW.sol";
 import {DeployMockMarketPlace} from "../utils/DeployMockMarketPlace.sol";
-import {MockMarketplace} from "../../contracts/mocks/MockMarketPlace.sol";
-import {DeployFakeEOA} from "../utils/DeployFakeEOA.sol";
+import {MockMarketplace} from "../../contracts/mocks/MockMarketplace.sol";
+import {MockDisguisedEOA} from "../../contracts/mocks/MockDisguisedEOA.sol";
+import {MockOnReceive} from "../../contracts/mocks/MockOnReceive.sol";
+
 
 contract AllowlistERC721TransferApprovals is Test {
     OperatorAllowlistUpgradeable public allowlist;
     ImmutableERC721 public immutableERC721;
     DeploySCWallet public deploySCWScript;
     DeployMockMarketPlace public deployMockMarketPlaceScript;
-    DeployFakeEOA public deployFakeEOAScript;
     MockMarketplace public mockMarketPlace;
+    MockFactory mockEOAFactory;
 
     uint256 feeReceiverKey = 1;
 
@@ -54,12 +57,15 @@ contract AllowlistERC721TransferApprovals is Test {
             0
         );
 
+        mockEOAFactory = new MockFactory();
+
         nonAuthorizedWallet = address(0x2);
 
         deploySCWScript = new DeploySCWallet();
 
         deployMockMarketPlaceScript = new DeployMockMarketPlace();
         mockMarketPlace = deployMockMarketPlaceScript.run(address(immutableERC721));
+
         _giveMinterRole();
     }
 
@@ -223,6 +229,37 @@ contract AllowlistERC721TransferApprovals is Test {
         immutableERC721.safeMint(scwAddr1, 1);
         scw1.transferNFT(address(immutableERC721), scwAddr1, scwAddr2, 1);
         assertEq(immutableERC721.ownerOf(1), scwAddr2);
+        vm.stopPrank();
+    }
+
+    function testDisguisedEOAApprovalTransfer() public {
+        vm.startPrank(minter, minter);
+        immutableERC721.safeMint(minter, 1);
+        bytes32 salt = keccak256(abi.encodePacked("0x1234"));
+
+        address create2Addr = mockEOAFactory.computeMockDisguisedEOAAddress(immutableERC721, salt);
+
+        immutableERC721.setApprovalForAll(create2Addr, true);
+        mockEOAFactory.deployMockEOAWithERC721Address(immutableERC721, salt);
+
+        assertTrue(immutableERC721.isApprovedForAll(minter, create2Addr));
+
+        MockDisguisedEOA disguisedEOA = MockDisguisedEOA(create2Addr);
+
+        vm.expectRevert(abi.encodeWithSignature("CallerNotInAllowlist(address)", create2Addr));
+        disguisedEOA.executeTransfer(minter, admin, 1);
+        vm.stopPrank();
+    }
+
+    // Here the malicious contract attempts to transfer the token out of the contract by calling transferFrom in onERC721Received
+    // However, sending to the contract will fail as the contract is not in the allowlist.
+    function testOnReceiveTransferFrom() public {
+        MockOnReceive onReceive = new MockOnReceive(immutableERC721, admin);
+
+        vm.startPrank(minter, minter);
+        immutableERC721.safeMint(minter, 1);
+        vm.expectRevert(abi.encodeWithSignature("TransferToNotInAllowlist(address)", address(onReceive)));
+        immutableERC721.safeTransferFrom(minter, address(onReceive), 1, "");
         vm.stopPrank();
     }
 

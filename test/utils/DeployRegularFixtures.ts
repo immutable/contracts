@@ -98,7 +98,6 @@ export const disguidedEOAFixture = async (erc721Addr: string, MockFactory: MockF
 
   // Append bytecode and constructor params
   const constructorByteCode = `${mockDisguisedEOAArtifact.bytecode}${encodedParams}`;
-  console.log(mockDisguisedEOAArtifact.bytecode)
 
   // Calulate address of deployed contract
   const deployedAddr = await MockFactory.computeAddress(salt, ethers.utils.keccak256(constructorByteCode));

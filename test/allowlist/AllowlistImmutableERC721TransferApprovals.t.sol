@@ -177,6 +177,18 @@ contract AllowlistERC721TransferApprovals is Test {
         vm.stopPrank();
     }
 
+    function testBlockTransferFromNoneOALAddress() public {
+        address[] memory addressTargets = new address[](1);
+        addressTargets[0] = address(mockMarketPlace);
+
+        vm.startPrank(minter, minter);
+        immutableERC721.mint(address(mockMarketPlace), 1);
+        vm.expectRevert(abi.encodeWithSignature("CallerNotInAllowlist(address)", address(mockMarketPlace)));
+        mockMarketPlace.executeTransferFrom(address(mockMarketPlace), minter, 1);
+        vm.stopPrank();
+    }
+
+
     function testBlockTransferForNoneOALAddr() public {
         vm.startPrank(minter, minter);
         immutableERC721.safeMint(minter, 1);

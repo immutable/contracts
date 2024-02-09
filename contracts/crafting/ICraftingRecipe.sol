@@ -1,4 +1,4 @@
-// Copyright Immutable Pty Ltd 2018 - 2023
+// Copyright Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
@@ -29,7 +29,12 @@ struct ERC20Input {
     address destination;
 }
 
-interface IRecipe {
+interface ICraftingRecipe {
+    error OnlyCraftingFactory(address _caller);
+
+
+
+
     function beforeTransfers(
         uint256 craftID,
         ERC20Input[] calldata erc20s,
@@ -38,5 +43,5 @@ interface IRecipe {
         bytes calldata data
     ) external;
 
-    function afterTransfers(uint256 craftID, bytes calldata data) external;
+    function afterTransfers(uint256 craftID, address _player, bytes calldata data) external;
 }

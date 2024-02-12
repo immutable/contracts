@@ -3,7 +3,6 @@
 pragma solidity 0.8.19;
 
 import {ICraftingRecipe} from "./ICraftingRecipe.sol";
-import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 abstract contract AbstractCraftingRecipe is ICraftingRecipe {
     modifier onlyCraftingFactory() {

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import {ICraftingRecipe, ERC1155Input, ERC721Input, ERC20Input, ERC1155Asset} from "./ICraftingRecipe.sol";
 
 contract CraftingFactory {
@@ -26,8 +27,8 @@ contract CraftingFactory {
         ERC721Input[] calldata erc721Inputs,
         ERC1155Input[] calldata erc1155Inputs,
         bytes calldata data
-    ) external {
-        uint craftID = craftCounter++;
+    ) external nonReentrant() {
+        uint256 craftID = craftCounter++;
 
         recipe.beforeTransfers(craftID, msg.sender, erc20Inputs, erc721Inputs, erc1155Inputs, data);
 

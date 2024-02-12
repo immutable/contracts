@@ -58,11 +58,18 @@ git pull upstream main
 git checkout -b <your-branch-name>
 ```
 
-6. Be sure to run the tests and set up the relevant linters to ensure all GitHub checks pass (see GitHub issues: https://docs.github.com/en/issues/tracking-your-work-with-issues/about-issues for more information).
+6. Be sure to run the tests and set up the relevant linters to ensure all GitHub checks pass (see GitHub issues: https://docs.github.com/en/issues/tracking-your-work-with-issues/about-issues, and [build information](BUILD.md) for more information). New test code should use Foundry tests and not Hardhat.
 
 ```
+forge test -vvv
 yarn test
 ```
+
+Test coverage for all new code must be 100%. To check your test coverage:
+
+ ```
+ forge coverage
+ ```
 
 7. Add and commit your changes, including a comprehensive commit message summarising your changes, then push changes to your fork. (e.g. Fixed formatting issue with ImmutableERC721MintByID.sol)
 

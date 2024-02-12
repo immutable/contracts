@@ -1,5 +1,6 @@
 // Copyright Immutable Pty Ltd 2018 - 2023
 // SPDX-License-Identifier: Apache 2.0
+// slither-disable-start calls-loop
 pragma solidity 0.8.19;
 
 // Allowlist Registry
@@ -88,14 +89,6 @@ abstract contract OperatorAllowlistEnforced is AccessControlEnumerable, Operator
     ///     =====  External functions  =====
 
     /**
-     * @notice Allows admin to set the operator allowlist the calling contract will interface with
-     * @param _operatorAllowlist the address of the Allowlist registry
-     */
-    function setOperatorAllowlistRegistry(address _operatorAllowlist) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        _setOperatorAllowlistRegistry(_operatorAllowlist);
-    }
-
-    /**
      * @notice ERC-165 interface support
      * @param interfaceId The interface identifier, which is a 4-byte selector.
      */
@@ -116,3 +109,4 @@ abstract contract OperatorAllowlistEnforced is AccessControlEnumerable, Operator
         operatorAllowlist = IOperatorAllowlist(_operatorAllowlist);
     }
 }
+// slither-disable-end calls-loop

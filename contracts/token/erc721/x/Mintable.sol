@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
+// solhint-disable compiler-version, custom-errors, reason-string
 pragma solidity ^0.8.4;
 
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { IMintable } from "./IMintable.sol";
-import { Minting } from "./utils/Minting.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {IMintable} from "./IMintable.sol";
+import {Minting} from "./utils/Minting.sol";
 
 abstract contract Mintable is Ownable, IMintable {
-    address public imx;
-    mapping(uint256 => bytes) public blueprints;
+    address public immutable imx;
+    mapping(uint256 id => bytes blueprint) public blueprints;
 
     event AssetMinted(address to, uint256 id, bytes blueprint);
 
@@ -22,11 +23,7 @@ abstract contract Mintable is Ownable, IMintable {
         _;
     }
 
-    function mintFor(
-        address user,
-        uint256 quantity,
-        bytes calldata mintingBlob
-    ) external override onlyOwnerOrIMX {
+    function mintFor(address user, uint256 quantity, bytes calldata mintingBlob) external override onlyOwnerOrIMX {
         require(quantity == 1, "Mintable: invalid quantity");
         (uint256 id, bytes memory blueprint) = Minting.split(mintingBlob);
         _mintFor(user, id, blueprint);
@@ -34,9 +31,5 @@ abstract contract Mintable is Ownable, IMintable {
         emit AssetMinted(user, id, blueprint);
     }
 
-    function _mintFor(
-        address to,
-        uint256 id,
-        bytes memory blueprint
-    ) internal virtual;
+    function _mintFor(address to, uint256 id, bytes memory blueprint) internal virtual;
 }

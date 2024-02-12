@@ -2,13 +2,12 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
-import "@openzeppelin/contracts/interfaces/IERC1271.sol";
-import "solidity-bytes-utils/contracts/BytesLib.sol";
-import "./IERC4494.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
+import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
+import {IERC4494} from "./IERC4494.sol";
+import {ERC721, ERC721Burnable, IERC165} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 // Errors
 import {IImmutableERC721Errors} from "../../../errors/Errors.sol";
 
@@ -17,30 +16,26 @@ import {IImmutableERC721Errors} from "../../../errors/Errors.sol";
  * @dev This contract implements ERC-4494 as well, allowing tokens to be approved via off-chain signed messages.
  */
 
-abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableERC721Errors{
-
+abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableERC721Errors {
     /** @notice mapping used to keep track of nonces of each token ID for validating
      *  signatures
      */
-    mapping(uint256 => uint256) private _nonces;
-
+    mapping(uint256 tokenId => uint256 nonce) private _nonces;
 
     /** @dev the unique identifier for the permit struct to be EIP 712 compliant */
-    bytes32 private constant _PERMIT_TYPEHASH = keccak256(
-        abi.encodePacked(
-            "Permit(",
+    bytes32 private constant _PERMIT_TYPEHASH =
+        keccak256(
+            abi.encodePacked(
+                "Permit(",
                 "address spender,"
                 "uint256 tokenId,"
                 "uint256 nonce,"
                 "uint256 deadline"
-            ")"
-        )
-    );
+                ")"
+            )
+        );
 
-    constructor(string memory name, string memory symbol)
-        ERC721(name, symbol)
-        EIP712(name, "1")
-    {}
+    constructor(string memory name, string memory symbol) ERC721(name, symbol) EIP712(name, "1") {}
 
     /**
      * @notice Function to approve by way of owner signature
@@ -49,12 +44,7 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
      * @param deadline a timestamp expiry for the permit
      * @param sig a traditional or EIP-2098 signature
      */
-    function permit(
-        address spender,
-        uint256 tokenId,
-        uint256 deadline,
-        bytes memory sig
-    ) external override {
+    function permit(address spender, uint256 tokenId, uint256 deadline, bytes memory sig) external override {
         _permit(spender, tokenId, deadline, sig);
     }
 
@@ -63,9 +53,7 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
      * @param tokenId The ID of the token for which to retrieve the nonce.
      * @return Current nonce of the given token.
      */
-    function nonces(
-        uint256 tokenId
-    ) external view returns (uint256) {
+    function nonces(uint256 tokenId) external view returns (uint256) {
         return _nonces[tokenId];
     }
 
@@ -73,6 +61,7 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
      * @notice Returns the domain separator used in the encoding of the signature for permits, as defined by EIP-712
      * @return the bytes32 domain separator
      */
+    // solhint-disable-next-line func-name-mixedcase
     function DOMAIN_SEPARATOR() external view override returns (bytes32) {
         return _domainSeparatorV4();
     }
@@ -82,16 +71,10 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
      * @param interfaceId The interface identifier, which is a 4-byte selector.
      * @return True if the contract implements `interfaceId` and the call doesn't revert, otherwise false.
      */
-    function supportsInterface(bytes4 interfaceId)
-      public
-      view
-      virtual
-      override(IERC165, ERC721)
-      returns (bool)
-    {
-     return
-      interfaceId == type(IERC4494).interfaceId || // 0x5604e225
-      super.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165, ERC721) returns (bool) {
+        return
+            interfaceId == type(IERC4494).interfaceId || // 0x5604e225
+            super.supportsInterface(interfaceId);
     }
 
     /**
@@ -100,21 +83,13 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
      * @param to The address to which the token is being transferred.
      * @param tokenId The ID of the token being transferred.
      */
-    function _transfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal virtual override(ERC721){
+    function _transfer(address from, address to, uint256 tokenId) internal virtual override(ERC721) {
         _nonces[tokenId]++;
         super._transfer(from, to, tokenId);
     }
 
-    function _permit(
-        address spender,
-        uint256 tokenId,
-        uint256 deadline,
-        bytes memory sig
-    ) internal virtual {
+    function _permit(address spender, uint256 tokenId, uint256 deadline, bytes memory sig) internal virtual {
+        // solhint-disable-next-line not-rely-on-time
         if (deadline < block.timestamp) {
             revert PermitExpired();
         }
@@ -127,7 +102,7 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
             return;
         }
 
-        address recoveredSigner;
+        address recoveredSigner = address(0);
 
         // EOA signature validation
         if (sig.length == 64) {
@@ -158,22 +133,8 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
      * @param deadline The deadline until which the permit is valid.
      * @return A bytes32 digest, EIP-712 compliant, that serves as a unique identifier for the permit.
      */
-    function _buildPermitDigest(
-        address spender,
-        uint256 tokenId,
-        uint256 deadline
-    ) internal view returns (bytes32) {
-        return _hashTypedDataV4(
-            keccak256(
-                abi.encode(
-                    _PERMIT_TYPEHASH,
-                    spender,
-                    tokenId,
-                    _nonces[tokenId],
-                    deadline
-                )
-            )
-        );
+    function _buildPermitDigest(address spender, uint256 tokenId, uint256 deadline) internal view returns (bytes32) {
+        return _hashTypedDataV4(keccak256(abi.encode(_PERMIT_TYPEHASH, spender, tokenId, _nonces[tokenId], deadline)));
     }
 
     /**
@@ -182,7 +143,7 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
      * @param tokenId The token id.
      * @return True if the signature is from an approved operator or owner, otherwise false.
      */
-    function _isValidEOASignature(address recoveredSigner, uint256 tokenId) private view returns(bool) {
+    function _isValidEOASignature(address recoveredSigner, uint256 tokenId) private view returns (bool) {
         return recoveredSigner != address(0) && _isApprovedOrOwner(recoveredSigner, tokenId);
     }
 
@@ -193,13 +154,10 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
      * @param sig The actual signature bytes.
      * @return True if the signature is valid according to EIP-1271, otherwise false.
      */
-    function _isValidERC1271Signature(address spender, bytes32 digest, bytes memory sig) private view returns(bool) {
+    function _isValidERC1271Signature(address spender, bytes32 digest, bytes memory sig) private view returns (bool) {
+        // slither-disable-next-line low-level-calls
         (bool success, bytes memory res) = spender.staticcall(
-            abi.encodeWithSelector(
-                IERC1271.isValidSignature.selector,
-                digest,
-                sig
-            )
+            abi.encodeWithSelector(IERC1271.isValidSignature.selector, digest, sig)
         );
 
         if (success && res.length == 32) {

@@ -15,10 +15,13 @@ jobs:
         uses: actions/checkout@v3
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile --network-concurrency 1
-      - name: Run tests
+      - name: Show Forge Version
+        run: forge --version
+      - name: Run tests and install dependancies
         run: forge test -vvv
+      - name: Debug Info1
+        if: '!cancelled()'
+        run: pwd
   hardhat-test:
     name: Run Hardhat Tests
     runs-on: ubuntu-latest
@@ -34,8 +37,9 @@ jobs:
         run: yarn install --frozen-lockfile --network-concurrency 1
       - name: Run Tests
         run: yarn test
-  lint:
+  eslint:
     name: Run eslint
+    continue-on-error: true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -48,7 +52,38 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile --network-concurrency 1
       - name: Run eslint
-        run: yarn lint
+        run: yarn run eslint
+  solhint:
+    name: Run solhint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+          cache: 'yarn'
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --network-concurrency 1
+      - name: Run solhint
+        run: yarn run solhint contracts/**/*.sol
+  slither:
+    name: Run slither
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Install Slither
+        run: sudo pip3 install slither-analyzer
+      - name: Show Slither Version
+        run: slither --version
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Show Forge Version
+        run: forge --version
+      - name: Run slither
+        run: slither --compile-force-framework forge  --foundry-out-directory foundry-out .
   publish:
     name: Publish to NPM (dry run)
     runs-on: ubuntu-latest

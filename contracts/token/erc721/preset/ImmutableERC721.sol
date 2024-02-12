@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
-import { MintingAccessControl } from "../abstract/MintingAccessControl.sol";
-import { ImmutableERC721HybridBase } from "../abstract/ImmutableERC721HybridBase.sol";
+import {ImmutableERC721HybridBase} from "../abstract/ImmutableERC721HybridBase.sol";
 
 contract ImmutableERC721 is ImmutableERC721HybridBase {
     ///     =====   Constructor  =====
@@ -88,7 +87,7 @@ contract ImmutableERC721 is ImmutableERC721HybridBase {
     function safeMintBatchByQuantity(Mint[] calldata mints) external onlyRole(MINTER_ROLE) {
         _safeMintBatchByQuantity(mints);
     }
-    
+
     /** @notice Allows minter to safe mint a number of tokens by ID to a number of specified
      *  addresses with hooks and checks. Check ERC721Hybrid for details on _mintBatchByIDToMultiple
      *  @param mints the list of IDMint struct containing the to, and tokenIds
@@ -121,7 +120,7 @@ contract ImmutableERC721 is ImmutableERC721HybridBase {
             revert IImmutableERC721MismatchedTransferLengths();
         }
 
-        for (uint i = 0; i < tr.tokenIds.length; i++) {
+        for (uint256 i = 0; i < tr.tokenIds.length; i++) {
             safeTransferFrom(tr.from, tr.tos[i], tr.tokenIds[i]);
         }
     }

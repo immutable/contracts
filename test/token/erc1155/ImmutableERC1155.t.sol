@@ -1,19 +1,21 @@
-// SPDX-License-Identifier: UNLICENSED
+// Copyright Immutable Pty Ltd 2018 - 2024
+// SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 import {ImmutableERC1155} from "../../../contracts/token/erc1155/preset/draft-ImmutableERC1155.sol";
 import {IImmutableERC1155Errors} from "../../../contracts/errors/Errors.sol";
 import {OperatorAllowlistEnforcementErrors} from "../../../contracts/errors/Errors.sol";
-import {OperatorAllowlist} from "../../../contracts/allowlist/OperatorAllowlist.sol";
+import {OperatorAllowlistUpgradeable} from "../../../contracts/allowlist/OperatorAllowlistUpgradeable.sol";
 import {Sign} from "../../utils/Sign.sol";
+import {DeployOperatorAllowlist} from  "../../utils/DeployAllowlistProxy.sol";
 import {MockWallet} from "../../../contracts/mocks/MockWallet.sol";
 import {MockWalletFactory} from "../../../contracts/mocks/MockWalletFactory.sol";
 
 contract ImmutableERC1155Test is Test {
     ImmutableERC1155 public immutableERC1155;
     Sign public sign;
-    OperatorAllowlist public operatorAllowlist;
+    OperatorAllowlistUpgradeable public operatorAllowlist;
     MockWalletFactory public scmf;
     MockWallet public mockWalletModule;
     MockWallet public scw;
@@ -41,11 +43,13 @@ contract ImmutableERC1155Test is Test {
 
     address public scwAddress;
     address public anotherScwAddress;
+    address public proxyAddr;
 
     function setUp() public {
-        operatorAllowlist = new OperatorAllowlist(
-            owner
-        );
+        DeployOperatorAllowlist deployScript = new DeployOperatorAllowlist();
+        proxyAddr = deployScript.run(owner, owner, owner);
+        operatorAllowlist = OperatorAllowlistUpgradeable(proxyAddr);
+
         immutableERC1155 = new ImmutableERC1155(
             owner,
             "test",
@@ -57,11 +61,7 @@ contract ImmutableERC1155Test is Test {
         );
 
         operatorAddrs.push(minter);
-        vm.startPrank(owner);
-        bytes32 regiRole = operatorAllowlist.REGISTRAR_ROLE();
-        operatorAllowlist.grantRegistrarRole(owner);
-        assertTrue(operatorAllowlist.hasRole(regiRole, owner));
-        vm.stopPrank();
+        assertTrue(operatorAllowlist.hasRole(operatorAllowlist.REGISTRAR_ROLE(), owner));
 
         sign = new Sign(immutableERC1155.DOMAIN_SEPARATOR());
         vm.prank(owner);
@@ -98,7 +98,7 @@ contract ImmutableERC1155Test is Test {
 
     function _addAddrToAllowListAndApprove() private {
         vm.startPrank(owner);
-        operatorAllowlist.addAddressToAllowlist(operatorAddrs);
+        operatorAllowlist.addAddressesToAllowlist(operatorAddrs);
         immutableERC1155.setApprovalForAll(minter, true);
         vm.stopPrank();
     }
@@ -139,6 +139,10 @@ contract ImmutableERC1155Test is Test {
     function test_DeploymentAllowlistShouldGiveAdminToOwner() public {
         bytes32 adminRole = operatorAllowlist.DEFAULT_ADMIN_ROLE();
         assertTrue(operatorAllowlist.hasRole(adminRole, owner));
+    }
+
+    function test_DeploymentShouldSetAllowlistToProxy() public {
+        assertEq(address(immutableERC1155.operatorAllowlist()), proxyAddr);
     }
 
     /*

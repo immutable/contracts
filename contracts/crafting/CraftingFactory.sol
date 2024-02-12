@@ -2,27 +2,26 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
-import {IRecipe, ERC1155Input, ERC721Input, ERC20Input, ERC1155Asset} from "./IRecipe.sol";
+import {ICraftingRecipe, ERC1155Input, ERC721Input, ERC20Input, ERC1155Asset} from "./ICraftingRecipe.sol";
 
 contract CraftingFactory {
-    event CraftComplete(uint256 indexed craftID, IRecipe indexed recipe);
+    event CraftComplete(uint256 indexed craftID, ICraftingRecipe indexed recipe);
 
     uint256 public craftCounter;
-
 
     /**
      * @notice Transfer some tokens and then execute an arbitrary action.
      * @dev The set of allowed token actions can be controlled by the a crafting recipe.
      * @dev The crafting receipt also defines the arbitrary action.
      * @dev The msg.sender is assumed to be the game player's EOA or Passport wallet contract.
-     * @param receipe Contract that defines the allowable set of inputs to crafting and the actions to do post transfers.
+     * @param recipe Contract that defines the allowable set of inputs to crafting and the actions to do post transfers.
      * @param erc20Inputs Tokens to be transferred.
      * @param erc721Inputs Tokens to be transferred.
      * @param erc1155Inputs Tokens to be transferred.
      * @param data ABI encoded parameters to the crafting logic post transfer.
      */
     function craft(
-        IRecipe recipe,
+        ICraftingRecipe recipe,
         ERC20Input[] calldata erc20Inputs,
         ERC721Input[] calldata erc721Inputs,
         ERC1155Input[] calldata erc1155Inputs,

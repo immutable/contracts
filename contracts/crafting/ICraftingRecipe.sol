@@ -32,11 +32,9 @@ struct ERC20Input {
 interface ICraftingRecipe {
     error OnlyCraftingFactory(address _caller);
 
-
-
-
     function beforeTransfers(
         uint256 craftID,
+        address _player,
         ERC20Input[] calldata erc20s,
         ERC721Input[] calldata erc721s,
         ERC1155Input[] calldata erc1155s,

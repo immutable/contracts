@@ -4,10 +4,9 @@ pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 
-import {ERC20PresetFixedSupply} from "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 
-import { ERC20Input, ERC721Input, ERC1155Input } from "../ICraftingRecipe.sol";
-import {CraftingFactor} from "contracts/crafting/CraftingFactory.sol";
+import { ERC20Input, ERC721Input, ERC1155Input } from "contracts/crafting/ICraftingRecipe.sol";
+import {CraftingFactory} from "contracts/crafting/CraftingFactory.sol";
 
 
 contract CraftingFactoryTest is Test {
@@ -26,8 +25,8 @@ contract CraftingFactoryTest is Test {
 
         craftingFactory = new CraftingFactory();
 
-        IERC20 erc20 = new ERC20PresetFixedSupply("TOKEN", "TOK", 1000, bank);
-        bank.transfer(player, 100);
+        // IERC20 erc20 = new ERC20PresetFixedSupply("TOKEN", "TOK", 1000, bank);
+        // bank.transfer(player, 100);
     }
 
     function testHappyPath() public {
@@ -35,3 +34,4 @@ contract CraftingFactoryTest is Test {
         // TODO
 
     }
+}

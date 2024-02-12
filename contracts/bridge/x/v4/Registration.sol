@@ -40,4 +40,30 @@ contract Registration {
             imx.withdraw(starkKey, assetType);
         }
     }
+
+    function registerAndWithdrawNft(
+        address ethKey,
+        uint256 starkKey,
+        bytes calldata signature,
+        uint256 assetType,
+        uint256 tokenId
+    ) external {
+        if (!this.isRegistered(starkKey)) {
+            imx.registerEthAddress(ethKey, starkKey, signature);
+        }
+        imx.withdrawNft(starkKey, assetType, tokenId);
+    }
+
+    function registerWithdrawAndMint(
+        address ethKey,
+        uint256 starkKey,
+        bytes calldata signature,
+        uint256 assetType,
+        bytes calldata mintingBlob
+    ) external {
+        if (!this.isRegistered(starkKey)) {
+            imx.registerEthAddress(ethKey, starkKey, signature);
+        }
+        imx.withdrawAndMint(starkKey, assetType, mintingBlob);
+    }
 }

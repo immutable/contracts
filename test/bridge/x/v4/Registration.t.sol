@@ -3,17 +3,18 @@ pragma solidity ^0.8.20;
 
 import {Registration} from "../../../../contracts/bridge/x/v4/Registration.sol";
 import {Test} from "forge-std/Test.sol";
+import {DeployRegistrationV4Dev} from "../../../../script/DeployRegistrationV4Dev.s.sol";
 
-contract RegistrationTest is Test {
+contract RegistrationEthTest is Test {
     Registration public registration;
 
-    address public DEV_CONTRACT = 0x590C809bd5FF50DCb39e4320b60139B29B880174;
     uint256 private BLOCK_NUMBER = 5104952;
     uint256 private SEPOLIA_CHAIN_ID = 11155111;
 
     function setUp() public {
         vm.rollFork(BLOCK_NUMBER);
-        registration = new Registration(payable(DEV_CONTRACT));
+        DeployRegistrationV4Dev deployer = new DeployRegistrationV4Dev();
+        registration = deployer.run();
     }
 
     function skipIfBlockAndChainIdAreIncorrect() public {

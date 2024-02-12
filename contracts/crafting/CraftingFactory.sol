@@ -30,7 +30,7 @@ contract CraftingFactory {
     ) external {
         uint craftID = craftCounter++;
 
-        recipe.beforeTransfers(craftID, erc20Inputs, erc721Inputs, erc1155Inputs, data);
+        recipe.beforeTransfers(craftID, msg.sender, erc20Inputs, erc721Inputs, erc1155Inputs, data);
 
         for (uint256 i = 0; i < erc20Inputs.length; i++) {
             ERC20Input memory input = erc20Inputs[i];

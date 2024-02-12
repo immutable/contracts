@@ -6,7 +6,7 @@ import { ERC20Input, ERC721Input, ERC1155Input } from "../ICraftingRecipe.sol";
 import { AbstractCraftingRecipe } from "../AbstractCraftingRecipe.sol";
 import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
-contract SimpleRecipe is AbstractCraftingRecipe {
+contract ExampleRecipeERC721 is AbstractCraftingRecipe {
     IERC721 public token;
 
     constructor(address _craftingFactory, IERC721 _token) AbstractCraftingRecipe(_craftingFactory) {
@@ -14,11 +14,12 @@ contract SimpleRecipe is AbstractCraftingRecipe {
     }
 
     function beforeTransfers(
-        uint256,
+        uint256 /* craftId */,
+        address _player, 
         ERC20Input[] calldata erc20s,
         ERC721Input[] calldata erc721s,
         ERC1155Input[] calldata erc1155s,
-        bytes calldata
+        bytes calldata /* data */
     ) external view onlyCraftingFactory {
 
         require(erc20s.length == 0, "No ERC20s allowed.");

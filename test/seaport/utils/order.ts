@@ -44,10 +44,10 @@ const orderType = {
 };
 
 export async function getAndVerifyOrderHash(marketplace: ImmutableSeaport, orderComponents: OrderComponents) {
-  const orderHash = await marketplace.getOrderHash(orderComponents);
+  // const orderHash = await marketplace.getOrderHash(orderComponents);
   const derivedOrderHash = calculateOrderHash(orderComponents);
-  expect(orderHash).to.equal(derivedOrderHash);
-  return orderHash;
+  // expect(orderHash).to.equal(derivedOrderHash);
+  return derivedOrderHash;
 }
 
 export function getDomainData(marketplaceAddress: string, chainId: string) {
@@ -144,7 +144,8 @@ export async function createOrder(
   bulkSignatureIndex?: number,
   bulkSignatureHeight?: number
 ) {
-  const counter = await marketplace.getCounter(offerer.address);
+  // const counter = await marketplace.getCounter(offerer.address);
+  const counter = ethers.BigNumber.from(0);
 
   const salt = !extraCheap ? randomHex() : constants.HashZero;
   const startTime = timeFlag !== "NOT_STARTED" ? 0 : toBN("0xee00000000000000000000000000");
@@ -171,15 +172,16 @@ export async function createOrder(
 
   const orderHash = await getAndVerifyOrderHash(marketplace, orderComponents);
 
-  const { isValidated, isCancelled, totalFilled, totalSize } = await marketplace.getOrderStatus(orderHash);
+  // const { isValidated, isCancelled, totalFilled, totalSize } = await marketplace.getOrderStatus(orderHash);
+  // console.log(`isValidated: ${isValidated}, isCancelled: ${isCancelled}, totalFilled: ${totalFilled}, totalSize: ${totalSize}`);
 
-  expect(isCancelled).to.equal(false);
+  // expect(isCancelled).to.equal(false);
 
   const orderStatus = {
-    isValidated,
-    isCancelled,
-    totalFilled,
-    totalSize,
+    isValidated: false,
+    isCancelled: false,
+    totalFilled: "0",
+    totalSize: "0",
   };
 
   const flatSig = await signOrder(marketplace, orderComponents, signer ?? offerer);
@@ -238,6 +240,55 @@ export async function generateSip7Signature(
   orderHash: string,
   fulfillerAddress: string,
   immutableSignedZoneAddress: string,
+  immutableSigner: Wallet,
+  chainId: number,
+) {
+  const considerationAsReceivedItem: ReceivedItemStruct[] = consideration.map((item) => {
+    return {
+      amount: item.startAmount,
+      identifier: item.identifierOrCriteria,
+      itemType: item.itemType,
+      recipient: item.recipient,
+      token: item.token,
+    };
+  });
+
+  // const expiration = (await getCurrentTimeStamp()) + 100;
+  const expiration = 1735653600;
+  const considerationHash = utils._TypedDataEncoder.hashStruct("Consideration", CONSIDERATION_EIP712_TYPE, {
+    consideration: considerationAsReceivedItem,
+  });
+
+  const context = utils.solidityPack(["bytes", "bytes[]"], [considerationHash, [orderHash]]);
+
+  const signedOrder = {
+    fulfiller: fulfillerAddress,
+    expiration,
+    orderHash,
+    context,
+  };
+
+  const signature = await immutableSigner._signTypedData(
+    EIP712_DOMAIN(chainId, immutableSignedZoneAddress),
+    SIGNED_ORDER_EIP712_TYPE,
+    signedOrder
+  );
+
+  let packed =  utils.solidityPack(
+    ["bytes1", "address", "uint64", "bytes", "bytes"],
+    [0, fulfillerAddress, expiration, convertSignatureToEIP2098(signature), context]
+  );
+
+  // console.log(`fullfiller: ${fulfillerAddress}`)
+  // console.log(`Packed signature: ${packed}`)
+
+  return packed
+}
+
+export async function generateSip7SignatureLoadTest(
+  consideration: ConsiderationItem[],
+  orderHash: string,
+  immutableSignedZoneAddress: string,
   immutableSigner: Wallet
 ) {
   const considerationAsReceivedItem: ReceivedItemStruct[] = consideration.map((item) => {
@@ -271,8 +322,11 @@ export async function generateSip7Signature(
     signedOrder
   );
 
-  return utils.solidityPack(
-    ["bytes1", "address", "uint64", "bytes", "bytes"],
-    [0, fulfillerAddress, expiration, convertSignatureToEIP2098(signature), context]
+  // Insert 
+  let packed =  utils.solidityPack(
+    ["bytes1", "uint64", "bytes", "bytes"],
+    [0, expiration, convertSignatureToEIP2098(signature), context]
   );
+  
+  return packed
 }

@@ -88,6 +88,10 @@ const config: HardhatUserConfig = {
     tests: "./test",
   },
   networks: {
+    devnet: {
+      url: "https://rpc.dev.immutable.com",
+      accounts:["b1ed5a4f9de92f05f29945b9b92e2ed5089f87d373105c7b6bfdc00fe845ed83","6e09743693d8f5b7accf2410f863e073c271822b9d909699a84cd50ad46fe63b", "34be7094156ef72230534e960671190aaabacdcdbea7fd1367155dce5327783b"]
+    },
     sepolia: {
       url: process.env.SEPOLIA_URL || "",
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],

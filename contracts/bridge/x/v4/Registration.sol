@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.19;
 
 import {Core} from "./Core.sol";
 
@@ -21,13 +21,13 @@ contract Registration {
     function registerAndWithdrawAll(address ethKey, uint256 starkKey, bytes calldata signature, uint256 assetType)
         external
     {
-        if (!this.isRegistered(starkKey)) {
+        if (!isRegistered(starkKey)) {
             imx.registerEthAddress(ethKey, starkKey, signature);
         }
-        this.withdrawAll(uint160(ethKey), starkKey, assetType);
+        withdrawAll(uint160(ethKey), starkKey, assetType);
     }
 
-    function withdrawAll(uint256 ethKey, uint256 starkKey, uint256 assetType) external {
+    function withdrawAll(uint256 ethKey, uint256 starkKey, uint256 assetType) public {
         uint256 ethKeyBalance = imx.getWithdrawalBalance(ethKey, assetType);
         uint256 starkKeyBalance = imx.getWithdrawalBalance(starkKey, assetType);
         require(ethKeyBalance != 0 || starkKeyBalance != 0, "No funds to withdraw");
@@ -48,7 +48,7 @@ contract Registration {
         uint256 assetType,
         uint256 tokenId
     ) external {
-        if (!this.isRegistered(starkKey)) {
+        if (!isRegistered(starkKey)) {
             imx.registerEthAddress(ethKey, starkKey, signature);
         }
         imx.withdrawNft(starkKey, assetType, tokenId);
@@ -61,7 +61,7 @@ contract Registration {
         uint256 assetType,
         bytes calldata mintingBlob
     ) external {
-        if (!this.isRegistered(starkKey)) {
+        if (!isRegistered(starkKey)) {
             imx.registerEthAddress(ethKey, starkKey, signature);
         }
         imx.withdrawAndMint(starkKey, assetType, mintingBlob);

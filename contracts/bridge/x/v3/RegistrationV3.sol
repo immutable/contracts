@@ -2,12 +2,12 @@
 // solhint-disable compiler-version
 pragma solidity ^0.8.11;
 
-import {Core} from "./Core.sol";
+import {CoreV3} from "./CoreV3.sol";
 
-contract Registration {
-    Core public immutable imx;
+contract RegistrationV3 {
+    CoreV3 public immutable imx;
 
-    constructor(Core _imx) {
+    constructor(CoreV3 _imx) {
         imx = _imx;
     }
 

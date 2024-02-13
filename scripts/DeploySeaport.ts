@@ -152,6 +152,7 @@ async function generateOrder(
     [offer],
     consideration,
     2, // FULL_RESTRICTED
+    chainId,
     undefined,
     undefined,
     undefined,

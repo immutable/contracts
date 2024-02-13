@@ -135,6 +135,7 @@ export async function createOrder(
   offer: OfferItem[],
   consideration: ConsiderationItem[],
   orderType: number,
+  chainId: number,
   timeFlag?: string | null,
   signer?: Wallet,
   zoneHash = constants.HashZero,

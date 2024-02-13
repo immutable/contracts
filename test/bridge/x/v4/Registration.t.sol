@@ -4,32 +4,28 @@ pragma solidity ^0.8.20;
 import {Registration} from "../../../../contracts/bridge/x/v4/Registration.sol";
 import {Test} from "forge-std/Test.sol";
 import {DeployRegistrationV4Dev} from "../../../../script/DeployRegistrationV4Dev.s.sol";
+import {MockCore} from "./MockCore.sol";
 
-contract RegistrationEthTest is Test {
+contract RegistrationTest is Test {
+    MockCore public mockCore;
     Registration public registration;
 
-    uint256 private BLOCK_NUMBER = 5104952;
-    uint256 private SEPOLIA_CHAIN_ID = 11155111;
+    uint256 private MOCK_CORE_FUNDS = 5e18;
 
     function setUp() public {
-        vm.rollFork(BLOCK_NUMBER);
-        DeployRegistrationV4Dev deployer = new DeployRegistrationV4Dev();
-        registration = deployer.run();
-    }
-
-    function skipIfBlockAndChainIdAreIncorrect() public {
-        vm.skip(block.chainid != SEPOLIA_CHAIN_ID);
-        vm.skip(block.number != BLOCK_NUMBER);
+        vm.startBroadcast();
+        mockCore = new MockCore();
+        registration = new Registration(payable(mockCore));
+        vm.deal(payable(mockCore), MOCK_CORE_FUNDS);
+        vm.stopBroadcast();
     }
 
     function testGetVersion() public {
-        skipIfBlockAndChainIdAreIncorrect();
         string memory version = registration.getVersion();
         assertTrue(keccak256(abi.encodePacked(version)) == keccak256(abi.encodePacked("4.0.1")));
     }
 
     function testCompleteWithdrawalAll_WhenUserIsRegistered() public {
-        skipIfBlockAndChainIdAreIncorrect();
         address ethAdd = 0xac3cc5a41D9e8c94Fe64138C1343A07B2fF5ff76;
         uint256 ethKey = 983301674259619813482344086789227297671214399350;
         // 0x7a88d4e1a357d33d6168058ac6b08fa54c07b72313f78af594d4d44e8268a6c
@@ -47,25 +43,26 @@ contract RegistrationEthTest is Test {
 
         // 0x2705737cd248ac819034b5de474c8f0368224f72a0fda9e031499d519992d9e (eth)
         uint256 assetType = 1103114524755001640548555873671808205895038091681120606634696969331999845790;
+        uint256 ethExpectedBalance = 4e10;
+        mockCore.addWithdrawalBalance(ethKey, assetType, ethExpectedBalance);
         uint256 ethWithdrawableBalance = registration.imx().getWithdrawalBalance(ethKey, assetType);
-        uint256 ethExpectedBalance = 40000000000000000;
         assertEq(ethExpectedBalance, ethWithdrawableBalance);
 
+        uint256 starkExpectedBalance = 3e10;
+        mockCore.addWithdrawalBalance(starkKey, assetType, starkExpectedBalance);
         uint256 starkWithdrawableBalance = registration.imx().getWithdrawalBalance(starkKey, assetType);
-        uint256 starkExpectedBalance = 30000000000000000;
         assertEq(starkExpectedBalance, starkWithdrawableBalance);
-
+        //
         uint256 initialBalance = ethAdd.balance;
-        // act
+        //        // act
         registration.withdrawAll(ethKey, starkKey, assetType);
-
+        //
         uint256 finalBalance = ethAdd.balance;
         uint256 expectedFinalBalance = initialBalance + ethExpectedBalance + starkExpectedBalance;
         assertEq(expectedFinalBalance, finalBalance);
     }
 
     function testShouldFailWithdrawalAll_WhenUserIsNotRegistered() public {
-        skipIfBlockAndChainIdAreIncorrect();
         address ethAdd = 0xac3cc5a41D9e8c94Fe64138C1343A07B2fF5ff76;
         uint256 ethKey = 983301674259619813482344086789227297671214399350;
         // 0x7a88d4e1a357d33d6168058ac6b08fa54c07b72313f78af594d4d44e8268a6c
@@ -74,12 +71,14 @@ contract RegistrationEthTest is Test {
         // 0x2705737cd248ac819034b5de474c8f0368224f72a0fda9e031499d519992d9e (eth)
         uint256 assetType = 1103114524755001640548555873671808205895038091681120606634696969331999845790;
 
+        uint256 ethExpectedBalance = 4e10;
+        mockCore.addWithdrawalBalance(ethKey, assetType, ethExpectedBalance);
         uint256 ethWithdrawableBalance = registration.imx().getWithdrawalBalance(ethKey, assetType);
-        uint256 ethExpectedBalance = 40000000000000000;
         assertEq(ethExpectedBalance, ethWithdrawableBalance);
 
+        uint256 starkExpectedBalance = 3e10;
+        mockCore.addWithdrawalBalance(starkKey, assetType, starkExpectedBalance);
         uint256 starkWithdrawableBalance = registration.imx().getWithdrawalBalance(starkKey, assetType);
-        uint256 starkExpectedBalance = 30000000000000000;
         assertEq(starkExpectedBalance, starkWithdrawableBalance);
 
         address registeredEthAddress = registration.imx().getEthKey(starkKey);
@@ -95,7 +94,6 @@ contract RegistrationEthTest is Test {
     }
 
     function testCompleteWithdrawalV4_WhenUserIsNotRegistered() public {
-        skipIfBlockAndChainIdAreIncorrect();
         address ethAdd = 0xac3cc5a41D9e8c94Fe64138C1343A07B2fF5ff76;
         uint256 ethKey = 983301674259619813482344086789227297671214399350;
         // 0x7a88d4e1a357d33d6168058ac6b08fa54c07b72313f78af594d4d44e8268a6c
@@ -104,12 +102,14 @@ contract RegistrationEthTest is Test {
         // 0x2705737cd248ac819034b5de474c8f0368224f72a0fda9e031499d519992d9e (eth)
         uint256 assetType = 1103114524755001640548555873671808205895038091681120606634696969331999845790;
 
+        uint256 ethExpectedBalance = 4e10;
+        mockCore.addWithdrawalBalance(ethKey, assetType, ethExpectedBalance);
         uint256 ethWithdrawableBalance = registration.imx().getWithdrawalBalance(ethKey, assetType);
-        uint256 ethExpectedBalance = 40000000000000000;
         assertEq(ethExpectedBalance, ethWithdrawableBalance);
 
+        uint256 starkExpectedBalance = 3e10;
+        mockCore.addWithdrawalBalance(starkKey, assetType, starkExpectedBalance);
         uint256 starkWithdrawableBalance = registration.imx().getWithdrawalBalance(starkKey, assetType);
-        uint256 starkExpectedBalance = 30000000000000000;
         assertEq(starkExpectedBalance, starkWithdrawableBalance);
 
         address registeredEthAddress = registration.imx().getEthKey(starkKey);
@@ -124,7 +124,6 @@ contract RegistrationEthTest is Test {
     }
 
     function testRegisterAndCompleteWithdrawalAll_WhenUserIsNotRegistered() public {
-        skipIfBlockAndChainIdAreIncorrect();
         address ethAdd = 0xac3cc5a41D9e8c94Fe64138C1343A07B2fF5ff76;
         uint256 ethKey = 983301674259619813482344086789227297671214399350;
         // 0x7a88d4e1a357d33d6168058ac6b08fa54c07b72313f78af594d4d44e8268a6c
@@ -133,12 +132,14 @@ contract RegistrationEthTest is Test {
         // 0x2705737cd248ac819034b5de474c8f0368224f72a0fda9e031499d519992d9e (eth)
         uint256 assetType = 1103114524755001640548555873671808205895038091681120606634696969331999845790;
 
+        uint256 ethExpectedBalance = 4e10;
+        mockCore.addWithdrawalBalance(ethKey, assetType, ethExpectedBalance);
         uint256 ethWithdrawableBalance = registration.imx().getWithdrawalBalance(ethKey, assetType);
-        uint256 ethExpectedBalance = 40000000000000000;
         assertEq(ethExpectedBalance, ethWithdrawableBalance);
 
+        uint256 starkExpectedBalance = 3e10;
+        mockCore.addWithdrawalBalance(starkKey, assetType, starkExpectedBalance);
         uint256 starkWithdrawableBalance = registration.imx().getWithdrawalBalance(starkKey, assetType);
-        uint256 starkExpectedBalance = 30000000000000000;
         assertEq(starkExpectedBalance, starkWithdrawableBalance);
 
         // assure the user is not registered
@@ -162,7 +163,6 @@ contract RegistrationEthTest is Test {
     }
 
     function testRegister_WhenUserIsNotRegistered() public {
-        skipIfBlockAndChainIdAreIncorrect();
         address ethAdd = 0xac3cc5a41D9e8c94Fe64138C1343A07B2fF5ff76;
         // 0x7a88d4e1a357d33d6168058ac6b08fa54c07b72313f78af594d4d44e8268a6c
         uint256 starkKey = 3463995498836494504631329032145085468217956335318243415256427132985150966380;

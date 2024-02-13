@@ -62,18 +62,21 @@ export function getDomainData(marketplaceAddress: string, chainId: string) {
 export async function signOrder(
   marketplace: ImmutableSeaport,
   orderComponents: OrderComponents,
-  signer: Wallet | Contract
+  signer: Wallet | Contract,
+  chainId,
+  domainSeparator,
 ) {
-  const chainId = await signer.getChainId();
+  // const chainId = await signer.getChainId();
   const signature = await signer._signTypedData(
     { ...getDomainData(marketplace.address, chainId), verifyingContract: marketplace.address },
     orderType,
     orderComponents
   );
 
-  const orderHash = await getAndVerifyOrderHash(marketplace, orderComponents);
+  const orderHash = calculateOrderHash(orderComponents);
 
-  const { domainSeparator } = await marketplace.information();
+  // const { domainSeparator } = await marketplace.information();
+  console.log(`domainSeparator: ${domainSeparator}`)
   const digest = keccak256(`0x1901${domainSeparator.slice(2)}${orderHash.slice(2)}`);
   const recoveredAddress = recoverAddress(digest, signature);
 
@@ -136,6 +139,7 @@ export async function createOrder(
   consideration: ConsiderationItem[],
   orderType: number,
   chainId: number,
+  domainSeperator: string,
   timeFlag?: string | null,
   signer?: Wallet,
   zoneHash = constants.HashZero,
@@ -185,7 +189,7 @@ export async function createOrder(
     totalSize: "0",
   };
 
-  const flatSig = await signOrder(marketplace, orderComponents, signer ?? offerer);
+  const flatSig = await signOrder(marketplace, orderComponents, signer ?? offerer, chainId, domainSeperator);
 
   const order = {
     parameters: orderParameters,

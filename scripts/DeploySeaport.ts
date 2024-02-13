@@ -84,6 +84,9 @@ export async function main() {
     throw new Error("Approval failed");
   }
 
+  // Get domain seperator
+    const { domainSeparator } = await immutableSeaport.information();
+
 
   // Generate orders
   const buyAmount = ethers.utils.parseEther("0.0000001");
@@ -102,6 +105,7 @@ export async function main() {
       serverSigner,
       buyAmount,
       chainId,
+      domainSeparator,
     );
 
     const tx = await immutableSeaport.populateTransaction.fulfillAdvancedOrder(order, [], conduitKey, buyer.address, {value: buyAmount});
@@ -142,6 +146,7 @@ async function generateOrder(
   immutableSigner,
   buyAmount,
   chainId,
+  domainSeparator,
 ) {
   const offer = await getTestItem721(erc721Addr, tokenId);
   const consideration = [getItemETH(buyAmount, buyAmount, seller.address)];
@@ -153,6 +158,7 @@ async function generateOrder(
     consideration,
     2, // FULL_RESTRICTED
     chainId,
+    domainSeparator,
     undefined,
     undefined,
     undefined,

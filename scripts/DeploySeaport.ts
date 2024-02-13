@@ -34,7 +34,7 @@ export async function main() {
   const l1Wallets = l1Keys.map((key) => new Wallet(key, hre.ethers.provider));
 
   // Get accountse
-  const [conduit, serverSigner, gameWallet, buyer] = await hre.ethers.getSigners();
+  const [conduit, serverSigner, gameWallet] = await hre.ethers.getSigners();
 
   // Deploy Seaport
   const { immutableSeaport, immutableSignedZone, conduitKey, conduitAddress } = await deployImmutableContracts(
@@ -63,7 +63,7 @@ export async function main() {
   // 3600/2 = 1800 blocks
   // 80 trades per block
   // Total NFT mints = 1800 * 80 = 144000 (make this more to ensure we hit the target)
-  const mintCount = 100;
+  const mintCount = 10;
   const txCount = 10;
   const mintTxCount = mintCount/txCount; // Max mints per tx?
 
@@ -85,15 +85,14 @@ export async function main() {
   }
 
   // Get domain seperator
-    const { domainSeparator } = await immutableSeaport.information();
-
+  const { domainSeparator } = await immutableSeaport.information();
 
   // Generate orders
   const buyAmount = ethers.utils.parseEther("0.0000001");
   let orders : any[] = [];
   console.log(`Generating ${mintCount} orders`)
-  for (let i = 0; i <= 1; i++) {
-    // const buyer = l1Wallets[i % l1Wallets.length];
+  for (let i = 0; i <= mintCount; i++) {
+    const buyer = l1Wallets[i % l1Wallets.length];
     const order = await generateOrder(
       erc721Mint.address,
       i,
@@ -111,14 +110,15 @@ export async function main() {
     const tx = await immutableSeaport.populateTransaction.fulfillAdvancedOrder(order, [], conduitKey, buyer.address, {value: buyAmount});
     await sendRawTx(tx.data, buyer, immutableSeaport, buyAmount);
     
-    // orders.push({[buyer.address] : tx.data});  
+    orders.push({[buyer.address] : tx.data});  
     console.log(`Order ${i}/${mintCount}`);
     // // const tx = await immutableSeaport.connect(buyer).fulfillAdvancedOrder(order, [], conduitKey, buyer.address, {
     // //   value: buyAmount,
     // // });
     // // await tx.wait();
+
   }
-  console.log(`Buyer 721 Balance: ${await erc721Mint.balanceOf(buyer.address)}`);
+  // console.log(`Buyer 721 Balance: ${await erc721Mint.balanceOf(buyer.address)}`);
   console.log(`Oders generated. Saving`);
   fs.writeFileSync("orders.json", JSON.stringify(orders, null, 2));
 }

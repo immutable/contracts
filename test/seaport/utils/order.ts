@@ -76,7 +76,7 @@ export async function signOrder(
   const orderHash = calculateOrderHash(orderComponents);
 
   // const { domainSeparator } = await marketplace.information();
-  console.log(`domainSeparator: ${domainSeparator}`)
+  // console.log(`domainSeparator: ${domainSeparator}`)
   const digest = keccak256(`0x1901${domainSeparator.slice(2)}${orderHash.slice(2)}`);
   const recoveredAddress = recoverAddress(digest, signature);
 
@@ -175,8 +175,8 @@ export async function createOrder(
     counter,
   };
 
-  const orderHash = await getAndVerifyOrderHash(marketplace, orderComponents);
-
+  // const orderHash = await getAndVerifyOrderHash(marketplace, orderComponents);
+  const orderHash = calculateOrderHash(orderComponents);
   // const { isValidated, isCancelled, totalFilled, totalSize } = await marketplace.getOrderStatus(orderHash);
   // console.log(`isValidated: ${isValidated}, isCancelled: ${isCancelled}, totalFilled: ${totalFilled}, totalSize: ${totalSize}`);
 

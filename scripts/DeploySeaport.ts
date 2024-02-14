@@ -63,15 +63,20 @@ export async function main() {
   // 3600/2 = 1800 blocks
   // 80 trades per block
   // Total NFT mints = 1800 * 80 = 144000 (make this more to ensure we hit the target)
-  const mintCount = 10;
+  const mintCount = 10000;
   const txCount = 10;
   const mintTxCount = mintCount/txCount; // Max mints per tx?
 
   console.log(`Minting ${mintCount} NFTs from tokenId ${await erc721Mint.tokenId()}`);
   for (let i = 1; i <= txCount; i++) {
-    const mintTx = await erc721Mint.mint(gameWallet.address, mintTxCount);
-    await mintTx.wait();
+    await erc721Mint.mint(gameWallet.address, mintTxCount);
+    // await mintTx.wait();
     console.log(`${i*mintTxCount}/${mintCount}`)
+  }
+
+  while ((await erc721Mint.tokenId()) < mintCount) {
+    console.log(`Waiting for mint to complete. Current tokenId: ${await erc721Mint.tokenId()}`);
+    await new Promise((resolve) => setTimeout(resolve, 10000));
   }
   console.log(`Minted ${mintCount} NFTs to tokenId ${await erc721Mint.tokenId()}`);
 
@@ -108,7 +113,7 @@ export async function main() {
     );
 
     const tx = await immutableSeaport.populateTransaction.fulfillAdvancedOrder(order, [], conduitKey, buyer.address, {value: buyAmount});
-    await sendRawTx(tx.data, buyer, immutableSeaport, buyAmount);
+    // await sendRawTx(tx.data, buyer, immutableSeaport, buyAmount);
     
     orders.push({[buyer.address] : tx.data});  
     console.log(`Order ${i}/${mintCount}`);

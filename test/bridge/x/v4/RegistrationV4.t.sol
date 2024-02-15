@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import {Registration} from "../../../../contracts/bridge/x/v4/Registration.sol";
+import {RegistrationV4} from "../../../../contracts/bridge/x/v4/RegistrationV4.sol";
 import {Test} from "forge-std/Test.sol";
 import {DeployRegistrationV4Dev} from "../../../../script/DeployRegistrationV4Dev.s.sol";
-import {MockCore} from "./MockCore.sol";
+import {MockCoreV4} from "./MockCoreV4.sol";
 
-contract RegistrationTest is Test {
-    MockCore public mockCore;
-    Registration public registration;
+contract RegistrationV4Test is Test {
+    MockCoreV4 public mockCore;
+    RegistrationV4 public registration;
 
     uint256 private MOCK_CORE_FUNDS = 5e18;
 
     function setUp() public {
         vm.startBroadcast();
-        mockCore = new MockCore();
-        registration = new Registration(payable(mockCore));
+        mockCore = new MockCoreV4();
+        registration = new RegistrationV4(payable(mockCore));
         vm.deal(payable(mockCore), MOCK_CORE_FUNDS);
         vm.stopBroadcast();
     }

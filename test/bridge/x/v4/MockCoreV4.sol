@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {Core} from "../../../../contracts/bridge/x/v4/Core.sol";
+import {CoreV4} from "../../../../contracts/bridge/x/v4/CoreV4.sol";
 
-contract MockCore is Core {
+contract MockCoreV4 is CoreV4 {
     address internal ZERO_ADDRESS = address(0);
 
     // Mapping from STARK public key to the Ethereum public key of its owner.

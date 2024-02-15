@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import {Core} from "./Core.sol";
+import {CoreV4} from "./CoreV4.sol";
 
-contract Registration {
-    Core public immutable imx;
+contract RegistrationV4 {
+    CoreV4 public immutable imx;
 
     constructor(address payable _imx) {
-        imx = Core(_imx);
+        imx = CoreV4(_imx);
     }
 
     function getVersion() external view returns (string memory) {

@@ -3,6 +3,8 @@
 pragma solidity ^0.8.19;
 
 import {CoreV4} from "../../../../contracts/bridge/x/v4/CoreV4.sol";
+import {Asset} from "../../../../contracts/token/erc721/x/Asset.sol";
+import {Minting} from "../../../../contracts/token/erc721/x/utils/Minting.sol";
 
 contract MockCoreV4 is CoreV4 {
     address internal ZERO_ADDRESS = address(0);
@@ -15,6 +17,10 @@ contract MockCoreV4 is CoreV4 {
     mapping(uint256 => mapping(uint256 => uint256)) internal pendingWithdrawals;
 
     uint256 internal constant MASK_ADDRESS = (1 << 160) - 1;
+
+    // Pending withdrawals.
+    // A map asset type => contract address.
+    mapping(uint256 => address) internal tokenContracts;
 
     fallback() external payable {
         revert();
@@ -250,7 +256,7 @@ contract MockCoreV4 is CoreV4 {
     }
 
     function onERC721Received(address, address, uint256, bytes memory) external pure override returns (bytes4) {
-        revert("Not implemented");
+        return this.onERC721Received.selector;
     }
 
     function orderRegistryAddress() external pure override returns (address) {
@@ -300,6 +306,10 @@ contract MockCoreV4 is CoreV4 {
         revert("Not implemented");
     }
 
+    function addTokenContract(uint256 assetType, address tokenContract) external {
+        tokenContracts[assetType] = tokenContract;
+    }
+
     function registerToken(uint256 assetType, bytes memory assetInfo, uint256 quantum) external pure override {
         revert("Not implemented");
     }
@@ -325,12 +335,48 @@ contract MockCoreV4 is CoreV4 {
         emit LogWithdrawalPerformed(ownerKey, assetType, amount, amount, recipient);
     }
 
-    function withdrawAndMint(uint256 ownerKey, uint256 assetType, bytes memory mintingBlob) external pure override {
-        revert("Not implemented");
+    function withdrawAndMint(uint256 ownerKey, uint256 assetType, bytes calldata mintingBlob) external override {
+        address payable recipient = payable(getEthKey(ownerKey));
+        require(recipient != ZERO_ADDRESS, "USER_UNREGISTERED");
+
+        (uint256 tokenId, bytes memory blueprint) = Minting.split(mintingBlob);
+        uint256 assetId = assetType + tokenId;
+        uint256 amount = pendingWithdrawals[ownerKey][assetId];
+        pendingWithdrawals[ownerKey][assetId] = 0;
+        require(amount == 1, "INVALID_AMOUNT");
+
+        // Make sure we don't accidentally burn funds.
+        require(recipient != address(0x0), "INVALID_RECIPIENT");
+        address tokenAddress = tokenContracts[assetType];
+        require(tokenAddress != address(0x0), "INVALID_CONTRACT");
+
+        Asset(tokenAddress).mintFor(address(recipient), amount, mintingBlob);
     }
 
-    function withdrawNft(uint256 ownerKey, uint256 assetType, uint256 tokenId) external pure override {
-        revert("Not implemented");
+    function withdrawNft(uint256 ownerKey, uint256 assetType, uint256 tokenId) external override {
+        uint256 assetId = assetType + tokenId;
+
+        address payable recipient = payable(getEthKey(ownerKey));
+        require(recipient != ZERO_ADDRESS, "USER_UNREGISTERED");
+
+        uint256 amount = pendingWithdrawals[ownerKey][assetId];
+        pendingWithdrawals[ownerKey][assetId] = 0;
+
+        require(amount == 1, "INVALID_AMOUNT");
+
+        // Transfer funds.
+        transferOutNft(recipient, assetType, tokenId);
+
+        emit LogNftWithdrawalPerformed(ownerKey, assetType, tokenId, assetId, recipient);
+    }
+
+    function transferOutNft(address recipient, uint256 assetType, uint256 tokenId) internal {
+        // Make sure we don't accidentally burn funds.
+        require(recipient != address(0x0), "INVALID_RECIPIENT");
+        address tokenAddress = tokenContracts[assetType];
+        require(tokenAddress != address(0x0), "INVALID_CONTRACT");
+
+        Asset(tokenAddress).safeTransferFrom(address(this), recipient, tokenId);
     }
 
     function STARKEX_MAX_DEFAULT_VAULT_LOCK() external pure override returns (uint256) {

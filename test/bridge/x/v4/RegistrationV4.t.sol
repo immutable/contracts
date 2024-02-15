@@ -6,6 +6,8 @@ import {RegistrationV4} from "../../../../contracts/bridge/x/v4/RegistrationV4.s
 import {Test} from "forge-std/Test.sol";
 import {DeployRegistrationV4Dev} from "../../../../script/DeployRegistrationV4Dev.s.sol";
 import {MockCoreV4} from "./MockCoreV4.sol";
+import {Asset} from "../../../../contracts/token/erc721/x/Asset.sol";
+import {console} from "forge-std/console.sol";
 
 contract RegistrationV4Test is Test {
     MockCoreV4 public mockCore;
@@ -183,5 +185,78 @@ contract RegistrationV4Test is Test {
         // checks if the user was registered correctly
         assertTrue(registration.isRegistered(starkKey));
         assertEq(ethAdd, registration.imx().getEthKey(starkKey));
+    }
+
+    function testCompleteWithdrawalNFT_WhenUserIsNotRegistered() public {
+        address ethAdd = 0xac3cc5a41D9e8c94Fe64138C1343A07B2fF5ff76;
+        uint256 ethKey = 983301674259619813482344086789227297671214399350;
+        // 0x7a88d4e1a357d33d6168058ac6b08fa54c07b72313f78af594d4d44e8268a6c
+        uint256 starkKey = 3463995498836494504631329032145085468217956335318243415256427132985150966380;
+
+        // arrange
+        bytes memory regSig = abi.encodePacked(
+            uint256(0x06f56e3e7392318ae672ff7d68d1b6c54a6f402019bd121dee9b8d8aa9658ab5), // r
+            uint256(0x06c1b98af915c6c1f88ea15f22f2d4f4a7a20c5416cafca0538bf227469dc14a), // s
+            uint256(0x02ec99c3c1d90d78dd77676a2505bbeba3cf9ecd1003d72c14949817d84625a4) // starkY
+        );
+
+        // 0x31e2a7a568737baacd430d7750c9bf07dba85ba60d13b6b6fe8d47e8d13aa21
+        uint256 assetType = 1410237129265691706741215969248966526395742991743406915223458527859231140385;
+        uint256 quantity = 1;
+        uint256 tokenId = 6;
+
+        // arrange nft contract
+        Asset nftContract = new Asset(address(this), "name", "symbol", address(registration.imx()));
+        mockCore.addTokenContract(assetType, address(nftContract));
+        mockCore.addWithdrawalBalance(starkKey, assetType + tokenId, 1);
+        nftContract.mintFor(address(mockCore), quantity, abi.encodePacked("{6}:{onchain-metadata}"));
+
+        // pre-checks
+        assertFalse(registration.isRegistered(starkKey));
+        assertEq(0, nftContract.balanceOf(ethAdd));
+
+        // act
+        registration.registerAndWithdrawNft(ethAdd, starkKey, regSig, assetType, tokenId);
+
+        // assert
+        assertTrue(registration.isRegistered(starkKey));
+        assertEq(quantity, nftContract.balanceOf(ethAdd));
+    }
+
+    function testCompleteWithdrawalAndMintNFT_WhenUserIsNotRegistered() public {
+        address ethAdd = 0xac3cc5a41D9e8c94Fe64138C1343A07B2fF5ff76;
+        uint256 ethKey = 983301674259619813482344086789227297671214399350;
+        // 0x7a88d4e1a357d33d6168058ac6b08fa54c07b72313f78af594d4d44e8268a6c
+        uint256 starkKey = 3463995498836494504631329032145085468217956335318243415256427132985150966380;
+
+        // arrange
+        bytes memory regSig = abi.encodePacked(
+            uint256(0x06f56e3e7392318ae672ff7d68d1b6c54a6f402019bd121dee9b8d8aa9658ab5), // r
+            uint256(0x06c1b98af915c6c1f88ea15f22f2d4f4a7a20c5416cafca0538bf227469dc14a), // s
+            uint256(0x02ec99c3c1d90d78dd77676a2505bbeba3cf9ecd1003d72c14949817d84625a4) // starkY
+        );
+
+        // 0x31e2a7a568737baacd430d7750c9bf07dba85ba60d13b6b6fe8d47e8d13aa21
+        uint256 assetType = 1410237129265691706741215969248966526395742991743406915223458527859231140385;
+        uint256 quantity = 1;
+        uint256 tokenId = 7;
+
+        // arrange nft contract
+        Asset nftContract = new Asset(address(this), "name", "symbol", address(registration.imx()));
+        mockCore.addTokenContract(assetType, address(nftContract));
+        mockCore.addWithdrawalBalance(starkKey, assetType + tokenId, 1);
+
+        // pre-checks
+        assertFalse(registration.isRegistered(starkKey));
+        assertEq(0, nftContract.balanceOf(ethAdd));
+
+        // act
+        registration.registerWithdrawAndMint(
+            ethAdd, starkKey, regSig, assetType, abi.encodePacked("{7}:{onchain-metadata}")
+        );
+
+        // assert
+        assertTrue(registration.isRegistered(starkKey));
+        assertEq(quantity, nftContract.balanceOf(ethAdd));
     }
 }

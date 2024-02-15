@@ -1,3 +1,5 @@
+// Copyright (c) Immutable Pty Ltd 2018 - 2024
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
 import {RegistrationV4} from "../contracts/bridge/x/v4/RegistrationV4.sol";

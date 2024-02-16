@@ -5,8 +5,8 @@ pragma solidity ^0.8.19;
 import {CoreV4} from "./CoreV4.sol";
 
 /**
-* Emitted when there are no funds to withdraw when calling `withdrawAll`.
-*/
+ * Emitted when there are no funds to withdraw when calling `withdrawAll`.
+ */
 error NoFundsToWithdraw(uint256 ethKey, uint256 starkKey);
 
 /**
@@ -18,14 +18,6 @@ contract RegistrationV4 {
 
     constructor(address payable _imx) {
         imx = CoreV4(_imx);
-    }
-
-    function getVersion() external view returns (string memory) {
-        return imx.VERSION();
-    }
-
-    function isRegistered(uint256 starkKey) public view returns (bool) {
-        return imx.getEthKey(starkKey) != address(0);
     }
 
     function registerAndWithdrawAll(address ethKey, uint256 starkKey, bytes calldata signature, uint256 assetType)
@@ -77,5 +69,13 @@ contract RegistrationV4 {
             imx.registerEthAddress(ethKey, starkKey, signature);
         }
         imx.withdrawAndMint(starkKey, assetType, mintingBlob);
+    }
+
+    function getVersion() external view returns (string memory) {
+        return imx.VERSION();
+    }
+
+    function isRegistered(uint256 starkKey) public view returns (bool) {
+        return imx.getEthKey(starkKey) != address(0);
     }
 }

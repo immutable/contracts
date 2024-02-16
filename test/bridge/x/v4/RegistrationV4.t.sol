@@ -187,7 +187,7 @@ contract RegistrationV4Test is Test {
         assertEq(ethAdd, registration.imx().getEthKey(starkKey));
     }
 
-    function testCompleteWithdrawalNFT_WhenUserIsNotRegistered() public {
+    function testRegisterAndWithdrawalNFT_WhenUserIsNotRegistered() public {
         address ethAdd = 0xac3cc5a41D9e8c94Fe64138C1343A07B2fF5ff76;
         uint256 ethKey = 983301674259619813482344086789227297671214399350;
         // 0x7a88d4e1a357d33d6168058ac6b08fa54c07b72313f78af594d4d44e8268a6c
@@ -223,7 +223,7 @@ contract RegistrationV4Test is Test {
         assertEq(quantity, nftContract.balanceOf(ethAdd));
     }
 
-    function testCompleteWithdrawalAndMintNFT_WhenUserIsNotRegistered() public {
+    function testRegisterWithdrawalAndMintNFT_WhenUserIsNotRegistered() public {
         address ethAdd = 0xac3cc5a41D9e8c94Fe64138C1343A07B2fF5ff76;
         uint256 ethKey = 983301674259619813482344086789227297671214399350;
         // 0x7a88d4e1a357d33d6168058ac6b08fa54c07b72313f78af594d4d44e8268a6c

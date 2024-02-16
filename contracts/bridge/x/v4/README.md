@@ -22,7 +22,7 @@ Contract audits:
 
 ## RegistrationV4
 
-This contract is a wrapper around the StarkEx contract to provide a more user-friendly interface for executing multiple StarkEx transactions at once.
+This contract is a wrapper around the StarkEx contract to provide a more user-friendly interface for executing multiple transactions on the StarkEx contract at once.
 
 ## CoreV4
 

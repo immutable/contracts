@@ -6,8 +6,7 @@
 // The Core contract is used to register and withdraw users and assets from the StarkEx system.
 //
 // This file was generated using the abi-to-sol tool.
-// the StarkEx contract ABI that was provided by StarkWare in our slack connect channel (#ext-immutable-starkware)
-// ref: https://imtbl.slack.com/archives/CRLP31EG6/p1705991730268739?thread_ts=1705900774.056429&cid=CRLP31EG6
+// the StarkEx contract ABI that was provided by StarkWare via slack.
 pragma solidity ^0.8.19;
 
 interface CoreV4 {

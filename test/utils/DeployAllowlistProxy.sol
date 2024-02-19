@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity ^0.8.19;
 
-import "forge-std/Test.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {OperatorAllowlistUpgradeable} from "../../contracts/allowlist/OperatorAllowlistUpgradeable.sol";
 

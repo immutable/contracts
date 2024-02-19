@@ -2,7 +2,7 @@
 
 The OperatorAllowlist contracts provide functionality for enabling token contract approvals and transfers to be restricted to allowlisted users. This enables on-chain royalties to be enforced by restricting a contract's transfers to Immutable's version of the Seaport contract that honors royalties.
 
-[Read more](https://docs.immutable.com/docs/zkEVM/products/minting/royalties/allowlist-spec)
+More developer documentation is available on Immutable's doc site: [https://docs.immutable.com/docs/zkEVM/products/minting/royalties/allowlist-spec](https://docs.immutable.com/docs/zkEVM/products/minting/royalties/allowlist-spec)
 
 
 # Status

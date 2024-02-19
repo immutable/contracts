@@ -7,11 +7,11 @@ The OperatorAllowlist contracts provide functionality for enabling token contrac
 
 # Status
 
-Contract audits:
+Contract audits and threat models:
 
 | Description               | Date             |Version Audited  | Link to Report |
 |---------------------------|------------------|-----------------|----------------|
-| -                         | -                | -               | -              |
+| No audits or threat models | -                | -               | -              |
 
 OperatorAllowlistUpgradeable Deployments: Note: the addresses are for the ERC 1967 Proxy that the implementation contract sits behind.
 

@@ -11,11 +11,11 @@ The reasons for using these contracts are that:
 
 # Status
 
-Contract audits:
+Contract threat models and audits:
 
 | Description               | Date             |Version Audited  | Link to Report |
 |---------------------------|------------------|-----------------|----------------|
-| Not audited               | -                | -               | -              |
+| Not audited and no threat model              | -                | -               | -              |
 
 Deployments:
 

@@ -19,10 +19,10 @@ Contract threat models and audits:
 
 Deployments:
 
-| Location                  | Version Deployed | Address |
-|---------------------------|------------------|---------|
-| Immutable zkEVM Testnet   | Not deployed     | -       |
-| Immutable zkEVM Mainnet   | Not deployed     | -       |
+| Location                  | Date             | Version Deployed | Address |
+|---------------------------|------------------|------------------|---------|
+| Immutable zkEVM Testnet   | Not deployed     | -       | - |
+| Immutable zkEVM Mainnet   | Not deployed     | -       | - |
 
 ## Architecture
 

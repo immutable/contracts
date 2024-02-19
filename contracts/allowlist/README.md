@@ -15,10 +15,10 @@ Contract audits and threat models:
 
 OperatorAllowlistUpgradeable Deployments: Note: the addresses are for the ERC 1967 Proxy that the implementation contract sits behind.
 
-| Location                  | Version Deployed | Address |
-|---------------------------|------------------|---------|
-| Immutable zkEVM Testnet   | [929cbb](https://github.com/immutable/contracts/blob/929cbbb9bfabdc854b2c21b1c7a8c7ab396f6676/contracts/allowlist/OperatorAllowlistUpgradeable.sol)     | [0x6b969FD89dE634d8DE3271EbE97734FEFfcd58eE](https://explorer.testnet.immutable.com/address/0x6b969FD89dE634d8DE3271EbE97734FEFfcd58eE)  |
-| Immutable zkEVM Mainnet   | [929cbb](https://github.com/immutable/contracts/blob/929cbbb9bfabdc854b2c21b1c7a8c7ab396f6676/contracts/allowlist/OperatorAllowlistUpgradeable.sol)    | [0x5F5EBa8133f68ea22D712b0926e2803E78D89221](https://explorer.immutable.com/address/0x5F5EBa8133f68ea22D712b0926e2803E78D89221?tab=contract)       |
+| Location                  | Date             | Version Deployed | Address |
+|---------------------------|------------------|------------------|---------|
+| Immutable zkEVM Testnet   | Jan 22, 2024     | [929cbb](https://github.com/immutable/contracts/blob/929cbbb9bfabdc854b2c21b1c7a8c7ab396f6676/contracts/allowlist/OperatorAllowlistUpgradeable.sol)     | [0x6b969FD89dE634d8DE3271EbE97734FEFfcd58eE](https://explorer.testnet.immutable.com/address/0x6b969FD89dE634d8DE3271EbE97734FEFfcd58eE)  |
+| Immutable zkEVM Mainnet   | Jan 22, 2024 | [929cbb](https://github.com/immutable/contracts/blob/929cbbb9bfabdc854b2c21b1c7a8c7ab396f6676/contracts/allowlist/OperatorAllowlistUpgradeable.sol)    | [0x5F5EBa8133f68ea22D712b0926e2803E78D89221](https://explorer.immutable.com/address/0x5F5EBa8133f68ea22D712b0926e2803E78D89221?tab=contract)       |
 
 
 # Architecture

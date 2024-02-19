@@ -5,11 +5,11 @@ From v4 onwards, Starkex changed the deposit, withdrawal and registration flows 
 
 # Status
 
-Contract audits:
+Contract audits and threat models:
 
-| Description | Date             |Version Audited  | Link to Report |
-|-------------|------------------|-----------------|----------------|
-| None        | -                | -               | -              |
+| Description    | Date             |Version Audited  | Link to Report |
+|----------------|------------------|-----------------|----------------|
+| Internal audit | Feb 16, 2024     | [4f0fd701e357e2bc9c94d13a6a46babdb6a5fbf2](https://github.com/immutable/contracts/tree/4f0fd701e357e2bc9c94d13a6a46babdb6a5fbf2/contracts/bridge/x/v4) | [202402-internal-audit-immutablex-bridge-v4](../../../../audits/bridge/x/202402-internal-audit-immutablex-bridge-v4.pdf) |
 
 
 ## Immutable Contract Addresses

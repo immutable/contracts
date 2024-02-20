@@ -17,7 +17,9 @@ Contract threat models and audits:
 |---------------------------|------------------|-----------------|----------------|
 | Not audited and no threat model              | -                | -               | -              |
 
-Deployments:
+## RandomSeedProvider
+
+The RandomSeedProvider contract has not yet been deployed.
 
 | Location                  | Date             | Version Deployed | Address |
 |---------------------------|------------------|------------------|---------|

@@ -11,18 +11,20 @@ The reasons for using these contracts are that:
 
 # Status
 
-Contract audits:
+Contract threat models and audits:
 
 | Description               | Date             |Version Audited  | Link to Report |
 |---------------------------|------------------|-----------------|----------------|
-| Not audited               | -                | -               | -              |
+| Not audited and no threat model              | -                | -               | -              |
 
-Deployments:
+## RandomSeedProvider
 
-| Location                  | Version Deployed | Address |
-|---------------------------|------------------|---------|
-| Immutable zkEVM Testnet   | Not deployed     | -       |
-| Immutable zkEVM Mainnet   | Not deployed     | -       |
+The RandomSeedProvider contract has not yet been deployed.
+
+| Location                  | Date             | Version Deployed | Address |
+|---------------------------|------------------|------------------|---------|
+| Immutable zkEVM Testnet   | Not deployed     | -       | - |
+| Immutable zkEVM Mainnet   | Not deployed     | -       | - |
 
 ## Architecture
 

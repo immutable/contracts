@@ -4,7 +4,6 @@ pragma solidity ^0.8.20;
 
 import {RegistrationV4, NoFundsToWithdraw} from "../../../../contracts/bridge/x/v4/RegistrationV4.sol";
 import {Test} from "forge-std/Test.sol";
-import {DeployRegistrationV4Dev} from "../../../../script/DeployRegistrationV4Dev.s.sol";
 import {MockCoreV4} from "./MockCoreV4.sol";
 import {Asset} from "../../../../contracts/token/erc721/x/Asset.sol";
 import {console} from "forge-std/console.sol";

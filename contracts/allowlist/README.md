@@ -11,7 +11,7 @@ Contract audits and threat models:
 
 | Description               | Date             |Version Audited  | Link to Report |
 |---------------------------|------------------|-----------------|----------------|
-| No audits or threat models | -                | -               | -              |
+| Internal audit            | Feb 16, 2024     | [c3dc85](https://github.com/immutable/contracts/blob/c3dc85984ced2e8e75576ba5ef84f2141d810bb4/contracts/allowlist/)  | [202402-internal-audit-operator-allow-list](../../audits/allowlist/202402-internal-audit-operator-allow-list.pdf) |
 
 ## OperatorAllowlistUpgradeable
 ERC 1967 Proxy that the implementation contract sits behind:

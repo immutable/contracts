@@ -21,7 +21,7 @@ import type { ImmutableSignedZone } from "../../typechain-types";
 import type { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import type { BytesLike } from "ethers";
 import { ReceivedItemStruct } from "../../typechain-types/contracts/trading/seaport/ImmutableSeaport";
-import { ZoneParametersStruct } from "../typechain-types/contracts/validators/ImmutableSeaportValidator";
+import { ZoneParametersStruct } from "../../typechain-types/seaport/contracts/helpers/order-validator/SeaportValidator";
 
 describe("ImmutableSignedZone", function () {
   let deployer: SignerWithAddress;

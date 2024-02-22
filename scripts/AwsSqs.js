@@ -27,7 +27,11 @@ const queueUrl = "https://sqs.us-east-2.amazonaws.com/783421985614/load-test-que
 
 // Function to upload items to SQS
 async function uploadToSQS() {
-  const jsonData = readJsonFromFile("./orders.json");
+  console.log('Uploading items to SQS...')
+  // Read the JSON data from the file
+  const fileName = process.argv[2];
+  const jsonData = readJsonFromFile(fileName);
+  console.log(`Uploading orders from ${fileName} to SQS`);
   try {
     if (jsonData) {
       // Map each item to a sendMessage promise

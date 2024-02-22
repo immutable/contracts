@@ -13,8 +13,7 @@ async function main() {
     const mintReciever = "0xa320e1DcF3c153c47E0B9e48dcF360E5118AFc84";
     const tx = await batchMint.populateTransaction.mint(mintReciever, 50);
     console.log(`BatchMint tx data: ${tx.data}`); 
-
- 
+    
     const batchMintMaterial = {
         address: batchMint.address,
         txData: tx.data,
@@ -29,7 +28,7 @@ async function main() {
     const gameWallet = new hre.ethers.Wallet("34be7094156ef72230534e960671190aaabacdcdbea7fd1367155dce5327783b", hre.ethers.provider);
     const data = tx.data;
     const address = batchMint.address;
-    await sendRawTx(data, gameWallet, address);
+    await sendRawTx(data, deployer, address);
 
     const erc721Addr = await batchMint.erc721();
     const erc721 = await hre.ethers.getContractAt("ERC721Mint", erc721Addr);

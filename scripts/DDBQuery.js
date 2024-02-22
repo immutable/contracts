@@ -10,7 +10,7 @@ var ddb = new AWS.DynamoDB({ apiVersion: "2012-08-10" });
 
 const params = {
   TableName: "wallets-dev",
-  Limit: 80,
+  Limit: 1500,
 };
 
 ddb.scan(params, function (err, data) {

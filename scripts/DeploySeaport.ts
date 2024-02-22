@@ -5,7 +5,37 @@ import { createOrder, generateSip7Signature } from "../test/seaport/utils/order"
 import { getTestItem721 } from "../test/seaport/utils/erc721";
 import { Wallet } from "ethers";
 import fs from "fs";
-import { send } from "process";
+import aws from "aws-sdk";
+
+
+// // Create an SQS service object
+// const sqs = new aws.SQS({
+//   region: "us-east-2", // specify the region where your SQS queue is located
+// });
+
+// // Define the SQS queue URL
+// const queueUrl = "https://sqs.us-east-2.amazonaws.com/783421985614/load-test-queue-dev";
+
+// // Define the SQS queue URL
+
+// // Function to upload items to SQS
+// async function uploadToSQS(jsonData: any) {
+//   try {
+//     if (jsonData) {
+//         const params = {
+//           MessageBody: JSON.stringify(jsonData),
+//           QueueUrl: queueUrl,
+//         };
+//         await sqs.sendMessage(params).promise();
+//       console.log('Uploaded item to SQS');
+//     } else {
+//       console.log('Failed to read JSON data from file.');
+//     }
+//   } catch (err) {
+//     console.error('Error uploading items to SQS:', err);
+//   }
+// }
+
 
 function readL1KeysFromFile(filePath: string): Promise<string[]> {
   return new Promise((resolve, reject) => {
@@ -33,62 +63,89 @@ export async function main() {
   const l1Keys = await readL1KeysFromFile("l1_keys.json");
   const l1Wallets = l1Keys.map((key) => new Wallet(key, hre.ethers.provider));
 
-  // Get accountse
+  // Get accounts
   const [conduit, serverSigner, gameWallet] = await hre.ethers.getSigners();
 
-  // Deploy Seaport
-  const { immutableSeaport, immutableSignedZone, conduitKey, conduitAddress } = await deployImmutableContracts(
-    serverSigner.address,
-  );
-  console.log(`Deployed Seaport at ${immutableSeaport.address}`);
+  // // Deploy Seaport
+  // const { immutableSeaport, immutableSignedZone, conduitKey, conduitAddress } = await deployImmutableContracts(
+  //   serverSigner.address,
+  // );
+  // console.log(`Deployed Seaport at ${immutableSeaport.address}`);
 
-  // Deploy ERC721
-  const ERC721Mint = await hre.ethers.getContractFactory("ERC721Mint");
-  const erc721Mint = await ERC721Mint.deploy();
-  await erc721Mint.deployed();
-  console.log(`Deployed ERC721 at ${erc721Mint.address}`);
+  // // Deploy ERC721
+  // const ERC721Mint = await hre.ethers.getContractFactory("ERC721Mint");
+  // const erc721Mint = await ERC721Mint.deploy();
+  // await erc721Mint.deployed();
+  // console.log(`Deployed ERC721 at ${erc721Mint.address}`);
 
-  // Save addresses
-  console.log(`Writing addresses to file`);
-  const addresses = {
-    immutableSeaport: immutableSeaport.address,
-    immutableSignedZone: immutableSignedZone.address,
-    conduitAddress: conduitAddress,
-    erc721Mint: erc721Mint.address,
-    conduitKey: conduitKey,
-  };
-  fs.writeFileSync("dev_addresses.json", JSON.stringify(addresses, null, 2));
+  // // Save addresses
+  // console.log(`Writing addresses to file`);
+  // const addresses = {
+  //   immutableSeaport: immutableSeaport.address,
+  //   immutableSignedZone: immutableSignedZone.address,
+  //   conduitAddress: conduitAddress,
+  //   erc721Mint: erc721Mint.address,
+  //   conduitKey: conduitKey,
+  // };
+  // fs.writeFileSync("dev_addresses.json", JSON.stringify(addresses, null, 2));
 
-  // Mint
-  // 3600/2 = 1800 blocks
-  // 80 trades per block
-  // Total NFT mints = 1800 * 80 = 144000 (make this more to ensure we hit the target)
-  const mintCount = 10000;
-  const txCount = 10;
-  const mintTxCount = mintCount/txCount; // Max mints per tx?
 
-  console.log(`Minting ${mintCount} NFTs from tokenId ${await erc721Mint.tokenId()}`);
-  for (let i = 1; i <= txCount; i++) {
+  // // Mint
+  // // 3600/2 = 1800 blocks
+  // // 80 trades per block
+  // // Total NFT mints = 1800 * 80 = 144000 (make this more to ensure we hit the target)
+  // const mintCount = 1000;
+  // // Next itterations will start at 80001 <---- remember
+  // const txCount = 1;
+  // const mintTxCount = mintCount/txCount; // Max mints per tx?
+
+  // console.log(`Minting ${mintCount} NFTs from tokenId ${await erc721Mint.tokenId()}`);
+  // for (let i = 0; i < txCount; i++) {
+  //   await erc721Mint.mint(gameWallet.address, mintTxCount);
+  //   // await mintTx.wait();
+  //   console.log(`${i*mintTxCount}/${mintCount}`)
+  // }
+
+  // while ((await erc721Mint.tokenId()) < mintCount) {
+  //   console.log(`Waiting for mint to complete. Current tokenId: ${await erc721Mint.tokenId()}`);
+  //   await new Promise((resolve) => setTimeout(resolve, 10000));
+  // }
+
+  // // Approve
+  // const approveTx = await erc721Mint.connect(gameWallet).setApprovalForAll(conduitAddress, true);
+  // await approveTx.wait();
+  // console.log(`Approved ${conduitAddress} for all NFTs`)
+
+  // if (!(await erc721Mint.isApprovedForAll(gameWallet.address, conduitAddress))) {
+  //   throw new Error("Approval failed");
+  // }
+
+  const immutableSeaport = await hre.ethers.getContractAt("ImmutableSeaport", "0xb1456aF8cFf6869B8558939616E35F3fC031A48a");
+  const immutableSignedZone = await hre.ethers.getContractAt("ImmutableSignedZone", "0x95e47a59667cc902b9d1de9c8831e63174de227c");
+  const erc721Mint = await hre.ethers.getContractAt("ERC721Mint", "0xC74534cc9207457F11078a0Fe3241C4f01D0FaF8");
+  const conduitKey = "0xf755537198510B674AF40e1ca509d85A1BC3DC8a000000000000000000000000";
+
+
+  // Get current tokenID
+  const currTokenId = (await erc721Mint.tokenId());
+  console.log(`Current tokenId: ${currTokenId}`);
+
+  const txCount = 1;
+  const mintCount = 200;
+  const mintTxCount = mintCount/txCount;
+
+  for (let i = 0; i < txCount; i++) {
     await erc721Mint.mint(gameWallet.address, mintTxCount);
-    // await mintTx.wait();
     console.log(`${i*mintTxCount}/${mintCount}`)
   }
 
-  while ((await erc721Mint.tokenId()) < mintCount) {
+  while ((await erc721Mint.tokenId()) < mintCount + Number(currTokenId)-1) {
     console.log(`Waiting for mint to complete. Current tokenId: ${await erc721Mint.tokenId()}`);
     await new Promise((resolve) => setTimeout(resolve, 10000));
   }
-  console.log(`Minted ${mintCount} NFTs to tokenId ${await erc721Mint.tokenId()}`);
 
-  // Approve
-  const approveTx = await erc721Mint.connect(gameWallet).setApprovalForAll(conduitAddress, true);
-  await approveTx.wait();
-  console.log(`Approved ${conduitAddress} for all NFTs`)
-
-  if (!(await erc721Mint.isApprovedForAll(gameWallet.address, conduitAddress))) {
-    throw new Error("Approval failed");
-  }
-
+  const postTokenID = await erc721Mint.tokenId();
+  
   // Get domain seperator
   const { domainSeparator } = await immutableSeaport.information();
 
@@ -96,7 +153,7 @@ export async function main() {
   const buyAmount = ethers.utils.parseEther("0.0000001");
   let orders : any[] = [];
   console.log(`Generating ${mintCount} orders`)
-  for (let i = 0; i <= mintCount; i++) {
+  for (let i = Number(currTokenId); i < Number(postTokenID); i++) {
     const buyer = l1Wallets[i % l1Wallets.length];
     const order = await generateOrder(
       erc721Mint.address,
@@ -112,20 +169,25 @@ export async function main() {
       domainSeparator,
     );
 
-    const tx = await immutableSeaport.populateTransaction.fulfillAdvancedOrder(order, [], conduitKey, buyer.address, {value: buyAmount});
-    // await sendRawTx(tx.data, buyer, immutableSeaport, buyAmount);
-    
-    orders.push({[buyer.address] : tx.data});  
-    console.log(`Order ${i}/${mintCount}`);
-    // // const tx = await immutableSeaport.connect(buyer).fulfillAdvancedOrder(order, [], conduitKey, buyer.address, {
-    // //   value: buyAmount,
-    // // });
-    // // await tx.wait();
-
+    const txPop = await immutableSeaport.populateTransaction.fulfillAdvancedOrder(order, [], conduitKey, buyer.address, {value: buyAmount});
+    orders.push({[buyer.address] : txPop.data});  
+    // console.log(`Order ${i+1}/${mintCount} for tokenId ${orderTokenID} generated`);
+    // await sendRawTx(txPop.data, buyer, immutableSeaport, buyAmount);
+    // const tx = await immutableSeaport.connect(buyer).fulfillAdvancedOrder(order, [], conduitKey, buyer.address, {
+    //   value: buyAmount, maxFeePerGas: ethers.utils.parseUnits("10", "gwei"), maxPriorityFeePerGas: ethers.utils.parseUnits("10", "gwei")
+    // });
+    // await tx.wait(1);
+    // if (txPop.data !== tx.data) {
+    //   throw new Error("Data mismatch");
+    // }
+    // console.log((await ethers.provider.getTransactionReceipt(tx.hash)).status); 
   }
-  // console.log(`Buyer 721 Balance: ${await erc721Mint.balanceOf(buyer.address)}`);
-  console.log(`Oders generated. Saving`);
-  fs.writeFileSync("orders.json", JSON.stringify(orders, null, 2));
+
+  // return;
+  // // console.log(`Buyer 721 Balance: ${await erc721Mint.balanceOf(buyer.address)}`);
+  const fileName = "orders04.json"
+  console.log(`Orders generated. Saving ${fileName}`);
+  fs.writeFileSync(`${fileName}`, JSON.stringify(orders, null, 2));
 }
 
 async function sendRawTx(txData, signer, immutableSeaport, value) {
@@ -137,7 +199,9 @@ async function sendRawTx(txData, signer, immutableSeaport, value) {
     value, 
   };
   const txResponse = await signer.sendTransaction(tx);
-  await txResponse.wait();
+  await txResponse.wait(1);
+
+  console.log((await ethers.provider.getTransactionReceipt(txResponse.hash)).status); 
 }
 
 async function generateOrder(

@@ -121,7 +121,7 @@ abstract contract RandomValues {
 
     /**
      * @notice Check whether a set of random values are ready to be fetched
-     * @dev If this function returns true then it is safe to call _fetchRandom or _fetchRandomValues.
+     * @dev If this function returns READY then it is safe to call _fetchRandom or _fetchRandomValues.
      * @param _randomRequestId The value returned by _requestRandomValueCreation.
      * @return RequestStatus indicates whether the random values are still be generated, are ready
      *      to be fetched, or whether they have already been fetched and are no longer available.

@@ -104,11 +104,5 @@ jobs:
           node-version-file: ".nvmrc"
           registry-url: https://registry.npmjs.org/
           cache: 'yarn'
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile --network-concurrency 1
-      - name: Compile contracts
-        run: yarn compile
-      - name: Build dist files
-        run: rm -rf dist && yarn build
       - name: Test publish
         run: npm pack --dry-run

@@ -28,7 +28,7 @@ The RandomSeedProvider contract has not yet been deployed.
 
 ## Architecture
 
-The Random Number Generation system on the immutable platform is shown in the diagram below.
+The Random Number Generation system on the Immutable platform is shown in the diagram below.
 
 ![Random number genration](./random-architecture.png)
 

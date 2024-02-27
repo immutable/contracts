@@ -81,6 +81,39 @@ Operational tests:
 | testMultipleGames               | Multiple games in parallel.                       | Yes        | Yes         |
 
 
+## RandomSequences.sol
+
+Initialize testing:
+
+| Test name                       |Description                                        | Happy Case | Implemented |
+|---------------------------------| --------------------------------------------------|------------|-------------|
+| testInit                        | Check that contructor worked.                     | Yes        | Yes         |
+
+
+Operational tests for getNextRandom: 
+
+| Test name                       |Description                                        | Happy Case | Implemented |
+|---------------------------------| --------------------------------------------------|------------|-------------|
+| testGetInvalidSequenceTypeId    | Attempt to use an invalid sequence type id        | No         | Yes         |
+| testGetNoExistingRequest        | When no previous call (no request)                | Yes        | Yes         |
+| testGetInProgress               | When random generation is in progress.            | Yes        | Yes         |
+| testGetAlreadyFetched           | Random value is being mistakenly re-used.         | No         | Yes         |
+| testGetRandom                   | Generate a random value.                          | Yes        | Yes         |
+| testGetRandomMultiple           | Generate a sequence of random values.             | Yes        | Yes         |
+| testGetRandomMultipleSequences  | Generate multiple sequences.                      | Yes        | Yes         |
+| testGetRandomMultiplePlayers    | Generate multiple sequences for multiple players. | Yes        | Yes         |
+
+
+Operational tests for randomStatus: 
+
+| Test name                       |Description                                        | Happy Case | Implemented |
+|---------------------------------| --------------------------------------------------|------------|-------------|
+| testStatusInvalidSequenceTypeId | Attempt to use an invalid sequence type id        | No         | Yes         |
+| testStatusNoExistingRequest     | When no previous call (no request)                | Yes        | Yes         |
+| testStatusInProgress            | When random generation is in progress.            | Yes        | Yes         |
+| testStatusAlreadyFetched        | Random value is being mistakenly re-used.         | No         | Yes         |
+| testStatusReady                 | Generate a random value.                          | Yes        | Yes         |
+
 
 ## ChainlinkSource.sol
 This section defines tests for contracts/random/offchainsources/chainlink/ChainlinkSource.sol. 

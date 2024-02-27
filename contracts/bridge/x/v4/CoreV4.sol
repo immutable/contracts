@@ -7,6 +7,7 @@
 //
 // This file was generated using the abi-to-sol tool.
 // the StarkEx contract ABI that was provided by StarkWare via slack.
+// solhint-disable func-name-mixedcase
 pragma solidity ^0.8.19;
 
 interface CoreV4 {
@@ -86,31 +87,59 @@ interface CoreV4 {
     );
     event LogDepositCancel(uint256 starkKey, uint256 vaultId, uint256 assetId);
     event LogDepositCancelReclaimed(
-        uint256 starkKey, uint256 vaultId, uint256 assetType, uint256 nonQuantizedAmount, uint256 quantizedAmount
+        uint256 starkKey,
+        uint256 vaultId,
+        uint256 assetType,
+        uint256 nonQuantizedAmount,
+        uint256 quantizedAmount
     );
     event LogDepositNftCancelReclaimed(
-        uint256 starkKey, uint256 vaultId, uint256 assetType, uint256 tokenId, uint256 assetId
+        uint256 starkKey,
+        uint256 vaultId,
+        uint256 assetType,
+        uint256 tokenId,
+        uint256 assetId
     );
     event LogMintWithdrawalPerformed(
-        uint256 ownerKey, uint256 assetType, uint256 nonQuantizedAmount, uint256 quantizedAmount, uint256 assetId
+        uint256 ownerKey,
+        uint256 assetType,
+        uint256 nonQuantizedAmount,
+        uint256 quantizedAmount,
+        uint256 assetId
     );
     event LogMintableWithdrawalAllowed(uint256 ownerKey, uint256 assetId, uint256 quantizedAmount);
     event LogNftDeposit(
-        address depositorEthKey, uint256 starkKey, uint256 vaultId, uint256 assetType, uint256 tokenId, uint256 assetId
+        address depositorEthKey,
+        uint256 starkKey,
+        uint256 vaultId,
+        uint256 assetType,
+        uint256 tokenId,
+        uint256 assetId
     );
     event LogNftWithdrawalAllowed(uint256 ownerKey, uint256 assetId);
     event LogNftWithdrawalPerformed(
-        uint256 ownerKey, uint256 assetType, uint256 tokenId, uint256 assetId, address recipient
+        uint256 ownerKey,
+        uint256 assetType,
+        uint256 tokenId,
+        uint256 assetId,
+        address recipient
     );
     event LogTokenAdminAdded(address tokenAdmin);
     event LogTokenAdminRemoved(address tokenAdmin);
     event LogTokenRegistered(uint256 assetType, bytes assetInfo, uint256 quantum);
     event LogUserRegistered(address ethKey, uint256 starkKey, address sender);
     event LogWithdrawalAllowed(
-        uint256 ownerKey, uint256 assetType, uint256 nonQuantizedAmount, uint256 quantizedAmount
+        uint256 ownerKey,
+        uint256 assetType,
+        uint256 nonQuantizedAmount,
+        uint256 quantizedAmount
     );
     event LogWithdrawalPerformed(
-        uint256 ownerKey, uint256 assetType, uint256 nonQuantizedAmount, uint256 quantizedAmount, address recipient
+        uint256 ownerKey,
+        uint256 assetType,
+        uint256 nonQuantizedAmount,
+        uint256 quantizedAmount,
+        address recipient
     );
 
     function defaultVaultWithdrawalLock() external view returns (uint256);
@@ -137,24 +166,27 @@ interface CoreV4 {
 
     function getAssetInfo(uint256 assetType) external view returns (bytes memory assetInfo);
 
-    function getCancellationRequest(uint256 starkKey, uint256 assetId, uint256 vaultId)
-        external
-        view
-        returns (uint256 request);
+    function getCancellationRequest(
+        uint256 starkKey,
+        uint256 assetId,
+        uint256 vaultId
+    ) external view returns (uint256 request);
 
-    function getDepositBalance(uint256 starkKey, uint256 assetId, uint256 vaultId)
-        external
-        view
-        returns (uint256 balance);
+    function getDepositBalance(
+        uint256 starkKey,
+        uint256 assetId,
+        uint256 vaultId
+    ) external view returns (uint256 balance);
 
     function getEthKey(uint256 ownerKey) external view returns (address);
 
     function getFullWithdrawalRequest(uint256 starkKey, uint256 vaultId) external view returns (uint256 res);
 
-    function getQuantizedDepositBalance(uint256 starkKey, uint256 assetId, uint256 vaultId)
-        external
-        view
-        returns (uint256 balance);
+    function getQuantizedDepositBalance(
+        uint256 starkKey,
+        uint256 assetId,
+        uint256 vaultId
+    ) external view returns (uint256 balance);
 
     function getQuantum(uint256 presumedAssetType) external view returns (uint256 quantum);
 
@@ -241,21 +273,26 @@ interface CoreV4 {
 
     event LogDefaultVaultWithdrawalLockSet(uint256 newDefaultLockTime);
     event LogDepositToVault(
-        address ethKey, uint256 assetId, uint256 vaultId, uint256 nonQuantizedAmount, uint256 quantizedAmount
+        address ethKey,
+        uint256 assetId,
+        uint256 vaultId,
+        uint256 nonQuantizedAmount,
+        uint256 quantizedAmount
     );
     event LogVaultWithdrawalLockSet(address ethKey, uint256 assetId, uint256 vaultId, uint256 timeRelease);
     event LogWithdrawalFromVault(
-        address ethKey, uint256 assetId, uint256 vaultId, uint256 nonQuantizedAmount, uint256 quantizedAmount
+        address ethKey,
+        uint256 assetId,
+        uint256 vaultId,
+        uint256 nonQuantizedAmount,
+        uint256 quantizedAmount
     );
 
     function depositERC20ToVault(uint256 assetId, uint256 vaultId, uint256 quantizedAmount) external;
 
     function depositEthToVault(uint256 assetId, uint256 vaultId) external payable;
 
-    function getQuantizedVaultBalance(address ethKey, uint256 assetId, uint256 vaultId)
-        external
-        view
-        returns (uint256);
+    function getQuantizedVaultBalance(address ethKey, uint256 assetId, uint256 vaultId) external view returns (uint256);
 
     function getVaultBalance(address ethKey, uint256 assetId, uint256 vaultId) external view returns (uint256);
 

@@ -18,6 +18,12 @@ forge test -vvv
 yarn test
 ```
 
+To execute a single set of tests using forge:
+
+```
+forge test --match-contract RandomSequencesStatusTest -vvv
+```
+
 ## Solidity Linter
 
 To execute solhint:

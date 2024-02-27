@@ -32,9 +32,11 @@ The Random Number Generation system on the immutable platform is shown in the di
 
 ![Random number genration](./random-architecture.png)
 
-Game contracts extend ```RandomValues.sol```. This contract interacts with the ```RandomSeedProvider.sol``` contract to request and retreive random seed values. 
+Game contracts can extend ```RandomValues.sol``` or ```RandomSequences.sol```. 
+```RandomSequences.sol``` is an extension of ```RandomValues.sol```. 
+```RandomValues.sol``` interacts with the ```RandomSeedProvider.sol``` contract to request and retreive random seed values. 
 
-There is one ```RandomSeedProvider.sol``` contract deployed per chain. Each game has its own instance of ```RandomValues.sol``` as this contract is integrated directly into the game contract. 
+There is one ```RandomSeedProvider.sol``` contract deployed per chain. Each game has its own instance of ```RandomValues.sol``` and / or ```RandomSequences.sol``` as this contract is integrated directly into the game contract. 
 
 The ```RandomSeedProvider.sol``` operates behind a transparent proxy, ```ERC1967Proxy.sol```, with the upgrade
 logic included in the ```UUPSUpgradeable.sol``` contract that ```RandomSeedProvider.sol``` extends. Using an upgradeable pattern allows the random manager contract to be upgraded to extend its feature set and resolve issues. 
@@ -43,11 +45,20 @@ The ```RandomSeedProvider.sol``` contract can be configured to use an off-chain 
 
 The architecture diagram shows a ChainLink VRF source and a Supra VRF source. This is purely to show the possibility of integrating with one off-chain service and then, at a later point choosing to switch to an alternative off-chain source. At present, there is no agreement to use any specific off-chain source.
 
+```RandomValues.sol``` provides an API in which random numbers are requested in one transaction and then 
+fulfilled in a later transaction. ```RandomSequences.sol``` provides an API in which a random number
+is supplied and the next one is requested in the same transaction. Whereas the API offered by 
+```RandomValues.sol``` provides numbers that can not be predicted, the API offered by 
+```RandomSequences.sol``` means that savvy game players that can analyse blockchain state can 
+predict the next random value to be generated. However, they are unable to the random number 
+that will be generated. ```RandomSequences.sol```'s API can be used securely by ensuring 
+the purpose of random numbers used in a game are clearly segregated, and that a different
+sequence type is given for each purpose. 
 
 
-## Process of Requesting a Random Number
+## Process of Requesting a Random Number using Random Values
 
-The process for requesting a random number is shown below. Players do actions requiring a random number or a set of random numbers. They purchase, or commit to the random value(s), which is later revealed. 
+The process for requesting a random number using ```RandomValues.sol``` is shown below. Players do actions requiring a random number or a set of random numbers. They purchase, or commit to the random value(s), which is later revealed. 
 
 ![Random number genration](./random-sequence.png)
 

@@ -36,7 +36,9 @@ abstract contract RandomValues {
         // The random value is ready to be fetched.
         READY,
         // The random value either was never requested or has previously been fetched.
-        ALREADY_FETCHED
+        ALREADY_FETCHED,
+        // The random generation process failed. The random value should be re-requested.
+        FAILED
     }
 
     // Address of random seed provider contract.
@@ -131,10 +133,15 @@ abstract contract RandomValues {
         if (request.size == 0) {
             return RequestStatus.ALREADY_FETCHED;
         }
-        return
-            randomSeedProvider.isRandomSeedReady(request.fulfilmentId, request.source)
-                ? RequestStatus.READY
-                : RequestStatus.IN_PROGRESS;
+        RandomSeedProvider.SeedRequestStatus status = 
+            randomSeedProvider.isRandomSeedReady(request.fulfilmentId, request.source);
+        if (status == RandomSeedProvider.SeedRequestStatus.READY) {
+            return RequestStatus.READY;
+        }
+        if (status == RandomSeedProvider.SeedRequestStatus.IN_PROGRESS) {
+            return RequestStatus.IN_PROGRESS;
+        }
+        return RequestStatus.FAILED;
     }
 
     // slither-disable-next-line unused-state,naming-convention

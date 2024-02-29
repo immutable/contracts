@@ -111,7 +111,7 @@ contract ChainlinkControlTests is ChainlinkInitTests {
 
 
 contract ChainlinkOperationalTests is ChainlinkInitTests {
-    error WaitForRandom();
+    error OffchainWaitForRandom();
     error UnexpectedRandomWordsLength(uint256 _length);
     event RequestId(uint256 _requestId);
 
@@ -183,7 +183,7 @@ contract ChainlinkOperationalTests is ChainlinkInitTests {
     function testRequestTooEarly() public {
         uint256 fulfilmentIndex = chainlinkSourceAdaptor.requestOffchainRandom();
 
-        vm.expectRevert(abi.encodeWithSelector(WaitForRandom.selector));
+        vm.expectRevert(abi.encodeWithSelector(OffchainWaitForRandom.selector));
         chainlinkSourceAdaptor.getOffchainRandom(fulfilmentIndex);
     }
 

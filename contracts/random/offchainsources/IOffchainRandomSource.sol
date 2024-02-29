@@ -7,7 +7,7 @@ pragma solidity 0.8.19;
  */
 interface IOffchainRandomSource {
     // The random seed value is not yet available.
-    error WaitForRandom();
+    error OffchainWaitForRandom();
 
     /**
      * @notice Request that an offchain random value be generated.

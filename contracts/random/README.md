@@ -6,7 +6,7 @@ The reasons for using these contracts are that:
 
 * Enables you to leverage a random number generation system designed by Immutable's cryptographers.
 * Allows you to build your game against an API that won't change.
-* The quality of the random numbers generated will improve as new capabilities are added to the platform. That is, the migration from ```block.hash``` to ```block.prevrandao``` when the BFT fork occurs will be seamless.
+* The quality of the random numbers generated will improve as new capabilities are added to the platform. 
 * For off-chain randomness, allows you to leverage the random number provider that Immutable has agreements with.
 
 # Status
@@ -43,6 +43,9 @@ logic included in the ```UUPSUpgradeable.sol``` contract that ```RandomSeedProvi
 
 The ```RandomSeedProvider.sol``` contract can be configured to use an off-chain random number source. This source is accessed via the ```IOffchainRandomSource.sol``` interface. To allow the flexibility to switch between off-chain random sources, there is an adaptor contract between the offchain random source contract and the random seed provider.
 
+Random seeds must be generated within 255 blocks of being requested when the `RandomSeedProvider.sol` contract is using the on-chain random number source. 
+That is, once a player has requested a random value via the `requestRandomSeed` function, either the player must fulfill the request by calling the `getRandomSeed` function or a service must call the `generateNextRandomOnChain` function. A service calling the `generateNextRandomOnChain` allows the game player at some later point to call the `getRandomSeed` function successfully.
+
 The architecture diagram shows a ChainLink VRF source and a Supra VRF source. This is purely to show the possibility of integrating with one off-chain service and then, at a later point choosing to switch to an alternative off-chain source. At present, there is no agreement to use any specific off-chain source.
 
 ```RandomValues.sol``` provides an API in which random numbers are requested in one transaction and then 
@@ -50,10 +53,11 @@ fulfilled in a later transaction. ```RandomSequences.sol``` provides an API in w
 is supplied and the next one is requested in the same transaction. Whereas the API offered by 
 ```RandomValues.sol``` provides numbers that can not be predicted, the API offered by 
 ```RandomSequences.sol``` means that savvy game players that can analyse blockchain state can 
-predict the next random value to be generated. However, they are unable to the random number 
+predict the next random value to be generated for them. However, they are unable to change the random number 
 that will be generated. ```RandomSequences.sol```'s API can be used securely by ensuring 
 the purpose of random numbers used in a game are clearly segregated, and that a different
-sequence type is given for each purpose. 
+sequence type is given for each purpose. In this way, the player has the choice of using the 
+random value or cease playing the game.
 
 
 ## Process of Requesting a Random Number using Random Values

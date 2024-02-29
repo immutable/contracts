@@ -10,10 +10,8 @@ Initialize testing:
 |---------------------------------| --------------------------------------------------|------------|-------------|
 | testInit                        | Check that deployment + initialize work.          | Yes        | Yes         |
 | testReinit                      | Calling initialise a second time fails.           | No         | Yes         |
-| testGetRandomSeedInitTraditional | getRandomSeed(), initial value, method TRADITIONAL | Yes      | Yes         |
-| testGetRandomSeedInitRandao     | getRandomSeed(), initial value, method RANDAO     | Yes        | Yes         |
-| testGetRandomSeedNotGenTraditional | getRandomSeed(), when value not generated      | No         | Yes         |
-| testGetRandomSeedNotGenRandao   | getRandomSeed(), when value not generated         | No         | Yes         |
+| testGetRandomSeedInit           | getRandomSeed(), initial value                    | Yes      | Yes         |
+| testGetRandomSeedNotGen         | getRandomSeed(), when value not generated         | No         | Yes         |
 | testGetRandomSeedNoOffchainSource | getRandomSeed(), when no offchain source configured | No     | Yes         |
 
 Control functions tests:
@@ -24,8 +22,6 @@ Control functions tests:
 | testRoleAdminBadAuth            | Check auth for create new admins.                 | No         | Yes         |
 | testSetOffchainRandomSource     | setOffchainRandomSource().                        | Yes        | Yes         |
 | testSetOffchainRandomSourceBadAuth | setOffchainRandomSource() without authorization. | No       | Yes         |
-| testSetRanDaoAvailable          | setRanDaoAvailable().                             | Yes        | Yes         |
-| testSetRanDaoAvailableBadAuth   | setRanDaoAvailable() without authorization.       | No         | Yes         |
 | testAddOffchainRandomConsumer   | addOffchainRandomConsumer().                      | Yes        | Yes         |
 | testAddOffchainRandomConsumerBadAuth | addOffchainRandomConsumer() without authorization.| No    | Yes         |
 | testRemoveOffchainRandomConsumer| removeOffchainRandomConsumer().                   | Yes        | Yes         |
@@ -33,21 +29,25 @@ Control functions tests:
 | testUpgrade                     | Check that the contract can be upgraded.          | Yes        | Yes         |
 | testUpgradeBadAuth              | Check upgrade authorisation.                      | No         | Yes         |
 | testNoUpgrade                   | Upgrade from V0 to V0.                            | No         | Yes         |
-
+| testSetOnchainDelay             | Change the onchain delay.                         | Yes        | No          |
+| testSetOnchainDelayBadAuth      | Change the onchain delay, without authorisation.  | Yes        | No          |
+| testSetOnchainDelayInvalid      | Change the onchain delay to an invalid value.     | Yes        | No          |
 
 Operational functions tests:
 
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|
 | testTradNextBlock               | Check basic request flow                          | Yes        | Yes         |
-| testRanDaoNextBlock             | Check basic request flow                          | Yes        | Yes         |
 | testOffchainNextBlock           | Check basic request flow                          | Yes        | Yes         |
 | testOffchainNotReady            | Attempt to fetch offchain random when not ready   | No         | Yes         |
 | testTradTwoInOneBlock           | Two calls to requestRandomSeed in one block       | Yes        | Yes         |
-| testRanDaoTwoInOneBlock         | Two calls to requestRandomSeed in one block       | Yes        | Yes         |
 | testOffchainTwoInOneBlock       | Two calls to requestRandomSeed in one block       | Yes        | Yes         |
 | testTradDelayedFulfilment       | Request then wait several blocks before fulfilment | Yes       | Yes         |
-| testRanDaoDelayedFulfilment     | Request then wait several blocks before fulfilment | Yes       | Yes         |
+| testStreamedSeedValues          | Request seeds each block.                         | Yes        | No          |
+| testBlock256Plus                | Check the operation with block number > 255       | Yes        | No          |
+| testMissedSeed                  | Don't generate the random in time                 | No         | No          |
+| testGenerateNextSeedOnChain     | Use generateNextSeedOnChain to fulfil requests    | Yes        | No          |
+| testCheckQueueLength            | Check if the request queue is empty               | Yes        | No          |
 
 Scenario: Generate some random numbers, switch random generation methodology, generate some more
 numbers, check that the numbers generated earlier are still available:
@@ -55,9 +55,20 @@ numbers, check that the numbers generated earlier are still available:
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|
 | testSwitchTraditionalOffchain   | Traditional -> Off-chain.                         | Yes        | Yes         |
-| testSwitchRandaoOffchain        | RanDAO -> Off-chain.                              | Yes        | Yes         |
 | testSwitchOffchainOffchain      | Off-chain to another off-chain source.            | Yes        | Yes         |
 | testSwitchOffchainOnchain       | Disable off-chain source.                         | Yes        | Yes         |
+
+
+## RandomSeedProviderRequestQueue.sol
+
+| Test name                       |Description                                        | Happy Case | Implemented |
+|---------------------------------| --------------------------------------------------|------------|-------------|
+| testInit                        | Empty queue.                                      | Yes        | Yes         |
+| testEnqueue                     | Enqueue one value.                                | Yes        | Yes         |
+| testDequeue                     | Enqueue then dequeue one value.                   | Yes        | Yes         |
+| testEnqueueDequeueMultiple      | Enqueue then dequeue multiple values.             | Yes        | Yes         |
+| testEnqueueSame                 | Check enqueuing the same value.                   | Yes        | Yes         |
+
 
 ## RandomValues.sol
 

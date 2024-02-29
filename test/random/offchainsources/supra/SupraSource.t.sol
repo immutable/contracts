@@ -106,7 +106,7 @@ contract SupraControlTests is SupraInitTests {
 
 
 contract SupraOperationalTests is SupraInitTests {
-    error WaitForRandom();
+    error OffchainWaitForRandom();
     error UnexpectedRandomWordsLength(uint256 _length);
 
     event RequestId(uint256 _requestId);
@@ -179,7 +179,7 @@ contract SupraOperationalTests is SupraInitTests {
     function testRequestTooEarly() public {
         uint256 fulfilmentIndex = supraSourceAdaptor.requestOffchainRandom();
 
-        vm.expectRevert(abi.encodeWithSelector(WaitForRandom.selector));
+        vm.expectRevert(abi.encodeWithSelector(OffchainWaitForRandom.selector));
         supraSourceAdaptor.getOffchainRandom(fulfilmentIndex);
     }
 

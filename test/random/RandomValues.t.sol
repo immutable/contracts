@@ -17,6 +17,7 @@ contract UninitializedRandomValuesTest is Test {
     error WaitForRandom();
 
     address public constant ONCHAIN = address(0);
+    uint256 public constant STANDARD_ONCHAIN_DELAY = 2;
 
     ERC1967Proxy public proxy;
     RandomSeedProvider public impl;
@@ -63,7 +64,7 @@ contract SingleGameRandomValuesTest is UninitializedRandomValuesTest {
         uint256 randomRequestId = game1.requestRandomValueCreation(1);
         assertEq(uint256(game1.isRandomValueReady(randomRequestId)), uint256(RandomValues.RequestStatus.IN_PROGRESS), "Ready in same block!");
 
-        vm.roll(block.number + 1);
+        vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
         assertEq(uint256(game1.isRandomValueReady(randomRequestId)), uint256(RandomValues.RequestStatus.READY), "Should be ready by next block!");
 
         bytes32[] memory randomValue = game1.fetchRandomValues(randomRequestId);
@@ -82,7 +83,7 @@ contract SingleGameRandomValuesTest is UninitializedRandomValuesTest {
 
     function testMultiFetch() public {
         uint256 randomRequestId1 = game1.requestRandomValueCreation(1);
-        vm.roll(block.number + 1);
+        vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
         game1.fetchRandomValues(randomRequestId1);
         vm.roll(block.number + 1);
         vm.expectRevert(abi.encodeWithSelector(RandomValuesPreviouslyFetched.selector));
@@ -91,7 +92,7 @@ contract SingleGameRandomValuesTest is UninitializedRandomValuesTest {
 
     function testFirstValues() public {
         uint256 randomRequestId = game1.requestRandomValueCreation(NUM_VALUES);
-        vm.roll(block.number + 1);
+        vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
         bytes32[] memory randomValues = game1.fetchRandomValues(randomRequestId);
         assertEq(randomValues.length, NUM_VALUES, "wrong length");
     }
@@ -99,7 +100,7 @@ contract SingleGameRandomValuesTest is UninitializedRandomValuesTest {
     function testSecondValues() public {
         uint256 randomRequestId1 = game1.requestRandomValueCreation(NUM_VALUES);
         uint256 randomRequestId2 = game1.requestRandomValueCreation(NUM_VALUES);
-        vm.roll(block.number + 1);
+        vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
 
         bytes32[] memory randomValues1 = game1.fetchRandomValues(randomRequestId1);
         bytes32[] memory randomValues2 = game1.fetchRandomValues(randomRequestId2);
@@ -117,7 +118,7 @@ contract SingleGameRandomValuesTest is UninitializedRandomValuesTest {
         assertEq(uint256(game1.isRandomValueReady(randomRequestId1)), uint256(RandomValues.RequestStatus.IN_PROGRESS), "Ready in same block!");
         assertEq(uint256(game2.isRandomValueReady(randomRequestId2)), uint256(RandomValues.RequestStatus.IN_PROGRESS), "Ready in same block!");
 
-        vm.roll(block.number + 1);
+        vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
         assertEq(uint256(game1.isRandomValueReady(randomRequestId1)), uint256(RandomValues.RequestStatus.READY), "Ready!");
         assertEq(uint256(game2.isRandomValueReady(randomRequestId2)), uint256(RandomValues.RequestStatus.READY), "Ready!");
 

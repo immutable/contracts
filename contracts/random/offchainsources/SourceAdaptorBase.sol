@@ -59,7 +59,7 @@ abstract contract SourceAdaptorBase is AccessControlEnumerable, IOffchainRandomS
     ) external view override(IOffchainRandomSource) returns (bytes32 _randomValue) {
         bytes32 rand = randomOutput[_fulfilmentIndex];
         if (rand == bytes32(0)) {
-            revert WaitForRandom();
+            revert OffchainWaitForRandom();
         }
         _randomValue = rand;
     }

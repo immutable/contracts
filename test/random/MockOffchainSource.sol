@@ -19,7 +19,7 @@ contract MockOffchainSource is IOffchainRandomSource {
 
     function getOffchainRandom(uint256 _fulfilmentIndex) external view override(IOffchainRandomSource) returns(bytes32 _randomValue) {
         if (!isReady) {
-            revert WaitForRandom();
+            revert OffchainWaitForRandom();
         }
         return keccak256(abi.encodePacked(_fulfilmentIndex));
     }

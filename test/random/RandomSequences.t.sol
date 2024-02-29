@@ -13,6 +13,7 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 contract UninitializedRandomSequencesTest is Test {
 
     address public constant ONCHAIN = address(0);
+    uint256 public constant STANDARD_ONCHAIN_DELAY = 2;
 
     ERC1967Proxy public proxy;
     RandomSeedProvider public impl;
@@ -35,10 +36,6 @@ contract UninitializedRandomSequencesTest is Test {
         randomSeedProvider = RandomSeedProvider(address(proxy));
 
         game1 = new MockGameSeq(address(randomSeedProvider));
-
-        // Ensure we are on a new block number when we start the tests. In particular, don't 
-        // be on the same block number as when the contracts were deployed.
-        vm.roll(block.number + 1);
     }
 
     function testInit() public {
@@ -69,7 +66,7 @@ contract RandomSequencesGetRandomTest is UninitializedRandomSequencesTest {
     function testGetAlreadyFetched() public {
         // First call will see that there is no initial request, and will request a random value.
         game1.getNextRandom(0);
-        vm.roll(block.number + 1);
+        vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
         game1.hackConsumeRandomValue(0);
 
         vm.expectRevert(abi.encodeWithSelector(RandomSequences.RandomValuePreviouslyFetched.selector));
@@ -79,7 +76,7 @@ contract RandomSequencesGetRandomTest is UninitializedRandomSequencesTest {
     function testGetRandom() public {
         // First call will see that there is no initial request, and will request a random value.
         game1.getNextRandom(0);
-        vm.roll(block.number + 1);
+        vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
         // One block later the random number should be ready
         (bool ready, bytes32 val) = game1.getNextRandom(0);
         assertTrue(ready, "Should be ready");
@@ -90,15 +87,15 @@ contract RandomSequencesGetRandomTest is UninitializedRandomSequencesTest {
         // First call will see that there is no initial request, and will request a random value.
         game1.getNextRandom(0);
 
-        vm.roll(block.number + 1);
+        vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
         (bool ready0, bytes32 val0) = game1.getNextRandom(0);
         assertTrue(ready0, "Should be ready");
 
-        vm.roll(block.number + 1);
+        vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
         (bool ready1, bytes32 val1) = game1.getNextRandom(0);
         assertTrue(ready1, "Should be ready");
 
-        vm.roll(block.number + 1);
+        vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
         (bool ready2, bytes32 val2) = game1.getNextRandom(0);
         assertTrue(ready2, "Should be ready");
 
@@ -118,19 +115,19 @@ contract RandomSequencesGetRandomTest is UninitializedRandomSequencesTest {
         // First call will see that there is no initial request, and will request a random value.
         game1.getNextRandom(0);
 
-        vm.roll(block.number + 1);
+        vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
         (ready, val0) = game1.getNextRandom(0);
         assertTrue(ready, "Should be ready");
         (ready,) = game1.getNextRandom(1);
         assertFalse(ready, "Should not be ready");
 
-        vm.roll(block.number + 1);
+        vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
         (ready, val1) = game1.getNextRandom(0);
         assertTrue(ready, "Should be ready");
         (ready, val2) = game1.getNextRandom(1);
         assertTrue(ready, "Should be ready");
 
-        vm.roll(block.number + 1);
+        vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
         (ready, val3) = game1.getNextRandom(0);
         assertTrue(ready, "Should be ready");
         (ready, val4) = game1.getNextRandom(1);
@@ -138,7 +135,7 @@ contract RandomSequencesGetRandomTest is UninitializedRandomSequencesTest {
         (ready,) = game1.getNextRandom(5);
         assertFalse(ready, "Should not be ready");
 
-        vm.roll(block.number + 1);
+        vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
         (ready, val5) = game1.getNextRandom(0);
         assertTrue(ready, "Should be ready");
         (ready, val6) = game1.getNextRandom(1);
@@ -180,7 +177,7 @@ contract RandomSequencesGetRandomTest is UninitializedRandomSequencesTest {
         (ready,) = game1.getNextRandom(0);
         assertFalse(ready, "Should not be ready");
 
-        vm.roll(block.number + 1);
+        vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
         // Happy case.
         vm.prank(player1);
         (ready, val0) = game1.getNextRandom(0);
@@ -198,7 +195,7 @@ contract RandomSequencesGetRandomTest is UninitializedRandomSequencesTest {
         (ready,) = game1.getNextRandom(0);
         assertFalse(ready, "Should not be ready");
 
-        vm.roll(block.number + 1);
+        vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
         // Happy case.
         vm.prank(player1);
         (ready, val2) = game1.getNextRandom(0);
@@ -252,7 +249,7 @@ contract RandomSequencesStatusTest is UninitializedRandomSequencesTest {
         // First call will see that there is no initial request, and will request a random value.
         vm.prank(player1);
         game1.getNextRandom(0);
-        vm.roll(block.number + 1);
+        vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
         vm.prank(player1);
         game1.hackConsumeRandomValue(0);
 
@@ -264,7 +261,7 @@ contract RandomSequencesStatusTest is UninitializedRandomSequencesTest {
         // First call will see that there is no initial request, and will request a random value.
         vm.prank(player1);
         game1.getNextRandom(0);
-        vm.roll(block.number + 1);
+        vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
         // One block later the random number should be ready
         RandomSequences.Status status = game1.randomStatus(player1, 0);
         assertEq(uint256(status), uint256(RandomSequences.Status.READY));

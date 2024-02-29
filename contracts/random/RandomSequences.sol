@@ -119,6 +119,11 @@ abstract contract RandomSequences is RandomValues {
         if (status == RequestStatus.IN_PROGRESS) {
             return (false, bytes32(0));
         }
+        if (status == RequestStatus.FAILED) {
+            // Re-request the random.
+            _requestNext(_sequenceTypeId);
+            return (false, bytes32(0));
+        }
         if (status == RequestStatus.ALREADY_FETCHED) {
             // The only way for the value to have been previously fetched is if the game contract
             // has directly fetched the random value, which should not happen as this contract

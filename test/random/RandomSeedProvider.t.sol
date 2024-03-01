@@ -175,7 +175,7 @@ contract ControlRandomSeedProviderTest is RandomSeedProviderBase {
         vm.expectEmit(true, true, true, true);
         emit Upgraded(address(randomSeedProviderV2));
         randomSeedProvider.upgradeToAndCall(address(randomSeedProviderV2), 
-            abi.encodeWithSelector(randomSeedProviderV2.upgrade.selector));
+            abi.encodeWithSelector(randomSeedProviderV2.upgrade.selector, bytes("")));
         assertEq(randomSeedProvider.version(), 2);
     }
 
@@ -184,13 +184,14 @@ contract ControlRandomSeedProviderTest is RandomSeedProviderBase {
 
         vm.expectRevert();
         randomSeedProvider.upgradeToAndCall(address(randomSeedProviderV2), 
-            abi.encodeWithSelector(randomSeedProviderV2.upgrade.selector));
+            abi.encodeWithSelector(randomSeedProviderV2.upgrade.selector, bytes("")));
     }
 
     function testNoUpgrade() public {
+        bytes memory data = "";
         vm.prank(upgradeAdmin);
         vm.expectRevert(abi.encodeWithSelector(CanNotUpgradeFrom.selector, 0, 0));
-        randomSeedProvider.upgrade();
+        randomSeedProvider.upgrade(data);
     }
 
     function testNoDowngrade() public {
@@ -199,12 +200,12 @@ contract ControlRandomSeedProviderTest is RandomSeedProviderBase {
 
         vm.prank(upgradeAdmin);
         randomSeedProvider.upgradeToAndCall(address(randomSeedProviderV2), 
-            abi.encodeWithSelector(randomSeedProviderV2.upgrade.selector));
+            abi.encodeWithSelector(randomSeedProviderV2.upgrade.selector, bytes("")));
 
         vm.prank(upgradeAdmin);
         vm.expectRevert(abi.encodeWithSelector(CanNotUpgradeFrom.selector, 2, 0));
         randomSeedProvider.upgradeToAndCall(address(randomSeedProviderV0), 
-            abi.encodeWithSelector(randomSeedProviderV0.upgrade.selector));
+            abi.encodeWithSelector(randomSeedProviderV0.upgrade.selector, bytes("")));
     }
 
     // Check that the downgrade code in MockRandomSeedProviderV2 works too.
@@ -223,7 +224,7 @@ contract ControlRandomSeedProviderTest is RandomSeedProviderBase {
         vm.prank(upgradeAdmin);
         vm.expectRevert(abi.encodeWithSelector(CanNotUpgradeFrom.selector, badVersion, 2));
         randomSeedProvider.upgradeToAndCall(address(randomSeedProviderV2), 
-            abi.encodeWithSelector(randomSeedProviderV2.upgrade.selector));
+            abi.encodeWithSelector(randomSeedProviderV2.upgrade.selector, bytes("")));
     }
 
     function testSetOnchainDelay() public {

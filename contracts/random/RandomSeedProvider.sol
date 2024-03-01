@@ -141,7 +141,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
      * @notice Called during contract upgrade.
      * @dev This function will be overridden in future versions of this contract.
      */
-    function upgrade() external virtual {
+    function upgrade(bytes calldata /* data */) external virtual {
         // Revert in the following situations:
         // - The function is called on the existing version.
         // - This version of code is mistakenly deploy, for an upgrade from V2 to V3.
@@ -166,7 +166,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
      * @param _onChainDelay For the on-chain source, this is the number of blocks between the request
      *       and the block that the block hash is used for. If this is set to 2 blocks then:
      *       current block number + 0: The block the player requested the seed in.
-     *       current block number + 2: The block the block hash will be used for.
+     *       current block number + 2: This block's block hash is used as entropy.
      *       current block number + 3: The value can be generated based on the request.
      */
     function setOnChainDelay(uint256 _onChainDelay) external onlyRole(RANDOM_ADMIN_ROLE) {

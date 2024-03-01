@@ -284,7 +284,7 @@ contract RandomSequencesStatusTest is BaseRandomSequencesTest {
         assertEq(uint256(status), uint256(RandomSequences.Status.READY));
     }
 
-    function testStatusRetyy() public {
+    function testStatusRetry() public {
         // First call will see that there is no initial request, and will request a random value.
         vm.prank(player1);
         game1.getNextRandom(0);
@@ -293,7 +293,11 @@ contract RandomSequencesStatusTest is BaseRandomSequencesTest {
         RandomSequences.Status status = game1.randomStatus(player1, 0);
         assertEq(uint256(status), uint256(RandomSequences.Status.RETRY));
 
+        vm.prank(player1);
         game1.getNextRandom(0);
+        status = game1.randomStatus(player1, 0);
+        assertEq(uint256(status), uint256(RandomSequences.Status.IN_PROGRESS));
+
         vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
         status = game1.randomStatus(player1, 0);
         assertEq(uint256(status), uint256(RandomSequences.Status.READY));

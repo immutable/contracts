@@ -11,7 +11,7 @@
 
 # Introduction
 
-This document is a threat model for the Random Number Generation contracts in preparation for external audit. The threat model is limited to the following Solidity files: `RandomSeedProvider.sol`,`RandomValues.sol`, `RandomSequences.sol`, `IOffchainRandomSource.sol`, and `SourceAdaptorBase.sol`. See the [Source Code](#source-code) for links to these files and more information about the how the code has been tested.
+This document is a threat model for the Random Number Generation contracts in preparation for external audit. The threat model is limited to the following Solidity files: `RandomSeedProvider.sol`, `RandomSeedProviderQueue.sol`, `RandomValues.sol`, `RandomSequences.sol`, `IOffchainRandomSource.sol`, and `SourceAdaptorBase.sol`. See the [Source Code](#source-code) for links to these files and more information about the how the code has been tested.
 
 
 # Architecture
@@ -22,30 +22,105 @@ The Random Number Generation system on the Immutable platform is shown in the di
 
 ![Random number genration](./202402-threat-model-random/random-architecture.png)
 
-Game contracts can extend ```RandomValues.sol``` or ```RandomSequences.sol```. 
-```RandomSequences.sol``` is an extension of ```RandomValues.sol```. 
-```RandomValues.sol``` interacts with the ```RandomSeedProvider.sol``` contract to request and retreive random seed values. 
+Game contracts can extend `RandomValues.sol` or `RandomSequences.sol`. 
+`RandomSequences.sol` is an extension of `RandomValues.sol`. 
+`RandomValues.sol` interacts with the `RandomSeedProvider.sol` contract to request and retreive random seed values. 
 
-There is one ```RandomSeedProvider.sol``` contract deployed per chain. Each game has its own instance of ```RandomValues.sol``` and / or ```RandomSequences.sol``` as this contract is integrated directly into the game contract. 
+There is one `RandomSeedProvider.sol` contract deployed per chain. Each game has its own instance game contract that extends `RandomValues.sol` or `RandomSequences.sol`. 
 
-The ```RandomSeedProvider.sol``` operates behind a transparent proxy, ```ERC1967Proxy.sol```, with the upgrade
-logic included in the ```UUPSUpgradeable.sol``` contract that ```RandomSeedProvider.sol``` extends. Using an upgradeable pattern allows the random manager contract to be upgraded to extend its feature set and resolve issues. 
+The `RandomSeedProvider.sol` operates behind a transparent proxy, `ERC1967Proxy.sol`, with the upgrade
+logic included in the `UUPSUpgradeable.sol` contract that `RandomSeedProvider.sol` extends. Using an upgradeable pattern allows the random manager contract to be upgraded to extend its feature set and resolve issues. 
 
-The ```RandomSeedProvider.sol``` contract can be configured to use an off-chain random number source. This source is accessed via the ```IOffchainRandomSource.sol``` interface. To allow the flexibility to switch between off-chain random sources, there is an adaptor contract between the offchain random source contract and the random seed provider.
+The `RandomSeedProvider.sol` contract by default uses an on-chain random number source. It can be configured to use an off-chain random number source. This source is accessed via the `IOffchainRandomSource.sol` interface. To allow the flexibility to switch between off-chain random sources, there is an adaptor contract between the offchain random source contract and the random seed provider. Common logic for adaptor implementations is held in `SourceAdaptorBase.sol`.
+
+The `RandomSeedProvider.sol` contract uses a queue implemented in `RandomSeedProviderRequestQueue.sol` to hold outstanding requests for on-chain generated random seed values. Having a separate implementation more easily allows the code to be easily unit tested. 
+
+The HashOnion.sol contract implements a deterministic number source by incrementally revealing recursive hash pre-images. This allows values that are unknown to game players, but deterministic so that they can't be manipulated, to be put on chain during periods of low chain utilization. This is useful to increase the amount of entropy on the chain, thus making on-chain seed values more difficult to predict.
 
 The architecture diagram shows a ChainLink VRF source and a Supra VRF source. This is purely to show the possibility of integrating with one off-chain service and then, at a later point choosing to switch to an alternative off-chain source. At present, there is no agreement to use any specific off-chain source.
 
-```RandomValues.sol``` provides an API in which random numbers are requested in one transaction and then 
-fulfilled in a later transaction. ```RandomSequences.sol``` provides an API in which a random number
+`RandomValues.sol` provides an API in which random numbers are requested in one transaction and then 
+fulfilled in a later transaction. `RandomSequences.sol` provides an API in which a random number
 is supplied and the next one is requested in the same transaction. Whereas the API offered by 
-```RandomValues.sol``` provides numbers that can not be predicted, the API offered by 
-```RandomSequences.sol``` means that savvy game players that can analyse blockchain state can 
-predict the next random value to be generated. However, they are unable to the random number 
-that will be generated. ```RandomSequences.sol```'s API can be used securely by ensuring 
+`RandomValues.sol` provides numbers that can not be predicted, the API offered by 
+`RandomSequences.sol` means that savvy game players that can analyse blockchain state can 
+predict the next random value to be generated. However, they are unable to change the random number 
+that will be generated. `RandomSequences.sol`'s API can be used securely by ensuring 
 the purpose of random numbers used in a game are clearly segregated, and that a different
-sequence type is given for each purpose. 
+sequence type is given for each purpose when requesting random values. 
+
 
 ## Random Seed Provider Design
+This section explains the security relevant aspects of the Random Seed Provider contract.
+
+### Random Source
+A random source is defined as where a random request will be fulfilled from. The random source has three distinct values:
+
+* 0: The random source has not been set.
+* 1: The random source is on-chain.
+* An address: The address of an off-chain source adaptor contract.
+
+When a game requests a random seed, it is returned a fulfillment identifier and a source id. The reason for supplying the source id is that the default source for the game could change between when the number is requested and when it is fulfilled. Forcing games to supply the source means that the number will be able to be supplied, even if the game would use another source for new seed requests.
+
+The Random Seed Provider can have none or one off-chain source configured at a time. The off-chain source can be switched using the `setOffchainRandomSource` function. The off-chain source can be removed by passing in `address(1)` to the `setOffchainRandomSource` function, thus setting the random source to on-chain.
+
+Even if an off-chain source has been configured, only authorised games can use the off-chain source. The reason for this restriction is that requesting off-chain random numbers will incur cost. A malicious game could maliciously request many random numbers, thus forcing the system to incur major cost for no benefit. Games can be added to the authorised list of games using the `addOffchainRandomConsumer` function and removed from the list using the `removeOffchainRandomConsumer` function.
+
+
+### Personalization of On-Chain Random Seed Generation
+The on-chain random sequence is personalised to the blockchain the code is executing on and when the random number generation system starts. Doing this ensures that different output is generated even if the same system is executed in similar conditions on multiple chains simultaneously.
+
+The following code is executed in the initializer, localising the seed values to the chain id and the block hash of the previous block.
+
+```Solidity
+prevRandomOutput = keccak256(abi.encodePacked(block.chainid, blockhash(block.number - 1)));
+```
+This value is then later combined with the random output thus:
+```Solidity
+bytes32 prev = prevRandomOutput;
+...
+uint256 entropy = uint256(blockhash(blockNumber));
+prev = keccak256(abi.encodePacked(prev, entropy));
+randomOutput[blockNumber] = prev;
+
+...
+prevRandomOutput = prev;
+```
+
+### On-Chain Random
+The block hash of a future block is used as the on-chain random source. Games request a seed value and are returned the random source and a fulfillment identifier. For the on-chain source, this fulfillment identifier is a block number. The block number is the block who's block has will be used as the source of entropy for the seed value returned to the game. 
+
+The block hash has been chosen as historic values are available across a large random of historic blocks. This means any service to fulfil requests on need run intermittently, and not every block or every second block. This is important both from a block space utilisation perspective, where the goal is to leave as much block space for games as possible, and from a cost perspective. Using the block hash EVM opcode, block hashes for the previous 255 blocks can be optained.
+
+### On-Chain Random Delay
+There is a delay between when a game requests a random seed value and when it is fulfilled. The default value is two block. This value can be set by an appropriate administrator. To help understand what the delay means in terms of requesting blocks:
+
+Assuming a delay of 2 blocks (the default) then:
+* Current block number + 0: The block the game requested the seed in.
+* Current block number + 2: This block's block hash is used as entropy.
+* Current block number + 3: The value can now be generated based on the request.
+
+Note that limits are placed on the possible values of on-chain delay. A delay of 0 would be mean using the block hash for the block that the game requested the random seed in. This would not be secure as the game player could observe the transaction pool, see the previous block's block hash, and attempt to determine a range of likely block hashes. They could then alter their transaction, in an attempt of generating a block hash that is favourable to them. As such, a value of 0 is not acceptable.
+
+In an effort to protect the system from an administrator mistakenly setting the delay to an excessively high value, the maximum delay is 30 blocks. Given a two second block time, this equates to a one minute delay between requests and fulfillment. This seems like a large maximum value. The contract can be upgraded in the unlikely event that a larger value needs to set.
+
+### On-Chain Random Fulfilment
+Seed values are produced by calling the `generateNextSeedOnChain`.
+
+TODO: Discuss:
+
+* Calling via get random
+* Web service to call generatedNextSeedOnChain
+* Failure modes
+* Worst case gas costs and why they are very unlikely.
+
+
+
+### Upgrade
+The Random Seed Provider contract uses a Universal Upgradeable Proxy Standard (UUPS) upgrade paradigm. An admin with upgrade priviledges calls the `upgradeToAndCall` function, which in turn calls the `_authorizeUpgrade` function, which does the authorisation check. `upgradeToAndCall` allows a function in the new application logic contract to be specified and called. This function must be specified as the `upgrade` function.
+
+The `upgrade` function must be written such that it is permissionless and will only run once for each upgrade. It must be able to be run against any version of the Random Seed Provider contract: the original version 0, and future versions. It needs to detect the version as supplied by the storage value `version` and compare that with the source code version being executed.
+
 
 TODO talk about roles
 

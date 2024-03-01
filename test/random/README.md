@@ -10,7 +10,7 @@ Initialize testing:
 |---------------------------------| --------------------------------------------------|------------|-------------|
 | testInit                        | Check that deployment + initialize work.          | Yes        | Yes         |
 | testReinit                      | Calling initialise a second time fails.           | No         | Yes         |
-| testGetRandomSeedInit           | getRandomSeed(), initial value                    | Yes      | Yes         |
+| testGetRandomSeedInit           | getRandomSeed(), initial value                    | Yes        | Yes         |
 | testGetRandomSeedNotGen         | getRandomSeed(), when value not generated         | No         | Yes         |
 | testGetRandomSeedNoOffchainSource | getRandomSeed(), when no offchain source configured | No     | Yes         |
 
@@ -29,32 +29,32 @@ Control functions tests:
 | testUpgrade                     | Check that the contract can be upgraded.          | Yes        | Yes         |
 | testUpgradeBadAuth              | Check upgrade authorisation.                      | No         | Yes         |
 | testNoUpgrade                   | Upgrade from V0 to V0.                            | No         | Yes         |
-| testSetOnchainDelay             | Change the onchain delay.                         | Yes        | No          |
-| testSetOnchainDelayBadAuth      | Change the onchain delay, without authorisation.  | Yes        | No          |
-| testSetOnchainDelayInvalid      | Change the onchain delay to an invalid value.     | Yes        | No          |
+| testSetOnchainDelay             | Change the onchain delay.                         | Yes        | Yes         |
+| testSetOnchainDelayBadAuth      | Change the onchain delay, without authorisation.  | Yes        | Yes         |
+| testSetOnchainDelayInvalid      | Change the onchain delay to an invalid value.     | Yes        | Yes         |
 
 Operational functions tests:
 
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|
-| testTradNextBlock               | Check basic request flow                          | Yes        | Yes         |
+| testOnchainNextBlock            | Check basic request flow                          | Yes        | Yes         |
 | testOffchainNextBlock           | Check basic request flow                          | Yes        | Yes         |
 | testOffchainNotReady            | Attempt to fetch offchain random when not ready   | No         | Yes         |
-| testTradTwoInOneBlock           | Two calls to requestRandomSeed in one block       | Yes        | Yes         |
+| testOnchainTwoInOneBlock        | Two calls to requestRandomSeed in one block       | Yes        | Yes         |
 | testOffchainTwoInOneBlock       | Two calls to requestRandomSeed in one block       | Yes        | Yes         |
-| testTradDelayedFulfilment       | Request then wait several blocks before fulfilment | Yes       | Yes         |
-| testStreamedSeedValues          | Request seeds each block.                         | Yes        | No          |
-| testBlock256Plus                | Check the operation with block number > 255       | Yes        | No          |
-| testMissedSeed                  | Don't generate the random in time                 | No         | No          |
-| testGenerateNextSeedOnChain     | Use generateNextSeedOnChain to fulfil requests    | Yes        | No          |
-| testCheckQueueLength            | Check if the request queue is empty               | Yes        | No          |
+| testOnchainDelayedFulfillment   | Request then wait several blocks before fulfillment | Yes      | Yes         |
+| testStreamedSeedValues          | Request seeds each block.                         | Yes        | Yes         |
+| testBlock256Plus                | Check the operation with block number > 255       | Yes        | Yes         |
+| testMissedSeed                  | Don't generate the random in time                 | No         | Yes         |
+| testGenerateNextSeedOnChain     | Use generateNextSeedOnChain to fulfill requests    | Yes       | Yes         |
+| testGenerateNextSeedOnChainLate | generateNextSeedOnChain too late for a request    | Yes        | Yes         |
 
 Scenario: Generate some random numbers, switch random generation methodology, generate some more
 numbers, check that the numbers generated earlier are still available:
 
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|
-| testSwitchTraditionalOffchain   | Traditional -> Off-chain.                         | Yes        | Yes         |
+| testSwitchOnchainOffchain       | On-chain -> Off-chain.                            | Yes        | Yes         |
 | testSwitchOffchainOffchain      | Off-chain to another off-chain source.            | Yes        | Yes         |
 | testSwitchOffchainOnchain       | Disable off-chain source.                         | Yes        | Yes         |
 
@@ -83,13 +83,14 @@ Operational tests:
 
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|
-| testNoValue                     | Request zero bytes be returned                    | No       | Yes         |
+| testNoValue                     | Request zero bytes be returned                    | No         | Yes         |
 | testFirstValue                  | Return a single value                             | Yes        | Yes         |
 | testSecondValue                 | Return two values                                 | Yes        | Yes         |
 | testMultiFetch                  | Attempt to fetch a generated number twice.        | Yes        | Yes         |
 | testFirstValues                 | Return a single set of values                     | Yes        | Yes         |
 | testSecondValues                | Return two sets of values                         | Yes        | Yes         |
 | testMultipleGames               | Multiple games in parallel.                       | Yes        | Yes         |
+| testTooLate                     | Handle auto seed failure                          | No         | Yes         |
 
 
 ## RandomSequences.sol
@@ -113,6 +114,7 @@ Operational tests for getNextRandom:
 | testGetRandomMultiple           | Generate a sequence of random values.             | Yes        | Yes         |
 | testGetRandomMultipleSequences  | Generate multiple sequences.                      | Yes        | Yes         |
 | testGetRandomMultiplePlayers    | Generate multiple sequences for multiple players. | Yes        | Yes         |
+| testMissedFulfillment           | Auto seed fulfillment failure, auto re-request.   | No         | Yes         |
 
 
 Operational tests for randomStatus: 
@@ -124,6 +126,7 @@ Operational tests for randomStatus:
 | testStatusInProgress            | When random generation is in progress.            | Yes        | Yes         |
 | testStatusAlreadyFetched        | Random value is being mistakenly re-used.         | No         | Yes         |
 | testStatusReady                 | Generate a random value.                          | Yes        | Yes         |
+| testStatusRetry                 | Handle auto seed fulfillment failure              | No         | Yes         |
 
 
 ## ChainlinkSource.sol
@@ -152,9 +155,9 @@ Operational functions tests:
 |---------------------------------| --------------------------------------------------|------------|-------------|
 | testRequestRandom               | Request a random value.                           | Yes        | Yes         |
 | testTwoRequests                 | Check that two requests return different values.  | Yes        | Yes         |
-| testBadFulfilment               | Return a set of random numbers rather than one.   | No         | Yes         |
+| testBadFulfillment               | Return a set of random numbers rather than one.   | No         | Yes         |
 | testRequestTooEarly             | Request before ready.                             | No         | Yes         |
-| testHackFulfilment              | Attempt to maliciously fulfil from other address. | No         | Yes         |
+| testHackFulfillment              | Attempt to maliciously fulfil from other address. | No         | Yes         |
 
 Integration tests:
 
@@ -190,12 +193,20 @@ Operational functions tests:
 |---------------------------------| --------------------------------------------------|------------|-------------|
 | testRequestRandom               | Request a random value.                           | Yes        | Yes         |
 | testTwoRequests                 | Check that two requests return different values.  | Yes        | Yes         |
-| testBadFulfilment               | Return a set of random numbers rather than one.   | No         | Yes         |
+| testBadFulfillment               | Return a set of random numbers rather than one.   | No         | Yes         |
 | testRequestTooEarly             | Request before ready.                             | No         | Yes         |
-| testHackFulfilment              | Attempt to maliciously fulfil from other address. | No         | Yes         |
+| testHackFulfillment              | Attempt to maliciously fulfil from other address. | No         | Yes         |
 
 Integration tests:
 
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|
 | testEndToEnd                    | Request a random value from randomValues.         | Yes        | Yes         |
+
+
+## Hash Onion
+
+| Test name                       |Description                                        | Happy Case | Implemented |
+|---------------------------------| --------------------------------------------------|------------|-------------|
+| testSequence                    | Check that a sequence works.                      | Yes        | Yes         |
+| testBadValue                    | Check that an incorrect preimage is not used.     | No         | Yes         |

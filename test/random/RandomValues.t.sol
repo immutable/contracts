@@ -127,4 +127,11 @@ contract SingleGameRandomValuesTest is UninitializedRandomValuesTest {
         assertEq(randomValue1.length, 2, "randomValue1 size");
         assertEq(randomValue2.length, 4, "randomValue2 size");
     }
+
+    function testTooLate() public {
+        uint256 randomRequestId1 = game1.requestRandomValueCreation(1);
+        vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 256);
+        assertEq(uint256(game1.isRandomValueReady(randomRequestId1)), uint256(RandomValues.RequestStatus.FAILED), "Ready!");
+    }
+
 }

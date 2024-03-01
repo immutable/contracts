@@ -66,6 +66,8 @@ abstract contract RandomSequences is RandomValues {
         READY,
         // @notice The random value is being generated, but is not ready yet.
         IN_PROGRESS,
+        // @notice The application needs to call _getNextRandom to trigger another request.
+        RETRY,
         // @notice The requested value has been fetched previously.
         // The only way for the value to have been previously fetched is if the game contract
         // has directly fetched the random value, which should not happen as this contract
@@ -171,6 +173,10 @@ abstract contract RandomSequences is RandomValues {
         if (status == RequestStatus.IN_PROGRESS) {
             return Status.IN_PROGRESS;
         }
+        if (status == RequestStatus.FAILED) {
+            return Status.RETRY;
+        }
+
         // The only way for the value to have been previously fetched is if the game contract
         // has directly fetched the random value, which should not happen as this contract
         // should be the only entity interacting with the random values provider.

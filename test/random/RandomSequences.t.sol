@@ -10,8 +10,7 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 
 
-contract UninitializedRandomSequencesTest is Test {
-
+contract BaseRandomSequencesTest is Test {
     address public constant ONCHAIN = address(0);
     uint256 public constant STANDARD_ONCHAIN_DELAY = 2;
 
@@ -37,14 +36,16 @@ contract UninitializedRandomSequencesTest is Test {
 
         game1 = new MockGameSeq(address(randomSeedProvider));
     }
+}
 
+contract UninitializedRandomSequencesTest is BaseRandomSequencesTest {
     function testInit() public {
         assertEq(address(game1.randomSeedProvider()), address(randomSeedProvider), "randomSeedProvider");
         assertEq(uint256(game1.randomStatus(address(0), 0)), uint256(RandomSequences.Status.NO_INITIAL_REQUEST), "Should not be ready");
     }
 }
 
-contract RandomSequencesGetRandomTest is UninitializedRandomSequencesTest {
+contract RandomSequencesGetRandomTest is BaseRandomSequencesTest {
     function testGetInvalidSequenceTypeId() public {
         vm.expectRevert(abi.encodeWithSelector(RandomSequences.InvalidSequenceTypeId.selector, 100000));
         game1.getNextRandom(100000);
@@ -219,10 +220,27 @@ contract RandomSequencesGetRandomTest is UninitializedRandomSequencesTest {
         assertNotEq(val0, val3, "val0, val2: Random Values equal");
         assertNotEq(val0, val4, "val0, val2: Random Values equal");
     }
+
+    function testMissedFulfillment() public {
+        // First call will see that there is no initial request, and will request a random value.
+        game1.getNextRandom(0);
+
+        // Wait too long, and assume other seed fulfillment fails.
+        vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 256);
+        // The request will determine that the seed was not generated and a re-request is required.
+        (bool ready0, ) = game1.getNextRandom(0);
+        assertFalse(ready0, "Should not be ready");
+
+        vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
+        (bool ready1, bytes32 val1) = game1.getNextRandom(0);
+        assertTrue(ready1, "Should be ready");
+
+        assertNotEq(val1, 0, "val1 is 0");
+    }
 }
 
 
-contract RandomSequencesStatusTest is UninitializedRandomSequencesTest {
+contract RandomSequencesStatusTest is BaseRandomSequencesTest {
     address public player1 = makeAddr("player1");
 
     function testStatusInvalidSequenceTypeId() public {
@@ -262,9 +280,24 @@ contract RandomSequencesStatusTest is UninitializedRandomSequencesTest {
         vm.prank(player1);
         game1.getNextRandom(0);
         vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
-        // One block later the random number should be ready
         RandomSequences.Status status = game1.randomStatus(player1, 0);
         assertEq(uint256(status), uint256(RandomSequences.Status.READY));
     }
+
+    function testStatusRetyy() public {
+        // First call will see that there is no initial request, and will request a random value.
+        vm.prank(player1);
+        game1.getNextRandom(0);
+        // Wait too long, and assume other seed fulfillment fails.
+        vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 256);
+        RandomSequences.Status status = game1.randomStatus(player1, 0);
+        assertEq(uint256(status), uint256(RandomSequences.Status.RETRY));
+
+        game1.getNextRandom(0);
+        vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
+        status = game1.randomStatus(player1, 0);
+        assertEq(uint256(status), uint256(RandomSequences.Status.READY));
+    }
+
 }
 

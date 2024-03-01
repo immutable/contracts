@@ -27,6 +27,9 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
     /// @notice The generation process has failed. The caller will need to submit a new request.
     error GenerationFailedTryAgain(uint256 _fulfillmentId);
 
+    //// @notice Prevent the on-chain delay from being set to values that will cause issues.
+    error InvalidOnchainDelay(uint256 _proposedDelay);
+
     /// @notice A seed could not be generate for a block because too long had elapsed between 
     /// requesting and a call to getRandomSeed or generateNextSeedOnChain.
     event TooLateToGenerateRandom(uint256 _blockNumber);
@@ -77,7 +80,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
     mapping(uint256 requestId => bytes32 randomValue) public randomOutput;
 
     /// @notice The block number in which the last seed value was generated.
-    uint256 public lastBlockRandomGenerated;
+    uint256 private lastBlockRandomGenerated;
 
     /// @notice The block when the last off-chain random request occurred.
     /// @dev This is used to limit off-chain random requests to once per block.
@@ -97,7 +100,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
     uint256 public onChainDelay;
 
     /// @notice Previous output.
-    bytes32 public prevRandomOutput;
+    bytes32 private prevRandomOutput;
 
     /// @notice Indicates an address is allow listed for the off-chain random provider.
     /// @dev Having an allow list prevents spammers from requesting one random number per block,
@@ -127,8 +130,6 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
         // Use the chain id as an input into the random number generator to ensure
         // all random numbers are personalised to this chain.
         prevRandomOutput = keccak256(abi.encodePacked(block.chainid, blockhash(block.number - 1)));
-
-        lastBlockRandomGenerated = block.number;
 
         randomSource = ONCHAIN;
         onChainDelay = 2; // 2 blocks.
@@ -162,8 +163,23 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
     /**
      * @notice Call this to configure the number of blocks between requests and fulfillment.
      * @dev Only RANDOM_ADMIN_ROLE can do this.
+     * @param _onChainDelay For the on-chain source, this is the number of blocks between the request
+     *       and the block that the block hash is used for. If this is set to 2 blocks then:
+     *       current block number + 0: The block the player requested the seed in.
+     *       current block number + 2: The block the block hash will be used for.
+     *       current block number + 3: The value can be generated based on the request.
      */
     function setOnChainDelay(uint256 _onChainDelay) external onlyRole(RANDOM_ADMIN_ROLE) {
+        // A delay of 0 would be mean using the block hash for the block that the player requested
+        // the random seed in. This would not be secure as the player could observe the 
+        // transaction pool, see the previous block's block hash, and attempt to determine
+        // a range of likely block hashes. They could then alter their transaction, in an 
+        // attempt of generating a block hash that is favourable to them.
+        // 30 x 2 second block time would mean a one minute delay between requests and 
+        // fulfillment. This seems like a large maximum value.
+        if (_onChainDelay == 0 || _onChainDelay > 30) {
+            revert InvalidOnchainDelay(_onChainDelay);
+        }
         onChainDelay = _onChainDelay;
         emit SetOnChainDelay(_onChainDelay);
     }
@@ -233,7 +249,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
             generateNextSeedOnChain();
             bytes32 output = randomOutput[_randomFulfilmentIndex];
             if (output == bytes32(0)) {
-                if (_randomFulfilmentIndex < blockNumberMinus255OrZero()) {
+                if (_randomFulfilmentIndex < block.number) {
                     revert GenerationFailedTryAgain(_randomFulfilmentIndex);
                 }
                 revert WaitForRandom(_randomFulfilmentIndex);
@@ -293,6 +309,8 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
             randomOutput[blockNumber] = prev;
         }
         prevRandomOutput = prev;
+
+        lastBlockRandomGenerated = block.number;
     }
 
 
@@ -318,6 +336,10 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
             return IOffchainRandomSource(_randomSource).isOffchainRandomReady(_randomFulfilmentIndex) ? 
                 SeedRequestStatus.READY : SeedRequestStatus.IN_PROGRESS;
         }
+    }
+
+    function onchainGenerationStatus() external view returns (uint256 _lastBlockGenerated, uint256 _queueDepth) {
+        return (lastBlockRandomGenerated, queueLength());
     }
 
     /**

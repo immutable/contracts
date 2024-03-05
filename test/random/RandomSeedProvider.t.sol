@@ -414,8 +414,8 @@ contract OperationalRandomSeedProviderTest is RandomSeedProviderBase {
 
     function testMissedSeed() public {
         (uint256 randomRequestId1, address source1) = randomSeedProvider.requestRandomSeed();
-        // Don't fulfil the value for more than 256 blocks after the fulfillment block.
-        vm.roll(randomRequestId1 + 256);
+        // Don't fulfil the value for more than 257 blocks after the fulfillment block.
+        vm.roll(randomRequestId1 + 257);
         vm.expectRevert(abi.encodeWithSelector(RandomSeedProvider.GenerationFailedTryAgain.selector, randomRequestId1));
         randomSeedProvider.getRandomSeed(randomRequestId1, source1);
     }
@@ -461,7 +461,7 @@ contract OperationalRandomSeedProviderTest is RandomSeedProviderBase {
 
     function testGenerateNextSeedOnChainLate() public {
         (uint256 randomRequestId1, address source1) = randomSeedProvider.requestRandomSeed();
-        vm.roll(randomRequestId1 + 256);
+        vm.roll(randomRequestId1 + 257);
         // It is not too late to fulfil the request
         vm.expectEmit(true, true, true, true);
         emit TooLateToGenerateRandom(randomRequestId1);

@@ -271,7 +271,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
         bytes32 prev = prevRandomOutput;
 
         uint256 lenOutstandingRequests = queueLength();
-        uint256 blockNumberMinus255 = blockNumberMinus255OrZero();
+        uint256 blockNumberMinus256 = blockNumberMinus256OrZero();
         for (uint256 i = 0; i < lenOutstandingRequests; i++) {
             uint256 blockNumber = peakNext();
             // If the block number is this block or a future block, then skip for now and 
@@ -282,7 +282,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
             //  Consume the request.
             dequeue();
 
-            if (blockNumber < blockNumberMinus255) {
+            if (blockNumber < blockNumberMinus256) {
                 emit TooLateToGenerateRandom(blockNumber);
                 continue;
             }
@@ -324,7 +324,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
         if (_randomSource == ONCHAIN) {
             // slither-disable-next-line incorrect-equality
             if ((randomOutput[_randomFulfilmentIndex] != bytes32(0)) ||
-                    (_randomFulfilmentIndex < block.number && _randomFulfilmentIndex > blockNumberMinus255OrZero())) {
+                    (_randomFulfilmentIndex < block.number && _randomFulfilmentIndex > blockNumberMinus256OrZero())) {
                 return SeedRequestStatus.READY;
             }
             // slither-disable-next-line incorrect-equality
@@ -343,14 +343,14 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
     }
 
     /**
-     * @notice Return block number - 255, but avoid underflow.
+     * @notice Return block number - 256, but avoid underflow.
      * @dev This view call can only be called in the context of a transaction.
      */
-    function blockNumberMinus255OrZero() private view returns (uint256) {
-        if (block.number < 255) {
+    function blockNumberMinus256OrZero() private view returns (uint256) {
+        if (block.number < 256) {
             return 0;
         }
-        return block.number - 255;
+        return block.number - 256;
     }
 
     /**

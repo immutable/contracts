@@ -104,7 +104,7 @@ RanDAO is an algorithm for generating random numbers in a decentralised way.  Im
 
 Solidity contract code obtains the value by calling block.prevrandao. This in turn calls an opcode that returns the RANDAO value for the previous block. The value is also included in the block header, thus adding uncertainty to the value of `blockhash<block number>`.
 
-#### Verifiable Random Functions (VRF) 
+### Verifiable Random Functions (VRF) 
 A Verifiable Random Function (VRF)([academic paper](https://eprint.iacr.org/2017/099.pdf), [blog](https://supra.com/academy/chainlink-vrf/)) is an algorithm for securely generating random numbers. A generator has a public / private key pair. The private key is combined with an input value α produce a certain output value β. The public key combined with the input value α can be used to check that the output value β was generated using the private key according to the generation algorithm.
 
 Chainlink, Supra, and others have created Verifiable Random Function (VRF) services. Chainlink uses a single private key and service, with fail-over capability to a secondary service. Supra's service involves a form of Multi-Party Computation (MPC) so that the “private key” is a sharded key share. In this way, if one key shard is compromised, then the overall “private key” is still secure.
@@ -165,7 +165,7 @@ The Random Seed Provider can have none or one off-chain source configured at a t
 Even if an off-chain source has been configured, only authorised games can use the off-chain source. The reason for this restriction is that requesting off-chain random numbers will incur cost. A malicious game could maliciously request many random numbers, thus forcing the system to incur major cost for no benefit. Games can be added to the authorised list of games using the `addOffchainRandomConsumer` function and removed from the list using the `removeOffchainRandomConsumer` function.
 
 
-### Personalization of On-Chain Random Seed Generation
+### Personalization of On-Chain Random Source to Immutable zkEVM
 The on-chain random sequence is personalised to the blockchain the code is executing on and when the random number generation system starts. Doing this ensures that different output is generated even if the same system is executed in similar conditions on multiple chains simultaneously.
 
 The following code is executed in the initializer, localising the seed values to the chain id and the block hash of the previous block.
@@ -185,13 +185,15 @@ randomOutput[blockNumber] = prev;
 prevRandomOutput = prev;
 ```
 
-### On-Chain Random
-The block hash of a future block is used as the on-chain random source. Games request a seed value and are returned the random source and a fulfillment identifier. For the on-chain source, this fulfillment identifier is a block number. The block number is the block who's block has will be used as the source of entropy for the seed value returned to the game. 
+### On-Chain Random Request
+The block hash of a future block is used as the on-chain random source. Games request a seed value using the `requestRandomSeed` function and are returned the random source and a fulfillment identifier. This identifier is the block number to determine the block hash for. 
 
-The block hash has been chosen as historic values are available across a large random of historic blocks. This means any service to fulfil requests on need run intermittently, and not every block or every second block. This is important both from a block space utilisation perspective, where the goal is to leave as much block space for games as possible, and from a cost perspective. Using the block hash EVM opcode, block hashes for the previous 255 blocks can be optained.
+The block hash has been chosen as historic values from the previous 256 blocks is available via the block hash opcode. This means any service to fulfil requests only needs to run intermittently, and not every block or every second block. This is important both from a block space utilisation perspective, where the goal is to leave as much block space for games as possible, and from a cost perspective. 
+
+The block number to determine the block hash of is recorded in the Random Seed provider's queue. 
 
 ### On-Chain Random Delay
-There is a delay between when a game requests a random seed value and when it is fulfilled. The default value is two block. This value can be set by an appropriate administrator. To help understand what the delay means in terms of requesting blocks:
+There is a delay between when a game requests a random seed value and when it is fulfilled. The default value is two blocks. This value can be set by an appropriately authorised administrator. To help understand what the delay means in terms of requesting blocks:
 
 Assuming a delay of 2 blocks (the default) then:
 * Current block number + 0: The block the game requested the seed in.
@@ -202,29 +204,70 @@ Note that limits are placed on the possible values of on-chain delay. A delay of
 
 In an effort to protect the system from an administrator mistakenly setting the delay to an excessively high value, the maximum delay is 30 blocks. Given a two second block time, this equates to a one minute delay between requests and fulfillment. This seems like a large maximum value. The contract can be upgraded in the unlikely event that a larger value needs to set.
 
-### On-Chain Random Fulfilment
-Seed values are produced by calling the `generateNextSeedOnChain`.
+### On-Chain Random Fulfillment
+Seed values are produced by calling the `generateNextSeedOnChain` function. This function can either be called directly, typically by a platform operated service, or via the `getRandomSeed` function.
 
-TODO: Discuss:
+The `generateNextSeedOnChain` function takes block numbers from the Random Seed Provider's queue. When analysing the block numbers, there are three possible scenarios:
 
-* Calling via get random
-* Web service to call generatedNextSeedOnChain
-* Failure modes
-* Worst case gas costs and why they are very unlikely.
+* The block is more than 256 blocks ago. In this case it is too late to determine the block hash. Games need to request a new random seed in this case.
+* The block number is for the current block or for a future block. In this case, the block hash can't be determined yet.
+* The block number is for a block between one and 256 blocks ago. The block hash is requested using the block hash opcode and stored in a map of block number to block hash for later use. 
 
+The `getRandomSeed` function returns seed values from the map of block number to block hash. The function reverts if the `generateNextSeedOnChain` function wasn't called in time given the block number, or if the block number is for the current block is is in the future. 
 
+The `isRandomSeedReady` function returns the generation status, with the possible status values matching the happy and two revert cases of the `getRandomSeed` function.
 
-### Upgrade
+### Off-chain Sources
+The Random Seed Provider delegates calls to the `requestRandomSeed`, `getRandomSeed`, and `isRandomSeedReady` functions to an off-chain random source via the `IOffchainRandomSource.sol` interface.
+
+### Random Seed Provider Approach to Upgrade
 The Random Seed Provider contract uses a Universal Upgradeable Proxy Standard (UUPS) upgrade paradigm. An admin with upgrade priviledges calls the `upgradeToAndCall` function, which in turn calls the `_authorizeUpgrade` function, which does the authorisation check. `upgradeToAndCall` allows a function in the new application logic contract to be specified and called. This function must be specified as the `upgrade` function.
 
 The `upgrade` function must be written such that it is permissionless and will only run once for each upgrade. It must be able to be run against any version of the Random Seed Provider contract: the original version 0, and future versions. It needs to detect the version as supplied by the storage value `version` and compare that with the source code version being executed.
 
+### Random Seed Provider Roles
+The Random Seed Provider supports the following roles:
 
-TODO talk about roles
+* Default Admin: Creates and removes other administrators.
+* Random Admin: Call the following configuration functions:
+  * `setOffchainRandomSource`
+  * `setOnChainDelay`
+  * `addOffchainRandomConsumer`
+  * `removeOffchainRandomConsumer`
+* Upgrade Admin: Can upgrade the contract.
 
-## Source Adaptor Base Design
 
-TODO talk about roles
+## Off-chain Random Source Interface and Source Adaptor Base Design
+The section describes the `IOffchainRandomSource.sol` interface and `SourceAdaptorBase.sol`. The `IOffchainRandomSource` interface defines all the functions that off-chain source must implement. The `SourceAdaptorBase.sol` provides common implementations for most of the functions. Add off-chain source adaptors should extend `SourceAdaptorBase.sol`.
+
+### Request Off-chain Random
+The `requestOffchainRandom` function requests a random value. This function in turn calls the off-chain provider's appropriate request function. The functions returns an off-chain provider specific fulfillment identifier.
+
+### Fulfil Random Words
+The `_fulfilRandomWords` function is defined in `SourceAdaptorBase.sol` as an internal function. External functions defined in off-chain adaptor contracts must call this function only after authenticating msg.sender to check that the `_fulfilRandomWords` function is being called by the off-chain provider's VRF contract only.
+
+The `_fulfilRandomWords` function only requests one word. This is because the off-chain random providers do seed expansion using a PRF, in a similar way to how it is done in the `RandomValues.sol`. The system in this document just needs a single seed value, and can derive other values from it.
+
+The `_fulfilRandomWords` function stores values returned by off-chain providers in a map of fulfillment identifier to random value. 
+
+### Get Off-chain Random
+The 'getOffchainRandom' function fetches random values from the map of fulfillment identifier to random value. It has been assumed that the off-chain provider operates perfectly, and that if a value does not exist in the map then this indicates that value has not yet been generated.
+
+### Is Off-chain Random Ready
+The `isOffchainRandomReady` returns whether a random value for a fulfillment identifier exists in the fulfillment identifier to random value map or not. If it does, then the function returns indicating the value is ready and can be successfully fetched using the `getOffchainRandom` function.
+
+### Source Adaptor Upgrade Approach
+Off-chain source adaptor contracts are not upgradeable. If there is an issue with the code, a new version shoudl be deployed, and the random seed provider shoudl point to the new version.
+
+### Source Adaptor Base Roles
+The Source Adaptor Base supports the following roles:
+
+* Default Admin: Creates and removes other administrators.
+* Config Admin: Configures adaptor specific configuration.
+
+
+
+
 
 ## Random Values Design
 
@@ -403,7 +446,7 @@ Hence, a delay of at least one block should be imposed between when a game playe
 
 Block Producer Manipulation: The block producer could manipulate the block hash by crafting a transaction that included a number that the block producer controls. A malicious block producer could produce many candidate blocks, in an attempt to produce a specific block hash value. In this attack, block producers will be limited to four seconds (which will probably be only one or two seconds in practice) to mount their attack. They would need to have received the previous block (which takes somewhere between 0 and 2 seconds to generate), generate the transaction to manipulate the block hash value, and then send the propose block through the consensus process (which takes between 0 and 2 seconds to generate).
 
-
+TODO: Attack where another game requests one number per block, but never fulfils, thus forcing other games to absorb the cost / pay for the cost. 
 
 ### RanDAO Attacks
 

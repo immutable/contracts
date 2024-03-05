@@ -13,6 +13,7 @@ import {IOffchainRandomSource} from "./IOffchainRandomSource.sol";
 abstract contract SourceAdaptorBase is AccessControlEnumerable, IOffchainRandomSource {
     error UnexpectedRandomWordsLength(uint256 _length);
 
+    // @notice Admin role to be used when changing a VRF adaptor specific configuration.
     bytes32 internal constant CONFIG_ADMIN_ROLE = keccak256("CONFIG_ADMIN_ROLE");
 
     // Immutable zkEVM has instant finality, so a single block confirmation is fine.
@@ -21,7 +22,7 @@ abstract contract SourceAdaptorBase is AccessControlEnumerable, IOffchainRandomS
     uint32 internal constant NUM_WORDS = 1;
 
     // The values returned by the VRF.
-    mapping(uint256 _fulfilmentId => bytes32 randomValue) private randomOutput;
+    mapping(uint256 _fulfillmentId => bytes32 randomValue) private randomOutput;
 
     // VRF contract.
     address public immutable vrfCoordinator;
@@ -40,7 +41,7 @@ abstract contract SourceAdaptorBase is AccessControlEnumerable, IOffchainRandomS
      * @param _requestId is the fulfilment index.
      * @param _randomWords are the random values from the VRF.
      */
-    function _fulfillRandomWords(uint256 _requestId, uint256[] memory _randomWords) internal {
+    function _fulfilRandomWords(uint256 _requestId, uint256[] memory _randomWords) internal {
         // NOTE: This function call is not allowed to fail. However, if one word is requested
         // and some other number of words has been returned, then maybe the source has been
         // compromised. Reverting the call is more likely to draw attention to the issue than

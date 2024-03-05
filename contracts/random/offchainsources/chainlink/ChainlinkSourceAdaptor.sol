@@ -86,6 +86,6 @@ contract ChainlinkSourceAdaptor is VRFConsumerBaseV2, SourceAdaptorBase {
         uint256 _requestId,
         uint256[] memory _randomWords
     ) internal virtual override(VRFConsumerBaseV2) {
-        _fulfillRandomWords(_requestId, _randomWords);
+        _fulfilRandomWords(_requestId, _randomWords);
     }
 }

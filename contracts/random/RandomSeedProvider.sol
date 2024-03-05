@@ -38,7 +38,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
     event OffchainRandomSourceSet(address _offchainRandomSource);
 
     /// @notice Changes the on chain source delay between requesting and fulfilling.
-    event SetOnChainDelay(uint256 _onChainDelay);
+    event OnChainDelaySet(uint256 _onChainDelay);
 
     /// @notice Indicates that a game contract that can consume off-chain random has been added.
     event OffchainRandomConsumerAdded(address _consumer);
@@ -181,7 +181,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
             revert InvalidOnchainDelay(_onChainDelay);
         }
         onChainDelay = _onChainDelay;
-        emit SetOnChainDelay(_onChainDelay);
+        emit OnChainDelaySet(_onChainDelay);
     }
 
     /**

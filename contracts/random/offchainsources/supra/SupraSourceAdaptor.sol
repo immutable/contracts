@@ -71,6 +71,6 @@ contract SupraSourceAdaptor is SourceAdaptorBase {
             revert NotVrfContract();
         }
 
-        _fulfillRandomWords(_requestId, _randomWords);
+        _fulfilRandomWords(_requestId, _randomWords);
     }
 }

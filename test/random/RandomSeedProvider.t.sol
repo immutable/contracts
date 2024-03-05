@@ -98,6 +98,7 @@ contract UninitializedRandomSeedProviderTest is RandomSeedProviderBase {
 
 contract ControlRandomSeedProviderTest is RandomSeedProviderBase {
     error CanNotUpgradeFrom(uint256 _storageVersion, uint256 _codeVersion);
+    event OnChainDelaySet(uint256 _onChainDelay);
     event Upgraded(address indexed implementation);
 
     address public constant NEW_SOURCE = address(10001);
@@ -226,9 +227,11 @@ contract ControlRandomSeedProviderTest is RandomSeedProviderBase {
         randomSeedProvider.upgradeToAndCall(address(randomSeedProviderV2), 
             abi.encodeWithSelector(randomSeedProviderV2.upgrade.selector, bytes("")));
     }
-
+    
     function testSetOnchainDelay() public {
         vm.prank(randomAdmin);
+        vm.expectEmit(true, true, true, true);
+        emit OnChainDelaySet(3);
         randomSeedProvider.setOnChainDelay(3);
         assertEq(randomSeedProvider.onChainDelay(), 3);
     }

@@ -3,38 +3,60 @@
 # Contents
 
 - [Introduction](#introduction)
+- [Rationale](#rationale)
+- [Threat Model Scope](#threat-model-scope)
+- [Background: Random Number Generation on Blockchain](#background-random-number-generation-on-blockchain)
 - [Architecture](#architecture)
 - [Attack Surfaces](#attack-surfaces)
 - [Perceived Attackers](#preceived-attackers)
 - [Attack Mitigation](#attack-mitigation)
 - [Conclusion](#conclusion)
 
+
 # Introduction
 
-This document is a threat model for the Random Number Generation contracts in preparation for external audit. The threat model is limited to the following Solidity files: `RandomSeedProvider.sol`, `RandomSeedProviderQueue.sol`, `RandomValues.sol`, `RandomSequences.sol`, `IOffchainRandomSource.sol`, and `SourceAdaptorBase.sol`. See the [Source Code](#source-code) for links to these files and more information about the how the code has been tested.
+This threat model document for the Random Number Generation contracts has been created in preparation for external audit. This document is also written as a detailed reference for the generation of random numbers on Immutable zkEVM and Immutable Dedicated zkEVMs.  
 
 
-# Architecture
+# Rationale
+
+The reasons why a game might choose to use Immutable's random number generator solution, rather than creating their own solution is:
+
+* Though it is simple to generate numbers that appear to be random on-chain, it is very difficult to generate random numbers that are not susceptible to calculation or guessing within a constained set of numbers by sufficiently motivated blockchain savvy game players. 
+* Enables games to leverage a random number generation system that has been designed by Immutable's cryptographers, has been widely reviewed, and will be (in Q2, 2024) audited by a top tier blockchain auditing company.
+* Allows games to build their game against an API that won't change, even as the underlying mechanics of the random number generation process changes. 
+* For off-chain randomness, allows games to leverage the random number provider that Immutable has agreements with. That is, rather than every game negotiating an agreement with a VRF provider, and paying them, Immutable pays a VRF provider and supplies the numbers to approved games. Multiple games may use the same VRF value as a seed, from which they generate unique random values. Re-using the same off-chain random value saves money and reduces block utilization.
+
+
+# Threat Model Scope
+The threat model is limited to the following Solidity files at GitHash [TBD](TBD): 
+
+* [RandomSeedProvider.sol](TBD)
+* [RandomSeedProviderQueue.sol](TBD)
+* [RandomValues.sol](TBD)
+* [RandomSequences.sol](TBD)
+* [IOffchainRandomSource.sol](TBD)
+* [SourceAdaptorBase.sol](TBD)
+* [HashOnion.sol](TBD)
 
 
 
-## Background Material
-The following sections provide context to the random generation process.
+# Background: Random Number Generation on Blockchain
+The following sections provide background material on the random number generation process on Immutable zkEVM and Immutable Dedicated zkEVMs.
 
-### Uses of Random Numbers in Games on the Immutable zkEVM Platform
+## Uses of Random Numbers in Games on the Immutable zkEVM Platform
 In games there are two types of uses for random numbers:
-
 * Deciding non-financial non-deterministic events. For example:
-  * Which direction will a non-player character walk in next.
+  * Which direction a non-player character walk in next.
 * Deciding financial non-deterministic events. For example:
   * The attributes of a randomly generated NFT.
   * The contents of a loot box.
   * The next card to be drawn from a deck of cards when playing poker.
 
-Non-financial non-deterministic events need Non-Secure Random Numbers. Game studios are encouraged to generate these numbers using standard game SDKs, and not using the blockchain. Financial non-deterministic events need Secure Random Numbers. These numbers should be supplied using the Secure Random Number Generator described in this document.
+Non-financial non-deterministic events need Non-Secure Random Numbers. Game studios are encouraged to generate these numbers using standard game SDKs, and not using the blockchain. Financial non-deterministic events need Secure Random Numbers. These numbers should be supplied using the system described in this document.
 
 
-### Generalised Process for Generating a Secure Random Number
+## Generalised Process for Generating a Secure Random Number
 A two step process across two blockchain transactions is required for generating Secure Random Numbers:
 
 * Transaction 1: Do an action that results in a request for a Secure Random Number to be generated. In some games this action could involve some form of payment. A request id is returned. 
@@ -42,12 +64,14 @@ A two step process across two blockchain transactions is required for generating
 
 Separating the process across two transactions is required as otherwise, if the process was included in a single transaction, the game player could request a random number be generated, and then revert the transaction if the random output was not one that they wanted. The game player could repeat the process until the random number generated was one that they did want. This scenario is partcularly applicable to the Immutable zkEVM where game players use the Immutable Passport wallet contract. These contracts have multi-call capability, allowing the game player to call the game contract in one call and then assess the result of any action in a secondary call, all done within the one transaction.
 
-Linking requests with fulfilment actions with a request id is important to ensure the game player is locked into which random number they will receive. Not using an identifier linking the request and fulfilment could allow the game player to choose which fulfilment action to utilise, reverting ones that are not advantageous to them.
+Linking requests to fulfillment actions using a request id is important to ensure the game player is locked into which random number they will receive. Not using an identifier linking the request and fulfillment could allow the game player to choose which fulfillment action to utilise, reverting ones that are not advantageous to them.
 
 If a payment is going to be involved in the overall game action that results in the random number being generated, then this payment must happen in the first transaction. This is important as it locks the user into paying for the random number, no matter what the outcome of the random generation process.
 
-### Random Seeds vs Random Numbers
-Random number sources for blockchain typically can produce one value per block. However, multiple games may need multiple random numbers for multiple players all in the same block. To achieve this we treat blockchain random values (for example the block hash) as random seed values from which are derived personalised random numbers. Random numbers will be personalised based on the following factors:
+Note that despite the two transaction approach described above, the solution described in this document includes a mechanism that requires only one transaction per random value generation. This *sequences* methodology is appropriate for some situations, and not others.
+
+## Random Seeds vs Random Numbers
+Random number sources for blockchain typically can produce one value per block. However, multiple games may need multiple random numbers for multiple players all in the same block. To achieve this blockchain random values (for example the block hash) are treated as random seed values from which are derived personalised random numbers. Random numbers are personalised based on the following factors:
 
 * Game contract address. This will be deemed to be a proxy for the game itself.
 * msg.sender address. This will be deemed to be a proxy for the user. The assumption is that either an EOA (Externally Owned Account, that is a Metamask wallet account), or a Passport contract will interact directly with the game contract.
@@ -55,39 +79,40 @@ Random number sources for blockchain typically can produce one value per block. 
 
 These factors will ensure seed values translate to random numbers that are unique for all game players in all games for each random number request. 
 
-### Random Number Expansion
+## Random Number Expansion
 Sometimes games will need several random numbers based on one random request. A Pseudo Random Function (PRF) is used to generate an array of numbers from one personalised random number using the following equation.
 
 ```
 random values[i] = keccak256(random value, i)
 ```
 
-### Combining Random Sources
+## Combining Random Sources
 Typically with random number generation, multiple low quality sources can be combined to produce a higher quality source. This combination approach does not apply to blockchains. The reason is that the random generation process occurs inside of a virtual machine which is controlled by block producers. Combining high quality off-chain random sources with random sources that the block producers control negates the randomness of the off-chain source. Hence, the random generation system does not to combine random sources.
 
+## On-Chain Sources of Random Seed Values
+This section describes the possible sources of random values on Immutable zkEVM. These sources have the advantage over off-chain sources that they are free. The disadvantage of these approaches is that they are susceptible to block producer manipulation.
 
-### On-Chain Sources of Random Seed Values
-This section describes the possible sources of random values on Immutable zkEVM. These sources have the advantage over off-chain sources that they are free. The disadvantage of these approaches is block producer manipulation, and in the case of RANDAO, that we won’t have it available until we ship BFT consensus.
+### Previous Block’s Block Hash
+In Ethereum based blockchains, including Immutable zkEVM, the Block Hash is the message digest of the block header of a block, exlcuding the Extra Data field. This is the “finger print” of all transactions that have occurred on the chain since genesis. 
 
-#### Previous Block’s Block Hash
-*What it is?* In Ethereum based blockchains, including Immutable zkEVM, the Block Hash is the message digest of the block header of a block, exlcuding the Extra Data field. This is the “finger print” of all transactions that have occurred on the chain since genesis. 
+Solidity contract code obtains the value by calling `blockhash(<block number>)`. This in turn calls an opcode that returns the blockhash. The block number can be any of the previous 256 blocks. 
 
-*How is it obtained?* Solidity contract code obtains the value by calling `blockhash(<block number>)`. This in turn calls an opcode that returns the blockhash. The block number can be any of the previous 256 blocks. 
+### Previous Block’s RANDAO
+*Note that prior to the PoS BFT fork, this value will be a predictable value related to the block number.*
 
-*How random is it?* The block hash will be different for each block, even if there are no transactions included in the block. The reason for this is because the block header includes the block hash of the previous block.
+RanDAO is an algorithm for generating random numbers in a decentralised way.  Immutable will use the Hash Onion approach, in which all validators commit to a recursive hash value, and the block producer reveals a new value once per block. The process is described here: [Decentralized Random Number Generation](https://youtu.be/ExAhv5HudMM?t=663) 
 
-#### Previous Block’s RANDAO
-Note that prior to the BFT fork, this value will be a predictable value related to the block number. 
+Solidity contract code obtains the value by calling block.prevrandao. This in turn calls an opcode that returns the RANDAO value for the previous block. The value is also included in the block header, thus adding uncertainty to the value of `blockhash<block number>`.
 
-* What it is?* RanDAO is an algorithm for generating random numbers in a decentralised way.  Immutable will use the Hash Onion approach, in which all validators commit to a recursive hash value, and the block producer reveals a new value once per block. The process is described here: [Decentralized Random Number Generation](https://youtu.be/ExAhv5HudMM?t=663) 
+#### Verifiable Random Functions (VRF) 
+A Verifiable Random Function (VRF)([academic paper](https://eprint.iacr.org/2017/099.pdf), [blog](https://supra.com/academy/chainlink-vrf/)) is an algorithm for securely generating random numbers. A generator has a public / private key pair. The private key is combined with an input value α produce a certain output value β. The public key combined with the input value α can be used to check that the output value β was generated using the private key according to the generation algorithm.
 
-*How is it obtained?* Solidity contract code obtains the value by calling block.prevrandao. This in turn calls an opcode that returns the RANDAO value for the previous block. 
+Chainlink, Supra, and others have created Verifiable Random Function (VRF) services. Chainlink uses a single private key and service, with fail-over capability to a secondary service. Supra's service involves a form of Multi-Party Computation (MPC) so that the “private key” is a sharded key share. In this way, if one key shard is compromised, then the overall “private key” is still secure.
 
-*How random is it?* The RANDAO will be different for each block. Note that prior to the BFT fork, this value will be a predictable value related to the block number. 
+For Chainlink, a `VRFCoordinator` contract (part of a set of contracts by Chainlink) is deployed to the chain. A call is made to the `VRFCoordinator` contract’s `requestRandomWords` function, passing in a subscription ID and the key pair to use, which returns a request id. Some blocks later, the request is fulfilled. The transaction to fulfil the request first verifies the generated number and then calls a call-back function to return the random value.
 
-#### VRF 
-TODO
 
+# Architecture
 
 ## Top Level Architecture
 

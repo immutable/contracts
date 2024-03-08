@@ -38,10 +38,11 @@ contract ChainlinkSourceAdaptor is VRFConsumerBaseV2, SourceAdaptorBase {
         address _roleAdmin,
         address _configAdmin,
         address _vrfCoordinator,
+        address _randomSeedProvider,
         bytes32 _keyHash,
         uint64 _subId,
         uint32 _callbackGasLimit
-    ) VRFConsumerBaseV2(_vrfCoordinator) SourceAdaptorBase(_roleAdmin, _configAdmin, _vrfCoordinator) {
+    ) VRFConsumerBaseV2(_vrfCoordinator) SourceAdaptorBase(_roleAdmin, _configAdmin, _vrfCoordinator, _randomSeedProvider) {
         keyHash = _keyHash;
         subId = _subId;
         callbackGasLimit = _callbackGasLimit;
@@ -67,7 +68,7 @@ contract ChainlinkSourceAdaptor is VRFConsumerBaseV2, SourceAdaptorBase {
     /**
      * @inheritdoc IOffchainRandomSource
      */
-    function requestOffchainRandom() external override(IOffchainRandomSource) returns (uint256 _requestId) {
+    function requestOffchainRandom() external override(IOffchainRandomSource) onlyRandomSeedProvider returns (uint256 _requestId) {
         return
             VRFCoordinatorV2Interface(vrfCoordinator).requestRandomWords(
                 keyHash,

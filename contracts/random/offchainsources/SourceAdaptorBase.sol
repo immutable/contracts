@@ -11,7 +11,19 @@ import {IOffchainRandomSource} from "./IOffchainRandomSource.sol";
  *      version of the code and have the random seed provider point to the new version.
  */
 abstract contract SourceAdaptorBase is AccessControlEnumerable, IOffchainRandomSource {
+    // @notice If the caller is not the random seed provider.
+    error NotRandomSeedProvider(address _badMsgSender);
+
+    // @notice If the VRF provider unexpectedly does not return just one word.
     error UnexpectedRandomWordsLength(uint256 _length);
+
+    // @notice Applied to functions that are only callable by the random seed provider.
+    modifier onlyRandomSeedProvider() {
+        if (msg.sender != randomSeedProvider) {
+            revert NotRandomSeedProvider(msg.sender);
+        }
+        _;
+    }
 
     // @notice Admin role to be used when changing a VRF adaptor specific configuration.
     bytes32 internal constant CONFIG_ADMIN_ROLE = keccak256("CONFIG_ADMIN_ROLE");
@@ -27,10 +39,14 @@ abstract contract SourceAdaptorBase is AccessControlEnumerable, IOffchainRandomS
     // VRF contract.
     address public immutable vrfCoordinator;
 
-    constructor(address _roleAdmin, address _configAdmin, address _vrfCoordinator) {
+    // Random seed provider.
+    address public immutable randomSeedProvider;
+
+    constructor(address _roleAdmin, address _configAdmin, address _vrfCoordinator, address _randomSeedProvider) {
         _grantRole(DEFAULT_ADMIN_ROLE, _roleAdmin);
         _grantRole(CONFIG_ADMIN_ROLE, _configAdmin);
         vrfCoordinator = _vrfCoordinator;
+        randomSeedProvider = _randomSeedProvider;
     }
 
     /**

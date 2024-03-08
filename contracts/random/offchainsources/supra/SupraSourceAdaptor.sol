@@ -32,8 +32,9 @@ contract SupraSourceAdaptor is SourceAdaptorBase {
         address _roleAdmin,
         address _configAdmin,
         address _vrfCoordinator,
+        address _randomSeedProvider,
         address _subscription
-    ) SourceAdaptorBase(_roleAdmin, _configAdmin, _vrfCoordinator) {
+    ) SourceAdaptorBase(_roleAdmin, _configAdmin, _vrfCoordinator, _randomSeedProvider) {
         // slither-disable-next-line missing-zero-check
         subscriptionAccount = _subscription;
     }
@@ -51,7 +52,7 @@ contract SupraSourceAdaptor is SourceAdaptorBase {
     /**
      * @inheritdoc IOffchainRandomSource
      */
-    function requestOffchainRandom() external override(IOffchainRandomSource) returns (uint256 _requestId) {
+    function requestOffchainRandom() external override(IOffchainRandomSource) onlyRandomSeedProvider returns (uint256 _requestId) {
         return
             ISupraRouter(vrfCoordinator).generateRequest(
                 "fulfillRandomWords(uint256,uint256[])",

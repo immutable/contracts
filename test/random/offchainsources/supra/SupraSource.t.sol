@@ -7,10 +7,10 @@ import {MockSupraRouter} from "./MockSupraRouter.sol";
 import {MockGame, RandomValues} from "../../MockGame.sol";
 import {RandomSeedProvider} from "contracts/random/RandomSeedProvider.sol";
 import {IOffchainRandomSource} from "contracts/random/offchainsources/IOffchainRandomSource.sol";
-import {SupraSourceAdaptor} from "contracts/random/offchainsources/supra/SupraSourceAdaptor.sol";
+import {SupraSourceAdaptor, SourceAdaptorBase} from "contracts/random/offchainsources/supra/SupraSourceAdaptor.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-contract SupraInitTests is Test {
+contract SupraTests is Test {
     error NotVrfContract();
 
     bytes32 public constant CONFIG_ADMIN_ROLE = keccak256("CONFIG_ADMIN_ROLE");
@@ -29,6 +29,9 @@ contract SupraInitTests is Test {
 
     address public subscription = address(0x123);
 
+    bytes32 public constant RAND1 = bytes32(uint256(0x1a));
+    bytes32 public constant RAND2 = bytes32(uint256(0x1b));
+
     function setUp() public virtual {
         roleAdmin = makeAddr("roleAdmin");
         randomAdmin = makeAddr("randomAdmin");
@@ -43,7 +46,7 @@ contract SupraInitTests is Test {
 
         mockSupraRouter = new MockSupraRouter();
         supraSourceAdaptor = new SupraSourceAdaptor(
-            roleAdmin, configAdmin, address(mockSupraRouter), subscription);
+            roleAdmin, configAdmin, address(mockSupraRouter), address(randomSeedProvider), subscription);
         mockSupraRouter.setAdaptor(address(supraSourceAdaptor));
 
         vm.prank(randomAdmin);
@@ -53,11 +56,13 @@ contract SupraInitTests is Test {
         // be on the same block number as when the contracts were deployed.
         vm.roll(block.number + 1);
     }
+}
 
+contract SupraInitTests is SupraTests {
     function testInit() public {
         mockSupraRouter = new MockSupraRouter();
         supraSourceAdaptor = new SupraSourceAdaptor(
-            roleAdmin, configAdmin, address(mockSupraRouter), subscription);
+            roleAdmin, configAdmin, address(mockSupraRouter), address(randomSeedProvider), subscription);
 
         assertEq(address(supraSourceAdaptor.vrfCoordinator()), address(mockSupraRouter), "vrfCoord not set correctly");
         assertEq(supraSourceAdaptor.subscriptionAccount(), subscription, "Subscription account did not match");
@@ -66,7 +71,7 @@ contract SupraInitTests is Test {
 }
 
 
-contract SupraControlTests is SupraInitTests {
+contract SupraControlTests is SupraTests {
     event SubscriptionChange(address _newSubscription);
 
     function testRoleAdmin() public {
@@ -105,17 +110,15 @@ contract SupraControlTests is SupraInitTests {
 }
 
 
-contract SupraOperationalTests is SupraInitTests {
+contract SupraOperationalTests is SupraTests {
     error OffchainWaitForRandom();
     error UnexpectedRandomWordsLength(uint256 _length);
 
     event RequestId(uint256 _requestId);
 
-    bytes32 public constant RAND1 = bytes32(uint256(0x1a));
-    bytes32 public constant RAND2 = bytes32(uint256(0x1b));
-
     function testRequestRandom() public {
         vm.recordLogs();
+        vm.prank(address(randomSeedProvider));
         uint256 fulfilmentIndex = supraSourceAdaptor.requestOffchainRandom();
         Vm.Log[] memory entries = vm.getRecordedLogs();
         assertEq(entries.length, 1);
@@ -132,12 +135,15 @@ contract SupraOperationalTests is SupraInitTests {
         ready = supraSourceAdaptor.isOffchainRandomReady(fulfilmentIndex);
         assertTrue(ready, "Should be ready");
 
+        vm.prank(address(randomSeedProvider));
         bytes32 rand = supraSourceAdaptor.getOffchainRandom(fulfilmentIndex);
         assertEq(rand, RAND1, "Wrong value returned");
     }
 
     function testTwoRequests() public {
+        vm.prank(address(randomSeedProvider));
         uint256 fulfilmentIndex1 = supraSourceAdaptor.requestOffchainRandom();
+        vm.prank(address(randomSeedProvider));
         uint256 fulfilmentIndex2 = supraSourceAdaptor.requestOffchainRandom();
         assertNotEq(fulfilmentIndex1, fulfilmentIndex2, "Different requests receive different indices");
 
@@ -152,6 +158,7 @@ contract SupraOperationalTests is SupraInitTests {
         ready = supraSourceAdaptor.isOffchainRandomReady(fulfilmentIndex2);
         assertTrue(ready, "Should be ready1");
 
+        vm.prank(address(randomSeedProvider));
         bytes32 rand = supraSourceAdaptor.getOffchainRandom(fulfilmentIndex2);
         assertEq(rand, RAND2, "Wrong value returned1");
 
@@ -161,11 +168,13 @@ contract SupraOperationalTests is SupraInitTests {
         ready = supraSourceAdaptor.isOffchainRandomReady(fulfilmentIndex2);
         assertTrue(ready, "Should be ready3");
 
+        vm.prank(address(randomSeedProvider));
         rand = supraSourceAdaptor.getOffchainRandom(fulfilmentIndex1);
         assertEq(rand, RAND1, "Wrong value returned2");
     }
 
     function testBadFulfilment() public {
+        vm.prank(address(randomSeedProvider));
         uint256 fulfilmentIndex = supraSourceAdaptor.requestOffchainRandom();
 
         uint256 length = 2;
@@ -177,13 +186,16 @@ contract SupraOperationalTests is SupraInitTests {
     }
 
     function testRequestTooEarly() public {
+        vm.prank(address(randomSeedProvider));
         uint256 fulfilmentIndex = supraSourceAdaptor.requestOffchainRandom();
 
+        vm.prank(address(randomSeedProvider));
         vm.expectRevert(abi.encodeWithSelector(OffchainWaitForRandom.selector));
         supraSourceAdaptor.getOffchainRandom(fulfilmentIndex);
     }
 
     function testHackFulfilment() public {
+        vm.prank(address(randomSeedProvider));
         uint256 fulfilmentIndex = supraSourceAdaptor.requestOffchainRandom();
 
         MockSupraRouter hackSupraRouter = new MockSupraRouter();
@@ -193,11 +205,16 @@ contract SupraOperationalTests is SupraInitTests {
         hackSupraRouter.sendFulfill(fulfilmentIndex, uint256(RAND1));
     }
 
+    function testRequestBadAuth() public {
+        vm.prank(configAdmin);
+        vm.expectRevert(abi.encodeWithSelector(SourceAdaptorBase.NotRandomSeedProvider.selector, configAdmin));
+        supraSourceAdaptor.requestOffchainRandom();
+    }
 }
 
 
 
-contract SupraIntegrationTests is SupraOperationalTests {
+contract SupraIntegrationTests is SupraTests {
     function testEndToEnd() public {
         MockGame game = new MockGame(address(randomSeedProvider));
 
@@ -223,7 +240,7 @@ contract SupraIntegrationTests is SupraOperationalTests {
     }
 }
 
-contract SupraCoverageFakeTests is SupraInitTests {
+contract SupraCoverageFakeTests is SupraTests {
         // Do calls to unused functions in MockSupraRouter so that it doesn't impact the coverage results.
     function testFixMockCoordinatorCoverage() public {
         mockSupraRouter = new MockSupraRouter();

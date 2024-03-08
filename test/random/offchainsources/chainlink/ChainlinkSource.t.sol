@@ -7,10 +7,10 @@ import {MockCoordinator} from "./MockCoordinator.sol";
 import {MockGame, RandomValues} from "../../MockGame.sol";
 import {RandomSeedProvider} from "contracts/random/RandomSeedProvider.sol";
 import {IOffchainRandomSource} from "contracts/random/offchainsources/IOffchainRandomSource.sol";
-import {ChainlinkSourceAdaptor} from "contracts/random/offchainsources/chainlink/ChainlinkSourceAdaptor.sol";
+import {ChainlinkSourceAdaptor, SourceAdaptorBase} from "contracts/random/offchainsources/chainlink/ChainlinkSourceAdaptor.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-contract ChainlinkInitTests is Test {
+contract ChainlinkTests is Test {
     event ConfigChanges( bytes32 _keyHash, uint64 _subId, uint32 _callbackGasLimit);
 
     bytes32 public constant CONFIG_ADMIN_ROLE = keccak256("CONFIG_ADMIN_ROLE");
@@ -18,6 +18,9 @@ contract ChainlinkInitTests is Test {
     bytes32 public constant KEY_HASH = bytes32(uint256(1));
     uint64 public constant SUB_ID = uint64(4);
     uint32 public constant CALLBACK_GAS_LIMIT = uint32(200000);
+
+    bytes32 public constant RAND1 = bytes32(uint256(0x1a));
+    bytes32 public constant RAND2 = bytes32(uint256(0x1b));
 
     ERC1967Proxy public proxy;
     RandomSeedProvider public impl;
@@ -44,7 +47,7 @@ contract ChainlinkInitTests is Test {
 
         mockChainlinkCoordinator = new MockCoordinator();
         chainlinkSourceAdaptor = new ChainlinkSourceAdaptor(
-            roleAdmin, configAdmin, address(mockChainlinkCoordinator), KEY_HASH, SUB_ID, CALLBACK_GAS_LIMIT);
+            roleAdmin, configAdmin, address(mockChainlinkCoordinator), address(randomSeedProvider), KEY_HASH, SUB_ID, CALLBACK_GAS_LIMIT);
         mockChainlinkCoordinator.setAdaptor(address(chainlinkSourceAdaptor));
 
         vm.prank(randomAdmin);
@@ -54,11 +57,14 @@ contract ChainlinkInitTests is Test {
         // be on the same block number as when the contracts were deployed.
         vm.roll(block.number + 1);
     }
+}
+
+contract ChainlinkInitTests is ChainlinkTests {
 
     function testInit() public {
         mockChainlinkCoordinator = new MockCoordinator();
         chainlinkSourceAdaptor = new ChainlinkSourceAdaptor(
-            roleAdmin, configAdmin, address(mockChainlinkCoordinator), KEY_HASH, SUB_ID, CALLBACK_GAS_LIMIT);
+            roleAdmin, configAdmin, address(mockChainlinkCoordinator), address(randomSeedProvider), KEY_HASH, SUB_ID, CALLBACK_GAS_LIMIT);
 
         assertEq(address(chainlinkSourceAdaptor.vrfCoordinator()), address(mockChainlinkCoordinator), "vrfCoord not set correctly");
         assertEq(chainlinkSourceAdaptor.keyHash(), KEY_HASH, "keyHash not set correctly");
@@ -68,7 +74,7 @@ contract ChainlinkInitTests is Test {
 }
 
 
-contract ChainlinkControlTests is ChainlinkInitTests {
+contract ChainlinkControlTests is ChainlinkTests {
     function testRoleAdmin() public {
         bytes32 role = CONFIG_ADMIN_ROLE;
         address newAdmin = makeAddr("newAdmin");
@@ -110,16 +116,14 @@ contract ChainlinkControlTests is ChainlinkInitTests {
 }
 
 
-contract ChainlinkOperationalTests is ChainlinkInitTests {
+contract ChainlinkOperationalTests is ChainlinkTests {
     error OffchainWaitForRandom();
     error UnexpectedRandomWordsLength(uint256 _length);
     event RequestId(uint256 _requestId);
 
-    bytes32 public constant RAND1 = bytes32(uint256(0x1a));
-    bytes32 public constant RAND2 = bytes32(uint256(0x1b));
-
     function testRequestRandom() public {
         vm.recordLogs();
+        vm.prank(address(randomSeedProvider));
         uint256 fulfilmentIndex = chainlinkSourceAdaptor.requestOffchainRandom();
         Vm.Log[] memory entries = vm.getRecordedLogs();
         assertEq(entries.length, 1);
@@ -136,12 +140,15 @@ contract ChainlinkOperationalTests is ChainlinkInitTests {
         ready = chainlinkSourceAdaptor.isOffchainRandomReady(fulfilmentIndex);
         assertTrue(ready, "Should be ready");
 
+        vm.prank(address(randomSeedProvider));
         bytes32 rand = chainlinkSourceAdaptor.getOffchainRandom(fulfilmentIndex);
         assertEq(rand, RAND1, "Wrong value returned");
     }
 
     function testTwoRequests() public {
+        vm.prank(address(randomSeedProvider));
         uint256 fulfilmentIndex1 = chainlinkSourceAdaptor.requestOffchainRandom();
+        vm.prank(address(randomSeedProvider));
         uint256 fulfilmentIndex2 = chainlinkSourceAdaptor.requestOffchainRandom();
         assertNotEq(fulfilmentIndex1, fulfilmentIndex2, "Different requests receive different indices");
 
@@ -156,6 +163,7 @@ contract ChainlinkOperationalTests is ChainlinkInitTests {
         ready = chainlinkSourceAdaptor.isOffchainRandomReady(fulfilmentIndex2);
         assertTrue(ready, "Should be ready1");
 
+        vm.prank(address(randomSeedProvider));
         bytes32 rand = chainlinkSourceAdaptor.getOffchainRandom(fulfilmentIndex2);
         assertEq(rand, RAND2, "Wrong value returned1");
 
@@ -165,11 +173,13 @@ contract ChainlinkOperationalTests is ChainlinkInitTests {
         ready = chainlinkSourceAdaptor.isOffchainRandomReady(fulfilmentIndex2);
         assertTrue(ready, "Should be ready3");
 
+        vm.prank(address(randomSeedProvider));
         rand = chainlinkSourceAdaptor.getOffchainRandom(fulfilmentIndex1);
         assertEq(rand, RAND1, "Wrong value returned2");
     }
 
     function testBadFulfilment() public {
+        vm.prank(address(randomSeedProvider));
         uint256 fulfilmentIndex = chainlinkSourceAdaptor.requestOffchainRandom();
 
         uint256 length = 2;
@@ -181,24 +191,33 @@ contract ChainlinkOperationalTests is ChainlinkInitTests {
     }
 
     function testRequestTooEarly() public {
+        vm.prank(address(randomSeedProvider));
         uint256 fulfilmentIndex = chainlinkSourceAdaptor.requestOffchainRandom();
 
+        vm.prank(address(randomSeedProvider));
         vm.expectRevert(abi.encodeWithSelector(OffchainWaitForRandom.selector));
         chainlinkSourceAdaptor.getOffchainRandom(fulfilmentIndex);
     }
 
     function testHackFulfilment() public {
+        vm.prank(address(randomSeedProvider));
         uint256 fulfilmentIndex = chainlinkSourceAdaptor.requestOffchainRandom();
 
         MockCoordinator hackChainlinkCoordinator = new MockCoordinator();
         vm.expectRevert();
         hackChainlinkCoordinator.sendFulfill(fulfilmentIndex, uint256(RAND1));
     }
+
+    function testRequestBadAuth() public {
+        vm.prank(configAdmin);
+        vm.expectRevert(abi.encodeWithSelector(SourceAdaptorBase.NotRandomSeedProvider.selector, configAdmin));
+        chainlinkSourceAdaptor.requestOffchainRandom();
+    }
 }
 
 
 
-contract ChainlinkIntegrationTests is ChainlinkOperationalTests {
+contract ChainlinkIntegrationTests is ChainlinkTests {
     function testEndToEnd() public {
         MockGame game = new MockGame(address(randomSeedProvider));
 
@@ -224,7 +243,7 @@ contract ChainlinkIntegrationTests is ChainlinkOperationalTests {
     }
 }
 
-contract ChainlinkCoverageFakeTests is ChainlinkInitTests {
+contract ChainlinkCoverageFakeTests is ChainlinkTests {
     error OnlyCoordinatorCanFulfill(address have, address want);
 
     // Do calls to unused functions in MockCoordinator so that it doesn't impact the coverage results.

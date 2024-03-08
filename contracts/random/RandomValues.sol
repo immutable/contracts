@@ -105,7 +105,7 @@ abstract contract RandomValues {
         delete randCreationRequests[_randomRequestId];
 
         // Request the random seed. If not enough time has elapsed yet, this call will revert.
-        bytes32 randomSeed = randomSeedProvider.getRandomSeed(request.fulfilmentId, request.source);
+        bytes32 randomSeed = randomSeedProvider.fulfilRandomSeedRequest(request.fulfilmentId, request.source);
 
         // Generate the personlised seed by combining:
         //  address(this): personalises the random seed to this game.

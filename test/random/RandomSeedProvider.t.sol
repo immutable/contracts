@@ -61,7 +61,7 @@ contract UninitializedRandomSeedProviderTest is RandomSeedProviderBase {
         vm.roll(block.number + 1);
 
         // Check  that the initialize funciton has worked correctly.
-        (uint256 lastBlock, uint256 queueLen) = randomSeedProvider1.onchainGenerationStatus();
+        (uint256 lastBlock, uint256 queueLen) = randomSeedProvider1.onChainGenerationStatus();
         assertEq(lastBlock, 0, "last block");
         assertEq(queueLen, 0, "queue len");
         assertEq(randomSeedProvider1.randomSource(), ONCHAIN, "randomSource");
@@ -80,18 +80,18 @@ contract UninitializedRandomSeedProviderTest is RandomSeedProviderBase {
     function testGetRandomSeedOld() public {
         vm.roll(block.number + 1000);
         vm.expectRevert(abi.encodeWithSelector(GenerationFailedTryAgain.selector, block.number - 1000));
-        randomSeedProvider.getRandomSeed(block.number - 1000, ONCHAIN);
+        randomSeedProvider.fulfilRandomSeedRequest(block.number - 1000, ONCHAIN);
     }
 
     function testGetRandomSeedNotGen() public {
         // 2 is the default onchain delay
         vm.expectRevert(abi.encodeWithSelector(WaitForRandom.selector, block.number));
-        randomSeedProvider.getRandomSeed(block.number, ONCHAIN);
+        randomSeedProvider.fulfilRandomSeedRequest(block.number, ONCHAIN);
     }
 
     function testGetRandomSeedNoOffchainSource() public {
         vm.expectRevert();
-        randomSeedProvider.getRandomSeed(0, address(1000));
+        randomSeedProvider.fulfilRandomSeedRequest(0, address(1000));
     }
 }
 
@@ -268,14 +268,14 @@ contract OperationalRandomSeedProviderTest is RandomSeedProviderBase {
             status = randomSeedProvider.isRandomSeedReady(fulfillmentIndex, source);
             assertEq(uint256(status), uint256(RandomSeedProvider.SeedRequestStatus.IN_PROGRESS), "Should not be ready yet");
             vm.expectRevert(abi.encodeWithSelector(WaitForRandom.selector, fulfillmentIndex));
-            randomSeedProvider.getRandomSeed(fulfillmentIndex, source);
+            randomSeedProvider.fulfilRandomSeedRequest(fulfillmentIndex, source);
             vm.roll(block.number + 1);
         }
 
         status = randomSeedProvider.isRandomSeedReady(fulfillmentIndex, source);
         assertEq(uint256(status), uint256(RandomSeedProvider.SeedRequestStatus.READY), "Should be ready");
 
-        bytes32 seed = randomSeedProvider.getRandomSeed(fulfillmentIndex, source);
+        bytes32 seed = randomSeedProvider.fulfilRandomSeedRequest(fulfillmentIndex, source);
         assertNotEq(seed, bytes32(0), "Should not be zero");
     }
 
@@ -300,7 +300,7 @@ contract OperationalRandomSeedProviderTest is RandomSeedProviderBase {
         status = randomSeedProvider.isRandomSeedReady(fulfillmentIndex, source);
         assertEq(uint256(status), uint256(RandomSeedProvider.SeedRequestStatus.READY), "Should be ready");
 
-        bytes32 seed = randomSeedProvider.getRandomSeed(fulfillmentIndex, source);
+        bytes32 seed = randomSeedProvider.fulfilRandomSeedRequest(fulfillmentIndex, source);
         assertNotEq(seed, bytes32(0), "Should not be zero");
     }
 
@@ -316,7 +316,7 @@ contract OperationalRandomSeedProviderTest is RandomSeedProviderBase {
         (uint256 fulfillmentIndex, address source) = randomSeedProvider.requestRandomSeed();
 
         vm.expectRevert(abi.encodeWithSelector(OffchainWaitForRandom.selector));
-        randomSeedProvider.getRandomSeed(fulfillmentIndex, source);
+        randomSeedProvider.fulfilRandomSeedRequest(fulfillmentIndex, source);
     }
 
     function testOnchainTwoInOneBlock() public {
@@ -347,24 +347,24 @@ contract OperationalRandomSeedProviderTest is RandomSeedProviderBase {
         vm.roll(randomRequestId1 + 1);
 
         (uint256 randomRequestId2, address source2) = randomSeedProvider.requestRandomSeed();
-        bytes32 rand1a = randomSeedProvider.getRandomSeed(randomRequestId1, source1);
+        bytes32 rand1a = randomSeedProvider.fulfilRandomSeedRequest(randomRequestId1, source1);
         assertNotEq(rand1a, bytes32(0), "rand1a: Random Values is zero");
         (uint256 randomRequestId3,) = randomSeedProvider.requestRandomSeed();
         assertNotEq(randomRequestId1, randomRequestId2, "Request id 1 and request id 2");
         assertEq(randomRequestId2, randomRequestId3, "Request id 2 and request id 3");
 
         vm.roll(randomRequestId2 + 1);
-        bytes32 rand1b = randomSeedProvider.getRandomSeed(randomRequestId1, source1);
+        bytes32 rand1b = randomSeedProvider.fulfilRandomSeedRequest(randomRequestId1, source1);
         assertNotEq(rand1b, bytes32(0), "rand1b: Random Values is zero");
         {
-            bytes32 rand2 = randomSeedProvider.getRandomSeed(randomRequestId2, source2);
+            bytes32 rand2 = randomSeedProvider.fulfilRandomSeedRequest(randomRequestId2, source2);
             assertNotEq(rand2, bytes32(0), "rand2: Random Values is zero");
             assertNotEq(rand1a, rand2, "rand1a, rand2: Random Values equal");
         }
 
         // Check that random request id 1 can be re-fetched at a later block.
         vm.roll(block.number + 1);
-        bytes32 rand1c = randomSeedProvider.getRandomSeed(randomRequestId1, source1);
+        bytes32 rand1c = randomSeedProvider.fulfilRandomSeedRequest(randomRequestId1, source1);
         assertNotEq(rand1c, bytes32(0), "rand1c: Random Values is zero");
 
         assertEq(rand1a, rand1b, "rand1a, rand1b: Random Values not equal");
@@ -384,16 +384,16 @@ contract OperationalRandomSeedProviderTest is RandomSeedProviderBase {
         (uint256 randomRequestId3, address source3) = randomSeedProvider.requestRandomSeed();
         vm.roll(block.number + 1);
         (uint256 randomRequestId4, address source4) = randomSeedProvider.requestRandomSeed();
-        bytes32 rand1 = randomSeedProvider.getRandomSeed(randomRequestId1, source1);
+        bytes32 rand1 = randomSeedProvider.fulfilRandomSeedRequest(randomRequestId1, source1);
         vm.roll(block.number + 1);
         (uint256 randomRequestId5, address source5) = randomSeedProvider.requestRandomSeed();
-        bytes32 rand2 = randomSeedProvider.getRandomSeed(randomRequestId2, source2);
+        bytes32 rand2 = randomSeedProvider.fulfilRandomSeedRequest(randomRequestId2, source2);
         vm.roll(block.number + 1);
-        bytes32 rand3 = randomSeedProvider.getRandomSeed(randomRequestId3, source3);
+        bytes32 rand3 = randomSeedProvider.fulfilRandomSeedRequest(randomRequestId3, source3);
         vm.roll(block.number + 1);
-        bytes32 rand4 = randomSeedProvider.getRandomSeed(randomRequestId4, source4);
+        bytes32 rand4 = randomSeedProvider.fulfilRandomSeedRequest(randomRequestId4, source4);
         vm.roll(block.number + 1);
-        bytes32 rand5 = randomSeedProvider.getRandomSeed(randomRequestId5, source5);
+        bytes32 rand5 = randomSeedProvider.fulfilRandomSeedRequest(randomRequestId5, source5);
 
         assertNotEq(rand1, bytes32(0), "rand1 is zero");
         assertNotEq(rand2, bytes32(0), "rand2 is zero");
@@ -411,7 +411,7 @@ contract OperationalRandomSeedProviderTest is RandomSeedProviderBase {
         vm.roll(block.number + 1000);
         (uint256 randomRequestId1, address source1) = randomSeedProvider.requestRandomSeed();
         vm.roll(randomRequestId1 + 1);
-        bytes32 rand1 = randomSeedProvider.getRandomSeed(randomRequestId1, source1);
+        bytes32 rand1 = randomSeedProvider.fulfilRandomSeedRequest(randomRequestId1, source1);
         assertNotEq(rand1, bytes32(0), "rand1 is zero");
     }
 
@@ -420,54 +420,54 @@ contract OperationalRandomSeedProviderTest is RandomSeedProviderBase {
         // Don't fulfil the value for more than 257 blocks after the fulfillment block.
         vm.roll(randomRequestId1 + 257);
         vm.expectRevert(abi.encodeWithSelector(RandomSeedProvider.GenerationFailedTryAgain.selector, randomRequestId1));
-        randomSeedProvider.getRandomSeed(randomRequestId1, source1);
+        randomSeedProvider.fulfilRandomSeedRequest(randomRequestId1, source1);
     }
 
     function testGenerateNextSeedOnChain() public {
-        (uint256 lastBlock, uint256 queueLen) = randomSeedProvider.onchainGenerationStatus();
+        (uint256 lastBlock, uint256 queueLen) = randomSeedProvider.onChainGenerationStatus();
         assertEq(lastBlock, 0, "last block");
         assertEq(queueLen, 0, "queue len");
 
         (uint256 randomRequestId1, address source1) = randomSeedProvider.requestRandomSeed();
-        (lastBlock, queueLen) = randomSeedProvider.onchainGenerationStatus();
+        (lastBlock, queueLen) = randomSeedProvider.onChainGenerationStatus();
         assertEq(lastBlock, randomRequestId1, "last block");
         assertEq(queueLen, 1, "queue len");
 
         // Note request in the same block
         (uint256 randomRequestId2, address source2) = randomSeedProvider.requestRandomSeed();
-        (lastBlock, queueLen) = randomSeedProvider.onchainGenerationStatus();
+        (lastBlock, queueLen) = randomSeedProvider.onChainGenerationStatus();
         assertEq(lastBlock, randomRequestId1, "last block");
         assertEq(queueLen, 1, "queue len");
 
         vm.roll(randomRequestId2 + 1);
         (uint256 randomRequestId3, address source3) = randomSeedProvider.requestRandomSeed();
-        (lastBlock, queueLen) = randomSeedProvider.onchainGenerationStatus();
+        (lastBlock, queueLen) = randomSeedProvider.onChainGenerationStatus();
         assertEq(lastBlock, randomRequestId1, "last block3");
         assertEq(queueLen, 2, "queue len3");
 
-        randomSeedProvider.getRandomSeed(randomRequestId1, source1);
-        (lastBlock, queueLen) = randomSeedProvider.onchainGenerationStatus();
+        randomSeedProvider.fulfilRandomSeedRequest(randomRequestId1, source1);
+        (lastBlock, queueLen) = randomSeedProvider.onChainGenerationStatus();
         assertEq(lastBlock, randomRequestId3, "last block4");
         assertEq(queueLen, 1, "queue len4");
         
-        randomSeedProvider.getRandomSeed(randomRequestId2, source2);
-        (lastBlock, queueLen) = randomSeedProvider.onchainGenerationStatus();
+        randomSeedProvider.fulfilRandomSeedRequest(randomRequestId2, source2);
+        (lastBlock, queueLen) = randomSeedProvider.onChainGenerationStatus();
         assertEq(lastBlock, randomRequestId3, "last block5");
         assertEq(queueLen, 1, "queue len5");
 
         randomSeedProvider.processOnChainGenerationQueue();
-        (lastBlock, queueLen) = randomSeedProvider.onchainGenerationStatus();
+        (lastBlock, queueLen) = randomSeedProvider.onChainGenerationStatus();
         assertEq(lastBlock, randomRequestId3, "last block");
         // It is too soon for randomRequestId3, so only 1 and 2 are fulfilled.
         assertEq(queueLen, 1, "queue len");
 
         vm.roll(randomRequestId3 + 1);
         randomSeedProvider.processOnChainGenerationQueue();
-        (lastBlock, queueLen) = randomSeedProvider.onchainGenerationStatus();
+        (lastBlock, queueLen) = randomSeedProvider.onChainGenerationStatus();
         assertEq(lastBlock, 0, "last block");
         assertEq(queueLen, 0, "queue len");
-        randomSeedProvider.getRandomSeed(randomRequestId2, source2);
-        randomSeedProvider.getRandomSeed(randomRequestId3, source3);
+        randomSeedProvider.fulfilRandomSeedRequest(randomRequestId2, source2);
+        randomSeedProvider.fulfilRandomSeedRequest(randomRequestId3, source3);
     }
 
     function testGenerateNextSeedOnChainLate() public {
@@ -477,11 +477,11 @@ contract OperationalRandomSeedProviderTest is RandomSeedProviderBase {
         vm.expectEmit(true, true, true, true);
         emit TooLateToGenerateRandom(randomRequestId1);
         randomSeedProvider.processOnChainGenerationQueue();
-        (uint256 lastBlock, uint256 queueLen) = randomSeedProvider.onchainGenerationStatus();
+        (uint256 lastBlock, uint256 queueLen) = randomSeedProvider.onChainGenerationStatus();
         assertEq(lastBlock, 0, "last block");
         assertEq(queueLen, 0, "queue len");
         vm.expectRevert(abi.encodeWithSelector(RandomSeedProvider.GenerationFailedTryAgain.selector, randomRequestId1));
-        randomSeedProvider.getRandomSeed(randomRequestId1, source1);
+        randomSeedProvider.fulfilRandomSeedRequest(randomRequestId1, source1);
     }
 }
 
@@ -498,7 +498,7 @@ contract SwitchingRandomSeedProviderTest is UninitializedRandomSeedProviderTest 
         assertEq(source1, ONCHAIN, "source");
         assertEq(fulfillmentIndex1, block.number + STANDARD_ONCHAIN_DELAY, "index");
         vm.roll(fulfillmentIndex1 + 1);
-        bytes32 seed1 = randomSeedProvider.getRandomSeed(fulfillmentIndex1, source1);
+        bytes32 seed1 = randomSeedProvider.fulfilRandomSeedRequest(fulfillmentIndex1, source1);
 
         vm.prank(randomAdmin);
         randomSeedProvider.setOffchainRandomSource(address(offchainSource));
@@ -509,9 +509,9 @@ contract SwitchingRandomSeedProviderTest is UninitializedRandomSeedProviderTest 
         assertEq(fulfillmentIndex2, 1000, "index");
 
         offchainSource.setIsReady(true);
-        bytes32 seed2 = randomSeedProvider.getRandomSeed(fulfillmentIndex2, source2);
+        bytes32 seed2 = randomSeedProvider.fulfilRandomSeedRequest(fulfillmentIndex2, source2);
 
-        bytes32 seed1a = randomSeedProvider.getRandomSeed(fulfillmentIndex1, source1);
+        bytes32 seed1a = randomSeedProvider.fulfilRandomSeedRequest(fulfillmentIndex1, source1);
 
         assertEq(seed1, seed1a, "Seed still available");
         assertNotEq(seed1, seed2, "Must be different");
@@ -544,9 +544,9 @@ contract SwitchingRandomSeedProviderTest is UninitializedRandomSeedProviderTest 
         status = randomSeedProvider.isRandomSeedReady(fulfillmentIndex1, source1);
         assertEq(uint256(status), uint256(RandomSeedProvider.SeedRequestStatus.READY), "Should be ready");
 
-        randomSeedProvider.getRandomSeed(fulfillmentIndex1, source1);
+        randomSeedProvider.fulfilRandomSeedRequest(fulfillmentIndex1, source1);
         offchainSource2.setIsReady(true);
-        randomSeedProvider.getRandomSeed(fulfillmentIndex2, source2);
+        randomSeedProvider.fulfilRandomSeedRequest(fulfillmentIndex2, source2);
     }
 
 
@@ -572,10 +572,10 @@ contract SwitchingRandomSeedProviderTest is UninitializedRandomSeedProviderTest 
         assertEq(fulfillmentIndex2, block.number + STANDARD_ONCHAIN_DELAY, "index");
 
         offchainSource.setIsReady(true);
-        randomSeedProvider.getRandomSeed(fulfillmentIndex1, source1);
+        randomSeedProvider.fulfilRandomSeedRequest(fulfillmentIndex1, source1);
 
         vm.roll(fulfillmentIndex2 + 1);
-        randomSeedProvider.getRandomSeed(fulfillmentIndex2, source2);
+        randomSeedProvider.fulfilRandomSeedRequest(fulfillmentIndex2, source2);
     }
 }
 

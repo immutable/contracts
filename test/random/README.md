@@ -10,9 +10,9 @@ Initialize testing:
 |---------------------------------| --------------------------------------------------|------------|-------------|
 | testInit                        | Check that deployment + initialize work.          | Yes        | Yes         |
 | testReinit                      | Calling initialise a second time fails.           | No         | Yes         |
-| testGetRandomSeedInit           | getRandomSeed(), initial value                    | Yes        | Yes         |
-| testGetRandomSeedNotGen         | getRandomSeed(), when value not generated         | No         | Yes         |
-| testGetRandomSeedNoOffchainSource | getRandomSeed(), when no offchain source configured | No     | Yes         |
+| testGetRandomSeedInit           | fulfilRandomSeedRequest(), initial value                    | Yes        | Yes         |
+| testGetRandomSeedNotGen         | fulfilRandomSeedRequest(), when value not generated         | No         | Yes         |
+| testGetRandomSeedNoOffchainSource | fulfilRandomSeedRequest(), when no offchain source configured | No     | Yes         |
 
 Control functions tests:
 
@@ -163,9 +163,10 @@ Operational functions tests:
 |---------------------------------| --------------------------------------------------|------------|-------------|
 | testRequestRandom               | Request a random value.                           | Yes        | Yes         |
 | testTwoRequests                 | Check that two requests return different values.  | Yes        | Yes         |
-| testBadFulfillment               | Return a set of random numbers rather than one.   | No         | Yes         |
+| testBadFulfillment              | Return a set of random numbers rather than one.   | No         | Yes         |
 | testRequestTooEarly             | Request before ready.                             | No         | Yes         |
-| testHackFulfillment              | Attempt to maliciously fulfil from other address. | No         | Yes         |
+| testHackFulfillment             | Attempt to maliciously fulfil from other address. | No         | Yes         |
+| testRequestBadAuth              | Request but not random seed provider.             | No         | Yes         |
 
 Integration tests:
 
@@ -201,9 +202,11 @@ Operational functions tests:
 |---------------------------------| --------------------------------------------------|------------|-------------|
 | testRequestRandom               | Request a random value.                           | Yes        | Yes         |
 | testTwoRequests                 | Check that two requests return different values.  | Yes        | Yes         |
-| testBadFulfillment               | Return a set of random numbers rather than one.   | No         | Yes         |
+| testBadFulfillment              | Return a set of random numbers rather than one.   | No         | Yes         |
 | testRequestTooEarly             | Request before ready.                             | No         | Yes         |
-| testHackFulfillment              | Attempt to maliciously fulfil from other address. | No         | Yes         |
+| testHackFulfillment             | Attempt to maliciously fulfil from other address. | No         | Yes         |
+| testRequestBadAuth              | Request but not random seed provider.             | No         | Yes         |
+
 
 Integration tests:
 

@@ -44,7 +44,7 @@ logic included in the ```UUPSUpgradeable.sol``` contract that ```RandomSeedProvi
 The ```RandomSeedProvider.sol``` contract can be configured to use an off-chain random number source. This source is accessed via the ```IOffchainRandomSource.sol``` interface. To allow the flexibility to switch between off-chain random sources, there is an adaptor contract between the offchain random source contract and the random seed provider.
 
 Random seeds must be generated within 255 blocks of being requested when the `RandomSeedProvider.sol` contract is using the on-chain random number source. 
-That is, once a player has requested a random value via the `requestRandomSeed` function, either the player must fulfill the request by calling the `getRandomSeed` function or a service must call the `generateNextRandomOnChain` function. A service calling the `generateNextRandomOnChain` allows the game player at some later point to call the `getRandomSeed` function successfully.
+That is, once a player has requested a random value via the `requestRandomSeed` function, either the player must fulfill the request by calling the `fulfilRandomSeedRequest` function or a service must call the `generateNextRandomOnChain` function. A service calling the `generateNextRandomOnChain` allows the game player at some later point to call the `fulfilRandomSeedRequest` function successfully.
 
 The architecture diagram shows a ChainLink VRF source and a Supra VRF source. This is purely to show the possibility of integrating with one off-chain service and then, at a later point choosing to switch to an alternative off-chain source. At present, there is no agreement to use any specific off-chain source.
 

@@ -31,7 +31,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
     error InvalidOnchainDelay(uint256 _proposedDelay);
 
     /// @notice A seed could not be generate for a block because too long had elapsed between 
-    /// requesting and a call to getRandomSeed or generateNextSeedOnChain.
+    /// requesting and a call to fulfilRandomSeedRequest or generateNextSeedOnChain.
     event TooLateToGenerateRandom(uint256 _blockNumber);
 
     /// @notice The off-chain random source has been updated.
@@ -73,11 +73,11 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
     // @dev This storage slot will be used during upgrades.
     uint256 public version;
 
-    /// @notice All historical random output.
+    /// @notice All historical random output produced by the on-chain source.
     /// @dev When random seeds are requested, a request id is returned. The id
     /// @dev relates to a certain future random seed. This map holds all of the
     /// @dev random seeds that have been produced.
-    mapping(uint256 requestId => bytes32 randomValue) public randomOutput;
+    mapping(uint256 requestId => bytes32 randomValue) private randomOutput;
 
     /// @notice The block when the last off-chain random request occurred.
     /// @dev This is used to limit off-chain random requests to once per block.
@@ -230,7 +230,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
      * @param _randomSource The source to use when retrieving the random seed.
      * @return _randomSeed The value from which random values can be derived.
      */
-    function getRandomSeed(
+    function fulfilRandomSeedRequest(
         uint256 _randomFulfilmentIndex,
         address _randomSource
     ) external returns (bytes32 _randomSeed) {
@@ -254,7 +254,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
 
     /**
      * @notice Generate a set of random values using on-chain methodologies.
-     * @dev Either this function or getRandomSeed need to be called within 255 blocks
+     * @dev Either this function or fulfilRandomSeedRequest need to be called within 255 blocks
      *      of requestRandomSeed being called.
      */
     function processOnChainGenerationQueue() public {
@@ -295,7 +295,12 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
         }
     }
 
-    function onchainGenerationStatus() external view returns (uint256 _oldestBlockNumber, uint256 _queueDepth) {
+    /**
+     * @notice Determine the state of the on-chain generation queue.
+     * @return _oldestBlockNumber The oldest block number in the queue. Zero if the queue is empty.
+     * @return _queueDepth The length of the queue (possibly including empty indices).
+     */
+    function onChainGenerationStatus() external view returns (uint256 _oldestBlockNumber, uint256 _queueDepth) {
         return (peakNext(), queueLength());
     }
 

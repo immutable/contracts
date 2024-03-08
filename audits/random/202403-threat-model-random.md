@@ -205,7 +205,7 @@ Note that limits are placed on the possible values of on-chain delay. A delay of
 In an effort to protect the system from an administrator mistakenly setting the delay to an excessively high value, the maximum delay is 30 blocks. Given a two second block time, this equates to a one minute delay between requests and fulfillment. This seems like a large maximum value. The contract can be upgraded in the unlikely event that a larger value needs to set.
 
 ### On-Chain Random Fulfillment
-Seed values are produced by calling the `generateNextSeedOnChain` function. This function can either be called directly, typically by a platform operated service, or via the `getRandomSeed` function.
+Seed values are produced by calling the `generateNextSeedOnChain` function. This function can either be called directly, typically by a platform operated service, or via the `fulfilRandomSeedRequest` function.
 
 The `generateNextSeedOnChain` function takes block numbers from the Random Seed Provider's queue. When analysing the block numbers, there are three possible scenarios:
 
@@ -213,12 +213,12 @@ The `generateNextSeedOnChain` function takes block numbers from the Random Seed 
 * The block number is for the current block or for a future block. In this case, the block hash can't be determined yet.
 * The block number is for a block between one and 256 blocks ago. The block hash is requested using the block hash opcode and stored in a map of block number to block hash for later use. 
 
-The `getRandomSeed` function returns seed values from the map of block number to block hash. The function reverts if the `generateNextSeedOnChain` function wasn't called in time given the block number, or if the block number is for the current block is is in the future. 
+The `fulfilRandomSeedRequest` function returns seed values from the map of block number to block hash. The function reverts if the `generateNextSeedOnChain` function wasn't called in time given the block number, or if the block number is for the current block is is in the future. 
 
-The `isRandomSeedReady` function returns the generation status, with the possible status values matching the happy and two revert cases of the `getRandomSeed` function.
+The `isRandomSeedReady` function returns the generation status, with the possible status values matching the happy and two revert cases of the `fulfilRandomSeedRequest` function.
 
 ### Off-chain Sources
-The Random Seed Provider delegates calls to the `requestRandomSeed`, `getRandomSeed`, and `isRandomSeedReady` functions to an off-chain random source via the `IOffchainRandomSource.sol` interface.
+The Random Seed Provider delegates calls to the `requestRandomSeed`, `fulfilRandomSeedRequest`, and `isRandomSeedReady` functions to an off-chain random source via the `IOffchainRandomSource.sol` interface.
 
 ### Random Seed Provider Approach to Upgrade
 The Random Seed Provider contract uses a Universal Upgradeable Proxy Standard (UUPS) upgrade paradigm. An admin with upgrade priviledges calls the `upgradeToAndCall` function, which in turn calls the `_authorizeUpgrade` function, which does the authorisation check. `upgradeToAndCall` allows a function in the new application logic contract to be specified and called. This function must be specified as the `upgrade` function.
@@ -282,73 +282,170 @@ TODO talk about storing source as well as id, and source is address thus allowin
 
 
 
+
 ## Other Information
 
-This section provides links to all source code, test plans, test code.
+This section provides links to test plans and test code.
 
-### TODO Source Code
-TODO update
+### Test Plans and Test Code
+The test plan is available here: [https://github.com/immutable/contracts/tree/main/test/random](https://github.com/immutable/contracts/tree/main/test/random). The test code is contained in the same directory at the test plan.
 
-This threat model pertains to the following source code:
+### Continuous Integration
 
-- [RootERC20PredicateFlowRate.sol](https://github.com/immutable/poly-core-contracts/blob/d0a3be95ac9d2d7820903558d4668197f9d77d9a/contracts/root/flowrate/RootERC20PredicateFlowRate.sol): Version of ERC 20 Bridge contract to be deployed on Ethereum for ERC 20 tokens that originate on Ethereum, that includes security features.
+Each time a commit is pushed to a pull request, the [continuous integration loop executes](https://github.com/immutable/contracts/actions).
 
+### Building, Testing, Coverage and Static Code Analysis
 
-### TODO Test Plans
-TODO update
-
-
-The following test plans were created to evaluate the tests required for adding Ether support and the security enhancements to the ERC 20 bridge. All tests described in the test plans were implemented.
-
-- [Root ERC 20 Predicate, Ether Support](https://github.com/immutable/poly-core-contracts/blob/d0a3be95ac9d2d7820903558d4668197f9d77d9a/test/forge/root/RootERC20Predicate.tree)
-- [Root ERC 20 Predicate, Security Enhancements](https://github.com/immutable/poly-core-contracts/blob/d0a3be95ac9d2d7820903558d4668197f9d77d9a/test/forge/root/flowrate/README.md)
-
-### TODO Test Code
-TODO update
+For instructions on building the code, running tests, coverage, and Slither, see the [BUILD.md](https://github.com/immutable/contracts/blob/main/BUILD.md).
 
 
-
-The following test code was created to test the ERC 20 bridge Ether support and security enhancements.
-
-- [Tests for RootERC20Predicate.sol, focusing on Ether support](https://github.com/immutable/poly-core-contracts/blob/d0a3be95ac9d2d7820903558d4668197f9d77d9a/test/forge/root/RootERC20Predicate.t.sol)
-
-
-### TODO Continuous Integration
-
-TODO REvise Each time a commit is pushed to a pull request, the [continuous integration loop executes](https://github.com/immutable/poly-core-contracts/actions).
-
-### TODO Building, Testing, Coverage and Static Code Analysis
-
-TODO: Revise 
-For instructions on building the code, running tests, coverage, and Slither, see the [Using this Repo](https://github.com/immutable/poly-core-contracts/blob/d0a3be95ac9d2d7820903558d4668197f9d77d9a/README.md#using-this-repo) section of the README.md at the root of this repo.
 
 # Attack Surfaces
 
 The following sections list attack surfaces evaluated as part of this threat modelling exercise.
 
-## TODO RootERC20PredicateFlowRate Externally Visible Functions
+## Externally Visible Functions
+An attacker could formulate an attack in which they send one or more transactions that execute one or more of these functions.
 
-This section describes the externally visible functions available in `RootERC20PredicateFlowRate`. An attacker could formulate an attack in which they send one or more transactions that execute one or more of these functions.
-
-The table below shows the list of externally visible functions. In addition to the name and function selector, the function type (transaction or view), and access control mechanisms are listed.
-
-The list of functions and their function selectors was determined by the following command. The additional information was obtained by reviewing the code.
+### RandomSeedProvider
+This section describes the externally visible functions available in `RandomSeedProvider`. The list of functions and their function selectors was determined by the following command. The additional information was obtained by reviewing the code.
 
 ```
-cd contracts/root/flowrate
-forge inspect RootERC20PredicateFlowRate --pretty methods
+forge inspect RandomSeedProvider --pretty methods
 ```
 
-| Name                                                                                 | Function Selector | Type        | Access Control       |
-| ------------------------------------------------------------------------------------ | ----------------- | ----------- | -------------------- |
-| DEFAULT_ADMIN_ROLE()                                                                 | a217fddf          | view        | -                    |
-| DEPOSIT_SIG()                                                                        | d41f1771          | view        | -                    |
-| MAP_TOKEN_SIG()                                                                      | f6451255          | view        | -                    |
-| NATIVE_TOKEN()                                                                       | 31f7d964          | view        | -                    |
-| WITHDRAW_SIG()                                                                       | b1768065          | view        | -                    |
-| activateWithdrawalQueue()                                                            | af8bbb5e          | transaction | RATE role            |
-| childERC20Predicate()                                                                | d57184e4          | view        | -                    |
+Functions that *change* state:
 
+| Name                                        | Function Selector | Access Control        |
+| ------------------------------------------- | ----------------- | --------------------- |
+| addOffchainRandomConsumer(address)          | 95497dce          | RANDOM_ADMIN          |
+| fulfilRandomSeedRequest(uint256,address)    | 8455c40a          | None - permissionless |
+| grantRole(bytes32,address)                  | 2f2ff15d          | Role admin            |
+| initialize(address,address,address)         | c0c53b8b          | Only on deployment.   |
+| processOnChainGenerationQueue()             | 1634965c          | None - permissionless |
+| removeOffchainRandomConsumer(address)       | fe1de09b          | RANDOM_ADMIN          |
+| renounceRole(bytes32,address)               | 36568abe          | msg.sender            |
+| requestRandomSeed()                         | e1da26c6          | None - permissionless |
+| revokeRole(bytes32,address)                 | d547741f          | Role admin            |
+| setOffchainRandomSource(address)            | d701b221          | RANDOM_ADMIN          |
+| setOnChainDelay(uint256)                    | 325f5b19          | RANDOM_ADMIN          |
+| upgrade(bytes)                              | 25394645          | Only on upgrade.      |
+| upgradeTo(address)                          | 3659cfe6          | UPGRADE_ADMIN         |
+| upgradeToAndCall(address,bytes)             | 4f1ef286          | UPGRADE_ADMIN         |
+
+Functions that *do not change* state:
+
+| Name                                        | Function Selector |
+| ------------------------------------------- | ----------------- |
+| DEFAULT_ADMIN_ROLE()                        | a217fddf          |
+| approvedForOffchainRandom(address)          | 7064be31          |
+| getRoleAdmin(bytes32)                       | 248a9ca3          |
+| getRoleMember(bytes32,uint256)              | 9010d07c          |
+| getRoleMemberCount(bytes32)                 | ca15c873          |
+| hasRole(bytes32,address)                    | 91d14854          |
+| isRandomSeedReady(uint256,address)          | eb619f43          |
+| onChainDelay()                              | 50b2cdad          |
+| onChainGenerationStatus()                   | b7a998ea          |
+| proxiableUUID()                             | 52d1902d          |
+| randomSource()                              | 0c89b766          |
+| supportsInterface(bytes4)                   | 01ffc9a7          |
+| version()                                   | 54fd4d50          |
+
+
+### Random Values and RandomSequences
+This section describes the externally visible functions available in `RandomValues` and in `RandomSequences`. `RandomSequences` itself does not define any additional external functions. As such, the external function visible in `RandomSequences` is the same as in `RandomValues`.
+
+The list of functions and their function selectors was determined by the following commands. The additional information was obtained by reviewing the code.
+
+```
+forge inspect RandomValues --pretty methods
+forge inspect RandomSequences --pretty methods
+```
+
+Functions that *change* state:
+
+| Name                                        | Function Selector | Access Control        |
+| ------------------------------------------- | ----------------- | --------------------- |
+| None                                        | None              | None  |
+
+Functions that *do not change* state:
+
+| Name                                        | Function Selector |
+| ------------------------------------------- | ----------------- |
+| randomSeedProvider()                        | 68fab262          |
+
+
+### ChainlinkSourceAdaptor
+This section describes the externally visible functions available in `ChainlinkSourceAdaptor`. The list of functions and their function selectors was determined by the following command. The additional information was obtained by reviewing the code.
+
+```
+forge inspect ChainlinkSourceAdaptor --pretty methods
+```
+
+Functions that *change* state:
+
+| Name                                        | Function Selector | Access Control        |
+| ------------------------------------------- | ----------------- | --------------------- |
+| configureRequests(bytes32,uint64,uint32)    | 0d604c14          | CONFIG_ADMIN          |
+| grantRole(bytes32,address)                  | 2f2ff15d          | Role admin            |
+| rawFulfillRandomWords(uint256,uint256[])    | 1fe543e3          | VRF Coordinator       |
+| renounceRole(bytes32,address)               | 36568abe          | msg.sender            |
+| requestOffchainRandom()                     | eab48712          | Random seed provider  |
+
+| revokeRole(bytes32,address)                 | d547741f          | Role admin            |
+
+Functions that *do not change* state:
+
+| Name                                        | Function Selector |
+| ------------------------------------------- | ----------------- |
+| DEFAULT_ADMIN_ROLE()                        | a217fddf          |
+| callbackGasLimit()                          | 24f74697          |
+| getOffchainRandom(uint256)                  | f9bdb1b8          |
+| getRoleAdmin(bytes32)                       | 248a9ca3          |
+| getRoleMember(bytes32,uint256)              | 9010d07c          |
+| getRoleMemberCount(bytes32)                 | ca15c873          |
+| hasRole(bytes32,address)                    | 91d14854          |
+| isOffchainRandomReady(uint256)              | 7f929b6a          |
+| keyHash()                                   | 61728f39          |
+| randomSeedProvider()                        | 68fab262          |
+| subId()                                     | eb1d28bb          |
+| supportsInterface(bytes4)                   | 01ffc9a7          |
+| vrfCoordinator()                            | a3e56fa8          |
+
+
+### SupraSourceAdaptor
+This section describes the externally visible functions available in `SupraSourceAdaptor`. The list of functions and their function selectors was determined by the following command. The additional information was obtained by reviewing the code.
+
+```
+forge inspect SupraSourceAdaptor --pretty methods
+```
+
+Functions that *change* state:
+
+| Name                                        | Function Selector | Access Control        |
+| ------------------------------------------- | ----------------- | --------------------- |
+| fulfillRandomWords(uint256,uint256[])       | 38ba4614          | VRF Coordinator       |
+| grantRole(bytes32,address)                  | 2f2ff15d          | Role admin            |
+| renounceRole(bytes32,address)               | 36568abe          | msg.sender            |
+| requestOffchainRandom()                     | eab48712          | Random seed provider  |
+| revokeRole(bytes32,address)                 | d547741f          | Role admin            |
+| setSubscription(address)                    | a5be1514          | Config admin          |
+
+Functions that *do not change* state:
+
+| Name                                        | Function Selector |
+| ------------------------------------------- | ----------------- |
+| DEFAULT_ADMIN_ROLE()                        | a217fddf          |
+| getOffchainRandom(uint256)                  | f9bdb1b8          |
+| getRoleAdmin(bytes32)                       | 248a9ca3          |
+| getRoleMember(bytes32,uint256)              | 9010d07c          |
+| getRoleMemberCount(bytes32)                 | ca15c873          |
+| hasRole(bytes32,address)                    | 91d14854          |
+| isOffchainRandomReady(uint256)              | 7f929b6a          |
+| randomSeedProvider()                        | 68fab262          |
+| supportsInterface(bytes4)                   | 01ffc9a7          |
+| subscriptionAccount()                       | 6eddbc14          |
+| vrfCoordinator()                            | a3e56fa8          |
 
 
 ## TODO Immutable zkEVM Validators: Block Hash Attack
@@ -361,17 +458,36 @@ forge inspect RootERC20PredicateFlowRate --pretty methods
 
 
 
-## TODO Accounts with DEFAULT_ADMIN, PAUSE, UNPAUSE, and RATE roles
+## Admin Roles
+Accounts with administrative privileges could be used by attackers to facilitate attacks. This section analyses what each role can do.
 
-Accounts with administrative privileges could be used by attackers to facilitate attacks. For example, an attacker could maliciously pause the bridge thus disrupting the bridge. Alternatively, used in conjunction with other attacks, the attacker could post malicious exits, which might enter the withdrawal queue, and then disable the withdrawal queue. Exploiting this attack surface requires compromising the administrative accounts with certain administrative roles.
+### Accounts with RANDOM_ADMIN Role on RandomSeedProvider Contract
 
-## TODO: RootERC20PredicateFlowRate, ExitHelper, CheckpointManager, CustomSupernetsManager Contract Upgrade
+Accounts with RANDOM_ADMIN role could change the off-chain source to a deterministic sequence that they controlled. They could set the delay to 30 seconds, making games less responsive. They could add games to the list of off-chain random consumers, providing game studios with free access to a feature which might otherwise be charged for. They could remove games from the list of off-chain random consumers, depriving game studios of higher quality random numbers. They could add all games to be off-chain consumers and change the off-chain source to a deterministic sequence that they controlled. Exploiting this attack surface requires compromising the administrative accounts with the RANDOM_ADMIN roles.
 
-This RootERC20PredicateFlowRate, ExitHelper, CheckpointManager, CustomSupernetsManager, StakeManager, and StateSender contracts are each deployed with a [TransparentUpgradeProxy](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/17c1a3a4584e2cbbca4131f2f1d16168c92f2310/contracts/proxy/transparent/TransparentUpgradeableProxy.sol) and a [Proxy Admin](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/17c1a3a4584e2cbbca4131f2f1d16168c92f2310/contracts/proxy/transparent/ProxyAdmin.sol) contract. An account, that can be thought of as the Proxy Administrator, deploys the `TransparentUpgradeProxy` contract and the `ProxyAdmin` contract. This Proxy Administrator can at some later point call the [upgradeAndCall](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/17c1a3a4584e2cbbca4131f2f1d16168c92f2310/contracts/proxy/transparent/ProxyAdmin.sol#L74) function to upgrade the implementation of the contract. The `TransparentUpgradeProxy` contract executes code in the contracts via `delegateCall`, thus executing the code in logic contract in the context of the `TransparentUpgradeProxy` contract. For example, the Proxy Administrator could use the ability to update the implementation of `RootERC20PredicateFlowRate` to deploy a malicious version of the contract.Exploiting this attack surface requires compromising the administrative account responsible for upgrading the contracts.
+### Accounts with UPGRADE_ADMIN Role on RandomSeedProvider Contract
 
-## RandomSeedProvider Contract Storage Slots: Upgrade
+This RandomSeedProvider contract is deployed with an [ERC1967Proxy](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.9/contracts/proxy/ERC1967/ERC1967Proxy.sol) contract. An account with UPGRADE role on the RandomSeedProvider can successfully call [upgradeTo](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.9/contracts/proxy/utils/UUPSUpgradeable.sol#L68) or [upgradeToAndCall](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/release-v4.9/contracts/proxy/utils/UUPSUpgradeable.sol#L83) to change the contract that the ERC1967 Proxy uses for business logic code (that is, which contract it delegate calls to). For example, the account with UPGRADE role could use the ability to update the implementation of `RandomSeedProvider` to deploy a malicious version of the contract. Exploiting this attack surface requires compromising the administrative account responsible for upgrading the contracts.
 
-An attack vector on future versions of this contract could be misaligned storage slots between a version and the subsequent version. That is, a new storage variable could be added without adjusting the storage gap variable for the file the variable is added to, thus moving the storage locations used by the new version of code relative to the old version of code. To monitor this attack surface, the storage slot utilisation or this initial version is shown in the table below. The table was constructed by using the command described below, and analysing the source code.
+### Accounts with DEFAULT_ADMIN Role on RandomSeedProvider Contract
+
+An account with DEFAULT_ADMIN role on the RandomSeedProvider contract could create other administrators for any role. This could result in the administrative attacks described above. Exploiting this attack surface requires compromising an account with DEFAULT_ADMIN role.
+
+### Accounts with CONTROL_ADMIN Role on SourceAdaptorBase Contract
+
+Accounts with CONTROL_ADMIN role 
+
+TODO
+could change the off-chain source to a deterministic sequence that they controlled. They could set the delay to 30 seconds, making games less responsive. They could add games to the list of off-chain random consumers, providing game studios with free access to a feature which might otherwise be charged for. They could remove games from the list of off-chain random consumers, depriving game studios of higher quality random numbers. They could add all games to be off-chain consumers and change the off-chain source to a deterministic sequence that they controlled. Exploiting this attack surface requires compromising the administrative accounts with the RANDOM_ADMIN roles.
+
+
+
+## Upgrade and Storage Slots
+
+An attack vector on future versions of this contract could be misaligned storage slots between a version and the subsequent version. That is, a new storage variable could be added without adjusting the storage gap variable for the file the variable is added to, thus moving the storage locations used by the new version of code relative to the old version of code. To monitor this attack surface, the storage slot utilisation or this initial version for each contract is shown in the sections below. Note that `ChainlinkSourceAdaptor.sol` and `SupraSourceAdaptor.sol` aren't included in this section as they are not upgradeable, and hence not subject to an upgrade attack.
+
+### RandomSeedProvider Contract Storage Slots
+The table was constructed by using the command described below, and analysing the source code.
 
 ```
 forge inspect RandomSeedProvider --pretty storage
@@ -393,14 +509,32 @@ forge inspect RandomSeedProvider --pretty storage
 | outstandingRequestsTail           | uint256                                                        | 302  | 0      | 32    | contracts/random/RandomSeedProviderRequestQueue.sol |
 | outstandingRequestsHead           | uint256                                                        | 303  | 0      | 32    | contracts/random/RandomSeedProviderRequestQueue.sol |
 | \_\_gapRandomSeedProviderRequestQueue | uint256[100]                                               | 304  | 0      | 3200  | contracts/random/RandomSeedProviderRequestQueue.sol  |
-| version                           | uint256                                                        | 404  | 0      | 32    | contracts/random/RandomSeedProvider.sol:RandomSeedProvider |
-| randomOutput                      | mapping(uint256 => bytes32)                                    | 405  | 0      | 32    | contracts/random/RandomSeedProvider.sol:RandomSeedProvider |
-| lastBlockOffchainRequest          | uint256                                                        | 406  | 0      | 32    | contracts/random/RandomSeedProvider.sol:RandomSeedProvider |
-| prevOffchainRandomRequest         | uint256                                                        | 407  | 0      | 32    | contracts/random/RandomSeedProvider.sol:RandomSeedProvider |
-| randomSource                      | address                                                        | 408  | 0      | 20    | contracts/random/RandomSeedProvider.sol:RandomSeedProvider |
-| onChainDelay                      | uint256                                                        | 409  | 0      | 32    | contracts/random/RandomSeedProvider.sol:RandomSeedProvider |
-| approvedForOffchainRandom         | mapping(address => bool)                                       | 410  | 0      | 32    | contracts/random/RandomSeedProvider.sol:RandomSeedProvider |
-| \_\_gapRandomSeedProvider         | uint256[100]                                                   | 411  | 0      | 3200  | contracts/random/RandomSeedProvider.sol:RandomSeedProvider |
+| version                           | uint256                                                        | 404  | 0      | 32    | contracts/random/RandomSeedProvider.sol |
+| randomOutput                      | mapping(uint256 => bytes32)                                    | 405  | 0      | 32    | contracts/random/RandomSeedProvider.sol |
+| lastBlockOffchainRequest          | uint256                                                        | 406  | 0      | 32    | contracts/random/RandomSeedProvider.sol |
+| prevOffchainRandomRequest         | uint256                                                        | 407  | 0      | 32    | contracts/random/RandomSeedProvider.sol |
+| randomSource                      | address                                                        | 408  | 0      | 20    | contracts/random/RandomSeedProvider.sol |
+| onChainDelay                      | uint256                                                        | 409  | 0      | 32    | contracts/random/RandomSeedProvider.sol |
+| approvedForOffchainRandom         | mapping(address => bool)                                       | 410  | 0      | 32    | contracts/random/RandomSeedProvider.sol |
+| \_\_gapRandomSeedProvider         | uint256[100]                                                   | 411  | 0      | 3200  | contracts/random/RandomSeedProvider.sol |
+
+
+### RandomSequences and RandomValues Contract Storage Slots
+This section covers both RandomSequences.sol and RandomValues.sol. RandomValues can be used independantly or by being included in RandomSequences.sol. The table was constructed by using the command described below, and analysing the source code. 
+
+```
+forge inspect RandomSequences --pretty storage
+```
+
+| Name                              | Type                                                           | Slot | Offset | Bytes | Source File |
+| --------------------------------- | -------------------------------------------------------------- | ---- | ------ | ----- | ----------- |
+| randCreationRequests | mapping(uint256 => struct RandomValues.RandomRequest) | 0    | 0      | 32    | contracts/random/RandomValues.sol |
+| nextNonce            | uint256                                               | 1    | 0      | 32    | contracts/random/RandomValues.sol |
+| __gapRandomValues    | uint256[100]                                          | 2    | 0      | 3200  | contracts/random/RandomValues.sol |
+| requestIds           | mapping(address => uint256[100000])                   | 102  | 0      | 32    | contracts/random/RandomSequences.sol |
+| __gapRandomSequences | uint256[100]                                          | 103  | 0      | 3200  | contracts/random/RandomSequences.sol |
+
+
 
 
 
@@ -435,6 +569,15 @@ This attacker is able to compromise any server computer, _Powerfully Owning_ the
 This attacker works for a company helping operate the Immutable zkEVM. This attacker could be being bribed or blackmailed. They can access the keys that they as an individual employee has access to. For instance, they might be one of the signers of the multi-signer administrative role.
 
 # Attack Mitigation
+
+## TODO Immutable zkEVM Validators: Block Hash Attack
+
+## TODO Immutable zkEVM Validators: RANDAO Attack
+
+## TODO VRF Key Compromise
+
+## TODO Reuse a Random Value 
+
 
 
 *Game Player Attacks*: Game players could observe blocks as they are being produced, and hence know the value of the block hash for the previous block. They might observe that at that point in time, the blockchain had low utilisation. They could assume that the there would be no transactions for the block that they submit their random seed request in and subsequent blocks until they fulfil their request. They could predict the block producer, and hence the value of the coinbase account. 

@@ -430,33 +430,41 @@ contract OperationalRandomSeedProviderTest is RandomSeedProviderBase {
 
         (uint256 randomRequestId1, address source1) = randomSeedProvider.requestRandomSeed();
         (lastBlock, queueLen) = randomSeedProvider.onchainGenerationStatus();
-        assertEq(lastBlock, 0, "last block");
+        assertEq(lastBlock, randomRequestId1, "last block");
         assertEq(queueLen, 1, "queue len");
 
         // Note request in the same block
         (uint256 randomRequestId2, address source2) = randomSeedProvider.requestRandomSeed();
         (lastBlock, queueLen) = randomSeedProvider.onchainGenerationStatus();
-        assertEq(lastBlock, 0, "last block");
+        assertEq(lastBlock, randomRequestId1, "last block");
         assertEq(queueLen, 1, "queue len");
 
         vm.roll(randomRequestId2 + 1);
         (uint256 randomRequestId3, address source3) = randomSeedProvider.requestRandomSeed();
         (lastBlock, queueLen) = randomSeedProvider.onchainGenerationStatus();
-        assertEq(lastBlock, 0, "last block");
-        assertEq(queueLen, 2, "queue len");
-        randomSeedProvider.getRandomSeed(randomRequestId1, source1);
-        randomSeedProvider.getRandomSeed(randomRequestId2, source2);
+        assertEq(lastBlock, randomRequestId1, "last block3");
+        assertEq(queueLen, 2, "queue len3");
 
-        randomSeedProvider.generateNextSeedOnChain();
+        randomSeedProvider.getRandomSeed(randomRequestId1, source1);
         (lastBlock, queueLen) = randomSeedProvider.onchainGenerationStatus();
-        assertEq(lastBlock, block.number, "last block");
+        assertEq(lastBlock, randomRequestId3, "last block4");
+        assertEq(queueLen, 1, "queue len4");
+        
+        randomSeedProvider.getRandomSeed(randomRequestId2, source2);
+        (lastBlock, queueLen) = randomSeedProvider.onchainGenerationStatus();
+        assertEq(lastBlock, randomRequestId3, "last block5");
+        assertEq(queueLen, 1, "queue len5");
+
+        randomSeedProvider.processOnChainGenerationQueue();
+        (lastBlock, queueLen) = randomSeedProvider.onchainGenerationStatus();
+        assertEq(lastBlock, randomRequestId3, "last block");
         // It is too soon for randomRequestId3, so only 1 and 2 are fulfilled.
         assertEq(queueLen, 1, "queue len");
 
         vm.roll(randomRequestId3 + 1);
-        randomSeedProvider.generateNextSeedOnChain();
+        randomSeedProvider.processOnChainGenerationQueue();
         (lastBlock, queueLen) = randomSeedProvider.onchainGenerationStatus();
-        assertEq(lastBlock, block.number, "last block");
+        assertEq(lastBlock, 0, "last block");
         assertEq(queueLen, 0, "queue len");
         randomSeedProvider.getRandomSeed(randomRequestId2, source2);
         randomSeedProvider.getRandomSeed(randomRequestId3, source3);
@@ -468,9 +476,9 @@ contract OperationalRandomSeedProviderTest is RandomSeedProviderBase {
         // It is not too late to fulfil the request
         vm.expectEmit(true, true, true, true);
         emit TooLateToGenerateRandom(randomRequestId1);
-        randomSeedProvider.generateNextSeedOnChain();
+        randomSeedProvider.processOnChainGenerationQueue();
         (uint256 lastBlock, uint256 queueLen) = randomSeedProvider.onchainGenerationStatus();
-        assertEq(lastBlock, block.number, "last block");
+        assertEq(lastBlock, 0, "last block");
         assertEq(queueLen, 0, "queue len");
         vm.expectRevert(abi.encodeWithSelector(RandomSeedProvider.GenerationFailedTryAgain.selector, randomRequestId1));
         randomSeedProvider.getRandomSeed(randomRequestId1, source1);

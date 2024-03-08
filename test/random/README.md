@@ -65,9 +65,17 @@ numbers, check that the numbers generated earlier are still available:
 |---------------------------------| --------------------------------------------------|------------|-------------|
 | testInit                        | Empty queue.                                      | Yes        | Yes         |
 | testEnqueue                     | Enqueue one value.                                | Yes        | Yes         |
-| testDequeue                     | Enqueue then dequeue one value.                   | Yes        | Yes         |
-| testEnqueueDequeueMultiple      | Enqueue then dequeue multiple values.             | Yes        | Yes         |
 | testEnqueueSame                 | Check enqueuing the same value.                   | Yes        | Yes         |
+| testDequeueBlockNumberOnly      | Dequeue by block number: one entry in queue       | Yes        | Yes         |
+| testDequeueBlockNumberFirst     | Dequeue by block number: dequeue value at head.   | Yes        | Yes         |
+| testDequeueBlockNumberLast      | Dequeue by block number: dequeue value at tail.   | Yes        | Yes         |
+| testDequeueBlockNumberMiddle    | Dequeue by block number: dequeue middle of queue. | Yes        | Yes         |
+| testDequeueBlockNumberMultipleToFirst | Dequeue from middle, and then head.         | Yes        | Yes         |
+| testDequeueBlockNumberMultipleToLast | Dequeue from middle, and then tail.          | Yes        | Yes         |
+| testDequeueHistoricBlockNumbersNoHistoricBlocks | Dequeue historic blocks when there are no historic blocks. | No | Yes |
+| testDequeueHistoricBlockNumbersOneBlock | Dequeue historic blocks when there is one historic block. | Yes | Yes |
+| testDequeueHistoricBlockNumbersMultipleBlocks | As above with multiple blocks.      | Yes        | Yes         |
+| testDequeueHistoricBlockNumbersWithHoles | Check interaction of dequeue by block number and historic blocks. | Yes | Yes |
 
 
 ## RandomValues.sol

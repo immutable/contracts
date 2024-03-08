@@ -79,9 +79,6 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
     /// @dev random seeds that have been produced.
     mapping(uint256 requestId => bytes32 randomValue) public randomOutput;
 
-    /// @notice The block number in which the last seed value was generated.
-    uint256 private lastBlockRandomGenerated;
-
     /// @notice The block when the last off-chain random request occurred.
     /// @dev This is used to limit off-chain random requests to once per block.
     uint256 private lastBlockOffchainRequest;
@@ -98,9 +95,6 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
 
     /// @notice Delay between requesting a random number and fulfilling it.
     uint256 public onChainDelay;
-
-    /// @notice Previous output.
-    bytes32 private prevRandomOutput;
 
     /// @notice Indicates an address is allow listed for the off-chain random provider.
     /// @dev Having an allow list prevents spammers from requesting one random number per block,
@@ -125,11 +119,6 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
         _grantRole(UPGRADE_ADMIN_ROLE, _upgradeAdmin);
 
         initializeRandomSeedProviderRequestQueue();
-
-        // Generate an initial "random" seed.
-        // Use the chain id as an input into the random number generator to ensure
-        // all random numbers are personalised to this chain.
-        prevRandomOutput = keccak256(abi.encodePacked(block.chainid, blockhash(block.number - 1)));
 
         randomSource = ONCHAIN;
         onChainDelay = 2; // 2 blocks.
@@ -246,14 +235,15 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
         address _randomSource
     ) external returns (bytes32 _randomSeed) {
         if (_randomSource == ONCHAIN) {
-            generateNextSeedOnChain();
-            bytes32 output = randomOutput[_randomFulfilmentIndex];
-            if (output == bytes32(0)) {
-                if (_randomFulfilmentIndex < block.number) {
-                    revert GenerationFailedTryAgain(_randomFulfilmentIndex);
-                }
+            if (_randomFulfilmentIndex >= block.number) {
                 revert WaitForRandom(_randomFulfilmentIndex);
             }
+            bytes32 output = randomOutput[_randomFulfilmentIndex];
+            if (output != bytes32(0)) {
+                return output;
+            }
+            output = generateSeedOnChain(_randomFulfilmentIndex);
+            randomOutput[_randomFulfilmentIndex] = output;
             return output;
         } else {
             // If random source is not the address of a valid contract this will revert
@@ -267,50 +257,17 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
      * @dev Either this function or getRandomSeed need to be called within 255 blocks
      *      of requestRandomSeed being called.
      */
-    function generateNextSeedOnChain() public {
-        bytes32 prev = prevRandomOutput;
-
-        uint256 lenOutstandingRequests = queueLength();
-        uint256 blockNumberMinus256 = blockNumberMinus256OrZero();
-        for (uint256 i = 0; i < lenOutstandingRequests; i++) {
-            uint256 blockNumber = peakNext();
-            // If the block number is this block or a future block, then skip for now and 
-            // do it later.
-            if (blockNumber >= block.number) {
-                break;
-            }
-            //  Consume the request.
-            dequeue();
-
-            if (blockNumber < blockNumberMinus256) {
+    function processOnChainGenerationQueue() public {
+        (uint256[] memory blockNumbers, uint256 lenUsed) = dequeueHistoricBlockNumbers();
+        for (uint256 i = 0; i < lenUsed; i++) {
+            uint256 blockNumber = blockNumbers[i];
+            if (blockNumber + 256 < block.number) {
                 emit TooLateToGenerateRandom(blockNumber);
                 continue;
             }
 
-            // The block producer could manipulate the block hash by crafting a
-            // transaction that included a number that the block producer controls. A
-            // malicious block producer could produce many candidate blocks, in an attempt
-            // to produce a specific value.
-            // If the blockchain has no transactions in multiple sequential blocks, a 
-            // deterministic block producer, and a stable block period, then a game player 
-            // could predict a range of possible block hash values. They could obverve a block 
-            // being produced and then, if advantageous to them, immeditately submit a 
-            // transaction, hoping that the transaction will be gossiped to the block producer
-            // in time for block inclusion. That is, they could request a random seed be
-            // produced in one block, knowing that the block hash some blocks later will
-            // be used as the entropy for the random seed generator. They could craft their
-            // transaction, in the hope of crafting a specific seed, and resultant random 
-            // number.
-            // The mitigation for this attack is for a transaction to be put onto the 
-            // blockchain regularly that reveals a new layer of a hash onion, thus 
-            // inserting unchangeable random values onto the chain.
-            uint256 entropy = uint256(blockhash(blockNumber));
-            prev = keccak256(abi.encodePacked(prev, entropy));
-            randomOutput[blockNumber] = prev;
+            randomOutput[blockNumber] = generateEntropy(blockNumber);
         }
-        prevRandomOutput = prev;
-
-        lastBlockRandomGenerated = block.number;
     }
 
 
@@ -324,7 +281,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
         if (_randomSource == ONCHAIN) {
             // slither-disable-next-line incorrect-equality
             if ((randomOutput[_randomFulfilmentIndex] != bytes32(0)) ||
-                    (_randomFulfilmentIndex < block.number && _randomFulfilmentIndex > blockNumberMinus256OrZero())) {
+                    (_randomFulfilmentIndex < block.number && _randomFulfilmentIndex + 256 > block.number)) {
                 return SeedRequestStatus.READY;
             }
             // slither-disable-next-line incorrect-equality
@@ -338,19 +295,49 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
         }
     }
 
-    function onchainGenerationStatus() external view returns (uint256 _lastBlockGenerated, uint256 _queueDepth) {
-        return (lastBlockRandomGenerated, queueLength());
+    function onchainGenerationStatus() external view returns (uint256 _oldestBlockNumber, uint256 _queueDepth) {
+        return (peakNext(), queueLength());
     }
 
     /**
-     * @notice Return block number - 256, but avoid underflow.
-     * @dev This view call can only be called in the context of a transaction.
+     * @notice Generate a seed value for a specifc block number that was previously requested.
+     * @param _blockNumber The block to generate the block hash for.
+     * @return block hash at the block
      */
-    function blockNumberMinus256OrZero() private view returns (uint256) {
-        if (block.number < 256) {
-            return 0;
+    function generateSeedOnChain(uint256 _blockNumber) private returns(bytes32) {
+        if (_blockNumber + 256 < block.number) {
+            // Too late to call blockhash.
+            revert GenerationFailedTryAgain(_blockNumber);
         }
-        return block.number - 256;
+        dequeueBlockNumber(_blockNumber);
+        return generateEntropy(_blockNumber);
+    }
+
+
+    /**
+     * @notice Generate entropy using block hash.
+     * @dev The block number must be one of the previous 256 blocks.
+     * @param _blockNumber is the block to fetch the block hash for. 
+     */
+    function generateEntropy(uint256 _blockNumber) private view returns (bytes32) {
+        // The block producer could manipulate the block hash by crafting a
+        // transaction that included a number that the block producer controls. A
+        // malicious block producer could produce many candidate blocks, in an attempt
+        // to produce a specific value.
+        // If the blockchain has no transactions in multiple sequential blocks, a 
+        // deterministic block producer, and a stable block period, then a game player 
+        // could predict a range of possible block hash values. They could obverve a block 
+        // being produced and then, if advantageous to them, immeditately submit a 
+        // transaction, hoping that the transaction will be gossiped to the block producer
+        // in time for block inclusion. That is, they could request a random seed be
+        // produced in one block, knowing that the block hash some blocks later will
+        // be used as the entropy for the random seed generator. They could craft their
+        // transaction, in the hope of crafting a specific seed, and resultant random 
+        // number.
+        // The mitigation for this attack is for a transaction to be put onto the 
+        // blockchain regularly that reveals a new layer of a hash onion, thus 
+        // inserting unchangeable random values onto the chain.
+        return blockhash(_blockNumber);
     }
 
     /**

@@ -369,41 +369,40 @@ Accounts with administrative privileges could be used by attackers to facilitate
 
 This RootERC20PredicateFlowRate, ExitHelper, CheckpointManager, CustomSupernetsManager, StakeManager, and StateSender contracts are each deployed with a [TransparentUpgradeProxy](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/17c1a3a4584e2cbbca4131f2f1d16168c92f2310/contracts/proxy/transparent/TransparentUpgradeableProxy.sol) and a [Proxy Admin](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/17c1a3a4584e2cbbca4131f2f1d16168c92f2310/contracts/proxy/transparent/ProxyAdmin.sol) contract. An account, that can be thought of as the Proxy Administrator, deploys the `TransparentUpgradeProxy` contract and the `ProxyAdmin` contract. This Proxy Administrator can at some later point call the [upgradeAndCall](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/17c1a3a4584e2cbbca4131f2f1d16168c92f2310/contracts/proxy/transparent/ProxyAdmin.sol#L74) function to upgrade the implementation of the contract. The `TransparentUpgradeProxy` contract executes code in the contracts via `delegateCall`, thus executing the code in logic contract in the context of the `TransparentUpgradeProxy` contract. For example, the Proxy Administrator could use the ability to update the implementation of `RootERC20PredicateFlowRate` to deploy a malicious version of the contract.Exploiting this attack surface requires compromising the administrative account responsible for upgrading the contracts.
 
-## TODO RootERC20PredicateFlowRate Contract Storage Slots: Upgrade
+## RandomSeedProvider Contract Storage Slots: Upgrade
 
-An attack vector on future versions of this contract could be misaligned storage slots between a version and the subsequent version. That is, a new storage variable could be added without adjusting the storage gap variable for the file the variable is added to, thus moving the storage locations used by the new version of code relative to the old version of code. To monitor this attack surface, the storage slot utilisation or this initial version is shown in the table below. The table was constructed by using the commands described below.
+An attack vector on future versions of this contract could be misaligned storage slots between a version and the subsequent version. That is, a new storage variable could be added without adjusting the storage gap variable for the file the variable is added to, thus moving the storage locations used by the new version of code relative to the old version of code. To monitor this attack surface, the storage slot utilisation or this initial version is shown in the table below. The table was constructed by using the command described below, and analysing the source code.
 
 ```
-cd contracts/root/flowrate
-forge inspect RootERC20PredicateFlowRate --pretty storage
+forge inspect RandomSeedProvider --pretty storage
 ```
 
-| Name                              | Type                                                                   | Slot | Offset | Bytes |
-| --------------------------------- | ---------------------------------------------------------------------- | ---- | ------ | ----- |
-| \_initialized                     | uint8                                                                  | 0    | 0      | 1     |
-| \_initializing                    | bool                                                                   | 0    | 1      | 1     |
-| stateSender                       | contract IStateSender                                                  | 0    | 2      | 20    |
-| exitHelper                        | address                                                                | 1    | 0      | 20    |
-| childERC20Predicate               | address                                                                | 2    | 0      | 20    |
-| childTokenTemplate                | address                                                                | 3    | 0      | 20    |
-| rootTokenToChildToken             | mapping(address => address)                                            | 4    | 0      | 32    |
-| \_\_gapRootERC20Predicate         | uint256[50]                                                            | 5    | 0      | 1600  |
-| \_\_gap                           | uint256[50]                                                            | 55   | 0      | 1600  |
-| \_paused                          | bool                                                                   | 105  | 0      | 1     |
-| \_\_gap                           | uint256[49]                                                            | 106  | 0      | 1568  |
-| \_\_gap                           | uint256[50]                                                            | 155  | 0      | 1600  |
-| \_roles                           | mapping(bytes32 => struct AccessControlUpgradeable.RoleData)           | 205  | 0      | 32    |
-| \_\_gap                           | uint256[49]                                                            | 206  | 0      | 1568  |
-| \_status                          | uint256                                                                | 255  | 0      | 32    |
-| \_\_gap                           | uint256[49]                                                            | 256  | 0      | 1568  |
-| flowRateBuckets                   | mapping(address => struct FlowRateDetection.Bucket)                    | 305  | 0      | 32    |
-| withdrawalQueueActivated          | bool                                                                   | 306  | 0      | 1     |
-| \_\_gapFlowRateDetecton           | uint256[50]                                                            | 307  | 0      | 1600  |
-| pendingWithdrawals                | mapping(address => struct FlowRateWithdrawalQueue.PendingWithdrawal[]) | 357  | 0      | 32    |
-| withdrawalDelay                   | uint256                                                                | 358  | 0      | 32    |
-| \_\_gapFlowRateWithdrawalQueue    | uint256[50]                                                            | 359  | 0      | 1600  |
-| largeTransferThresholds           | mapping(address => uint256)                                            | 409  | 0      | 32    |
-| \_\_gapRootERC20PredicateFlowRate | uint256[50]                                                            | 410  | 0      | 1600  |
+| Name                              | Type                                                           | Slot | Offset | Bytes | Source File |
+| --------------------------------- | -------------------------------------------------------------- | ---- | ------ | ----- | ----------- |
+| \_initialized                     | uint8                                                          | 0    | 0      | 1     | OpenZeppelin Contracts v4.9.3: proxy/utils/Initializable.sol |
+| \_initializing                    | bool                                                           | 0    | 1      | 1     | OpenZeppelin Contracts v4.9.3: proxy/utils/Initializable.sol |
+| \_\_gap                           | uint256[50]                                                    | 1    | 0      | 1600  | OpenZeppelin Contracts v4.9.3: utils/Context.sol)            |
+| \_\_gap                           | uint256[50]                                                    | 51   | 0      | 1600  | OpenZeppelin Contracts v4.9.3: utils/introspection/ERC165.sol |
+| \_roles                           | mapping(bytes32 => struct AccessControlUpgradeable.RoleData)   | 101  | 0      | 32    | OpenZeppelin Contracts v4.9.3: access/AccessControlUpgradeable.sol |
+| \_\_gap                           | uint256[49]                                                    | 102  | 0      | 1568  | OpenZeppelin Contracts v4.9.3: access/AccessControlUpgradeable.sol |
+| \_roleMembers                     | mapping(bytes32 => struct EnumerableSetUpgradeable.AddressSet) | 151  | 0      | 32    | OpenZeppelin Contracts v4.9.3: access/AccessControlEnumerableUpgradeable.sol |
+| \_\_gap                           | uint256[49]                                                    | 152  | 0      | 1568  | OpenZeppelin Contracts v4.9.3: access/AccessControlEnumerableUpgradeable.sol |
+| \_\_gap                           | uint256[50]                                                    | 201  | 0      | 1600  | OpenZeppelin Contracts v4.9.3: proxy/ERC1967/ERC1967Upgrade.sol |
+| \_\_gap                           | uint256[50]                                                    | 251  | 0      | 1600  | OpenZeppelin Contracts v4.9.3: proxy/utils/UUPSUpgradeable.sol  |
+| outstandingRequests               | mapping(uint256 => uint256)                                    | 301  | 0      | 32    | contracts/random/RandomSeedProviderRequestQueue.sol             |
+| outstandingRequestsTail           | uint256                                                        | 302  | 0      | 32    | contracts/random/RandomSeedProviderRequestQueue.sol |
+| outstandingRequestsHead           | uint256                                                        | 303  | 0      | 32    | contracts/random/RandomSeedProviderRequestQueue.sol |
+| \_\_gapRandomSeedProviderRequestQueue | uint256[100]                                               | 304  | 0      | 3200  | contracts/random/RandomSeedProviderRequestQueue.sol  |
+| version                           | uint256                                                        | 404  | 0      | 32    | contracts/random/RandomSeedProvider.sol:RandomSeedProvider |
+| randomOutput                      | mapping(uint256 => bytes32)                                    | 405  | 0      | 32    | contracts/random/RandomSeedProvider.sol:RandomSeedProvider |
+| lastBlockOffchainRequest          | uint256                                                        | 406  | 0      | 32    | contracts/random/RandomSeedProvider.sol:RandomSeedProvider |
+| prevOffchainRandomRequest         | uint256                                                        | 407  | 0      | 32    | contracts/random/RandomSeedProvider.sol:RandomSeedProvider |
+| randomSource                      | address                                                        | 408  | 0      | 20    | contracts/random/RandomSeedProvider.sol:RandomSeedProvider |
+| onChainDelay                      | uint256                                                        | 409  | 0      | 32    | contracts/random/RandomSeedProvider.sol:RandomSeedProvider |
+| approvedForOffchainRandom         | mapping(address => bool)                                       | 410  | 0      | 32    | contracts/random/RandomSeedProvider.sol:RandomSeedProvider |
+| \_\_gapRandomSeedProvider         | uint256[100]                                                   | 411  | 0      | 3200  | contracts/random/RandomSeedProvider.sol:RandomSeedProvider |
+
+
 
 # Perceived Attackers
 

@@ -84,6 +84,14 @@ jobs:
         run: forge --version
       - name: Run slither
         run: slither --compile-force-framework forge  --foundry-out-directory foundry-out .
+  readme:
+    name: Check README.md is contained in each contracts directory
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Run check script
+        run: sh readmecheck.sh
   publish:
     name: Publish to NPM (dry run)
     runs-on: ubuntu-latest

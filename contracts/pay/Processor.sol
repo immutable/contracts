@@ -20,7 +20,7 @@ struct Order {
 struct Receipt {
     uint256 id;
     Order order;
-    uint256 paidToken;
+    address paidToken;
     uint256 paidAmount;
 }
 
@@ -29,14 +29,24 @@ contract Processor {
     uint256 public counter;
     IRouter public router;
     IWrapper public wrappedNativeToken; 
+    uint8 public feePercentage;
+    address public feeRecipient;
 
     event PaymentProcessed(uint256 indexed id, Order order);
     error IncorrectValue(uint256 msgValue, uint256 paymentAmount);
+    error InsufficientPaymentAmount(uint256 required, uint256 received);
     error FailedNativeTokenTransfer();
 
-    constructor(IRouter _router, IWrapper _wrappedNativeToken) {
+    constructor(
+        IRouter _router,
+        IWrapper _wrappedNativeToken,
+        uint8 _feePercentage,
+        address _feeRecipient
+    ) {
         router = _router;
         wrappedNativeToken = _wrappedNativeToken;
+        feePercentage = _feePercentage;
+        feeRecipient = _feeRecipient;
     }
 
     function process(Order calldata order) external {
@@ -51,7 +61,7 @@ contract Processor {
         }
 
         // Receiver can be left blank if no on-chain actions are required
-        if (order.receiver) {
+        if (order.receiver != address(0)) {
             IReceiver(order.receiver).onPaymentProcessed(receipt);
         }
     }
@@ -62,38 +72,39 @@ contract Processor {
         }
         if (order.pricingToken == order.paymentToken) {
             // priced in native currency
-            _send(order.receiver, msg.value);
-            
+
+            _payFeeAndTransferNativeToken(msg.value, order.recipient);
+
             return Receipt({
-                amount: msg.value,
-                pricingToken: order.pricingToken,
-                recipient: order.recipient
+                id: id,
+                order: order,
+                paidToken: order.pricingToken,
+                paidAmount: msg.value
             });
         } else {
             if (order.allowSwap) {
                 // wrap token, then swap
-                wrappedNativeToken.deposit.call{value: msg.value}();
+                wrappedNativeToken.deposit{value: msg.value}();
                 uint256 paymentAmount = _executeSwap(
-                    wrappedNativeToken,
+                    address(wrappedNativeToken),
                     order.paymentAmount,
                     order.pricingToken,
                     order.pricingAmount
                 );
 
-                IERC20(order.pricingAmount).transfer(order.recipient, order.pricingAmount);
+                _payFeeAndTransferERC20(order.pricingToken, order.pricingAmount, order.recipient);
 
                 return Receipt({
                     id: id,
-                    paymentToken: order.paymentToken,
-                    paymentAmount: paymentAmount,
+                    order: order,
                     paidToken: order.pricingToken,
                     paidAmount: order.pricingAmount
                 });
 
             } else {
                 // the user is relying on the sale contract to accept their payment currency
-                uint256 quote = _getQuote(
-                    wrappedNativeToken,
+                uint256 quote = getQuote(
+                    address(wrappedNativeToken),
                     order.pricingToken,
                     order.pricingAmount
                 );
@@ -107,10 +118,7 @@ contract Processor {
                     _send(msg.sender, msg.value - quote);
                 }
 
-                (bool sent,) = order.receiver.call{value: quote}("");
-                if (!sent) {
-                    revert FailedNativeTokenTransfer();
-                }
+                _payFeeAndTransferNativeToken(quote, order.recipient);
 
                 // the user is relying on the sale contract to accept their payment currency
                 return Receipt({
@@ -124,10 +132,12 @@ contract Processor {
         }
     }
 
-    function _handleERC2OPayment(uint256 id, Order memory order) internal returns (Receipt memory) {
+    function _handleERC20Payment(uint256 id, Order memory order) internal returns (Receipt memory) {
 
         if (order.pricingToken == order.paymentToken) {
-            IERC20(order.paymentToken).transferFrom(msg.sender, recipient, order.paymentAmount);
+
+            // TODO: fees
+            IERC20(order.paymentToken).transferFrom(msg.sender, order.recipient, order.paymentAmount);
             return Receipt({
                 id: id,
                 order: order,
@@ -144,7 +154,7 @@ contract Processor {
                     order.pricingAmount
                 );
 
-                IERC20(order.pricingToken).transfer(order.recipient, order.pricingAmount);
+                _payFeeAndTransferERC20(order.pricingToken, order.pricingAmount, order.recipient);
 
                 return Receipt({
                     id: id,
@@ -155,7 +165,7 @@ contract Processor {
                 
             } else {
 
-                uint256 quote = _getQuote(
+                uint256 quote = getQuote(
                     order.paymentToken,
                     order.pricingToken,
                     order.pricingAmount
@@ -165,7 +175,7 @@ contract Processor {
                     revert InsufficientPaymentAmount(quote, order.paymentAmount);
                 }
 
-                IERC20(order.paymentToken).transfer(order.recipient, quote);
+                _payFeeAndTransferERC20(order.paymentToken, quote, order.recipient);
 
                 // the user is relying on the sale contract to accept their payment currency
                 return Receipt({
@@ -180,8 +190,8 @@ contract Processor {
 
     function _executeSwap(address from, uint256 amountInMax, address to, uint256 exactAmountOut) internal returns (uint256 amountSwapped) {
         
-        from.transferFrom(msg.sender, address(this), amountInMax);
-        from.approve(address(router), amountInMax);
+        IERC20(from).transferFrom(msg.sender, address(this), amountInMax);
+        IERC20(from).approve(address(router), amountInMax);
 
         address[] memory path = new address[](2);
         path[0] = from;
@@ -193,13 +203,13 @@ contract Processor {
 
         // Refund WETH to msg.sender
         if (amounts[0] < amountInMax) {
-            from.transfer(msg.sender, amountInMax - amounts[0]);
+            IERC20(from).transfer(msg.sender, amountInMax - amounts[0]);
         }
 
         return amounts[0];
     }
 
-    function _getQuote(address from, address to, uint256 exactAmountOut) internal returns (uint256 quote) {
+    function getQuote(address from, address to, uint256 exactAmountOut) public returns (uint256 quote) {
 
         address[] memory path = new address[](2);
         path[0] = from;
@@ -215,6 +225,22 @@ contract Processor {
         if (!sent) {
             revert FailedNativeTokenTransfer();
         }
+    }
+
+    function _payFeeAndTransferERC20(address token, uint256 amount, address recipient) internal {
+        uint256 fee = _calculateFee(amount);
+        IERC20(token).transfer(feeRecipient, fee);
+        IERC20(token).transfer(recipient, amount - fee);
+    }
+
+    function _payFeeAndTransferNativeToken(uint256 amount, address recipient) internal {
+        uint256 fee = _calculateFee(amount);
+        _send(feeRecipient, fee);
+        _send(recipient, amount - fee);
+    }
+
+    function _calculateFee(uint256 value) internal view returns (uint256 fee) {
+        return (value / 100) * feePercentage;
     }
 
 

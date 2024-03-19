@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity ^0.8.19;
 
-import { IReceiver } from "../IReceiver.sol";
+import { IReceiver, Receipt } from "../IReceiver.sol";
 
 contract SignatureValidatingReceiver is IReceiver {
 

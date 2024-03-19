@@ -2,7 +2,8 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity ^0.8.19;
 
-import { IReceiver } from "../IReceiver.sol";
+import { IReceiver, Receipt } from "../IReceiver.sol";
+import { IERC721 } from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 contract StrictCurrencyReceiver is IReceiver {
 
@@ -19,15 +20,15 @@ contract StrictCurrencyReceiver is IReceiver {
 
     function onPaymentProcessed(Receipt memory receipt) external {
 
-        if (receipt.paymentToken != address(0)) {
-            revert OnlyNativeTokenPayments(receipt.paymentToken);
+        if (receipt.paidToken != address(0)) {
+            revert OnlyNativeTokenPayments(receipt.paidToken);
         }
 
-        if (receipt.paymentAmount != purchasePrice) {
-            revert OnlyExactPayments(receipt.paymentAmount);
+        if (receipt.paidAmount != purchasePrice) {
+            revert OnlyExactPayments(receipt.paidAmount);
         }
 
-        erc721.mint(1, receipt.purchasedFor);
+        // erc721.mint(1, receipt.order.recipient);
     }
 
 }

@@ -1,7 +1,7 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2023
 // SPDX-License-Identifier: Apache-2
 // solhint-disable compiler-version
-pragma solidity 0.8.17;
+pragma solidity ^0.8.17;
 
 import {Consideration} from "seaport-core/src/lib/Consideration.sol";
 import {AdvancedOrder, BasicOrderParameters, CriteriaResolver, Execution, Fulfillment, FulfillmentComponent, Order} from "seaport-types/src/lib/ConsiderationStructs.sol";

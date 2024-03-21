@@ -28,6 +28,13 @@ abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Perm
      * Sets the default admin to `owner`
      * Sets the `baseURI` and `tokenURI`
      * Sets the royalty receiver and amount (this can not be changed once set)
+     * @param owner The address that will be granted the `DEFAULT_ADMIN_ROLE`
+     * @param name_ The name of the collection
+     * @param baseURI_ The base URI for the collection
+     * @param contractURI_ The contract URI for the collection
+     * @param _operatorAllowlist The address of the OAL
+     * @param _receiver The address that will receive the royalty payments
+     * @param _feeNumerator The percentage of the sale price that will be paid as a royalty
      */
     constructor(
         address owner,

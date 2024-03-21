@@ -21,7 +21,7 @@ import type { ImmutableSignedZone } from "../../typechain-types";
 import type { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import type { BytesLike } from "ethers";
 import { ReceivedItemStruct } from "../../typechain-types/contracts/trading/seaport/ImmutableSeaport";
-import { ZoneParametersStruct } from "../typechain-types/contracts/validators/ImmutableSeaportValidator";
+import { ZoneParametersStruct } from "../../typechain-types/contracts/trading/seaport/zones/ImmutableSignedZone";
 
 describe("ImmutableSignedZone", function () {
   let deployer: SignerWithAddress;
@@ -571,7 +571,7 @@ describe("ImmutableSignedZone", function () {
 });
 
 function mockConsideration(howMany: number = 10): ReceivedItemStruct[] {
-  const consideration = [];
+  const consideration: ReceivedItemStruct[] = [];
   for (let i = 0; i < howMany; i++) {
     consideration.push({
       itemType: 0,
@@ -586,7 +586,7 @@ function mockConsideration(howMany: number = 10): ReceivedItemStruct[] {
 }
 
 function mockBulkOrderHashes(howMany: number = 10): string[] {
-  const hashes = [];
+  const hashes: string[] = [];
   for (let i = 0; i < howMany; i++) {
     hashes.push(keccak256(`0x123${i >= 10 ? i + "0" : i}`));
   }

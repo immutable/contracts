@@ -9,7 +9,7 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
  * @notice ERC 20 contract that mints a fixed total supply of tokens when the contract 
  *  is deployed.
  */
-contract ImmutableERC20FixedSupply is ERC20 {
+contract ImmutableERC20FixedSupplyNoBurn is ERC20 {
     /**
      * @dev Mints `_totalSupply` number of token and transfers them to `_owner`.
      *

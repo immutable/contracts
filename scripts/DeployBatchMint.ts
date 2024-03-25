@@ -1,13 +1,19 @@
 import hre from "hardhat";
 import fs from "fs";
+import { decodeError, DecodedError } from 'ethers-decode-error'
 
 async function main() {
     const [deployer] = await hre.ethers.getSigners();
     console.log(`Deploying contracts with the account: ${deployer.address}`);
 
-    const BatchMint = await hre.ethers.getContractFactory("BatchMint");
+    const BatchMint = await hre.ethers.getContractFactory("ImmutableSeaport");
     const batchMint = await BatchMint.deploy();
     await batchMint.deployed();
+
+    const err = "0x10fda3e106e4b2e495332ed9a11e1a65e67192ce0e28287932579c0ac010f26f7ff8f286"
+    const decoded = decodeError(err);
+    console.log(decoded)
+    return;
     console.log(`BatchMint deployed to: ${batchMint.address}`)
     
     const mintReciever = "0xa320e1DcF3c153c47E0B9e48dcF360E5118AFc84";

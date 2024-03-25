@@ -72,6 +72,7 @@
     "@rari-capital/solmate": "^6.4.0",
     "aws-sdk": "^2.1555.0",
     "eslint-plugin-mocha": "^10.2.0",
+    "ethers-decode-error": "^1.0.0",
     "openzeppelin-contracts-upgradeable-4.9.3": "npm:@openzeppelin/contracts-upgradeable@^4.9.3",
     "seaport": "https://github.com/immutable/seaport.git#1.5.0+im.1.3",
     "solidity-bits": "^0.4.0",

@@ -4052,6 +4052,11 @@
     "ethereum-cryptography" "^0.1.3"
     "rlp" "^2.2.4"
 
+"ethers-decode-error@^1.0.0":
+  "integrity" "sha512-wWB9g3XZZ/sQwNhzo+/IVtiyH3s1I5bPi0wH7Hp7XTPJEN0Tx2+LwXDNBgspxCHV5T8aok3D0LTnC062ZNnceA=="
+  "resolved" "https://registry.npmjs.org/ethers-decode-error/-/ethers-decode-error-1.0.0.tgz"
+  "version" "1.0.0"
+
 "ethers-eip712@^0.2.0":
   "integrity" "sha512-fgS196gCIXeiLwhsWycJJuxI9nL/AoUPGSQ+yvd+8wdWR+43G+J1n69LmWVWvAON0M6qNaf2BF4/M159U8fujQ=="
   "resolved" "https://registry.npmjs.org/ethers-eip712/-/ethers-eip712-0.2.0.tgz"

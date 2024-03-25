@@ -1,6 +1,7 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2023
 // SPDX-License-Identifier: Apache-2
 // solhint-disable compiler-version
+// slither-disable-start missing-inheritance
 pragma solidity ^0.8.17;
 
 import {ZoneParameters, Schema, ReceivedItem} from "seaport-types/src/lib/ConsiderationStructs.sol";
@@ -513,3 +514,4 @@ contract ImmutableSignedZone is
         return interfaceId == type(ZoneInterface).interfaceId || super.supportsInterface(interfaceId);
     }
 }
+// slither-disable-end missing-inheritance

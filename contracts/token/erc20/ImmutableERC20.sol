@@ -10,8 +10,6 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
  */
 contract ImmutableERC20 is ERC20 {
     /**
-     * @dev Mints `_totalSupply` number of token and transfers them to `_owner`.
-     *
      * @param _name  Name of the token.
      * @param _symbol Token symbol.
      */

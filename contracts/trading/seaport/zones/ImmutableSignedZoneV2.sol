@@ -397,9 +397,8 @@ contract ImmutableSignedZoneV2 is
         uint256 substandardIndexEnd = 65 + (expectedOrderHashesSize * 32);
         bytes32[] memory expectedOrderHashes = abi.decode(context[1:substandardIndexEnd + 1], (bytes32[]));
 
-        // revert if order hashes in context and payload do not match
-        // every expected order hash need to exist in fulfilling order hashes
-        if (!_everyElementExists(expectedOrderHashes, zoneParameters.orderHashes)) {
+        // revert if any order hashes in substandard data are not present in zoneParameters.orderHashes
+        if (!_bytes32ArrayIncludes(zoneParameters.orderHashes, expectedOrderHashes)) {
             revert SubstandardViolation(4, "invalid order hashes", zoneParameters.orderHash);
         }
 
@@ -495,30 +494,30 @@ contract ImmutableSignedZoneV2 is
     }
 
     /**
-     * @dev helper function to check if every element of array1 exists in array2
+     * @dev helper function to check if every element of values exists in sourceArray
      *  optimised for performance checking arrays sized 0-15
      *
-     * @param array1 subset array
-     * @param array2 superset array
+     * @param sourceArray source array
+     * @param values values array
      */
-    function _everyElementExists(bytes32[] memory array1, bytes32[] calldata array2) internal pure returns (bool) {
+    function _bytes32ArrayIncludes(bytes32[] calldata sourceArray, bytes32[] memory values) internal pure returns (bool) {
         // cache the length in memory for loop optimisation
-        uint256 array1Size = array1.length;
-        uint256 array2Size = array2.length;
+        uint256 sourceArraySize = sourceArray.length;
+        uint256 valuesSize = values.length;
 
-        // we can assume all items (order hashes) are unique
-        // therefore if subset is bigger than superset, revert
-        if (array1Size > array2Size) {
+        // we can assume all items are unique
+        // therefore if values is bigger than superset sourceArray, return false
+        if (valuesSize > sourceArraySize) {
             return false;
         }
 
         // Iterate through each element and compare them
-        for (uint256 i = 0; i < array1Size; ) {
+        for (uint256 i = 0; i < valuesSize; ) {
             bool found = false;
-            bytes32 item = array1[i];
-            for (uint256 j = 0; j < array2Size; ) {
-                if (item == array2[j]) {
-                    // if item from array1 is in array2, break
+            bytes32 item = values[i];
+            for (uint256 j = 0; j < sourceArraySize; ) {
+                if (item == sourceArray[j]) {
+                    // if item from values is in sourceArray, break
                     found = true;
                     break;
                 }
@@ -527,7 +526,7 @@ contract ImmutableSignedZoneV2 is
                 }
             }
             if (!found) {
-                // if any item from array1 is not found in array2, return false
+                // if any item from values is not found in sourceArray, return false
                 return false;
             }
             unchecked {
@@ -535,7 +534,7 @@ contract ImmutableSignedZoneV2 is
             }
         }
 
-        // All elements from array1 exist in array2
+        // All elements from values exist in sourceArray
         return true;
     }
 

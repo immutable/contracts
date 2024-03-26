@@ -3,7 +3,7 @@
 pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
-import {ImmutableERC1155} from "../../../contracts/token/erc1155/preset/draft-ImmutableERC1155.sol";
+import {ImmutableERC1155} from "../../../contracts/token/erc1155/preset/ImmutableERC1155.sol";
 import {IImmutableERC1155Errors} from "../../../contracts/errors/Errors.sol";
 import {OperatorAllowlistEnforcementErrors} from "../../../contracts/errors/Errors.sol";
 import {OperatorAllowlistUpgradeable} from "../../../contracts/allowlist/OperatorAllowlistUpgradeable.sol";

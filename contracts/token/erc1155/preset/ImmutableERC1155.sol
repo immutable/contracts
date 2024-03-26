@@ -5,10 +5,8 @@ pragma solidity 0.8.19;
 import {ImmutableERC1155Base} from "../abstract/ImmutableERC1155Base.sol";
 
 /**
- * @title draft-ImmutableERC1155
- * @author
- * @notice This contract is experimental and is in draft. It should be thoroughly reviewed before using.
- * It is possible for this contract to receive breaking changes, and backwards compatibility is not insured.
+ * @title ImmutableERC1155
+ * @author @jasonzwli, Immutable
  */
 
 contract ImmutableERC1155 is ImmutableERC1155Base {

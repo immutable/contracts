@@ -9,5 +9,6 @@
     "resolveJsonModule": true,
     "skipLibCheck": true
   },
-  "include": ["./index.ts"]
+  "include": ["./index.ts", "./test/**/*.ts"],
+  "files": ["hardhat.config.ts"]
 }

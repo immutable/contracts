@@ -1,5 +1,5 @@
 import hre from "hardhat";
-import { ImmutableSeaport, ImmutableSignedZone } from "../../../typechain-types";
+import { ImmutableSeaport, ImmutableSignedZone } from "../../../../typechain-types";
 
 // Deploy the Immutable ecosystem contracts, returning the contract
 // references

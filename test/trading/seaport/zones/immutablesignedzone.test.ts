@@ -5,7 +5,7 @@ import { Wallet, constants } from "ethers";
 import { keccak256 } from "ethers/lib/utils";
 import { ethers } from "hardhat";
 
-import { ImmutableSignedZone__factory } from "../../typechain-types";
+import { ImmutableSignedZone__factory } from "../../../../typechain-types";
 
 import {
   CONSIDERATION_EIP712_TYPE,
@@ -15,13 +15,13 @@ import {
   autoMining,
   convertSignatureToEIP2098,
   getCurrentTimeStamp,
-} from "./utils/signedZone";
+} from "../utils/signedZone";
 
-import type { ImmutableSignedZone } from "../../typechain-types";
+import type { ImmutableSignedZone } from "../../../../typechain-types";
 import type { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import type { BytesLike } from "ethers";
-import { ReceivedItemStruct } from "../../typechain-types/contracts/trading/seaport/ImmutableSeaport";
-import { ZoneParametersStruct } from "../../typechain-types/contracts/trading/seaport/zones/ImmutableSignedZone";
+import { ReceivedItemStruct } from "../../../../typechain-types/contracts/trading/seaport/ImmutableSeaport";
+import { ZoneParametersStruct } from "../../../../typechain-types/contracts/trading/seaport/zones/ImmutableSignedZone";
 
 describe("ImmutableSignedZone", function () {
   let deployer: SignerWithAddress;

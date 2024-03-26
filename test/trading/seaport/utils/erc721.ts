@@ -3,12 +3,12 @@ import hre from "hardhat";
 
 import { getOfferOrConsiderationItem, randomBN } from "./encoding";
 
-import type { TestERC721 } from "../../../typechain-types";
+import type { TestERC721 } from "../../../../typechain-types";
 import type { BigNumberish, BigNumber, Contract, Wallet } from "ethers";
 
 export async function deployERC721(): Promise<TestERC721> {
   const erc721Factory = await hre.ethers.getContractFactory("TestERC721");
-  const erc721 = await erc721Factory.deploy();
+  const erc721 = (await erc721Factory.deploy()) as TestERC721;
   return erc721.deployed();
 }
 

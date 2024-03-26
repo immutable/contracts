@@ -2,7 +2,7 @@
 import { ethers, network } from "hardhat";
 import { randomBytes } from "crypto";
 
-import type { ImmutableSeaport, ImmutableSignedZone, TestERC721 } from "../../typechain-types";
+import type { ImmutableSeaport, ImmutableSignedZone, TestERC721 } from "../../../typechain-types";
 import { constants } from "ethers";
 import type { Wallet, BigNumber, BigNumberish } from "ethers";
 import { deployImmutableContracts } from "./utils/deploy-immutable-contracts";

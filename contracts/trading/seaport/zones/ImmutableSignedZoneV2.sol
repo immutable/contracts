@@ -160,6 +160,69 @@ contract ImmutableSignedZoneV2 is
     }
 
     /**
+     * @notice Update the API endpoint returned by this zone.
+     *
+     * @param newApiEndpoint The new API endpoint.
+     */
+    function updateAPIEndpoint(string calldata newApiEndpoint) external override onlyOwner {
+        // Update to the new API endpoint.
+        _sip7APIEndpoint = newApiEndpoint;
+    }
+
+    /**
+     * @dev Returns Seaport metadata for this contract, returning the
+     *      contract name and supported schemas.
+     *
+     * @return name    The contract name
+     * @return schemas The supported SIPs
+     */
+    function getSeaportMetadata()
+        external
+        view
+        override(SIP5Interface, ZoneInterface)
+        returns (string memory name, Schema[] memory schemas)
+    {
+        name = _ZONE_NAME;
+
+        // supported SIP (7)
+        schemas = new Schema[](1);
+        schemas[0].id = 7;
+        schemas[0].metadata = abi.encode(_domainSeparator(), _sip7APIEndpoint, _getSupportedSubstandards(), _documentationURI);
+    }
+
+    /**
+     * @notice Returns signing information about the zone.
+     *
+     * @return domainSeparator The domain separator used for signing.
+     */
+    function sip7Information()
+        external
+        view
+        override
+        returns (
+            bytes32 domainSeparator,
+            string memory apiEndpoint,
+            uint256[] memory substandards,
+            string memory documentationURI
+        )
+    {
+        domainSeparator = _domainSeparator();
+        apiEndpoint = _sip7APIEndpoint;
+
+        substandards = _getSupportedSubstandards();
+
+        documentationURI = _documentationURI;
+    }
+
+    /**
+     * @notice ERC-165 interface support
+     * @param interfaceId The interface ID to check for support.
+     */
+    function supportsInterface(bytes4 interfaceId) public view override(ERC165, ZoneInterface) returns (bool) {
+        return interfaceId == type(ZoneInterface).interfaceId || super.supportsInterface(interfaceId);
+    }
+
+    /**
      * @notice Check if a given order including extraData is currently valid.
      *
      * @dev This function is called by Seaport whenever any extraData is
@@ -250,80 +313,40 @@ contract ImmutableSignedZoneV2 is
     }
 
     /**
-     * @dev Internal view function to get the EIP-712 domain separator. If the
-     *      chainId matches the chainId set on deployment, the cached domain
-     *      separator will be returned; otherwise, it will be derived from
-     *      scratch.
+     * @dev get the supported substandards of the contract
      *
-     * @return The domain separator.
+     * @return substandards array of substandards supported
+     *
      */
-    function _domainSeparator() internal view returns (bytes32) {
-        return block.chainid == _CHAIN_ID ? _DOMAIN_SEPARATOR : _deriveDomainSeparator();
+    function _getSupportedSubstandards() internal pure returns (uint256[] memory substandards) {
+        // support substandards 3, 4 and 6
+        substandards = new uint256[](3);
+        substandards[0] = 3;
+        substandards[1] = 4;
+        substandards[2] = 6;
     }
 
     /**
-     * @dev Returns Seaport metadata for this contract, returning the
-     *      contract name and supported schemas.
+     * @dev Derive the signedOrder hash from the orderHash and expiration.
      *
-     * @return name    The contract name
-     * @return schemas The supported SIPs
-     */
-    function getSeaportMetadata()
-        external
-        view
-        override(SIP5Interface, ZoneInterface)
-        returns (string memory name, Schema[] memory schemas)
-    {
-        name = _ZONE_NAME;
-
-        // supported SIP (7)
-        schemas = new Schema[](1);
-        schemas[0].id = 7;
-
-        schemas[0].metadata = abi.encode(_domainSeparator(), _sip7APIEndpoint, _getSupportedSubstandards(), _documentationURI);
-    }
-
-    /**
-     * @dev Internal view function to derive the EIP-712 domain separator.
+     * @param fulfiller  The expected fulfiller address.
+     * @param expiration The signature expiration timestamp.
+     * @param orderHash  The order hash.
+     * @param context    The optional variable-length context.
      *
-     * @return domainSeparator The derived domain separator.
-     */
-    function _deriveDomainSeparator() internal view returns (bytes32 domainSeparator) {
-        return keccak256(abi.encode(_EIP_712_DOMAIN_TYPEHASH, _NAME_HASH, _VERSION_HASH, block.chainid, address(this)));
-    }
-
-    /**
-     * @notice Update the API endpoint returned by this zone.
+     * @return signedOrderHash The signedOrder hash.
      *
-     * @param newApiEndpoint The new API endpoint.
      */
-    function updateAPIEndpoint(string calldata newApiEndpoint) external override onlyOwner {
-        // Update to the new API endpoint.
-        _sip7APIEndpoint = newApiEndpoint;
-    }
-
-    /**
-     * @notice Returns signing information about the zone.
-     *
-     * @return domainSeparator The domain separator used for signing.
-     */
-    function sip7Information()
-        external
-        view
-        override
-        returns (
-            bytes32 domainSeparator,
-            string memory apiEndpoint,
-            uint256[] memory substandards,
-            string memory documentationURI
-        )
-    {
-        domainSeparator = _domainSeparator();
-        apiEndpoint = _sip7APIEndpoint;
-
-        substandards = _getSupportedSubstandards();
-
-        documentationURI = _documentationURI;
+    function _deriveSignedOrderHash(
+        address fulfiller,
+        uint64 expiration,
+        bytes32 orderHash,
+        bytes calldata context
+    ) internal view returns (bytes32 signedOrderHash) {
+        // Derive the signed order hash.
+        signedOrderHash = keccak256(
+            abi.encode(_SIGNED_ORDER_TYPEHASH, fulfiller, expiration, orderHash, keccak256(context))
+        );
     }
 
     /**
@@ -432,43 +455,6 @@ contract ImmutableSignedZoneV2 is
     }
 
     /**
-     * @dev get the supported substandards of the contract
-     *
-     * @return substandards array of substandards supported
-     *
-     */
-    function _getSupportedSubstandards() internal pure returns (uint256[] memory substandards) {
-        // support substandards 3, 4 and 6
-        substandards = new uint256[](3);
-        substandards[0] = 3;
-        substandards[1] = 4;
-        substandards[2] = 6;
-    }
-
-    /**
-     * @dev Derive the signedOrder hash from the orderHash and expiration.
-     *
-     * @param fulfiller  The expected fulfiller address.
-     * @param expiration The signature expiration timestamp.
-     * @param orderHash  The order hash.
-     * @param context    The optional variable-length context.
-     *
-     * @return signedOrderHash The signedOrder hash.
-     *
-     */
-    function _deriveSignedOrderHash(
-        address fulfiller,
-        uint64 expiration,
-        bytes32 orderHash,
-        bytes calldata context
-    ) internal view returns (bytes32 signedOrderHash) {
-        // Derive the signed order hash.
-        signedOrderHash = keccak256(
-            abi.encode(_SIGNED_ORDER_TYPEHASH, fulfiller, expiration, orderHash, keccak256(context))
-        );
-    }
-
-    /**
      * @dev Derive the received items hash based on received item array
      *
      * @param receivedItems actual received item array
@@ -538,8 +524,24 @@ contract ImmutableSignedZoneV2 is
         return true;
     }
 
-    // TODO: confirm this works for ERC165
-    function supportsInterface(bytes4 interfaceId) public view override(ERC165, ZoneInterface) returns (bool) {
-        return interfaceId == type(ZoneInterface).interfaceId || super.supportsInterface(interfaceId);
+    /**
+     * @dev Internal view function to get the EIP-712 domain separator. If the
+     *      chainId matches the chainId set on deployment, the cached domain
+     *      separator will be returned; otherwise, it will be derived from
+     *      scratch.
+     *
+     * @return The domain separator.
+     */
+    function _domainSeparator() internal view returns (bytes32) {
+        return block.chainid == _CHAIN_ID ? _DOMAIN_SEPARATOR : _deriveDomainSeparator();
+    }
+
+    /**
+     * @dev Internal view function to derive the EIP-712 domain separator.
+     *
+     * @return domainSeparator The derived domain separator.
+     */
+    function _deriveDomainSeparator() internal view returns (bytes32 domainSeparator) {
+        return keccak256(abi.encode(_EIP_712_DOMAIN_TYPEHASH, _NAME_HASH, _VERSION_HASH, block.chainid, address(this)));
     }
 }

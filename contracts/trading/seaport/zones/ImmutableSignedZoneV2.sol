@@ -335,7 +335,6 @@ contract ImmutableSignedZoneV2 is
         bytes calldata context,
         ZoneParameters calldata zoneParameters
     ) internal pure {
-
         uint256 startIndex = 0;
 
         if (startIndex > context.length) { return; }
@@ -349,30 +348,6 @@ contract ImmutableSignedZoneV2 is
 
         if (startIndex != context.length) {
             revert InvalidExtraData("invalid context, unexpected context length", zoneParameters.orderHash);
-        }
-
-        // substandard 4 - validate order hashes actual match expected
-
-        // byte 33 to end are orderHashes array for substandard 4
-        bytes calldata orderHashesBytes = context[32:];
-        // context must be a multiple of 32 bytes
-        if (orderHashesBytes.length % 32 != 0) {
-            revert InvalidExtraData(
-                "invalid context, order hashes bytes not an array of bytes32 hashes",
-                zoneParameters.orderHash
-            );
-        }
-
-        // compute expected order hashes array based on context bytes
-        bytes32[] memory expectedOrderHashes = new bytes32[](orderHashesBytes.length / 32);
-        for (uint256 i = 0; i < orderHashesBytes.length / 32; i++) {
-            expectedOrderHashes[i] = bytes32(orderHashesBytes[i * 32:i * 32 + 32]);
-        }
-
-        // revert if order hashes in context and payload do not match
-        // every expected order hash need to exist in fulfilling order hashes
-        if (!_everyElementExists(expectedOrderHashes, zoneParameters.orderHashes)) {
-            revert SubstandardViolation(4, "invalid order hashes", zoneParameters.orderHash);
         }
     }
 
@@ -393,7 +368,7 @@ contract ImmutableSignedZoneV2 is
             revert InvalidExtraData("invalid context, expecting substandard ID 3 followed by bytes32 consideration hash", zoneParameters.orderHash);
         }
 
-        if (_deriveConsiderationHash(zoneParameters.consideration) != bytes32(context[1:33])) {
+        if (_deriveReceivedItemsHash(zoneParameters.consideration, 1, 1) != bytes32(context[1:33])) {
             revert SubstandardViolation(3, "invalid consideration hash", zoneParameters.orderHash);
         }
 
@@ -411,6 +386,23 @@ contract ImmutableSignedZoneV2 is
         if (uint8(context[0]) != 4) {
             return 0;
         }
+
+        // substandard ID + array offset + array length
+        if (context.length < 65) {
+            revert InvalidExtraData("invalid context, expecting substandard ID 4 followed by bytes32 array offset and bytes32 array length", zoneParameters.orderHash);
+        }
+
+        uint256 expectedOrderHashesSize = uint256(bytes32(context[33:65]));
+        uint256 substandardIndexEnd = 65 + (expectedOrderHashesSize * 32);
+        bytes32[] memory expectedOrderHashes = abi.decode(context[1:substandardIndexEnd + 1], (bytes32[]));
+
+        // revert if order hashes in context and payload do not match
+        // every expected order hash need to exist in fulfilling order hashes
+        if (!_everyElementExists(expectedOrderHashes, zoneParameters.orderHashes)) {
+            revert SubstandardViolation(4, "invalid order hashes", zoneParameters.orderHash);
+        }
+
+        return substandardIndexEnd + 1;
     }
 
     /**
@@ -424,6 +416,19 @@ contract ImmutableSignedZoneV2 is
         if (uint8(context[0]) != 6) {
             return 0;
         }
+
+        if (context.length < 65) {
+            revert InvalidExtraData("invalid context, expecting substandard ID 6 followed by (uint256, bytes32)", zoneParameters.orderHash);
+        }
+
+        uint256 originalFirstOfferItemAmount = uint256(bytes32(context[1:33]));
+        bytes32 expectedReceivedItemsHash = bytes32(context[33:65]);
+
+        if (_deriveReceivedItemsHash(zoneParameters.consideration, originalFirstOfferItemAmount, zoneParameters.offer[0].amount) != expectedReceivedItemsHash) {
+            revert SubstandardViolation(6, "invalid consideration hash", zoneParameters.orderHash);
+        }
+
+        return 65;
     }
 
     /**
@@ -464,26 +469,28 @@ contract ImmutableSignedZoneV2 is
     }
 
     /**
-     * @dev Derive the consideration hash based on received item array
+     * @dev Derive the received items hash based on received item array
      *
      * @param receivedItems actual received item array
+     * @param scalingFactorNumerator scaling factor numerator
+     * @param scalingFactorDenominator scaling factor denominator
      */
-    function _deriveConsiderationHash(ReceivedItem[] calldata receivedItems) internal pure returns (bytes32) {
+    function _deriveReceivedItemsHash(ReceivedItem[] calldata receivedItems, uint256 scalingFactorNumerator, uint256 scalingFactorDenominator) internal pure returns (bytes32) {
         uint256 numberOfItems = receivedItems.length;
-        bytes memory considerationHash;
+        bytes memory receivedItemsHash;
 
         for (uint256 i; i < numberOfItems; i++) {
-            considerationHash = abi.encodePacked(
-                considerationHash,
+            receivedItemsHash = abi.encodePacked(
+                receivedItemsHash,
                 receivedItems[i].itemType,
                 receivedItems[i].token,
                 receivedItems[i].identifier,
-                receivedItems[i].amount,
+                receivedItems[i].amount * scalingFactorNumerator / scalingFactorDenominator,
                 receivedItems[i].recipient
             );
         }
 
-        return keccak256(considerationHash);
+        return keccak256(receivedItemsHash);
     }
 
     /**

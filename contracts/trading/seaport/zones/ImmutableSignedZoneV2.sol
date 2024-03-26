@@ -12,6 +12,7 @@ import {SIP5Interface} from "./interfaces/SIP5Interface.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import "openzeppelin-contracts-5.0.2/utils/math/Math.sol";
 
 /**
  * @title  ImmutableSignedZoneV2
@@ -485,7 +486,7 @@ contract ImmutableSignedZoneV2 is
                 receivedItems[i].itemType,
                 receivedItems[i].token,
                 receivedItems[i].identifier,
-                receivedItems[i].amount * scalingFactorNumerator / scalingFactorDenominator,
+                Math.mulDiv(receivedItems[i].amount, scalingFactorNumerator, scalingFactorDenominator),
                 receivedItems[i].recipient
             );
         }

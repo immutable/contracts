@@ -1,8 +1,18 @@
+// Copyright (c) Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract ImmutableERC20 is ERC20 {
-    constructor(string memory name_, string memory symbol_) ERC20(name_, symbol_) {}
+
+/**
+ * @notice ERC 20 contract that wraps Open Zeppelin's ERC 20 contract.
+ */
+abstract contract ImmutableERC20 is ERC20 {
+    /**
+     * @dev Delegate to Open Zeppelin's contract.
+     * @param _name  Name of the token.
+     * @param _symbol Token symbol.
+     */
+    constructor(string memory _name, string memory _symbol) ERC20(_name, _symbol) {}
 }

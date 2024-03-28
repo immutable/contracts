@@ -1,4 +1,5 @@
 @openzeppelin/contracts/=lib/openzeppelin-contracts-4.9.3/contracts/
+openzeppelin-contracts-5.0.2/=lib/openzeppelin-contracts-5.0.2/contracts/
 openzeppelin-contracts-upgradeable-4.9.3/=lib/openzeppelin-contracts-upgradeable-4.9.3/contracts/
 solidity-bits/=lib/solidity-bits/
 solidity-bytes-utils/=lib/solidity-bytes-utils/

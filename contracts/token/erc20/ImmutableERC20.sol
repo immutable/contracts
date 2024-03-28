@@ -8,7 +8,7 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 /**
  * @notice ERC 20 contract that wraps Open Zeppelin's ERC 20 contract.
  */
-contract ImmutableERC20 is ERC20 {
+abstract contract ImmutableERC20 is ERC20 {
     /**
      * @dev Delegate to Open Zeppelin's contract.
      * @param _name  Name of the token.

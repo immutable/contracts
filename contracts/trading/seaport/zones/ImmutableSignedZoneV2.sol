@@ -9,7 +9,7 @@ import {SIP7Interface} from "./interfaces/SIP7Interface.sol";
 import {SIP7EventsAndErrors} from "./interfaces/SIP7EventsAndErrors.sol";
 import {SIP6EventsAndErrors} from "./interfaces/SIP6EventsAndErrors.sol";
 import {SIP5Interface} from "./interfaces/SIP5Interface.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "openzeppelin-contracts-5.0.2/utils/math/Math.sol";
@@ -28,7 +28,7 @@ contract ImmutableSignedZoneV2 is
     ZoneInterface,
     SIP5Interface,
     SIP7Interface,
-    Ownable
+    AccessControlEnumerable
 {
     /// @dev The EIP-712 digest parameters.
     bytes32 internal immutable _VERSION_HASH = keccak256(bytes("2.0"));
@@ -94,6 +94,7 @@ contract ImmutableSignedZoneV2 is
     constructor(string memory zoneName, string memory apiEndpoint, string memory documentationURI, address owner) {
         // Set the zone name.
         _ZONE_NAME = zoneName;
+
         // set name hash
         _NAME_HASH = keccak256(bytes(zoneName));
 
@@ -107,8 +108,8 @@ contract ImmutableSignedZoneV2 is
         // Emit an event to signal a SIP-5 contract has been deployed.
         emit SeaportCompatibleContractDeployed();
 
-        // Transfer ownership to the address specified in the constructor
-        _transferOwnership(owner);
+        // Grant admin role to the specified owner
+        _grantRole(DEFAULT_ADMIN_ROLE, owner);
     }
 
     /**
@@ -116,7 +117,7 @@ contract ImmutableSignedZoneV2 is
      *
      * @param signer The new signer address to add.
      */
-    function addSigner(address signer) external override onlyOwner {
+    function addSigner(address signer) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         // Do not allow the zero address to be added as a signer.
         if (signer == address(0)) {
             revert SignerCannotBeZeroAddress();
@@ -146,7 +147,7 @@ contract ImmutableSignedZoneV2 is
      *
      * @param signer The signer address to remove.
      */
-    function removeSigner(address signer) external override onlyOwner {
+    function removeSigner(address signer) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         // Revert if the signer is not active.
         if (!_signers[signer].active) {
             revert SignerNotActive(signer);
@@ -164,7 +165,7 @@ contract ImmutableSignedZoneV2 is
      *
      * @param newApiEndpoint The new API endpoint.
      */
-    function updateAPIEndpoint(string calldata newApiEndpoint) external override onlyOwner {
+    function updateAPIEndpoint(string calldata newApiEndpoint) external override onlyRole(DEFAULT_ADMIN_ROLE) {
         // Update to the new API endpoint.
         _sip7APIEndpoint = newApiEndpoint;
     }
@@ -218,7 +219,7 @@ contract ImmutableSignedZoneV2 is
      * @notice ERC-165 interface support
      * @param interfaceId The interface ID to check for support.
      */
-    function supportsInterface(bytes4 interfaceId) public view override(ERC165, ZoneInterface) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view override(ERC165, ZoneInterface, AccessControlEnumerable) returns (bool) {
         return interfaceId == type(ZoneInterface).interfaceId || super.supportsInterface(interfaceId);
     }
 

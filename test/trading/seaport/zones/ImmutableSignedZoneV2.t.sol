@@ -190,6 +190,93 @@ contract ImmutableSignedZoneV2Test is Test {
     }
 
     /* _validateSubstandard4 - N */
+    function test_validateSubstandard4_returnsZeroLengthIfNotSubstandard4() public {
+        ImmutableSignedZoneV2Harness zone = new ImmutableSignedZoneV2Harness(
+            "MyZoneName",
+            "https://www.immutable.com",
+            "https://www.immutable.com/docs",
+            address(0x2)
+        );
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0),
+            fulfiller: address(0x2),
+            offerer: address(0x3),
+            offer: new SpentItem[](0),
+            consideration: new ReceivedItem[](0),
+            extraData: new bytes(0),
+            orderHashes: new bytes32[](0),
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+        bytes memory context = new bytes(0x04);
+        uint256 substandardLengthResult = zone.exposed_validateSubstandard4(context, zoneParameters);
+        assertEq(substandardLengthResult, 0);
+    }
+
+    function test_validateSubstandard4_revertsIfContextLengthIsInvalid() public {
+        ImmutableSignedZoneV2Harness zone = new ImmutableSignedZoneV2Harness(
+            "MyZoneName",
+            "https://www.immutable.com",
+            "https://www.immutable.com/docs",
+            address(0x2)
+        );
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0),
+            fulfiller: address(0x2),
+            offerer: address(0x3),
+            offer: new SpentItem[](0),
+            consideration: new ReceivedItem[](0),
+            extraData: new bytes(0),
+            orderHashes: new bytes32[](0),
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+        bytes memory context = abi.encodePacked(bytes1(0x04), bytes10(0));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                InvalidExtraData.selector,
+                "invalid context, expecting substandard ID 4 followed by bytes32 array offset and bytes32 array length",
+                zoneParameters.orderHash
+            )
+        );
+        zone.exposed_validateSubstandard4(context, zoneParameters);
+    }
+
+    function test_validateSubstandard4_revertsIfDerivedOrderHashesIsNotEqualToHashesInContext() public {
+        ImmutableSignedZoneV2Harness zone = new ImmutableSignedZoneV2Harness(
+            "MyZoneName",
+            "https://www.immutable.com",
+            "https://www.immutable.com/docs",
+            address(0x2)
+        );
+        bytes32[] memory orderHashes = new bytes32[](1);
+        orderHashes[0] = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0),
+            fulfiller: address(0x2),
+            offerer: address(0x3),
+            offer: new SpentItem[](0),
+            consideration: new ReceivedItem[](0),
+            extraData: new bytes(0),
+            orderHashes: orderHashes,
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+
+        bytes memory context = abi.encodePacked(bytes1(0x04), bytes32(uint256(32)), bytes32(uint256(1)), bytes32(0x0));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SubstandardViolation.selector,
+                4,
+                "invalid order hashes",
+                zoneParameters.orderHash
+            )
+        );
+        zone.exposed_validateSubstandard4(context, zoneParameters);
+    }
 
     /* _validateSubstandard6 - N */
 

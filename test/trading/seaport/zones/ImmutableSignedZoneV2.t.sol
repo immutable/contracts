@@ -13,6 +13,8 @@ contract ImmutableSignedZoneV2Test is Test {
     error InvalidExtraData(string reason, bytes32 orderHash); // SIP-7
     error SubstandardViolation(uint256 substandardId, string reason, bytes32 orderHash); // SIP-7 (custom)
 
+    /* constructor */
+
     function test_contructor_grantsAdminRoleToOwner() public {
         address owner = address(0x2);
         ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
@@ -35,6 +37,28 @@ contract ImmutableSignedZoneV2Test is Test {
             address(0x2)
         );
     }
+
+    /* addSigner - L */
+
+    /* removeSigner - L */
+
+    /* updateAPIEndpoint - N */
+
+    /* getSeaportMetadata - L */
+
+    /* sip7Information - L */
+
+    /* supportsInterface - L */
+
+    /* validateOrder */
+
+    /* _getSupportedSubstandards - L */
+
+    /* _deriveSignedOrderHash - N  */
+
+    /* _validateSubstandards */
+
+    /* _validateSubstandard3 */
 
     function test_validateSubstandard3_returnsZeroLengthIfNotSubstandard3() public {
         ImmutableSignedZoneV2Harness zone = new ImmutableSignedZoneV2Harness(
@@ -164,6 +188,18 @@ contract ImmutableSignedZoneV2Test is Test {
         uint256 substandardLengthResult = zone.exposed_validateSubstandard3(context, zoneParameters);
         assertEq(substandardLengthResult, 33);
     }
+
+    /* _validateSubstandard4 - N */
+
+    /* _validateSubstandard6 - N */
+
+    /* _deriveReceivedItemsHash - N */
+
+    /* _bytes32ArrayIncludes - N */
+
+    /* _domainSeparator - N */
+
+    /* _deriveDomainSeparator - N */
 }
 
 contract ImmutableSignedZoneV2Harness is ImmutableSignedZoneV2 {

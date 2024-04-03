@@ -1,6 +1,7 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: Apache-2
 
+// solhint-disable-next-line compiler-version
 pragma solidity ^0.8.17;
 
 import {ReceivedItem, SpentItem, ZoneParameters} from "seaport-types/src/lib/ConsiderationStructs.sol";
@@ -132,6 +133,27 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     /* getSeaportMetadata - L */
 
     /* sip7Information - L */
+
+    function test_sip7Information() public {
+        string memory expectedApiEndpoint = "https://www.immutable.com";
+        string memory expectedDocumentationURI = "https://www.immutable.com/docs";
+
+        ImmutableSignedZoneV2Harness zone = new ImmutableSignedZoneV2Harness(
+            "MyZoneName",
+            expectedApiEndpoint,
+            expectedDocumentationURI,
+            OWNER
+        );
+
+        bytes32 expectedDomainSeparator = zone.exposed_deriveDomainSeparator();
+        uint256[] memory expectedSubstandards = zone.exposed_getSupportedSubstandards();
+
+        (bytes32 domainSeparator, string memory apiEndpoint, uint256[] memory substandards, string memory documentationURI) = zone.sip7Information();
+        assertEq(domainSeparator, expectedDomainSeparator);
+        assertEq(apiEndpoint, expectedApiEndpoint);
+        assertEq(substandards, expectedSubstandards);
+        assertEq(documentationURI, expectedDocumentationURI);
+    }
 
     /* supportsInterface - L */
 

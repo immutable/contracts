@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.17;
 
-import {ReceivedItem, SpentItem, ZoneParameters} from "seaport-types/src/lib/ConsiderationStructs.sol";
+import {ReceivedItem, ZoneParameters} from "seaport-types/src/lib/ConsiderationStructs.sol";
 import {ImmutableSignedZoneV2} from "../../../../contracts/trading/seaport/zones/ImmutableSignedZoneV2.sol";
 
 contract ImmutableSignedZoneV2Harness is ImmutableSignedZoneV2 {

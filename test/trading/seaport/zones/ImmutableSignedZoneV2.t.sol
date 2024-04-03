@@ -9,7 +9,7 @@ import {ImmutableSignedZoneV2} from "../../../../contracts/trading/seaport/zones
 import {ImmutableSignedZoneV2Harness} from "./ImmutableSignedZoneV2Harness.t.sol";
 import {ImmutableSignedZoneV2TestHelper} from "./ImmutableSignedZoneV2TestHelper.t.sol";
 
-/* solhint-disable func-name-mixedcase */
+// solhint-disable func-name-mixedcase
 
 contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     event SeaportCompatibleContractDeployed(); // SIP-5
@@ -498,3 +498,5 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     /* _deriveDomainSeparator - N */
 }
+
+// solhint-enable func-name-mixedcase

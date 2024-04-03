@@ -6,6 +6,8 @@ pragma solidity ^0.8.17;
 import {ReceivedItem, ZoneParameters} from "seaport-types/src/lib/ConsiderationStructs.sol";
 import {ImmutableSignedZoneV2} from "../../../../contracts/trading/seaport/zones/ImmutableSignedZoneV2.sol";
 
+// solhint-disable func-name-mixedcase
+
 contract ImmutableSignedZoneV2Harness is ImmutableSignedZoneV2 {
     constructor(string memory zoneName, string memory apiEndpoint, string memory documentationURI, address owner)
         ImmutableSignedZoneV2(zoneName, apiEndpoint, documentationURI, owner)
@@ -79,3 +81,5 @@ contract ImmutableSignedZoneV2Harness is ImmutableSignedZoneV2 {
         return _deriveDomainSeparator();
     }
 }
+
+// solhint-enable func-name-mixedcase

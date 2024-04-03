@@ -455,16 +455,42 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
         });
 
         // console.logBytes32(zone.exposed_deriveReceivedItemsHash(receivedItems, 100, 10));
-
         bytes32 substandard6Data = 0xff3642433fc0f83e6d23869de6d358c7c36e3257da4bd89a3b6d17dd25e7c823;
         bytes memory context = abi.encodePacked(bytes1(0x06), uint256(100), substandard6Data);
-
         uint256 substandardLengthResult = zone.exposed_validateSubstandard6(context, zoneParameters);
         // bytes1 + uint256 + bytes32 = 65
         assertEq(substandardLengthResult, 65);
     }
 
     /* _deriveReceivedItemsHash - N */
+
+    function test_deriveReceivedItemsHash_returnsHashIfNoReceivedItems() public {
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ReceivedItem[] memory receivedItems = new ReceivedItem[](0);
+        bytes32 receivedItemsHash = zone.exposed_deriveReceivedItemsHash(receivedItems, 0, 0);
+        assertEq(receivedItemsHash, bytes32(0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470));
+    }
+
+    function test_deriveReceivedItemsHash_returnsHashForValidReceivedItems() public {
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ReceivedItem[] memory receivedItems = new ReceivedItem[](2);
+        receivedItems[0] = ReceivedItem({
+            itemType: ItemType.ERC721,
+            token: address(0x2),
+            identifier: 222,
+            amount: 1,
+            recipient: payable(address(0x3))
+        });
+        receivedItems[1] = ReceivedItem({
+            itemType: ItemType.ERC721,
+            token: address(0x2),
+            identifier: 199,
+            amount: 1,
+            recipient: payable(address(0x3))
+        });
+        bytes32 receivedItemsHash = zone.exposed_deriveReceivedItemsHash(receivedItems, 100, 10);
+        assertEq(receivedItemsHash, bytes32(0xf01bacf40a3dd95740faaaad186bf1c000a9edc06008ea07c789ea761d7f3ffb));
+    }
 
     /* _bytes32ArrayIncludes - N */
 

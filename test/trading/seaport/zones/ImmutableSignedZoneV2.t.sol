@@ -139,6 +139,15 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     /* _getSupportedSubstandards - L */
 
+    function test_getSupportedSubstandards() public {
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        uint256[] memory supportedSubstandards = zone.exposed_getSupportedSubstandards();
+        assertEq(supportedSubstandards.length, 3);
+        assertEq(supportedSubstandards[0], 3);
+        assertEq(supportedSubstandards[1], 4);
+        assertEq(supportedSubstandards[2], 6);
+    }
+
     /* _deriveSignedOrderHash - N  */
 
     /* _validateSubstandards */

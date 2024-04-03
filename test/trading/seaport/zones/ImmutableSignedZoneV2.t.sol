@@ -4,7 +4,7 @@
 // solhint-disable-next-line compiler-version
 pragma solidity ^0.8.17;
 
-import {ReceivedItem, SpentItem, ZoneParameters} from "seaport-types/src/lib/ConsiderationStructs.sol";
+import {ReceivedItem, Schema, SpentItem, ZoneParameters} from "seaport-types/src/lib/ConsiderationStructs.sol";
 import {ItemType} from "seaport-types/src/lib/ConsiderationEnums.sol";
 import {ImmutableSignedZoneV2} from "../../../../contracts/trading/seaport/zones/ImmutableSignedZoneV2.sol";
 import {ImmutableSignedZoneV2Harness} from "./ImmutableSignedZoneV2Harness.t.sol";
@@ -131,6 +131,35 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     /* updateAPIEndpoint - N */
 
     /* getSeaportMetadata - L */
+
+    function test_getSeaportMetadata() public {
+        string memory expectedZoneName = "MyZoneName";
+        string memory expectedApiEndpoint = "https://www.immutable.com";
+        string memory expectedDocumentationURI = "https://www.immutable.com/docs";
+
+        ImmutableSignedZoneV2Harness zone = new ImmutableSignedZoneV2Harness(
+            expectedZoneName,
+            expectedApiEndpoint,
+            expectedDocumentationURI,
+            OWNER
+        );
+
+        bytes32 expectedDomainSeparator = zone.exposed_deriveDomainSeparator();
+        uint256[] memory expectedSubstandards = zone.exposed_getSupportedSubstandards();
+
+        (string memory name, Schema[] memory schemas) = zone.getSeaportMetadata();
+        (bytes32 domainSeparator, string memory apiEndpoint, uint256[] memory substandards, string memory documentationURI) = abi.decode(
+            schemas[0].metadata,
+            (bytes32, string, uint256[], string)
+        );
+        assertEq(name, expectedZoneName);
+        assertEq(schemas.length, 1);
+        assertEq(schemas[0].id, 7);
+        assertEq(domainSeparator, expectedDomainSeparator);
+        assertEq(apiEndpoint, expectedApiEndpoint);
+        assertEq(substandards, expectedSubstandards);
+        assertEq(documentationURI, expectedDocumentationURI);
+    }
 
     /* sip7Information - L */
 

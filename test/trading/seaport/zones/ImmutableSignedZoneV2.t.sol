@@ -351,6 +351,119 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     /* _validateSubstandard6 - N */
 
+    function test_validateSubstandard6_returnsZeroLengthIfNotSubstandard6() public {
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0),
+            fulfiller: address(0x2),
+            offerer: address(0x3),
+            offer: new SpentItem[](0),
+            consideration: new ReceivedItem[](0),
+            extraData: new bytes(0),
+            orderHashes: new bytes32[](0),
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+        bytes memory context = new bytes(0x04);
+        uint256 substandardLengthResult = zone.exposed_validateSubstandard6(context, zoneParameters);
+        assertEq(substandardLengthResult, 0);
+    }
+
+    function test_validateSubstandard6_revertsIfContextLengthIsInvalid() public {
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0),
+            fulfiller: address(0x2),
+            offerer: address(0x3),
+            offer: new SpentItem[](0),
+            consideration: new ReceivedItem[](0),
+            extraData: new bytes(0),
+            orderHashes: new bytes32[](0),
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+        bytes memory context = abi.encodePacked(bytes1(0x06), bytes10(0));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                InvalidExtraData.selector,
+                "invalid context, expecting substandard ID 6 followed by (uint256, bytes32)",
+                zoneParameters.orderHash
+            )
+        );
+        zone.exposed_validateSubstandard6(context, zoneParameters);
+    }
+
+    function test_validateSubstandard6_revertsIfDerivedReceivedItemsHashesIsNotEqualToHashesInContext() public {
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
+        receivedItems[0] = ReceivedItem({
+            itemType: ItemType.ERC721,
+            token: address(0x2),
+            identifier: 222,
+            amount: 1,
+            recipient: payable(address(0x3))
+        });
+        SpentItem[] memory spentItems = new SpentItem[](1);
+        spentItems[0] = SpentItem({itemType: ItemType.ERC721, token: address(0x2), identifier: 222, amount: 10});
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0),
+            fulfiller: address(0x2),
+            offerer: address(0x3),
+            offer: spentItems,
+            consideration: receivedItems,
+            extraData: new bytes(0),
+            orderHashes: new bytes32[](0),
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+
+        bytes memory context = abi.encodePacked(bytes1(0x06), uint256(100), bytes32(uint256(0x123456)));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SubstandardViolation.selector, 6, "invalid consideration hash", zoneParameters.orderHash
+            )
+        );
+        zone.exposed_validateSubstandard6(context, zoneParameters);
+    }
+
+    function test_validateSubstandard6_returnsLengthOfSubstandardSegmentOnSuccess() public {
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
+        receivedItems[0] = ReceivedItem({
+            itemType: ItemType.ERC721,
+            token: address(0x2),
+            identifier: 222,
+            amount: 1,
+            recipient: payable(address(0x3))
+        });
+        SpentItem[] memory spentItems = new SpentItem[](1);
+        spentItems[0] = SpentItem({itemType: ItemType.ERC721, token: address(0x2), identifier: 222, amount: 10});
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0),
+            fulfiller: address(0x2),
+            offerer: address(0x3),
+            offer: spentItems,
+            consideration: receivedItems,
+            extraData: new bytes(0),
+            orderHashes: new bytes32[](0),
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+
+        // console.logBytes32(zone.exposed_deriveReceivedItemsHash(receivedItems, 100, 10));
+
+        bytes32 substandard6Data = 0xff3642433fc0f83e6d23869de6d358c7c36e3257da4bd89a3b6d17dd25e7c823;
+        bytes memory context = abi.encodePacked(bytes1(0x06), uint256(100), substandard6Data);
+
+        uint256 substandardLengthResult = zone.exposed_validateSubstandard6(context, zoneParameters);
+        // bytes1 + uint256 + bytes32 = 65
+        assertEq(substandardLengthResult, 65);
+    }
+
     /* _deriveReceivedItemsHash - N */
 
     /* _bytes32ArrayIncludes - N */

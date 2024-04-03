@@ -148,10 +148,12 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
         uint256[] memory expectedSubstandards = zone.exposed_getSupportedSubstandards();
 
         (string memory name, Schema[] memory schemas) = zone.getSeaportMetadata();
-        (bytes32 domainSeparator, string memory apiEndpoint, uint256[] memory substandards, string memory documentationURI) = abi.decode(
-            schemas[0].metadata,
-            (bytes32, string, uint256[], string)
-        );
+        (
+            bytes32 domainSeparator,
+            string memory apiEndpoint,
+            uint256[] memory substandards,
+            string memory documentationURI
+        ) = abi.decode(schemas[0].metadata, (bytes32, string, uint256[], string));
         assertEq(name, expectedZoneName);
         assertEq(schemas.length, 1);
         assertEq(schemas[0].id, 7);
@@ -177,7 +179,12 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
         bytes32 expectedDomainSeparator = zone.exposed_deriveDomainSeparator();
         uint256[] memory expectedSubstandards = zone.exposed_getSupportedSubstandards();
 
-        (bytes32 domainSeparator, string memory apiEndpoint, uint256[] memory substandards, string memory documentationURI) = zone.sip7Information();
+        (
+            bytes32 domainSeparator,
+            string memory apiEndpoint,
+            uint256[] memory substandards,
+            string memory documentationURI
+        ) = zone.sip7Information();
         assertEq(domainSeparator, expectedDomainSeparator);
         assertEq(apiEndpoint, expectedApiEndpoint);
         assertEq(substandards, expectedSubstandards);

@@ -20,6 +20,8 @@ contract ImmutableSignedZoneV2Test is Test {
     error InvalidExtraData(string reason, bytes32 orderHash); // SIP-7
     error SubstandardViolation(uint256 substandardId, string reason, bytes32 orderHash); // SIP-7 (custom)
 
+    address internal OWNER = makeAddr("owner");
+
     /* constructor */
 
     function test_contructor_grantsAdminRoleToOwner() public {
@@ -48,34 +50,19 @@ contract ImmutableSignedZoneV2Test is Test {
     /* addSigner - L */
 
     function test_addSigner_revertsIfCalledByNonAdminRole() public {
-        address owner = makeAddr("owner");
-        address randomAddress = makeAddr("random");
-        address signerToAdd = makeAddr("signerToAdd");
-        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
-            "MyZoneName",
-            "https://www.immutable.com",
-            "https://www.immutable.com/docs",
-            owner
-        );
+        ImmutableSignedZoneV2 zone = _newZone();
         vm.expectRevert(
             "AccessControl: account 0x42a3d6e125aad539ac15ed04e1478eb0a4dc1489 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
         );
-        vm.prank(randomAddress);
-        zone.addSigner(signerToAdd);
+        vm.prank(makeAddr("random"));
+        zone.addSigner(makeAddr("signerToAdd"));
     }
 
     function test_addSigner_revertsIfSignerIsTheZeroAddress() public {
-        address owner = makeAddr("owner");
-        address signerToAdd = address(0);
-        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
-            "MyZoneName",
-            "https://www.immutable.com",
-            "https://www.immutable.com/docs",
-            owner
-        );
+        ImmutableSignedZoneV2 zone = _newZone();
         vm.expectRevert(abi.encodeWithSelector(SignerCannotBeZeroAddress.selector));
-        vm.prank(owner);
-        zone.addSigner(signerToAdd);
+        vm.prank(OWNER);
+        zone.addSigner(address(0));
     }
 
     function test_addSigner_emitsSignerAddedEvent() public {
@@ -448,7 +435,49 @@ contract ImmutableSignedZoneV2Test is Test {
     /* _domainSeparator - N */
 
     /* _deriveDomainSeparator - N */
+
+    /* Helper functions */
+
+    function _newZone() internal returns (ImmutableSignedZoneV2) {
+        return new ImmutableSignedZoneV2(
+            "MyZoneName",
+            "https://www.immutable.com",
+            "https://www.immutable.com/docs",
+            OWNER
+        );
+    }
+
+    function _newZoneHarness() internal returns (ImmutableSignedZoneV2Harness) {
+        return new ImmutableSignedZoneV2Harness(
+            "MyZoneName",
+            "https://www.immutable.com",
+            "https://www.immutable.com/docs",
+            OWNER
+        );
+    }
 }
+
+// abstract contract ImmutableSignedZoneV2TestHelper {
+//     address internal OWNER = makeAddr("owner");
+
+//     function _newZone() internal returns (ImmutableSignedZoneV2) {
+//         return new ImmutableSignedZoneV2(
+//             "MyZoneName",
+//             "https://www.immutable.com",
+//             "https://www.immutable.com/docs",
+//             OWNER
+//         );
+//     }
+
+//     function _newZoneHarness() internal returns (ImmutableSignedZoneV2Harness) {
+//         return new ImmutableSignedZoneV2Harness(
+//             "MyZoneName",
+//             "https://www.immutable.com",
+//             "https://www.immutable.com/docs",
+//             OWNER
+//         );
+//     }
+// }
 
 contract ImmutableSignedZoneV2Harness is ImmutableSignedZoneV2 {
     constructor(string memory zoneName, string memory apiEndpoint, string memory documentationURI, address owner)

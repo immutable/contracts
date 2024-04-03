@@ -11,7 +11,7 @@ import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnf
 
 // Utils
 import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
-import {AccessControlEnumerable, MintingAccessControl} from "./MintingAccessControl.sol";
+import {AccessControlEnumerable, MintingAccessControl} from "../../../access/MintingAccessControl.sol";
 
 /*
     ImmutableERC721Base is an abstract contract that offers minimum preset functionality without

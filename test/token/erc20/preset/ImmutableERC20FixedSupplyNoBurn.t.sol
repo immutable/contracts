@@ -4,6 +4,7 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 
 import {ImmutableERC20FixedSupplyNoBurn} from "contracts/token/erc20/preset/ImmutableERC20FixedSupplyNoBurn.sol";
+import {IImmutableERC20Errors} from "contracts/errors/ERC20Errors.sol";
 
 
 contract ImmutableERC20FixedSupplyNoBurnTest is Test {
@@ -44,7 +45,7 @@ contract ImmutableERC20FixedSupplyNoBurnTest is Test {
 
     function testRenounceOwnerBlocked() public {
         vm.prank(hubOwner);
-        vm.expectRevert(abi.encodeWithSelector(ImmutableERC20FixedSupplyNoBurn.RenounceOwnershipNotAllowed.selector));
+        vm.expectRevert(abi.encodeWithSelector(IImmutableERC20Errors.RenounceOwnershipNotAllowed.selector));
         erc20.renounceOwnership();
     }
 

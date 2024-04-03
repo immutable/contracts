@@ -626,7 +626,28 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     /* _domainSeparator - N */
 
+    function test_domainSeparator_returnsCachedDomainSeparatorWhenChainIDMatchesValueSetOnDeployment() public {
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        bytes32 domainSeparator = zone.exposed_domainSeparator();
+        assertEq(domainSeparator, bytes32(0xafb48e1c246f21ba06352cb2c0ebe99b8adc2590dfc48fa547732df870835b42));
+    }
+
+    function test_domainSeparator_returnsUpdatedDomainSeparatorIfChainIDIsDifferentFromValueSetOnDeployment() public {
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        bytes32 domainSeparatorCached = zone.exposed_domainSeparator();
+        vm.chainId(31338);
+        bytes32 domainSeparatorDerived = zone.exposed_domainSeparator();
+        assertFalse(domainSeparatorCached == domainSeparatorDerived);
+        assertEq(domainSeparatorDerived, bytes32(0x835aabb0d2af048df195a75a990b42533471d4a4e82842cd54a892eaac463d74));
+    }
+
     /* _deriveDomainSeparator - N */
+
+    function test_deriveDomainSeparator_returnsDomainSeparatorForChainID() public {
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        bytes32 domainSeparator = zone.exposed_deriveDomainSeparator();
+        assertEq(domainSeparator, bytes32(0xafb48e1c246f21ba06352cb2c0ebe99b8adc2590dfc48fa547732df870835b42));
+    }
 }
 
 // solhint-enable func-name-mixedcase

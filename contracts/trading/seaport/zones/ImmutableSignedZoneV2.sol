@@ -418,7 +418,7 @@ contract ImmutableSignedZoneV2 is
         }
 
         uint256 expectedOrderHashesSize = uint256(bytes32(context[33:65]));
-        uint256 substandardIndexEnd = 65 + (expectedOrderHashesSize * 32);
+        uint256 substandardIndexEnd = 64 + (expectedOrderHashesSize * 32);
         bytes32[] memory expectedOrderHashes = abi.decode(context[1:substandardIndexEnd + 1], (bytes32[]));
 
         // revert if any order hashes in substandard data are not present in zoneParameters.orderHashes

@@ -23,7 +23,7 @@ contract ImmutableSignedZoneV2Test is Test {
     /* constructor */
 
     function test_contructor_grantsAdminRoleToOwner() public {
-        address owner = address(0x2);
+        address owner = makeAddr("owner");
         ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
             "MyZoneName",
             "https://www.immutable.com",
@@ -41,7 +41,7 @@ contract ImmutableSignedZoneV2Test is Test {
             "MyZoneName",
             "https://www.immutable.com",
             "https://www.immutable.com/docs",
-            address(0x2)
+            makeAddr("owner")
         );
     }
 

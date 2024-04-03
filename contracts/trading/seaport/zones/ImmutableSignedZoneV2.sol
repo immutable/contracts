@@ -32,29 +32,17 @@ contract ImmutableSignedZoneV2 is
 {
     /// @dev The EIP-712 digest parameters.
     bytes32 internal immutable _VERSION_HASH = keccak256(bytes("2.0"));
-    bytes32 internal immutable _EIP_712_DOMAIN_TYPEHASH =
-        keccak256(
-            abi.encodePacked(
-                "EIP712Domain(",
-                "string name,",
-                "string version,",
-                "uint256 chainId,",
-                "address verifyingContract",
-                ")"
-            )
-        );
+    bytes32 internal immutable _EIP_712_DOMAIN_TYPEHASH = keccak256(
+        abi.encodePacked(
+            "EIP712Domain(", "string name,", "string version,", "uint256 chainId,", "address verifyingContract", ")"
+        )
+    );
 
-    bytes32 internal immutable _SIGNED_ORDER_TYPEHASH =
-        keccak256(
-            abi.encodePacked(
-                "SignedOrder(",
-                "address fulfiller,",
-                "uint64 expiration,",
-                "bytes32 orderHash,",
-                "bytes context",
-                ")"
-            )
-        );
+    bytes32 internal immutable _SIGNED_ORDER_TYPEHASH = keccak256(
+        abi.encodePacked(
+            "SignedOrder(", "address fulfiller,", "uint64 expiration,", "bytes32 orderHash,", "bytes context", ")"
+        )
+    );
 
     uint256 internal immutable _CHAIN_ID = block.chainid;
     bytes32 internal immutable _DOMAIN_SEPARATOR;
@@ -188,7 +176,8 @@ contract ImmutableSignedZoneV2 is
         // supported SIP (7)
         schemas = new Schema[](1);
         schemas[0].id = 7;
-        schemas[0].metadata = abi.encode(_domainSeparator(), _sip7APIEndpoint, _getSupportedSubstandards(), _documentationURI);
+        schemas[0].metadata =
+            abi.encode(_domainSeparator(), _sip7APIEndpoint, _getSupportedSubstandards(), _documentationURI);
     }
 
     /**
@@ -219,7 +208,12 @@ contract ImmutableSignedZoneV2 is
      * @notice ERC-165 interface support
      * @param interfaceId The interface ID to check for support.
      */
-    function supportsInterface(bytes4 interfaceId) public view override(ERC165, ZoneInterface, AccessControlEnumerable) returns (bool) {
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC165, ZoneInterface, AccessControlEnumerable)
+        returns (bool)
+    {
         return interfaceId == type(ZoneInterface).interfaceId || super.supportsInterface(interfaceId);
     }
 
@@ -232,9 +226,12 @@ contract ImmutableSignedZoneV2 is
      * @return validOrderMagicValue A magic value indicating if the order is
      *                              currently valid.
      */
-    function validateOrder(
-        ZoneParameters calldata zoneParameters
-    ) external view override returns (bytes4 validOrderMagicValue) {
+    function validateOrder(ZoneParameters calldata zoneParameters)
+        external
+        view
+        override
+        returns (bytes4 validOrderMagicValue)
+    {
         // Put the extraData and orderHash on the stack for cheaper access.
         bytes calldata extraData = zoneParameters.extraData;
         bytes32 orderHash = zoneParameters.orderHash;
@@ -338,16 +335,14 @@ contract ImmutableSignedZoneV2 is
      * @return signedOrderHash The signedOrder hash.
      *
      */
-    function _deriveSignedOrderHash(
-        address fulfiller,
-        uint64 expiration,
-        bytes32 orderHash,
-        bytes calldata context
-    ) internal view returns (bytes32 signedOrderHash) {
+    function _deriveSignedOrderHash(address fulfiller, uint64 expiration, bytes32 orderHash, bytes calldata context)
+        internal
+        view
+        returns (bytes32 signedOrderHash)
+    {
         // Derive the signed order hash.
-        signedOrderHash = keccak256(
-            abi.encode(_SIGNED_ORDER_TYPEHASH, fulfiller, expiration, orderHash, keccak256(context))
-        );
+        signedOrderHash =
+            keccak256(abi.encode(_SIGNED_ORDER_TYPEHASH, fulfiller, expiration, orderHash, keccak256(context)));
     }
 
     /**
@@ -356,19 +351,16 @@ contract ImmutableSignedZoneV2 is
      * @param context bytes payload of context
      * @param zoneParameters zone parameters
      */
-    function _validateSubstandards(
-        bytes calldata context,
-        ZoneParameters calldata zoneParameters
-    ) internal pure {
+    function _validateSubstandards(bytes calldata context, ZoneParameters calldata zoneParameters) internal pure {
         uint256 startIndex = 0;
 
-        if (startIndex > context.length) { return; }
+        if (startIndex > context.length) return;
         startIndex = _validateSubstandard3(context[startIndex:], zoneParameters) + startIndex;
 
-        if (startIndex > context.length) { return; }
+        if (startIndex > context.length) return;
         startIndex = _validateSubstandard4(context[startIndex:], zoneParameters) + startIndex;
 
-        if (startIndex > context.length) { return; }
+        if (startIndex > context.length) return;
         startIndex = _validateSubstandard6(context[startIndex:], zoneParameters) + startIndex;
 
         if (startIndex != context.length) {
@@ -383,14 +375,21 @@ contract ImmutableSignedZoneV2 is
      * @param zoneParameters zone parameters
      * @return Length of substandard segment
      */
-    function _validateSubstandard3(bytes calldata context, ZoneParameters calldata zoneParameters) internal pure returns (uint256) {
+    function _validateSubstandard3(bytes calldata context, ZoneParameters calldata zoneParameters)
+        internal
+        pure
+        returns (uint256)
+    {
         if (uint8(context[0]) != 3) {
             return 0;
         }
 
         if (context.length < 33) {
             // TODO: Does size of error message have a gas impact?
-            revert InvalidExtraData("invalid context, expecting substandard ID 3 followed by bytes32 consideration hash", zoneParameters.orderHash);
+            revert InvalidExtraData(
+                "invalid context, expecting substandard ID 3 followed by bytes32 consideration hash",
+                zoneParameters.orderHash
+            );
         }
 
         if (_deriveReceivedItemsHash(zoneParameters.consideration, 1, 1) != bytes32(context[1:33])) {
@@ -407,14 +406,21 @@ contract ImmutableSignedZoneV2 is
      * @param zoneParameters zone parameters
      * @return Length of substandard segment
      */
-    function _validateSubstandard4(bytes calldata context, ZoneParameters calldata zoneParameters) internal pure returns (uint256) {
+    function _validateSubstandard4(bytes calldata context, ZoneParameters calldata zoneParameters)
+        internal
+        pure
+        returns (uint256)
+    {
         if (uint8(context[0]) != 4) {
             return 0;
         }
 
         // substandard ID + array offset + array length
         if (context.length < 65) {
-            revert InvalidExtraData("invalid context, expecting substandard ID 4 followed by bytes32 array offset and bytes32 array length", zoneParameters.orderHash);
+            revert InvalidExtraData(
+                "invalid context, expecting substandard ID 4 followed by bytes32 array offset and bytes32 array length",
+                zoneParameters.orderHash
+            );
         }
 
         uint256 expectedOrderHashesSize = uint256(bytes32(context[33:65]));
@@ -436,19 +442,29 @@ contract ImmutableSignedZoneV2 is
      * @param zoneParameters zone parameters
      * @return Length of substandard segment
      */
-    function _validateSubstandard6(bytes calldata context, ZoneParameters calldata zoneParameters) internal pure returns (uint256) {
+    function _validateSubstandard6(bytes calldata context, ZoneParameters calldata zoneParameters)
+        internal
+        pure
+        returns (uint256)
+    {
         if (uint8(context[0]) != 6) {
             return 0;
         }
 
         if (context.length < 65) {
-            revert InvalidExtraData("invalid context, expecting substandard ID 6 followed by (uint256, bytes32)", zoneParameters.orderHash);
+            revert InvalidExtraData(
+                "invalid context, expecting substandard ID 6 followed by (uint256, bytes32)", zoneParameters.orderHash
+            );
         }
 
         uint256 originalFirstOfferItemAmount = uint256(bytes32(context[1:33]));
         bytes32 expectedReceivedItemsHash = bytes32(context[33:65]);
 
-        if (_deriveReceivedItemsHash(zoneParameters.consideration, originalFirstOfferItemAmount, zoneParameters.offer[0].amount) != expectedReceivedItemsHash) {
+        if (
+            _deriveReceivedItemsHash(
+                zoneParameters.consideration, originalFirstOfferItemAmount, zoneParameters.offer[0].amount
+            ) != expectedReceivedItemsHash
+        ) {
             revert SubstandardViolation(6, "invalid consideration hash", zoneParameters.orderHash);
         }
 
@@ -462,7 +478,11 @@ contract ImmutableSignedZoneV2 is
      * @param scalingFactorNumerator scaling factor numerator
      * @param scalingFactorDenominator scaling factor denominator
      */
-    function _deriveReceivedItemsHash(ReceivedItem[] calldata receivedItems, uint256 scalingFactorNumerator, uint256 scalingFactorDenominator) internal pure returns (bytes32) {
+    function _deriveReceivedItemsHash(
+        ReceivedItem[] calldata receivedItems,
+        uint256 scalingFactorNumerator,
+        uint256 scalingFactorDenominator
+    ) internal pure returns (bytes32) {
         uint256 numberOfItems = receivedItems.length;
         bytes memory receivedItemsHash;
 
@@ -487,7 +507,11 @@ contract ImmutableSignedZoneV2 is
      * @param sourceArray source array
      * @param values values array
      */
-    function _bytes32ArrayIncludes(bytes32[] calldata sourceArray, bytes32[] memory values) internal pure returns (bool) {
+    function _bytes32ArrayIncludes(bytes32[] calldata sourceArray, bytes32[] memory values)
+        internal
+        pure
+        returns (bool)
+    {
         // cache the length in memory for loop optimisation
         uint256 sourceArraySize = sourceArray.length;
         uint256 valuesSize = values.length;
@@ -499,10 +523,10 @@ contract ImmutableSignedZoneV2 is
         }
 
         // Iterate through each element and compare them
-        for (uint256 i = 0; i < valuesSize; ) {
+        for (uint256 i = 0; i < valuesSize;) {
             bool found = false;
             bytes32 item = values[i];
-            for (uint256 j = 0; j < sourceArraySize; ) {
+            for (uint256 j = 0; j < sourceArraySize;) {
                 if (item == sourceArray[j]) {
                     // if item from values is in sourceArray, break
                     found = true;

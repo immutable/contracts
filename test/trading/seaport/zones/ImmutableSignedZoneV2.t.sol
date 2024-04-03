@@ -322,6 +322,7 @@ contract ImmutableSignedZoneV2Test is Test {
     }
 
     /* _validateSubstandard4 - N */
+
     function test_validateSubstandard4_returnsZeroLengthIfNotSubstandard4() public {
         ImmutableSignedZoneV2Harness zone = new ImmutableSignedZoneV2Harness(
             "MyZoneName",

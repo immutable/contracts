@@ -123,7 +123,7 @@ contract ImmutableSignedZoneV2 is
             revert SignerCannotBeZeroAddress();
         }
 
-        // Revert if the signer is already added.
+        // Revert if the signer is already active.
         if (_signers[signer].active) {
             revert SignerAlreadyActive(signer);
         }

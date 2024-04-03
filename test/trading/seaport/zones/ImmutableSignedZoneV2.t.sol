@@ -10,7 +10,11 @@ import "../../../../contracts/trading/seaport/zones/ImmutableSignedZoneV2.sol";
 
 contract ImmutableSignedZoneV2Test is Test {
     event SeaportCompatibleContractDeployed(); // SIP-5
+    event SignerAdded(address signer); // SIP-7
 
+    error SignerCannotBeZeroAddress(); // SIP-7
+    error SignerAlreadyActive(address signer); // SIP-7
+    error SignerCannotBeReauthorized(address signer); // SIP-7
     error InvalidExtraData(string reason, bytes32 orderHash); // SIP-7
     error SubstandardViolation(uint256 substandardId, string reason, bytes32 orderHash); // SIP-7 (custom)
 
@@ -40,6 +44,86 @@ contract ImmutableSignedZoneV2Test is Test {
     }
 
     /* addSigner - L */
+
+    function test_addSigner_revertsIfCalledByNonAdminRole() public {
+        address owner = makeAddr("owner");
+        address randomAddress = makeAddr("random");
+        address signerToAdd = makeAddr("signerToAdd");
+        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
+            "MyZoneName",
+            "https://www.immutable.com",
+            "https://www.immutable.com/docs",
+            owner
+        );
+        vm.expectRevert(
+            "AccessControl: account 0x42a3d6e125aad539ac15ed04e1478eb0a4dc1489 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
+        );
+        vm.prank(randomAddress);
+        zone.addSigner(signerToAdd);
+    }
+
+    function test_addSigner_revertsIfSignerIsTheZeroAddress() public {
+        address owner = makeAddr("owner");
+        address signerToAdd = address(0);
+        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
+            "MyZoneName",
+            "https://www.immutable.com",
+            "https://www.immutable.com/docs",
+            owner
+        );
+        vm.expectRevert(abi.encodeWithSelector(SignerCannotBeZeroAddress.selector));
+        vm.prank(owner);
+        zone.addSigner(signerToAdd);
+    }
+
+    function test_addSigner_emitsSignerAddedEvent() public {
+        address owner = makeAddr("owner");
+        address signerToAdd = makeAddr("signerToAdd");
+        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
+            "MyZoneName",
+            "https://www.immutable.com",
+            "https://www.immutable.com/docs",
+            owner
+        );
+        vm.expectEmit(address(zone));
+        emit SignerAdded(signerToAdd);
+        vm.prank(owner);
+        zone.addSigner(signerToAdd);
+    }
+
+    function test_addSigner_revertsIfSignerAlreadyActive() public {
+        address owner = makeAddr("owner");
+        address signerToAdd = makeAddr("signerToAdd");
+        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
+            "MyZoneName",
+            "https://www.immutable.com",
+            "https://www.immutable.com/docs",
+            owner
+        );
+        vm.prank(owner);
+        zone.addSigner(signerToAdd);
+        vm.expectRevert(abi.encodeWithSelector(SignerAlreadyActive.selector, signerToAdd));
+        vm.prank(owner);
+        zone.addSigner(signerToAdd);
+    }
+
+    function test_addSigner_revertsIfSignerWasPreviouslyActive() public {
+        address owner = makeAddr("owner");
+        address signerToAdd = makeAddr("signerToAdd");
+        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
+            "MyZoneName",
+            "https://www.immutable.com",
+            "https://www.immutable.com/docs",
+            owner
+        );
+        vm.prank(owner);
+        zone.addSigner(signerToAdd);
+        vm.prank(owner);
+        zone.removeSigner(signerToAdd);
+        vm.expectRevert(abi.encodeWithSelector(SignerCannotBeReauthorized.selector, signerToAdd));
+        vm.prank(owner);
+        zone.addSigner(signerToAdd);
+    }
 
     /* removeSigner - L */
 

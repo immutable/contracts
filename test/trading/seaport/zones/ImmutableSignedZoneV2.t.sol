@@ -1,12 +1,14 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: Apache-2
-
+// solhint-disable-next-line one-contract-per-file
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import {ReceivedItem, SpentItem, ZoneParameters} from "seaport-types/src/lib/ConsiderationStructs.sol";
 import {ItemType} from "seaport-types/src/lib/ConsiderationEnums.sol";
 import "../../../../contracts/trading/seaport/zones/ImmutableSignedZoneV2.sol";
+
+/* solhint-disable func-name-mixedcase */
 
 contract ImmutableSignedZoneV2Test is Test {
     event SeaportCompatibleContractDeployed(); // SIP-5
@@ -552,3 +554,5 @@ contract ImmutableSignedZoneV2Harness is ImmutableSignedZoneV2 {
         return _deriveDomainSeparator();
     }
 }
+
+/* solhint-enable func-name-mixedcase */

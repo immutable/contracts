@@ -193,6 +193,15 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     /* supportsInterface - L */
 
+    function test_supportsInterface() public {
+        ImmutableSignedZoneV2 zone = _newZone();
+        assertTrue(zone.supportsInterface(0x01ffc9a7)); // ERC165 interface
+        assertFalse(zone.supportsInterface(0xffffffff)); // ERC165 compliance
+        assertTrue(zone.supportsInterface(0x3839be19)); // ZoneInterface
+        assertTrue(zone.supportsInterface(0x2e778efc)); // SIP-5 interface
+        assertTrue(zone.supportsInterface(0x1a511c70)); // SIP-7 interface
+    }
+
     /* validateOrder */
 
     /* _getSupportedSubstandards - L */

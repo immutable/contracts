@@ -214,7 +214,8 @@ contract ImmutableSignedZoneV2 is
         override(ERC165, ZoneInterface, AccessControlEnumerable)
         returns (bool)
     {
-        return interfaceId == type(ZoneInterface).interfaceId || super.supportsInterface(interfaceId);
+        return interfaceId == type(ZoneInterface).interfaceId || interfaceId == type(SIP5Interface).interfaceId
+            || interfaceId == type(SIP7Interface).interfaceId || super.supportsInterface(interfaceId);
     }
 
     /**

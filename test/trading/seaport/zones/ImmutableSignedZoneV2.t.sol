@@ -10,6 +10,13 @@ import "../../../../contracts/trading/seaport/zones/ImmutableSignedZoneV2.sol";
 
 contract ImmutableSignedZoneV2Test is Test {
     event SeaportCompatibleContractDeployed(); // SIP-5
+    event SignerAdded(address signer); // SIP-7
+    event SignerRemoved(address signer); // SIP-7
+
+    error SignerCannotBeZeroAddress(); // SIP-7
+    error SignerAlreadyActive(address signer); // SIP-7
+    error SignerCannotBeReauthorized(address signer); // SIP-7
+    error SignerNotActive(address signer); // SIP-7
     error InvalidExtraData(string reason, bytes32 orderHash); // SIP-7
     error SubstandardViolation(uint256 substandardId, string reason, bytes32 orderHash); // SIP-7 (custom)
 
@@ -40,7 +47,135 @@ contract ImmutableSignedZoneV2Test is Test {
 
     /* addSigner - L */
 
+    function test_addSigner_revertsIfCalledByNonAdminRole() public {
+        address owner = makeAddr("owner");
+        address randomAddress = makeAddr("random");
+        address signerToAdd = makeAddr("signerToAdd");
+        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
+            "MyZoneName",
+            "https://www.immutable.com",
+            "https://www.immutable.com/docs",
+            owner
+        );
+        vm.expectRevert(
+            "AccessControl: account 0x42a3d6e125aad539ac15ed04e1478eb0a4dc1489 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
+        );
+        vm.prank(randomAddress);
+        zone.addSigner(signerToAdd);
+    }
+
+    function test_addSigner_revertsIfSignerIsTheZeroAddress() public {
+        address owner = makeAddr("owner");
+        address signerToAdd = address(0);
+        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
+            "MyZoneName",
+            "https://www.immutable.com",
+            "https://www.immutable.com/docs",
+            owner
+        );
+        vm.expectRevert(abi.encodeWithSelector(SignerCannotBeZeroAddress.selector));
+        vm.prank(owner);
+        zone.addSigner(signerToAdd);
+    }
+
+    function test_addSigner_emitsSignerAddedEvent() public {
+        address owner = makeAddr("owner");
+        address signerToAdd = makeAddr("signerToAdd");
+        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
+            "MyZoneName",
+            "https://www.immutable.com",
+            "https://www.immutable.com/docs",
+            owner
+        );
+        vm.expectEmit(address(zone));
+        emit SignerAdded(signerToAdd);
+        vm.prank(owner);
+        zone.addSigner(signerToAdd);
+    }
+
+    function test_addSigner_revertsIfSignerAlreadyActive() public {
+        address owner = makeAddr("owner");
+        address signerToAdd = makeAddr("signerToAdd");
+        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
+            "MyZoneName",
+            "https://www.immutable.com",
+            "https://www.immutable.com/docs",
+            owner
+        );
+        vm.prank(owner);
+        zone.addSigner(signerToAdd);
+        vm.expectRevert(abi.encodeWithSelector(SignerAlreadyActive.selector, signerToAdd));
+        vm.prank(owner);
+        zone.addSigner(signerToAdd);
+    }
+
+    function test_addSigner_revertsIfSignerWasPreviouslyActive() public {
+        address owner = makeAddr("owner");
+        address signerToAdd = makeAddr("signerToAdd");
+        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
+            "MyZoneName",
+            "https://www.immutable.com",
+            "https://www.immutable.com/docs",
+            owner
+        );
+        vm.prank(owner);
+        zone.addSigner(signerToAdd);
+        vm.prank(owner);
+        zone.removeSigner(signerToAdd);
+        vm.expectRevert(abi.encodeWithSelector(SignerCannotBeReauthorized.selector, signerToAdd));
+        vm.prank(owner);
+        zone.addSigner(signerToAdd);
+    }
+
     /* removeSigner - L */
+
+    function test_removeSigner_revertsIfCalledByNonAdminRole() public {
+        address owner = makeAddr("owner");
+        address randomAddress = makeAddr("random");
+        address signerToRemove = makeAddr("signerToRemove");
+        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
+            "MyZoneName",
+            "https://www.immutable.com",
+            "https://www.immutable.com/docs",
+            owner
+        );
+        vm.expectRevert(
+            "AccessControl: account 0x42a3d6e125aad539ac15ed04e1478eb0a4dc1489 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
+        );
+        vm.prank(randomAddress);
+        zone.removeSigner(signerToRemove);
+    }
+
+    function test_removeSigner_revertsIfSignerNotActive() public {
+        address owner = makeAddr("owner");
+        address signerToRemove = makeAddr("signerToRemove");
+        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
+            "MyZoneName",
+            "https://www.immutable.com",
+            "https://www.immutable.com/docs",
+            owner
+        );
+        vm.expectRevert(abi.encodeWithSelector(SignerNotActive.selector, signerToRemove));
+        vm.prank(owner);
+        zone.removeSigner(signerToRemove);
+    }
+
+    function test_removeSigner_emitsSignerRemovedEvent() public {
+        address owner = makeAddr("owner");
+        address signerToRemove = makeAddr("signerToRemove");
+        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
+            "MyZoneName",
+            "https://www.immutable.com",
+            "https://www.immutable.com/docs",
+            owner
+        );
+        vm.prank(owner);
+        zone.addSigner(signerToRemove);
+        vm.expectEmit(address(zone));
+        emit SignerRemoved(signerToRemove);
+        vm.prank(owner);
+        zone.removeSigner(signerToRemove);
+    }
 
     /* updateAPIEndpoint - N */
 
@@ -145,10 +280,7 @@ contract ImmutableSignedZoneV2Test is Test {
         bytes memory context = abi.encodePacked(bytes1(0x03), bytes32(0));
         vm.expectRevert(
             abi.encodeWithSelector(
-                SubstandardViolation.selector,
-                3,
-                "invalid consideration hash",
-                zoneParameters.orderHash
+                SubstandardViolation.selector, 3, "invalid consideration hash", zoneParameters.orderHash
             )
         );
         zone.exposed_validateSubstandard3(context, zoneParameters);
@@ -290,12 +422,9 @@ contract ImmutableSignedZoneV2Test is Test {
 }
 
 contract ImmutableSignedZoneV2Harness is ImmutableSignedZoneV2 {
-    constructor(
-        string memory zoneName,
-        string memory apiEndpoint,
-        string memory documentationURI,
-        address owner
-    ) ImmutableSignedZoneV2(zoneName, apiEndpoint, documentationURI, owner) {}
+    constructor(string memory zoneName, string memory apiEndpoint, string memory documentationURI, address owner)
+        ImmutableSignedZoneV2(zoneName, apiEndpoint, documentationURI, owner)
+    {}
 
     function exposed_getSupportedSubstandards() external pure returns (uint256[] memory substandards) {
         return _getSupportedSubstandards();
@@ -310,31 +439,34 @@ contract ImmutableSignedZoneV2Harness is ImmutableSignedZoneV2 {
         return _deriveSignedOrderHash(fulfiller, expiration, orderHash, context);
     }
 
-    function exposed_validateSubstandards(
-        bytes calldata context,
-        ZoneParameters calldata zoneParameters
-    ) external pure {
+    function exposed_validateSubstandards(bytes calldata context, ZoneParameters calldata zoneParameters)
+        external
+        pure
+    {
         return _validateSubstandards(context, zoneParameters);
     }
 
-    function exposed_validateSubstandard3(
-        bytes calldata context,
-        ZoneParameters calldata zoneParameters
-    ) external pure returns (uint256) {
+    function exposed_validateSubstandard3(bytes calldata context, ZoneParameters calldata zoneParameters)
+        external
+        pure
+        returns (uint256)
+    {
         return _validateSubstandard3(context, zoneParameters);
     }
 
-    function exposed_validateSubstandard4(
-        bytes calldata context,
-        ZoneParameters calldata zoneParameters
-    ) external pure returns (uint256) {
+    function exposed_validateSubstandard4(bytes calldata context, ZoneParameters calldata zoneParameters)
+        external
+        pure
+        returns (uint256)
+    {
         return _validateSubstandard4(context, zoneParameters);
     }
 
-    function exposed_validateSubstandard6(
-        bytes calldata context,
-        ZoneParameters calldata zoneParameters
-    ) external pure returns (uint256) {
+    function exposed_validateSubstandard6(bytes calldata context, ZoneParameters calldata zoneParameters)
+        external
+        pure
+        returns (uint256)
+    {
         return _validateSubstandard6(context, zoneParameters);
     }
 
@@ -346,10 +478,11 @@ contract ImmutableSignedZoneV2Harness is ImmutableSignedZoneV2 {
         return _deriveReceivedItemsHash(receivedItems, scalingFactorNumerator, scalingFactorDenominator);
     }
 
-    function exposed_bytes32ArrayIncludes(
-        bytes32[] calldata sourceArray,
-        bytes32[] memory values
-    ) external pure returns (bool) {
+    function exposed_bytes32ArrayIncludes(bytes32[] calldata sourceArray, bytes32[] memory values)
+        external
+        pure
+        returns (bool)
+    {
         return _bytes32ArrayIncludes(sourceArray, values);
     }
 

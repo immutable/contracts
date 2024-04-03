@@ -67,101 +67,63 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_addSigner_emitsSignerAddedEvent() public {
-        address owner = makeAddr("owner");
         address signerToAdd = makeAddr("signerToAdd");
-        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
-            "MyZoneName",
-            "https://www.immutable.com",
-            "https://www.immutable.com/docs",
-            owner
-        );
+        ImmutableSignedZoneV2 zone = _newZone();
         vm.expectEmit(address(zone));
         emit SignerAdded(signerToAdd);
-        vm.prank(owner);
+        vm.prank(OWNER);
         zone.addSigner(signerToAdd);
     }
 
     function test_addSigner_revertsIfSignerAlreadyActive() public {
-        address owner = makeAddr("owner");
         address signerToAdd = makeAddr("signerToAdd");
-        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
-            "MyZoneName",
-            "https://www.immutable.com",
-            "https://www.immutable.com/docs",
-            owner
-        );
-        vm.prank(owner);
+        ImmutableSignedZoneV2 zone = _newZone();
+        vm.prank(OWNER);
         zone.addSigner(signerToAdd);
         vm.expectRevert(abi.encodeWithSelector(SignerAlreadyActive.selector, signerToAdd));
-        vm.prank(owner);
+        vm.prank(OWNER);
         zone.addSigner(signerToAdd);
     }
 
     function test_addSigner_revertsIfSignerWasPreviouslyActive() public {
-        address owner = makeAddr("owner");
         address signerToAdd = makeAddr("signerToAdd");
-        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
-            "MyZoneName",
-            "https://www.immutable.com",
-            "https://www.immutable.com/docs",
-            owner
-        );
-        vm.prank(owner);
+        ImmutableSignedZoneV2 zone = _newZone();
+        vm.prank(OWNER);
         zone.addSigner(signerToAdd);
-        vm.prank(owner);
+        vm.prank(OWNER);
         zone.removeSigner(signerToAdd);
         vm.expectRevert(abi.encodeWithSelector(SignerCannotBeReauthorized.selector, signerToAdd));
-        vm.prank(owner);
+        vm.prank(OWNER);
         zone.addSigner(signerToAdd);
     }
 
     /* removeSigner - L */
 
     function test_removeSigner_revertsIfCalledByNonAdminRole() public {
-        address owner = makeAddr("owner");
-        address randomAddress = makeAddr("random");
-        address signerToRemove = makeAddr("signerToRemove");
-        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
-            "MyZoneName",
-            "https://www.immutable.com",
-            "https://www.immutable.com/docs",
-            owner
-        );
+        ImmutableSignedZoneV2 zone = _newZone();
         vm.expectRevert(
             "AccessControl: account 0x42a3d6e125aad539ac15ed04e1478eb0a4dc1489 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
         );
-        vm.prank(randomAddress);
-        zone.removeSigner(signerToRemove);
+        vm.prank(makeAddr("random"));
+        zone.removeSigner(makeAddr("signerToRemove"));
     }
 
     function test_removeSigner_revertsIfSignerNotActive() public {
-        address owner = makeAddr("owner");
         address signerToRemove = makeAddr("signerToRemove");
-        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
-            "MyZoneName",
-            "https://www.immutable.com",
-            "https://www.immutable.com/docs",
-            owner
-        );
+        ImmutableSignedZoneV2 zone = _newZone();
         vm.expectRevert(abi.encodeWithSelector(SignerNotActive.selector, signerToRemove));
-        vm.prank(owner);
+        vm.prank(OWNER);
         zone.removeSigner(signerToRemove);
     }
 
     function test_removeSigner_emitsSignerRemovedEvent() public {
-        address owner = makeAddr("owner");
         address signerToRemove = makeAddr("signerToRemove");
-        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
-            "MyZoneName",
-            "https://www.immutable.com",
-            "https://www.immutable.com/docs",
-            owner
-        );
-        vm.prank(owner);
+        ImmutableSignedZoneV2 zone = _newZone();
+        vm.prank(OWNER);
         zone.addSigner(signerToRemove);
         vm.expectEmit(address(zone));
         emit SignerRemoved(signerToRemove);
-        vm.prank(owner);
+        vm.prank(OWNER);
         zone.removeSigner(signerToRemove);
     }
 
@@ -184,12 +146,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     /* _validateSubstandard3 */
 
     function test_validateSubstandard3_returnsZeroLengthIfNotSubstandard3() public {
-        ImmutableSignedZoneV2Harness zone = new ImmutableSignedZoneV2Harness(
-            "MyZoneName",
-            "https://www.immutable.com",
-            "https://www.immutable.com/docs",
-            address(0x2)
-        );
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
             fulfiller: address(0x2),
@@ -208,12 +165,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateSubstandard3_revertsIfContextLengthIsInvalid() public {
-        ImmutableSignedZoneV2Harness zone = new ImmutableSignedZoneV2Harness(
-            "MyZoneName",
-            "https://www.immutable.com",
-            "https://www.immutable.com/docs",
-            address(0x2)
-        );
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
             fulfiller: address(0x2),
@@ -238,12 +190,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateSubstandard3_revertsIfDerivedReceivedItemsHashNotEqualToHashInContext() public {
-        ImmutableSignedZoneV2Harness zone = new ImmutableSignedZoneV2Harness(
-            "MyZoneName",
-            "https://www.immutable.com",
-            "https://www.immutable.com/docs",
-            address(0x2)
-        );
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
         ReceivedItem[] memory consideration = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
             itemType: ItemType.ERC721,
@@ -275,12 +222,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateSubstandard3_returns33OnSuccess() public {
-        ImmutableSignedZoneV2Harness zone = new ImmutableSignedZoneV2Harness(
-            "MyZoneName",
-            "https://www.immutable.com",
-            "https://www.immutable.com/docs",
-            address(0x2)
-        );
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
         ReceivedItem[] memory consideration = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
             itemType: ItemType.ERC721,
@@ -312,12 +254,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     /* _validateSubstandard4 - N */
 
     function test_validateSubstandard4_returnsZeroLengthIfNotSubstandard4() public {
-        ImmutableSignedZoneV2Harness zone = new ImmutableSignedZoneV2Harness(
-            "MyZoneName",
-            "https://www.immutable.com",
-            "https://www.immutable.com/docs",
-            address(0x2)
-        );
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
             fulfiller: address(0x2),
@@ -336,12 +273,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateSubstandard4_revertsIfContextLengthIsInvalid() public {
-        ImmutableSignedZoneV2Harness zone = new ImmutableSignedZoneV2Harness(
-            "MyZoneName",
-            "https://www.immutable.com",
-            "https://www.immutable.com/docs",
-            address(0x2)
-        );
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
             fulfiller: address(0x2),
@@ -366,12 +298,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateSubstandard4_revertsIfDerivedOrderHashesIsNotEqualToHashesInContext() public {
-        ImmutableSignedZoneV2Harness zone = new ImmutableSignedZoneV2Harness(
-            "MyZoneName",
-            "https://www.immutable.com",
-            "https://www.immutable.com/docs",
-            address(0x2)
-        );
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
         bytes32[] memory orderHashes = new bytes32[](1);
         orderHashes[0] = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
         ZoneParameters memory zoneParameters = ZoneParameters({
@@ -395,12 +322,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateSubstandard4_returnsLengthOfSubstandardSegmentOnSuccess() public {
-        ImmutableSignedZoneV2Harness zone = new ImmutableSignedZoneV2Harness(
-            "MyZoneName",
-            "https://www.immutable.com",
-            "https://www.immutable.com/docs",
-            address(0x2)
-        );
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
         bytes32[] memory orderHashes = new bytes32[](1);
         orderHashes[0] = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
         ZoneParameters memory zoneParameters = ZoneParameters({

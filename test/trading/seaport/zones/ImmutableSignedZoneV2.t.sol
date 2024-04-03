@@ -561,6 +561,60 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     /* _bytes32ArrayIncludes - N */
 
+    function test_bytes32ArrayIncludes_returnsFalseIfSourceArrayIsEmpty() public {
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        bytes32[] memory emptySourceArray = new bytes32[](0);
+        bytes32[] memory valuesArray = new bytes32[](2);
+        bool includes = zone.exposed_bytes32ArrayIncludes(emptySourceArray, valuesArray);
+        assertFalse(includes);
+    }
+
+    function test_bytes32ArrayIncludes_returnsFalseIfSourceArrayIsSmallerThanValuesArray() public {
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        bytes32[] memory sourceArray = new bytes32[](1);
+        bytes32[] memory valuesArray = new bytes32[](2);
+        bool includesEmptySource = zone.exposed_bytes32ArrayIncludes(sourceArray, valuesArray);
+        assertFalse(includesEmptySource);
+    }
+
+    function test_bytes32ArrayIncludes_returnsFalseIfSourceArrayDoesNotIncludeValuesArray() public {
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        bytes32[] memory sourceArray = new bytes32[](2);
+        sourceArray[0] = bytes32(uint256(1));
+        sourceArray[1] = bytes32(uint256(2));
+        bytes32[] memory valuesArray = new bytes32[](2);
+        valuesArray[0] = bytes32(uint256(3));
+        valuesArray[1] = bytes32(uint256(4));
+        bool includes = zone.exposed_bytes32ArrayIncludes(sourceArray, valuesArray);
+        assertFalse(includes);
+    }
+
+    function test_bytes32ArrayIncludes_returnsTrueIfSourceArrayIncludesValuesArray() public {
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        bytes32[] memory sourceArray = new bytes32[](2);
+        sourceArray[0] = bytes32(uint256(1));
+        sourceArray[1] = bytes32(uint256(2));
+        bytes32[] memory valuesArray = new bytes32[](2);
+        valuesArray[0] = bytes32(uint256(1));
+        valuesArray[1] = bytes32(uint256(2));
+        bool includes = zone.exposed_bytes32ArrayIncludes(sourceArray, valuesArray);
+        assertTrue(includes);
+    }
+
+    function test_bytes32ArrayIncludes_returnsTrueIfValuesArrayIsASubsetOfSourceArray() public {
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        bytes32[] memory sourceArray = new bytes32[](4);
+        sourceArray[0] = bytes32(uint256(1));
+        sourceArray[1] = bytes32(uint256(2));
+        sourceArray[2] = bytes32(uint256(3));
+        sourceArray[3] = bytes32(uint256(4));
+        bytes32[] memory valuesArray = new bytes32[](2);
+        valuesArray[0] = bytes32(uint256(1));
+        valuesArray[1] = bytes32(uint256(2));
+        bool includes = zone.exposed_bytes32ArrayIncludes(sourceArray, valuesArray);
+        assertTrue(includes);
+    }
+
     /* _domainSeparator - N */
 
     /* _deriveDomainSeparator - N */

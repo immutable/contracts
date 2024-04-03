@@ -11,10 +11,12 @@ import "../../../../contracts/trading/seaport/zones/ImmutableSignedZoneV2.sol";
 contract ImmutableSignedZoneV2Test is Test {
     event SeaportCompatibleContractDeployed(); // SIP-5
     event SignerAdded(address signer); // SIP-7
+    event SignerRemoved(address signer); // SIP-7
 
     error SignerCannotBeZeroAddress(); // SIP-7
     error SignerAlreadyActive(address signer); // SIP-7
     error SignerCannotBeReauthorized(address signer); // SIP-7
+    error SignerNotActive(address signer); // SIP-7
     error InvalidExtraData(string reason, bytes32 orderHash); // SIP-7
     error SubstandardViolation(uint256 substandardId, string reason, bytes32 orderHash); // SIP-7 (custom)
 
@@ -126,6 +128,54 @@ contract ImmutableSignedZoneV2Test is Test {
     }
 
     /* removeSigner - L */
+
+    function test_removeSigner_revertsIfCalledByNonAdminRole() public {
+        address owner = makeAddr("owner");
+        address randomAddress = makeAddr("random");
+        address signerToRemove = makeAddr("signerToRemove");
+        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
+            "MyZoneName",
+            "https://www.immutable.com",
+            "https://www.immutable.com/docs",
+            owner
+        );
+        vm.expectRevert(
+            "AccessControl: account 0x42a3d6e125aad539ac15ed04e1478eb0a4dc1489 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
+        );
+        vm.prank(randomAddress);
+        zone.removeSigner(signerToRemove);
+    }
+
+    function test_removeSigner_revertsIfSignerNotActive() public {
+        address owner = makeAddr("owner");
+        address signerToRemove = makeAddr("signerToRemove");
+        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
+            "MyZoneName",
+            "https://www.immutable.com",
+            "https://www.immutable.com/docs",
+            owner
+        );
+        vm.expectRevert(abi.encodeWithSelector(SignerNotActive.selector, signerToRemove));
+        vm.prank(owner);
+        zone.removeSigner(signerToRemove);
+    }
+
+    function test_removeSigner_emitsSignerRemovedEvent() public {
+        address owner = makeAddr("owner");
+        address signerToRemove = makeAddr("signerToRemove");
+        ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
+            "MyZoneName",
+            "https://www.immutable.com",
+            "https://www.immutable.com/docs",
+            owner
+        );
+        vm.prank(owner);
+        zone.addSigner(signerToRemove);
+        vm.expectEmit(address(zone));
+        emit SignerRemoved(signerToRemove);
+        vm.prank(owner);
+        zone.removeSigner(signerToRemove);
+    }
 
     /* updateAPIEndpoint - N */
 

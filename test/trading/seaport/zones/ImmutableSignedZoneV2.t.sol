@@ -401,12 +401,7 @@ contract ImmutableSignedZoneV2Test is Test {
 
         bytes memory context = abi.encodePacked(bytes1(0x04), bytes32(uint256(32)), bytes32(uint256(1)), bytes32(0x0));
         vm.expectRevert(
-            abi.encodeWithSelector(
-                SubstandardViolation.selector,
-                4,
-                "invalid order hashes",
-                zoneParameters.orderHash
-            )
+            abi.encodeWithSelector(SubstandardViolation.selector, 4, "invalid order hashes", zoneParameters.orderHash)
         );
         zone.exposed_validateSubstandard4(context, zoneParameters);
     }
@@ -433,7 +428,12 @@ contract ImmutableSignedZoneV2Test is Test {
             zoneHash: bytes32(0)
         });
 
-        bytes memory context = abi.encodePacked(bytes1(0x04), bytes32(uint256(32)), bytes32(uint256(1)), bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9));
+        bytes memory context = abi.encodePacked(
+            bytes1(0x04),
+            bytes32(uint256(32)),
+            bytes32(uint256(1)),
+            bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9)
+        );
         uint256 substandardLengthResult = zone.exposed_validateSubstandard4(context, zoneParameters);
         // bytes1 + bytes32 + bytes32 + bytes32 = 97
         assertEq(substandardLengthResult, 97);

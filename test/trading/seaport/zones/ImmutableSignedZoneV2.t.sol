@@ -10,6 +10,7 @@ import "../../../../contracts/trading/seaport/zones/ImmutableSignedZoneV2.sol";
 
 contract ImmutableSignedZoneV2Test is Test {
     event SeaportCompatibleContractDeployed(); // SIP-5
+
     error InvalidExtraData(string reason, bytes32 orderHash); // SIP-7
     error SubstandardViolation(uint256 substandardId, string reason, bytes32 orderHash); // SIP-7 (custom)
 
@@ -145,10 +146,7 @@ contract ImmutableSignedZoneV2Test is Test {
         bytes memory context = abi.encodePacked(bytes1(0x03), bytes32(0));
         vm.expectRevert(
             abi.encodeWithSelector(
-                SubstandardViolation.selector,
-                3,
-                "invalid consideration hash",
-                zoneParameters.orderHash
+                SubstandardViolation.selector, 3, "invalid consideration hash", zoneParameters.orderHash
             )
         );
         zone.exposed_validateSubstandard3(context, zoneParameters);
@@ -203,12 +201,9 @@ contract ImmutableSignedZoneV2Test is Test {
 }
 
 contract ImmutableSignedZoneV2Harness is ImmutableSignedZoneV2 {
-    constructor(
-        string memory zoneName,
-        string memory apiEndpoint,
-        string memory documentationURI,
-        address owner
-    ) ImmutableSignedZoneV2(zoneName, apiEndpoint, documentationURI, owner) {}
+    constructor(string memory zoneName, string memory apiEndpoint, string memory documentationURI, address owner)
+        ImmutableSignedZoneV2(zoneName, apiEndpoint, documentationURI, owner)
+    {}
 
     function exposed_getSupportedSubstandards() external pure returns (uint256[] memory substandards) {
         return _getSupportedSubstandards();
@@ -223,31 +218,34 @@ contract ImmutableSignedZoneV2Harness is ImmutableSignedZoneV2 {
         return _deriveSignedOrderHash(fulfiller, expiration, orderHash, context);
     }
 
-    function exposed_validateSubstandards(
-        bytes calldata context,
-        ZoneParameters calldata zoneParameters
-    ) external pure {
+    function exposed_validateSubstandards(bytes calldata context, ZoneParameters calldata zoneParameters)
+        external
+        pure
+    {
         return _validateSubstandards(context, zoneParameters);
     }
 
-    function exposed_validateSubstandard3(
-        bytes calldata context,
-        ZoneParameters calldata zoneParameters
-    ) external pure returns (uint256) {
+    function exposed_validateSubstandard3(bytes calldata context, ZoneParameters calldata zoneParameters)
+        external
+        pure
+        returns (uint256)
+    {
         return _validateSubstandard3(context, zoneParameters);
     }
 
-    function exposed_validateSubstandard4(
-        bytes calldata context,
-        ZoneParameters calldata zoneParameters
-    ) external pure returns (uint256) {
+    function exposed_validateSubstandard4(bytes calldata context, ZoneParameters calldata zoneParameters)
+        external
+        pure
+        returns (uint256)
+    {
         return _validateSubstandard4(context, zoneParameters);
     }
 
-    function exposed_validateSubstandard6(
-        bytes calldata context,
-        ZoneParameters calldata zoneParameters
-    ) external pure returns (uint256) {
+    function exposed_validateSubstandard6(bytes calldata context, ZoneParameters calldata zoneParameters)
+        external
+        pure
+        returns (uint256)
+    {
         return _validateSubstandard6(context, zoneParameters);
     }
 
@@ -259,10 +257,11 @@ contract ImmutableSignedZoneV2Harness is ImmutableSignedZoneV2 {
         return _deriveReceivedItemsHash(receivedItems, scalingFactorNumerator, scalingFactorDenominator);
     }
 
-    function exposed_bytes32ArrayIncludes(
-        bytes32[] calldata sourceArray,
-        bytes32[] memory values
-    ) external pure returns (bool) {
+    function exposed_bytes32ArrayIncludes(bytes32[] calldata sourceArray, bytes32[] memory values)
+        external
+        pure
+        returns (bool)
+    {
         return _bytes32ArrayIncludes(sourceArray, values);
     }
 

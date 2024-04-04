@@ -221,7 +221,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
         assertTrue(zone.supportsInterface(0x1a511c70)); // SIP-7 interface
     }
 
-    /* validateOrder */
+    /* validateOrder - N */
 
     /* _getSupportedSubstandards - L */
 
@@ -246,7 +246,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
         assertEq(derivedSignedOrderHash, 0x40c87207c5a0c362da24cb974859c70655de00fee9400f3a805ac360b90bd8c5);
     }
 
-    /* _validateSubstandards */
+    /* _validateSubstandards - L */
 
     /* _validateSubstandard3 */
 

@@ -354,17 +354,18 @@ contract ImmutableSignedZoneV2 is
      */
     function _validateSubstandards(bytes calldata context, ZoneParameters calldata zoneParameters) internal pure {
         uint256 startIndex = 0;
+        uint256 contextLength = context.length;
 
-        if (startIndex > context.length) return;
+        if (startIndex == contextLength) return;
         startIndex = _validateSubstandard3(context[startIndex:], zoneParameters) + startIndex;
 
-        if (startIndex > context.length) return;
+        if (startIndex == contextLength) return;
         startIndex = _validateSubstandard4(context[startIndex:], zoneParameters) + startIndex;
 
-        if (startIndex > context.length) return;
+        if (startIndex == contextLength) return;
         startIndex = _validateSubstandard6(context[startIndex:], zoneParameters) + startIndex;
 
-        if (startIndex != context.length) {
+        if (startIndex != contextLength) {
             revert InvalidExtraData("invalid context, unexpected context length", zoneParameters.orderHash);
         }
     }

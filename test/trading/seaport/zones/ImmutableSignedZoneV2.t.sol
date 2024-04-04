@@ -241,8 +241,9 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
         address fulfiller = 0x71458637cD221877830A21F543E8b731e93C3627;
         uint64 expiration = 1234995;
         bytes32 orderHash = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
-        bytes memory context = new bytes(0x0);
-        zone.exposed_deriveSignedOrderHash(fulfiller, expiration, orderHash, context);
+        bytes memory context = hex"9062b0574be745508bed2ff7f8f5057446b89d16d35980b2a26f8e4cb03ddf91";
+        bytes32 derivedSignedOrderHash = zone.exposed_deriveSignedOrderHash(fulfiller, expiration, orderHash, context);
+        assertEq(derivedSignedOrderHash, 0x40c87207c5a0c362da24cb974859c70655de00fee9400f3a805ac360b90bd8c5);
     }
 
     /* _validateSubstandards */

@@ -130,6 +130,25 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     /* updateAPIEndpoint - N */
 
+    function test_updateAPIEndpoint_revertsIfCalledByNonAdminRole() public {
+        ImmutableSignedZoneV2 zone = _newZone();
+        vm.prank(makeAddr("random"));
+        vm.expectRevert(
+            "AccessControl: account 0x42a3d6e125aad539ac15ed04e1478eb0a4dc1489 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
+        );
+        zone.updateAPIEndpoint("https://www.new-immutable.com");
+    }
+
+    function test_updateAPIEndpoint_updatesAPIEndpointIfCalledByAdminRole() public {
+        ImmutableSignedZoneV2 zone = _newZone();
+        vm.prank(OWNER);
+        string memory expectedApiEndpoint = "https://www.new-immutable.com";
+        zone.updateAPIEndpoint(expectedApiEndpoint);
+        (, Schema[] memory schemas) = zone.getSeaportMetadata();
+        (, string memory apiEndpoint,,) = abi.decode(schemas[0].metadata, (bytes32, string, uint256[], string));
+        assertEq(apiEndpoint, expectedApiEndpoint);
+    }
+
     /* getSeaportMetadata - L */
 
     function test_getSeaportMetadata() public {
@@ -216,6 +235,15 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     /* _deriveSignedOrderHash - N  */
+
+    function test_deriveSignedOrderHash_returnsHashOfSignedOrder() public {
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        address fulfiller = 0x71458637cD221877830A21F543E8b731e93C3627;
+        uint64 expiration = 1234995;
+        bytes32 orderHash = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
+        bytes memory context = new bytes(0x0);
+        zone.exposed_deriveSignedOrderHash(fulfiller, expiration, orderHash, context);
+    }
 
     /* _validateSubstandards */
 

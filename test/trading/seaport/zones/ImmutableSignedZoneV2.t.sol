@@ -264,8 +264,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             endTime: 0,
             zoneHash: bytes32(0)
         });
-        bytes memory context = new bytes(0x04);
-        uint256 substandardLengthResult = zone.exposed_validateSubstandard3(context, zoneParameters);
+        uint256 substandardLengthResult = zone.exposed_validateSubstandard3(hex"04", zoneParameters);
         assertEq(substandardLengthResult, 0);
     }
 
@@ -372,8 +371,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             endTime: 0,
             zoneHash: bytes32(0)
         });
-        bytes memory context = new bytes(0x04);
-        uint256 substandardLengthResult = zone.exposed_validateSubstandard4(context, zoneParameters);
+        uint256 substandardLengthResult = zone.exposed_validateSubstandard4(hex"02", zoneParameters);
         assertEq(substandardLengthResult, 0);
     }
 
@@ -470,8 +468,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             endTime: 0,
             zoneHash: bytes32(0)
         });
-        bytes memory context = new bytes(0x04);
-        uint256 substandardLengthResult = zone.exposed_validateSubstandard6(context, zoneParameters);
+        uint256 substandardLengthResult = zone.exposed_validateSubstandard6(hex"04", zoneParameters);
         assertEq(substandardLengthResult, 0);
     }
 

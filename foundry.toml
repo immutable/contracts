@@ -3,7 +3,6 @@ src = 'contracts'
 out = 'foundry-out'
 # libs = ["lib", "node_modules"]
 libs = ["lib"]
-# memory_limit = 1073741824
-# gas_limit = "18446744073709551615"
+
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 

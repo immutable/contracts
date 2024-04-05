@@ -297,7 +297,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
         bytes32 orderHash = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
         uint64 expiration = 100;
 
-        bytes memory extraData = _buildExtraData(orderHash, expiration, zone, new bytes(0));
+        bytes memory extraData = _buildExtraData(zone, orderHash, expiration, new bytes(0));
 
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
@@ -330,7 +330,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
         bytes32 orderHash = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
         uint64 expiration = 100;
 
-        bytes memory extraData = _buildExtraData(orderHash, expiration, zone, new bytes(0));
+        bytes memory extraData = _buildExtraData(zone, orderHash, expiration, new bytes(0));
 
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
@@ -360,7 +360,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
         bytes32 orderHash = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
         uint64 expiration = 100;
 
-        bytes memory extraData = _buildExtraData(orderHash, expiration, zone, new bytes(0));
+        bytes memory extraData = _buildExtraData(zone, orderHash, expiration, new bytes(0));
 
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
@@ -368,7 +368,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             offerer: OFFERER,
             offer: new SpentItem[](0),
             consideration: new ReceivedItem[](0),
-            extraData:extraData,
+            extraData: extraData,
             orderHashes: new bytes32[](0),
             startTime: 0,
             endTime: 0,
@@ -412,7 +412,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             bytes1(0x03), substandard3Data, bytes1(0x04), substandard4Data, bytes1(0x06), substandard6Data
         );
 
-        bytes memory extraData = _buildExtraData(orderHash, expiration, zone, context);
+        bytes memory extraData = _buildExtraData(zone, orderHash, expiration, context);
 
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),

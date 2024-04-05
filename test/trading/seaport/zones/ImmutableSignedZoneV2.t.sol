@@ -23,6 +23,12 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     error SignerNotActive(address signer); // SIP-7
     error InvalidExtraData(string reason, bytes32 orderHash); // SIP-7
     error SubstandardViolation(uint256 substandardId, string reason, bytes32 orderHash); // SIP-7 (custom)
+    error UnsupportedExtraDataVersion(uint8 version); // SIP-6
+    error SignatureExpired(uint256 currentTimestamp, uint256 expiration, bytes32 orderHash); // SIP-7
+    error InvalidFulfiller(address expectedFulfiller, address actualFulfiller, bytes32 orderHash); // SIP-7
+
+    address internal immutable FULFILLER = makeAddr("fulfiller");
+    address internal immutable OFFERER = makeAddr("offerer");
 
     /* constructor */
 
@@ -222,6 +228,171 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     /* validateOrder - N */
+
+    function test_validateOrder_revertsIfEmptyExtraData() public {
+        ImmutableSignedZoneV2 zone = _newZone();
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
+            fulfiller: FULFILLER,
+            offerer: OFFERER,
+            offer: new SpentItem[](0),
+            consideration: new ReceivedItem[](0),
+            extraData: new bytes(0),
+            orderHashes: new bytes32[](0),
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                InvalidExtraData.selector,
+                "extraData is empty",
+                zoneParameters.orderHash
+            )
+        );
+        zone.validateOrder(zoneParameters);
+    }
+
+    function test_validateOrder_revertsIfExtraDataLengthIsLessThan93() public {
+        ImmutableSignedZoneV2 zone = _newZone();
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
+            fulfiller: FULFILLER,
+            offerer: OFFERER,
+            offer: new SpentItem[](0),
+            consideration: new ReceivedItem[](0),
+            extraData: bytes(hex"01"),
+            orderHashes: new bytes32[](0),
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                InvalidExtraData.selector,
+                "extraData length must be at least 93 bytes",
+                zoneParameters.orderHash
+            )
+        );
+        zone.validateOrder(zoneParameters);
+    }
+
+    function test_validateOrder_revertsIfExtraDataVersionIsNotSupported() public {
+        ImmutableSignedZoneV2 zone = _newZone();
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
+            fulfiller: FULFILLER,
+            offerer: OFFERER,
+            offer: new SpentItem[](0),
+            consideration: new ReceivedItem[](0),
+            extraData: bytes(hex"01f39fd6e51aad88f6f4ce6ab8827279cfffb9226600000000660f3027d9ef9e6e50a74cc24433373b9cdd97693a02adcc94e562bb59a5af68190ecaea4414dcbe74618f6c77d11cbcf4a8345bbdf46e665249904925c95929ba6606638b779c6b502204fca6bb0539cdc3dc258fe3ce7b53be0c4ad620899167fedaa8"),
+            orderHashes: new bytes32[](0),
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                UnsupportedExtraDataVersion.selector,
+                uint8(1)
+            )
+        );
+        zone.validateOrder(zoneParameters);
+    }
+
+    function test_validateOrder_revertsIfSignatureHasExpired() public {
+    ImmutableSignedZoneV2 zone = _newZone();
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
+            fulfiller: FULFILLER,
+            offerer: OFFERER,
+            offer: new SpentItem[](0),
+            consideration: new ReceivedItem[](0),
+            extraData: bytes(hex"00f39fd6e51aad88f6f4ce6ab8827279cfffb9226600000000660f3027d9ef9e6e50a74cc24433373b9cdd97693a02adcc94e562bb59a5af68190ecaea4414dcbe74618f6c77d11cbcf4a8345bbdf46e665249904925c95929ba6606638b779c6b502204fca6bb0539cdc3dc258fe3ce7b53be0c4ad620899167fedaa8"),
+            orderHashes: new bytes32[](0),
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SignatureExpired.selector,
+                1714829338,
+                1712271399,
+                bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9)
+            )
+        );
+        vm.warp(1714829338);
+        zone.validateOrder(zoneParameters);
+    }
+
+    function test_validateOrder_revertsIfActualFulfillerDoesNotMatchExpectedFulfiller() public {
+        address randomFulfiller = makeAddr("random");
+        ImmutableSignedZoneV2 zone = _newZone();
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
+            fulfiller: randomFulfiller,
+            offerer: OFFERER,
+            offer: new SpentItem[](0),
+            consideration: new ReceivedItem[](0),
+            extraData: bytes(hex"0071458637cd221877830a21f543e8b731e93c362700000000660f35b870eb77aa71239beb73729a53fac6c035dd6008dfafbacea3f8492bfcfeff3f2bc2e6116f4f94b56f20a5672ae38c9a4764fb152aa37f6134e12a9a08374382308b779c6b502204fca6bb0539cdc3dc258fe3ce7b53be0c4ad620899167fedaa8"),
+            orderHashes: new bytes32[](0),
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                InvalidFulfiller.selector,
+                FULFILLER,
+                randomFulfiller,
+                bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9)
+            )
+        );
+        zone.validateOrder(zoneParameters);
+    }
+
+    function test_validateOrder_revertsIfSignerIsNotActive() public {
+        ImmutableSignedZoneV2 zone = _newZone();
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
+            fulfiller: FULFILLER,
+            offerer: OFFERER,
+            offer: new SpentItem[](0),
+            consideration: new ReceivedItem[](0),
+            extraData: bytes(hex"0071458637cd221877830a21f543e8b731e93c362700000000660f35b870eb77aa71239beb73729a53fac6c035dd6008dfafbacea3f8492bfcfeff3f2bc2e6116f4f94b56f20a5672ae38c9a4764fb152aa37f6134e12a9a0837438230"),
+            orderHashes: new bytes32[](0),
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SignerNotActive.selector,
+                address(0xb14f041201f3546C5636A6E2e8E3C6d04A2A480C)
+            )
+        );
+        zone.validateOrder(zoneParameters);
+    }
+
+    function test_validateOrder_returnsMagicValueOnSuccessfulValidation() public {
+        ImmutableSignedZoneV2 zone = _newZone();
+        vm.prank(OWNER);
+        zone.addSigner(address(0xb14f041201f3546C5636A6E2e8E3C6d04A2A480C));
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
+            fulfiller: FULFILLER,
+            offerer: OFFERER,
+            offer: new SpentItem[](0),
+            consideration: new ReceivedItem[](0),
+            extraData: bytes(hex"0071458637cd221877830a21f543e8b731e93c362700000000660f35b870eb77aa71239beb73729a53fac6c035dd6008dfafbacea3f8492bfcfeff3f2bc2e6116f4f94b56f20a5672ae38c9a4764fb152aa37f6134e12a9a0837438230"),
+            orderHashes: new bytes32[](0),
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+        assertEq(zone.validateOrder(zoneParameters), bytes4(0x17b1f942));
+    }
 
     /* _getSupportedSubstandards - L */
 

@@ -1122,11 +1122,11 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             itemType: ItemType.ERC721,
             token: address(0x2),
             identifier: 222,
-            amount: 1,
+            amount: 10,
             recipient: payable(address(0x3))
         });
 
-        bytes32 receivedItemsHash = zone.exposed_deriveReceivedItemsHash(receivedItems, MAX_UINT_TYPE, 10);
+        bytes32 receivedItemsHash = zone.exposed_deriveReceivedItemsHash(receivedItems, MAX_UINT_TYPE, 100);
         assertEq(receivedItemsHash, bytes32(0xa349370a3f10599b502d8886045635579be4cfa14bb3140589e5619e492f876c));
     }
 

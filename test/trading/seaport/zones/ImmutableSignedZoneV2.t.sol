@@ -179,6 +179,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             uint256[] memory substandards,
             string memory documentationURI
         ) = abi.decode(schemas[0].metadata, (bytes32, string, uint256[], string));
+
         assertEq(name, expectedZoneName);
         assertEq(schemas.length, 1);
         assertEq(schemas[0].id, 7);
@@ -210,6 +211,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             uint256[] memory substandards,
             string memory documentationURI
         ) = zone.sip7Information();
+
         assertEq(domainSeparator, expectedDomainSeparator);
         assertEq(apiEndpoint, expectedApiEndpoint);
         assertEq(substandards, expectedSubstandards);
@@ -417,6 +419,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     function test_validateSubstandards_emptyContext() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
             fulfiller: address(0x2),
@@ -429,13 +432,14 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             endTime: 0,
             zoneHash: bytes32(0)
         });
-        bytes memory context = new bytes(0);
-        zone.exposed_validateSubstandards(context, zoneParameters);
+
+        zone.exposed_validateSubstandards(new bytes(0), zoneParameters);
     }
 
     function test_validateSubstandards_substandard3() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
-        ReceivedItem[] memory consideration = new ReceivedItem[](1);
+
+        ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
             itemType: ItemType.ERC721,
             token: address(0x2),
@@ -443,20 +447,22 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             amount: 1,
             recipient: payable(address(0x3))
         });
-        consideration[0] = receivedItem;
+        receivedItems[0] = receivedItem;
+
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
             fulfiller: address(0x2),
             offerer: address(0x3),
             offer: new SpentItem[](0),
-            consideration: consideration,
+            consideration: receivedItems,
             extraData: new bytes(0),
             orderHashes: new bytes32[](0),
             startTime: 0,
             endTime: 0,
             zoneHash: bytes32(0)
         });
-        // console.logBytes32(zone.exposed_deriveReceivedItemsHash(consideration, 1, 1));
+
+        // console.logBytes32(zone.exposed_deriveReceivedItemsHash(receivedItems, 1, 1));
         bytes32 substandard3Data = bytes32(0x9062b0574be745508bed2ff7f8f5057446b89d16d35980b2a26f8e4cb03ddf91);
         bytes memory context = abi.encodePacked(bytes1(0x03), substandard3Data);
         zone.exposed_validateSubstandards(context, zoneParameters);
@@ -464,8 +470,10 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     function test_validateSubstandards_substandard4() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+
         bytes32[] memory orderHashes = new bytes32[](1);
         orderHashes[0] = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
+
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
             fulfiller: address(0x2),
@@ -485,11 +493,16 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             bytes32(uint256(1)),
             bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9)
         );
+
         zone.exposed_validateSubstandards(context, zoneParameters);
     }
 
     function test_validateSubstandards_substandard6() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+
+        SpentItem[] memory spentItems = new SpentItem[](1);
+        spentItems[0] = SpentItem({itemType: ItemType.ERC721, token: address(0x2), identifier: 222, amount: 10});
+
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         receivedItems[0] = ReceivedItem({
             itemType: ItemType.ERC721,
@@ -498,8 +511,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             amount: 1,
             recipient: payable(address(0x3))
         });
-        SpentItem[] memory spentItems = new SpentItem[](1);
-        spentItems[0] = SpentItem({itemType: ItemType.ERC721, token: address(0x2), identifier: 222, amount: 10});
+
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
             fulfiller: address(0x2),
@@ -516,12 +528,14 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
         // console.logBytes32(zone.exposed_deriveReceivedItemsHash(receivedItems, 100, 10));
         bytes32 substandard6Data = 0xff3642433fc0f83e6d23869de6d358c7c36e3257da4bd89a3b6d17dd25e7c823;
         bytes memory context = abi.encodePacked(bytes1(0x06), uint256(100), substandard6Data);
+
         zone.exposed_validateSubstandards(context, zoneParameters);
     }
 
     function test_validateSubstandards_multipleSubstandardsInCorrectOrder() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
-        ReceivedItem[] memory consideration = new ReceivedItem[](1);
+
+        ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
             itemType: ItemType.ERC721,
             token: address(0x2),
@@ -529,25 +543,27 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             amount: 1,
             recipient: payable(address(0x3))
         });
-        consideration[0] = receivedItem;
+        receivedItems[0] = receivedItem;
+
         bytes32[] memory orderHashes = new bytes32[](1);
         orderHashes[0] = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
+
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
             fulfiller: address(0x2),
             offerer: address(0x3),
             offer: new SpentItem[](0),
-            consideration: consideration,
+            consideration: receivedItems,
             extraData: new bytes(0),
             orderHashes: orderHashes,
             startTime: 0,
             endTime: 0,
             zoneHash: bytes32(0)
         });
+
         // console.logBytes32(zone.exposed_deriveReceivedItemsHash(consideration, 1, 1));
         bytes32 substandard3Data = bytes32(0x9062b0574be745508bed2ff7f8f5057446b89d16d35980b2a26f8e4cb03ddf91);
         bytes memory substandard4Data = abi.encode(orderHashes);
-
         bytes memory context = abi.encodePacked(bytes1(0x03), substandard3Data, bytes1(0x04), substandard4Data);
 
         zone.exposed_validateSubstandards(context, zoneParameters);
@@ -635,7 +651,8 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     function test_validateSubstandards_revertsOnMultipleSubstandardsInIncorrectOrder() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
-        ReceivedItem[] memory consideration = new ReceivedItem[](1);
+
+        ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
             itemType: ItemType.ERC721,
             token: address(0x2),
@@ -643,25 +660,27 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             amount: 1,
             recipient: payable(address(0x3))
         });
-        consideration[0] = receivedItem;
+        receivedItems[0] = receivedItem;
+
         bytes32[] memory orderHashes = new bytes32[](1);
         orderHashes[0] = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
+
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
             fulfiller: address(0x2),
             offerer: address(0x3),
             offer: new SpentItem[](0),
-            consideration: consideration,
+            consideration: receivedItems,
             extraData: new bytes(0),
             orderHashes: orderHashes,
             startTime: 0,
             endTime: 0,
             zoneHash: bytes32(0)
         });
-        // console.logBytes32(zone.exposed_deriveReceivedItemsHash(consideration, 1, 1));
+
+        // console.logBytes32(zone.exposed_deriveReceivedItemsHash(receivedItems, 1, 1));
         bytes32 substandard3Data = bytes32(0x9062b0574be745508bed2ff7f8f5057446b89d16d35980b2a26f8e4cb03ddf91);
         bytes memory substandard4Data = abi.encode(orderHashes);
-
         bytes memory context = abi.encodePacked(bytes1(0x04), substandard4Data, bytes1(0x03), substandard3Data);
 
         vm.expectRevert(
@@ -676,6 +695,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     function test_validateSubstandard3_returnsZeroLengthIfNotSubstandard3() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
             fulfiller: address(0x2),
@@ -688,12 +708,14 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             endTime: 0,
             zoneHash: bytes32(0)
         });
+
         uint256 substandardLengthResult = zone.exposed_validateSubstandard3(hex"04", zoneParameters);
         assertEq(substandardLengthResult, 0);
     }
 
     function test_validateSubstandard3_revertsIfContextLengthIsInvalid() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
             fulfiller: address(0x2),
@@ -706,7 +728,9 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             endTime: 0,
             zoneHash: bytes32(0)
         });
+
         bytes memory context = abi.encodePacked(bytes1(0x03), bytes10(0));
+
         vm.expectRevert(
             abi.encodeWithSelector(
                 InvalidExtraData.selector,
@@ -719,7 +743,8 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     function test_validateSubstandard3_revertsIfDerivedReceivedItemsHashNotEqualToHashInContext() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
-        ReceivedItem[] memory consideration = new ReceivedItem[](1);
+
+        ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
             itemType: ItemType.ERC721,
             token: address(0x2),
@@ -727,20 +752,23 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             amount: 1,
             recipient: payable(address(0x3))
         });
-        consideration[0] = receivedItem;
+        receivedItems[0] = receivedItem;
+
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
             fulfiller: address(0x2),
             offerer: address(0x3),
             offer: new SpentItem[](0),
-            consideration: consideration,
+            consideration: receivedItems,
             extraData: new bytes(0),
             orderHashes: new bytes32[](0),
             startTime: 0,
             endTime: 0,
             zoneHash: bytes32(0)
         });
+
         bytes memory context = abi.encodePacked(bytes1(0x03), bytes32(0));
+
         vm.expectRevert(
             abi.encodeWithSelector(
                 SubstandardViolation.selector, 3, "invalid consideration hash", zoneParameters.orderHash
@@ -751,7 +779,8 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     function test_validateSubstandard3_returns33OnSuccess() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
-        ReceivedItem[] memory consideration = new ReceivedItem[](1);
+
+        ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
             itemType: ItemType.ERC721,
             token: address(0x2),
@@ -759,22 +788,25 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             amount: 1,
             recipient: payable(address(0x3))
         });
-        consideration[0] = receivedItem;
+        receivedItems[0] = receivedItem;
+
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
             fulfiller: address(0x2),
             offerer: address(0x3),
             offer: new SpentItem[](0),
-            consideration: consideration,
+            consideration: receivedItems,
             extraData: new bytes(0),
             orderHashes: new bytes32[](0),
             startTime: 0,
             endTime: 0,
             zoneHash: bytes32(0)
         });
-        // console.logBytes32(zone.exposed_deriveReceivedItemsHash(consideration, 1, 1));
+
+        // console.logBytes32(zone.exposed_deriveReceivedItemsHash(receivedItems, 1, 1));
         bytes32 substandard3Data = bytes32(0x9062b0574be745508bed2ff7f8f5057446b89d16d35980b2a26f8e4cb03ddf91);
         bytes memory context = abi.encodePacked(bytes1(0x03), substandard3Data);
+
         uint256 substandardLengthResult = zone.exposed_validateSubstandard3(context, zoneParameters);
         assertEq(substandardLengthResult, 33);
     }
@@ -783,6 +815,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     function test_validateSubstandard4_returnsZeroLengthIfNotSubstandard4() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
             fulfiller: address(0x2),
@@ -795,12 +828,14 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             endTime: 0,
             zoneHash: bytes32(0)
         });
+
         uint256 substandardLengthResult = zone.exposed_validateSubstandard4(hex"02", zoneParameters);
         assertEq(substandardLengthResult, 0);
     }
 
     function test_validateSubstandard4_revertsIfContextLengthIsInvalid() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
             fulfiller: address(0x2),
@@ -813,7 +848,9 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             endTime: 0,
             zoneHash: bytes32(0)
         });
+
         bytes memory context = abi.encodePacked(bytes1(0x04), bytes10(0));
+
         vm.expectRevert(
             abi.encodeWithSelector(
                 InvalidExtraData.selector,
@@ -826,8 +863,10 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     function test_validateSubstandard4_revertsIfDerivedOrderHashesIsNotEqualToHashesInContext() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+
         bytes32[] memory orderHashes = new bytes32[](1);
         orderHashes[0] = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
+
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
             fulfiller: address(0x2),
@@ -842,6 +881,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
         });
 
         bytes memory context = abi.encodePacked(bytes1(0x04), bytes32(uint256(32)), bytes32(uint256(1)), bytes32(0x0));
+
         vm.expectRevert(
             abi.encodeWithSelector(SubstandardViolation.selector, 4, "invalid order hashes", zoneParameters.orderHash)
         );
@@ -850,8 +890,10 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     function test_validateSubstandard4_returnsLengthOfSubstandardSegmentOnSuccess() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+
         bytes32[] memory orderHashes = new bytes32[](1);
         orderHashes[0] = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
+
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
             fulfiller: address(0x2),
@@ -871,6 +913,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             bytes32(uint256(1)),
             bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9)
         );
+
         uint256 substandardLengthResult = zone.exposed_validateSubstandard4(context, zoneParameters);
         // bytes1 + bytes32 + bytes32 + bytes32 = 97
         assertEq(substandardLengthResult, 97);
@@ -880,6 +923,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     function test_validateSubstandard6_returnsZeroLengthIfNotSubstandard6() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
             fulfiller: address(0x2),
@@ -892,12 +936,14 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             endTime: 0,
             zoneHash: bytes32(0)
         });
+
         uint256 substandardLengthResult = zone.exposed_validateSubstandard6(hex"04", zoneParameters);
         assertEq(substandardLengthResult, 0);
     }
 
     function test_validateSubstandard6_revertsIfContextLengthIsInvalid() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
             fulfiller: address(0x2),
@@ -910,7 +956,9 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             endTime: 0,
             zoneHash: bytes32(0)
         });
+
         bytes memory context = abi.encodePacked(bytes1(0x06), bytes10(0));
+
         vm.expectRevert(
             abi.encodeWithSelector(
                 InvalidExtraData.selector,
@@ -923,6 +971,10 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     function test_validateSubstandard6_revertsIfDerivedReceivedItemsHashesIsNotEqualToHashesInContext() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+
+        SpentItem[] memory spentItems = new SpentItem[](1);
+        spentItems[0] = SpentItem({itemType: ItemType.ERC721, token: address(0x2), identifier: 222, amount: 10});
+
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         receivedItems[0] = ReceivedItem({
             itemType: ItemType.ERC721,
@@ -931,8 +983,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             amount: 1,
             recipient: payable(address(0x3))
         });
-        SpentItem[] memory spentItems = new SpentItem[](1);
-        spentItems[0] = SpentItem({itemType: ItemType.ERC721, token: address(0x2), identifier: 222, amount: 10});
+
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
             fulfiller: address(0x2),
@@ -947,6 +998,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
         });
 
         bytes memory context = abi.encodePacked(bytes1(0x06), uint256(100), bytes32(uint256(0x123456)));
+
         vm.expectRevert(
             abi.encodeWithSelector(
                 SubstandardViolation.selector, 6, "invalid consideration hash", zoneParameters.orderHash
@@ -957,6 +1009,10 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     function test_validateSubstandard6_returnsLengthOfSubstandardSegmentOnSuccess() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+
+        SpentItem[] memory spentItems = new SpentItem[](1);
+        spentItems[0] = SpentItem({itemType: ItemType.ERC721, token: address(0x2), identifier: 222, amount: 10});
+
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         receivedItems[0] = ReceivedItem({
             itemType: ItemType.ERC721,
@@ -965,8 +1021,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             amount: 1,
             recipient: payable(address(0x3))
         });
-        SpentItem[] memory spentItems = new SpentItem[](1);
-        spentItems[0] = SpentItem({itemType: ItemType.ERC721, token: address(0x2), identifier: 222, amount: 10});
+
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
             fulfiller: address(0x2),
@@ -983,6 +1038,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
         // console.logBytes32(zone.exposed_deriveReceivedItemsHash(receivedItems, 100, 10));
         bytes32 substandard6Data = 0xff3642433fc0f83e6d23869de6d358c7c36e3257da4bd89a3b6d17dd25e7c823;
         bytes memory context = abi.encodePacked(bytes1(0x06), uint256(100), substandard6Data);
+
         uint256 substandardLengthResult = zone.exposed_validateSubstandard6(context, zoneParameters);
         // bytes1 + uint256 + bytes32 = 65
         assertEq(substandardLengthResult, 65);
@@ -992,13 +1048,16 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     function test_deriveReceivedItemsHash_returnsHashIfNoReceivedItems() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+
         ReceivedItem[] memory receivedItems = new ReceivedItem[](0);
+
         bytes32 receivedItemsHash = zone.exposed_deriveReceivedItemsHash(receivedItems, 0, 0);
         assertEq(receivedItemsHash, bytes32(0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470));
     }
 
     function test_deriveReceivedItemsHash_returnsHashForValidReceivedItems() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+
         ReceivedItem[] memory receivedItems = new ReceivedItem[](2);
         receivedItems[0] = ReceivedItem({
             itemType: ItemType.ERC721,
@@ -1014,6 +1073,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             amount: 1,
             recipient: payable(address(0x3))
         });
+
         bytes32 receivedItemsHash = zone.exposed_deriveReceivedItemsHash(receivedItems, 100, 10);
         assertEq(receivedItemsHash, bytes32(0xf01bacf40a3dd95740faaaad186bf1c000a9edc06008ea07c789ea761d7f3ffb));
     }
@@ -1022,46 +1082,55 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     function test_bytes32ArrayIncludes_returnsFalseIfSourceArrayIsEmpty() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+
         bytes32[] memory emptySourceArray = new bytes32[](0);
         bytes32[] memory valuesArray = new bytes32[](2);
+
         bool includes = zone.exposed_bytes32ArrayIncludes(emptySourceArray, valuesArray);
         assertFalse(includes);
     }
 
     function test_bytes32ArrayIncludes_returnsFalseIfSourceArrayIsSmallerThanValuesArray() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+
         bytes32[] memory sourceArray = new bytes32[](1);
         bytes32[] memory valuesArray = new bytes32[](2);
+
         bool includesEmptySource = zone.exposed_bytes32ArrayIncludes(sourceArray, valuesArray);
         assertFalse(includesEmptySource);
     }
 
     function test_bytes32ArrayIncludes_returnsFalseIfSourceArrayDoesNotIncludeValuesArray() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+
         bytes32[] memory sourceArray = new bytes32[](2);
         sourceArray[0] = bytes32(uint256(1));
         sourceArray[1] = bytes32(uint256(2));
         bytes32[] memory valuesArray = new bytes32[](2);
         valuesArray[0] = bytes32(uint256(3));
         valuesArray[1] = bytes32(uint256(4));
+
         bool includes = zone.exposed_bytes32ArrayIncludes(sourceArray, valuesArray);
         assertFalse(includes);
     }
 
     function test_bytes32ArrayIncludes_returnsTrueIfSourceArrayIncludesValuesArray() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+
         bytes32[] memory sourceArray = new bytes32[](2);
         sourceArray[0] = bytes32(uint256(1));
         sourceArray[1] = bytes32(uint256(2));
         bytes32[] memory valuesArray = new bytes32[](2);
         valuesArray[0] = bytes32(uint256(1));
         valuesArray[1] = bytes32(uint256(2));
+
         bool includes = zone.exposed_bytes32ArrayIncludes(sourceArray, valuesArray);
         assertTrue(includes);
     }
 
     function test_bytes32ArrayIncludes_returnsTrueIfValuesArrayIsASubsetOfSourceArray() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+
         bytes32[] memory sourceArray = new bytes32[](4);
         sourceArray[0] = bytes32(uint256(1));
         sourceArray[1] = bytes32(uint256(2));
@@ -1070,6 +1139,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
         bytes32[] memory valuesArray = new bytes32[](2);
         valuesArray[0] = bytes32(uint256(1));
         valuesArray[1] = bytes32(uint256(2));
+
         bool includes = zone.exposed_bytes32ArrayIncludes(sourceArray, valuesArray);
         assertTrue(includes);
     }
@@ -1078,15 +1148,18 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     function test_domainSeparator_returnsCachedDomainSeparatorWhenChainIDMatchesValueSetOnDeployment() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+
         bytes32 domainSeparator = zone.exposed_domainSeparator();
         assertEq(domainSeparator, bytes32(0xafb48e1c246f21ba06352cb2c0ebe99b8adc2590dfc48fa547732df870835b42));
     }
 
     function test_domainSeparator_returnsUpdatedDomainSeparatorIfChainIDIsDifferentFromValueSetOnDeployment() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+
         bytes32 domainSeparatorCached = zone.exposed_domainSeparator();
         vm.chainId(31338);
         bytes32 domainSeparatorDerived = zone.exposed_domainSeparator();
+
         assertFalse(domainSeparatorCached == domainSeparatorDerived);
         assertEq(domainSeparatorDerived, bytes32(0x835aabb0d2af048df195a75a990b42533471d4a4e82842cd54a892eaac463d74));
     }
@@ -1095,6 +1168,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     function test_deriveDomainSeparator_returnsDomainSeparatorForChainID() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+
         bytes32 domainSeparator = zone.exposed_deriveDomainSeparator();
         assertEq(domainSeparator, bytes32(0xafb48e1c246f21ba06352cb2c0ebe99b8adc2590dfc48fa547732df870835b42));
     }

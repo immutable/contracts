@@ -29,6 +29,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     address internal immutable FULFILLER = makeAddr("fulfiller");
     address internal immutable OFFERER = makeAddr("offerer");
+    uint256 public constant MAX_UINT_TYPE = type(uint256).max;
 
     /* constructor */
 
@@ -1076,6 +1077,21 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
         bytes32 receivedItemsHash = zone.exposed_deriveReceivedItemsHash(receivedItems, 100, 10);
         assertEq(receivedItemsHash, bytes32(0xf01bacf40a3dd95740faaaad186bf1c000a9edc06008ea07c789ea761d7f3ffb));
+    }
+
+    function test_deriveReceivedItemsHash_returnsHashForReceivedItemWithAVeryLargeAmount() public {
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
+        receivedItems[0] = ReceivedItem({
+            itemType: ItemType.ERC721,
+            token: address(0x2),
+            identifier: 222,
+            amount: 1,
+            recipient: payable(address(0x3))
+        });
+
+        bytes32 receivedItemsHash = zone.exposed_deriveReceivedItemsHash(receivedItems, MAX_UINT_TYPE, 10);
+        assertEq(receivedItemsHash, bytes32(0xa349370a3f10599b502d8886045635579be4cfa14bb3140589e5619e492f876c));
     }
 
     /* _bytes32ArrayIncludes - N */

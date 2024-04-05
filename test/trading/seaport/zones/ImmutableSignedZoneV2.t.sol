@@ -27,8 +27,6 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     error SignatureExpired(uint256 currentTimestamp, uint256 expiration, bytes32 orderHash); // SIP-7
     error InvalidFulfiller(address expectedFulfiller, address actualFulfiller, bytes32 orderHash); // SIP-7
 
-    address internal immutable FULFILLER = makeAddr("fulfiller");
-    address internal immutable OFFERER = makeAddr("offerer");
     uint256 public constant MAX_UINT_TYPE = type(uint256).max;
 
     /* constructor */
@@ -295,16 +293,19 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateOrder_revertsIfSignatureHasExpired() public {
-        ImmutableSignedZoneV2 zone = _newZone();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        bytes32 orderHash = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
+        uint64 expiration = 100;
+
+        bytes memory extraData = _buildExtraData(orderHash, expiration, zone, new bytes(0));
+
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
             fulfiller: FULFILLER,
             offerer: OFFERER,
             offer: new SpentItem[](0),
             consideration: new ReceivedItem[](0),
-            extraData: bytes(
-                hex"00f39fd6e51aad88f6f4ce6ab8827279cfffb9226600000000660f3027d9ef9e6e50a74cc24433373b9cdd97693a02adcc94e562bb59a5af68190ecaea4414dcbe74618f6c77d11cbcf4a8345bbdf46e665249904925c95929ba6606638b779c6b502204fca6bb0539cdc3dc258fe3ce7b53be0c4ad620899167fedaa8"
-                ),
+            extraData: extraData,
             orderHashes: new bytes32[](0),
             startTime: 0,
             endTime: 0,
@@ -313,27 +314,31 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
         vm.expectRevert(
             abi.encodeWithSelector(
                 SignatureExpired.selector,
-                1714829338,
-                1712271399,
+                1000,
+                100,
                 bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9)
             )
         );
-        vm.warp(1714829338);
+        // set current block.timestamp to be 1000
+        vm.warp(1000);
         zone.validateOrder(zoneParameters);
     }
 
     function test_validateOrder_revertsIfActualFulfillerDoesNotMatchExpectedFulfiller() public {
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
         address randomFulfiller = makeAddr("random");
-        ImmutableSignedZoneV2 zone = _newZone();
+        bytes32 orderHash = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
+        uint64 expiration = 100;
+
+        bytes memory extraData = _buildExtraData(orderHash, expiration, zone, new bytes(0));
+
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
             fulfiller: randomFulfiller,
             offerer: OFFERER,
             offer: new SpentItem[](0),
             consideration: new ReceivedItem[](0),
-            extraData: bytes(
-                hex"0071458637cd221877830a21f543e8b731e93c362700000000660f35b870eb77aa71239beb73729a53fac6c035dd6008dfafbacea3f8492bfcfeff3f2bc2e6116f4f94b56f20a5672ae38c9a4764fb152aa37f6134e12a9a08374382308b779c6b502204fca6bb0539cdc3dc258fe3ce7b53be0c4ad620899167fedaa8"
-                ),
+            extraData: extraData,
             orderHashes: new bytes32[](0),
             startTime: 0,
             endTime: 0,
@@ -351,41 +356,72 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateOrder_revertsIfSignerIsNotActive() public {
-        ImmutableSignedZoneV2 zone = _newZone();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        bytes32 orderHash = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
+        uint64 expiration = 100;
+
+        bytes memory extraData = _buildExtraData(orderHash, expiration, zone, new bytes(0));
+
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
             fulfiller: FULFILLER,
             offerer: OFFERER,
             offer: new SpentItem[](0),
             consideration: new ReceivedItem[](0),
-            extraData: bytes(
-                hex"0071458637cd221877830a21f543e8b731e93c362700000000660f35b870eb77aa71239beb73729a53fac6c035dd6008dfafbacea3f8492bfcfeff3f2bc2e6116f4f94b56f20a5672ae38c9a4764fb152aa37f6134e12a9a0837438230"
-                ),
+            extraData:extraData,
             orderHashes: new bytes32[](0),
             startTime: 0,
             endTime: 0,
             zoneHash: bytes32(0)
         });
         vm.expectRevert(
-            abi.encodeWithSelector(SignerNotActive.selector, address(0xb14f041201f3546C5636A6E2e8E3C6d04A2A480C))
+            abi.encodeWithSelector(SignerNotActive.selector, address(0x6E12D8C87503D4287c294f2Fdef96ACd9DFf6bd2))
         );
         zone.validateOrder(zoneParameters);
     }
 
     function test_validateOrder_returnsMagicValueOnSuccessfulValidation() public {
-        ImmutableSignedZoneV2 zone = _newZone();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
         vm.prank(OWNER);
-        zone.addSigner(address(0xb14f041201f3546C5636A6E2e8E3C6d04A2A480C));
+        zone.addSigner(SIGNER);
+
+        bytes32 orderHash = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
+        uint64 expiration = 100;
+
+        SpentItem[] memory spentItems = new SpentItem[](1);
+        spentItems[0] = SpentItem({itemType: ItemType.ERC1155, token: address(0x5), identifier: 222, amount: 10});
+
+        ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
+        ReceivedItem memory receivedItem = ReceivedItem({
+            itemType: ItemType.ERC20,
+            token: address(0x4),
+            identifier: 0,
+            amount: 20,
+            recipient: payable(address(0x3))
+        });
+        receivedItems[0] = receivedItem;
+
+        bytes32[] memory orderHashes = new bytes32[](1);
+        orderHashes[0] = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
+
+        // console.logBytes32(zone.exposed_deriveReceivedItemsHash(receivedItems, 1, 1));
+        bytes32 substandard3Data = bytes32(0xec07a42041c18889c5c5dcd348923ea9f3d0979735bd8b3b687ebda38d9b6a31);
+        bytes memory substandard4Data = abi.encode(orderHashes);
+        bytes memory substandard6Data = abi.encodePacked(uint256(10), substandard3Data);
+        bytes memory context = abi.encodePacked(
+            bytes1(0x03), substandard3Data, bytes1(0x04), substandard4Data, bytes1(0x06), substandard6Data
+        );
+
+        bytes memory extraData = _buildExtraData(orderHash, expiration, zone, context);
+
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
             fulfiller: FULFILLER,
             offerer: OFFERER,
-            offer: new SpentItem[](0),
-            consideration: new ReceivedItem[](0),
-            extraData: bytes(
-                hex"0071458637cd221877830a21f543e8b731e93c362700000000660f35b870eb77aa71239beb73729a53fac6c035dd6008dfafbacea3f8492bfcfeff3f2bc2e6116f4f94b56f20a5672ae38c9a4764fb152aa37f6134e12a9a0837438230"
-                ),
-            orderHashes: new bytes32[](0),
+            offer: spentItems,
+            consideration: receivedItems,
+            extraData: extraData,
+            orderHashes: orderHashes,
             startTime: 0,
             endTime: 0,
             zoneHash: bytes32(0)

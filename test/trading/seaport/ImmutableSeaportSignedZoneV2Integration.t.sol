@@ -7,7 +7,8 @@ import "forge-std/Test.sol";
 import {ImmutableSignedZoneV2Harness} from "./zones/ImmutableSignedZoneV2Harness.t.sol";
 import {ConduitController} from "../../../contracts/trading/seaport/conduit/ConduitController.sol";
 import {ImmutableSeaportHarness} from "./ImmutableSeaportHarness.t.sol";
-import {ImmutableERC20FixedSupplyNoBurn} from "../../../contracts/token/erc20/preset/ImmutableERC20FixedSupplyNoBurn.sol";
+import {ImmutableERC20FixedSupplyNoBurn} from
+    "../../../contracts/token/erc20/preset/ImmutableERC20FixedSupplyNoBurn.sol";
 import {ImmutableERC1155} from "../../../contracts/token/erc1155/preset/ImmutableERC1155.sol";
 import {OperatorAllowlistUpgradeable} from "../../../contracts/allowlist/OperatorAllowlistUpgradeable.sol";
 import {Consideration} from "seaport-core/src/lib/Consideration.sol";
@@ -26,7 +27,7 @@ import {
 import {ItemType, OrderType} from "seaport-types/src/lib/ConsiderationEnums.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-// solhint-disable func-name-mixedcase
+// solhint-disable func-name-mixedcase private-vars-leading-underscore
 
 contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
     ImmutableSeaportHarness internal seaport;
@@ -84,7 +85,6 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
     //         )
     //     )
     // );
-
 
     function setUp() public {
         // operator allowlist
@@ -243,7 +243,8 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
         bytes32 eip712SignedOrderHash = zone.exposed_deriveSignedOrderHash(FULFILLER, uint256(4000), orderHash, context);
         bytes32 signatureDigest = ECDSA.toTypedDataHash(zone.exposed_domainSeparator(), eip712SignedOrderHash);
         (, bytes32 signedOrderR, bytes32 signedOrderS) = vm.sign(signerPK, signatureDigest);
-        bytes memory extraData = abi.encodePacked(hex"00", FULFILLER, uint256(4000), signedOrderR, signedOrderS, context);
+        bytes memory extraData =
+            abi.encodePacked(hex"00", FULFILLER, uint256(4000), signedOrderR, signedOrderS, context);
 
         AdvancedOrder advancedOrder = AdvancedOrder({
             parameters: orderParameters,
@@ -255,7 +256,11 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
 
         // mints
         vm.prank(OWNER);
-        erc20Token.transfer(FULFILLER, considerationItems[0].startAmount + considerationItems[1].startAmount + considerationItems[2].startAmount + considerationItems[3].startAmount);
+        erc20Token.transfer(
+            FULFILLER,
+            considerationItems[0].startAmount + considerationItems[1].startAmount + considerationItems[2].startAmount
+                + considerationItems[3].startAmount
+        );
         vm.prank(OWNER);
         erc1155Token.safeMint(FULFILLER, offerItems[0].identifierOrCriteria, offerItems[0].startAmount, new bytes(0));
 
@@ -263,11 +268,15 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
         vm.prank(OFFERER);
         erc1155Token.setApprovalForAll(address(seaport), true);
         vm.prank(FULFILLER);
-        erc20Token.approve(address(seaport), considerationItems[0].startAmount + considerationItems[1].startAmount + considerationItems[2].startAmount + considerationItems[3].startAmount);
+        erc20Token.approve(
+            address(seaport),
+            considerationItems[0].startAmount + considerationItems[1].startAmount + considerationItems[2].startAmount
+                + considerationItems[3].startAmount
+        );
 
         // fulfill
         seaport.fulfillAdvancedOrder(advancedOrder, new CriteriaResolver[](0), bytes32(0), FULFILLER);
     }
 }
 
-// solhint-enable func-name-mixedcase
+// solhint-enable func-name-mixedcase private-vars-leading-underscore

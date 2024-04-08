@@ -41,7 +41,7 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
     address internal immutable SIGNER = makeAddr("signer"); // 0x6E12D8C87503D4287c294f2Fdef96ACd9DFf6bd2
     address internal immutable FULFILLER = makeAddr("fulfiller"); // 0x71458637cD221877830A21F543E8b731e93C3627
     address internal immutable OFFERER = makeAddr("offerer"); // 0xD4A3ED913c988269BbB6caeCBEC568063B43435a
-    address internal immutable PROTOCOL_FEE_RECEIVER = makeAddr("ecosystem_fee_receiver");
+    address internal immutable PROTOCOL_FEE_RECEIVER = makeAddr("protocol_fee_receiver");
     address internal immutable ROYALTY_FEE_RECEIVER = makeAddr("royalty_fee_receiver");
     address internal immutable ECOSYSTEM_FEE_RECEIVER = makeAddr("ecosystem_fee_receiver");
 
@@ -57,7 +57,8 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
         operatorAllowlist.initialize(OWNER, OWNER, OWNER);
 
         // tokens
-        erc20Token = IERC20(deployCode(ERC20_ARTIFACT, abi.encode("TestERC20", "ERC20", uint256(1000), OWNER, OWNER)));
+        erc20Token =
+            IERC20(deployCode(ERC20_ARTIFACT, abi.encode("TestERC20", "ERC20", type(uint256).max, OWNER, OWNER)));
         erc1155Token = IImmutableERC1155(
             deployCode(
                 ERC1155_ARTIFACT,
@@ -108,8 +109,8 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
             itemType: ItemType.ERC20,
             token: address(erc20Token),
             identifierOrCriteria: uint256(0),
-            startAmount: uint256(200),
-            endAmount: uint256(200),
+            startAmount: uint256(200_000_000_000_000_000_000), // 200^18
+            endAmount: uint256(200_000_000_000_000_000_000), // 200^18
             recipient: payable(OFFERER)
         });
 
@@ -120,8 +121,8 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
             itemType: ItemType.ERC20,
             token: address(erc20Token),
             identifierOrCriteria: uint256(0),
-            startAmount: uint256(4),
-            endAmount: uint256(4),
+            startAmount: uint256(4_000_000_000_000_000_000),
+            endAmount: uint256(4_000_000_000_000_000_000),
             recipient: payable(PROTOCOL_FEE_RECEIVER)
         });
         // royalty fee - 1%
@@ -129,8 +130,8 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
             itemType: ItemType.ERC20,
             token: address(erc20Token),
             identifierOrCriteria: uint256(0),
-            startAmount: uint256(2),
-            endAmount: uint256(2),
+            startAmount: uint256(2_000_000_000_000_000_000),
+            endAmount: uint256(2_000_000_000_000_000_000),
             recipient: payable(ROYALTY_FEE_RECEIVER)
         });
         // ecosystem fee - 3%
@@ -138,8 +139,8 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
             itemType: ItemType.ERC20,
             token: address(erc20Token),
             identifierOrCriteria: uint256(0),
-            startAmount: uint256(6),
-            endAmount: uint256(6),
+            startAmount: uint256(6_000_000_000_000_000_000),
+            endAmount: uint256(6_000_000_000_000_000_000),
             recipient: payable(ECOSYSTEM_FEE_RECEIVER)
         });
 
@@ -230,7 +231,7 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
         AdvancedOrder memory advancedOrder = AdvancedOrder({
             parameters: orderParameters,
             numerator: uint120(1),
-            denominator: uint120(1),
+            denominator: uint120(100),
             signature: orderSignature,
             extraData: extraData
         });
@@ -239,8 +240,10 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
         vm.prank(OWNER);
         erc20Token.transfer(
             FULFILLER,
-            considerationItems[0].startAmount + considerationItems[1].startAmount + considerationItems[2].startAmount
-                + considerationItems[3].startAmount
+            (
+                considerationItems[0].startAmount + considerationItems[1].startAmount
+                    + considerationItems[2].startAmount + considerationItems[3].startAmount
+            ) / 100
         );
         vm.prank(OWNER);
         erc1155Token.safeMint(OFFERER, offerItems[0].identifierOrCriteria, offerItems[0].startAmount, new bytes(0));
@@ -249,15 +252,24 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
         vm.prank(OFFERER);
         erc1155Token.setApprovalForAll(address(seaport), true);
         vm.prank(FULFILLER);
-        erc20Token.approve(
-            address(seaport),
-            considerationItems[0].startAmount + considerationItems[1].startAmount + considerationItems[2].startAmount
-                + considerationItems[3].startAmount
-        );
+        erc20Token.approve(address(seaport), type(uint256).max);
 
         // fulfillment
         vm.prank(FULFILLER);
         seaport.fulfillAdvancedOrder(advancedOrder, new CriteriaResolver[](0), bytes32(0), FULFILLER);
+
+        // assertions
+        assertEq(
+            erc1155Token.balanceOf(OFFERER, offerItems[0].identifierOrCriteria), offerItems[0].startAmount * 99 / 100
+        );
+        assertEq(
+            erc1155Token.balanceOf(FULFILLER, offerItems[0].identifierOrCriteria), offerItems[0].startAmount * 1 / 100
+        );
+        assertEq(erc20Token.balanceOf(OFFERER), considerationItems[0].startAmount / 100);
+        assertEq(erc20Token.balanceOf(FULFILLER), 0);
+        assertEq(erc20Token.balanceOf(PROTOCOL_FEE_RECEIVER), considerationItems[1].startAmount / 100);
+        assertEq(erc20Token.balanceOf(ROYALTY_FEE_RECEIVER), considerationItems[2].startAmount / 100);
+        assertEq(erc20Token.balanceOf(ECOSYSTEM_FEE_RECEIVER), considerationItems[3].startAmount / 100);
     }
 }
 

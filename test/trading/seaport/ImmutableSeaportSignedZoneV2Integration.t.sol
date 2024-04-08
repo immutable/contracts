@@ -84,6 +84,13 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
     // );
 
     function setUp() public {
+        string constant operatorAllowlistArtifact = "../../../foundry-out/OperatorAllowlistUpgradeable.sol/OperatorAllowlistUpgradeable.json";
+        string constant erc1155TokenArtifact = "../../../foundry-out/ImmutableERC1155.sol/ImmutableERC1155.json";
+        string constant erc20TokenArtifact = "../../../foundry-out/ImmutableERC20FixedSupplyNoBurn.sol/ImmutableERC20FixedSupplyNoBurn.json";
+
+        // address _weth9 = deployCode(weth9Artifact);
+        // weth9 = WETH9(_weth9);
+
         // operator allowlist
         OperatorAllowlistUpgradeable operatorAllowlist = new OperatorAllowlistUpgradeable();
 

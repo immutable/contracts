@@ -1,7 +1,7 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: Apache-2
 
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
 import {ImmutableSignedZoneV2Harness} from "./zones/ImmutableSignedZoneV2Harness.t.sol";

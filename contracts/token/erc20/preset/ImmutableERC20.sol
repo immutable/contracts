@@ -18,6 +18,8 @@ import {IImmutableERC20Errors} from "../../../errors/ERC20Errors.sol";
  *  with a specific Immutable Hub account.
  */
 contract ImmutableERC20 is Ownable, ERC20Permit, MintingAccessControl {
+    uint256 private immutable _maxSupply;
+
     /**
      * @dev Delegate to Open Zeppelin's contract.
      * @param _name  Name of the token.
@@ -25,10 +27,11 @@ contract ImmutableERC20 is Ownable, ERC20Permit, MintingAccessControl {
      * @param _owner The account that owns the contract and is associated with Immutable Hub. 
      * @param minterRole The account that has the MINTER_ROLE.
      */
-    constructor(string memory _name, string memory _symbol, address _owner, address minterRole) ERC20(_name, _symbol) ERC20Permit(_name) {
+    constructor(string memory _name, string memory _symbol, address _owner, address minterRole, uint256 _maxTokenSupply) ERC20(_name, _symbol) ERC20Permit(_name) {
         _transferOwnership(_owner);
         _grantRole(DEFAULT_ADMIN_ROLE, _owner);
         _grantRole(MINTER_ROLE, minterRole);
+        _maxSupply = _maxTokenSupply;
     }
 
     /**
@@ -37,6 +40,9 @@ contract ImmutableERC20 is Ownable, ERC20Permit, MintingAccessControl {
      * @param amount  The amount of tokens to mint.
      */
     function mint(address to, uint256 amount) external onlyRole(MINTER_ROLE) {
+        if(totalSupply() + amount > _maxSupply) {
+            revert IImmutableERC20Errors.MaxSupplyExceeded(_maxSupply);
+        }
         _mint(to, amount);
     }
 
@@ -54,5 +60,12 @@ contract ImmutableERC20 is Ownable, ERC20Permit, MintingAccessControl {
      */
     function renounceOwnership() public pure override {
         revert IImmutableERC20Errors.RenounceOwnershipNotAllowed();
+    }
+
+    /**
+     * @dev Returns the maximum supply of the token.
+     */
+    function maxSupply() external view returns (uint256) {
+        return _maxSupply;
     }
 }

@@ -15,15 +15,16 @@ contract ImmutableERC20Test is Test {
     address public hubOwner;
     string name;
     string symbol;
-    uint256 supply;
+    uint256 maxSupply;
 
     function setUp() public virtual {
         hubOwner = makeAddr("hubOwner");
         minter = makeAddr("minterRole");
         name = "HappyToken";
         symbol = "HPY";
+        maxSupply = 1000;
 
-        erc20 = new ImmutableERC20(name, symbol, hubOwner, minter);
+        erc20 = new ImmutableERC20(name, symbol, hubOwner, minter, maxSupply);
     }
 
     function testInit() public {
@@ -34,6 +35,7 @@ contract ImmutableERC20Test is Test {
         assertTrue(erc20.hasRole(minterRole, minter));
         bytes32 adminRole = erc20.DEFAULT_ADMIN_ROLE();
         assertTrue(erc20.hasRole(adminRole, hubOwner));
+        assertEq(erc20.maxSupply(), maxSupply, "total supply");
     }
 
     function testChangeOwner() public {
@@ -73,6 +75,17 @@ contract ImmutableERC20Test is Test {
         assertEq(erc20.balanceOf(from), 100);
         erc20.burn(from, amount);
         assertEq(erc20.balanceOf(from), 0);
+    }
+
+    function testCanOnlyMintUpToMaxSupply() public {
+        address to = makeAddr("to");
+        uint256 amount = 1000;
+        vm.startPrank(minter);
+        erc20.mint(to, amount);
+        assertEq(erc20.balanceOf(to), amount);
+        vm.expectRevert(abi.encodeWithSelector(IImmutableERC20Errors.MaxSupplyExceeded.selector, maxSupply));
+        erc20.mint(to, 1);
+        vm.stopPrank();
     }
 
 }

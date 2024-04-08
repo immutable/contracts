@@ -27,10 +27,10 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 // solhint-disable func-name-mixedcase, private-vars-leading-underscore
 
 contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
-    string constant internal OPERATOR_ALLOWLIST_ARTIFACT = "../../../foundry-out/OperatorAllowlistUpgradeable.sol/OperatorAllowlistUpgradeable.json";
-    string constant internal ERC1155_ARTIFACT = "../../../foundry-out/ImmutableERC1155.sol/ImmutableERC1155.json";
-    string constant internal ERC20_ARTIFACT = "../../../foundry-out/ImmutableERC20FixedSupplyNoBurn.sol/ImmutableERC20FixedSupplyNoBurn.json";
-    string constant internal ZONE_ARTIFACT = "../../../foundry-out/ImmutableSignedZoneV2Harness.sol/ImmutableSignedZoneV2Harness.json";
+    string constant internal OPERATOR_ALLOWLIST_ARTIFACT = "./foundry-out/OperatorAllowlistUpgradeable.sol/OperatorAllowlistUpgradeable.json";
+    string constant internal ERC1155_ARTIFACT = "./foundry-out/ImmutableERC1155.sol/ImmutableERC1155.json";
+    string constant internal ERC20_ARTIFACT = "./foundry-out/ImmutableERC20FixedSupplyNoBurn.sol/ImmutableERC20FixedSupplyNoBurn.json";
+    string constant internal ZONE_ARTIFACT = "./foundry-out/ImmutableSignedZoneV2Harness.t.sol/ImmutableSignedZoneV2Harness.json";
 
     address internal immutable OWNER = makeAddr("owner"); // 0x7c8999dC9a822c1f0Df42023113EDB4FDd543266
     address internal immutable SIGNER = makeAddr("signer"); // 0x6E12D8C87503D4287c294f2Fdef96ACd9DFf6bd2
@@ -47,33 +47,17 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
 
     function setUp() public {
         // operator allowlist
-        // OperatorAllowlistUpgradeable operatorAllowlist = new OperatorAllowlistUpgradeable();
         IOperatorAllowlistUpgradeable operatorAllowlist = IOperatorAllowlistUpgradeable(deployCode(OPERATOR_ALLOWLIST_ARTIFACT));
+        operatorAllowlist.initialize(OWNER, OWNER, OWNER);
 
         // tokens
-        // erc20Token = new ImmutableERC20FixedSupplyNoBurn("TestERC20", "ERC20", 1000, OWNER, OWNER);
-        erc20Token = IERC20(deployCode(ERC20_ARTIFACT));
-        // erc1155Token = new ImmutableERC1155(
-        //     OWNER,
-        //     "TestERC1155",
-        //     "",
-        //     "",
-        //     address(operatorAllowlist),
-        //     ROYALTY_FEE_RECEIVER,
-        //     100 // 1%
-        // );
+        erc20Token = IERC20(deployCode(ERC20_ARTIFACT, abi.encode("TestERC20","ERC20",uint256(1000),OWNER,OWNER)));
         erc1155Token = IImmutableERC1155(deployCode(ERC1155_ARTIFACT, abi.encode(OWNER,"TestERC1155","","",address(operatorAllowlist),ROYALTY_FEE_RECEIVER,uint96(100))));
         vm.prank(OWNER);
         erc1155Token.grantMinterRole(OWNER);
 
         // zone
         zone = IImmutableSignedZoneV2Harness(deployCode(ZONE_ARTIFACT, abi.encode("MyZoneName","https://www.immutable.com","https://www.immutable.com/docs",OWNER)));
-        // zone = new ImmutableSignedZoneV2Harness(
-        //     "MyZoneName",
-        //     "https://www.immutable.com",
-        //     "https://www.immutable.com/docs",
-        //     OWNER
-        // );
         vm.prank(OWNER);
         zone.addSigner(SIGNER);
 

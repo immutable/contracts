@@ -9,6 +9,13 @@ pragma solidity ^0.8.17;
  */
 interface IOperatorAllowlistUpgradeable {
     /**
+     * @notice Grants `DEFAULT_ADMIN_ROLE` to the supplied `admin` address
+     * @param _roleAdmin the address to grant `DEFAULT_ADMIN_ROLE` to
+     * @param _upgradeAdmin the address to grant `UPGRADE_ROLE` to
+     */
+    function initialize(address _roleAdmin, address _upgradeAdmin, address _registerarAdmin) external;
+
+    /**
      * @notice Adds a list of multiple addresses to Allowlist
      * @param addressTargets the addresses to be added to the allowlist
      */

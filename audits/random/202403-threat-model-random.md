@@ -116,7 +116,7 @@ The precise formula for a block's RanDAO value is given by:
              )
   ``` 
 
-The constant "RANDAO" is included to personalise the value to this particular usage: generating random values. This reduces the likelihood that the block producer will have previously signed the same plain text in some other usage. If this value wasn't included, observers might be able to predict the signature value.
+The constant "RANDAO" is included to personalise the value to this particular usage: generating random values for RanDAO. This reduces the likelihood that the block producer will have previously signed the same plain text in some other usage. If this value wasn't included, observers might be able to predict the signature value by knowing signature produced previous for the same plain text.
 
 The chain id of the blockchain is included to personalise the value to this particular chain. This is needed to ensure the number is different, even if the same block producer is using the same BLS key pair on multiple chains.
 

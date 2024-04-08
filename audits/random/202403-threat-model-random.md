@@ -37,7 +37,6 @@ The threat model is limited to the following Solidity files at GitHash [TBD](TBD
 * [RandomSequences.sol](TBD)
 * [IOffchainRandomSource.sol](TBD)
 * [SourceAdaptorBase.sol](TBD)
-* [HashOnion.sol](TBD)
 
 
 
@@ -164,8 +163,6 @@ logic included in the `UUPSUpgradeable.sol` contract that `RandomSeedProvider.so
 The `RandomSeedProvider.sol` contract by default uses an on-chain random number source. It can be configured to use an off-chain random number source. This source is accessed via the `IOffchainRandomSource.sol` interface. To allow the flexibility to switch between off-chain random sources, there is an adaptor contract between the offchain random source contract and the random seed provider. Common logic for adaptor implementations is held in `SourceAdaptorBase.sol`.
 
 The `RandomSeedProvider.sol` contract uses a queue implemented in `RandomSeedProviderRequestQueue.sol` to hold outstanding requests for on-chain generated random seed values. Having a separate implementation more easily allows the code to be easily unit tested. 
-
-The HashOnion.sol contract implements a deterministic number source by incrementally revealing recursive hash pre-images. This allows values that are unknown to game players, but deterministic so that they can't be manipulated, to be put on chain during periods of low chain utilization. This is useful to increase the amount of entropy on the chain, thus making on-chain seed values more difficult to predict.
 
 The architecture diagram shows a ChainLink VRF source and a Supra VRF source. This is purely to show the possibility of integrating with one off-chain service and then, at a later point choosing to switch to an alternative off-chain source. At present, there is no agreement to use any specific off-chain source.
 

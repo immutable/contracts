@@ -14,12 +14,8 @@ import {OperatorAllowlistUpgradeable} from "../../../contracts/allowlist/Operato
 import {Consideration} from "seaport-core/src/lib/Consideration.sol";
 import {
     AdvancedOrder,
-    BasicOrderParameters,
     ConsiderationItem,
     CriteriaResolver,
-    Execution,
-    Fulfillment,
-    FulfillmentComponent,
     OrderComponents,
     OfferItem,
     OrderParameters

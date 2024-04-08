@@ -1,5 +1,6 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: Apache-2
+
 // solhint-disable compiler-version
 pragma solidity ^0.8.17;
 
@@ -12,7 +13,7 @@ import {SIP5Interface} from "./interfaces/SIP5Interface.sol";
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-import "openzeppelin-contracts-5.0.2/utils/math/Math.sol";
+import {Math} from "openzeppelin-contracts-5.0.2/utils/math/Math.sol";
 
 /**
  * @title  ImmutableSignedZoneV2

@@ -1,8 +1,10 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: Apache-2
 
+// solhint-disable-next-line compiler-version
 pragma solidity ^0.8.17;
 
+// solhint-disable-next-line no-global-import
 import "forge-std/Test.sol";
 import {ImmutableSignedZoneV2Harness} from "./zones/ImmutableSignedZoneV2Harness.t.sol";
 import {ConduitController} from "../../../contracts/trading/seaport/conduit/ConduitController.sol";
@@ -11,7 +13,6 @@ import {ImmutableERC20FixedSupplyNoBurn} from
     "../../../contracts/token/erc20/preset/ImmutableERC20FixedSupplyNoBurn.sol";
 import {ImmutableERC1155} from "../../../contracts/token/erc1155/preset/ImmutableERC1155.sol";
 import {OperatorAllowlistUpgradeable} from "../../../contracts/allowlist/OperatorAllowlistUpgradeable.sol";
-import {Consideration} from "seaport-core/src/lib/Consideration.sol";
 import {
     AdvancedOrder,
     ConsiderationItem,
@@ -23,7 +24,7 @@ import {
 import {ItemType, OrderType} from "seaport-types/src/lib/ConsiderationEnums.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-// solhint-disable func-name-mixedcase private-vars-leading-underscore
+// solhint-disable func-name-mixedcase, private-vars-leading-underscore
 
 contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
     ImmutableSeaportHarness internal seaport;
@@ -275,4 +276,4 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
     }
 }
 
-// solhint-enable func-name-mixedcase private-vars-leading-underscore
+// solhint-enable func-name-mixedcase, private-vars-leading-underscore

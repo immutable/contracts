@@ -10,6 +10,7 @@ import {IImmutableSignedZoneV2Harness} from "./zones/IImmutableSignedZoneV2Harne
 import {ConduitController} from "../../../contracts/trading/seaport/conduit/ConduitController.sol";
 import {ImmutableSeaportHarness} from "./ImmutableSeaportHarness.t.sol";
 import {IImmutableERC1155} from "./utils/IImmutableERC1155.t.sol";
+import {IImmutableERC721} from "./utils/IImmutableERC721.t.sol";
 import {IOperatorAllowlistUpgradeable} from "./utils/IOperatorAllowlistUpgradeable.t.sol";
 import {
     AdvancedOrder,
@@ -22,6 +23,7 @@ import {
 } from "seaport-types/src/lib/ConsiderationStructs.sol";
 import {ItemType, OrderType} from "seaport-types/src/lib/ConsiderationEnums.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 // solhint-disable func-name-mixedcase, private-vars-leading-underscore
@@ -34,6 +36,7 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
     string internal constant ERC1155_ARTIFACT = "./foundry-out/ImmutableERC1155.sol/ImmutableERC1155.json";
     string internal constant ERC20_ARTIFACT =
         "./foundry-out/ImmutableERC20FixedSupplyNoBurn.sol/ImmutableERC20FixedSupplyNoBurn.json";
+    string internal constant ERC721_ARTIFACT = "./foundry-out/ImmutableERC721.sol/ImmutableERC721.json";
     string internal constant ZONE_ARTIFACT =
         "./foundry-out/ImmutableSignedZoneV2Harness.t.sol/ImmutableSignedZoneV2Harness.json";
 
@@ -50,6 +53,7 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
     IImmutableSignedZoneV2Harness internal zone;
     IERC20 internal erc20Token;
     IImmutableERC1155 internal erc1155Token;
+    IImmutableERC721 internal erc721Token;
 
     function setUp() public {
         // operator allowlist
@@ -60,6 +64,16 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
         // tokens
         erc20Token =
             IERC20(deployCode(ERC20_ARTIFACT, abi.encode("TestERC20", "ERC20", type(uint256).max, OWNER, OWNER)));
+        erc721Token = IImmutableERC721(
+            deployCode(
+                ERC721_ARTIFACT,
+                abi.encode(
+                    OWNER, "TestERC721", "ERC721", "", "", address(operatorAllowlist), ROYALTY_FEE_RECEIVER, uint96(100)
+                )
+            )
+        );
+        vm.prank(OWNER);
+        erc721Token.grantMinterRole(OWNER);
         erc1155Token = IImmutableERC1155(
             deployCode(
                 ERC1155_ARTIFACT,
@@ -90,6 +104,183 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
         allowlistAddress[0] = address(seaport);
         vm.prank(OWNER);
         operatorAllowlist.addAddressesToAllowlist(allowlistAddress);
+    }
+
+    function test_fulfillAdvancedOrder_withCompleteFulfilment() public {
+        // offer items
+        OfferItem[] memory offerItems = new OfferItem[](1);
+        offerItems[0] = OfferItem({
+            itemType: ItemType.ERC721,
+            token: address(erc721Token),
+            identifierOrCriteria: uint256(50),
+            startAmount: uint256(1),
+            endAmount: uint256(1)
+        });
+
+        // consideration items
+        ConsiderationItem[] memory originalConsiderationItems = new ConsiderationItem[](1);
+        // original item
+        originalConsiderationItems[0] = ConsiderationItem({
+            itemType: ItemType.ERC20,
+            token: address(erc20Token),
+            identifierOrCriteria: uint256(0),
+            startAmount: uint256(200_000_000_000_000_000_000), // 200^18
+            endAmount: uint256(200_000_000_000_000_000_000), // 200^18
+            recipient: payable(OFFERER)
+        });
+
+        ConsiderationItem[] memory considerationItems = new ConsiderationItem[](4);
+        considerationItems[0] = originalConsiderationItems[0];
+        // protocol fee - 2%
+        considerationItems[1] = ConsiderationItem({
+            itemType: ItemType.ERC20,
+            token: address(erc20Token),
+            identifierOrCriteria: uint256(0),
+            startAmount: uint256(4_000_000_000_000_000_000),
+            endAmount: uint256(4_000_000_000_000_000_000),
+            recipient: payable(PROTOCOL_FEE_RECEIVER)
+        });
+        // royalty fee - 1%
+        considerationItems[2] = ConsiderationItem({
+            itemType: ItemType.ERC20,
+            token: address(erc20Token),
+            identifierOrCriteria: uint256(0),
+            startAmount: uint256(2_000_000_000_000_000_000),
+            endAmount: uint256(2_000_000_000_000_000_000),
+            recipient: payable(ROYALTY_FEE_RECEIVER)
+        });
+        // ecosystem fee - 3%
+        considerationItems[3] = ConsiderationItem({
+            itemType: ItemType.ERC20,
+            token: address(erc20Token),
+            identifierOrCriteria: uint256(0),
+            startAmount: uint256(6_000_000_000_000_000_000),
+            endAmount: uint256(6_000_000_000_000_000_000),
+            recipient: payable(ECOSYSTEM_FEE_RECEIVER)
+        });
+
+        // order
+        OrderParameters memory orderParameters = OrderParameters({
+            offerer: OFFERER,
+            zone: address(zone),
+            offer: offerItems,
+            consideration: considerationItems,
+            orderType: OrderType.FULL_RESTRICTED,
+            startTime: uint256(0),
+            endTime: uint256(5000),
+            zoneHash: bytes32(0),
+            salt: uint256(123),
+            conduitKey: bytes32(0),
+            totalOriginalConsiderationItems: uint256(1)
+        });
+
+        // order hash
+        bytes32 orderHash = seaport.getOrderHash(
+            OrderComponents({
+                offerer: orderParameters.offerer,
+                zone: orderParameters.zone,
+                offer: orderParameters.offer,
+                consideration: originalConsiderationItems,
+                orderType: orderParameters.orderType,
+                startTime: orderParameters.startTime,
+                endTime: orderParameters.endTime,
+                zoneHash: orderParameters.zoneHash,
+                salt: orderParameters.salt,
+                conduitKey: orderParameters.conduitKey,
+                counter: seaport.getCounter(orderParameters.offerer)
+            })
+        );
+
+        // order signature
+        bytes memory orderSignature;
+        {
+            (, uint256 offererPK) = makeAddrAndKey("offerer");
+            bytes32 orderDigest = seaport.exposed_deriveEIP712Digest(seaport.exposed_domainSeparator(), orderHash);
+            (uint8 listingV, bytes32 listingR, bytes32 listingS) = vm.sign(offererPK, orderDigest);
+            orderSignature = abi.encodePacked(listingR, listingS, listingV);
+        }
+
+        // extra data
+        bytes memory extraData;
+        {
+            (, uint256 signerPK) = makeAddrAndKey("signer");
+            ReceivedItem[] memory expectedReceivedItems = new ReceivedItem[](4);
+            expectedReceivedItems[0] = ReceivedItem({
+                itemType: considerationItems[0].itemType,
+                token: considerationItems[0].token,
+                identifier: considerationItems[0].identifierOrCriteria,
+                amount: considerationItems[0].startAmount,
+                recipient: considerationItems[0].recipient
+            });
+            expectedReceivedItems[1] = ReceivedItem({
+                itemType: considerationItems[1].itemType,
+                token: considerationItems[1].token,
+                identifier: considerationItems[1].identifierOrCriteria,
+                amount: considerationItems[1].startAmount,
+                recipient: considerationItems[1].recipient
+            });
+            expectedReceivedItems[2] = ReceivedItem({
+                itemType: considerationItems[2].itemType,
+                token: considerationItems[2].token,
+                identifier: considerationItems[2].identifierOrCriteria,
+                amount: considerationItems[2].startAmount,
+                recipient: considerationItems[2].recipient
+            });
+            expectedReceivedItems[3] = ReceivedItem({
+                itemType: considerationItems[3].itemType,
+                token: considerationItems[3].token,
+                identifier: considerationItems[3].identifierOrCriteria,
+                amount: considerationItems[3].startAmount,
+                recipient: considerationItems[3].recipient
+            });
+            bytes32 substandard6Data = zone.exposed_deriveReceivedItemsHash(expectedReceivedItems, 1, 1);
+            bytes memory context = abi.encodePacked(bytes1(0x06), offerItems[0].startAmount, substandard6Data);
+            bytes32 eip712SignedOrderHash =
+                zone.exposed_deriveSignedOrderHash(FULFILLER, uint64(4000), orderHash, context);
+            bytes32 signatureDigest = ECDSA.toTypedDataHash(zone.exposed_domainSeparator(), eip712SignedOrderHash);
+            (, bytes32 signedOrderR, bytes32 signedOrderS) = vm.sign(signerPK, signatureDigest);
+            extraData = abi.encodePacked(bytes1(0), FULFILLER, uint64(4000), signedOrderR, signedOrderS, context);
+        }
+
+        // advanced order
+        AdvancedOrder memory advancedOrder = AdvancedOrder({
+            parameters: orderParameters,
+            numerator: uint120(1),
+            denominator: uint120(1),
+            signature: orderSignature,
+            extraData: extraData
+        });
+
+        // mints
+        vm.prank(OWNER);
+        erc20Token.transfer(
+            FULFILLER,
+            (
+                considerationItems[0].startAmount + considerationItems[1].startAmount
+                    + considerationItems[2].startAmount + considerationItems[3].startAmount
+            )
+        );
+        vm.prank(OWNER);
+        erc721Token.safeMint(OFFERER, offerItems[0].identifierOrCriteria);
+
+        // approvals
+        vm.prank(OFFERER);
+        erc721Token.setApprovalForAll(address(seaport), true);
+        vm.prank(FULFILLER);
+        erc20Token.approve(address(seaport), type(uint256).max);
+
+        // fulfillment
+        vm.prank(FULFILLER);
+        seaport.fulfillAdvancedOrder(advancedOrder, new CriteriaResolver[](0), bytes32(0), FULFILLER);
+
+        // assertions
+        assertEq(erc721Token.balanceOf(OFFERER), 0);
+        assertEq(erc721Token.balanceOf(FULFILLER), offerItems[0].startAmount);
+        assertEq(erc20Token.balanceOf(OFFERER), considerationItems[0].startAmount);
+        assertEq(erc20Token.balanceOf(FULFILLER), 0);
+        assertEq(erc20Token.balanceOf(PROTOCOL_FEE_RECEIVER), considerationItems[1].startAmount);
+        assertEq(erc20Token.balanceOf(ROYALTY_FEE_RECEIVER), considerationItems[2].startAmount);
+        assertEq(erc20Token.balanceOf(ECOSYSTEM_FEE_RECEIVER), considerationItems[3].startAmount);
     }
 
     function test_fulfillAdvancedOrder_withPartialFill() public {

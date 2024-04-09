@@ -1,5 +1,3 @@
-/clients @immutable/assets
-
 /contracts/allowlist @immutable/assets
 /contracts/token @immutable/assets
 /contracts/trading @immutable/traders

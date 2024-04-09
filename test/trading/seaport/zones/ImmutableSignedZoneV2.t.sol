@@ -4,15 +4,18 @@
 // solhint-disable-next-line compiler-version
 pragma solidity ^0.8.17;
 
+// solhint-disable-next-line no-global-import
+import "forge-std/Test.sol";
 import {ReceivedItem, Schema, SpentItem, ZoneParameters} from "seaport-types/src/lib/ConsiderationStructs.sol";
 import {ItemType} from "seaport-types/src/lib/ConsiderationEnums.sol";
 import {ImmutableSignedZoneV2} from "../../../../contracts/trading/seaport/zones/ImmutableSignedZoneV2.sol";
 import {ImmutableSignedZoneV2Harness} from "./ImmutableSignedZoneV2Harness.t.sol";
-import {ImmutableSignedZoneV2TestHelper} from "./ImmutableSignedZoneV2TestHelper.t.sol";
+import {SigningTestHelper} from "../utils/SigningTestHelper.t.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 // solhint-disable func-name-mixedcase
 
-contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
+contract ImmutableSignedZoneV2Test is Test, SigningTestHelper {
     event SeaportCompatibleContractDeployed(); // SIP-5
     event SignerAdded(address signer); // SIP-7
     event SignerRemoved(address signer); // SIP-7
@@ -28,6 +31,18 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     error InvalidFulfiller(address expectedFulfiller, address actualFulfiller, bytes32 orderHash); // SIP-7
 
     uint256 public constant MAX_UINT_TYPE = type(uint256).max;
+
+    // solhint-disable private-vars-leading-underscore
+    address internal immutable OWNER = makeAddr("owner");
+    address internal immutable FULFILLER = makeAddr("fulfiller");
+    address internal immutable OFFERER = makeAddr("offerer");
+    address internal immutable SIGNER;
+    uint256 internal immutable SIGNER_PRIVATE_KEY;
+    // solhint-enable private-vars-leading-underscore
+
+    constructor() {
+        (SIGNER, SIGNER_PRIVATE_KEY) = makeAddrAndKey("signer");
+    }
 
     /* constructor */
 
@@ -57,7 +72,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     /* addSigner - L */
 
     function test_addSigner_revertsIfCalledByNonAdminRole() public {
-        ImmutableSignedZoneV2 zone = _newZone();
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
         vm.expectRevert(
             "AccessControl: account 0x42a3d6e125aad539ac15ed04e1478eb0a4dc1489 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
         );
@@ -66,7 +81,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_addSigner_revertsIfSignerIsTheZeroAddress() public {
-        ImmutableSignedZoneV2 zone = _newZone();
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
         vm.expectRevert(abi.encodeWithSelector(SignerCannotBeZeroAddress.selector));
         vm.prank(OWNER);
         zone.addSigner(address(0));
@@ -74,7 +89,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     function test_addSigner_emitsSignerAddedEvent() public {
         address signerToAdd = makeAddr("signerToAdd");
-        ImmutableSignedZoneV2 zone = _newZone();
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
         vm.expectEmit(address(zone));
         emit SignerAdded(signerToAdd);
         vm.prank(OWNER);
@@ -83,7 +98,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     function test_addSigner_revertsIfSignerAlreadyActive() public {
         address signerToAdd = makeAddr("signerToAdd");
-        ImmutableSignedZoneV2 zone = _newZone();
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
         vm.prank(OWNER);
         zone.addSigner(signerToAdd);
         vm.expectRevert(abi.encodeWithSelector(SignerAlreadyActive.selector, signerToAdd));
@@ -93,7 +108,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     function test_addSigner_revertsIfSignerWasPreviouslyActive() public {
         address signerToAdd = makeAddr("signerToAdd");
-        ImmutableSignedZoneV2 zone = _newZone();
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
         vm.prank(OWNER);
         zone.addSigner(signerToAdd);
         vm.prank(OWNER);
@@ -106,7 +121,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     /* removeSigner - L */
 
     function test_removeSigner_revertsIfCalledByNonAdminRole() public {
-        ImmutableSignedZoneV2 zone = _newZone();
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
         vm.expectRevert(
             "AccessControl: account 0x42a3d6e125aad539ac15ed04e1478eb0a4dc1489 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
         );
@@ -116,7 +131,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     function test_removeSigner_revertsIfSignerNotActive() public {
         address signerToRemove = makeAddr("signerToRemove");
-        ImmutableSignedZoneV2 zone = _newZone();
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
         vm.expectRevert(abi.encodeWithSelector(SignerNotActive.selector, signerToRemove));
         vm.prank(OWNER);
         zone.removeSigner(signerToRemove);
@@ -124,7 +139,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
 
     function test_removeSigner_emitsSignerRemovedEvent() public {
         address signerToRemove = makeAddr("signerToRemove");
-        ImmutableSignedZoneV2 zone = _newZone();
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
         vm.prank(OWNER);
         zone.addSigner(signerToRemove);
         vm.expectEmit(address(zone));
@@ -136,7 +151,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     /* updateAPIEndpoint - N */
 
     function test_updateAPIEndpoint_revertsIfCalledByNonAdminRole() public {
-        ImmutableSignedZoneV2 zone = _newZone();
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
         vm.prank(makeAddr("random"));
         vm.expectRevert(
             "AccessControl: account 0x42a3d6e125aad539ac15ed04e1478eb0a4dc1489 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -145,7 +160,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_updateAPIEndpoint_updatesAPIEndpointIfCalledByAdminRole() public {
-        ImmutableSignedZoneV2 zone = _newZone();
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
         vm.prank(OWNER);
         string memory expectedApiEndpoint = "https://www.new-immutable.com";
         zone.updateAPIEndpoint(expectedApiEndpoint);
@@ -220,7 +235,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     /* supportsInterface - L */
 
     function test_supportsInterface() public {
-        ImmutableSignedZoneV2 zone = _newZone();
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
         assertTrue(zone.supportsInterface(0x01ffc9a7)); // ERC165 interface
         assertFalse(zone.supportsInterface(0xffffffff)); // ERC165 compliance
         assertTrue(zone.supportsInterface(0x3839be19)); // ZoneInterface
@@ -231,7 +246,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     /* validateOrder - N */
 
     function test_validateOrder_revertsIfEmptyExtraData() public {
-        ImmutableSignedZoneV2 zone = _newZone();
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
             fulfiller: FULFILLER,
@@ -251,7 +266,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateOrder_revertsIfExtraDataLengthIsLessThan93() public {
-        ImmutableSignedZoneV2 zone = _newZone();
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
             fulfiller: FULFILLER,
@@ -273,7 +288,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateOrder_revertsIfExtraDataVersionIsNotSupported() public {
-        ImmutableSignedZoneV2 zone = _newZone();
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
             fulfiller: FULFILLER,
@@ -293,11 +308,12 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateOrder_revertsIfSignatureHasExpired() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
         bytes32 orderHash = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
         uint64 expiration = 100;
 
-        bytes memory extraData = _buildExtraData(zone, orderHash, expiration, new bytes(0));
+        bytes memory extraData =
+            _buildExtraData(zone, SIGNER_PRIVATE_KEY, FULFILLER, expiration, orderHash, new bytes(0));
 
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
@@ -325,12 +341,13 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateOrder_revertsIfActualFulfillerDoesNotMatchExpectedFulfiller() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
         address randomFulfiller = makeAddr("random");
         bytes32 orderHash = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
         uint64 expiration = 100;
 
-        bytes memory extraData = _buildExtraData(zone, orderHash, expiration, new bytes(0));
+        bytes memory extraData =
+            _buildExtraData(zone, SIGNER_PRIVATE_KEY, FULFILLER, expiration, orderHash, new bytes(0));
 
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
@@ -356,11 +373,12 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateOrder_revertsIfSignerIsNotActive() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
         bytes32 orderHash = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
         uint64 expiration = 100;
 
-        bytes memory extraData = _buildExtraData(zone, orderHash, expiration, new bytes(0));
+        bytes memory extraData =
+            _buildExtraData(zone, SIGNER_PRIVATE_KEY, FULFILLER, expiration, orderHash, new bytes(0));
 
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
@@ -381,7 +399,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateOrder_returnsMagicValueOnSuccessfulValidation() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
         vm.prank(OWNER);
         zone.addSigner(SIGNER);
 
@@ -412,7 +430,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
             bytes1(0x03), substandard3Data, bytes1(0x04), substandard4Data, bytes1(0x06), substandard6Data
         );
 
-        bytes memory extraData = _buildExtraData(zone, orderHash, expiration, context);
+        bytes memory extraData = _buildExtraData(zone, SIGNER_PRIVATE_KEY, FULFILLER, expiration, orderHash, context);
 
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
@@ -432,7 +450,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     /* _getSupportedSubstandards - L */
 
     function test_getSupportedSubstandards() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
         uint256[] memory supportedSubstandards = zone.exposed_getSupportedSubstandards();
         assertEq(supportedSubstandards.length, 3);
         assertEq(supportedSubstandards[0], 3);
@@ -443,7 +461,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     /* _deriveSignedOrderHash - N  */
 
     function test_deriveSignedOrderHash_returnsHashOfSignedOrder() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
         address fulfiller = 0x71458637cD221877830A21F543E8b731e93C3627;
         uint64 expiration = 1234995;
         bytes32 orderHash = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
@@ -455,7 +473,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     /* _validateSubstandards - L */
 
     function test_validateSubstandards_emptyContext() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
@@ -474,7 +492,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateSubstandards_substandard3() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
@@ -506,7 +524,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateSubstandards_substandard4() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         bytes32[] memory orderHashes = new bytes32[](1);
         orderHashes[0] = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
@@ -535,7 +553,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateSubstandards_substandard6() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         SpentItem[] memory spentItems = new SpentItem[](1);
         spentItems[0] = SpentItem({itemType: ItemType.ERC721, token: address(0x2), identifier: 222, amount: 10});
@@ -570,7 +588,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateSubstandards_multipleSubstandardsInCorrectOrder() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
@@ -607,7 +625,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateSubstandards_substandards3Then6() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         SpentItem[] memory spentItems = new SpentItem[](1);
         spentItems[0] = SpentItem({itemType: ItemType.ERC1155, token: address(0x5), identifier: 222, amount: 10});
@@ -644,7 +662,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateSubstandards_allSubstandards() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         SpentItem[] memory spentItems = new SpentItem[](1);
         spentItems[0] = SpentItem({itemType: ItemType.ERC1155, token: address(0x5), identifier: 222, amount: 10});
@@ -687,7 +705,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateSubstandards_revertsOnMultipleSubstandardsInIncorrectOrder() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
@@ -731,7 +749,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     /* _validateSubstandard3 */
 
     function test_validateSubstandard3_returnsZeroLengthIfNotSubstandard3() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
@@ -751,7 +769,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateSubstandard3_revertsIfContextLengthIsInvalid() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
@@ -779,7 +797,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateSubstandard3_revertsIfDerivedReceivedItemsHashNotEqualToHashInContext() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
@@ -815,7 +833,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateSubstandard3_returns33OnSuccess() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
@@ -851,7 +869,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     /* _validateSubstandard4 - N */
 
     function test_validateSubstandard4_returnsZeroLengthIfNotSubstandard4() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
@@ -871,7 +889,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateSubstandard4_revertsIfContextLengthIsInvalid() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
@@ -899,7 +917,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateSubstandard4_revertsIfDerivedOrderHashesIsNotEqualToHashesInContext() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         bytes32[] memory orderHashes = new bytes32[](1);
         orderHashes[0] = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
@@ -926,7 +944,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateSubstandard4_returnsLengthOfSubstandardSegmentOnSuccess() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         bytes32[] memory orderHashes = new bytes32[](1);
         orderHashes[0] = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
@@ -959,7 +977,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     /* _validateSubstandard6 - N */
 
     function test_validateSubstandard6_returnsZeroLengthIfNotSubstandard6() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
@@ -979,7 +997,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateSubstandard6_revertsIfContextLengthIsInvalid() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0),
@@ -1007,7 +1025,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateSubstandard6_revertsIfDerivedReceivedItemsHashesIsNotEqualToHashesInContext() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         SpentItem[] memory spentItems = new SpentItem[](1);
         spentItems[0] = SpentItem({itemType: ItemType.ERC721, token: address(0x2), identifier: 222, amount: 10});
@@ -1045,7 +1063,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_validateSubstandard6_returnsLengthOfSubstandardSegmentOnSuccess() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         SpentItem[] memory spentItems = new SpentItem[](1);
         spentItems[0] = SpentItem({itemType: ItemType.ERC721, token: address(0x2), identifier: 222, amount: 10});
@@ -1084,7 +1102,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     /* _deriveReceivedItemsHash - N */
 
     function test_deriveReceivedItemsHash_returnsHashIfNoReceivedItems() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](0);
 
@@ -1093,7 +1111,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_deriveReceivedItemsHash_returnsHashForValidReceivedItems() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](2);
         receivedItems[0] = ReceivedItem({
@@ -1117,7 +1135,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_deriveReceivedItemsHash_returnsHashForReceivedItemWithAVeryLargeAmount() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         receivedItems[0] = ReceivedItem({
             itemType: ItemType.ERC20,
@@ -1135,7 +1153,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     /* _bytes32ArrayIncludes - N */
 
     function test_bytes32ArrayIncludes_returnsFalseIfSourceArrayIsEmpty() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         bytes32[] memory emptySourceArray = new bytes32[](0);
         bytes32[] memory valuesArray = new bytes32[](2);
@@ -1145,7 +1163,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_bytes32ArrayIncludes_returnsFalseIfSourceArrayIsSmallerThanValuesArray() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         bytes32[] memory sourceArray = new bytes32[](1);
         bytes32[] memory valuesArray = new bytes32[](2);
@@ -1155,7 +1173,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_bytes32ArrayIncludes_returnsFalseIfSourceArrayDoesNotIncludeValuesArray() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         bytes32[] memory sourceArray = new bytes32[](2);
         sourceArray[0] = bytes32(uint256(1));
@@ -1169,7 +1187,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_bytes32ArrayIncludes_returnsTrueIfSourceArrayIncludesValuesArray() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         bytes32[] memory sourceArray = new bytes32[](2);
         sourceArray[0] = bytes32(uint256(1));
@@ -1183,7 +1201,7 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     }
 
     function test_bytes32ArrayIncludes_returnsTrueIfValuesArrayIsASubsetOfSourceArray() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         bytes32[] memory sourceArray = new bytes32[](4);
         sourceArray[0] = bytes32(uint256(1));
@@ -1201,14 +1219,14 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     /* _domainSeparator - N */
 
     function test_domainSeparator_returnsCachedDomainSeparatorWhenChainIDMatchesValueSetOnDeployment() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         bytes32 domainSeparator = zone.exposed_domainSeparator();
         assertEq(domainSeparator, bytes32(0xafb48e1c246f21ba06352cb2c0ebe99b8adc2590dfc48fa547732df870835b42));
     }
 
     function test_domainSeparator_returnsUpdatedDomainSeparatorIfChainIDIsDifferentFromValueSetOnDeployment() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         bytes32 domainSeparatorCached = zone.exposed_domainSeparator();
         vm.chainId(31338);
@@ -1221,10 +1239,49 @@ contract ImmutableSignedZoneV2Test is ImmutableSignedZoneV2TestHelper {
     /* _deriveDomainSeparator - N */
 
     function test_deriveDomainSeparator_returnsDomainSeparatorForChainID() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness();
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         bytes32 domainSeparator = zone.exposed_deriveDomainSeparator();
         assertEq(domainSeparator, bytes32(0xafb48e1c246f21ba06352cb2c0ebe99b8adc2590dfc48fa547732df870835b42));
+    }
+
+    /* helper functions */
+
+    function _newZone(address owner) internal returns (ImmutableSignedZoneV2) {
+        return new ImmutableSignedZoneV2(
+            "MyZoneName",
+            "https://www.immutable.com",
+            "https://www.immutable.com/docs",
+            owner
+        );
+    }
+
+    function _newZoneHarness(address owner) internal returns (ImmutableSignedZoneV2Harness) {
+        return new ImmutableSignedZoneV2Harness(
+            "MyZoneName",
+            "https://www.immutable.com",
+            "https://www.immutable.com/docs",
+            owner
+        );
+    }
+
+    function _buildExtraData(
+        ImmutableSignedZoneV2Harness zone,
+        uint256 signerPrivateKey,
+        address fulfiller,
+        uint64 expiration,
+        bytes32 orderHash,
+        bytes memory context
+    ) internal view returns (bytes memory) {
+        bytes32 eip712SignedOrderHash = zone.exposed_deriveSignedOrderHash(fulfiller, expiration, orderHash, context);
+        bytes memory extraData = abi.encodePacked(
+            bytes1(0),
+            fulfiller,
+            expiration,
+            _signCompact(signerPrivateKey, ECDSA.toTypedDataHash(zone.exposed_domainSeparator(), eip712SignedOrderHash)),
+            context
+        );
+        return extraData;
     }
 }
 

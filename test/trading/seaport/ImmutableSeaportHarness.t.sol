@@ -11,7 +11,11 @@ import {ImmutableSeaport} from "../../../contracts/trading/seaport/ImmutableSeap
 contract ImmutableSeaportHarness is ImmutableSeaport {
     constructor(address conduitController, address owner) ImmutableSeaport(conduitController, owner) {}
 
-    function exposed_deriveEIP712Digest(bytes32 domainSeparator, bytes32 orderHash) external pure returns (bytes32 value) {
+    function exposed_deriveEIP712Digest(bytes32 domainSeparator, bytes32 orderHash)
+        external
+        pure
+        returns (bytes32 value)
+    {
         return _deriveEIP712Digest(domainSeparator, orderHash);
     }
 

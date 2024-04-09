@@ -8,18 +8,12 @@ pragma solidity ^0.8.17;
 import "forge-std/Test.sol";
 
 abstract contract SigningTestHelper is Test {
-    function _sign(
-        uint256 signerPrivateKey,
-        bytes32 signatureDigest
-    ) internal pure returns (bytes memory) {
+    function _sign(uint256 signerPrivateKey, bytes32 signatureDigest) internal pure returns (bytes memory) {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPrivateKey, signatureDigest);
         return abi.encodePacked(r, s, v);
     }
 
-    function _signCompact(
-        uint256 signerPrivateKey,
-        bytes32 signatureDigest
-    ) internal pure returns (bytes memory) {
+    function _signCompact(uint256 signerPrivateKey, bytes32 signatureDigest) internal pure returns (bytes memory) {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPrivateKey, signatureDigest);
         if (v != 27) {
             // then left-most bit of s has to be flipped to 1.

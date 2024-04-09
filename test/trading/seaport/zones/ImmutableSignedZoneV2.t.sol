@@ -12,23 +12,13 @@ import {ImmutableSignedZoneV2} from "../../../../contracts/trading/seaport/zones
 import {ImmutableSignedZoneV2Harness} from "./ImmutableSignedZoneV2Harness.t.sol";
 import {SigningTestHelper} from "../utils/SigningTestHelper.t.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {SIP6EventsAndErrors} from "../../../../contracts/trading/seaport/zones/interfaces/SIP6EventsAndErrors.sol";
+import {SIP7EventsAndErrors} from "../../../../contracts/trading/seaport/zones/interfaces/SIP7EventsAndErrors.sol";
 
 // solhint-disable func-name-mixedcase
 
-contract ImmutableSignedZoneV2Test is Test, SigningTestHelper {
+contract ImmutableSignedZoneV2Test is Test, SigningTestHelper, SIP6EventsAndErrors, SIP7EventsAndErrors {
     event SeaportCompatibleContractDeployed(); // SIP-5
-    event SignerAdded(address signer); // SIP-7
-    event SignerRemoved(address signer); // SIP-7
-
-    error SignerCannotBeZeroAddress(); // SIP-7
-    error SignerAlreadyActive(address signer); // SIP-7
-    error SignerCannotBeReauthorized(address signer); // SIP-7
-    error SignerNotActive(address signer); // SIP-7
-    error InvalidExtraData(string reason, bytes32 orderHash); // SIP-7
-    error SubstandardViolation(uint256 substandardId, string reason, bytes32 orderHash); // SIP-7 (custom)
-    error UnsupportedExtraDataVersion(uint8 version); // SIP-6
-    error SignatureExpired(uint256 currentTimestamp, uint256 expiration, bytes32 orderHash); // SIP-7
-    error InvalidFulfiller(address expectedFulfiller, address actualFulfiller, bytes32 orderHash); // SIP-7
 
     uint256 public constant MAX_UINT_TYPE = type(uint256).max;
 
@@ -788,9 +778,7 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                InvalidExtraData.selector,
-                "invalid context, expecting substandard ID 3 followed by bytes32 consideration hash",
-                zoneParameters.orderHash
+                InvalidExtraData.selector, "invalid substandard 3 data length", zoneParameters.orderHash
             )
         );
         zone.exposed_validateSubstandard3(context, zoneParameters);
@@ -824,11 +812,7 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper {
 
         bytes memory context = abi.encodePacked(bytes1(0x03), bytes32(0));
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                SubstandardViolation.selector, 3, "invalid consideration hash", zoneParameters.orderHash
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(Substandard3Violation.selector, zoneParameters.orderHash));
         zone.exposed_validateSubstandard3(context, zoneParameters);
     }
 
@@ -908,9 +892,7 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                InvalidExtraData.selector,
-                "invalid context, expecting substandard ID 4 followed by bytes32 array offset and bytes32 array length",
-                zoneParameters.orderHash
+                InvalidExtraData.selector, "invalid substandard 4 data length", zoneParameters.orderHash
             )
         );
         zone.exposed_validateSubstandard4(context, zoneParameters);
@@ -935,10 +917,18 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper {
             zoneHash: bytes32(0)
         });
 
-        bytes memory context = abi.encodePacked(bytes1(0x04), bytes32(uint256(32)), bytes32(uint256(1)), bytes32(0x0));
+        bytes32[] memory expectedOrderHashes = new bytes32[](1);
+        expectedOrderHashes[0] = bytes32(0x123456);
+
+        bytes memory context = abi.encodePacked(bytes1(0x04), abi.encode(expectedOrderHashes));
 
         vm.expectRevert(
-            abi.encodeWithSelector(SubstandardViolation.selector, 4, "invalid order hashes", zoneParameters.orderHash)
+            abi.encodeWithSelector(
+                Substandard4Violation.selector,
+                zoneParameters.orderHashes,
+                expectedOrderHashes,
+                zoneParameters.orderHash
+            )
         );
         zone.exposed_validateSubstandard4(context, zoneParameters);
     }
@@ -962,12 +952,7 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper {
             zoneHash: bytes32(0)
         });
 
-        bytes memory context = abi.encodePacked(
-            bytes1(0x04),
-            bytes32(uint256(32)),
-            bytes32(uint256(1)),
-            bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9)
-        );
+        bytes memory context = abi.encodePacked(bytes1(0x04), abi.encode(orderHashes));
 
         uint256 substandardLengthResult = zone.exposed_validateSubstandard4(context, zoneParameters);
         // bytes1 + bytes32 + bytes32 + bytes32 = 97
@@ -1016,9 +1001,7 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper {
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                InvalidExtraData.selector,
-                "invalid context, expecting substandard ID 6 followed by (uint256, bytes32)",
-                zoneParameters.orderHash
+                InvalidExtraData.selector, "invalid substandard 6 data length", zoneParameters.orderHash
             )
         );
         zone.exposed_validateSubstandard6(context, zoneParameters);
@@ -1055,9 +1038,7 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper {
         bytes memory context = abi.encodePacked(bytes1(0x06), uint256(100), bytes32(uint256(0x123456)));
 
         vm.expectRevert(
-            abi.encodeWithSelector(
-                SubstandardViolation.selector, 6, "invalid consideration hash", zoneParameters.orderHash
-            )
+            abi.encodeWithSelector(Substandard6Violation.selector, spentItems[0].amount, 100, zoneParameters.orderHash)
         );
         zone.exposed_validateSubstandard6(context, zoneParameters);
     }

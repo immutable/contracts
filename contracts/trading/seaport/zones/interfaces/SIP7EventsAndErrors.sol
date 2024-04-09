@@ -52,13 +52,32 @@ interface SIP7EventsAndErrors {
     error InvalidFulfiller(address expectedFulfiller, address actualFulfiller, bytes32 orderHash);
 
     /**
-     * @dev Revert with an error if a substandard validation fails
-     */
-    error SubstandardViolation(uint256 substandardId, string reason, bytes32 orderHash);
-
-    /**
      * @dev Revert with an error if supplied order extraData is invalid
      *      or improperly formatted.
      */
     error InvalidExtraData(string reason, bytes32 orderHash);
+
+    /**
+     * @dev Revert with an error if a substandard validation fails.
+     *      This is a custom error that is not part of the SIP-7 spec.
+     */
+    error SubstandardViolation(uint256 substandardId, string reason, bytes32 orderHash);
+
+    /**
+     * @dev Revert with an error if substandard 3 validation fails.
+     *      This is a custom error that is not part of the SIP-7 spec.
+     */
+    error Substandard3Violation(bytes32 orderHash);
+
+    /**
+     * @dev Revert with an error if substandard 4 validation fails.
+     *      This is a custom error that is not part of the SIP-7 spec.
+     */
+    error Substandard4Violation(bytes32[] actualOrderHashes, bytes32[] expectedOrderHashes, bytes32 orderHash);
+
+    /**
+     * @dev Revert with an error if substandard 6 validation fails.
+     *      This is a custom error that is not part of the SIP-7 spec.
+     */
+    error Substandard6Violation(uint256 actualSpentItemAmount, uint256 originalSpentItemAmount, bytes32 orderHash);
 }

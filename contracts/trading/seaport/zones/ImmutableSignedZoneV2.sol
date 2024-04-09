@@ -388,15 +388,11 @@ contract ImmutableSignedZoneV2 is
         }
 
         if (context.length < 33) {
-            // TODO: Does size of error message have a gas impact?
-            revert InvalidExtraData(
-                "invalid context, expecting substandard ID 3 followed by bytes32 consideration hash",
-                zoneParameters.orderHash
-            );
+            revert InvalidExtraData("invalid substandard 3 data length", zoneParameters.orderHash);
         }
 
         if (_deriveReceivedItemsHash(zoneParameters.consideration, 1, 1) != bytes32(context[1:33])) {
-            revert SubstandardViolation(3, "invalid consideration hash", zoneParameters.orderHash);
+            revert Substandard3Violation(zoneParameters.orderHash);
         }
 
         return 33;
@@ -420,10 +416,7 @@ contract ImmutableSignedZoneV2 is
 
         // substandard ID + array offset + array length
         if (context.length < 65) {
-            revert InvalidExtraData(
-                "invalid context, expecting substandard ID 4 followed by bytes32 array offset and bytes32 array length",
-                zoneParameters.orderHash
-            );
+            revert InvalidExtraData("invalid substandard 4 data length", zoneParameters.orderHash);
         }
 
         uint256 expectedOrderHashesSize = uint256(bytes32(context[33:65]));
@@ -432,7 +425,7 @@ contract ImmutableSignedZoneV2 is
 
         // revert if any order hashes in substandard data are not present in zoneParameters.orderHashes
         if (!_bytes32ArrayIncludes(zoneParameters.orderHashes, expectedOrderHashes)) {
-            revert SubstandardViolation(4, "invalid order hashes", zoneParameters.orderHash);
+            revert Substandard4Violation(zoneParameters.orderHashes, expectedOrderHashes, zoneParameters.orderHash);
         }
 
         return substandardIndexEnd + 1;
@@ -455,9 +448,7 @@ contract ImmutableSignedZoneV2 is
         }
 
         if (context.length < 65) {
-            revert InvalidExtraData(
-                "invalid context, expecting substandard ID 6 followed by (uint256, bytes32)", zoneParameters.orderHash
-            );
+            revert InvalidExtraData("invalid substandard 6 data length", zoneParameters.orderHash);
         }
 
         uint256 originalFirstOfferItemAmount = uint256(bytes32(context[1:33]));
@@ -468,7 +459,7 @@ contract ImmutableSignedZoneV2 is
                 zoneParameters.consideration, originalFirstOfferItemAmount, zoneParameters.offer[0].amount
             ) != expectedReceivedItemsHash
         ) {
-            revert SubstandardViolation(6, "invalid consideration hash", zoneParameters.orderHash);
+            revert Substandard6Violation(zoneParameters.offer[0].amount, originalFirstOfferItemAmount, zoneParameters.orderHash);
         }
 
         return 65;

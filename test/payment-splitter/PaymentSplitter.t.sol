@@ -165,7 +165,7 @@ contract PaymentSplitterTest is Test {
 
         mockToken1.mint(address(paymentSplitter), 100);
         mockToken2.mint(address(paymentSplitter), 100);
-
+        
 
         vm.prank(fundsAdmin);
         vm.expectEmit(true, true, true, false, address(paymentSplitter));
@@ -203,7 +203,7 @@ contract PaymentSplitterTest is Test {
 
         mockToken1.mint(address(paymentSplitter), 100);
         mockToken2.mint(address(paymentSplitter), 100);
-
+        
 
         vm.prank(fundsAdmin);
         paymentSplitter.releaseAll();
@@ -295,7 +295,7 @@ contract PaymentSplitterTest is Test {
 
     function testReceiveNativeTokenEvent() public {
         vm.deal(address(this), 100);
-        vm.expectEmit(true, true, false, false, address(paymentSplitter));
+        vm.expectEmit(true, true, false, false, address(paymentSplitter)); 
         emit PaymentReceived(address(this), 100);
         Address.sendValue(payable(address(paymentSplitter)), 100);
     }

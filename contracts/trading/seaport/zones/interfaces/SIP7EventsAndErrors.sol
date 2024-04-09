@@ -1,11 +1,12 @@
-// Copyright (c) Immutable Pty Ltd 2018 - 2023
+// Copyright (c) Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: Apache-2
+
 // solhint-disable compiler-version
 pragma solidity ^0.8.17;
 
 /**
  * @notice SIP7EventsAndErrors contains errors and events
- *         related to zone interaction as specified in the SIP7.
+ *         related to zone interaction as specified in the SIP-7.
  */
 interface SIP7EventsAndErrors {
     /**
@@ -26,7 +27,7 @@ interface SIP7EventsAndErrors {
 
     /**
      * @dev Revert with an error if trying to remove a signer that is
-     *      not active
+     *      not active.
      */
     error SignerNotActive(address signer);
 

@@ -1,7 +1,8 @@
-// Copyright (c) Immutable Pty Ltd 2018 - 2023
+// Copyright (c) Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: Apache-2
-// solhint-disable compiler-version
+
 // slither-disable-start missing-inheritance
+// solhint-disable-next-line compiler-version
 pragma solidity ^0.8.17;
 
 import {ZoneParameters, Schema, ReceivedItem} from "seaport-types/src/lib/ConsiderationStructs.sol";

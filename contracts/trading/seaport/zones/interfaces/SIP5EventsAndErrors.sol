@@ -6,7 +6,7 @@ pragma solidity ^0.8.17;
 
 /**
  * @notice SIP5EventsAndErrors contains errors and events
- *         related to zone interaction as specified in the SIP5.
+ *         related to zone interaction as specified in the SIP-5.
  */
 interface SIP5EventsAndErrors {
     /**

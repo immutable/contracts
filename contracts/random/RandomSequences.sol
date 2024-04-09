@@ -15,7 +15,7 @@ import {RandomValues} from "./RandomValues.sol";
  * @dev This contract can be used with UPGRADEABLE or NON-UNGRADEABLE contracts.
  *
  * This contract utilises the concept of sequences of random numbers. Games should
- * define all of the types of random number generation they plan to do. They should
+ * define all of the types of random number generation they plan to use. They should
  * assign a separate sequence type id to each type of random number generation. For
  * example, imagine a game had three uses for random numbers: determining the results
  * of opening an Armour Loot Box, determining the results of opening a Weapon Loot
@@ -28,18 +28,19 @@ import {RandomValues} from "./RandomValues.sol";
  * example, imagine that all three types of random values described above used the
  * same sequence. A game player could predict the next random value. If this was not
  * going to yeild a good random result for the Armour or the Weapon Loot Boxes, they
- * would use do the action in the game to ensure the number was used for the
+ * would do the action in the game to ensure the number was used for the
  * Participation Bonus. They could do this repeatedly, only utilising the random values
  * for Loot Boxes that were advantageous to them.
  *
  * Using a separate sequence type id for each class of random means that even though
- * the game player knows the output come opening a Loot Box ahead of time, they can't
+ * the game player knows the outcome opening a Loot Box ahead of time, they can't
  * alter the outcome. They could choose to never open the Loot Box, or leave the game
- * and create a new player profile.
+ * and create a new player profile. However, within their current player profile, they 
+ * could not change the outcome.
  *
  * An example of when this type of random number generation isn't appropriate is
  * when there is a shared activity. For example, drawing a prize that multiple people
- * can simultaneously bit on. Using this sequence type random generation process,
+ * can simultaneously bid on. Using this sequence type random generation process,
  * where savvy game players could predict the random output, and would thus have
  * an advantage over less savvy players is not appropriate. In this case, use the
  * RandomValues.sol directly.

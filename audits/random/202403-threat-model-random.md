@@ -304,13 +304,48 @@ The `RandomValue.sol` contract is intended to be extended by game contracts. It 
 
 The `_requestRandomValueCreation` requires the number of random values to be return to be specified so that game players can not manipulate the game into providing more values. It stores the size, as well as the source of random numbers and the request identifier returned by the `RandomSeedProvider`, so that the request can be unambigously fulfilled. Storing the random source additionally means that the random source can be upgraded within the `RandomSeedProvider` without compromising in-flight random number requests.
 
+The `_fetchRandomValues` function will only return a set of random numbers for specific request identifier once. Attempts to reuse the request identifier will fail. This has been done in order to prevent games from inadvertantly requesting and using the same set of random values twice.
+
 The Random Values contract is designed to be either upgradeable or non-upgradeable. The contract has a constructor, but only sets an _immutable_ variable.
 
 
 ## Random Sequences Design
+Game contracts that would like to return random numbers in a single transaction should extend this contract. The design has limitations and is not applicable to all scenarios. Importantly, the game players will be able to determine the next random value for any random sequence type. However, they will not be able to change the value.
 
-TODO
+### Sequence Type Identifiers
+The `RandomSequences` contract utilises the concept of sequences of random numbers. Games should
+define all of the types of random number generation they plan to use. They should
+assign a separate sequence type id to each type of random number generation. For
+example, imagine a game had three uses for random numbers: determining the results
+of opening an Armour Loot Box, determining the results of opening a Weapon Loot
+Box, and determining the value of a Participation Bonus. Each of these types
+of random numbers needs to have a separate Sequence Type Id: for instance 1, 2,
+and 3.
 
+Using a separate sequence type id for each type of random action is important as
+game players can exploit sequences that are used for two or more actions. For
+example, imagine that all three types of random values described above used the
+same sequence. A game player could predict the next random value. If this was not
+going to yeild a good random result for the Armour or the Weapon Loot Boxes, they
+would do the action in the game to ensure the number was used for the
+Participation Bonus. They could do this repeatedly, only utilising the random values
+for Loot Boxes that were advantageous to them.
+
+Using a separate sequence type id for each class of random means that even though
+the game player knows the outcome of opening a Loot Box ahead of time, they can't
+alter the outcome. They could choose to never open the Loot Box, or leave the game
+and create a new player profile. However, within their current player profile, they could not change the outcome.
+
+### When Not To Use
+An example of when random sequences random number generation isn't appropriate is
+when there is a shared activity. For example, drawing a prize that multiple people
+can simultaneously bid on. Using this sequence type random generation process,
+where savvy game players could predict the random output, and would thus have
+an advantage over less savvy players is not appropriate. In this case, games should
+use the `RandomValues.sol` directly.
+
+### Requesting and Fetching a Random Number
+The `_getNextRandom` function shoulld be called to simultaneously fetch a random value and request another random value. Before a game needs to have first random value in a sequence, it should call `_getNextRandom` for the sequence.
 
 
 ## Other Information

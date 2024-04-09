@@ -7,8 +7,8 @@
     "outDir": "dist",
     "declaration": true,
     "resolveJsonModule": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
   },
-  "include": ["./test/**/*.ts"],
-  "files": ["hardhat.config.ts"]
+  "include": ["./test/**/*.ts", "./index.ts"],
+  "files": ["hardhat.config.ts"],
 }

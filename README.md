@@ -6,6 +6,12 @@ Immutable Contracts is a library of smart contracts targeted at developers who w
 
 - Token presets, e.g. ERC721
 
+    - [ImmutableERC721](./contracts/token/erc721/preset/ImmutableERC721.sol)
+    - [ImmutableERC721MintByID](./contracts/token/erc721/preset/ImmutableERC721MintByID.sol)
+    - [ImmutableERC1155](./contracts/token/erc1155/preset/ImmutableERC1155.sol)
+    - [ImmutableERC20](./contracts/token/erc20/preset/ImmutableERC20.sol)
+    - [ImmutableERC20FixedSupplyNoBurn](./contracts/token/erc20/preset/ImmutableERC20FixedSupplyNoBurn.sol)
+
 - Bridging contracts
 
 - Marketplace and AMM contracts

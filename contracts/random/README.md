@@ -15,7 +15,7 @@ Contract threat models and audits:
 
 | Description               | Date             |Version Audited  | Link to Report |
 |---------------------------|------------------|-----------------|----------------|
-| Not audited and no threat model              | -                | -               | -              |
+| Threat model              | April 9, 2024    | -               | [202403-threat-model-random.md](../../audits/random/202403-threat-model-random.md)     | -              |
 
 ## RandomSeedProvider
 

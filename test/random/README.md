@@ -214,10 +214,3 @@ Integration tests:
 |---------------------------------| --------------------------------------------------|------------|-------------|
 | testEndToEnd                    | Request a random value from randomValues.         | Yes        | Yes         |
 
-
-## Hash Onion
-
-| Test name                       |Description                                        | Happy Case | Implemented |
-|---------------------------------| --------------------------------------------------|------------|-------------|
-| testSequence                    | Check that a sequence works.                      | Yes        | Yes         |
-| testBadValue                    | Check that an incorrect preimage is not used.     | No         | Yes         |

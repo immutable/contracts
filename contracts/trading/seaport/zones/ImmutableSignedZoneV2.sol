@@ -504,7 +504,7 @@ contract ImmutableSignedZoneV2 is
     }
 
     /**
-     * @dev helper function to check if every element of values exists in sourceArray
+     * @dev Helper function to check if every element of values exists in sourceArray
      *  optimised for performance checking arrays sized 0-15
      *
      * @param sourceArray source array

@@ -10,7 +10,7 @@ pragma solidity ^0.8.17;
  */
 interface SIP6EventsAndErrors {
     /**
-     * @dev Revert with an error if SIP-6 version byte is not supported
+     * @dev Revert with an error if SIP-6 version byte is not supported.
      */
     error UnsupportedExtraDataVersion(uint8 version);
 }

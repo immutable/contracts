@@ -19,7 +19,7 @@ import {Math} from "openzeppelin-contracts-5.0.2/utils/math/Math.sol";
  * @author Immutable
  * @notice ImmutableSignedZoneV2 is a zone implementation based on the
  *         SIP-7 standard https://github.com/ProjectOpenSea/SIPs/blob/main/SIPS/sip-7.md
- *         Implementing substandard 3, 4 and 6.
+ *         implementing substandards 3, 4 and 6.
  */
 contract ImmutableSignedZoneV2 is
     ERC165,
@@ -82,7 +82,7 @@ contract ImmutableSignedZoneV2 is
         // Set the zone name.
         _ZONE_NAME = zoneName;
 
-        // set name hash
+        // Set name hash.
         _NAME_HASH = keccak256(bytes(zoneName));
 
         // Set the API endpoint.
@@ -95,7 +95,7 @@ contract ImmutableSignedZoneV2 is
         // Emit an event to signal a SIP-5 contract has been deployed.
         emit SeaportCompatibleContractDeployed();
 
-        // Grant admin role to the specified owner
+        // Grant admin role to the specified owner.
         _grantRole(DEFAULT_ADMIN_ROLE, owner);
     }
 
@@ -117,7 +117,7 @@ contract ImmutableSignedZoneV2 is
 
         // Revert if the signer was previously authorized.
         // Specified in SIP-7 to prevent compromised signer from being
-        // Cycled back into use.
+        // cycled back into use.
         if (_signers[signer].previouslyActive) {
             revert SignerCannotBeReauthorized(signer);
         }
@@ -161,8 +161,8 @@ contract ImmutableSignedZoneV2 is
      * @dev Returns Seaport metadata for this contract, returning the
      *      contract name and supported schemas.
      *
-     * @return name    The contract name
-     * @return schemas The supported SIPs
+     * @return name    The contract name.
+     * @return schemas The supported SIPs.
      */
     function getSeaportMetadata()
         external
@@ -182,7 +182,10 @@ contract ImmutableSignedZoneV2 is
     /**
      * @notice Returns signing information about the zone.
      *
-     * @return domainSeparator The domain separator used for signing.
+     * @return domainSeparator  The domain separator used for signing.
+     * @return apiEndpoint      The API endpoint to get signatures for orders.
+     * @return substandards     The supported substandards.
+     * @return documentationURI The documentation URI.
      */
     function sip7Information()
         external
@@ -204,7 +207,7 @@ contract ImmutableSignedZoneV2 is
     }
 
     /**
-     * @notice ERC-165 interface support
+     * @notice ERC-165 interface support.
      * @param interfaceId The interface ID to check for support.
      */
     function supportsInterface(bytes4 interfaceId)
@@ -223,6 +226,8 @@ contract ImmutableSignedZoneV2 is
      * @dev This function is called by Seaport whenever any extraData is
      *      provided by the caller.
      *
+     * @param zoneParameters The zone parameters containing data related to
+     *                       the fulfilment execution.
      * @return validOrderMagicValue A magic value indicating if the order is
      *                              currently valid.
      */
@@ -311,9 +316,9 @@ contract ImmutableSignedZoneV2 is
     }
 
     /**
-     * @dev get the supported substandards of the contract
+     * @dev Get the supported substandards of the contract.
      *
-     * @return substandards array of substandards supported
+     * @return substandards Array of substandards supported.
      *
      */
     function _getSupportedSubstandards() internal pure returns (uint256[] memory substandards) {
@@ -346,10 +351,10 @@ contract ImmutableSignedZoneV2 is
     }
 
     /**
-     * @dev validate substandards 3, 4 and 6 based on context
+     * @dev Validate substandards 3, 4 and 6 based on context.
      *
-     * @param context bytes payload of context
-     * @param zoneParameters zone parameters
+     * @param context Bytes payload of context.
+     * @param zoneParameters The zone parameters.
      */
     function _validateSubstandards(bytes calldata context, ZoneParameters calldata zoneParameters) internal pure {
         uint256 startIndex = 0;
@@ -370,11 +375,11 @@ contract ImmutableSignedZoneV2 is
     }
 
     /**
-     * @dev Validates substandard 3
+     * @dev Validates substandard 3.
      *
-     * @param context bytes payload of context, 0 indexed to start of substandard segment
-     * @param zoneParameters zone parameters
-     * @return Length of substandard segment
+     * @param context Bytes payload of context, 0 indexed to start of substandard segment.
+     * @param zoneParameters The zone parameters.
+     * @return Length of substandard segment.
      */
     function _validateSubstandard3(bytes calldata context, ZoneParameters calldata zoneParameters)
         internal
@@ -397,11 +402,11 @@ contract ImmutableSignedZoneV2 is
     }
 
     /**
-     * @dev Validates substandard 4
+     * @dev Validates substandard 4.
      *
-     * @param context bytes payload of context, 0 indexed to start of substandard segment
-     * @param zoneParameters zone parameters
-     * @return Length of substandard segment
+     * @param context Bytes payload of context, 0 indexed to start of substandard segment.
+     * @param zoneParameters The zone parameters.
+     * @return Length of substandard segment.
      */
     function _validateSubstandard4(bytes calldata context, ZoneParameters calldata zoneParameters)
         internal
@@ -430,11 +435,11 @@ contract ImmutableSignedZoneV2 is
     }
 
     /**
-     * @dev Validates substandard 6
+     * @dev Validates substandard 6.
      *
-     * @param context bytes payload of context, 0 indexed to start of substandard segment
-     * @param zoneParameters zone parameters
-     * @return Length of substandard segment
+     * @param context Bytes payload of context, 0 indexed to start of substandard segment.
+     * @param zoneParameters The zone parameters.
+     * @return Length of substandard segment.
      */
     function _validateSubstandard6(bytes calldata context, ZoneParameters calldata zoneParameters)
         internal
@@ -457,18 +462,21 @@ contract ImmutableSignedZoneV2 is
                 zoneParameters.consideration, originalFirstOfferItemAmount, zoneParameters.offer[0].amount
             ) != expectedReceivedItemsHash
         ) {
-            revert Substandard6Violation(zoneParameters.offer[0].amount, originalFirstOfferItemAmount, zoneParameters.orderHash);
+            revert Substandard6Violation(
+                zoneParameters.offer[0].amount, originalFirstOfferItemAmount, zoneParameters.orderHash
+            );
         }
 
         return 65;
     }
 
     /**
-     * @dev Derive the received items hash based on received item array
+     * @dev Derive the received items hash based on received item array.
      *
-     * @param receivedItems actual received item array
-     * @param scalingFactorNumerator scaling factor numerator
-     * @param scalingFactorDenominator scaling factor denominator
+     * @param receivedItems            Actual received item array.
+     * @param scalingFactorNumerator   Scaling factor numerator.
+     * @param scalingFactorDenominator Scaling factor denominator.
+     * @return receivedItemsHash       Hash of received items.
      */
     function _deriveReceivedItemsHash(
         ReceivedItem[] calldata receivedItems,
@@ -494,10 +502,10 @@ contract ImmutableSignedZoneV2 is
 
     /**
      * @dev Helper function to check if every element of values exists in sourceArray
-     *  optimised for performance checking arrays sized 0-15
+     *      optimised for performance checking arrays sized 0-15.
      *
-     * @param sourceArray source array
-     * @param values values array
+     * @param sourceArray Source array.
+     * @param values Values array.
      */
     function _bytes32ArrayIncludes(bytes32[] calldata sourceArray, bytes32[] memory values)
         internal

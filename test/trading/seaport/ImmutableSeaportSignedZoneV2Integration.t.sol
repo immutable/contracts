@@ -432,7 +432,7 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test, SigningTestHelper 
             );
         }
 
-        // advanced order
+        // advanced order, fill 1/100th of the order
         AdvancedOrder memory advancedOrder = AdvancedOrder({
             parameters: orderParameters,
             numerator: uint120(1),
@@ -616,7 +616,7 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test, SigningTestHelper 
             );
         }
 
-        // advanced orders
+        // advanced order, fill 1/100th of the order
         AdvancedOrder memory advancedOrder = AdvancedOrder({
             parameters: orderParameters,
             numerator: uint120(1),
@@ -820,7 +820,7 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test, SigningTestHelper 
             );
         }
 
-        // advanced orders
+        // advanced order, fill 1/2 of the order
         AdvancedOrder memory advancedOrder1 = AdvancedOrder({
             parameters: orderParameters,
             numerator: uint120(50),
@@ -829,6 +829,7 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test, SigningTestHelper 
             extraData: extraData1
         });
 
+        // advanced order, attempt to fill the whole order
         AdvancedOrder memory advancedOrder2 = AdvancedOrder({
             parameters: orderParameters,
             numerator: uint120(1),

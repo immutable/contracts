@@ -28,3 +28,4 @@ All of the tests defined in the table below are in test/erc20/preset/ImmutableER
 | testRenounceOwnershipBlocked    | Ensure renounceOwnership reverts.                 | No         | Yes         |
 | testOnlyMinterCanMunt           | Ensure Only minter role can mint reverts.         | No         | Yes         |
 | testMint                        | Ensure successful minting by minter               | No         | Yes         |
+| testCanOnlyMintUpToMaxSupply    | Ensure can only mint up to max supply             | No         | Yes         |

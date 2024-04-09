@@ -7,7 +7,6 @@ pragma solidity ^0.8.17;
 import {ZoneParameters, Schema, ReceivedItem} from "seaport-types/src/lib/ConsiderationStructs.sol";
 import {ZoneInterface} from "seaport/contracts/interfaces/ZoneInterface.sol";
 import {SIP7Interface} from "./interfaces/SIP7Interface.sol";
-import {SIP7EventsAndErrors} from "./interfaces/SIP7EventsAndErrors.sol";
 import {SIP6EventsAndErrors} from "./interfaces/SIP6EventsAndErrors.sol";
 import {SIP5Interface} from "./interfaces/SIP5Interface.sol";
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
@@ -24,7 +23,6 @@ import {Math} from "openzeppelin-contracts-5.0.2/utils/math/Math.sol";
  */
 contract ImmutableSignedZoneV2 is
     ERC165,
-    SIP7EventsAndErrors,
     SIP6EventsAndErrors,
     ZoneInterface,
     SIP5Interface,

@@ -1,7 +1,10 @@
-// Copyright (c) Immutable Pty Ltd 2018 - 2023
+// Copyright (c) Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: Apache-2
+
 // solhint-disable compiler-version
 pragma solidity ^0.8.17;
+
+import {SIP7EventsAndErrors} from "./SIP7EventsAndErrors.sol";
 
 /**
  * @title SIP7Interface
@@ -11,13 +14,15 @@ pragma solidity ^0.8.17;
  *         https://github.com/ProjectOpenSea/SIPs/blob/main/SIPS/sip-7.md
  *
  */
-interface SIP7Interface {
+interface SIP7Interface is SIP7EventsAndErrors {
     /**
      * @dev The struct for storing signer info.
      */
     struct SignerInfo {
-        bool active; /// If the signer is currently active.
-        bool previouslyActive; /// If the signer has been active before.
+        /// If the signer is currently active.
+        bool active;
+        /// If the signer has been active before.
+        bool previouslyActive;
     }
 
     /**

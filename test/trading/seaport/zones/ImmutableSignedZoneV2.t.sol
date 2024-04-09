@@ -12,14 +12,19 @@ import {ImmutableSignedZoneV2} from "../../../../contracts/trading/seaport/zones
 import {ImmutableSignedZoneV2Harness} from "./ImmutableSignedZoneV2Harness.t.sol";
 import {SigningTestHelper} from "../utils/SigningTestHelper.t.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {SIP5EventsAndErrors} from "../../../../contracts/trading/seaport/zones/interfaces/SIP5EventsAndErrors.sol";
 import {SIP6EventsAndErrors} from "../../../../contracts/trading/seaport/zones/interfaces/SIP6EventsAndErrors.sol";
 import {SIP7EventsAndErrors} from "../../../../contracts/trading/seaport/zones/interfaces/SIP7EventsAndErrors.sol";
 
 // solhint-disable func-name-mixedcase
 
-contract ImmutableSignedZoneV2Test is Test, SigningTestHelper, SIP6EventsAndErrors, SIP7EventsAndErrors {
-    event SeaportCompatibleContractDeployed(); // SIP-5
-
+contract ImmutableSignedZoneV2Test is
+    Test,
+    SigningTestHelper,
+    SIP5EventsAndErrors,
+    SIP6EventsAndErrors,
+    SIP7EventsAndErrors
+{
     uint256 public constant MAX_UINT_TYPE = type(uint256).max;
 
     // solhint-disable private-vars-leading-underscore
@@ -59,7 +64,7 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper, SIP6EventsAndErro
         );
     }
 
-    /* addSigner - L */
+    /* addSigner */
 
     function test_addSigner_revertsIfCalledByNonAdminRole() public {
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
@@ -108,7 +113,7 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper, SIP6EventsAndErro
         zone.addSigner(signerToAdd);
     }
 
-    /* removeSigner - L */
+    /* removeSigner */
 
     function test_removeSigner_revertsIfCalledByNonAdminRole() public {
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
@@ -138,7 +143,7 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper, SIP6EventsAndErro
         zone.removeSigner(signerToRemove);
     }
 
-    /* updateAPIEndpoint - N */
+    /* updateAPIEndpoint */
 
     function test_updateAPIEndpoint_revertsIfCalledByNonAdminRole() public {
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
@@ -159,7 +164,7 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper, SIP6EventsAndErro
         assertEq(apiEndpoint, expectedApiEndpoint);
     }
 
-    /* getSeaportMetadata - L */
+    /* getSeaportMetadata */
 
     function test_getSeaportMetadata() public {
         string memory expectedZoneName = "MyZoneName";
@@ -193,7 +198,7 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper, SIP6EventsAndErro
         assertEq(documentationURI, expectedDocumentationURI);
     }
 
-    /* sip7Information - L */
+    /* sip7Information */
 
     function test_sip7Information() public {
         string memory expectedApiEndpoint = "https://www.immutable.com";
@@ -222,7 +227,7 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper, SIP6EventsAndErro
         assertEq(documentationURI, expectedDocumentationURI);
     }
 
-    /* supportsInterface - L */
+    /* supportsInterface */
 
     function test_supportsInterface() public {
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
@@ -233,7 +238,7 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper, SIP6EventsAndErro
         assertTrue(zone.supportsInterface(0x1a511c70)); // SIP-7 interface
     }
 
-    /* validateOrder - N */
+    /* validateOrder */
 
     function test_validateOrder_revertsIfEmptyExtraData() public {
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
@@ -437,7 +442,7 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper, SIP6EventsAndErro
         assertEq(zone.validateOrder(zoneParameters), bytes4(0x17b1f942));
     }
 
-    /* _getSupportedSubstandards - L */
+    /* _getSupportedSubstandards */
 
     function test_getSupportedSubstandards() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
@@ -448,7 +453,7 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper, SIP6EventsAndErro
         assertEq(supportedSubstandards[2], 6);
     }
 
-    /* _deriveSignedOrderHash - N  */
+    /* _deriveSignedOrderHash  */
 
     function test_deriveSignedOrderHash_returnsHashOfSignedOrder() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
@@ -460,7 +465,7 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper, SIP6EventsAndErro
         assertEq(derivedSignedOrderHash, 0x40c87207c5a0c362da24cb974859c70655de00fee9400f3a805ac360b90bd8c5);
     }
 
-    /* _validateSubstandards - L */
+    /* _validateSubstandards */
 
     function test_validateSubstandards_emptyContext() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
@@ -850,7 +855,7 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper, SIP6EventsAndErro
         assertEq(substandardLengthResult, 33);
     }
 
-    /* _validateSubstandard4 - N */
+    /* _validateSubstandard4 */
 
     function test_validateSubstandard4_returnsZeroLengthIfNotSubstandard4() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
@@ -918,7 +923,7 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper, SIP6EventsAndErro
         });
 
         bytes32[] memory expectedOrderHashes = new bytes32[](1);
-        expectedOrderHashes[0] = bytes32(0x123456);
+        expectedOrderHashes[0] = bytes32(0x17d4cf2b6c174a86b533210b50ba676a82e5ab1e2e89ea538f0a43a37f92fcbf);
 
         bytes memory context = abi.encodePacked(bytes1(0x04), abi.encode(expectedOrderHashes));
 
@@ -959,7 +964,7 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper, SIP6EventsAndErro
         assertEq(substandardLengthResult, 97);
     }
 
-    /* _validateSubstandard6 - N */
+    /* _validateSubstandard6 */
 
     function test_validateSubstandard6_returnsZeroLengthIfNotSubstandard6() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
@@ -1080,7 +1085,7 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper, SIP6EventsAndErro
         assertEq(substandardLengthResult, 65);
     }
 
-    /* _deriveReceivedItemsHash - N */
+    /* _deriveReceivedItemsHash */
 
     function test_deriveReceivedItemsHash_returnsHashIfNoReceivedItems() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
@@ -1131,7 +1136,7 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper, SIP6EventsAndErro
         assertEq(receivedItemsHash, bytes32(0xdb99f7eb854f29cd6f8faedea38d7da25073ef9876653ff45ab5c10e51f8ce4f));
     }
 
-    /* _bytes32ArrayIncludes - N */
+    /* _bytes32ArrayIncludes */
 
     function test_bytes32ArrayIncludes_returnsFalseIfSourceArrayIsEmpty() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
@@ -1197,7 +1202,7 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper, SIP6EventsAndErro
         assertTrue(includes);
     }
 
-    /* _domainSeparator - N */
+    /* _domainSeparator */
 
     function test_domainSeparator_returnsCachedDomainSeparatorWhenChainIDMatchesValueSetOnDeployment() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
@@ -1217,7 +1222,7 @@ contract ImmutableSignedZoneV2Test is Test, SigningTestHelper, SIP6EventsAndErro
         assertEq(domainSeparatorDerived, bytes32(0x835aabb0d2af048df195a75a990b42533471d4a4e82842cd54a892eaac463d74));
     }
 
-    /* _deriveDomainSeparator - N */
+    /* _deriveDomainSeparator */
 
     function test_deriveDomainSeparator_returnsDomainSeparatorForChainID() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);

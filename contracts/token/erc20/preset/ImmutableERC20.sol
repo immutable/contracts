@@ -28,6 +28,9 @@ contract ImmutableERC20 is Ownable, ERC20Permit, MintingAccessControl {
      * @param minterRole The account that has the MINTER_ROLE.
      */
     constructor(string memory _name, string memory _symbol, address _owner, address minterRole, uint256 _maxTokenSupply) ERC20(_name, _symbol) ERC20Permit(_name) {
+        if (_maxTokenSupply == 0) {
+            revert IImmutableERC20Errors.InvalidMaxSupply();
+        }
         _transferOwnership(_owner);
         _grantRole(DEFAULT_ADMIN_ROLE, _owner);
         _grantRole(MINTER_ROLE, minterRole);

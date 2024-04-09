@@ -5,4 +5,6 @@ interface IImmutableERC20Errors {
     error RenounceOwnershipNotAllowed();
 
     error MaxSupplyExceeded(uint256 maxSupply);
+
+    error InvalidMaxSupply();
 }

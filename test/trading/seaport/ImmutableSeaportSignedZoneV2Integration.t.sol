@@ -9,6 +9,7 @@ import "forge-std/Test.sol";
 import {IImmutableSignedZoneV2Harness} from "./zones/IImmutableSignedZoneV2Harness.t.sol";
 import {ConduitController} from "../../../contracts/trading/seaport/conduit/ConduitController.sol";
 import {ImmutableSeaportHarness} from "./ImmutableSeaportHarness.t.sol";
+import {SigningTestHelper} from "./utils/SigningTestHelper.t.sol";
 import {IImmutableERC1155} from "./utils/IImmutableERC1155.t.sol";
 import {IImmutableERC721} from "./utils/IImmutableERC721.t.sol";
 import {IOperatorAllowlistUpgradeable} from "./utils/IOperatorAllowlistUpgradeable.t.sol";
@@ -27,7 +28,7 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 // solhint-disable func-name-mixedcase, private-vars-leading-underscore
 
-contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
+contract ImmutableSeaportSignedZoneV2IntegrationTest is Test, SigningTestHelper {
     // Foundry artifacts allow the test to deploy contracts separately that aren't compatible with
     // the solidity version compiler that the test and its dependencies resolve to.
     string internal constant OPERATOR_ALLOWLIST_ARTIFACT =
@@ -40,10 +41,12 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
         "./foundry-out/ImmutableSignedZoneV2Harness.t.sol/ImmutableSignedZoneV2Harness.json";
 
     address internal immutable OWNER = makeAddr("owner");
-    address internal immutable SIGNER = makeAddr("signer");
+    address internal immutable SIGNER;
+    uint256 internal immutable SIGNER_PRIVATE_KEY;
     address internal immutable FULFILLER = makeAddr("fulfiller");
     address internal immutable FULFILLER_TWO = makeAddr("fulfiller_two");
-    address internal immutable OFFERER = makeAddr("offerer");
+    address internal immutable OFFERER;
+    uint256 internal immutable OFFERER_PRIVATE_KEY;
     address internal immutable PROTOCOL_FEE_RECEIVER = makeAddr("protocol_fee_receiver");
     address internal immutable ROYALTY_FEE_RECEIVER = makeAddr("royalty_fee_receiver");
     address internal immutable ECOSYSTEM_FEE_RECEIVER = makeAddr("ecosystem_fee_receiver");
@@ -53,6 +56,11 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
     IERC20 internal erc20Token;
     IImmutableERC1155 internal erc1155Token;
     IImmutableERC721 internal erc721Token;
+
+    constructor() {
+        (SIGNER, SIGNER_PRIVATE_KEY) = makeAddrAndKey("signer");
+        (OFFERER, OFFERER_PRIVATE_KEY) = makeAddrAndKey("offerer");
+    }
 
     function setUp() public {
         // operator allowlist
@@ -193,16 +201,13 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
         // order signature
         bytes memory orderSignature;
         {
-            (, uint256 offererPK) = makeAddrAndKey("offerer");
             bytes32 orderDigest = seaport.exposed_deriveEIP712Digest(seaport.exposed_domainSeparator(), orderHash);
-            (uint8 listingV, bytes32 listingR, bytes32 listingS) = vm.sign(offererPK, orderDigest);
-            orderSignature = abi.encodePacked(listingR, listingS, listingV);
+            orderSignature = _sign(OFFERER_PRIVATE_KEY, orderDigest);
         }
 
         // extra data
         bytes memory extraData;
         {
-            (, uint256 signerPK) = makeAddrAndKey("signer");
             ReceivedItem[] memory expectedReceivedItems = new ReceivedItem[](4);
             expectedReceivedItems[0] = ReceivedItem({
                 itemType: considerationItems[0].itemType,
@@ -236,9 +241,15 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
             bytes memory context = abi.encodePacked(bytes1(0x06), offerItems[0].startAmount, substandard6Data);
             bytes32 eip712SignedOrderHash =
                 zone.exposed_deriveSignedOrderHash(FULFILLER, uint64(4000), orderHash, context);
-            bytes32 signatureDigest = ECDSA.toTypedDataHash(zone.exposed_domainSeparator(), eip712SignedOrderHash);
-            (, bytes32 signedOrderR, bytes32 signedOrderS) = vm.sign(signerPK, signatureDigest);
-            extraData = abi.encodePacked(bytes1(0), FULFILLER, uint64(4000), signedOrderR, signedOrderS, context);
+            extraData = abi.encodePacked(
+                bytes1(0),
+                FULFILLER,
+                uint64(4000),
+                _signCompact(
+                    SIGNER_PRIVATE_KEY, ECDSA.toTypedDataHash(zone.exposed_domainSeparator(), eip712SignedOrderHash)
+                ),
+                context
+            );
         }
 
         // advanced order
@@ -370,16 +381,13 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
         // order signature
         bytes memory orderSignature;
         {
-            (, uint256 offererPK) = makeAddrAndKey("offerer");
             bytes32 orderDigest = seaport.exposed_deriveEIP712Digest(seaport.exposed_domainSeparator(), orderHash);
-            (uint8 listingV, bytes32 listingR, bytes32 listingS) = vm.sign(offererPK, orderDigest);
-            orderSignature = abi.encodePacked(listingR, listingS, listingV);
+            orderSignature = _sign(OFFERER_PRIVATE_KEY, orderDigest);
         }
 
         // extra data
         bytes memory extraData;
         {
-            (, uint256 signerPK) = makeAddrAndKey("signer");
             ReceivedItem[] memory expectedReceivedItems = new ReceivedItem[](4);
             expectedReceivedItems[0] = ReceivedItem({
                 itemType: considerationItems[0].itemType,
@@ -413,9 +421,15 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
             bytes memory context = abi.encodePacked(bytes1(0x06), offerItems[0].startAmount, substandard6Data);
             bytes32 eip712SignedOrderHash =
                 zone.exposed_deriveSignedOrderHash(FULFILLER, uint64(4000), orderHash, context);
-            bytes32 signatureDigest = ECDSA.toTypedDataHash(zone.exposed_domainSeparator(), eip712SignedOrderHash);
-            (, bytes32 signedOrderR, bytes32 signedOrderS) = vm.sign(signerPK, signatureDigest);
-            extraData = abi.encodePacked(bytes1(0), FULFILLER, uint64(4000), signedOrderR, signedOrderS, context);
+            extraData = abi.encodePacked(
+                bytes1(0),
+                FULFILLER,
+                uint64(4000),
+                _signCompact(
+                    SIGNER_PRIVATE_KEY, ECDSA.toTypedDataHash(zone.exposed_domainSeparator(), eip712SignedOrderHash)
+                ),
+                context
+            );
         }
 
         // advanced order
@@ -551,16 +565,13 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
         // order signature
         bytes memory orderSignature;
         {
-            (, uint256 offererPK) = makeAddrAndKey("offerer");
             bytes32 orderDigest = seaport.exposed_deriveEIP712Digest(seaport.exposed_domainSeparator(), orderHash);
-            (uint8 listingV, bytes32 listingR, bytes32 listingS) = vm.sign(offererPK, orderDigest);
-            orderSignature = abi.encodePacked(listingR, listingS, listingV);
+            orderSignature = _sign(OFFERER_PRIVATE_KEY, orderDigest);
         }
 
         // extra data
         bytes memory extraData;
         {
-            (, uint256 signerPK) = makeAddrAndKey("signer");
             ReceivedItem[] memory expectedReceivedItems = new ReceivedItem[](4);
             expectedReceivedItems[0] = ReceivedItem({
                 itemType: considerationItems[0].itemType,
@@ -594,9 +605,15 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
             bytes memory context = abi.encodePacked(bytes1(0x06), offerItems[0].startAmount, substandard6Data);
             bytes32 eip712SignedOrderHash =
                 zone.exposed_deriveSignedOrderHash(FULFILLER, uint64(4000), orderHash, context);
-            bytes32 signatureDigest = ECDSA.toTypedDataHash(zone.exposed_domainSeparator(), eip712SignedOrderHash);
-            (, bytes32 signedOrderR, bytes32 signedOrderS) = vm.sign(signerPK, signatureDigest);
-            extraData = abi.encodePacked(bytes1(0), FULFILLER, uint64(4000), signedOrderR, signedOrderS, context);
+            extraData = abi.encodePacked(
+                bytes1(0),
+                FULFILLER,
+                uint64(4000),
+                _signCompact(
+                    SIGNER_PRIVATE_KEY, ECDSA.toTypedDataHash(zone.exposed_domainSeparator(), eip712SignedOrderHash)
+                ),
+                context
+            );
         }
 
         // advanced orders
@@ -734,10 +751,8 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
         // order signature
         bytes memory orderSignature;
         {
-            (, uint256 offererPK) = makeAddrAndKey("offerer");
             bytes32 orderDigest = seaport.exposed_deriveEIP712Digest(seaport.exposed_domainSeparator(), orderHash);
-            (uint8 listingV, bytes32 listingR, bytes32 listingS) = vm.sign(offererPK, orderDigest);
-            orderSignature = abi.encodePacked(listingR, listingS, listingV);
+            orderSignature = _sign(OFFERER_PRIVATE_KEY, orderDigest);
         }
 
         // substandard 6 data expected received items
@@ -775,24 +790,34 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test {
         bytes memory extraData1;
         bytes memory extraData2;
         {
-            (, uint256 signerPK) = makeAddrAndKey("signer");
             bytes32 substandard6Data = zone.exposed_deriveReceivedItemsHash(expectedReceivedItems, 1, 1);
             bytes memory context = abi.encodePacked(bytes1(0x06), offerItems[0].startAmount, substandard6Data);
             bytes32 eip712SignedOrderHash =
                 zone.exposed_deriveSignedOrderHash(FULFILLER, uint64(4000), orderHash, context);
-            bytes32 signatureDigest = ECDSA.toTypedDataHash(zone.exposed_domainSeparator(), eip712SignedOrderHash);
-            (, bytes32 signedOrderR, bytes32 signedOrderS) = vm.sign(signerPK, signatureDigest);
-            extraData1 = abi.encodePacked(bytes1(0), FULFILLER, uint64(4000), signedOrderR, signedOrderS, context);
+            extraData1 = abi.encodePacked(
+                bytes1(0),
+                FULFILLER,
+                uint64(4000),
+                _signCompact(
+                    SIGNER_PRIVATE_KEY, ECDSA.toTypedDataHash(zone.exposed_domainSeparator(), eip712SignedOrderHash)
+                ),
+                context
+            );
         }
         {
-            (, uint256 signerPK) = makeAddrAndKey("signer");
             bytes32 substandard6Data = zone.exposed_deriveReceivedItemsHash(expectedReceivedItems, 1, 1);
             bytes memory context = abi.encodePacked(bytes1(0x06), offerItems[0].startAmount, substandard6Data);
             bytes32 eip712SignedOrderHash =
                 zone.exposed_deriveSignedOrderHash(FULFILLER_TWO, uint64(4000), orderHash, context);
-            bytes32 signatureDigest = ECDSA.toTypedDataHash(zone.exposed_domainSeparator(), eip712SignedOrderHash);
-            (, bytes32 signedOrderR, bytes32 signedOrderS) = vm.sign(signerPK, signatureDigest);
-            extraData2 = abi.encodePacked(bytes1(0), FULFILLER_TWO, uint64(4000), signedOrderR, signedOrderS, context);
+            extraData2 = abi.encodePacked(
+                bytes1(0),
+                FULFILLER_TWO,
+                uint64(4000),
+                _signCompact(
+                    SIGNER_PRIVATE_KEY, ECDSA.toTypedDataHash(zone.exposed_domainSeparator(), eip712SignedOrderHash)
+                ),
+                context
+            );
         }
 
         // advanced orders

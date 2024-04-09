@@ -2,11 +2,8 @@
   "name": "@imtbl/contracts",
   "description": "Immutable Smart Contracts",
   "version": "0.0.0",
-  "main": "dist/clients/index.js",
-  "types": "dist/clients/index.d.ts",
   "files": [
-    "contracts",
-    "dist"
+    "contracts"
   ],
   "scripts": {
     "postinstall": "npx rimraf ./node_modules/seaport/foundry.toml",
@@ -15,7 +12,6 @@
     "test": "hardhat test",
     "prettier:solidity": "./node_modules/.bin/prettier --write --plugin=prettier-plugin-solidity contracts/**/*.sol",
     "lint": "eslint . --ext .ts,.tsx --fix && solhint --config ./.solhint.json  contracts/**/*.sol",
-    "eslint": "eslint clients --ext .ts,.tsx",
     "solhint": "solhint --config ./.solhint.json",
     "clean": "hardhat clean",
     "coverage": "hardhat coverage"

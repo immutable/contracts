@@ -6,7 +6,7 @@ pragma solidity ^0.8.17;
 
 // solhint-disable-next-line no-global-import
 import "forge-std/Test.sol";
-import {IImmutableSignedZoneV2Harness} from "./zones/IImmutableSignedZoneV2Harness.t.sol";
+import {IImmutableSignedZoneV2Harness} from "./zones/immutable-signed-zone/v2/IImmutableSignedZoneV2Harness.t.sol";
 import {ConduitController} from "../../../contracts/trading/seaport/conduit/ConduitController.sol";
 import {ImmutableSeaportHarness} from "./ImmutableSeaportHarness.t.sol";
 import {SigningTestHelper} from "./utils/SigningTestHelper.t.sol";

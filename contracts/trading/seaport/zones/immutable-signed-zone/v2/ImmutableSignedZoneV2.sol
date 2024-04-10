@@ -64,19 +64,18 @@ contract ImmutableSignedZoneV2 is
     ///      Request and response payloads are defined in SIP-7.
     string private _sip7APIEndpoint;
 
-    /// @dev The documentationURI;
+    /// @dev The documentationURI.
     string private _documentationURI;
 
     /**
      * @notice Constructor to deploy the contract.
      *
-     * @param zoneName    The name for the zone returned in
-     *                    getSeaportMetadata().
-     * @param apiEndpoint The API endpoint where orders for this zone can be
-     *                    signed.
-     *                    Request and response payloads are defined in SIP-7.
-     * @param owner       The address of the owner of this contract. Specified in the
-     *                    constructor to be CREATE2 / CREATE3 compatible.
+     * @param zoneName         The name for the zone returned in getSeaportMetadata().
+     * @param apiEndpoint      The API endpoint where orders for this zone can be signed.
+     *                         Request and response payloads are defined in SIP-7.
+     * @param documentationURI The documentation URI.
+     * @param owner            The address of the owner of this contract. Specified in the
+     *                         constructor to be CREATE2 / CREATE3 compatible.
      */
     constructor(string memory zoneName, string memory apiEndpoint, string memory documentationURI, address owner) {
         // Set the zone name.
@@ -208,6 +207,7 @@ contract ImmutableSignedZoneV2 is
 
     /**
      * @notice ERC-165 interface support.
+     *
      * @param interfaceId The interface ID to check for support.
      */
     function supportsInterface(bytes4 interfaceId)
@@ -221,13 +221,13 @@ contract ImmutableSignedZoneV2 is
     }
 
     /**
-     * @notice Check if a given order including extraData is currently valid.
+     * @notice Validates a fulfilment execution.
      *
      * @dev This function is called by Seaport whenever any extraData is
      *      provided by the caller.
      *
-     * @param zoneParameters The zone parameters containing data related to
-     *                       the fulfilment execution.
+     * @param zoneParameters        The zone parameters containing data related to
+                                    the fulfilment execution.
      * @return validOrderMagicValue A magic value indicating if the order is
      *                              currently valid.
      */
@@ -255,23 +255,23 @@ contract ImmutableSignedZoneV2 is
             revert InvalidExtraData("extraData length must be at least 93 bytes", orderHash);
         }
 
-        // Revert if SIP6 version is not accepted (0)
+        // Revert if SIP-6 version is not accepted (0).
         if (uint8(extraData[0]) != _ACCEPTED_SIP6_VERSION) {
             revert UnsupportedExtraDataVersion(uint8(extraData[0]));
         }
 
-        // extraData bytes 1-21: expected fulfiller
-        // (zero address means not restricted)
+        // extraData bytes 1-21: expected fulfiller.
+        // (zero address means not restricted).
         address expectedFulfiller = address(bytes20(extraData[1:21]));
 
-        // extraData bytes 21-29: expiration timestamp (uint64)
+        // extraData bytes 21-29: expiration timestamp.
         uint64 expiration = uint64(bytes8(extraData[21:29]));
 
-        // extraData bytes 29-93: signature
-        // (strictly requires 64 byte compact sig, ERC2098)
+        // extraData bytes 29-93: signature.
+        // (strictly requires 64 byte compact sig, ERC2098).
         bytes calldata signature = extraData[29:93];
 
-        // extraData bytes 93-end: context (optional, variable length)
+        // extraData bytes 93-end: context (optional, variable length).
         bytes calldata context = extraData[93:];
 
         // Revert if expired.
@@ -284,34 +284,34 @@ contract ImmutableSignedZoneV2 is
         // Put fulfiller on the stack for more efficient access.
         address actualFulfiller = zoneParameters.fulfiller;
 
-        // Revert unless
-        // Expected fulfiller is 0 address (any fulfiller) or
-        // Expected fulfiller is the same as actual fulfiller
+        // Revert unless:
+        // - expected fulfiller is 0 address (any fulfiller) OR
+        // - expected fulfiller is the same as actual fulfiller.
         if (expectedFulfiller != address(0) && expectedFulfiller != actualFulfiller) {
             revert InvalidFulfiller(expectedFulfiller, actualFulfiller, orderHash);
         }
 
-        // validate supported substandards
+        // Validate supported substandards.
         _validateSubstandards(context, zoneParameters);
 
-        // Derive the signedOrder hash
+        // Derive the signedOrder hash.
         bytes32 signedOrderHash = _deriveSignedOrderHash(expectedFulfiller, expiration, orderHash, context);
 
         // Derive the EIP-712 digest using the domain separator and signedOrder
-        // hash through openzepplin helper
+        // hash through openzepplin helper.
         bytes32 digest = ECDSA.toTypedDataHash(_domainSeparator(), signedOrderHash);
 
         // Recover the signer address from the digest and signature.
-        // Pass in R and VS from compact signature (ERC2098)
+        // Pass in R and VS from compact signature (ERC2098).
         address recoveredSigner = ECDSA.recover(digest, bytes32(signature[0:32]), bytes32(signature[32:64]));
 
-        // Revert if the signer is not active
-        // !This also reverts if the digest constructed on serverside is incorrect
+        // Revert if the signer is not active.
+        // This also reverts if the digest constructed on serverside is incorrect.
         if (!_signers[recoveredSigner].active) {
             revert SignerNotActive(recoveredSigner);
         }
 
-        // All validation completes and passes with no reverts, return valid
+        // All validation completes and passes with no reverts, return valid.
         validOrderMagicValue = ZoneInterface.validateOrder.selector;
     }
 
@@ -319,7 +319,6 @@ contract ImmutableSignedZoneV2 is
      * @dev Get the supported substandards of the contract.
      *
      * @return substandards Array of substandards supported.
-     *
      */
     function _getSupportedSubstandards() internal pure returns (uint256[] memory substandards) {
         // support substandards 3, 4 and 6
@@ -332,13 +331,11 @@ contract ImmutableSignedZoneV2 is
     /**
      * @dev Derive the signedOrder hash from the orderHash and expiration.
      *
-     * @param fulfiller  The expected fulfiller address.
-     * @param expiration The signature expiration timestamp.
-     * @param orderHash  The order hash.
-     * @param context    The optional variable-length context.
-     *
+     * @param fulfiller        The expected fulfiller address.
+     * @param expiration       The signature expiration timestamp.
+     * @param orderHash        The order hash.
+     * @param context          The optional variable-length context.
      * @return signedOrderHash The signedOrder hash.
-     *
      */
     function _deriveSignedOrderHash(address fulfiller, uint64 expiration, bytes32 orderHash, bytes calldata context)
         internal
@@ -353,12 +350,15 @@ contract ImmutableSignedZoneV2 is
     /**
      * @dev Validate substandards 3, 4 and 6 based on context.
      *
-     * @param context Bytes payload of context.
+     * @param context        Bytes payload of context.
      * @param zoneParameters The zone parameters.
      */
     function _validateSubstandards(bytes calldata context, ZoneParameters calldata zoneParameters) internal pure {
         uint256 startIndex = 0;
         uint256 contextLength = context.length;
+
+        // Each _validateSubstandard* function returns the length of the substandard
+        // segment (0 if the substandard was not matched).
 
         if (startIndex == contextLength) return;
         startIndex = _validateSubstandard3(context[startIndex:], zoneParameters) + startIndex;
@@ -377,9 +377,9 @@ contract ImmutableSignedZoneV2 is
     /**
      * @dev Validates substandard 3.
      *
-     * @param context Bytes payload of context, 0 indexed to start of substandard segment.
+     * @param context        Bytes payload of context, 0 indexed to start of substandard segment.
      * @param zoneParameters The zone parameters.
-     * @return Length of substandard segment.
+     * @return               Length of substandard segment.
      */
     function _validateSubstandard3(bytes calldata context, ZoneParameters calldata zoneParameters)
         internal
@@ -404,9 +404,9 @@ contract ImmutableSignedZoneV2 is
     /**
      * @dev Validates substandard 4.
      *
-     * @param context Bytes payload of context, 0 indexed to start of substandard segment.
+     * @param context        Bytes payload of context, 0 indexed to start of substandard segment.
      * @param zoneParameters The zone parameters.
-     * @return Length of substandard segment.
+     * @return               Length of substandard segment.
      */
     function _validateSubstandard4(bytes calldata context, ZoneParameters calldata zoneParameters)
         internal
@@ -417,7 +417,7 @@ contract ImmutableSignedZoneV2 is
             return 0;
         }
 
-        // substandard ID + array offset + array length
+        // substandard ID + array offset + array length.
         if (context.length < 65) {
             revert InvalidExtraData("invalid substandard 4 data length", zoneParameters.orderHash);
         }
@@ -426,7 +426,7 @@ contract ImmutableSignedZoneV2 is
         uint256 substandardIndexEnd = 64 + (expectedOrderHashesSize * 32);
         bytes32[] memory expectedOrderHashes = abi.decode(context[1:substandardIndexEnd + 1], (bytes32[]));
 
-        // revert if any order hashes in substandard data are not present in zoneParameters.orderHashes
+        // revert if any order hashes in substandard data are not present in zoneParameters.orderHashes.
         if (!_bytes32ArrayIncludes(zoneParameters.orderHashes, expectedOrderHashes)) {
             revert Substandard4Violation(zoneParameters.orderHashes, expectedOrderHashes, zoneParameters.orderHash);
         }
@@ -437,9 +437,9 @@ contract ImmutableSignedZoneV2 is
     /**
      * @dev Validates substandard 6.
      *
-     * @param context Bytes payload of context, 0 indexed to start of substandard segment.
+     * @param context        Bytes payload of context, 0 indexed to start of substandard segment.
      * @param zoneParameters The zone parameters.
-     * @return Length of substandard segment.
+     * @return               Length of substandard segment.
      */
     function _validateSubstandard6(bytes calldata context, ZoneParameters calldata zoneParameters)
         internal
@@ -454,9 +454,20 @@ contract ImmutableSignedZoneV2 is
             revert InvalidExtraData("invalid substandard 6 data length", zoneParameters.orderHash);
         }
 
+        // The first 32 bytes are the original first offer item amount.
         uint256 originalFirstOfferItemAmount = uint256(bytes32(context[1:33]));
+        // The next 32 bytes are the hash of the received items that were expected
+        // derived based on an assumption of full fulfilment (i.e. numerator = denominator = 1).
         bytes32 expectedReceivedItemsHash = bytes32(context[33:65]);
 
+        // To support partial fulfilment scenarios, we must scale the actual received item amounts
+        // to match the expected received items hash based on full fulfilment (i.e. numerator = denominator = 1).
+        //
+        // actualAmount = originalAmount * numerator / denominator
+        // originalAmount = actualAmount * denominator / numerator
+        //
+        // The numerator and denominator values are inferred from the actual and original (extracted
+        // from context) amounts of the first offer item.
         if (
             _deriveReceivedItemsHash(
                 zoneParameters.consideration, originalFirstOfferItemAmount, zoneParameters.offer[0].amount
@@ -505,7 +516,8 @@ contract ImmutableSignedZoneV2 is
      *      optimised for performance checking arrays sized 0-15.
      *
      * @param sourceArray Source array.
-     * @param values Values array.
+     * @param values      Values array.
+     * @return            True if all elements in values exist in sourceArray.
      */
     function _bytes32ArrayIncludes(bytes32[] calldata sourceArray, bytes32[] memory values)
         internal

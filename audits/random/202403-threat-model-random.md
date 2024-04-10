@@ -515,12 +515,17 @@ Functions that *do not change* state:
 
 ## TODO Immutable zkEVM Validators: Block Hash Attack
 
+
+
+
+
 ## TODO Immutable zkEVM Validators: RANDAO Attack
 
 ## TODO VRF Key Compromise
 
 ## TODO Reuse a Random Value 
-
+## TODO Random Value Size
+## TODO Random Sequence for Same Usage
 
 
 ## Admin Roles

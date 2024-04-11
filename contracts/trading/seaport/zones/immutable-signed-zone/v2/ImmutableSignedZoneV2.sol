@@ -375,7 +375,12 @@ contract ImmutableSignedZoneV2 is
     }
 
     /**
-     * @dev Validates substandard 3.
+     * @dev Validates substandard 3. This substandard is used to validate that the server's
+     *      specified received items matches the actual received items. This substandard
+     *      should be used when the server is able to accurately determine the received items
+     *      for an exact fulfilment scenario. This substandard should NOT be used for fulfilments
+     *      where the received items cannot be accurately known in advance, as is the case in
+     *      best-efforts partial fulfilment scenarios.
      *
      * @param context        Bytes payload of context, 0 indexed to start of substandard segment.
      * @param zoneParameters The zone parameters.
@@ -402,7 +407,10 @@ contract ImmutableSignedZoneV2 is
     }
 
     /**
-     * @dev Validates substandard 4.
+     * @dev Validates substandard 4. This substandard is used to validate that the server's
+     *      specified orders that must be bundled with the fulfilment are present. This is useful
+     *      for scenarios where the fulfiller desires a bundled fulfilment to revert if part of
+     *      bundle is not available for fulfilment.
      *
      * @param context        Bytes payload of context, 0 indexed to start of substandard segment.
      * @param zoneParameters The zone parameters.
@@ -435,7 +443,9 @@ contract ImmutableSignedZoneV2 is
     }
 
     /**
-     * @dev Validates substandard 6.
+     * @dev Validates substandard 6. This substandard a variation on substandard 3 to support
+     *      that supports fulfilments where server cannot accurately determine expected received
+     *      items in advance, as is the case in best-efforts partial fulfilment scenarios.
      *
      * @param context        Bytes payload of context, 0 indexed to start of substandard segment.
      * @param zoneParameters The zone parameters.

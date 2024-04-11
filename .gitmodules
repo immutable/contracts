@@ -19,6 +19,3 @@
 [submodule "lib/immutable-seaport-core-1.5.0+im1"]
 	path = lib/immutable-seaport-core-1.5.0+im1
 	url = https://github.com/immutable/seaport-core
-[submodule "lib/contract-deployer"]
-	path = lib/contract-deployer
-	url = https://github.com/immutable/contract-deployer

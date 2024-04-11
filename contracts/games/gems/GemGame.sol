@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 
 /**
  * @title GemGame - A simple contract that emits an event for the purpose of indexing off-chain
+ * @author Immutable
  * @dev The GemGame contract is not designed to be upgradeable or extended
  */
 contract GemGame {

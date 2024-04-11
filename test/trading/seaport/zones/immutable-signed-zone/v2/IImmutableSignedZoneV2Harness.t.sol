@@ -6,7 +6,8 @@ pragma solidity ^0.8.17;
 
 import {ZoneInterface} from "seaport/contracts/interfaces/ZoneInterface.sol";
 import {ReceivedItem, ZoneParameters} from "seaport-types/src/lib/ConsiderationStructs.sol";
-import {SIP7Interface} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/SIP7Interface.sol";
+import {SIP7Interface} from
+    "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/SIP7Interface.sol";
 
 // solhint-disable func-name-mixedcase
 

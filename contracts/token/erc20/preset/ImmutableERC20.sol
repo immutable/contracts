@@ -51,11 +51,10 @@ contract ImmutableERC20 is Ownable, ERC20Permit, MintingAccessControl {
 
     /**
      * @dev Burns `amount` number of tokens from the `from` address.
-     * @param from the address to burn the tokens from.
      * @param amount the amount of tokens to burn.
      */
-    function burn(address from, uint256 amount) external {
-        _burn(from, amount);
+    function burn(uint256 amount) external {
+        _burn(msg.sender, amount);
     }
 
     /** 

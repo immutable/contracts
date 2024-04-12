@@ -19,9 +19,6 @@ contract GemGame is AccessControl, Pausable {
     /// @notice Indicates that an account has earned a gem
     event GemEarned(address indexed account, uint256 timestamp);
 
-    /// @notice Mapping of the last time an account earned a gem
-    mapping(address account => uint256 lastEarned) public accountLastEarned;
-
     /// @notice Role to allow pausing the contract
     bytes32 private constant _PAUSE = keccak256("PAUSE");
 

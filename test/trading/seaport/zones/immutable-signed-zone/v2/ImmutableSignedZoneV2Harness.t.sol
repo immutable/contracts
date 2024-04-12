@@ -15,6 +15,14 @@ contract ImmutableSignedZoneV2Harness is ImmutableSignedZoneV2 {
         ImmutableSignedZoneV2(zoneName, apiEndpoint, documentationURI, owner)
     {}
 
+    function exposed_domainSeparator() external view returns (bytes32) {
+        return _domainSeparator();
+    }
+
+    function exposed_deriveDomainSeparator() external view returns (bytes32 domainSeparator) {
+        return _deriveDomainSeparator();
+    }
+
     function exposed_getSupportedSubstandards() external pure returns (uint256[] memory substandards) {
         return _getSupportedSubstandards();
     }
@@ -24,7 +32,7 @@ contract ImmutableSignedZoneV2Harness is ImmutableSignedZoneV2 {
         uint64 expiration,
         bytes32 orderHash,
         bytes calldata context
-    ) external view returns (bytes32 signedOrderHash) {
+    ) external pure returns (bytes32 signedOrderHash) {
         return _deriveSignedOrderHash(fulfiller, expiration, orderHash, context);
     }
 
@@ -73,14 +81,6 @@ contract ImmutableSignedZoneV2Harness is ImmutableSignedZoneV2 {
         returns (bool)
     {
         return _bytes32ArrayIncludes(sourceArray, values);
-    }
-
-    function exposed_domainSeparator() external view returns (bytes32) {
-        return _domainSeparator();
-    }
-
-    function exposed_deriveDomainSeparator() external view returns (bytes32 domainSeparator) {
-        return _deriveDomainSeparator();
     }
 }
 

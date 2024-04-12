@@ -4,15 +4,16 @@
 // solhint-disable-next-line compiler-version
 pragma solidity ^0.8.17;
 
-import {ZoneParameters, Schema, ReceivedItem} from "seaport-types/src/lib/ConsiderationStructs.sol";
 import {ZoneInterface} from "seaport/contracts/interfaces/ZoneInterface.sol";
+import {ZoneParameters, Schema, ReceivedItem} from "seaport-types/src/lib/ConsiderationStructs.sol";
+import {AccessControlEnumerable} from "openzeppelin-contracts-5.0.2/access/extensions/AccessControlEnumerable.sol";
+import {ECDSA} from "openzeppelin-contracts-5.0.2/utils/cryptography/ECDSA.sol";
+import {MessageHashUtils} from "openzeppelin-contracts-5.0.2/utils/cryptography/MessageHashUtils.sol";
+import {ERC165} from "openzeppelin-contracts-5.0.2/utils/introspection/ERC165.sol";
+import {Math} from "openzeppelin-contracts-5.0.2/utils/math/Math.sol";
 import {SIP5Interface} from "./interfaces/SIP5Interface.sol";
 import {SIP6Interface} from "./interfaces/SIP6Interface.sol";
 import {SIP7Interface} from "./interfaces/SIP7Interface.sol";
-import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
-import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-import {Math} from "openzeppelin-contracts-5.0.2/utils/math/Math.sol";
 
 /**
  * @title  ImmutableSignedZoneV2
@@ -30,31 +31,28 @@ contract ImmutableSignedZoneV2 is
     AccessControlEnumerable
 {
     /// @dev The EIP-712 digest parameters.
-    bytes32 internal immutable _VERSION_HASH = keccak256(bytes("2.0"));
-    bytes32 internal immutable _EIP_712_DOMAIN_TYPEHASH = keccak256(
+    bytes32 private constant _VERSION_HASH = keccak256(bytes("2.0"));
+    bytes32 private constant _EIP_712_DOMAIN_TYPEHASH = keccak256(
         abi.encodePacked(
             "EIP712Domain(", "string name,", "string version,", "uint256 chainId,", "address verifyingContract", ")"
         )
     );
 
-    bytes32 internal immutable _SIGNED_ORDER_TYPEHASH = keccak256(
+    bytes32 private constant _SIGNED_ORDER_TYPEHASH = keccak256(
         abi.encodePacked(
             "SignedOrder(", "address fulfiller,", "uint64 expiration,", "bytes32 orderHash,", "bytes context", ")"
         )
     );
 
-    uint256 internal immutable _CHAIN_ID = block.chainid;
-    bytes32 internal immutable _DOMAIN_SEPARATOR;
-    uint8 internal immutable _ACCEPTED_SIP6_VERSION = 0;
+    uint256 private immutable _CHAIN_ID = block.chainid;
+    bytes32 private immutable _DOMAIN_SEPARATOR;
+    uint8 private constant _ACCEPTED_SIP6_VERSION = 0;
 
     /// @dev The name for this zone returned in getSeaportMetadata().
     // solhint-disable-next-line var-name-mixedcase
     string private _ZONE_NAME;
 
-    // slither-disable-start immutable-states
-    // solhint-disable-next-line var-name-mixedcase
-    bytes32 internal _NAME_HASH;
-    // slither-disable-end immutable-states
+    bytes32 private immutable _NAME_HASH;
 
     /// @dev The allowed signers.
     // solhint-disable-next-line named-parameters-mapping
@@ -62,7 +60,7 @@ contract ImmutableSignedZoneV2 is
 
     /// @dev The API endpoint where orders for this zone can be signed.
     ///      Request and response payloads are defined in SIP-7.
-    string private _sip7APIEndpoint;
+    string private _apiEndpoint;
 
     /// @dev The documentationURI.
     string private _documentationURI;
@@ -85,7 +83,9 @@ contract ImmutableSignedZoneV2 is
         _NAME_HASH = keccak256(bytes(zoneName));
 
         // Set the API endpoint.
-        _sip7APIEndpoint = apiEndpoint;
+        _apiEndpoint = apiEndpoint;
+
+        // Set the documentation URI.
         _documentationURI = documentationURI;
 
         // Derive and set the domain separator.
@@ -152,8 +152,20 @@ contract ImmutableSignedZoneV2 is
      * @param newApiEndpoint The new API endpoint.
      */
     function updateAPIEndpoint(string calldata newApiEndpoint) external override onlyRole(DEFAULT_ADMIN_ROLE) {
-        // Update to the new API endpoint.
-        _sip7APIEndpoint = newApiEndpoint;
+        _apiEndpoint = newApiEndpoint;
+    }
+
+    /**
+     * @notice Update the documentation URI returned by this zone.
+     *
+     * @param newDocumentationURI The new documentation URI.
+     */
+    function updateDocumentationURI(string calldata newDocumentationURI)
+        external
+        override
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
+        _documentationURI = newDocumentationURI;
     }
 
     /**
@@ -175,7 +187,7 @@ contract ImmutableSignedZoneV2 is
         schemas = new Schema[](1);
         schemas[0].id = 7;
         schemas[0].metadata =
-            abi.encode(_domainSeparator(), _sip7APIEndpoint, _getSupportedSubstandards(), _documentationURI);
+            abi.encode(_domainSeparator(), _apiEndpoint, _getSupportedSubstandards(), _documentationURI);
     }
 
     /**
@@ -198,26 +210,11 @@ contract ImmutableSignedZoneV2 is
         )
     {
         domainSeparator = _domainSeparator();
-        apiEndpoint = _sip7APIEndpoint;
+        apiEndpoint = _apiEndpoint;
 
         substandards = _getSupportedSubstandards();
 
         documentationURI = _documentationURI;
-    }
-
-    /**
-     * @notice ERC-165 interface support.
-     *
-     * @param interfaceId The interface ID to check for support.
-     */
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(ERC165, ZoneInterface, AccessControlEnumerable)
-        returns (bool)
-    {
-        return interfaceId == type(ZoneInterface).interfaceId || interfaceId == type(SIP5Interface).interfaceId
-            || interfaceId == type(SIP7Interface).interfaceId || super.supportsInterface(interfaceId);
     }
 
     /**
@@ -227,7 +224,7 @@ contract ImmutableSignedZoneV2 is
      *      provided by the caller.
      *
      * @param zoneParameters        The zone parameters containing data related to
-                                    the fulfilment execution.
+     *                                 the fulfilment execution.
      * @return validOrderMagicValue A magic value indicating if the order is
      *                              currently valid.
      */
@@ -299,7 +296,7 @@ contract ImmutableSignedZoneV2 is
 
         // Derive the EIP-712 digest using the domain separator and signedOrder
         // hash through openzepplin helper.
-        bytes32 digest = ECDSA.toTypedDataHash(_domainSeparator(), signedOrderHash);
+        bytes32 digest = MessageHashUtils.toTypedDataHash(_domainSeparator(), signedOrderHash);
 
         // Recover the signer address from the digest and signature.
         // Pass in R and VS from compact signature (ERC2098).
@@ -313,6 +310,42 @@ contract ImmutableSignedZoneV2 is
 
         // All validation completes and passes with no reverts, return valid.
         validOrderMagicValue = ZoneInterface.validateOrder.selector;
+    }
+
+    /**
+     * @notice ERC-165 interface support.
+     *
+     * @param interfaceId The interface ID to check for support.
+     */
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC165, ZoneInterface, AccessControlEnumerable)
+        returns (bool)
+    {
+        return interfaceId == type(ZoneInterface).interfaceId || interfaceId == type(SIP5Interface).interfaceId
+            || interfaceId == type(SIP7Interface).interfaceId || super.supportsInterface(interfaceId);
+    }
+
+    /**
+     * @dev Internal view function to get the EIP-712 domain separator. If the
+     *      chainId matches the chainId set on deployment, the cached domain
+     *      separator will be returned; otherwise, it will be derived from
+     *      scratch.
+     *
+     * @return The domain separator.
+     */
+    function _domainSeparator() internal view returns (bytes32) {
+        return block.chainid == _CHAIN_ID ? _DOMAIN_SEPARATOR : _deriveDomainSeparator();
+    }
+
+    /**
+     * @dev Internal view function to derive the EIP-712 domain separator.
+     *
+     * @return domainSeparator The derived domain separator.
+     */
+    function _deriveDomainSeparator() internal view returns (bytes32 domainSeparator) {
+        return keccak256(abi.encode(_EIP_712_DOMAIN_TYPEHASH, _NAME_HASH, _VERSION_HASH, block.chainid, address(this)));
     }
 
     /**
@@ -339,7 +372,7 @@ contract ImmutableSignedZoneV2 is
      */
     function _deriveSignedOrderHash(address fulfiller, uint64 expiration, bytes32 orderHash, bytes calldata context)
         internal
-        view
+        pure
         returns (bytes32 signedOrderHash)
     {
         // Derive the signed order hash.
@@ -569,26 +602,5 @@ contract ImmutableSignedZoneV2 is
 
         // All elements from values exist in sourceArray
         return true;
-    }
-
-    /**
-     * @dev Internal view function to get the EIP-712 domain separator. If the
-     *      chainId matches the chainId set on deployment, the cached domain
-     *      separator will be returned; otherwise, it will be derived from
-     *      scratch.
-     *
-     * @return The domain separator.
-     */
-    function _domainSeparator() internal view returns (bytes32) {
-        return block.chainid == _CHAIN_ID ? _DOMAIN_SEPARATOR : _deriveDomainSeparator();
-    }
-
-    /**
-     * @dev Internal view function to derive the EIP-712 domain separator.
-     *
-     * @return domainSeparator The derived domain separator.
-     */
-    function _deriveDomainSeparator() internal view returns (bytes32 domainSeparator) {
-        return keccak256(abi.encode(_EIP_712_DOMAIN_TYPEHASH, _NAME_HASH, _VERSION_HASH, block.chainid, address(this)));
     }
 }

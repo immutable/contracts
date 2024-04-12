@@ -6,13 +6,9 @@ pragma solidity ^0.8.17;
 
 // solhint-disable-next-line no-global-import
 import "forge-std/Test.sol";
-import {IImmutableSignedZoneV2Harness} from "./zones/immutable-signed-zone/v2/IImmutableSignedZoneV2Harness.t.sol";
-import {ConduitController} from "../../../contracts/trading/seaport/conduit/ConduitController.sol";
-import {ImmutableSeaportHarness} from "./ImmutableSeaportHarness.t.sol";
-import {SigningTestHelper} from "./utils/SigningTestHelper.t.sol";
-import {IImmutableERC1155} from "./utils/IImmutableERC1155.t.sol";
-import {IImmutableERC721} from "./utils/IImmutableERC721.t.sol";
-import {IOperatorAllowlistUpgradeable} from "./utils/IOperatorAllowlistUpgradeable.t.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {ItemType, OrderType} from "seaport-types/src/lib/ConsiderationEnums.sol";
 import {
     AdvancedOrder,
     ConsiderationItem,
@@ -22,40 +18,44 @@ import {
     OrderParameters,
     ReceivedItem
 } from "seaport-types/src/lib/ConsiderationStructs.sol";
-import {ItemType, OrderType} from "seaport-types/src/lib/ConsiderationEnums.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {ConduitController} from "../../../contracts/trading/seaport/conduit/ConduitController.sol";
+import {ImmutableSeaportHarness} from "./ImmutableSeaportHarness.t.sol";
+import {IImmutableERC1155} from "./utils/IImmutableERC1155.t.sol";
+import {IImmutableERC721} from "./utils/IImmutableERC721.t.sol";
+import {IOperatorAllowlistUpgradeable} from "./utils/IOperatorAllowlistUpgradeable.t.sol";
+import {SigningTestHelper} from "./utils/SigningTestHelper.t.sol";
+import {IImmutableSignedZoneV2Harness} from "./zones/immutable-signed-zone/v2/IImmutableSignedZoneV2Harness.t.sol";
 
 // solhint-disable func-name-mixedcase, private-vars-leading-underscore
 
 contract ImmutableSeaportSignedZoneV2IntegrationTest is Test, SigningTestHelper {
     // Foundry artifacts allow the test to deploy contracts separately that aren't compatible with
     // the solidity version compiler that the test and its dependencies resolve to.
-    string internal constant OPERATOR_ALLOWLIST_ARTIFACT =
+    string private constant OPERATOR_ALLOWLIST_ARTIFACT =
         "./foundry-out/OperatorAllowlistUpgradeable.sol/OperatorAllowlistUpgradeable.json";
-    string internal constant ERC1155_ARTIFACT = "./foundry-out/ImmutableERC1155.sol/ImmutableERC1155.json";
-    string internal constant ERC20_ARTIFACT =
+    string private constant ERC1155_ARTIFACT = "./foundry-out/ImmutableERC1155.sol/ImmutableERC1155.json";
+    string private constant ERC20_ARTIFACT =
         "./foundry-out/ImmutableERC20FixedSupplyNoBurn.sol/ImmutableERC20FixedSupplyNoBurn.json";
-    string internal constant ERC721_ARTIFACT = "./foundry-out/ImmutableERC721.sol/ImmutableERC721.json";
-    string internal constant ZONE_ARTIFACT =
+    string private constant ERC721_ARTIFACT = "./foundry-out/ImmutableERC721.sol/ImmutableERC721.json";
+    string private constant ZONE_ARTIFACT =
         "./foundry-out/ImmutableSignedZoneV2Harness.t.sol/ImmutableSignedZoneV2Harness.json";
 
-    address internal immutable OWNER = makeAddr("owner");
-    address internal immutable SIGNER;
-    uint256 internal immutable SIGNER_PRIVATE_KEY;
-    address internal immutable FULFILLER = makeAddr("fulfiller");
-    address internal immutable FULFILLER_TWO = makeAddr("fulfiller_two");
-    address internal immutable OFFERER;
-    uint256 internal immutable OFFERER_PRIVATE_KEY;
-    address internal immutable PROTOCOL_FEE_RECEIVER = makeAddr("protocol_fee_receiver");
-    address internal immutable ROYALTY_FEE_RECEIVER = makeAddr("royalty_fee_receiver");
-    address internal immutable ECOSYSTEM_FEE_RECEIVER = makeAddr("ecosystem_fee_receiver");
+    address private immutable OWNER = makeAddr("owner");
+    address private immutable SIGNER;
+    uint256 private immutable SIGNER_PRIVATE_KEY;
+    address private immutable FULFILLER = makeAddr("fulfiller");
+    address private immutable FULFILLER_TWO = makeAddr("fulfiller_two");
+    address private immutable OFFERER;
+    uint256 private immutable OFFERER_PRIVATE_KEY;
+    address private immutable PROTOCOL_FEE_RECEIVER = makeAddr("protocol_fee_receiver");
+    address private immutable ROYALTY_FEE_RECEIVER = makeAddr("royalty_fee_receiver");
+    address private immutable ECOSYSTEM_FEE_RECEIVER = makeAddr("ecosystem_fee_receiver");
 
-    ImmutableSeaportHarness internal seaport;
-    IImmutableSignedZoneV2Harness internal zone;
-    IERC20 internal erc20Token;
-    IImmutableERC1155 internal erc1155Token;
-    IImmutableERC721 internal erc721Token;
+    ImmutableSeaportHarness private seaport;
+    IImmutableSignedZoneV2Harness private zone;
+    IERC20 private erc20Token;
+    IImmutableERC1155 private erc1155Token;
+    IImmutableERC721 private erc721Token;
 
     constructor() {
         (SIGNER, SIGNER_PRIVATE_KEY) = makeAddrAndKey("signer");

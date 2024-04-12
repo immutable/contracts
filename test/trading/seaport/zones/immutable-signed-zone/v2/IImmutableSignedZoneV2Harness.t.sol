@@ -12,6 +12,10 @@ import {SIP7Interface} from
 // solhint-disable func-name-mixedcase
 
 interface IImmutableSignedZoneV2Harness is ZoneInterface, SIP7Interface {
+    function exposed_domainSeparator() external view returns (bytes32);
+
+    function exposed_deriveDomainSeparator() external view returns (bytes32 domainSeparator);
+
     function exposed_getSupportedSubstandards() external pure returns (uint256[] memory substandards);
 
     function exposed_deriveSignedOrderHash(
@@ -50,10 +54,6 @@ interface IImmutableSignedZoneV2Harness is ZoneInterface, SIP7Interface {
         external
         pure
         returns (bool);
-
-    function exposed_domainSeparator() external view returns (bytes32);
-
-    function exposed_deriveDomainSeparator() external view returns (bytes32 domainSeparator);
 }
 
 // solhint-enable func-name-mixedcase

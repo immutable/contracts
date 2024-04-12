@@ -37,6 +37,8 @@ struct GemGameContractArgs {
 }
 
 contract DeployGemGame is Test {
+    event GemEarned(address indexed account, uint256 timestamp);
+
     function testDeploy() external {
         /// @dev Fork the Immutable zkEVM testnet for this test
         string memory rpcURL = "https://rpc.testnet.immutable.com";
@@ -71,6 +73,11 @@ contract DeployGemGame is Test {
         assertEq(
             false, deployedGemGameContract.hasRole(deployedGemGameContract.DEFAULT_ADMIN_ROLE(), deploymentArgs.signer)
         );
+
+        // Earn a gem
+        vm.expectEmit(true, true, false, false);
+        emit GemEarned(address(this), block.timestamp);
+        deployedGemGameContract.earnGem();
     }
 
     function deploy() external {

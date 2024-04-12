@@ -13,6 +13,7 @@ contract ImmutableERC20Test is Test {
 
     address public minter;
     address public hubOwner;
+    address public tokenReceiver;
     string name;
     string symbol;
     uint256 maxSupply;
@@ -20,6 +21,7 @@ contract ImmutableERC20Test is Test {
     function setUp() public virtual {
         hubOwner = makeAddr("hubOwner");
         minter = makeAddr("minterRole");
+        tokenReceiver = makeAddr("tokenReceiver");
         name = "HappyToken";
         symbol = "HPY";
         maxSupply = 1000;
@@ -68,13 +70,13 @@ contract ImmutableERC20Test is Test {
     }
 
     function testBurn() public {
-        address from = makeAddr("from");
         uint256 amount = 100;
         vm.prank(minter);
-        erc20.mint(from, amount);
-        assertEq(erc20.balanceOf(from), 100);
-        erc20.burn(from, amount);
-        assertEq(erc20.balanceOf(from), 0);
+        erc20.mint(tokenReceiver, amount);
+        assertEq(erc20.balanceOf(tokenReceiver), 100);
+        vm.prank(tokenReceiver);
+        erc20.burn(amount);
+        assertEq(erc20.balanceOf(tokenReceiver), 0);
     }
 
     function testCanOnlyMintUpToMaxSupply() public {

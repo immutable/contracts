@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2
 
 // solhint-disable-next-line compiler-version
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.20;
 
 import {ZoneInterface} from "seaport/contracts/interfaces/ZoneInterface.sol";
 import {ZoneParameters, Schema, ReceivedItem} from "seaport-types/src/lib/ConsiderationStructs.sol";

@@ -30,22 +30,30 @@ contract ImmutableSignedZoneV2 is
     SIP7Interface,
     AccessControlEnumerable
 {
-    /// @dev The EIP-712 digest parameters.
-    bytes32 private constant _VERSION_HASH = keccak256(bytes("2.0"));
+    /// @dev The EIP-712 domain type hash.
     bytes32 private constant _EIP_712_DOMAIN_TYPEHASH = keccak256(
         abi.encodePacked(
             "EIP712Domain(", "string name,", "string version,", "uint256 chainId,", "address verifyingContract", ")"
         )
     );
 
+    /// @dev The EIP-712 domain version value.
+    bytes32 private constant _VERSION_HASH = keccak256(bytes("2.0"));
+
+    /// @dev The EIP-712 signed order type hash.
     bytes32 private constant _SIGNED_ORDER_TYPEHASH = keccak256(
         abi.encodePacked(
             "SignedOrder(", "address fulfiller,", "uint64 expiration,", "bytes32 orderHash,", "bytes context", ")"
         )
     );
 
+    /// @dev The chain ID on which the contract was deployed.
     uint256 private immutable _CHAIN_ID = block.chainid;
+
+    /// @dev The domain separator used for signing.
     bytes32 private immutable _DOMAIN_SEPARATOR;
+
+    /// @dev The accepted SIP-6 version.
     uint8 private constant _ACCEPTED_SIP6_VERSION = 0;
 
     /// @dev The name for this zone returned in getSeaportMetadata().
@@ -59,7 +67,6 @@ contract ImmutableSignedZoneV2 is
     mapping(address => SignerInfo) private _signers;
 
     /// @dev The API endpoint where orders for this zone can be signed.
-    ///      Request and response payloads are defined in SIP-7.
     string private _apiEndpoint;
 
     /// @dev The documentationURI.

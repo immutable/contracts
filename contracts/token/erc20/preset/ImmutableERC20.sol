@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
+import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import {ERC20Permit, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {MintingAccessControl} from "../../../access/MintingAccessControl.sol";
@@ -17,7 +18,7 @@ import {IImmutableERC20Errors} from "../../../errors/ERC20Errors.sol";
  *  function. The Immutable Hub uses this function to help associate the ERC 20 contract 
  *  with a specific Immutable Hub account.
  */
-contract ImmutableERC20 is Ownable, ERC20Permit, MintingAccessControl {
+contract ImmutableERC20 is Ownable, ERC20Burnable, ERC20Permit, MintingAccessControl {
     uint256 private immutable _maxSupply;
 
     /**
@@ -47,14 +48,6 @@ contract ImmutableERC20 is Ownable, ERC20Permit, MintingAccessControl {
             revert IImmutableERC20Errors.MaxSupplyExceeded(_maxSupply);
         }
         _mint(to, amount);
-    }
-
-    /**
-     * @dev Burns `amount` number of tokens from the `from` address.
-     * @param amount the amount of tokens to burn.
-     */
-    function burn(uint256 amount) external {
-        _burn(msg.sender, amount);
     }
 
     /** 

@@ -79,6 +79,22 @@ contract ImmutableERC20Test is Test {
         assertEq(erc20.balanceOf(tokenReceiver), 0);
     }
 
+    function testBurnFrom() public {
+        address burner = makeAddr("burner");
+        uint256 amount = 100;
+        vm.prank(minter);
+        erc20.mint(tokenReceiver, amount);
+        assertEq(erc20.balanceOf(tokenReceiver), 100);
+        vm.prank(burner);
+        vm.expectRevert("ERC20: insufficient allowance");
+        erc20.burnFrom(tokenReceiver, amount);
+        vm.prank(tokenReceiver);
+        erc20.approve(burner, 100);
+        vm.prank(burner);
+        erc20.burnFrom(tokenReceiver, amount);
+        assertEq(erc20.balanceOf(tokenReceiver), 0);
+    }
+
     function testCanOnlyMintUpToMaxSupply() public {
         address to = makeAddr("to");
         uint256 amount = 1000;

@@ -503,7 +503,7 @@ contract ImmutableSignedZoneV2Test is
         vm.chainId(31338);
         bytes32 domainSeparatorDerived = zone.exposed_domainSeparator();
 
-        assertFalse(domainSeparatorCached == domainSeparatorDerived);
+        assertNotEq(domainSeparatorCached, domainSeparatorDerived);
         assertEq(domainSeparatorDerived, bytes32(0x835aabb0d2af048df195a75a990b42533471d4a4e82842cd54a892eaac463d74));
     }
 
@@ -977,7 +977,7 @@ contract ImmutableSignedZoneV2Test is
         zone.exposed_validateSubstandard4(context, zoneParameters);
     }
 
-    function test_validateSubstandard4_revertsIfDerivedOrderHashesIsNotEqualToHashesInContext() public {
+    function test_validateSubstandard4_revertsIfExpectedOrderHashesAreNotPresent() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         bytes32[] memory orderHashes = new bytes32[](1);
@@ -1212,16 +1212,6 @@ contract ImmutableSignedZoneV2Test is
 
     /* _bytes32ArrayIncludes */
 
-    function test_bytes32ArrayIncludes_returnsFalseIfSourceArrayIsEmpty() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
-
-        bytes32[] memory emptySourceArray = new bytes32[](0);
-        bytes32[] memory valuesArray = new bytes32[](2);
-
-        bool includes = zone.exposed_bytes32ArrayIncludes(emptySourceArray, valuesArray);
-        assertFalse(includes);
-    }
-
     function test_bytes32ArrayIncludes_returnsFalseIfSourceArrayIsSmallerThanValuesArray() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
@@ -1246,7 +1236,7 @@ contract ImmutableSignedZoneV2Test is
         assertFalse(includes);
     }
 
-    function test_bytes32ArrayIncludes_returnsTrueIfSourceArrayIncludesValuesArray() public {
+    function test_bytes32ArrayIncludes_returnsTrueIfSourceArrayEqualsValuesArray() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         bytes32[] memory sourceArray = new bytes32[](2);

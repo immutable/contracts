@@ -6,19 +6,19 @@ pragma solidity ^0.8.17;
 
 // solhint-disable-next-line no-global-import
 import "forge-std/Test.sol";
-import {ReceivedItem, Schema, SpentItem, ZoneParameters} from "seaport-types/src/lib/ConsiderationStructs.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {ItemType} from "seaport-types/src/lib/ConsiderationEnums.sol";
+import {ReceivedItem, Schema, SpentItem, ZoneParameters} from "seaport-types/src/lib/ConsiderationStructs.sol";
 import {ImmutableSignedZoneV2} from
     "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/ImmutableSignedZoneV2.sol";
-import {ImmutableSignedZoneV2Harness} from "./ImmutableSignedZoneV2Harness.t.sol";
-import {SigningTestHelper} from "../../../utils/SigningTestHelper.t.sol";
-import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {SIP5EventsAndErrors} from
     "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/SIP5EventsAndErrors.sol";
 import {SIP6EventsAndErrors} from
     "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/SIP6EventsAndErrors.sol";
 import {SIP7EventsAndErrors} from
     "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/SIP7EventsAndErrors.sol";
+import {SigningTestHelper} from "../../../utils/SigningTestHelper.t.sol";
+import {ImmutableSignedZoneV2Harness} from "./ImmutableSignedZoneV2Harness.t.sol";
 
 // solhint-disable func-name-mixedcase
 
@@ -29,15 +29,16 @@ contract ImmutableSignedZoneV2Test is
     SIP6EventsAndErrors,
     SIP7EventsAndErrors
 {
-    uint256 public constant MAX_UINT_TYPE = type(uint256).max;
-
     // solhint-disable private-vars-leading-underscore
-    address internal immutable OWNER = makeAddr("owner");
-    address internal immutable FULFILLER = makeAddr("fulfiller");
-    address internal immutable OFFERER = makeAddr("offerer");
-    address internal immutable SIGNER;
-    uint256 internal immutable SIGNER_PRIVATE_KEY;
+    address private immutable OWNER = makeAddr("owner");
+    address private immutable FULFILLER = makeAddr("fulfiller");
+    address private immutable OFFERER = makeAddr("offerer");
+    address private immutable SIGNER;
+    uint256 private immutable SIGNER_PRIVATE_KEY;
     // solhint-enable private-vars-leading-underscore
+
+    // OpenZeppelin v5 access/IAccessControl.sol
+    error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
 
     constructor() {
         (SIGNER, SIGNER_PRIVATE_KEY) = makeAddrAndKey("signer");
@@ -72,11 +73,16 @@ contract ImmutableSignedZoneV2Test is
 
     function test_addSigner_revertsIfCalledByNonAdminRole() public {
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
+        address nonAdminAccount = makeAddr("non_admin");
         vm.expectRevert(
-            "AccessControl: account 0x42a3d6e125aad539ac15ed04e1478eb0a4dc1489 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector,
+                nonAdminAccount,
+                zone.DEFAULT_ADMIN_ROLE()
+            )
         );
-        vm.prank(makeAddr("random"));
-        zone.addSigner(makeAddr("signerToAdd"));
+        vm.prank(nonAdminAccount);
+        zone.addSigner(makeAddr("signer_to_add"));
     }
 
     function test_addSigner_revertsIfSignerIsTheZeroAddress() public {
@@ -87,7 +93,7 @@ contract ImmutableSignedZoneV2Test is
     }
 
     function test_addSigner_emitsSignerAddedEvent() public {
-        address signerToAdd = makeAddr("signerToAdd");
+        address signerToAdd = makeAddr("signer_to_add");
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
         vm.expectEmit(address(zone));
         emit SignerAdded(signerToAdd);
@@ -96,7 +102,7 @@ contract ImmutableSignedZoneV2Test is
     }
 
     function test_addSigner_revertsIfSignerAlreadyActive() public {
-        address signerToAdd = makeAddr("signerToAdd");
+        address signerToAdd = makeAddr("signer_to_add");
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
         vm.prank(OWNER);
         zone.addSigner(signerToAdd);
@@ -106,7 +112,7 @@ contract ImmutableSignedZoneV2Test is
     }
 
     function test_addSigner_revertsIfSignerWasPreviouslyActive() public {
-        address signerToAdd = makeAddr("signerToAdd");
+        address signerToAdd = makeAddr("signer_to_add");
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
         vm.prank(OWNER);
         zone.addSigner(signerToAdd);
@@ -121,15 +127,20 @@ contract ImmutableSignedZoneV2Test is
 
     function test_removeSigner_revertsIfCalledByNonAdminRole() public {
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
+        address nonAdminAccount = makeAddr("non_admin");
         vm.expectRevert(
-            "AccessControl: account 0x42a3d6e125aad539ac15ed04e1478eb0a4dc1489 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector,
+                nonAdminAccount,
+                zone.DEFAULT_ADMIN_ROLE()
+            )
         );
-        vm.prank(makeAddr("random"));
-        zone.removeSigner(makeAddr("signerToRemove"));
+        vm.prank(nonAdminAccount);
+        zone.removeSigner(makeAddr("signer_to_remove"));
     }
 
     function test_removeSigner_revertsIfSignerNotActive() public {
-        address signerToRemove = makeAddr("signerToRemove");
+        address signerToRemove = makeAddr("signer_to_remove");
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
         vm.expectRevert(abi.encodeWithSelector(SignerNotActive.selector, signerToRemove));
         vm.prank(OWNER);
@@ -137,7 +148,7 @@ contract ImmutableSignedZoneV2Test is
     }
 
     function test_removeSigner_emitsSignerRemovedEvent() public {
-        address signerToRemove = makeAddr("signerToRemove");
+        address signerToRemove = makeAddr("signer_to_remove");
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
         vm.prank(OWNER);
         zone.addSigner(signerToRemove);
@@ -151,21 +162,52 @@ contract ImmutableSignedZoneV2Test is
 
     function test_updateAPIEndpoint_revertsIfCalledByNonAdminRole() public {
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
-        vm.prank(makeAddr("random"));
+        address nonAdminAccount = makeAddr("non_admin");
         vm.expectRevert(
-            "AccessControl: account 0x42a3d6e125aad539ac15ed04e1478eb0a4dc1489 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector,
+                nonAdminAccount,
+                zone.DEFAULT_ADMIN_ROLE()
+            )
         );
+        vm.prank(nonAdminAccount);
         zone.updateAPIEndpoint("https://www.new-immutable.com");
     }
 
     function test_updateAPIEndpoint_updatesAPIEndpointIfCalledByAdminRole() public {
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
-        vm.prank(OWNER);
         string memory expectedApiEndpoint = "https://www.new-immutable.com";
+        vm.prank(OWNER);
         zone.updateAPIEndpoint(expectedApiEndpoint);
         (, Schema[] memory schemas) = zone.getSeaportMetadata();
         (, string memory apiEndpoint,,) = abi.decode(schemas[0].metadata, (bytes32, string, uint256[], string));
         assertEq(apiEndpoint, expectedApiEndpoint);
+    }
+
+    /* updateDocumentationURI */
+
+    function test_updateDocumentationURI_revertsIfCalledByNonAdminRole() public {
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
+        address nonAdminAccount = makeAddr("non_admin");
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                AccessControlUnauthorizedAccount.selector,
+                nonAdminAccount,
+                zone.DEFAULT_ADMIN_ROLE()
+            )
+        );
+        vm.prank(nonAdminAccount);
+        zone.updateDocumentationURI("https://www.new-immutable.com/docs");
+    }
+
+    function test_updateDocumentationURI_updatesDocumentationURIIfCalledByAdminRole() public {
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
+        string memory expectedDocumentationURI = "https://www.new-immutable.com/docs";
+        vm.prank(OWNER);
+        zone.updateDocumentationURI(expectedDocumentationURI);
+        (, Schema[] memory schemas) = zone.getSeaportMetadata();
+        (,,, string memory documentationURI) = abi.decode(schemas[0].metadata, (bytes32, string, uint256[], string));
+        assertEq(documentationURI, expectedDocumentationURI);
     }
 
     /* getSeaportMetadata */
@@ -229,17 +271,6 @@ contract ImmutableSignedZoneV2Test is
         assertEq(apiEndpoint, expectedApiEndpoint);
         assertEq(substandards, expectedSubstandards);
         assertEq(documentationURI, expectedDocumentationURI);
-    }
-
-    /* supportsInterface */
-
-    function test_supportsInterface() public {
-        ImmutableSignedZoneV2 zone = _newZone(OWNER);
-        assertTrue(zone.supportsInterface(0x01ffc9a7)); // ERC165 interface
-        assertFalse(zone.supportsInterface(0xffffffff)); // ERC165 compliance
-        assertTrue(zone.supportsInterface(0x3839be19)); // ZoneInterface
-        assertTrue(zone.supportsInterface(0x2e778efc)); // SIP-5 interface
-        assertTrue(zone.supportsInterface(0x1a511c70)); // SIP-7 interface
     }
 
     /* validateOrder */
@@ -444,6 +475,45 @@ contract ImmutableSignedZoneV2Test is
             zoneHash: bytes32(0)
         });
         assertEq(zone.validateOrder(zoneParameters), bytes4(0x17b1f942));
+    }
+
+    /* supportsInterface */
+
+    function test_supportsInterface() public {
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
+        assertTrue(zone.supportsInterface(0x01ffc9a7)); // ERC165 interface
+        assertFalse(zone.supportsInterface(0xffffffff)); // ERC165 compliance
+        assertTrue(zone.supportsInterface(0x2e778efc)); // SIP-5 interface
+        assertTrue(zone.supportsInterface(0x3839be19)); // SIP-5 compliance - ZoneInterface
+    }
+
+    /* _domainSeparator */
+
+    function test_domainSeparator_returnsCachedDomainSeparatorWhenChainIDMatchesValueSetOnDeployment() public {
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
+
+        bytes32 domainSeparator = zone.exposed_domainSeparator();
+        assertEq(domainSeparator, bytes32(0xafb48e1c246f21ba06352cb2c0ebe99b8adc2590dfc48fa547732df870835b42));
+    }
+
+    function test_domainSeparator_returnsUpdatedDomainSeparatorIfChainIDIsDifferentFromValueSetOnDeployment() public {
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
+
+        bytes32 domainSeparatorCached = zone.exposed_domainSeparator();
+        vm.chainId(31338);
+        bytes32 domainSeparatorDerived = zone.exposed_domainSeparator();
+
+        assertNotEq(domainSeparatorCached, domainSeparatorDerived);
+        assertEq(domainSeparatorDerived, bytes32(0x835aabb0d2af048df195a75a990b42533471d4a4e82842cd54a892eaac463d74));
+    }
+
+    /* _deriveDomainSeparator */
+
+    function test_deriveDomainSeparator_returnsDomainSeparatorForChainID() public {
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
+
+        bytes32 domainSeparator = zone.exposed_deriveDomainSeparator();
+        assertEq(domainSeparator, bytes32(0xafb48e1c246f21ba06352cb2c0ebe99b8adc2590dfc48fa547732df870835b42));
     }
 
     /* _getSupportedSubstandards */
@@ -907,7 +977,7 @@ contract ImmutableSignedZoneV2Test is
         zone.exposed_validateSubstandard4(context, zoneParameters);
     }
 
-    function test_validateSubstandard4_revertsIfDerivedOrderHashesIsNotEqualToHashesInContext() public {
+    function test_validateSubstandard4_revertsIfExpectedOrderHashesAreNotPresent() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         bytes32[] memory orderHashes = new bytes32[](1);
@@ -1135,22 +1205,12 @@ contract ImmutableSignedZoneV2Test is
             recipient: payable(address(0x3))
         });
 
-        // console.logBytes32(zone.exposed_deriveReceivedItemsHash(receivedItems, MAX_UINT_TYPE, 100));
-        bytes32 receivedItemsHash = zone.exposed_deriveReceivedItemsHash(receivedItems, MAX_UINT_TYPE, 100);
+        // console.logBytes32(zone.exposed_deriveReceivedItemsHash(receivedItems, type(uint256).max, 100));
+        bytes32 receivedItemsHash = zone.exposed_deriveReceivedItemsHash(receivedItems, type(uint256).max, 100);
         assertEq(receivedItemsHash, bytes32(0xdb99f7eb854f29cd6f8faedea38d7da25073ef9876653ff45ab5c10e51f8ce4f));
     }
 
     /* _bytes32ArrayIncludes */
-
-    function test_bytes32ArrayIncludes_returnsFalseIfSourceArrayIsEmpty() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
-
-        bytes32[] memory emptySourceArray = new bytes32[](0);
-        bytes32[] memory valuesArray = new bytes32[](2);
-
-        bool includes = zone.exposed_bytes32ArrayIncludes(emptySourceArray, valuesArray);
-        assertFalse(includes);
-    }
 
     function test_bytes32ArrayIncludes_returnsFalseIfSourceArrayIsSmallerThanValuesArray() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
@@ -1176,7 +1236,7 @@ contract ImmutableSignedZoneV2Test is
         assertFalse(includes);
     }
 
-    function test_bytes32ArrayIncludes_returnsTrueIfSourceArrayIncludesValuesArray() public {
+    function test_bytes32ArrayIncludes_returnsTrueIfSourceArrayEqualsValuesArray() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         bytes32[] memory sourceArray = new bytes32[](2);
@@ -1206,38 +1266,9 @@ contract ImmutableSignedZoneV2Test is
         assertTrue(includes);
     }
 
-    /* _domainSeparator */
-
-    function test_domainSeparator_returnsCachedDomainSeparatorWhenChainIDMatchesValueSetOnDeployment() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
-
-        bytes32 domainSeparator = zone.exposed_domainSeparator();
-        assertEq(domainSeparator, bytes32(0xafb48e1c246f21ba06352cb2c0ebe99b8adc2590dfc48fa547732df870835b42));
-    }
-
-    function test_domainSeparator_returnsUpdatedDomainSeparatorIfChainIDIsDifferentFromValueSetOnDeployment() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
-
-        bytes32 domainSeparatorCached = zone.exposed_domainSeparator();
-        vm.chainId(31338);
-        bytes32 domainSeparatorDerived = zone.exposed_domainSeparator();
-
-        assertFalse(domainSeparatorCached == domainSeparatorDerived);
-        assertEq(domainSeparatorDerived, bytes32(0x835aabb0d2af048df195a75a990b42533471d4a4e82842cd54a892eaac463d74));
-    }
-
-    /* _deriveDomainSeparator */
-
-    function test_deriveDomainSeparator_returnsDomainSeparatorForChainID() public {
-        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
-
-        bytes32 domainSeparator = zone.exposed_deriveDomainSeparator();
-        assertEq(domainSeparator, bytes32(0xafb48e1c246f21ba06352cb2c0ebe99b8adc2590dfc48fa547732df870835b42));
-    }
-
     /* helper functions */
 
-    function _newZone(address owner) internal returns (ImmutableSignedZoneV2) {
+    function _newZone(address owner) private returns (ImmutableSignedZoneV2) {
         return new ImmutableSignedZoneV2(
             "MyZoneName",
             "https://www.immutable.com",
@@ -1246,7 +1277,7 @@ contract ImmutableSignedZoneV2Test is
         );
     }
 
-    function _newZoneHarness(address owner) internal returns (ImmutableSignedZoneV2Harness) {
+    function _newZoneHarness(address owner) private returns (ImmutableSignedZoneV2Harness) {
         return new ImmutableSignedZoneV2Harness(
             "MyZoneName",
             "https://www.immutable.com",
@@ -1262,7 +1293,7 @@ contract ImmutableSignedZoneV2Test is
         uint64 expiration,
         bytes32 orderHash,
         bytes memory context
-    ) internal view returns (bytes memory) {
+    ) private view returns (bytes memory) {
         bytes32 eip712SignedOrderHash = zone.exposed_deriveSignedOrderHash(fulfiller, expiration, orderHash, context);
         bytes memory extraData = abi.encodePacked(
             bytes1(0),

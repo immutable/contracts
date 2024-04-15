@@ -20,7 +20,7 @@ jobs:
       - name: Run tests and install dependancies
         run: forge test -vvv
       - name: Debug Info1
-        if: "!cancelled()"
+        if: '!cancelled()'
         run: pwd
   hardhat-test:
     name: Run Hardhat Tests
@@ -32,7 +32,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: lts/*
-          cache: "yarn"
+          cache: 'yarn'
       - name: Install dependencies
         run: yarn install --frozen-lockfile --network-concurrency 1
       - name: Run Tests
@@ -48,7 +48,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: lts/*
-          cache: "yarn"
+          cache: 'yarn'
       - name: Install dependencies
         run: yarn install --frozen-lockfile --network-concurrency 1
       - name: Run eslint
@@ -63,7 +63,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: lts/*
-          cache: "yarn"
+          cache: 'yarn'
       - name: Install dependencies
         run: yarn install --frozen-lockfile --network-concurrency 1
       - name: Run solhint
@@ -103,12 +103,6 @@ jobs:
         with:
           node-version-file: ".nvmrc"
           registry-url: https://registry.npmjs.org/
-          cache: "yarn"
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile --network-concurrency 1
-      - name: Compile contracts
-        run: yarn compile
-      - name: Build dist files
-        run: rm -rf dist && yarn build
+          cache: 'yarn'
       - name: Test publish
         run: npm pack --dry-run

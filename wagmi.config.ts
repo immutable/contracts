@@ -6,7 +6,7 @@ import ImmutableERC721MintByID from "./foundry-out/ImmutableERC721MintByID.sol/I
 
 // https://github.com/wevm/viem/discussions/1009
 export default defineConfig({
-  out: "abi/index.ts",
+  out: "abi/generated.ts",
   contracts: [
     {
       name: "ImmutableERC721",

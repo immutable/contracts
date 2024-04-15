@@ -2,12 +2,11 @@
   "name": "@imtbl/contracts",
   "description": "Immutable Smart Contracts",
   "version": "0.0.0",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "./dist/abi/index.js",
+  "types": "./dist/abi/index.d.ts",
   "files": [
     "contracts",
-    "abi",
-    "index.ts"
+    "dist/abi"
   ],
   "scripts": {
     "postinstall": "npx rimraf ./node_modules/seaport/foundry.toml",

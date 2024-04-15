@@ -28,7 +28,7 @@ contract ImmutableERC20MinterBurnerPermitTest is Test {
         symbol = "HPY";
         maxSupply = 1000;
 
-        erc20 = new ImmutableERC20MinterBurnerPermit(name, symbol, hubOwner, minter, maxSupply, admin);
+        erc20 = new ImmutableERC20MinterBurnerPermit(admin, minter, hubOwner, name, symbol, maxSupply);
     }
 
     function testInit() public {
@@ -118,5 +118,52 @@ contract ImmutableERC20MinterBurnerPermitTest is Test {
         erc20.mint(to, 1);
         vm.stopPrank();
     }
+
+    function testBurnFrom() public {
+        uint256 amount = 100;
+        address operator = makeAddr("operator");
+        vm.prank(minter);
+        erc20.mint(tokenReceiver, amount);
+        assertEq(erc20.balanceOf(tokenReceiver), 100);
+        vm.prank(tokenReceiver);
+        erc20.increaseAllowance(operator, amount);
+        vm.prank(operator);
+        erc20.burnFrom(tokenReceiver, amount);
+        assertEq(erc20.balanceOf(tokenReceiver), 0);
+    }
+
+    function testPermit() public {
+        uint256 ownerPrivateKey = 1;
+        uint256 spenderPrivateKey = 2;
+        address owner = vm.addr(ownerPrivateKey);
+        address spender = vm.addr(spenderPrivateKey);
+
+        bytes32 PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
+
+        uint256 value = 1e18;
+
+        uint256 deadline = block.timestamp + 1 days;
+        uint256 nonce = erc20.nonces(owner);
+        bytes32 structHash = keccak256(
+            abi.encode(
+                PERMIT_TYPEHASH,
+                owner,
+                spender,
+                value,
+                nonce,
+                deadline
+            )
+        );
+        bytes32 hash = erc20.DOMAIN_SEPARATOR();
+        hash = keccak256(abi.encodePacked("\x19\x01", hash, structHash));
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(ownerPrivateKey, hash);
+
+        vm.startPrank(owner);
+        erc20.permit(owner, spender, value, deadline, v, r, s);
+        vm.stopPrank();
+
+        assertEq(erc20.allowance(owner, spender), value);
+    }
+
 
 }

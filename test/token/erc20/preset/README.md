@@ -29,3 +29,9 @@ All of the tests defined in the table below are in test/erc20/preset/ImmutableER
 | testOnlyMinterCanMunt           | Ensure Only minter role can mint reverts.         | No         | Yes         |
 | testMint                        | Ensure successful minting by minter               | No         | Yes         |
 | testCanOnlyMintUpToMaxSupply    | Ensure can only mint up to max supply             | No         | Yes         |
+| testRenounceLastHubOwnerBlocked | Ensure the last hub owner cannot be renounced     | No         | Yes         |
+| testRenounceLastAdminBlocked    | Ensure the last default admin cannot be renounced | No         | Yes         |
+| testRenounceAdmin               | Ensure admin role can be renounced                | No         | Yes         |
+| testRenounceHubOwner            | Ensure hub owner role can be renounced            | No         | Yes         |
+| testBurnFrom                    | Ensure allowance is required to burnFrom          | Yes        | Yes         |
+| testPermit                      | Ensure Permit works                               | Yes        | Yes         |

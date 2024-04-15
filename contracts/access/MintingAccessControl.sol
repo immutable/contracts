@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
-import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
+import {AccessControlEnumerable, AccessControl, IAccessControl} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 
 abstract contract MintingAccessControl is AccessControlEnumerable {
     /// @notice Role to mint tokens

@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {IImmutableERC20Errors} from "../../../errors/ERC20Errors.sol";
+import {IImmutableERC20Errors} from "./Errors.sol";
 
 
 /**

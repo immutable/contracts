@@ -14,12 +14,12 @@ All of the tests defined in the table below are in test/erc20/preset/ImmutableER
 | testRenounceOwnershipBlocked    | Ensure renounceOwnership reverts.                 | No         | Yes         |
 
 
-## ImmutableERC20.sol
-This section defines tests for contracts/erc20/preset/ImmutableERC20.sol. Note
+## ImmutableERC20MinterBurnerPermit.sol
+This section defines tests for contracts/erc20/preset/ImmutableERC20MinterBurnerPermit.sol. Note
 that this contract extends Open Zeppelin's ERC 20 contract which is extensively tested here:
 https://github.com/OpenZeppelin/openzeppelin-contracts/tree/release-v4.9/test/token/ERC20 .
 
-All of the tests defined in the table below are in test/erc20/preset/ImmutableERC20.t.sol.
+All of the tests defined in the table below are in test/erc20/preset/ImmutableERC20MinterBurnerPermit.t.sol.
 
 | Test name                       |Description                                        | Happy Case | Implemented |
 |---------------------------------| --------------------------------------------------|------------|-------------|

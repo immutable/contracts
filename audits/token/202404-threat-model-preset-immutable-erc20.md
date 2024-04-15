@@ -2,7 +2,7 @@
 This document is a thread model for ImmutableERC20 token contracts built by Immutable.
 
 Contracts covered under this model include:
-[ImmutableERC20](../../contracts/token/erc20/preset/ImmutableERC20.sol)
+[ImmutableERC20MinterBurnerPermit](../../contracts/token/erc20/preset/ImmutableERC20MinterBurnerPermit.sol)
 
 
 ## Context
@@ -21,13 +21,12 @@ The ERC20 token built by Immutable is meant to be used by game studios to releas
 
 ### ImmutableERC20
 
-ImmutableERC20 is a simple wrapper around the [ERC20 implementation from openzeppelin](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol). It also extends [ERC20Permit](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/extensions/ERC20Permit.sol) allowing token holders to offload the approval costs to a third party who wish to operate on behalf of the holder. 
+ImmutableERC20 is a simple wrapper around the [ERC20 implementation from openzeppelin](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol). It also extends [ERC20Permit](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/extensions/ERC20Permit.sol), [ERC20Capped](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/extensions/ERC20Capped.sol) and [ERC20Burnable](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/extensions/ERC20Burnable.sol) allowing token holders to offload the approval costs to a third party who wish to operate on behalf of the holder. 
 
 The contract defines an immutable `_maxSupply` value to track the maximum number of tokens allowed to be in circulation. This helps the token to derive value using scarcity.
 
-The `renounceOwnership()` method from the `Ownable` extension has been overridden to prevent the contract from being ownerless. This is to help Immutable Hub to link tokens based of their owners. 
+The `renonceRole()` method from the `AccessControl` extension has been overridden to prevent the contract from being ownerless. This is to help Immutable Hub to link tokens based of their owners. 
 
-`Owner` and `DEFAULT_ADMIN_ROLE` will share the same key at depolyment, but the `Ownership` can be transferred.
 
 
 ## Attack Surfaces
@@ -48,7 +47,6 @@ Functions that *change* state:
 | ------------------------------------------------------------- | ----------------- | --------------------- |
 | mint(address,uint256)                                         | 0x40c10f19        | MINTER_ROLE           |
 | burn(address,uint256)                                         | 0x9dc29fac        | None - permissionless |
-| renounceOwnership()                                           | 0x715018a6        | OnlyOwner             |
 | transfer(address,uint256)                                     | 0xa9059cbb        | None - permissionless |
 | approve(address,uint256)                                      | 0x095ea7b3        | None - permissionless |
 | increaseAllowance(address,uint256)                            | 0x39509351        | None - permissionless |
@@ -60,7 +58,7 @@ Functions that *change* state:
 | renounceRole(bytes32,address)                                 | 0x36568abe        | None - permissionless |
 | revokeMinterRole(address)                                     | 0x69e2f0fb        | DEFAULT_ADMIN_ROLE    |
 | revokeRole(bytes32,address)                                   | 0xd547741f        | DEFAULT_ADMIN_ROLE    |
-| transferOwnership(address)                                    | 0xf2fde38b        | OnlyOwner             |
+| burnFrom(address,uint256)                                     | 0x79cc6790          | None - permissionless |
 
 Functions that *do not change* state:
 | Name                                                          | Function Selector | Access Control        |
@@ -84,9 +82,10 @@ Functions that *do not change* state:
 | supportsInterface(bytes4)                                     | 0x01ffc9a7        | None - permissionless |
 | symbol()                                                      | 0x95d89b41        | None - permissionless |
 | totalSupply()                                                 | 0x18160ddd        | None - permissionless |
+| cap()                                                         | 0x355274ea        | None - permissionless |
 
 ## Tests
 `forge test` will run all the related tests for the above mentioned repos. The test plan and cases are written in the test files describing the scenario is it testing for. The test plan can be seen [here](../../test/token/erc20/preset/README.md)
 
 ## Diagram 
-![](./202404-threat-model-preset-immutable-erc20/ImmutableERC20.png)
+![](./202404-threat-model-preset-immutable-erc20/ImmutableERC20MinterBurnerPermit.png)

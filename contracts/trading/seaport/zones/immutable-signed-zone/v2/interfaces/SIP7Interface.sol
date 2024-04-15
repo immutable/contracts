@@ -19,9 +19,9 @@ interface SIP7Interface is SIP7EventsAndErrors {
      * @dev The struct for storing signer info.
      */
     struct SignerInfo {
-        /// If the signer is currently active.
+        /// @dev If the signer is currently active.
         bool active;
-        /// If the signer has been active before.
+        /// @dev If the signer has been active before.
         bool previouslyActive;
     }
 
@@ -45,6 +45,13 @@ interface SIP7Interface is SIP7EventsAndErrors {
      * @param newApiEndpoint The new API endpoint.
      */
     function updateAPIEndpoint(string calldata newApiEndpoint) external;
+
+    /**
+     * @notice Update the documentation URI returned by this zone.
+     *
+     * @param newDocumentationURI The new documentation URI.
+     */
+    function updateDocumentationURI(string calldata newDocumentationURI) external;
 
     /**
      * @notice Returns signing information about the zone.

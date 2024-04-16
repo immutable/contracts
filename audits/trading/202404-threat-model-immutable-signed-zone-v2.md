@@ -35,8 +35,6 @@ Seaport: [Documentation](https://github.com/ProjectOpenSea/seaport/blob/20b84b94
 
 SIP-7: [Documentation [TBD]]().
 
-* Note: Immutable Signed Zone (v2) implements substandards 3, 4 and 6.
-
 ## Architecture
 
 ### Top Level Architecture
@@ -66,6 +64,8 @@ The sequence of events is as follows:
    1. `ImmutableSignedZoneV2.sol` validates the fulfilment execution details using the `extraData` payload, reverting if expectations are not met
 
 ### Immutable Signed Zone (v2) Design
+
+Immutable Signed Zone (v2) is an implementation of the SIP-7 specification, supporting substandards 3, 4 and 6.
 
 This section explains the security relevant aspects of the Immutable Signed Zone (v2) contract beyond the scope of the SIP-7 specification.
 

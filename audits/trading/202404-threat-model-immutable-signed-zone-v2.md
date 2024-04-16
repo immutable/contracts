@@ -35,6 +35,8 @@ Seaport: [Documentation](https://github.com/ProjectOpenSea/seaport/blob/20b84b94
 
 SIP-7: [Documentation [TBD]]().
 
+* Note: Immutable Signed Zone (v2) implements substandards 3, 4 and 6.
+
 ## Architecture
 
 ### Top Level Architecture

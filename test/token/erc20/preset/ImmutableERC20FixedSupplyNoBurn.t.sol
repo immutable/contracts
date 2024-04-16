@@ -4,7 +4,7 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 
 import {ImmutableERC20FixedSupplyNoBurn} from "contracts/token/erc20/preset/ImmutableERC20FixedSupplyNoBurn.sol";
-import {IImmutableERC20Errors} from "contracts/errors/ERC20Errors.sol";
+import {IImmutableERC20Errors} from "contracts/token/erc20/preset/Errors.sol";
 
 
 contract ImmutableERC20FixedSupplyNoBurnTest is Test {

@@ -142,6 +142,10 @@ Functions that *do not change* state:
 
 ### Signers
 
+### Upgrade and Storage Slots
+
+`ImmutableSignedZoneV2.sol` is not upgradeable, and hence not subject to an upgrade attack.
+
 ## Perceived Attackers
 
 ### TBD

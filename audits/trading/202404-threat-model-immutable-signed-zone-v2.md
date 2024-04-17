@@ -33,7 +33,7 @@ The threat model is limited to the following Solidity files at GitHash [TBD]:
 
 Seaport: [Documentation](https://github.com/ProjectOpenSea/seaport/blob/20b84b94755ab4fcdd88735d5f8f1f578e07924a/docs/SeaportDocumentation.md) for v1.6 but relevant for v1.5 which Immutable's Seaport fork is based on.
 
-SIP-7: [Documentation [TBD]]().
+SIP-7: [Documentation [TBD]](https://github.com/ProjectOpenSea/SIPs/blob/main/SIPS/sip-7.md).
 
 ## Architecture
 
@@ -142,7 +142,27 @@ Functions that *do not change* state:
 
 ### Admin Roles
 
-### Signers
+Accounts with administrative privileges could be used by attackers to facilitate attacks. This section analyses what each role can do.
+
+#### Accounts with `DEFAULT_ADMIN` role on ImmutableSignedZoneV2 contract
+
+This role is granted to the `owner` specified in the `constructor` of the contract. Accounts with the `DEFAULT_ADMIN` account can:
+
+* Grant can grant administrator roles to any account, including the `DEFAULT_ADMIN` role
+* Revoke `DEFAULT_ADMIN` role from any account
+* Renounce the `DEFAULT_ADMIN` role for itself, possibly leading to no administrators and loss of control of the contract
+* Update API endpoint and documentation URI (no impact to Immutable system as these values are not utilised)
+* Add and remove SIP-7 signers, letting them control the result of order validation
+
+Exploiting this attack surface requires compromising an account with `DEFAULT_ADMIN` role.
+
+### SIP-7 Signers on the ImmutableSignedZoneV2 contract
+
+Accounts added as SIP-7 signers could be used by attackers to facilitate attacks. Accounts added as an SIP-7 signer can:
+
+* Control the result of order validation
+
+Exploiting this attack surface requires compromising an account added as an SIP-7 signer.
 
 ### Upgrade and Storage Slots
 
@@ -150,21 +170,46 @@ Functions that *do not change* state:
 
 ## Perceived Attackers
 
-### TBD
+This section lists the attackers that could attack the trading system.
+
+It is assumed that all attackers have access to all documentation and source code of all systems related to the Immutable zkEVM, irrespective of whether the information resides in a public or private GitHub repository, email, Slack, Confluence, or any other information system.
+
+### Spear Phisher
+
+This attacker compromises accounts of people by using Spear Phishing attacks. For example they send a malicious PDF file to a user, which the user opens, the PDF file then installs malware on the user's computer. At this point, it is assumed that the Spear Phisher Attacker can detect all key strokes, mouse clicks, see all information retrieved, see any file in the user's file system, and execute any program on the user's computer.
+
+### Server Powner
+
+This attacker is able to compromise any server computer, *Powerfully Owning* the computer. For instance, they can compromise an Immutable server responsible for signing SIP-7 data. They can read values from the computer's RAM and access key material for an SIP-7 signer.
+
+### Immutable zkEVM Block Proposer
+
+An operator of an Immutable zkEVM Block Proposer could, within narrow limits, alter the block timestamp of the block they produce. If this block included transactions related to this zone, it could allow an expired signature to evaluated as valid.
+
+### Insider
+
+This attacker works for a company helping operate the Immutable zkEVM. This attacker could be being bribed or blackmailed. They can access the keys that they as an individual employee have access to. For instance, they might be one of the signers of the multi-signer administrative role.
 
 ## Attack Mitigation
 
-### TBD
+This section outlines possible attacks against the attack surfaces by the attackers, and how those attacks are mitigated.
+
+### `DEFAULT_ADMIN` Role Account Compromise
+
+**Detection:** Monitoring role change events and SIP-7 signer events.
+
+The mitigation is to assume that the role will be operated by multi-signature addresses such that an attacker would need to compromise multiple signers simultaneously. As such, even if some keys are compromised due to the Spear Phishing Attacker or the Insider Attacker, the administrative actions will not be able to be executed as a threshold number of keys will not be available.
+
+### SIP-7 Signer Account Compromise
+
+**Detection:** Monitoring order fulfilment events against SIP-7 data signed by Immutable's systems.
+
+The Spear Phisher or Server Powner Attackers can compromise Immutable's systems to extract SIP-7 signer key material. Due to the nature of the trading system requiring high frequency signing of SIP-7 data, signer key material is stored on the server. The mitigation to this is to rotate SIP-7 signers on a regular cadence.
+
+### `block.timestamp` Manipulation
+
+This attack performed by an operator of an Immutable zkEVM Block Proposer, could allow an attacker to alter the result of order validation, only where it concerns SIP-7 signature expiry within a narrow time range. This attack is unlikely to be meaningful for an attacker.
 
 ## Conclusion
 
-
-
-
-
-
-
-
-
-
-
+This threat model has presented the architecture of the system, determined attack surfaces, and identified possible attackers and their capabilities. It has walked through each attack surface and based on the attackers, determined how the attacks are mitigated.

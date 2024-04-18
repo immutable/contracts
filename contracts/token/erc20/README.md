@@ -18,4 +18,5 @@ Contract threat models and audits:
 | Description               | Date             |Version Audited  | Link to Report |
 |---------------------------|------------------|-----------------|----------------|
 | Internal audit            | March 28, 2024   | [b7adf0d7](https://github.com/immutable/contracts/tree/b7adf0d702ea71ae43b65f904c1b18d7cdfbb4a2) | [202403-internal-audit-immutable-erc20.pdf](../../../audits/token/202403-internal-audit-immutable-erc20.pdf) |
+| Internal audit            | April 16. 2024   | [aa6c1d4](https://github.com/immutable/contracts/tree/aa6c1d43a4165a6e4d8cde302fe34b424b99bd32) | [202404-internal-audit-immutable-erc20.pdf](../../../audits/token/202404-internal-audit-immutable-erc20.pdf)
 

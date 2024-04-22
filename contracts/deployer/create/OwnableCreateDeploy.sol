@@ -11,7 +11,8 @@ pragma solidity 0.8.19;
  *      see: https://github.com/axelarnetwork/axelar-gmp-sdk-solidity/blob/5f15a1036215f8b9c8eeb6438d352172b430dd38/contracts/deploy/CreateDeploy.sol
  */
 contract OwnableCreateDeploy {
-    address private owner;
+    // Address that is authorised to call the deploy function.
+    address private immutable owner;
 
     constructor() {
         owner = msg.sender;
@@ -21,11 +22,11 @@ contract OwnableCreateDeploy {
      * @param bytecode The bytecode of the contract to be deployed
      */
     // slither-disable-next-line locked-ether
-
     function deploy(bytes memory bytecode) external payable {
+        // solhint-disable-next-line custom-errors
         require(msg.sender == owner, "CreateDeploy: caller is not the owner");
         assembly {
-            if iszero(create(0, add(bytecode, 32), mload(bytecode))) { revert(0, 0) }
+            if iszero(create(callvalue(), add(bytecode, 32), mload(bytecode))) { revert(0, 0) }
         }
     }
 }

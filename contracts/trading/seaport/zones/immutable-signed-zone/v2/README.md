@@ -33,12 +33,16 @@ flowchart LR
   seaport -- 3a. transferFrom --> erc20[IERC20.sol]
   seaport -- 3b. transferFrom --> erc721[IERC721.sol]
   seaport -- 3c. safeTransferFrom --> erc1155[IERC1155.sol]
-  seaport -- 4. validateOrder --> zone[ImmutableSignedZoneV2.sol]
+  seaport -- 4. validateOrder --> Zone
+  subgraph Zone
+    direction TB
+    zone[ImmutableSignedZoneV2.sol] --> AccessControlEnumerable.sol
+  end
 ```
 
 The sequence of events is as follows:
 
-1. The client makes a HTTP `POST .../fulfillment-data` request to the Immutable Orderbook, which will construct signs and sign an `extraData` payload to return to the client
+1. The client makes a HTTP `POST .../fulfillment-data` request to the Immutable Orderbook, which will construct and sign an `extraData` payload to return to the client
 2. The client calls `fulfillAdvancedOrder` or `fulfillAvailableAdavancedOrders` on `ImmutableSeaport.sol` to fulfill an order
 3. `ImmutableSeaport.sol` executes the fufilment by transferring items between parties
 4. `ImmutableSeaport.sol` calls `validateOrder` on `ImmutableSignedZoneV2.sol`, passing it the fulfilment execution details as well as the `extraData` parameter

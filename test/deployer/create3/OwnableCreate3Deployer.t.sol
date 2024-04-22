@@ -10,8 +10,8 @@ import {ERC20MintableBurnable} from "@axelar-gmp-sdk-solidity/contracts/test/tok
 import {ERC20MintableBurnableInit} from "@axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnableInit.sol";
 import {ContractAddress} from "@axelar-gmp-sdk-solidity/contracts/libs/ContractAddress.sol";
 
-import {OwnableCreate3Deployer} from "../../src/create3/OwnableCreate3Deployer.sol";
-import {OwnableCreateDeploy} from "../../src/create/OwnableCreateDeploy.sol";
+import {OwnableCreate3Deployer} from "../../../contracts/deployer/create3/OwnableCreate3Deployer.sol";
+import {OwnableCreateDeploy} from "../../../contracts/deployer/create/OwnableCreateDeploy.sol";
 
 contract OwnableCreate3DeployerTest is Test {
     OwnableCreate3Deployer private factory;

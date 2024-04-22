@@ -116,21 +116,22 @@ forge inspect ImmutableSignedZoneV2 --pretty methods
 
 Functions that *change* state:
 
-| Name                             | Function Selector | Access Control  |
-| -------------------------------- | ----------------- | --------------- |
-| `addSigner(address)`             | eb12d61e          | `DEFAULT_ADMIN` |
-| `grantRole(bytes32,address)`     | 2f2ff15d          | Role admin      |
-| `removeSigner(address)`          | 0e316ab7          | `DEFAULT_ADMIN` |
-| `renounceRole(bytes32,address)`  | 36568abe          | `msg.sender`    |
-| `revokeRole(bytes32,address)`    | d547741f          | Role admin      |
-| `updateAPIEndpoint(string)`      | 297234d7          | `DEFAULT_ADMIN` |
-| `updateDocumentationURI(string)` | 0a904f08          | `DEFAULT_ADMIN` |
+| Name                             | Function Selector | Access Control      |
+| -------------------------------- | ----------------- | ------------------- |
+| `addSigner(address)`             | eb12d61e          | `ZONE_MANAGER_ROLE` |
+| `grantRole(bytes32,address)`     | 2f2ff15d          | Role admin          |
+| `removeSigner(address)`          | 0e316ab7          | `ZONE_MANAGER_ROLE` |
+| `renounceRole(bytes32,address)`  | 36568abe          | `msg.sender`        |
+| `revokeRole(bytes32,address)`    | d547741f          | Role admin          |
+| `updateAPIEndpoint(string)`      | 297234d7          | `ZONE_MANAGER_ROLE` |
+| `updateDocumentationURI(string)` | 0a904f08          | `ZONE_MANAGER_ROLE` |
 
 Functions that *do not change* state:
 
 | Name                                                                                                                                                           | Function Selector |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
 | `DEFAULT_ADMIN_ROLE()`                                                                                                                                         | a217fddf          |
+| `ZONE_MANAGER_ROLE()`                                                                                                                                          | c6e95ae7          |
 | `getRoleAdmin(bytes32)`                                                                                                                                        | 248a9ca3          |
 | `getRoleMember(bytes32,uint256)`                                                                                                                               | 9010d07c          |
 | `getRoleMemberCount(bytes32)`                                                                                                                                  | ca15c873          |
@@ -148,13 +149,22 @@ Accounts with administrative privileges could be used by attackers to facilitate
 
 This role is granted to the `owner` specified in the `constructor` of the contract. Accounts with the `DEFAULT_ADMIN` account can:
 
-* Grant can grant administrator roles to any account, including the `DEFAULT_ADMIN` role
-* Revoke `DEFAULT_ADMIN` role from any account
-* Renounce the `DEFAULT_ADMIN` role for itself, possibly leading to no administrators and loss of control of the contract
-* Update API endpoint and documentation URI (no impact to Immutable system as these values are not utilised)
-* Add and remove SIP-7 signers, letting them control the result of order validation
+* Grant administrator roles to any account, including the `DEFAULT_ADMIN` role
+* Revoke administrator roles from any account, including the `DEFAULT_ADMIN` role
+  * The `DEFAULT_ADMIN` role cannot be revoked from an account if it the only account with the `DEFAULT_ADMIN` role
+* Renounce the `DEFAULT_ADMIN` role for itself, unless it is the only account with the `DEFAULT_ADMIN` role
 
 Exploiting this attack surface requires compromising an account with `DEFAULT_ADMIN` role.
+
+#### Accounts with `ZONE_MANAGER` role on ImmutableSignedZoneV2 contract
+
+An account with `ZONE_MANAGER` role can:
+
+* Update API endpoint and documentation URI (no impact to Immutable system as these values are not utilised)
+* Add and remove SIP-7 signers, letting them control the result of order validation
+* Renounce the `ZONE_MANAGER` role for itself
+
+Exploiting this attack surface requires compromising an account with `ZONE_MANAGER` role.
 
 ### SIP-7 Signers on the ImmutableSignedZoneV2 contract
 
@@ -196,7 +206,13 @@ This section outlines possible attacks against the attack surfaces by the attack
 
 ### `DEFAULT_ADMIN` Role Account Compromise
 
-**Detection:** Monitoring role change events and SIP-7 signer events.
+**Detection:** Monitoring role change events.
+
+The mitigation is to assume that the role will be operated by multi-signature addresses such that an attacker would need to compromise multiple signers simultaneously. As such, even if some keys are compromised due to the Spear Phishing Attacker or the Insider Attacker, the administrative actions will not be able to be executed as a threshold number of keys will not be available.
+
+### `ZONE_MANAGER` Role Account Compromise
+
+**Detection:** Monitoring SIP-7 signer events.
 
 The mitigation is to assume that the role will be operated by multi-signature addresses such that an attacker would need to compromise multiple signers simultaneously. As such, even if some keys are compromised due to the Spear Phishing Attacker or the Insider Attacker, the administrative actions will not be able to be executed as a threshold number of keys will not be available.
 

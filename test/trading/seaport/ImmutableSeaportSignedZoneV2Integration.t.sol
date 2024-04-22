@@ -41,6 +41,7 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test, SigningTestHelper 
         "./foundry-out/ImmutableSignedZoneV2Harness.t.sol/ImmutableSignedZoneV2Harness.json";
 
     address private immutable OWNER = makeAddr("owner");
+    address private immutable ZONE_MANAGER = makeAddr("zone_manager");
     address private immutable SIGNER;
     uint256 private immutable SIGNER_PRIVATE_KEY;
     address private immutable FULFILLER = makeAddr("fulfiller");
@@ -98,6 +99,10 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test, SigningTestHelper 
             )
         );
         vm.prank(OWNER);
+        bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
+        vm.prank(OWNER);
+        zone.grantRole(managerRole, ZONE_MANAGER);
+        vm.prank(ZONE_MANAGER);
         zone.addSigner(SIGNER);
 
         // seaport

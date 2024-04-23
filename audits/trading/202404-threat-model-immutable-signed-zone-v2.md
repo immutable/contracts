@@ -78,6 +78,7 @@ The Immutable Signed Zone (v2) supports the following roles:
 * Default Admin
   * Creates and removes other administrators
   * First admin is assigned to the `address owner` param on the `constructor`
+* Zone Manager
   * Call the following configuration functions:
     * `addSigner`
     * `removeSigner`

@@ -3,12 +3,11 @@
 pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
-import {IDeploy} from "@axelar-gmp-sdk-solidity/contracts/interfaces/IDeploy.sol";
-
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/ERC20Mock.sol";
-import {ERC20MintableBurnable} from "@axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnable.sol";
-import {ERC20MintableBurnableInit} from "@axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnableInit.sol";
-import {ContractAddress} from "@axelar-gmp-sdk-solidity/contracts/libs/ContractAddress.sol";
+import {IDeploy} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/interfaces/IDeploy.sol";
+import {ERC20MintableBurnable} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnable.sol";
+import {ERC20MintableBurnableInit} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnableInit.sol";
+import {ContractAddress} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/libs/ContractAddress.sol";
 
 import {OwnableCreate3Deployer} from "../../../contracts/deployer/create3/OwnableCreate3Deployer.sol";
 import {OwnableCreateDeploy} from "../../../contracts/deployer/create/OwnableCreateDeploy.sol";

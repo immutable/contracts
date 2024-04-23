@@ -3,8 +3,8 @@
 pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import {Deployer} from "@axelar-gmp-sdk-solidity/contracts/deploy/Deployer.sol";
-import {Create2} from "@axelar-gmp-sdk-solidity/contracts/deploy/Create2.sol";
+import {Deployer} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/deploy/Deployer.sol";
+import {Create2} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/deploy/Create2.sol";
 
 /**
  * @title OwnableCreate2Deployer

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {IDeploy} from "@axelar-gmp-sdk-solidity/contracts/interfaces/IDeploy.sol";
-import {ContractAddress} from "@axelar-gmp-sdk-solidity/contracts/libs/ContractAddress.sol";
+import {IDeploy} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/interfaces/IDeploy.sol";
+import {ContractAddress} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/libs/ContractAddress.sol";
 
 import {OwnableCreate3Address} from "./OwnableCreate3Address.sol";
 import {OwnableCreateDeploy} from "../create/OwnableCreateDeploy.sol";

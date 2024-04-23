@@ -6,4 +6,4 @@ solidity-bytes-utils/=lib/solidity-bytes-utils/
 seaport/contracts/=lib/immutable-seaport-1.5.0+im1.3/contracts/
 seaport-core/=lib/immutable-seaport-core-1.5.0+im1/
 seaport-types/=lib/immutable-seaport-1.5.0+im1.3/lib/seaport-types/
-@axelar-gmp-sdk-solidity=lib/axelar-gmp-sdk-solidity
+@axelar-network/axelar-gmp-sdk-solidity=lib/axelar-gmp-sdk-solidity

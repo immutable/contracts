@@ -11,7 +11,7 @@ Immutable operates a global off-chain orderbook across Immutable zkEVM chains an
 * Centralise liquidity
 * Enforce payment of fees (protocol, royalty, marketplace)
 
-The [Immutable Signed Zone (v2)](../../contracts/trading/seaport/zones/immutable-signed-zone/v2/README.md) is an implementation of [SIP-7: Server-Signed Orders [TBD]](). The reasons Immutable has chosen this solution is:
+The [Immutable Signed Zone (v2)](../../contracts/trading/seaport/zones/immutable-signed-zone/v2/README.md) is an implementation of [SIP-7: Server-Signed Orders](https://github.com/ProjectOpenSea/SIPs/blob/main/SIPS/sip-7.md). The reasons Immutable has chosen this solution is:
 
 * It requires orders to be known by the orderbook prior to fulfilment
 * It allows the orderbook to refuse fulfilment of an order at its discretion (e.g. for gasless cancellations, or compromised collections)
@@ -19,21 +19,23 @@ The [Immutable Signed Zone (v2)](../../contracts/trading/seaport/zones/immutable
 
 ## Threat Model Scope
 
-The threat model is limited to the following Solidity files at GitHash [TBD]:
+The threat model is limited to the following Solidity files at GitHash [`f6dffe08db1ff2daead3abe0c22b44d792ce5e59`](https://github.com/immutable/contracts/blob/f6dffe08db1ff2daead3abe0c22b44d792ce5e59/contracts/trading/seaport/zones/immutable-signed-zone/v2):
 
-* [ImmutableSignedZoneV2.sol [TBD]]()
-* [SIP5EventsAndErrors.sol [TBD]]()
-* [SIP5Interface [TBD]]()
-* [SIP6EventsAndErrors [TBD]]()
-* [SIP6Interface [TBD]]()
-* [SIP7EventsAndErrors [TBD]]()
-* [SIP7Interface [TBD]]()
+* [ImmutableSignedZoneV2.sol](https://github.com/immutable/contracts/blob/f6dffe08db1ff2daead3abe0c22b44d792ce5e59/contracts/trading/seaport/zones/immutable-signed-zone/v2/ImmutableSignedZoneV2.sol)
+* [ZoneAccessControl.sol](https://github.com/immutable/contracts/blob/f6dffe08db1ff2daead3abe0c22b44d792ce5e59/contracts/trading/seaport/zones/immutable-signed-zone/v2/ZoneAccessControl.sol)
+* [ZoneAccessControlEventsAndErrors.sol](https://github.com/immutable/contracts/blob/f6dffe08db1ff2daead3abe0c22b44d792ce5e59/contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/ZoneAccessControlEventsAndErrors.sol)
+* [SIP5EventsAndErrors.sol](https://github.com/immutable/contracts/blob/f6dffe08db1ff2daead3abe0c22b44d792ce5e59/contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/SIP5EventsAndErrors.sol)
+* [SIP5Interface](https://github.com/immutable/contracts/blob/f6dffe08db1ff2daead3abe0c22b44d792ce5e59/contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/SIP5Interface.sol)
+* [SIP6EventsAndErrors](https://github.com/immutable/contracts/blob/f6dffe08db1ff2daead3abe0c22b44d792ce5e59/contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/SIP6EventsAndErrors.sol)
+* [SIP6Interface](https://github.com/immutable/contracts/blob/f6dffe08db1ff2daead3abe0c22b44d792ce5e59/contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/SIP6Interface.sol)
+* [SIP7EventsAndErrors](https://github.com/immutable/contracts/blob/f6dffe08db1ff2daead3abe0c22b44d792ce5e59/contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/SIP7EventsAndErrors.sol)
+* [SIP7Interface](https://github.com/immutable/contracts/blob/f6dffe08db1ff2daead3abe0c22b44d792ce5e59/contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/SIP7Interface.sol)
 
 ## Background
 
 Seaport: [Documentation](https://github.com/ProjectOpenSea/seaport/blob/20b84b94755ab4fcdd88735d5f8f1f578e07924a/docs/SeaportDocumentation.md) for v1.6 but relevant for v1.5 which Immutable's Seaport fork is based on.
 
-SIP-7: [Documentation [TBD]](https://github.com/ProjectOpenSea/SIPs/blob/main/SIPS/sip-7.md).
+SIP-7: [Documentation](https://github.com/ProjectOpenSea/SIPs/blob/main/SIPS/sip-7.md).
 
 ## Architecture
 

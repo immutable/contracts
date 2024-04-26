@@ -4,13 +4,14 @@
 // solhint-disable-next-line compiler-version
 pragma solidity ^0.8.20;
 
-import {ZoneInterface} from "seaport/contracts/interfaces/ZoneInterface.sol";
-import {ZoneParameters, Schema, ReceivedItem} from "seaport-types/src/lib/ConsiderationStructs.sol";
 import {AccessControlEnumerable} from "openzeppelin-contracts-5.0.2/access/extensions/AccessControlEnumerable.sol";
 import {ECDSA} from "openzeppelin-contracts-5.0.2/utils/cryptography/ECDSA.sol";
 import {MessageHashUtils} from "openzeppelin-contracts-5.0.2/utils/cryptography/MessageHashUtils.sol";
 import {ERC165} from "openzeppelin-contracts-5.0.2/utils/introspection/ERC165.sol";
 import {Math} from "openzeppelin-contracts-5.0.2/utils/math/Math.sol";
+import {ZoneInterface} from "seaport/contracts/interfaces/ZoneInterface.sol";
+import {ZoneParameters, Schema, ReceivedItem} from "seaport-types/src/lib/ConsiderationStructs.sol";
+import {ZoneAccessControl} from "./ZoneAccessControl.sol";
 import {SIP5Interface} from "./interfaces/SIP5Interface.sol";
 import {SIP6Interface} from "./interfaces/SIP6Interface.sol";
 import {SIP7Interface} from "./interfaces/SIP7Interface.sol";
@@ -24,11 +25,11 @@ import {SIP7Interface} from "./interfaces/SIP7Interface.sol";
  */
 contract ImmutableSignedZoneV2 is
     ERC165,
+    ZoneAccessControl,
     ZoneInterface,
     SIP5Interface,
     SIP6Interface,
-    SIP7Interface,
-    AccessControlEnumerable
+    SIP7Interface
 {
     /// @dev The EIP-712 domain type hash.
     bytes32 private constant _EIP_712_DOMAIN_TYPEHASH = keccak256(
@@ -82,7 +83,9 @@ contract ImmutableSignedZoneV2 is
      * @param owner            The address of the owner of this contract. Specified in the
      *                         constructor to be CREATE2 / CREATE3 compatible.
      */
-    constructor(string memory zoneName, string memory apiEndpoint, string memory documentationURI, address owner) {
+    constructor(string memory zoneName, string memory apiEndpoint, string memory documentationURI, address owner)
+        ZoneAccessControl(owner)
+    {
         // Set the zone name.
         _ZONE_NAME = zoneName;
 
@@ -100,9 +103,6 @@ contract ImmutableSignedZoneV2 is
 
         // Emit an event to signal a SIP-5 contract has been deployed.
         emit SeaportCompatibleContractDeployed();
-
-        // Grant admin role to the specified owner.
-        _grantRole(DEFAULT_ADMIN_ROLE, owner);
     }
 
     /**
@@ -110,7 +110,7 @@ contract ImmutableSignedZoneV2 is
      *
      * @param signer The new signer address to add.
      */
-    function addSigner(address signer) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+    function addSigner(address signer) external override onlyRole(ZONE_MANAGER_ROLE) {
         // Do not allow the zero address to be added as a signer.
         if (signer == address(0)) {
             revert SignerCannotBeZeroAddress();
@@ -140,7 +140,7 @@ contract ImmutableSignedZoneV2 is
      *
      * @param signer The signer address to remove.
      */
-    function removeSigner(address signer) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+    function removeSigner(address signer) external override onlyRole(ZONE_MANAGER_ROLE) {
         // Revert if the signer is not active.
         if (!_signers[signer].active) {
             revert SignerNotActive(signer);
@@ -158,7 +158,7 @@ contract ImmutableSignedZoneV2 is
      *
      * @param newApiEndpoint The new API endpoint.
      */
-    function updateAPIEndpoint(string calldata newApiEndpoint) external override onlyRole(DEFAULT_ADMIN_ROLE) {
+    function updateAPIEndpoint(string calldata newApiEndpoint) external override onlyRole(ZONE_MANAGER_ROLE) {
         _apiEndpoint = newApiEndpoint;
     }
 
@@ -170,7 +170,7 @@ contract ImmutableSignedZoneV2 is
     function updateDocumentationURI(string calldata newDocumentationURI)
         external
         override
-        onlyRole(DEFAULT_ADMIN_ROLE)
+        onlyRole(ZONE_MANAGER_ROLE)
     {
         _documentationURI = newDocumentationURI;
     }

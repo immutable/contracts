@@ -17,6 +17,8 @@ import {SIP6EventsAndErrors} from
     "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/SIP6EventsAndErrors.sol";
 import {SIP7EventsAndErrors} from
     "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/SIP7EventsAndErrors.sol";
+import {ZoneAccessControlEventsAndErrors} from
+    "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/ZoneAccessControlEventsAndErrors.sol";
 import {SigningTestHelper} from "../../../utils/SigningTestHelper.t.sol";
 import {ImmutableSignedZoneV2Harness} from "./ImmutableSignedZoneV2Harness.t.sol";
 
@@ -25,6 +27,7 @@ import {ImmutableSignedZoneV2Harness} from "./ImmutableSignedZoneV2Harness.t.sol
 contract ImmutableSignedZoneV2Test is
     Test,
     SigningTestHelper,
+    ZoneAccessControlEventsAndErrors,
     SIP5EventsAndErrors,
     SIP6EventsAndErrors,
     SIP7EventsAndErrors
@@ -39,6 +42,7 @@ contract ImmutableSignedZoneV2Test is
 
     // OpenZeppelin v5 access/IAccessControl.sol
     error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
+    error AccessControlBadConfirmation();
 
     constructor() {
         (SIGNER, SIGNER_PRIVATE_KEY) = makeAddrAndKey("signer");
@@ -69,24 +73,142 @@ contract ImmutableSignedZoneV2Test is
         );
     }
 
+    /* grantRole */
+
+    function test_grantRole_revertsIfCalledByNonAdminRole() public {
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
+        address nonAdmin = makeAddr("non_admin");
+        bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
+        vm.expectRevert(
+            abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, nonAdmin, zone.DEFAULT_ADMIN_ROLE())
+        );
+        vm.prank(nonAdmin);
+        zone.grantRole(managerRole, OWNER);
+    }
+
+    function test_grantRole_grantsIfCalledByAdminRole() public {
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
+        address newManager = makeAddr("new_manager");
+        bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
+        vm.prank(OWNER);
+        zone.grantRole(managerRole, newManager);
+        bool newManagerHasManagerRole = zone.hasRole(managerRole, newManager);
+        assertTrue(newManagerHasManagerRole);
+    }
+
+    /* revokeRole */
+
+    function test_revokeRole_revertsIfCalledByNonAdminRole() public {
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
+        bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
+        address managerOne = makeAddr("manager_one");
+        address managerTwo = makeAddr("manager_two");
+        vm.prank(OWNER);
+        zone.grantRole(managerRole, managerOne);
+        vm.prank(OWNER);
+        zone.grantRole(managerRole, managerTwo);
+        vm.expectRevert(
+            abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, managerOne, zone.DEFAULT_ADMIN_ROLE())
+        );
+        vm.prank(managerOne);
+        zone.revokeRole(managerRole, managerTwo);
+    }
+
+    function test_revokeRole_revertsIfRevokingLastDefaultAdminRole() public {
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
+        bytes32 adminRole = zone.DEFAULT_ADMIN_ROLE();
+        vm.expectRevert(abi.encodeWithSelector(LastDefaultAdminRole.selector, OWNER));
+        vm.prank(OWNER);
+        zone.revokeRole(adminRole, OWNER);
+    }
+
+    function test_revokeRole_revokesIfRevokingNonLastDefaultAdminRole() public {
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
+        bytes32 adminRole = zone.DEFAULT_ADMIN_ROLE();
+        address newAdmin = makeAddr("new_admin");
+        vm.prank(OWNER);
+        zone.grantRole(adminRole, newAdmin);
+        vm.prank(OWNER);
+        zone.revokeRole(adminRole, OWNER);
+        bool ownerHasAdminRole = zone.hasRole(adminRole, OWNER);
+        assertFalse(ownerHasAdminRole);
+    }
+
+    function test_revokeRole_revokesIfRevokingLastNonDefaultAdminRole() public {
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
+        bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
+        vm.prank(OWNER);
+        zone.grantRole(managerRole, OWNER);
+        vm.prank(OWNER);
+        zone.revokeRole(managerRole, OWNER);
+        bool ownerHasManagerRole = zone.hasRole(managerRole, OWNER);
+        uint256 managerCount = zone.getRoleMemberCount(managerRole);
+        assertFalse(ownerHasManagerRole);
+        assertEq(managerCount, 0);
+    }
+
+    /* renounceRole */
+
+    function test_renounceRole_revertsIfCallerDoesNotMatchCallerConfirmationAddress() public {
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
+        bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
+        address newManager = makeAddr("new_manager");
+        vm.prank(OWNER);
+        zone.grantRole(managerRole, newManager);
+        vm.expectRevert(abi.encodeWithSelector(AccessControlBadConfirmation.selector));
+        vm.prank(newManager);
+        zone.renounceRole(managerRole, makeAddr("random"));
+    }
+
+    function test_renounceRole_revertsIfRenouncingLastDefaultAdminRole() public {
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
+        bytes32 adminRole = zone.DEFAULT_ADMIN_ROLE();
+        vm.expectRevert(abi.encodeWithSelector(LastDefaultAdminRole.selector, OWNER));
+        vm.prank(OWNER);
+        zone.renounceRole(adminRole, OWNER);
+    }
+
+    function test_renounceRole_revokesIfRenouncingNonLastDefaultAdminRole() public {
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
+        bytes32 adminRole = zone.DEFAULT_ADMIN_ROLE();
+        address newAdmin = makeAddr("new_admin");
+        vm.prank(OWNER);
+        zone.grantRole(adminRole, newAdmin);
+        vm.prank(OWNER);
+        zone.renounceRole(adminRole, OWNER);
+        bool ownerHasAdminRole = zone.hasRole(adminRole, OWNER);
+        assertFalse(ownerHasAdminRole);
+    }
+
+    function test_renounceRole_revokesIfRenouncingLastNonDefaultAdminRole() public {
+        ImmutableSignedZoneV2 zone = _newZone(OWNER);
+        bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
+        vm.prank(OWNER);
+        zone.grantRole(managerRole, OWNER);
+        vm.prank(OWNER);
+        zone.renounceRole(managerRole, OWNER);
+        bool ownerHasManagerRole = zone.hasRole(managerRole, OWNER);
+        uint256 managerCount = zone.getRoleMemberCount(managerRole);
+        assertFalse(ownerHasManagerRole);
+        assertEq(managerCount, 0);
+    }
+
     /* addSigner */
 
-    function test_addSigner_revertsIfCalledByNonAdminRole() public {
+    function test_addSigner_revertsIfCalledByNonZoneManagerRole() public {
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
-        address nonAdminAccount = makeAddr("non_admin");
         vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControlUnauthorizedAccount.selector,
-                nonAdminAccount,
-                zone.DEFAULT_ADMIN_ROLE()
-            )
+            abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, OWNER, zone.ZONE_MANAGER_ROLE())
         );
-        vm.prank(nonAdminAccount);
+        vm.prank(OWNER);
         zone.addSigner(makeAddr("signer_to_add"));
     }
 
     function test_addSigner_revertsIfSignerIsTheZeroAddress() public {
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
+        bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
+        vm.prank(OWNER);
+        zone.grantRole(managerRole, OWNER);
         vm.expectRevert(abi.encodeWithSelector(SignerCannotBeZeroAddress.selector));
         vm.prank(OWNER);
         zone.addSigner(address(0));
@@ -95,6 +217,9 @@ contract ImmutableSignedZoneV2Test is
     function test_addSigner_emitsSignerAddedEvent() public {
         address signerToAdd = makeAddr("signer_to_add");
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
+        bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
+        vm.prank(OWNER);
+        zone.grantRole(managerRole, OWNER);
         vm.expectEmit(address(zone));
         emit SignerAdded(signerToAdd);
         vm.prank(OWNER);
@@ -104,6 +229,9 @@ contract ImmutableSignedZoneV2Test is
     function test_addSigner_revertsIfSignerAlreadyActive() public {
         address signerToAdd = makeAddr("signer_to_add");
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
+        bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
+        vm.prank(OWNER);
+        zone.grantRole(managerRole, OWNER);
         vm.prank(OWNER);
         zone.addSigner(signerToAdd);
         vm.expectRevert(abi.encodeWithSelector(SignerAlreadyActive.selector, signerToAdd));
@@ -114,6 +242,9 @@ contract ImmutableSignedZoneV2Test is
     function test_addSigner_revertsIfSignerWasPreviouslyActive() public {
         address signerToAdd = makeAddr("signer_to_add");
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
+        bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
+        vm.prank(OWNER);
+        zone.grantRole(managerRole, OWNER);
         vm.prank(OWNER);
         zone.addSigner(signerToAdd);
         vm.prank(OWNER);
@@ -125,23 +256,21 @@ contract ImmutableSignedZoneV2Test is
 
     /* removeSigner */
 
-    function test_removeSigner_revertsIfCalledByNonAdminRole() public {
+    function test_removeSigner_revertsIfCalledByNonZoneManagerRole() public {
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
-        address nonAdminAccount = makeAddr("non_admin");
         vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControlUnauthorizedAccount.selector,
-                nonAdminAccount,
-                zone.DEFAULT_ADMIN_ROLE()
-            )
+            abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, OWNER, zone.ZONE_MANAGER_ROLE())
         );
-        vm.prank(nonAdminAccount);
+        vm.prank(OWNER);
         zone.removeSigner(makeAddr("signer_to_remove"));
     }
 
     function test_removeSigner_revertsIfSignerNotActive() public {
         address signerToRemove = makeAddr("signer_to_remove");
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
+        bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
+        vm.prank(OWNER);
+        zone.grantRole(managerRole, OWNER);
         vm.expectRevert(abi.encodeWithSelector(SignerNotActive.selector, signerToRemove));
         vm.prank(OWNER);
         zone.removeSigner(signerToRemove);
@@ -150,6 +279,9 @@ contract ImmutableSignedZoneV2Test is
     function test_removeSigner_emitsSignerRemovedEvent() public {
         address signerToRemove = makeAddr("signer_to_remove");
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
+        bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
+        vm.prank(OWNER);
+        zone.grantRole(managerRole, OWNER);
         vm.prank(OWNER);
         zone.addSigner(signerToRemove);
         vm.expectEmit(address(zone));
@@ -160,22 +292,20 @@ contract ImmutableSignedZoneV2Test is
 
     /* updateAPIEndpoint */
 
-    function test_updateAPIEndpoint_revertsIfCalledByNonAdminRole() public {
+    function test_updateAPIEndpoint_revertsIfCalledByNonZoneManagerRole() public {
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
-        address nonAdminAccount = makeAddr("non_admin");
         vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControlUnauthorizedAccount.selector,
-                nonAdminAccount,
-                zone.DEFAULT_ADMIN_ROLE()
-            )
+            abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, OWNER, zone.ZONE_MANAGER_ROLE())
         );
-        vm.prank(nonAdminAccount);
+        vm.prank(OWNER);
         zone.updateAPIEndpoint("https://www.new-immutable.com");
     }
 
-    function test_updateAPIEndpoint_updatesAPIEndpointIfCalledByAdminRole() public {
+    function test_updateAPIEndpoint_updatesAPIEndpointIfCalledByZoneManagerRole() public {
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
+        bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
+        vm.prank(OWNER);
+        zone.grantRole(managerRole, OWNER);
         string memory expectedApiEndpoint = "https://www.new-immutable.com";
         vm.prank(OWNER);
         zone.updateAPIEndpoint(expectedApiEndpoint);
@@ -186,22 +316,20 @@ contract ImmutableSignedZoneV2Test is
 
     /* updateDocumentationURI */
 
-    function test_updateDocumentationURI_revertsIfCalledByNonAdminRole() public {
+    function test_updateDocumentationURI_revertsIfCalledByNonZoneManagerRole() public {
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
-        address nonAdminAccount = makeAddr("non_admin");
         vm.expectRevert(
-            abi.encodeWithSelector(
-                AccessControlUnauthorizedAccount.selector,
-                nonAdminAccount,
-                zone.DEFAULT_ADMIN_ROLE()
-            )
+            abi.encodeWithSelector(AccessControlUnauthorizedAccount.selector, OWNER, zone.ZONE_MANAGER_ROLE())
         );
-        vm.prank(nonAdminAccount);
+        vm.prank(OWNER);
         zone.updateDocumentationURI("https://www.new-immutable.com/docs");
     }
 
-    function test_updateDocumentationURI_updatesDocumentationURIIfCalledByAdminRole() public {
+    function test_updateDocumentationURI_updatesDocumentationURIIfCalledByZoneManagerRole() public {
         ImmutableSignedZoneV2 zone = _newZone(OWNER);
+        bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
+        vm.prank(OWNER);
+        zone.grantRole(managerRole, OWNER);
         string memory expectedDocumentationURI = "https://www.new-immutable.com/docs";
         vm.prank(OWNER);
         zone.updateDocumentationURI(expectedDocumentationURI);
@@ -430,6 +558,9 @@ contract ImmutableSignedZoneV2Test is
 
     function test_validateOrder_returnsMagicValueOnSuccessfulValidation() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
+        bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
+        vm.prank(OWNER);
+        zone.grantRole(managerRole, OWNER);
         vm.prank(OWNER);
         zone.addSigner(SIGNER);
 

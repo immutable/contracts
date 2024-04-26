@@ -12,6 +12,12 @@ import {SIP7Interface} from
 // solhint-disable func-name-mixedcase
 
 interface IImmutableSignedZoneV2Harness is ZoneInterface, SIP7Interface {
+    function grantRole(bytes32 role, address account) external;
+
+    function DEFAULT_ADMIN_ROLE() external view returns (bytes32);
+
+    function ZONE_MANAGER_ROLE() external view returns (bytes32);
+
     function exposed_domainSeparator() external view returns (bytes32);
 
     function exposed_deriveDomainSeparator() external view returns (bytes32 domainSeparator);

@@ -74,6 +74,7 @@ The following Typescript ABIs are available:
 
 - `ImmutableERC721Abi`
 - `ImmutableERC721MintByIdAbi`
+- `ImmutableERC1155Abi`
 
 An example of how to create and use a contract client in order to interact with a deployed `ImmutableERC721`:
 

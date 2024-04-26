@@ -6,11 +6,11 @@ Immutable Contracts is a library of smart contracts targeted at developers who w
 
 - Token presets, e.g. ERC721
 
-    - [ImmutableERC721](./contracts/token/erc721/preset/ImmutableERC721.sol)
-    - [ImmutableERC721MintByID](./contracts/token/erc721/preset/ImmutableERC721MintByID.sol)
-    - [ImmutableERC1155](./contracts/token/erc1155/preset/ImmutableERC1155.sol)
-    - [ImmutableERC20MinterBurnerPermit](./contracts/token/erc20/preset/ImmutableERC20MinterBurnerPermit.sol)
-    - [ImmutableERC20FixedSupplyNoBurn](./contracts/token/erc20/preset/ImmutableERC20FixedSupplyNoBurn.sol)
+  - [ImmutableERC721](./contracts/token/erc721/preset/ImmutableERC721.sol)
+  - [ImmutableERC721MintByID](./contracts/token/erc721/preset/ImmutableERC721MintByID.sol)
+  - [ImmutableERC1155](./contracts/token/erc1155/preset/ImmutableERC1155.sol)
+  - [ImmutableERC20MinterBurnerPermit](./contracts/token/erc20/preset/ImmutableERC20MinterBurnerPermit.sol)
+  - [ImmutableERC20FixedSupplyNoBurn](./contracts/token/erc20/preset/ImmutableERC20FixedSupplyNoBurn.sol)
 
 - Bridging contracts
 
@@ -65,24 +65,54 @@ contract MyERC721 is ImmutableERC721 {
 }
 ```
 
-#### SDK client
+#### Typescript ABIs
 
-`contracts` comes with a Typescript SDK client that can be used to interface with Immutable preset contracts:
+`contracts` comes with importable Typescript ABIs that can be used to generate a contract client in conjunction with libraries such as `viem` or `wagmi`, so that you can
+interact with deployed preset contracts.
 
-- ImmutableERC721
-- ImmutableERC721MintByID
+The following Typescript ABIs are available:
 
-To import and use the ImmutableERC721 contract client:
+- `ImmutableERC721Abi`
+- `ImmutableERC721MintByIdAbi`
+
+An example of how to create and use a contract client in order to interact with a deployed `ImmutableERC721`:
 
 ```typescript
-import { ERC721Client } from "@imtbl/contracts";
+import { getContract, http, createWalletClient, defineChain } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { ImmutableERC721MintByIdAbi } from "@imtbl/contracts";
 
-const contractAddress = YOUR_CONTRACT_ADDRESS;
+const PRIVATE_KEY = "YOUR_PRIVATE_KEY"; // should be read from environment variable
+const CONTRACT_ADDRESS = "YOUR_CONTRACT_ADDRESS"; // should be of type `0x${string}`
+const RECIPIENT = "ACCOUNT_ADDRESS"; // should be of type `0x${string}`
+const TOKEN_ID = BigInt(1);
 
-const client = new ERC721Client(contractAddress);
+const immutableTestnet = defineChain({
+  id: 13473,
+  name: "imtbl-zkevm-testnet",
+  nativeCurrency: { name: "IMX", symbol: "IMX", decimals: 18 },
+  rpcUrls: {
+    default: {
+      http: ["https://rpc.testnet.immutable.com"],
+    },
+  },
+});
 
-const mintTransaction = await client.populateMint(receiver, 1);
-const tx = await signer.sendTransaction(mintTransaction);
+const walletClient = createWalletClient({
+  chain: immutableTestnet,
+  transport: http(),
+  account: privateKeyToAccount(`0x${PRIVATE_KEY}`),
+});
+
+// Bound contract instance
+const contract = getContract({
+  address: CONTRACT_ADDRESS,
+  abi: ImmutableERC721MintByIdAbi,
+  client: walletClient,
+});
+
+const txHash = await contract.write.mint([recipient, tokenId]);
+console.log(`txHash: ${txHash}`);
 ```
 
 ## Build and Test

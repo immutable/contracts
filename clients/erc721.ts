@@ -18,6 +18,11 @@ export type TransferRequest = ERC721Hybrid.TransferRequestStruct;
 // Struct for burning multiple tokens from the same address
 export type IDBurn = ERC721Hybrid.IDBurnStruct;
 
+/**
+ * @deprecated ERC721Client is deprecated and will be removed in the future. Please refer to
+ * our latest guides for recommendations on interacting with deployed preset contracts:
+ * https://docs.immutable.com/docs/zkEVM/deploy-contracts/interact
+ */
 export class ERC721Client {
   private readonly contract: ImmutableERC721;
 

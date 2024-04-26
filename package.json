@@ -2,8 +2,8 @@
   "name": "@imtbl/contracts",
   "description": "Immutable Smart Contracts",
   "version": "0.0.0",
-  "main": "dist/clients/index.js",
-  "types": "dist/clients/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
     "contracts",
     "dist"

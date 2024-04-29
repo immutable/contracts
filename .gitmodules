@@ -22,3 +22,6 @@
 [submodule "lib/openzeppelin-contracts-5.0.2"]
 	path = lib/openzeppelin-contracts-5.0.2
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "lib/axelar-gmp-sdk-solidity"]
+	path = lib/axelar-gmp-sdk-solidity
+	url = https://github.com/axelarnetwork/axelar-gmp-sdk-solidity

@@ -47,3 +47,15 @@ The sequence of events is as follows:
 3. `ImmutableSeaport.sol` executes the fufilment by transferring items between parties
 4. `ImmutableSeaport.sol` calls `validateOrder` on `ImmutableSignedZoneV2.sol`, passing it the fulfilment execution details as well as the `extraData` parameter
    1. `ImmutableSignedZoneV2.sol` validates the fulfilment execution details using the `extraData` payload, reverting if expectations are not met
+
+## Difference compared to ImmutableSignedZone (v1)
+
+The contract is developed based on ImmutableSignedZone, with the addition of substandard 6 support as well a new role based access control.
+
+### ZoneAccessControl
+
+The contract now uses a finer grained access control with role based access with the `ZoneAccessControl` interface, rather than the `Ownable` interface in the v1 contract. A seperate `zoneManager` roles is used to manage signers and an admin role used to control roles.
+
+### Support of SIP7 substandard 6
+
+The V2 contract now supports substandard-6 of the SIP7 specification, found here (https://github.com/immutable/platform-services/pull/12775). A server side signed order can adhere to substandard 3 + 4 (full fulfillment) or substandard 6 + 4 (partial fulfillment).

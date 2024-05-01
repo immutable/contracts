@@ -1489,7 +1489,7 @@ contract ImmutableSignedZoneV2Test is
         uint256 signerPrivateKey,
         address fulfiller,
         uint64 expiration,
-        bytes32 orderHash,
+        bytes32 orderHash
     ) private view returns (bytes memory) {
         bytes32 eip712SignedOrderHash = zone.exposed_deriveSignedOrderHash(fulfiller, expiration, orderHash, context);
         bytes memory extraData = abi.encodePacked(

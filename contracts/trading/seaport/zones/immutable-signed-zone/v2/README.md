@@ -46,11 +46,13 @@ The sequence of events is as follows:
 2. The client calls `fulfillAdvancedOrder` or `fulfillAvailableAdavancedOrders` on `ImmutableSeaport.sol` to fulfill an order
 3. `ImmutableSeaport.sol` executes the fufilment by transferring items between parties
 4. `ImmutableSeaport.sol` calls `validateOrder` on `ImmutableSignedZoneV2.sol`, passing it the fulfilment execution details as well as the `extraData` parameter
-   1. `ImmutableSignedZoneV2.sol` validates the fulfilment execution details using the `extraData` payload, reverting if expectations are not met
+5. `ImmutableSignedZoneV2.sol` validates the fulfilment execution details using the `extraData` payload, reverting if expectations are not met
 
-## Difference compared to ImmutableSignedZone (v1)
+## Differences compared to ImmutableSignedZone (v1)
 
-The contract is developed based on ImmutableSignedZone, with the addition of substandard 6 support as well a new role based access control.
+The contract was developed based on ImmutableSignedZone, with the addition of:
+ - SIP7 substandard 6 support
+ - Role based access control to be role based
 
 ### ZoneAccessControl
 

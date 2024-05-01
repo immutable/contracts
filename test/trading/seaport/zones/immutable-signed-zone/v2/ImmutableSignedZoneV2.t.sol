@@ -744,7 +744,7 @@ contract ImmutableSignedZoneV2Test is
     }
 
     /* _validateSubstandards */
-    function test_validateSubstandards_emptyContext() public {
+    function test_validateSubstandards_revertsIfEmptyContext() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
 
         ZoneParameters memory zoneParameters = ZoneParameters({

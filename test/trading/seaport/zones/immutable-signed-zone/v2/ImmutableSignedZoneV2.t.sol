@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2
 
 // solhint-disable-next-line compiler-version
-pragma solidity ^0.8.17;
+pragma solidity 0.8.20;
 
 // solhint-disable-next-line no-global-import
 import "forge-std/Test.sol";

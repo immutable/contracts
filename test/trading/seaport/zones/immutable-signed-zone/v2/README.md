@@ -50,6 +50,7 @@ Operational function tests:
 | `test_validateOrder_revertsIfActualFulfillerDoesNotMatchExpectedFulfiller` | Validate order with unexpected fufiller.           | No         | Yes         |
 | `test_validateOrder_revertsIfActualFulfillerDoesNotMatchExpectedFulfiller` | Validate order with expected *any* fufiller.       | Yes        | No          |
 | `test_validateOrder_revertsIfSignerIsNotActive`                            | Validate order with inactive signer.               | No         | Yes         |
+| `test_validateOrder_revertsIfContextIsEmpty`                            | Validate order with an empty context.               | No         | Yes         |
 | `test_validateOrder_returnsMagicValueOnSuccessfulValidation`               | Validate order successfully.                       | Yes        | Yes         |
 
 Internal operational function tests:

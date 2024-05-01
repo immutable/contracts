@@ -397,10 +397,14 @@ contract ImmutableSignedZoneV2 is
         uint256 startIndex = 0;
         uint256 contextLength = context.length;
 
+        // The ImmutableSignedZoneV2 contract enforces at least
+        // one of the supported substandards is present in the context.
+        if (contextLength == 0) {
+            revert InvalidExtraData("invalid context, no substandards present", zoneParameters.orderHash);
+        }
+
         // Each _validateSubstandard* function returns the length of the substandard
         // segment (0 if the substandard was not matched).
-
-        if (startIndex == contextLength) return;
         startIndex = _validateSubstandard3(context[startIndex:], zoneParameters) + startIndex;
 
         if (startIndex == contextLength) return;

@@ -556,6 +556,54 @@ contract ImmutableSignedZoneV2Test is
         zone.validateOrder(zoneParameters);
     }
 
+    function test_validateOrder_revertsIfContextIsEmpty() public {
+        ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
+        bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
+        vm.prank(OWNER);
+        zone.grantRole(managerRole, OWNER);
+        vm.prank(OWNER);
+        zone.addSigner(SIGNER);
+
+        bytes32 orderHash = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
+        uint64 expiration = 100;
+
+        SpentItem[] memory spentItems = new SpentItem[](1);
+        spentItems[0] = SpentItem({itemType: ItemType.ERC1155, token: address(0x5), identifier: 222, amount: 10});
+
+        ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
+        ReceivedItem memory receivedItem = ReceivedItem({
+            itemType: ItemType.ERC20,
+            token: address(0x4),
+            identifier: 0,
+            amount: 20,
+            recipient: payable(address(0x3))
+        });
+        receivedItems[0] = receivedItem;
+
+        bytes32[] memory orderHashes = new bytes32[](1);
+        orderHashes[0] = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
+
+        bytes memory extraData = _buildExtraDataWithoutContext(zone, SIGNER_PRIVATE_KEY, FULFILLER, expiration, orderHash);
+
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
+            fulfiller: FULFILLER,
+            offerer: OFFERER,
+            offer: spentItems,
+            consideration: receivedItems,
+            extraData: extraData,
+            orderHashes: orderHashes,
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+
+        vm.expectRevert(
+            abi.encodeWithSelector(InvalidExtraData.selector, "invalid context, no substandards present", zoneParameters.orderHash)
+        );
+        zone.validateOrder(zoneParameters);
+    }
+
     function test_validateOrder_returnsMagicValueOnSuccessfulValidation() public {
         ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
         bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
@@ -1432,6 +1480,23 @@ contract ImmutableSignedZoneV2Test is
             expiration,
             _signCompact(signerPrivateKey, ECDSA.toTypedDataHash(zone.exposed_domainSeparator(), eip712SignedOrderHash)),
             context
+        );
+        return extraData;
+    }
+
+    function _buildExtraDataWithoutContext(
+        ImmutableSignedZoneV2Harness zone,
+        uint256 signerPrivateKey,
+        address fulfiller,
+        uint64 expiration,
+        bytes32 orderHash,
+    ) private view returns (bytes memory) {
+        bytes32 eip712SignedOrderHash = zone.exposed_deriveSignedOrderHash(fulfiller, expiration, orderHash, context);
+        bytes memory extraData = abi.encodePacked(
+            bytes1(0),
+            fulfiller,
+            expiration,
+            _signCompact(signerPrivateKey, ECDSA.toTypedDataHash(zone.exposed_domainSeparator(), eip712SignedOrderHash))
         );
         return extraData;
     }

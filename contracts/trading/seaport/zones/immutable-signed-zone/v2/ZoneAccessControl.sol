@@ -31,21 +31,21 @@ abstract contract ZoneAccessControl is AccessControlEnumerable, ZoneAccessContro
      * @inheritdoc AccessControl
      */
     function revokeRole(bytes32 role, address account) public override(AccessControl, IAccessControl) onlyRole(getRoleAdmin(role)) {
-        super.revokeRole(role, account);
-
         if (role == DEFAULT_ADMIN_ROLE && super.getRoleMemberCount(DEFAULT_ADMIN_ROLE) == 0) {
             revert LastDefaultAdminRole(account);
         }
+
+        super.revokeRole(role, account);
     }
 
     /**
      * @inheritdoc AccessControl
      */
     function renounceRole(bytes32 role, address callerConfirmation) public override(AccessControl, IAccessControl) {
-        super.renounceRole(role, callerConfirmation);
-
         if (role == DEFAULT_ADMIN_ROLE && super.getRoleMemberCount(DEFAULT_ADMIN_ROLE) == 0) {
             revert LastDefaultAdminRole(callerConfirmation);
         }
+
+        super.renounceRole(role, callerConfirmation);
     }
 }

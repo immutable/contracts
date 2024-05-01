@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2
 
 // solhint-disable-next-line compiler-version
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import {AccessControlEnumerable} from "openzeppelin-contracts-5.0.2/access/extensions/AccessControlEnumerable.sol";
 import {ECDSA} from "openzeppelin-contracts-5.0.2/utils/cryptography/ECDSA.sol";
@@ -22,6 +22,7 @@ import {SIP7Interface} from "./interfaces/SIP7Interface.sol";
  * @notice ImmutableSignedZoneV2 is a zone implementation based on the
  *         SIP-7 standard https://github.com/ProjectOpenSea/SIPs/blob/main/SIPS/sip-7.md
  *         implementing substandards 3, 4 and 6.
+ *         The contract is not upgradable.
  */
 contract ImmutableSignedZoneV2 is
     ERC165,

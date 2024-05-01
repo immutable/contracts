@@ -8,6 +8,8 @@ import {IImmutableERC20Errors} from "./Errors.sol";
 
 
 /**
+ * @notice This contract is now deprecated in favour of ImmutableERC20FixedSupplyNoBurnV2.sol.
+ * 
  * @notice ERC 20 contract that mints a fixed total supply of tokens when the contract 
  *  is deployed.
  * @dev This contract has the concept of an owner, called _hubOwner in the constructor. 
@@ -17,6 +19,8 @@ import {IImmutableERC20Errors} from "./Errors.sol";
  *  with a specific Immutable Hub account.
  */
 contract ImmutableERC20FixedSupplyNoBurn is Ownable, ERC20 {
+    // Report an error if renounceOwnership is called.
+    error RenounceOwnershipNotAllowed();
 
     /**
      * @dev Mints `_totalSupply` number of token and transfers them to `_owner`.

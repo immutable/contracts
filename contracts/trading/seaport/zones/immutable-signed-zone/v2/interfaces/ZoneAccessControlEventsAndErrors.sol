@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2
 
 // solhint-disable compiler-version
-pragma solidity 0.8.20;
+pragma solidity ^0.8.17;
 
 /**
  * @notice ZoneAccessControlEventsAndErrors contains errors and events

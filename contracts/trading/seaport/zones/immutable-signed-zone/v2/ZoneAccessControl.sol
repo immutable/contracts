@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2
 
 // solhint-disable-next-line compiler-version
-pragma solidity 0.8.20;
+pragma solidity ^0.8.20;
 
 import {AccessControl} from "openzeppelin-contracts-5.0.2/access/AccessControl.sol";
 import {IAccessControl} from "openzeppelin-contracts-5.0.2/access/IAccessControl.sol";

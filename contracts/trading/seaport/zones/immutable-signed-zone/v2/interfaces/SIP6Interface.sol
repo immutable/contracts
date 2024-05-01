@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2
 
 // solhint-disable compiler-version
-pragma solidity 0.8.20;
+pragma solidity ^0.8.17;
 
 import {Schema} from "seaport-types/src/lib/ConsiderationStructs.sol";
 import {SIP6EventsAndErrors} from "./SIP6EventsAndErrors.sol";

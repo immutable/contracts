@@ -13,7 +13,7 @@ Contract threat models and audits:
 
 | Description                     | Date | Version Audited | Link to Report |
 | ------------------------------- | ---- | --------------- | -------------- |
-| Not audited and no threat model | -    | -               | -              |
+| Not audited and no threat model | 2024-05-02   | V2               | -  ../../../audits/trading/202405-internal-audit-immutable-signed-zone-v2.pdf            |
 
 ## ImmutableSignedZoneV2
 

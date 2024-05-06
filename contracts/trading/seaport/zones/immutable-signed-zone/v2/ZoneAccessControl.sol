@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2
 
 // solhint-disable-next-line compiler-version
-pragma solidity ^0.8.20;
+pragma solidity 0.8.20;
 
 import {AccessControl} from "openzeppelin-contracts-5.0.2/access/AccessControl.sol";
 import {IAccessControl} from "openzeppelin-contracts-5.0.2/access/IAccessControl.sol";
@@ -31,21 +31,21 @@ abstract contract ZoneAccessControl is AccessControlEnumerable, ZoneAccessContro
      * @inheritdoc AccessControl
      */
     function revokeRole(bytes32 role, address account) public override(AccessControl, IAccessControl) onlyRole(getRoleAdmin(role)) {
-        super.revokeRole(role, account);
-
-        if (role == DEFAULT_ADMIN_ROLE && super.getRoleMemberCount(DEFAULT_ADMIN_ROLE) == 0) {
+        if (role == DEFAULT_ADMIN_ROLE && super.getRoleMemberCount(DEFAULT_ADMIN_ROLE) == 1) {
             revert LastDefaultAdminRole(account);
         }
+
+        super.revokeRole(role, account);
     }
 
     /**
      * @inheritdoc AccessControl
      */
     function renounceRole(bytes32 role, address callerConfirmation) public override(AccessControl, IAccessControl) {
-        super.renounceRole(role, callerConfirmation);
-
-        if (role == DEFAULT_ADMIN_ROLE && super.getRoleMemberCount(DEFAULT_ADMIN_ROLE) == 0) {
+        if (role == DEFAULT_ADMIN_ROLE && super.getRoleMemberCount(DEFAULT_ADMIN_ROLE) == 1) {
             revert LastDefaultAdminRole(callerConfirmation);
         }
+
+        super.renounceRole(role, callerConfirmation);
     }
 }

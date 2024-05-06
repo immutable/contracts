@@ -60,4 +60,4 @@ The contract now uses a finer grained access control with role based access with
 
 ### Support of SIP7 substandard 6
 
-The V2 contract now supports substandard-6 of the SIP7 specification, found here (https://github.com/immutable/platform-services/pull/12775). A server side signed order can adhere to substandard 3 + 4 (full fulfillment) or substandard 6 + 4 (partial fulfillment).
+The V2 contract now supports substandard-6 of the SIP7 specification, found here (https://github.com/immutable/platform-services/pull/12775). A server side signed order can adhere to substandard 3 + 4 (full fulfillment only) or substandard 6 + 4 (full or partial fulfillment).

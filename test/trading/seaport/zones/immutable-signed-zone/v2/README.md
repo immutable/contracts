@@ -50,6 +50,7 @@ Operational function tests:
 | `test_validateOrder_revertsIfActualFulfillerDoesNotMatchExpectedFulfiller` | Validate order with unexpected fufiller.           | No         | Yes         |
 | `test_validateOrder_revertsIfActualFulfillerDoesNotMatchExpectedFulfiller` | Validate order with expected *any* fufiller.       | Yes        | No          |
 | `test_validateOrder_revertsIfSignerIsNotActive`                            | Validate order with inactive signer.               | No         | Yes         |
+| `test_validateOrder_revertsIfContextIsEmpty`                               | Validate order with an empty context.              | No         | Yes         |
 | `test_validateOrder_returnsMagicValueOnSuccessfulValidation`               | Validate order successfully.                       | Yes        | Yes         |
 
 Internal operational function tests:
@@ -61,7 +62,7 @@ Internal operational function tests:
 | `test_deriveDomainSeparator_returnsDomainSeparatorForChainID`                                    | Domain separator derivation.                                                                 | Yes        | Yes         |
 | `test_getSupportedSubstandards`                                                                  | Retrieve Zone's supported substandards.                                                      | Yes        | Yes         |
 | `test_deriveSignedOrderHash_returnsHashOfSignedOrder`                                            | Signed order hash derivation.                                                                | Yes        | Yes         |
-| `test_validateSubstandards_emptyContext`                                                         | Empty context without substandards.                                                          | Yes        | Yes         |
+| `test_validateSubstandards_revertsIfEmptyContext`                                                | Empty context without substandards should revert.                                            | No         | Yes         |
 | `test_validateSubstandards_substandard3`                                                         | Context with substandard 3.                                                                  | Yes        | Yes         |
 | `test_validateSubstandards_substandard4`                                                         | Context with substandard 4.                                                                  | Yes        | Yes         |
 | `test_validateSubstandards_substandard6`                                                         | Context with substandard 6.                                                                  | Yes        | Yes         |

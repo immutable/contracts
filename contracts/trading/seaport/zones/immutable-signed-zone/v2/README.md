@@ -13,7 +13,7 @@ Contract threat models and audits:
 
 | Description                     | Date | Version Audited | Link to Report |
 | ------------------------------- | ---- | --------------- | -------------- |
-| Not audited and no threat model | -    | -               | -              |
+| Not audited and no threat model | 2024-05-02   | V2               | -  ../../../audits/trading/202405-internal-audit-immutable-signed-zone-v2.pdf            |
 
 ## ImmutableSignedZoneV2
 
@@ -46,4 +46,18 @@ The sequence of events is as follows:
 2. The client calls `fulfillAdvancedOrder` or `fulfillAvailableAdavancedOrders` on `ImmutableSeaport.sol` to fulfill an order
 3. `ImmutableSeaport.sol` executes the fufilment by transferring items between parties
 4. `ImmutableSeaport.sol` calls `validateOrder` on `ImmutableSignedZoneV2.sol`, passing it the fulfilment execution details as well as the `extraData` parameter
-   1. `ImmutableSignedZoneV2.sol` validates the fulfilment execution details using the `extraData` payload, reverting if expectations are not met
+5. `ImmutableSignedZoneV2.sol` validates the fulfilment execution details using the `extraData` payload, reverting if expectations are not met
+
+## Differences compared to ImmutableSignedZone (v1)
+
+The contract was developed based on ImmutableSignedZone, with the addition of:
+ - SIP7 substandard 6 support
+ - Role based access control to be role based
+
+### ZoneAccessControl
+
+The contract now uses a finer grained access control with role based access with the `ZoneAccessControl` interface, rather than the `Ownable` interface in the v1 contract. A seperate `zoneManager` roles is used to manage signers and an admin role used to control roles.
+
+### Support of SIP7 substandard 6
+
+The V2 contract now supports substandard-6 of the SIP7 specification, found here (https://github.com/immutable/platform-services/pull/12775). A server side signed order can adhere to substandard 3 + 4 (full fulfillment only) or substandard 6 + 4 (full or partial fulfillment).

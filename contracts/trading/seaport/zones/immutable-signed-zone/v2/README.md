@@ -11,9 +11,10 @@ This zone is used by Immutable to enable:
 
 Contract threat models and audits:
 
-| Description                     | Date | Version Audited | Link to Report |
-| ------------------------------- | ---- | --------------- | -------------- |
-| Not audited and no threat model | 2024-05-02   | V2               | -  ../../../audits/trading/202405-internal-audit-immutable-signed-zone-v2.pdf            |
+| Description    | Date       | Version Audited | Link to Report                                                                                                                      |
+| -------------- | ---------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Threat Model   | 2024-04-15 | V2              | [202404-threat-model-immutable-signed-zone-v2.md](../../../../../../audits/trading/202404-threat-model-immutable-signed-zone-v2.md)       |
+| Internal Audit | 2024-05-02 | V2              | [202405-internal-audit-immutable-signed-zone-v2.pdf](../../../../../../audits/trading/202405-internal-audit-immutable-signed-zone-v2.pdf) |
 
 ## ImmutableSignedZoneV2
 

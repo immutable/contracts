@@ -5,7 +5,6 @@ pragma solidity 0.8.20;
 
 import "forge-std/Test.sol";
 import {ImmutableSignedZoneV2} from "../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/ImmutableSignedZoneV2.sol";
-import "forge-std/console.sol";
 
 /**
  * @title IDeployer Interface

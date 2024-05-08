@@ -85,7 +85,7 @@ const mintTransaction = await client.populateMint(receiver, 1);
 const tx = await signer.sendTransaction(mintTransaction);
 ```
 
-## Build and Test
+## Build, Test and Deploy
 
 Information about how to build and test the contracts can be found in our [build information](BUILD.md).
 

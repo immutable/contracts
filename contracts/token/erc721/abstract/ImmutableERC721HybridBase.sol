@@ -30,7 +30,6 @@ abstract contract ImmutableERC721HybridBase is
      * @param operatorAllowlist_ The address of the operator allowlist
      * @param receiver_ The address of the royalty receiver
      * @param feeNumerator_ The royalty fee numerator
-     * @dev the royalty receiver and amount (this can not be changed once set)
      */
     constructor(
         address owner_,

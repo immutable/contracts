@@ -68,10 +68,11 @@ abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Perm
      * @param receiver The address of the royalty receiver
      * @param feeNumerator The royalty fee numerator
      */
-    function setNFTRoyaltyReceiver(uint256 tokenId, address receiver, uint96 feeNumerator)
-        public
-        onlyRole(MINTER_ROLE)
-    {
+    function setNFTRoyaltyReceiver(
+        uint256 tokenId,
+        address receiver,
+        uint96 feeNumerator
+    ) public onlyRole(MINTER_ROLE) {
         _setTokenRoyalty(tokenId, receiver, feeNumerator);
     }
 
@@ -81,10 +82,11 @@ abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Perm
      * @param receiver The address of the royalty receiver
      * @param feeNumerator The royalty fee numerator
      */
-    function setNFTRoyaltyReceiverBatch(uint256[] calldata tokenIds, address receiver, uint96 feeNumerator)
-        public
-        onlyRole(MINTER_ROLE)
-    {
+    function setNFTRoyaltyReceiverBatch(
+        uint256[] calldata tokenIds,
+        address receiver,
+        uint96 feeNumerator
+    ) public onlyRole(MINTER_ROLE) {
         for (uint256 i = 0; i < tokenIds.length; i++) {
             _setTokenRoyalty(tokenIds[i], receiver, feeNumerator);
         }
@@ -150,13 +152,9 @@ abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Perm
      * @param interfaceId The interface identifier, which is a 4-byte selector.
      * @return True if the contract implements `interfaceId` and the call doesn't revert, otherwise false.
      */
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        virtual
-        override(ERC1155Permit, ERC2981, OperatorAllowlistEnforced)
-        returns (bool)
-    {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(ERC1155Permit, ERC2981, OperatorAllowlistEnforced) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
@@ -252,11 +250,13 @@ abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Perm
      * @param value The amount to transfer.
      * @param data Additional data with no specified format, sent in call to `to`.
      */
-    function _safeTransferFrom(address from, address to, uint256 id, uint256 value, bytes memory data)
-        internal
-        override
-        validateTransfer(from, to)
-    {
+    function _safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        uint256 value,
+        bytes memory data
+    ) internal override validateTransfer(from, to) {
         super._safeTransferFrom(from, to, id, value, data);
     }
 

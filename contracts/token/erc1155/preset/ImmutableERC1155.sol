@@ -56,10 +56,12 @@ contract ImmutableERC1155 is ImmutableERC1155Base {
      * @param values The amounts of tokens to mint
      * @param data Additional data
      */
-    function safeMintBatch(address to, uint256[] calldata ids, uint256[] calldata values, bytes memory data)
-        external
-        onlyRole(MINTER_ROLE)
-    {
+    function safeMintBatch(
+        address to,
+        uint256[] calldata ids,
+        uint256[] calldata values,
+        bytes memory data
+    ) external onlyRole(MINTER_ROLE) {
         super._mintBatch(to, ids, values, data);
     }
 }

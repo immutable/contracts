@@ -193,10 +193,10 @@ contract PaymentSplitter is AccessControlEnumerable, IPaymentSplitterErrors, Ree
      * @param payees the address of new payees
      * @param shares_ the shares of new payees
      */
-    function overridePayees(address payable[] memory payees, uint256[] memory shares_)
-        public
-        onlyRole(DEFAULT_ADMIN_ROLE)
-    {
+    function overridePayees(
+        address payable[] memory payees,
+        uint256[] memory shares_
+    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
         if (payees.length != shares_.length) {
             revert PaymentSplitterLengthMismatchSharesPayees();
         }

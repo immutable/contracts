@@ -42,30 +42,43 @@ contract ImmutableSignedZone is
 {
     /// @dev The EIP-712 digest parameters.
     bytes32 internal immutable _VERSION_HASH = keccak256(bytes("1.0"));
-    bytes32 internal immutable _EIP_712_DOMAIN_TYPEHASH = keccak256(
-        abi.encodePacked(
-            "EIP712Domain(", "string name,", "string version,", "uint256 chainId,", "address verifyingContract", ")"
-        )
-    );
+    bytes32 internal immutable _EIP_712_DOMAIN_TYPEHASH =
+        keccak256(
+            abi.encodePacked(
+                "EIP712Domain(",
+                "string name,",
+                "string version,",
+                "uint256 chainId,",
+                "address verifyingContract",
+                ")"
+            )
+        );
 
-    bytes32 internal immutable _SIGNED_ORDER_TYPEHASH = keccak256(
-        abi.encodePacked(
-            "SignedOrder(", "address fulfiller,", "uint64 expiration,", "bytes32 orderHash,", "bytes context", ")"
-        )
-    );
+    bytes32 internal immutable _SIGNED_ORDER_TYPEHASH =
+        keccak256(
+            abi.encodePacked(
+                "SignedOrder(",
+                "address fulfiller,",
+                "uint64 expiration,",
+                "bytes32 orderHash,",
+                "bytes context",
+                ")"
+            )
+        );
 
     bytes internal constant CONSIDERATION_BYTES =
         abi.encodePacked("Consideration(", "ReceivedItem[] consideration", ")");
 
-    bytes internal constant RECEIVED_ITEM_BYTES = abi.encodePacked(
-        "ReceivedItem(",
-        "uint8 itemType,",
-        "address token,",
-        "uint256 identifier,",
-        "uint256 amount,",
-        "address recipient",
-        ")"
-    );
+    bytes internal constant RECEIVED_ITEM_BYTES =
+        abi.encodePacked(
+            "ReceivedItem(",
+            "uint8 itemType,",
+            "address token,",
+            "uint256 identifier,",
+            "uint256 amount,",
+            "address recipient",
+            ")"
+        );
 
     bytes32 internal constant RECEIVED_ITEM_TYPEHASH = keccak256(RECEIVED_ITEM_BYTES);
 
@@ -184,12 +197,9 @@ contract ImmutableSignedZone is
      * @return validOrderMagicValue A magic value indicating if the order is
      *                              currently valid.
      */
-    function validateOrder(ZoneParameters calldata zoneParameters)
-        external
-        view
-        override
-        returns (bytes4 validOrderMagicValue)
-    {
+    function validateOrder(
+        ZoneParameters calldata zoneParameters
+    ) external view override returns (bytes4 validOrderMagicValue) {
         // Put the extraData and orderHash on the stack for cheaper access.
         bytes calldata extraData = zoneParameters.extraData;
         bytes32 orderHash = zoneParameters.orderHash;
@@ -362,7 +372,8 @@ contract ImmutableSignedZone is
         // first 32bytes of context must be exactly a keccak256 hash of consideration item array
         if (context.length < 32) {
             revert InvalidExtraData(
-                "invalid context, expecting consideration hash followed by order hashes", zoneParameters.orderHash
+                "invalid context, expecting consideration hash followed by order hashes",
+                zoneParameters.orderHash
             );
         }
 
@@ -379,7 +390,8 @@ contract ImmutableSignedZone is
         // context must be a multiple of 32 bytes
         if (orderHashesBytes.length % 32 != 0) {
             revert InvalidExtraData(
-                "invalid context, order hashes bytes not an array of bytes32 hashes", zoneParameters.orderHash
+                "invalid context, order hashes bytes not an array of bytes32 hashes",
+                zoneParameters.orderHash
             );
         }
 
@@ -420,14 +432,16 @@ contract ImmutableSignedZone is
      * @return signedOrderHash The signedOrder hash.
      *
      */
-    function _deriveSignedOrderHash(address fulfiller, uint64 expiration, bytes32 orderHash, bytes calldata context)
-        internal
-        view
-        returns (bytes32 signedOrderHash)
-    {
+    function _deriveSignedOrderHash(
+        address fulfiller,
+        uint64 expiration,
+        bytes32 orderHash,
+        bytes calldata context
+    ) internal view returns (bytes32 signedOrderHash) {
         // Derive the signed order hash.
-        signedOrderHash =
-            keccak256(abi.encode(_SIGNED_ORDER_TYPEHASH, fulfiller, expiration, orderHash, keccak256(context)));
+        signedOrderHash = keccak256(
+            abi.encode(_SIGNED_ORDER_TYPEHASH, fulfiller, expiration, orderHash, keccak256(context))
+        );
     }
 
     /**
@@ -471,10 +485,10 @@ contract ImmutableSignedZone is
         }
 
         // Iterate through each element and compare them
-        for (uint256 i = 0; i < array1Size;) {
+        for (uint256 i = 0; i < array1Size; ) {
             bool found = false;
             bytes32 item = array1[i];
-            for (uint256 j = 0; j < array2Size;) {
+            for (uint256 j = 0; j < array2Size; ) {
                 if (item == array2[j]) {
                     // if item from array1 is in array2, break
                     found = true;

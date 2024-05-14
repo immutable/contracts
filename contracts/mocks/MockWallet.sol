@@ -21,10 +21,12 @@ contract MockWallet {
         IERC1155(token).safeTransferFrom(from, to, tokenId, amount, "");
     }
 
-    function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data)
-        external
-        returns (bytes4)
-    {
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external returns (bytes4) {
         emit Received(operator, from, tokenId, 1, data);
         return bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"));
     }
@@ -39,10 +41,13 @@ contract MockWallet {
         IERC1155(token).safeBatchTransferFrom(from, to, tokenIds, amounts, "");
     }
 
-    function onERC1155Received(address operator, address from, uint256 id, uint256 value, bytes calldata data)
-        external
-        returns (bytes4)
-    {
+    function onERC1155Received(
+        address operator,
+        address from,
+        uint256 id,
+        uint256 value,
+        bytes calldata data
+    ) external returns (bytes4) {
         emit Received(operator, from, id, value, data);
         return bytes4(keccak256("onERC1155Received(address,address,uint256,uint256,bytes)"));
     }

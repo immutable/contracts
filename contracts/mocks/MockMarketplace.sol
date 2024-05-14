@@ -34,10 +34,7 @@ contract MockMarketplace {
     /// @notice This code is only for testing purposes. Do not use similar
     /// @notice constructions in production code as they are open to attack.
     /// @dev For details see: https://github.com/crytic/slither/wiki/Detector-Documentation#arbitrary-from-in-transferfrom
-    function executeTransferRoyalties(address from, address recipient, uint256 _tokenId, uint256 price)
-        public
-        payable
-    {
+    function executeTransferRoyalties(address from, address recipient, uint256 _tokenId, uint256 price) public payable {
         if (from == address(0)) {
             revert ZeroAddress();
         }

@@ -64,8 +64,8 @@ abstract contract OperatorAllowlistEnforced is AccessControlEnumerable, Operator
         // 1. caller is an EOA
         // 2. caller is Allowlisted or is the calling address bytecode is Allowlisted
         if (
-            msg.sender != tx.origin // solhint-disable-line avoid-tx-origin
-                && !operatorAllowlist.isAllowlisted(msg.sender)
+            msg.sender != tx.origin && // solhint-disable-line avoid-tx-origin
+            !operatorAllowlist.isAllowlisted(msg.sender)
         ) {
             revert CallerNotInAllowlist(msg.sender);
         }

@@ -7,10 +7,12 @@ import {Mintable} from "./Mintable.sol";
 
 // slither-disable-start missing-inheritance
 contract Asset is ERC721, Mintable {
-    constructor(address _owner, string memory _name, string memory _symbol, address _imx)
-        ERC721(_name, _symbol)
-        Mintable(_owner, _imx)
-    {}
+    constructor(
+        address _owner,
+        string memory _name,
+        string memory _symbol,
+        address _imx
+    ) ERC721(_name, _symbol) Mintable(_owner, _imx) {}
 
     function _mintFor(address user, uint256 id, bytes memory) internal override {
         _safeMint(user, id);

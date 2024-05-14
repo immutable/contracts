@@ -7,8 +7,7 @@ pragma solidity 0.8.20;
 import {AccessControl} from "openzeppelin-contracts-5.0.2/access/AccessControl.sol";
 import {IAccessControl} from "openzeppelin-contracts-5.0.2/access/IAccessControl.sol";
 import {AccessControlEnumerable} from "openzeppelin-contracts-5.0.2/access/extensions/AccessControlEnumerable.sol";
-import {ZoneAccessControlEventsAndErrors} from
-    "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/ZoneAccessControlEventsAndErrors.sol";
+import {ZoneAccessControlEventsAndErrors} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/ZoneAccessControlEventsAndErrors.sol";
 
 /**
  * @notice ZoneAccessControl encapsulates access control functionality for the zone.
@@ -30,11 +29,10 @@ abstract contract ZoneAccessControl is AccessControlEnumerable, ZoneAccessContro
     /**
      * @inheritdoc AccessControl
      */
-    function revokeRole(bytes32 role, address account)
-        public
-        override(AccessControl, IAccessControl)
-        onlyRole(getRoleAdmin(role))
-    {
+    function revokeRole(
+        bytes32 role,
+        address account
+    ) public override(AccessControl, IAccessControl) onlyRole(getRoleAdmin(role)) {
         if (role == DEFAULT_ADMIN_ROLE && super.getRoleMemberCount(DEFAULT_ADMIN_ROLE) == 1) {
             revert LastDefaultAdminRole(account);
         }

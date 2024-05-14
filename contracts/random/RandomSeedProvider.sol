@@ -3,8 +3,7 @@
 pragma solidity 0.8.19;
 
 import {UUPSUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/proxy/utils/UUPSUpgradeable.sol";
-import {AccessControlEnumerableUpgradeable} from
-    "openzeppelin-contracts-upgradeable-4.9.3/access/AccessControlEnumerableUpgradeable.sol";
+import {AccessControlEnumerableUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/access/AccessControlEnumerableUpgradeable.sol";
 import {IOffchainRandomSource} from "./offchainsources/IOffchainRandomSource.sol";
 
 /**
@@ -95,11 +94,12 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
      * @param _upgradeAdmin is the account that has UPGRADE_ADMIN_ROLE privilege.
      * @param _ranDaoAvailable indicates if the chain supports the PREVRANDAO opcode.
      */
-    function initialize(address _roleAdmin, address _randomAdmin, address _upgradeAdmin, bool _ranDaoAvailable)
-        public
-        virtual
-        initializer
-    {
+    function initialize(
+        address _roleAdmin,
+        address _randomAdmin,
+        address _upgradeAdmin,
+        bool _ranDaoAvailable
+    ) public virtual initializer {
         _grantRole(DEFAULT_ADMIN_ROLE, _roleAdmin);
         _grantRole(RANDOM_ADMIN_ROLE, _randomAdmin);
         _grantRole(UPGRADE_ADMIN_ROLE, _upgradeAdmin);
@@ -212,10 +212,10 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
      * @param _randomSource The source to use when retrieving the random seed.
      * @return _randomSeed The value from which random values can be derived.
      */
-    function getRandomSeed(uint256 _randomFulfilmentIndex, address _randomSource)
-        external
-        returns (bytes32 _randomSeed)
-    {
+    function getRandomSeed(
+        uint256 _randomFulfilmentIndex,
+        address _randomSource
+    ) external returns (bytes32 _randomSeed) {
         if (_randomSource == ONCHAIN) {
             _generateNextRandomOnChain();
             if (_randomFulfilmentIndex >= nextRandomIndex) {
@@ -252,11 +252,9 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
      * @notice Check that msg.sender is authorised to perform the contract upgrade.
      */
     // solhint-disable no-empty-blocks
-    function _authorizeUpgrade(address newImplementation)
-        internal
-        override(UUPSUpgradeable)
-        onlyRole(UPGRADE_ADMIN_ROLE)
-    {
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal override(UUPSUpgradeable) onlyRole(UPGRADE_ADMIN_ROLE) {
         // Nothing to do beyond upgrade authorisation check.
     }
     // solhint-enable no-empty-blocks

@@ -103,10 +103,11 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
      *  @param feeNumerator the royalty fee numerator
      *  @dev This can only be called by the a minter. See ERC2981 for more details on _setTokenRoyalty
      */
-    function setNFTRoyaltyReceiver(uint256 tokenId, address receiver, uint96 feeNumerator)
-        public
-        onlyRole(MINTER_ROLE)
-    {
+    function setNFTRoyaltyReceiver(
+        uint256 tokenId,
+        address receiver,
+        uint96 feeNumerator
+    ) public onlyRole(MINTER_ROLE) {
         _setTokenRoyalty(tokenId, receiver, feeNumerator);
     }
 
@@ -117,10 +118,11 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
      *  @param feeNumerator the royalty fee numerator
      *  @dev This can only be called by the a minter. See ERC2981 for more details on _setTokenRoyalty
      */
-    function setNFTRoyaltyReceiverBatch(uint256[] calldata tokenIds, address receiver, uint96 feeNumerator)
-        public
-        onlyRole(MINTER_ROLE)
-    {
+    function setNFTRoyaltyReceiverBatch(
+        uint256[] calldata tokenIds,
+        address receiver,
+        uint96 feeNumerator
+    ) public onlyRole(MINTER_ROLE) {
         for (uint256 i = 0; i < tokenIds.length; i++) {
             _setTokenRoyalty(tokenIds[i], receiver, feeNumerator);
         }
@@ -193,7 +195,9 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
      * @notice Returns the supported interfaces
      *  @param interfaceId the interface to check for support
      */
-    function supportsInterface(bytes4 interfaceId)
+    function supportsInterface(
+        bytes4 interfaceId
+    )
         public
         view
         virtual
@@ -222,11 +226,11 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
      * @inheritdoc ERC721Permit
      * @dev Note it will validate the to and from address in the allowlist
      */
-    function _transfer(address from, address to, uint256 tokenId)
-        internal
-        override(ERC721Permit)
-        validateTransfer(from, to)
-    {
+    function _transfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override(ERC721Permit) validateTransfer(from, to) {
         super._transfer(from, to, tokenId);
     }
 

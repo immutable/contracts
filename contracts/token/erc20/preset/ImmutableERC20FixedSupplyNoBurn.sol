@@ -25,9 +25,13 @@ contract ImmutableERC20FixedSupplyNoBurn is Ownable, ERC20 {
      * @param _treasurer Initial owner of entire supply of all tokens.
      * @param _hubOwner The account associated with Immutable Hub.
      */
-    constructor(string memory _name, string memory _symbol, uint256 _totalSupply, address _treasurer, address _hubOwner)
-        ERC20(_name, _symbol)
-    {
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        uint256 _totalSupply,
+        address _treasurer,
+        address _hubOwner
+    ) ERC20(_name, _symbol) {
         _mint(_treasurer, _totalSupply);
         _transferOwnership(_hubOwner);
     }

@@ -108,7 +108,7 @@ contract AccessControlledDeployer is AccessControlEnumerable, Pausable {
     }
 
     /**
-     * @notice Revokes the DEPLOYER_ROLE for a list of addresses
+     * @notice Revokes the DEPLOYER_ROLE from a list of addresses
      * @param deployers list of addresses to revoke the DEPLOYER_ROLE from
      * @dev Only address with DEFAULT_ADMIN_ROLE can call this function
      * @dev The function emits `RoleRevoked` event for each address for which the DEPLOYER_ROLE was revoked
@@ -132,6 +132,7 @@ contract AccessControlledDeployer is AccessControlEnumerable, Pausable {
      * @param newOwner The new owner of the deployer contract
      * @dev Only address with DEFAULT_ADMIN_ROLE can call this function
      * @dev This function requires that the current owner of `ownableDeployer` is this contract
+     * @dev The function emits `OwnershipTransferred` event if the ownership is successfully transferred
      */
     function transferOwnershipOfDeployer(
         Ownable ownableDeployer,

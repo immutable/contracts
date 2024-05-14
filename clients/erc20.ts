@@ -8,6 +8,11 @@ import { ERC20__factory } from "../typechain-types/factories/@openzeppelin/contr
 import { PromiseOrValue } from "../typechain-types/common";
 import { defaultGasOverrides } from "./config/overrides";
 
+/**
+ * @deprecated ERC20Client is deprecated and will be removed in the future. Please refer to
+ * our latest guides for recommendations on interacting with deployed preset contracts:
+ * https://docs.immutable.com/docs/zkEVM/deploy-contracts/interact
+ */
 export class ERC20Client {
   private readonly contract: ERC20;
 

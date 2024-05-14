@@ -18,6 +18,11 @@ export type TransferRequest = ImmutableERC721Base.TransferRequestStruct;
 // Struct for safe burning multiple tokens from a single address.
 export type IDBurn = ImmutableERC721Base.IDBurnStruct;
 
+/**
+ * @deprecated ERC721MintByIDClient is deprecated and will be removed in the future. Please refer to
+ * our latest guides for recommendations on interacting with deployed preset contracts:
+ * https://docs.immutable.com/docs/zkEVM/deploy-contracts/interact
+ */
 export class ERC721MintByIDClient {
   private readonly contract: ImmutableERC721MintByID;
 

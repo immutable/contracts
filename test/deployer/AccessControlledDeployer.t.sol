@@ -26,6 +26,10 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
 
     event Deployed(address indexed deployedAddress, address indexed sender, bytes32 indexed salt, bytes32 bytecodeHash);
 
+    error ZeroAddress();
+    error EmptyDeployerList();
+    error NotOwnerOfDeployer();
+
     function setUp() public {
         rbacDeployer = new AccessControlledDeployer(admin, pauser, unpauser);
 
@@ -38,17 +42,17 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
      * Constructor
      */
     function test_Constructor_RevertIf_AdminIsZeroAddress() public {
-        vm.expectRevert("admin is the zero address");
+        vm.expectRevert(ZeroAddress.selector);
         new AccessControlledDeployer(address(0), pauser, unpauser);
     }
 
     function test_Constructor_RevertIf_PauserIsZeroAddress() public {
-        vm.expectRevert("pauser is the zero address");
+        vm.expectRevert(ZeroAddress.selector);
         new AccessControlledDeployer(admin, address(0), unpauser);
     }
 
     function test_Constructor_RevertIf_UnpauserIsZeroAddress() public {
-        vm.expectRevert("unpauser is the zero address");
+        vm.expectRevert(ZeroAddress.selector);
         new AccessControlledDeployer(admin, pauser, address(0));
     }
 
@@ -91,20 +95,20 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
     function test_RevertIf_TransferDeployerOwnership_WithZeroOwnerAddress() public {
         OwnableCreate2Deployer create2Deployer = new OwnableCreate2Deployer(address(rbacDeployer));
         vm.startPrank(admin);
-        vm.expectRevert("new owner is the zero address");
+        vm.expectRevert(ZeroAddress.selector);
         rbacDeployer.transferOwnershipOfDeployer(create2Deployer, address(0));
     }
 
     function test_RevertIf_TransferDeployerOwnership_WhenNotCurrentOwner() public {
         OwnableCreate2Deployer create2Deployer = new OwnableCreate2Deployer(makeAddr("currentOwner"));
         vm.startPrank(admin);
-        vm.expectRevert("deployer contract is not owned by this contract");
+        vm.expectRevert(NotOwnerOfDeployer.selector);
         rbacDeployer.transferOwnershipOfDeployer(create2Deployer, makeAddr("newOwner2"));
     }
 
     function test_RevertIf_TransferDeployerOwnership_WithZeroDeployerAddress() public {
         vm.startPrank(admin);
-        vm.expectRevert("deployer contract is the zero address");
+        vm.expectRevert(ZeroAddress.selector);
         rbacDeployer.transferOwnershipOfDeployer(Ownable(address(0)), makeAddr("newOwner2"));
     }
 
@@ -169,7 +173,7 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
      */
     function test_RevertIf_GrantDeployerRole_WithEmptyArray() public {
         address[] memory emptyDeployers = new address[](0);
-        vm.expectRevert("deployers list is empty");
+        vm.expectRevert(EmptyDeployerList.selector);
         vm.prank(admin);
         rbacDeployer.grantDeployerRole(emptyDeployers);
     }
@@ -180,7 +184,7 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
         // note that second deployer in the array is the zero address
 
         vm.prank(admin);
-        vm.expectRevert("deployer is the zero address");
+        vm.expectRevert(ZeroAddress.selector);
         rbacDeployer.grantDeployerRole(newDeployers);
     }
 
@@ -213,7 +217,7 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
 
     function test_RevertIf_RevokeDeployerRole_WithEmptyArray() public {
         address[] memory emptyDeployers = new address[](0);
-        vm.expectRevert("deployers list is empty");
+        vm.expectRevert(EmptyDeployerList.selector);
         vm.prank(admin);
         rbacDeployer.revokeDeployerRole(emptyDeployers);
     }
@@ -224,7 +228,7 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
         // note that second deployer in the array is the zero address
 
         vm.prank(admin);
-        vm.expectRevert("deployer is the zero address");
+        vm.expectRevert(ZeroAddress.selector);
         rbacDeployer.grantDeployerRole(existingDeployers);
     }
 

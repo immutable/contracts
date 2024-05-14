@@ -15,25 +15,19 @@ import {IImmutableERC721Errors} from "../../../errors/Errors.sol";
  * @title ERC721Permit: An extension of the ERC721Burnable NFT standard that supports off-chain approval via permits.
  * @dev This contract implements ERC-4494 as well, allowing tokens to be approved via off-chain signed messages.
  */
-
 abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableERC721Errors {
-    /** @notice mapping used to keep track of nonces of each token ID for validating
+    /**
+     * @notice mapping used to keep track of nonces of each token ID for validating
      *  signatures
      */
     mapping(uint256 tokenId => uint256 nonce) private _nonces;
 
-    /** @dev the unique identifier for the permit struct to be EIP 712 compliant */
-    bytes32 private constant _PERMIT_TYPEHASH =
-        keccak256(
-            abi.encodePacked(
-                "Permit(",
-                "address spender,"
-                "uint256 tokenId,"
-                "uint256 nonce,"
-                "uint256 deadline"
-                ")"
-            )
-        );
+    /**
+     * @dev the unique identifier for the permit struct to be EIP 712 compliant
+     */
+    bytes32 private constant _PERMIT_TYPEHASH = keccak256(
+        abi.encodePacked("Permit(", "address spender," "uint256 tokenId," "uint256 nonce," "uint256 deadline" ")")
+    );
 
     constructor(string memory name, string memory symbol) ERC721(name, symbol) EIP712(name, "1") {}
 
@@ -72,9 +66,8 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
      * @return True if the contract implements `interfaceId` and the call doesn't revert, otherwise false.
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165, ERC721) returns (bool) {
-        return
-            interfaceId == type(IERC4494).interfaceId || // 0x5604e225
-            super.supportsInterface(interfaceId);
+        return interfaceId == type(IERC4494).interfaceId // 0x5604e225
+            || super.supportsInterface(interfaceId);
     }
 
     /**
@@ -107,11 +100,8 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
         // EOA signature validation
         if (sig.length == 64) {
             // ERC2098 Sig
-            recoveredSigner = ECDSA.recover(
-                digest,
-                bytes32(BytesLib.slice(sig, 0, 32)),
-                bytes32(BytesLib.slice(sig, 32, 64))
-            );
+            recoveredSigner =
+                ECDSA.recover(digest, bytes32(BytesLib.slice(sig, 0, 32)), bytes32(BytesLib.slice(sig, 32, 64)));
         } else if (sig.length == 65) {
             // typical EDCSA Sig
             recoveredSigner = ECDSA.recover(digest, sig);
@@ -156,9 +146,8 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
      */
     function _isValidERC1271Signature(address spender, bytes32 digest, bytes memory sig) private view returns (bool) {
         // slither-disable-next-line low-level-calls
-        (bool success, bytes memory res) = spender.staticcall(
-            abi.encodeWithSelector(IERC1271.isValidSignature.selector, digest, sig)
-        );
+        (bool success, bytes memory res) =
+            spender.staticcall(abi.encodeWithSelector(IERC1271.isValidSignature.selector, digest, sig));
 
         if (success && res.length == 32) {
             bytes4 decodedRes = abi.decode(res, (bytes4));

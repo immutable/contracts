@@ -53,11 +53,10 @@ contract ChainlinkSourceAdaptor is VRFConsumerBaseV2, SourceAdaptorBase {
      * @param _subId Subscription id.
      * @param _callbackGasLimit Gas limit to pass when calling the callback.
      */
-    function configureRequests(
-        bytes32 _keyHash,
-        uint64 _subId,
-        uint32 _callbackGasLimit
-    ) external onlyRole(CONFIG_ADMIN_ROLE) {
+    function configureRequests(bytes32 _keyHash, uint64 _subId, uint32 _callbackGasLimit)
+        external
+        onlyRole(CONFIG_ADMIN_ROLE)
+    {
         keyHash = _keyHash;
         subId = _subId;
         callbackGasLimit = _callbackGasLimit;
@@ -68,24 +67,20 @@ contract ChainlinkSourceAdaptor is VRFConsumerBaseV2, SourceAdaptorBase {
      * @inheritdoc IOffchainRandomSource
      */
     function requestOffchainRandom() external override(IOffchainRandomSource) returns (uint256 _requestId) {
-        return
-            VRFCoordinatorV2Interface(vrfCoordinator).requestRandomWords(
-                keyHash,
-                subId,
-                MIN_CONFIRMATIONS,
-                callbackGasLimit,
-                NUM_WORDS
-            );
+        return VRFCoordinatorV2Interface(vrfCoordinator).requestRandomWords(
+            keyHash, subId, MIN_CONFIRMATIONS, callbackGasLimit, NUM_WORDS
+        );
     }
 
     /**
      * @inheritdoc VRFConsumerBaseV2
      */
     // solhint-disable-next-line private-vars-leading-underscore
-    function fulfillRandomWords(
-        uint256 _requestId,
-        uint256[] memory _randomWords
-    ) internal virtual override(VRFConsumerBaseV2) {
+    function fulfillRandomWords(uint256 _requestId, uint256[] memory _randomWords)
+        internal
+        virtual
+        override(VRFConsumerBaseV2)
+    {
         _fulfillRandomWords(_requestId, _randomWords);
     }
 }

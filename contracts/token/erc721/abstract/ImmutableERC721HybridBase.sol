@@ -51,9 +51,7 @@ abstract contract ImmutableERC721HybridBase is
     }
 
     /// @dev Returns the supported interfaces
-    function supportsInterface(
-        bytes4 interfaceId
-    )
+    function supportsInterface(bytes4 interfaceId)
         public
         view
         virtual
@@ -68,7 +66,8 @@ abstract contract ImmutableERC721HybridBase is
         return baseURI;
     }
 
-    /** @notice Allows admin to set the base URI
+    /**
+     * @notice Allows admin to set the base URI
      *  @param baseURI_ The base URI to set
      */
     function setBaseURI(string memory baseURI_) public onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -87,10 +86,12 @@ abstract contract ImmutableERC721HybridBase is
      * @inheritdoc ERC721Hybrid
      * @dev Note it will validate the operator in the allowlist
      */
-    function setApprovalForAll(
-        address operator,
-        bool approved
-    ) public virtual override(ERC721Hybrid) validateApproval(operator) {
+    function setApprovalForAll(address operator, bool approved)
+        public
+        virtual
+        override(ERC721Hybrid)
+        validateApproval(operator)
+    {
         super.setApprovalForAll(operator, approved);
     }
 
@@ -106,15 +107,17 @@ abstract contract ImmutableERC721HybridBase is
      * @inheritdoc ERC721HybridPermit
      * @dev Note it will validate the from and to address in the allowlist
      */
-    function _transfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal virtual override(ERC721HybridPermit) validateTransfer(from, to) {
+    function _transfer(address from, address to, uint256 tokenId)
+        internal
+        virtual
+        override(ERC721HybridPermit)
+        validateTransfer(from, to)
+    {
         super._transfer(from, to, tokenId);
     }
 
-    /** @notice Set the default royalty receiver address
+    /**
+     * @notice Set the default royalty receiver address
      *  @param receiver the address to receive the royalty
      *  @param feeNumerator the royalty fee numerator
      *  @dev This can only be called by the an admin. See ERC2981 for more details on _setDefaultRoyalty
@@ -123,31 +126,31 @@ abstract contract ImmutableERC721HybridBase is
         _setDefaultRoyalty(receiver, feeNumerator);
     }
 
-    /** @notice Set the royalty receiver address for a specific tokenId
+    /**
+     * @notice Set the royalty receiver address for a specific tokenId
      *  @param tokenId the token to set the royalty for
      *  @param receiver the address to receive the royalty
      *  @param feeNumerator the royalty fee numerator
      *  @dev This can only be called by the a minter. See ERC2981 for more details on _setTokenRoyalty
      */
-    function setNFTRoyaltyReceiver(
-        uint256 tokenId,
-        address receiver,
-        uint96 feeNumerator
-    ) public onlyRole(MINTER_ROLE) {
+    function setNFTRoyaltyReceiver(uint256 tokenId, address receiver, uint96 feeNumerator)
+        public
+        onlyRole(MINTER_ROLE)
+    {
         _setTokenRoyalty(tokenId, receiver, feeNumerator);
     }
 
-    /** @notice Set the royalty receiver address for a list of tokenId
+    /**
+     * @notice Set the royalty receiver address for a list of tokenId
      *  @param tokenIds the list of tokens to set the royalty for
      *  @param receiver the address to receive the royalty
      *  @param feeNumerator the royalty fee numerator
      *  @dev This can only be called by the a minter. See ERC2981 for more details on _setTokenRoyalty
      */
-    function setNFTRoyaltyReceiverBatch(
-        uint256[] calldata tokenIds,
-        address receiver,
-        uint96 feeNumerator
-    ) public onlyRole(MINTER_ROLE) {
+    function setNFTRoyaltyReceiverBatch(uint256[] calldata tokenIds, address receiver, uint96 feeNumerator)
+        public
+        onlyRole(MINTER_ROLE)
+    {
         for (uint256 i = 0; i < tokenIds.length; i++) {
             _setTokenRoyalty(tokenIds[i], receiver, feeNumerator);
         }

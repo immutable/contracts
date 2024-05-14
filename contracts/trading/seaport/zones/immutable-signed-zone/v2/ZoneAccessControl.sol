@@ -30,7 +30,11 @@ abstract contract ZoneAccessControl is AccessControlEnumerable, ZoneAccessContro
     /**
      * @inheritdoc AccessControl
      */
-    function revokeRole(bytes32 role, address account) public override(AccessControl, IAccessControl) onlyRole(getRoleAdmin(role)) {
+    function revokeRole(bytes32 role, address account)
+        public
+        override(AccessControl, IAccessControl)
+        onlyRole(getRoleAdmin(role))
+    {
         if (role == DEFAULT_ADMIN_ROLE && super.getRoleMemberCount(DEFAULT_ADMIN_ROLE) == 1) {
             revert LastDefaultAdminRole(account);
         }

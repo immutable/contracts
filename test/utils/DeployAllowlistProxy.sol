@@ -10,16 +10,10 @@ contract DeployOperatorAllowlist {
         OperatorAllowlistUpgradeable impl = new OperatorAllowlistUpgradeable();
 
         bytes memory initData = abi.encodeWithSelector(
-            OperatorAllowlistUpgradeable.initialize.selector,
-            admin,
-            upgradeAdmin,
-            registerarAdmin
+            OperatorAllowlistUpgradeable.initialize.selector, admin, upgradeAdmin, registerarAdmin
         );
 
-        ERC1967Proxy proxy = new ERC1967Proxy(
-            address(impl),
-            initData
-        );
+        ERC1967Proxy proxy = new ERC1967Proxy(address(impl), initData);
 
         return address(proxy);
     }

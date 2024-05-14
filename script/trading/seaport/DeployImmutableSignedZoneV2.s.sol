@@ -4,7 +4,8 @@
 pragma solidity 0.8.20;
 
 import "forge-std/Test.sol";
-import {ImmutableSignedZoneV2} from "../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/ImmutableSignedZoneV2.sol";
+import {ImmutableSignedZoneV2} from
+    "../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/ImmutableSignedZoneV2.sol";
 
 /**
  * @title IDeployer Interface
@@ -51,21 +52,25 @@ contract DeployImmutableSignedZoneV2 is Test {
         });
 
         // Run deployment against forked testnet
-       ImmutableSignedZoneV2 deployedContract = _deploy(deploymentArgs, zoneDeploymentArgs);
+        ImmutableSignedZoneV2 deployedContract = _deploy(deploymentArgs, zoneDeploymentArgs);
 
-        // Assert 
-       (
-            ,
-            string memory apiEndpoint,
-            ,
-            string memory documentationURI
-        ) = deployedContract.sip7Information();
+        // Assert
+        (, string memory apiEndpoint,, string memory documentationURI) = deployedContract.sip7Information();
 
-       assertEq(true, (keccak256(abi.encodePacked(apiEndpoint)) == keccak256(abi.encodePacked(zoneDeploymentArgs.apiEndpoint))));
-       assertEq(true, (keccak256(abi.encodePacked(documentationURI)) == keccak256(abi.encodePacked(zoneDeploymentArgs.documentationURI))));
+        assertEq(
+            true,
+            (keccak256(abi.encodePacked(apiEndpoint)) == keccak256(abi.encodePacked(zoneDeploymentArgs.apiEndpoint)))
+        );
+        assertEq(
+            true,
+            (
+                keccak256(abi.encodePacked(documentationURI))
+                    == keccak256(abi.encodePacked(zoneDeploymentArgs.documentationURI))
+            )
+        );
     }
 
-     function deploy() external {
+    function deploy() external {
         address signer = vm.envAddress("DEPLOYER_ADDRESS");
         address factory = vm.envAddress("OWNABLE_CREATE3_FACTORY_ADDRESS");
         address owner = vm.envAddress("OWNER");

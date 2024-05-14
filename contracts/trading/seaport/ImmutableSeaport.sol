@@ -4,7 +4,15 @@
 pragma solidity ^0.8.17;
 
 import {Consideration} from "seaport-core/src/lib/Consideration.sol";
-import {AdvancedOrder, BasicOrderParameters, CriteriaResolver, Execution, Fulfillment, FulfillmentComponent, Order} from "seaport-types/src/lib/ConsiderationStructs.sol";
+import {
+    AdvancedOrder,
+    BasicOrderParameters,
+    CriteriaResolver,
+    Execution,
+    Fulfillment,
+    FulfillmentComponent,
+    Order
+} from "seaport-types/src/lib/ConsiderationStructs.sol";
 import {OrderType} from "seaport-types/src/lib/ConsiderationEnums.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ImmutableSeaportEvents} from "./interfaces/ImmutableSeaportEvents.sol";
@@ -108,9 +116,13 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
      * @return fulfilled A boolean indicating whether the order has been
      *                   successfully fulfilled.
      */
-    function fulfillBasicOrder(
-        BasicOrderParameters calldata parameters
-    ) public payable virtual override returns (bool fulfilled) {
+    function fulfillBasicOrder(BasicOrderParameters calldata parameters)
+        public
+        payable
+        virtual
+        override
+        returns (bool fulfilled)
+    {
         // All restricted orders are captured using this method
         if (uint256(parameters.basicOrderType) % 4 != 2 && uint256(parameters.basicOrderType) % 4 != 3) {
             revert OrderNotRestricted();
@@ -150,9 +162,13 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
      *                   successfully fulfilled.
      */
     // solhint-disable-next-line func-name-mixedcase
-    function fulfillBasicOrder_efficient_6GL6yc(
-        BasicOrderParameters calldata parameters
-    ) public payable virtual override returns (bool fulfilled) {
+    function fulfillBasicOrder_efficient_6GL6yc(BasicOrderParameters calldata parameters)
+        public
+        payable
+        virtual
+        override
+        returns (bool fulfilled)
+    {
         // All restricted orders are captured using this method
         if (uint256(parameters.basicOrderType) % 4 != 2 && uint256(parameters.basicOrderType) % 4 != 3) {
             revert OrderNotRestricted();
@@ -193,8 +209,8 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
         bytes32 fulfillerConduitKey
     ) public payable virtual override returns (bool fulfilled) {
         if (
-            order.parameters.orderType != OrderType.FULL_RESTRICTED &&
-            order.parameters.orderType != OrderType.PARTIAL_RESTRICTED
+            order.parameters.orderType != OrderType.FULL_RESTRICTED
+                && order.parameters.orderType != OrderType.PARTIAL_RESTRICTED
         ) {
             revert OrderNotRestricted();
         }
@@ -260,8 +276,8 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
         address recipient
     ) public payable virtual override returns (bool fulfilled) {
         if (
-            advancedOrder.parameters.orderType != OrderType.FULL_RESTRICTED &&
-            advancedOrder.parameters.orderType != OrderType.PARTIAL_RESTRICTED
+            advancedOrder.parameters.orderType != OrderType.FULL_RESTRICTED
+                && advancedOrder.parameters.orderType != OrderType.PARTIAL_RESTRICTED
         ) {
             revert OrderNotRestricted();
         }
@@ -344,27 +360,22 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
         payable
         virtual
         override
-        returns (bool[] memory, /* availableOrders */ Execution[] memory /* executions */)
+        returns (bool[] memory, /* availableOrders */ Execution[] memory /* executions */ )
     {
         for (uint256 i = 0; i < orders.length; i++) {
             Order memory order = orders[i];
             if (
-                order.parameters.orderType != OrderType.FULL_RESTRICTED &&
-                order.parameters.orderType != OrderType.PARTIAL_RESTRICTED
+                order.parameters.orderType != OrderType.FULL_RESTRICTED
+                    && order.parameters.orderType != OrderType.PARTIAL_RESTRICTED
             ) {
                 revert OrderNotRestricted();
             }
             _rejectIfZoneInvalid(order.parameters.zone);
         }
 
-        return
-            super.fulfillAvailableOrders(
-                orders,
-                offerFulfillments,
-                considerationFulfillments,
-                fulfillerConduitKey,
-                maximumFulfilled
-            );
+        return super.fulfillAvailableOrders(
+            orders, offerFulfillments, considerationFulfillments, fulfillerConduitKey, maximumFulfilled
+        );
     }
 
     /**
@@ -470,13 +481,13 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
         payable
         virtual
         override
-        returns (bool[] memory, /* availableOrders */ Execution[] memory /* executions */)
+        returns (bool[] memory, /* availableOrders */ Execution[] memory /* executions */ )
     {
         for (uint256 i = 0; i < advancedOrders.length; i++) {
             AdvancedOrder memory advancedOrder = advancedOrders[i];
             if (
-                advancedOrder.parameters.orderType != OrderType.FULL_RESTRICTED &&
-                advancedOrder.parameters.orderType != OrderType.PARTIAL_RESTRICTED
+                advancedOrder.parameters.orderType != OrderType.FULL_RESTRICTED
+                    && advancedOrder.parameters.orderType != OrderType.PARTIAL_RESTRICTED
             ) {
                 revert OrderNotRestricted();
             }
@@ -484,16 +495,15 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
             _rejectIfZoneInvalid(advancedOrder.parameters.zone);
         }
 
-        return
-            super.fulfillAvailableAdvancedOrders(
-                advancedOrders,
-                criteriaResolvers,
-                offerFulfillments,
-                considerationFulfillments,
-                fulfillerConduitKey,
-                recipient,
-                maximumFulfilled
-            );
+        return super.fulfillAvailableAdvancedOrders(
+            advancedOrders,
+            criteriaResolvers,
+            offerFulfillments,
+            considerationFulfillments,
+            fulfillerConduitKey,
+            recipient,
+            maximumFulfilled
+        );
     }
 
     /**
@@ -534,12 +544,12 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
          * @custom:name fulfillments
          */
         Fulfillment[] calldata fulfillments
-    ) public payable virtual override returns (Execution[] memory /* executions */) {
+    ) public payable virtual override returns (Execution[] memory /* executions */ ) {
         for (uint256 i = 0; i < orders.length; i++) {
             Order memory order = orders[i];
             if (
-                order.parameters.orderType != OrderType.FULL_RESTRICTED &&
-                order.parameters.orderType != OrderType.PARTIAL_RESTRICTED
+                order.parameters.orderType != OrderType.FULL_RESTRICTED
+                    && order.parameters.orderType != OrderType.PARTIAL_RESTRICTED
             ) {
                 revert OrderNotRestricted();
             }
@@ -615,12 +625,12 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
          */
         Fulfillment[] calldata fulfillments,
         address recipient
-    ) public payable virtual override returns (Execution[] memory /* executions */) {
+    ) public payable virtual override returns (Execution[] memory /* executions */ ) {
         for (uint256 i = 0; i < advancedOrders.length; i++) {
             AdvancedOrder memory advancedOrder = advancedOrders[i];
             if (
-                advancedOrder.parameters.orderType != OrderType.FULL_RESTRICTED &&
-                advancedOrder.parameters.orderType != OrderType.PARTIAL_RESTRICTED
+                advancedOrder.parameters.orderType != OrderType.FULL_RESTRICTED
+                    && advancedOrder.parameters.orderType != OrderType.PARTIAL_RESTRICTED
             ) {
                 revert OrderNotRestricted();
             }

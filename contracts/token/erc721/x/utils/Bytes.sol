@@ -59,11 +59,11 @@ library Bytes {
         return -1;
     }
 
-    function substring(
-        bytes memory strBytes,
-        uint256 startIndex,
-        uint256 endIndex
-    ) internal pure returns (string memory) {
+    function substring(bytes memory strBytes, uint256 startIndex, uint256 endIndex)
+        internal
+        pure
+        returns (string memory)
+    {
         bytes memory result = new bytes(endIndex - startIndex);
         for (uint256 i = startIndex; i < endIndex; i++) {
             result[i - startIndex] = strBytes[i];

@@ -35,36 +35,34 @@ contract SupraInitTests is Test {
         configAdmin = makeAddr("configAdmin");
         upgradeAdmin = makeAddr("upgradeAdmin");
 
-
         impl = new RandomSeedProvider();
-        proxy = new ERC1967Proxy(address(impl), 
-            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, upgradeAdmin, false));
+        proxy = new ERC1967Proxy(
+            address(impl),
+            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, upgradeAdmin, false)
+        );
         randomSeedProvider = RandomSeedProvider(address(proxy));
 
         mockSupraRouter = new MockSupraRouter();
-        supraSourceAdaptor = new SupraSourceAdaptor(
-            roleAdmin, configAdmin, address(mockSupraRouter), subscription);
+        supraSourceAdaptor = new SupraSourceAdaptor(roleAdmin, configAdmin, address(mockSupraRouter), subscription);
         mockSupraRouter.setAdaptor(address(supraSourceAdaptor));
 
         vm.prank(randomAdmin);
         randomSeedProvider.setOffchainRandomSource(address(supraSourceAdaptor));
 
-        // Ensure we are on a new block number when we start the tests. In particular, don't 
+        // Ensure we are on a new block number when we start the tests. In particular, don't
         // be on the same block number as when the contracts were deployed.
         vm.roll(block.number + 1);
     }
 
     function testInit() public {
         mockSupraRouter = new MockSupraRouter();
-        supraSourceAdaptor = new SupraSourceAdaptor(
-            roleAdmin, configAdmin, address(mockSupraRouter), subscription);
+        supraSourceAdaptor = new SupraSourceAdaptor(roleAdmin, configAdmin, address(mockSupraRouter), subscription);
 
         assertEq(address(supraSourceAdaptor.vrfCoordinator()), address(mockSupraRouter), "vrfCoord not set correctly");
         assertEq(supraSourceAdaptor.subscriptionAccount(), subscription, "Subscription account did not match");
         assertTrue(supraSourceAdaptor.hasRole(CONFIG_ADMIN_ROLE, configAdmin), "Role config admin");
     }
 }
-
 
 contract SupraControlTests is SupraInitTests {
     event SubscriptionChange(address _newSubscription);
@@ -98,12 +96,10 @@ contract SupraControlTests is SupraInitTests {
     function testSetSubscriptionBadAuth() public {
         address newSub = address(7);
 
-        vm.expectRevert(); 
+        vm.expectRevert();
         supraSourceAdaptor.setSubscription(newSub);
     }
-
 }
-
 
 contract SupraOperationalTests is SupraInitTests {
     error WaitForRandom();
@@ -122,7 +118,6 @@ contract SupraOperationalTests is SupraInitTests {
         assertEq(entries[0].topics[0], keccak256("RequestId(uint256)"));
         uint256 requestId = abi.decode(entries[0].data, (uint256));
         assertEq(fulfilmentIndex, requestId, "Must be the same");
-
 
         bool ready = supraSourceAdaptor.isOffchainRandomReady(fulfilmentIndex);
         assertFalse(ready, "Should not be ready yet");
@@ -192,10 +187,7 @@ contract SupraOperationalTests is SupraInitTests {
         vm.expectRevert(abi.encodeWithSelector(NotVrfContract.selector));
         hackSupraRouter.sendFulfill(fulfilmentIndex, uint256(RAND1));
     }
-
 }
-
-
 
 contract SupraIntegrationTests is SupraOperationalTests {
     function testEndToEnd() public {
@@ -211,11 +203,19 @@ contract SupraIntegrationTests is SupraOperationalTests {
         assertEq(entries[0].topics[0], keccak256("RequestId(uint256)"));
         uint256 fulfilmentIndex = abi.decode(entries[0].data, (uint256));
 
-        assertEq(uint256(game.isRandomValueReady(randomRequestId)), uint256(RandomValues.RequestStatus.IN_PROGRESS), "Should not be ready yet");
+        assertEq(
+            uint256(game.isRandomValueReady(randomRequestId)),
+            uint256(RandomValues.RequestStatus.IN_PROGRESS),
+            "Should not be ready yet"
+        );
 
         mockSupraRouter.sendFulfill(fulfilmentIndex, uint256(RAND1));
 
-        assertEq(uint256(game.isRandomValueReady(randomRequestId)), uint256(RandomValues.RequestStatus.READY), "Should be ready");
+        assertEq(
+            uint256(game.isRandomValueReady(randomRequestId)),
+            uint256(RandomValues.RequestStatus.READY),
+            "Should be ready"
+        );
 
         bytes32[] memory randomValue = game.fetchRandomValues(randomRequestId);
         assertEq(randomValue.length, 1, "length");
@@ -224,19 +224,17 @@ contract SupraIntegrationTests is SupraOperationalTests {
 }
 
 contract SupraCoverageFakeTests is SupraInitTests {
-        // Do calls to unused functions in MockSupraRouter so that it doesn't impact the coverage results.
+    // Do calls to unused functions in MockSupraRouter so that it doesn't impact the coverage results.
     function testFixMockCoordinatorCoverage() public {
         mockSupraRouter = new MockSupraRouter();
         mockSupraRouter.setAdaptor(address(supraSourceAdaptor));
         string memory str = "";
         mockSupraRouter.generateRequest(
             str,
-            uint8(0) /* _rngCount */,
-            uint256(0) /* _numConfirmations */,
-            uint256(0) /* _clientSeed */,
+            uint8(0), /* _rngCount */
+            uint256(0), /* _numConfirmations */
+            uint256(0), /* _clientSeed */
             address(0) /* _clientWalletAddress */
         );
-
     }
 }
-

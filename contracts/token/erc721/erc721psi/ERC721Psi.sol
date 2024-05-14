@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: MIT
 /**
-  ______ _____   _____ ______ ___  __ _  _  _
- |  ____|  __ \ / ____|____  |__ \/_ | || || |
- | |__  | |__) | |        / /   ) || | \| |/ |
- |  __| |  _  /| |       / /   / / | |\_   _/
- | |____| | \ \| |____  / /   / /_ | |  | |
- |______|_|  \_\\_____|/_/   |____||_|  |_|
-
- - github: https://github.com/estarriolvetch/ERC721Psi
- - npm: https://www.npmjs.com/package/erc721psi
-
+ * ______ _____   _____ ______ ___  __ _  _  _
+ *  |  ____|  __ \ / ____|____  |__ \/_ | || || |
+ *  | |__  | |__) | |        / /   ) || | \| |/ |
+ *  |  __| |  _  /| |       / /   / / | |\_   _/
+ *  | |____| | \ \| |____  / /   / /_ | |  | |
+ *  |______|_|  \_\\_____|/_/   |____||_|  |_|
+ *
+ *  - github: https://github.com/estarriolvetch/ERC721Psi
+ *  - npm: https://www.npmjs.com/package/erc721psi
  */
 // solhint-disable
 pragma solidity 0.8.19;
@@ -84,20 +83,18 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
      * @dev See {IERC165-supportsInterface}.
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
-        return
-            interfaceId == type(IERC721).interfaceId ||
-            interfaceId == type(IERC721Metadata).interfaceId ||
-            super.supportsInterface(interfaceId);
+        return interfaceId == type(IERC721).interfaceId || interfaceId == type(IERC721Metadata).interfaceId
+            || super.supportsInterface(interfaceId);
     }
 
     /**
      * @dev See {IERC721-balanceOf}.
      */
-    function balanceOf(address owner) public view virtual override returns (uint) {
+    function balanceOf(address owner) public view virtual override returns (uint256) {
         require(owner != address(0), "ERC721Psi: balance query for the zero address");
 
-        uint count = 0;
-        for (uint i = _startTokenId(); i < _nextTokenId(); ++i) {
+        uint256 count = 0;
+        for (uint256 i = _startTokenId(); i < _nextTokenId(); ++i) {
             if (_exists(i)) {
                 if (owner == ownerOf(i)) {
                     ++count;
@@ -111,7 +108,7 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
      * @dev See {IERC721-ownerOf}.
      */
     function ownerOf(uint256 tokenId) public view virtual override returns (address) {
-        (address owner, ) = _ownerAndBatchHeadOf(tokenId);
+        (address owner,) = _ownerAndBatchHeadOf(tokenId);
         return owner;
     }
 
@@ -242,8 +239,7 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
     function _safeTransfer(address from, address to, uint256 tokenId, bytes memory _data) internal virtual {
         _transfer(from, to, tokenId);
         require(
-            _checkOnERC721Received(from, to, tokenId, 1, _data),
-            "ERC721Psi: transfer to non ERC721Receiver implementer"
+            _checkOnERC721Received(from, to, tokenId, 1, _data), "ERC721Psi: transfer to non ERC721Receiver implementer"
         );
     }
 
@@ -330,11 +326,7 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
             // The `iszero(eq(,))` check ensures that large values of `quantity`
             // that overflows uint256 will make the loop run out of gas.
             // The compiler will optimize the `iszero` away for performance.
-            for {
-                let tokenId := add(nextTokenId, 1)
-            } iszero(eq(tokenId, end)) {
-                tokenId := add(tokenId, 1)
-            } {
+            for { let tokenId := add(nextTokenId, 1) } iszero(eq(tokenId, end)) { tokenId := add(tokenId, 1) } {
                 // Emit the `Transfer` event. Similar to above.
                 log4(0, 0, _TRANSFER_EVENT_SIGNATURE, 0, toMasked, tokenId)
             }

@@ -131,10 +131,9 @@ abstract contract RandomValues {
         if (request.size == 0) {
             return RequestStatus.ALREADY_FETCHED;
         }
-        return
-            randomSeedProvider.isRandomSeedReady(request.fulfilmentId, request.source)
-                ? RequestStatus.READY
-                : RequestStatus.IN_PROGRESS;
+        return randomSeedProvider.isRandomSeedReady(request.fulfilmentId, request.source)
+            ? RequestStatus.READY
+            : RequestStatus.IN_PROGRESS;
     }
 
     // slither-disable-next-line unused-state,naming-convention

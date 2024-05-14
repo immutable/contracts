@@ -47,51 +47,35 @@ interface CoreV3 {
     );
 
     event LogNftDeposit(
-        address depositorEthKey,
-        uint256 starkKey,
-        uint256 vaultId,
-        uint256 assetType,
-        uint256 tokenId,
-        uint256 assetId
+        address depositorEthKey, uint256 starkKey, uint256 vaultId, uint256 assetType, uint256 tokenId, uint256 assetId
     );
 
     event LogDepositCancel(uint256 starkKey, uint256 vaultId, uint256 assetId);
 
     event LogDepositCancelReclaimed(
-        uint256 starkKey,
-        uint256 vaultId,
-        uint256 assetType,
-        uint256 nonQuantizedAmount,
-        uint256 quantizedAmount
+        uint256 starkKey, uint256 vaultId, uint256 assetType, uint256 nonQuantizedAmount, uint256 quantizedAmount
     );
 
     event LogDepositNftCancelReclaimed(
-        uint256 starkKey,
-        uint256 vaultId,
-        uint256 assetType,
-        uint256 tokenId,
-        uint256 assetId
+        uint256 starkKey, uint256 vaultId, uint256 assetType, uint256 tokenId, uint256 assetId
     );
 
-    function getDepositBalance(
-        uint256 starkKey,
-        uint256 assetId,
-        uint256 vaultId
-    ) external view returns (uint256 balance);
+    function getDepositBalance(uint256 starkKey, uint256 assetId, uint256 vaultId)
+        external
+        view
+        returns (uint256 balance);
 
-    function getQuantizedDepositBalance(
-        uint256 starkKey,
-        uint256 assetId,
-        uint256 vaultId
-    ) external view returns (uint256 balance);
+    function getQuantizedDepositBalance(uint256 starkKey, uint256 assetId, uint256 vaultId)
+        external
+        view
+        returns (uint256 balance);
 
     function depositNft(uint256 starkKey, uint256 assetType, uint256 vaultId, uint256 tokenId) external;
 
-    function getCancellationRequest(
-        uint256 starkKey,
-        uint256 assetId,
-        uint256 vaultId
-    ) external view returns (uint256 request);
+    function getCancellationRequest(uint256 starkKey, uint256 assetId, uint256 vaultId)
+        external
+        view
+        returns (uint256 request);
 
     function depositERC20(uint256 starkKey, uint256 assetType, uint256 vaultId, uint256 quantizedAmount) external;
 
@@ -108,34 +92,19 @@ interface CoreV3 {
     function depositNftReclaim(uint256 starkKey, uint256 assetType, uint256 vaultId, uint256 tokenId) external;
 
     event LogWithdrawalPerformed(
-        uint256 ownerKey,
-        uint256 assetType,
-        uint256 nonQuantizedAmount,
-        uint256 quantizedAmount,
-        address recipient
+        uint256 ownerKey, uint256 assetType, uint256 nonQuantizedAmount, uint256 quantizedAmount, address recipient
     );
 
     event LogNftWithdrawalPerformed(
-        uint256 ownerKey,
-        uint256 assetType,
-        uint256 tokenId,
-        uint256 assetId,
-        address recipient
+        uint256 ownerKey, uint256 assetType, uint256 tokenId, uint256 assetId, address recipient
     );
 
     event LogMintWithdrawalPerformed(
-        uint256 ownerKey,
-        uint256 assetType,
-        uint256 nonQuantizedAmount,
-        uint256 quantizedAmount,
-        uint256 assetId
+        uint256 ownerKey, uint256 assetType, uint256 nonQuantizedAmount, uint256 quantizedAmount, uint256 assetId
     );
 
     event LogWithdrawalAllowed(
-        uint256 ownerKey,
-        uint256 assetType,
-        uint256 nonQuantizedAmount,
-        uint256 quantizedAmount
+        uint256 ownerKey, uint256 assetType, uint256 nonQuantizedAmount, uint256 quantizedAmount
     );
 
     event LogNftWithdrawalAllowed(uint256 ownerKey, uint256 assetId);

@@ -24,12 +24,9 @@ contract RegistrationV3 {
         imx.depositNft(starkKey, assetType, vaultId, tokenId);
     }
 
-    function registerAndWithdraw(
-        address ethKey,
-        uint256 starkKey,
-        bytes calldata signature,
-        uint256 assetType
-    ) external {
+    function registerAndWithdraw(address ethKey, uint256 starkKey, bytes calldata signature, uint256 assetType)
+        external
+    {
         imx.registerUser(ethKey, starkKey, signature);
         imx.withdraw(starkKey, assetType);
     }

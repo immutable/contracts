@@ -3,7 +3,8 @@
 pragma solidity 0.8.19;
 
 import {UUPSUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/proxy/utils/UUPSUpgradeable.sol";
-import {AccessControlEnumerableUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/access/AccessControlEnumerableUpgradeable.sol";
+import {AccessControlEnumerableUpgradeable} from
+    "openzeppelin-contracts-upgradeable-4.9.3/access/AccessControlEnumerableUpgradeable.sol";
 
 // Introspection
 import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
@@ -162,9 +163,13 @@ contract OperatorAllowlistUpgradeable is
      * @notice ERC-165 interface support
      * @param interfaceId The interface identifier, which is a 4-byte selector.
      */
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view virtual override(ERC165, AccessControlEnumerableUpgradeable) returns (bool) {
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ERC165, AccessControlEnumerableUpgradeable)
+        returns (bool)
+    {
         return interfaceId == type(IOperatorAllowlist).interfaceId || super.supportsInterface(interfaceId);
     }
 

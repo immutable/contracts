@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {VRFCoordinatorV2Interface} from "../../../../contracts/random/offchainsources/chainlink/VRFCoordinatorV2Interface.sol";
+import {VRFCoordinatorV2Interface} from
+    "../../../../contracts/random/offchainsources/chainlink/VRFCoordinatorV2Interface.sol";
 import {ChainlinkSourceAdaptor} from "../../../../contracts/random/offchainsources/chainlink/ChainlinkSourceAdaptor.sol";
 
 contract MockCoordinator is VRFCoordinatorV2Interface {
@@ -27,13 +28,10 @@ contract MockCoordinator is VRFCoordinatorV2Interface {
         adaptor.rawFulfillRandomWords(_requestId, _rand);
     }
 
-
-
-    function requestRandomWords(bytes32,uint64,uint16,uint32,uint32) external returns (uint256 requestId) {
+    function requestRandomWords(bytes32, uint64, uint16, uint32, uint32) external returns (uint256 requestId) {
         requestId = nextIndex++;
         emit RequestId(requestId);
     }
-
 
     // Unused functions
 
@@ -46,18 +44,21 @@ contract MockCoordinator is VRFCoordinatorV2Interface {
         return subscriptionId;
     }
 
-    function getSubscription(uint64) external pure 
-        returns (uint96 balance, uint64 reqCount, address owner, address[] memory consumers) {
+    function getSubscription(uint64)
+        external
+        pure
+        returns (uint96 balance, uint64 reqCount, address owner, address[] memory consumers)
+    {
         return (uint96(0), uint64(0), address(0), consumers);
     }
 
     function requestSubscriptionOwnerTransfer(uint64, address) external {}
     function acceptSubscriptionOwnerTransfer(uint64) external {}
     function addConsumer(uint64, address) external {}
-    function removeConsumer(uint64, address) external{}
-    function cancelSubscription(uint64, address) external{}
+    function removeConsumer(uint64, address) external {}
+    function cancelSubscription(uint64, address) external {}
+
     function pendingRequestExists(uint64) external view returns (bool) {
         return pending;
     }
 }
-

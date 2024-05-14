@@ -16,9 +16,11 @@ interface SIP7Interface {
      * @dev The struct for storing signer info.
      */
     struct SignerInfo {
-        bool active; /// If the signer is currently active.
-        bool previouslyActive; /// If the signer has been active before.
+        bool active;
+        /// If the signer is currently active.
+        bool previouslyActive;
     }
+    /// If the signer has been active before.
 
     /**
      * @notice Add a new signer to the zone.

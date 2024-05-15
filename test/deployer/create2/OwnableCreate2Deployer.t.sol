@@ -3,15 +3,19 @@
 pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
-import {ERC20Mock} from "@openzeppelin/contracts/mocks/ERC20Mock.sol";
 import {IDeploy} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/interfaces/IDeploy.sol";
-import {ERC20MintableBurnable} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnable.sol";
-import {ERC20MintableBurnableInit} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnableInit.sol";
+
+import {ERC20Mock} from "@openzeppelin/contracts/mocks/ERC20Mock.sol";
+import {ERC20MintableBurnable} from
+    "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnable.sol";
+import {ERC20MintableBurnableInit} from
+    "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnableInit.sol";
 import {ContractAddress} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/libs/ContractAddress.sol";
 
 import {OwnableCreate2Deployer} from "../../../contracts/deployer/create2/OwnableCreate2Deployer.sol";
+import {Create2Utils} from "./Create2Utils.sol";
 
-contract OwnableCreate2DeployerTest is Test {
+contract OwnableCreate2DeployerTest is Test, Create2Utils {
     OwnableCreate2Deployer private factory;
     bytes private erc20MockBytecode;
     bytes32 private erc20MockSalt;
@@ -26,7 +30,7 @@ contract OwnableCreate2DeployerTest is Test {
         factory = new OwnableCreate2Deployer(factoryOwner);
 
         erc20MockBytecode = type(ERC20Mock).creationCode;
-        erc20MockSalt = createSaltFromKey("erc20-mock-v1");
+        erc20MockSalt = Create2Utils.createSaltFromKey("erc20-mock-v1", factoryOwner);
 
         vm.startPrank(factoryOwner);
     }
@@ -57,8 +61,9 @@ contract OwnableCreate2DeployerTest is Test {
 
     /// @dev ensure contracts are deployed at the expected address
     function test_deploy_DeploysContractAtExpectedAddress() public {
-        address expectedAddress =
-            predictCreate2Address(erc20MockBytecode, address(factory), address(factoryOwner), erc20MockSalt);
+        address expectedAddress = Create2Utils.predictCreate2Address(
+            erc20MockBytecode, address(factory), address(factoryOwner), erc20MockSalt
+        );
 
         /// forward the nonce of the owner and the factory, to confirm they doesn't influence address
         vm.setNonce(factoryOwner, vm.getNonce(factoryOwner) + 10);
@@ -75,10 +80,11 @@ contract OwnableCreate2DeployerTest is Test {
     function test_deploy_DeploysContractWithConstructor() public {
         bytes memory erc20MintableBytecode =
             abi.encodePacked(type(ERC20MintableBurnable).creationCode, abi.encode("Test Token", "TEST", 18));
-        bytes32 erc20MintableSalt = createSaltFromKey("erc20-mintable-burnable-v1");
+        bytes32 erc20MintableSalt = Create2Utils.createSaltFromKey("erc20-mintable-burnable-v1", factoryOwner);
 
-        address expectedAddress =
-            predictCreate2Address(erc20MintableBytecode, address(factory), address(factoryOwner), erc20MintableSalt);
+        address expectedAddress = Create2Utils.predictCreate2Address(
+            erc20MintableBytecode, address(factory), address(factoryOwner), erc20MintableSalt
+        );
 
         vm.expectEmit();
         emit Deployed(expectedAddress, address(factoryOwner), erc20MintableSalt, keccak256(erc20MintableBytecode));
@@ -94,7 +100,7 @@ contract OwnableCreate2DeployerTest is Test {
     function test_deploy_DeploysSameContractToDifferentAddresses_GivenDifferentSalts() public {
         address deployed1 = factory.deploy(erc20MockBytecode, erc20MockSalt);
 
-        bytes32 newSalt = createSaltFromKey("create2-deployer-test-v2");
+        bytes32 newSalt = Create2Utils.createSaltFromKey("create2-deployer-test-v2", factoryOwner);
         address deployed2 = factory.deploy(erc20MockBytecode, newSalt);
 
         assertEq(deployed1.code, deployed2.code, "bytecodes of deployed contracts do not match");
@@ -114,7 +120,7 @@ contract OwnableCreate2DeployerTest is Test {
         // test that the new owner can deploy
         vm.startPrank(newOwner);
         address expectedAddress =
-            predictCreate2Address(erc20MockBytecode, address(factory), address(newOwner), erc20MockSalt);
+            Create2Utils.predictCreate2Address(erc20MockBytecode, address(factory), address(newOwner), erc20MockSalt);
 
         vm.expectEmit();
         emit Deployed(expectedAddress, address(newOwner), erc20MockSalt, keccak256(erc20MockBytecode));
@@ -140,10 +146,11 @@ contract OwnableCreate2DeployerTest is Test {
         bytes memory mintableInitBytecode =
             abi.encodePacked(type(ERC20MintableBurnableInit).creationCode, abi.encode(18));
 
-        bytes32 mintableInitSalt = createSaltFromKey("erc20-mintable-burnable-init-v1");
+        bytes32 mintableInitSalt = Create2Utils.createSaltFromKey("erc20-mintable-burnable-init-v1", factoryOwner);
 
-        address expectedAddress =
-            predictCreate2Address(mintableInitBytecode, address(factory), address(factoryOwner), mintableInitSalt);
+        address expectedAddress = Create2Utils.predictCreate2Address(
+            mintableInitBytecode, address(factory), address(factoryOwner), mintableInitSalt
+        );
 
         bytes memory initPayload = abi.encodeWithSelector(ERC20MintableBurnableInit.init.selector, "Test Token", "TEST");
         vm.expectEmit();
@@ -162,29 +169,12 @@ contract OwnableCreate2DeployerTest is Test {
     function test_deployedAddress_ReturnsPredictedAddress() public {
         address deployAddress = factory.deployedAddress(erc20MockBytecode, address(factoryOwner), erc20MockSalt);
 
-        address predictedAddress =
-            predictCreate2Address(erc20MockBytecode, address(factory), address(factoryOwner), erc20MockSalt);
+        address predictedAddress = Create2Utils.predictCreate2Address(
+            erc20MockBytecode, address(factory), address(factoryOwner), erc20MockSalt
+        );
         address deployedAddress = factory.deploy(erc20MockBytecode, erc20MockSalt);
 
         assertEq(deployAddress, predictedAddress, "deployment address did not match predicted address");
         assertEq(deployAddress, deployedAddress, "deployment address did not match deployed address");
-    }
-
-    /**
-     * private helper functions
-     */
-    function predictCreate2Address(bytes memory _bytecode, address _deployer, address _sender, bytes32 _salt)
-        private
-        pure
-        returns (address)
-    {
-        bytes32 deploySalt = keccak256(abi.encode(_sender, _salt));
-        return address(
-            uint160(uint256(keccak256(abi.encodePacked(hex"ff", address(_deployer), deploySalt, keccak256(_bytecode)))))
-        );
-    }
-
-    function createSaltFromKey(string memory key) private view returns (bytes32) {
-        return keccak256(abi.encode(address(factoryOwner), key));
     }
 }

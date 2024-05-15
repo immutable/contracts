@@ -130,7 +130,7 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
 
     function test_TransferDeployerOwnership_ForOwnableCreate3Deployer() public {
         OwnableCreate3Deployer create3Deployer = new OwnableCreate3Deployer(address(rbacDeployer));
-        assertTrue(create2Deployer.owner() == address(rbacDeployer));
+        assertTrue(create3Deployer.owner() == address(rbacDeployer));
 
         address newOwner = makeAddr("newOwner");
         vm.startPrank(admin);

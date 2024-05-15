@@ -69,6 +69,9 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
         address newPauser = makeAddr("newPauser");
         address newUnpauser = makeAddr("newUnpauser");
 
+        assertFalse(rbacDeployer.hasRole(rbacDeployer.PAUSER_ROLE(), newPauser));
+        assertFalse(rbacDeployer.hasRole(rbacDeployer.UNPAUSER_ROLE(), newUnpauser));
+
         vm.startPrank(admin);
         rbacDeployer.grantRole(rbacDeployer.PAUSER_ROLE(), newPauser);
         rbacDeployer.grantRole(rbacDeployer.UNPAUSER_ROLE(), newUnpauser);
@@ -79,6 +82,9 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
 
     function test_AdminCanRevokeRoles() public {
         vm.startPrank(admin);
+        assertTrue(rbacDeployer.hasRole(rbacDeployer.PAUSER_ROLE(), pauser));
+        assertTrue(rbacDeployer.hasRole(rbacDeployer.UNPAUSER_ROLE(), unpauser));
+
         rbacDeployer.revokeRole(rbacDeployer.PAUSER_ROLE(), pauser);
         rbacDeployer.revokeRole(rbacDeployer.UNPAUSER_ROLE(), unpauser);
 
@@ -114,6 +120,8 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
 
     function test_TransferDeployerOwnership_ForOwnableCreate2Deployer() public {
         OwnableCreate2Deployer create2Deployer = new OwnableCreate2Deployer(address(rbacDeployer));
+        assertTrue(create2Deployer.owner() == address(rbacDeployer));
+
         address newOwner = makeAddr("newOwner");
         vm.startPrank(admin);
         rbacDeployer.transferOwnershipOfDeployer(create2Deployer, newOwner);
@@ -122,6 +130,8 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
 
     function test_TransferDeployerOwnership_ForOwnableCreate3Deployer() public {
         OwnableCreate3Deployer create3Deployer = new OwnableCreate3Deployer(address(rbacDeployer));
+        assertTrue(create2Deployer.owner() == address(rbacDeployer));
+
         address newOwner = makeAddr("newOwner");
         vm.startPrank(admin);
         rbacDeployer.transferOwnershipOfDeployer(create3Deployer, newOwner);

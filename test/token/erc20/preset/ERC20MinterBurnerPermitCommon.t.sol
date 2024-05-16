@@ -26,14 +26,6 @@ abstract contract ERC20MinterBurnerPermitCommonTest is ERC20TestCommon {
         assertTrue(erc20.hasRole(erc20.HUB_OWNER_ROLE(), hubOwner), "hub owner");
     }
 
-    function testOnlyMinterCanMint() public {
-        address to = makeAddr("to");
-        uint256 amount = 100;
-        vm.prank(hubOwner);
-        vm.expectRevert("AccessControl: account 0xa268ae5516b47694c3f15805a560258dbcdefd08 is missing role 0x4d494e5445525f524f4c45000000000000000000000000000000000000000000");
-        erc20.mint(to, amount);
-    }
-
     function testMint() public {
         address to = makeAddr("to");
         uint256 amount = 100;
@@ -42,14 +34,12 @@ abstract contract ERC20MinterBurnerPermitCommonTest is ERC20TestCommon {
         assertEq(erc20.balanceOf(to), amount);
     }
 
-    function testBurn() public {
+    function testOnlyMinterCanMint() public {
+        address to = makeAddr("to");
         uint256 amount = 100;
-        vm.prank(minter);
-        erc20.mint(tokenReceiver, amount);
-        assertEq(erc20.balanceOf(tokenReceiver), 100);
-        vm.prank(tokenReceiver);
-        erc20.burn(amount);
-        assertEq(erc20.balanceOf(tokenReceiver), 0);
+        vm.prank(hubOwner);
+        vm.expectRevert("AccessControl: account 0xa268ae5516b47694c3f15805a560258dbcdefd08 is missing role 0x4d494e5445525f524f4c45000000000000000000000000000000000000000000");
+        erc20.mint(to, amount);
     }
 
     function testCanOnlyMintUpToMaxSupply() public {
@@ -61,6 +51,16 @@ abstract contract ERC20MinterBurnerPermitCommonTest is ERC20TestCommon {
         vm.expectRevert("ERC20Capped: cap exceeded");
         erc20.mint(to, 1);
         vm.stopPrank();
+    }
+
+    function testBurn() public {
+        uint256 amount = 100;
+        vm.prank(minter);
+        erc20.mint(tokenReceiver, amount);
+        assertEq(erc20.balanceOf(tokenReceiver), 100);
+        vm.prank(tokenReceiver);
+        erc20.burn(amount);
+        assertEq(erc20.balanceOf(tokenReceiver), 0);
     }
 
     function testBurnFrom() public {

@@ -19,9 +19,16 @@ contract ImmutableERC20FixedSupplyNoBurnTest is ERC20TestCommon {
         assertEq(erc20.owner(), hubOwner, "Hub owner");
     }
 
-    function testRenounceOwnership() public {
-        vm.startPrank(hubOwner);
+    function testChangeOwner() public {
+        address newOwner = makeAddr("newOwner");
+        vm.prank(hubOwner);
+        erc20.transferOwnership(newOwner);
+        assertEq(erc20.owner(), newOwner, "new owner");
+    }
+
+    function testRenounceOwnerBlocked() public {
+        vm.prank(hubOwner);
         vm.expectRevert(abi.encodeWithSelector(ImmutableERC20FixedSupplyNoBurn.RenounceOwnershipNotAllowed.selector));
         erc20.renounceOwnership();
-    }
+    }    
 }

@@ -19,7 +19,6 @@ contract ImmutableERC20MinterBurnerPermitTest is ERC20MinterBurnerPermitCommonTe
         basicERC20 = IERC20Metadata(address(erc20));
     }
 
-
     function testRenounceAdmin() public {
         address secondAdmin = makeAddr("secondAdmin");
         vm.startPrank(admin);

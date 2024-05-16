@@ -12,7 +12,7 @@ contract HubOwnerImpl is HubOwner {
     }
 }
 
-contract HowOwnerTest is Test {
+contract HubOwnerTest is Test {
     HubOwner public tokenContract;
 
     address public hubOwner;
@@ -44,9 +44,10 @@ contract HowOwnerTest is Test {
     }
 
     function testRenounceLastAdminBlocked() public {
+        bytes32 defaultAdminRole = tokenContract.DEFAULT_ADMIN_ROLE();
         vm.prank(admin);
         vm.expectRevert(abi.encodeWithSelector(HubOwner.RenounceLastNotAllowed.selector));
-        tokenContract.renounceRole(tokenContract.DEFAULT_ADMIN_ROLE(), admin);
+        tokenContract.renounceRole(defaultAdminRole, admin);
     }
 
     function testRenounceHubOwner() public {
@@ -63,8 +64,9 @@ contract HowOwnerTest is Test {
     }
 
     function testRenounceLastHubOwnerBlocked() public {
+        bytes32 hubOwnerRole = tokenContract.HUB_OWNER_ROLE();
         vm.prank(hubOwner);
         vm.expectRevert(abi.encodeWithSelector(HubOwner.RenounceLastNotAllowed.selector));
-        tokenContract.renounceRole(tokenContract.HUB_OWNER_ROLE(), hubOwner);
+        tokenContract.renounceRole(hubOwnerRole, hubOwner);
     }
 }

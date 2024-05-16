@@ -14,17 +14,17 @@ import {AccessControlEnumerable, AccessControl, IAccessControl} from "@openzeppe
  */
 abstract contract HubOwner is AccessControlEnumerable {
     // Report an error if renounceRole is called for the last DEFAULT_ADMIN_ROLE or 
-    // HUB_OWNER_ROLE.
+    // OWNER_ROLE.
     error RenounceLastNotAllowed();
 
-    /// @notice Role to indicate hub owner
+    /// @notice Role to indicate owner for Immutable Hub and other applications.
     bytes32 public constant HUB_OWNER_ROLE = bytes32("HUB_OWNER_ROLE");
 
 
     /**
      * @param _roleAdmin The account that administers other roles and other 
      *                   accounts with DEFAULT_ADMIN_ROLE.
-     * @param _hubOwner The account associated with Immutable Hub. 
+     * @param _hubOwner The account associated with Immutable Hub and other applications that need an "owner".
      */
     constructor(address _roleAdmin, address _hubOwner) {
         _grantRole(DEFAULT_ADMIN_ROLE, _roleAdmin);
@@ -58,5 +58,20 @@ abstract contract HubOwner is AccessControlEnumerable {
             admins[i] = getRoleMember(_role, i);
         }
         return admins;
+    }
+
+    /**
+     * @notice Return the first account that has OWNER_ROLE.
+     * @dev Some applications assume there is only one owner and it is returned by the owner function.
+     * @return address The "owner" of the contract.
+     */
+    function owner() external view returns (address) {
+        bytes32 role = HUB_OWNER_ROLE;
+        if (getRoleMemberCount(role) == 0) {
+            // The only way that there could be no owners is if an account with DEFAULT_ADMIN_ROLE 
+            // revoked all of the accounts with OWNER_ROLE.
+            return address(0);
+        }
+        return getRoleMember(role, 0);
     }
 }

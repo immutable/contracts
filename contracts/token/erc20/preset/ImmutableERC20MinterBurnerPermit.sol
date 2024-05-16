@@ -6,7 +6,6 @@ import {ERC20Permit, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions
 import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import {ERC20Capped} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 import {MintingAccessControl, AccessControl, IAccessControl} from "../../../access/MintingAccessControl.sol";
-import {IImmutableERC20Errors} from "./Errors.sol";
 
 /**
  * @notice This contract is now deprecated in favour of ImmutableERC20MinterBurnerPermitV2.sol.
@@ -19,6 +18,9 @@ import {IImmutableERC20Errors} from "./Errors.sol";
  *  with a specific Immutable Hub account.
  */
 contract ImmutableERC20MinterBurnerPermit is ERC20Capped, ERC20Burnable, ERC20Permit, MintingAccessControl {
+    // Report an error if renounceOwnership is called.
+    error RenounceOwnershipNotAllowed();
+
     /// @notice Role to mint tokens
     bytes32 public constant HUB_OWNER_ROLE = bytes32("HUB_OWNER_ROLE");
 
@@ -57,7 +59,7 @@ contract ImmutableERC20MinterBurnerPermit is ERC20Capped, ERC20Burnable, ERC20Pe
      */
     function renounceRole(bytes32 role, address account) public override(AccessControl, IAccessControl) {
         if (getRoleMemberCount(role) == 1 && (role == HUB_OWNER_ROLE || role == DEFAULT_ADMIN_ROLE)) {
-            revert IImmutableERC20Errors.RenounceOwnershipNotAllowed();
+            revert RenounceOwnershipNotAllowed();
         }
         super.renounceRole(role, account);
     }

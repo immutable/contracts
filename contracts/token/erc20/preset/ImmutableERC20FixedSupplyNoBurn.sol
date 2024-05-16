@@ -4,8 +4,6 @@ pragma solidity 0.8.19;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {IImmutableERC20Errors} from "./Errors.sol";
-
 
 /**
  * @notice This contract is now deprecated in favour of ImmutableERC20FixedSupplyNoBurnV2.sol.
@@ -40,6 +38,6 @@ contract ImmutableERC20FixedSupplyNoBurn is Ownable, ERC20 {
      * @notice Prevent calls to renounce ownership.
      */
     function renounceOwnership() public pure override {
-        revert IImmutableERC20Errors.RenounceOwnershipNotAllowed();
+        revert RenounceOwnershipNotAllowed();
     }
 }

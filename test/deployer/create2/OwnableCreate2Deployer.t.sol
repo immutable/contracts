@@ -4,7 +4,6 @@ pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 import {IDeploy} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/interfaces/IDeploy.sol";
-
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/ERC20Mock.sol";
 import {ERC20MintableBurnable} from
     "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnable.sol";

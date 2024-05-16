@@ -12,12 +12,12 @@ contract Sign {
         _DOMAIN_SEPARATOR = DOMAIN_SEPARATOR_;
     }
 
-    function buildPermitDigest(address owner, address spender, bool approved, uint256 nonce, uint256 deadline) public view returns (bytes32) {
-        bytes32 structHash = keccak256(
-            abi.encode(
-                _PERMIT_TYPEHASH, owner, spender, approved, nonce, deadline
-            )
-        );
+    function buildPermitDigest(address owner, address spender, bool approved, uint256 nonce, uint256 deadline)
+        public
+        view
+        returns (bytes32)
+    {
+        bytes32 structHash = keccak256(abi.encode(_PERMIT_TYPEHASH, owner, spender, approved, nonce, deadline));
         return keccak256(abi.encodePacked("\x19\x01", _DOMAIN_SEPARATOR, structHash));
     }
 }

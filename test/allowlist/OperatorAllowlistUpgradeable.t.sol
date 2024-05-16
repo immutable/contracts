@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {OperatorAllowlistUpgradeable} from "../../contracts/allowlist/OperatorAllowlistUpgradeable.sol";
 import {MockOperatorAllowlistUpgradeable} from "./MockOAL.sol";
 import {ImmutableERC721} from "../../contracts/token/erc721/preset/ImmutableERC721.sol";
-import {DeployOperatorAllowlist} from  "../utils/DeployAllowlistProxy.sol";
+import {DeployOperatorAllowlist} from "../utils/DeployAllowlistProxy.sol";
 import {DeploySCWallet} from "../utils/DeploySCW.sol";
 import {IWalletProxy} from "../../contracts/allowlist/IWalletProxy.sol";
 
@@ -36,14 +36,7 @@ contract OperatorAllowlistTest is Test, OperatorAllowlistUpgradeable {
         allowlist = OperatorAllowlistUpgradeable(proxyAddr);
 
         immutableERC721 = new ImmutableERC721(
-            admin,
-            "test",
-            "USDC",
-            "test-base-uri",
-            "test-contract-uri",
-            address(allowlist),
-            feeReceiver,
-            0
+            admin, "test", "USDC", "test-base-uri", "test-contract-uri", address(allowlist), feeReceiver, 0
         );
 
         nonAuthorizedWallet = address(0x2);
@@ -71,7 +64,7 @@ contract OperatorAllowlistTest is Test, OperatorAllowlistUpgradeable {
     }
 
     function testFailedUpgradeNoPerms() public {
-         MockOperatorAllowlistUpgradeable oalImplV2 = new MockOperatorAllowlistUpgradeable();
+        MockOperatorAllowlistUpgradeable oalImplV2 = new MockOperatorAllowlistUpgradeable();
         vm.prank(nonAuthorizedWallet);
         vm.expectRevert("Must have upgrade role to upgrade");
         allowlist.upgradeTo(address(oalImplV2));
@@ -86,16 +79,24 @@ contract OperatorAllowlistTest is Test, OperatorAllowlistUpgradeable {
         addressTargets[0] = address(0x1);
         vm.startPrank(admin);
 
-        vm.expectRevert("AccessControl: account 0xe48648ee1c7285ff3ad32fa99c427884666caf17 is missing role 0x5245474953545241525f524f4c45000000000000000000000000000000000000");
+        vm.expectRevert(
+            "AccessControl: account 0xe48648ee1c7285ff3ad32fa99c427884666caf17 is missing role 0x5245474953545241525f524f4c45000000000000000000000000000000000000"
+        );
         allowlist.addAddressesToAllowlist(addressTargets);
 
-        vm.expectRevert("AccessControl: account 0xe48648ee1c7285ff3ad32fa99c427884666caf17 is missing role 0x5245474953545241525f524f4c45000000000000000000000000000000000000");
+        vm.expectRevert(
+            "AccessControl: account 0xe48648ee1c7285ff3ad32fa99c427884666caf17 is missing role 0x5245474953545241525f524f4c45000000000000000000000000000000000000"
+        );
         allowlist.removeAddressesFromAllowlist(addressTargets);
 
-        vm.expectRevert("AccessControl: account 0xe48648ee1c7285ff3ad32fa99c427884666caf17 is missing role 0x5245474953545241525f524f4c45000000000000000000000000000000000000");
+        vm.expectRevert(
+            "AccessControl: account 0xe48648ee1c7285ff3ad32fa99c427884666caf17 is missing role 0x5245474953545241525f524f4c45000000000000000000000000000000000000"
+        );
         allowlist.addWalletToAllowlist(address(0x3));
 
-        vm.expectRevert("AccessControl: account 0xe48648ee1c7285ff3ad32fa99c427884666caf17 is missing role 0x5245474953545241525f524f4c45000000000000000000000000000000000000");
+        vm.expectRevert(
+            "AccessControl: account 0xe48648ee1c7285ff3ad32fa99c427884666caf17 is missing role 0x5245474953545241525f524f4c45000000000000000000000000000000000000"
+        );
         allowlist.removeWalletFromAllowlist(address(0x3));
 
         vm.stopPrank();
@@ -113,7 +114,7 @@ contract OperatorAllowlistTest is Test, OperatorAllowlistUpgradeable {
 
         vm.startPrank(registrar);
 
-        vm.expectEmit(true, true, true, false, address(allowlist)); 
+        vm.expectEmit(true, true, true, false, address(allowlist));
         emit WalletAllowlistChanged(keccak256(abi.encodePacked(deployedBytecode)), scwAddr, true);
         allowlist.addWalletToAllowlist(scwAddr);
         assertTrue(allowlist.isAllowlisted(scwAddr));
@@ -123,7 +124,7 @@ contract OperatorAllowlistTest is Test, OperatorAllowlistUpgradeable {
         allowlist.removeWalletFromAllowlist(scwAddr);
         assertFalse(allowlist.isAllowlisted(scwAddr));
 
-        vm.stopPrank(); 
+        vm.stopPrank();
     }
 
     function testShouldAddAndRemoveAnAddressOfAMarketPlaceAndRemoveItFromAllowlist() public {
@@ -148,7 +149,7 @@ contract OperatorAllowlistTest is Test, OperatorAllowlistUpgradeable {
     function testShouldNotAllowlistSCWWithSameBytecodeButDifferentImplementationAddress() public {
         bytes32 salt1 = keccak256(abi.encodePacked("0x5678"));
         address firstScwAddr;
-        (firstScwAddr, ) = deploySCWScript.run(salt1);
+        (firstScwAddr,) = deploySCWScript.run(salt1);
 
         vm.startPrank(registrar);
         allowlist.addWalletToAllowlist(firstScwAddr);
@@ -156,7 +157,7 @@ contract OperatorAllowlistTest is Test, OperatorAllowlistUpgradeable {
 
         bytes32 salt2 = keccak256(abi.encodePacked("0x5678"));
         address secondScwAddr;
-        (secondScwAddr, ) = deploySCWScript.run(salt2);
+        (secondScwAddr,) = deploySCWScript.run(salt2);
         assertFalse(allowlist.isAllowlisted(secondScwAddr));
         vm.stopPrank();
     }

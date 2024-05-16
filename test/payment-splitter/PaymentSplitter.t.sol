@@ -27,7 +27,7 @@ contract PaymentSplitterTest is Test {
     address registrarAdmin = makeAddr("registrarAdmin");
     address fundsAdmin = makeAddr("fundsAdmin");
 
-    address payable [] payees = new address payable[](2);
+    address payable[] payees = new address payable[](2);
     IERC20[] erc20s = new IERC20[](2);
     uint256[] shares = new uint256[](2);
 
@@ -76,16 +76,24 @@ contract PaymentSplitterTest is Test {
 
     function testInvalidPermissions() public {
         vm.prank(defaultAdmin);
-        vm.expectRevert("AccessControl: account 0x6fcb7bf6c32f0cd3bbc5fde0a55a80d3af6d0050 is missing role 0x544f4b454e5f5245474953545241525f524f4c45000000000000000000000000");
+        vm.expectRevert(
+            "AccessControl: account 0x6fcb7bf6c32f0cd3bbc5fde0a55a80d3af6d0050 is missing role 0x544f4b454e5f5245474953545241525f524f4c45000000000000000000000000"
+        );
         paymentSplitter.addToAllowlist(erc20s);
 
         vm.startPrank(registrarAdmin);
-        vm.expectRevert("AccessControl: account 0xa4985bf934d639cba655d34733ebf617e7f82429 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+        vm.expectRevert(
+            "AccessControl: account 0xa4985bf934d639cba655d34733ebf617e7f82429 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
+        );
         paymentSplitter.overridePayees(payees, shares);
-        vm.expectRevert("AccessControl: account 0xa4985bf934d639cba655d34733ebf617e7f82429 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+        vm.expectRevert(
+            "AccessControl: account 0xa4985bf934d639cba655d34733ebf617e7f82429 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
+        );
         paymentSplitter.revokeReleaseFundsRole(fundsAdmin);
 
-        vm.expectRevert("AccessControl: account 0xa4985bf934d639cba655d34733ebf617e7f82429 is missing role 0x52454c454153455f46554e44535f524f4c450000000000000000000000000000");
+        vm.expectRevert(
+            "AccessControl: account 0xa4985bf934d639cba655d34733ebf617e7f82429 is missing role 0x52454c454153455f46554e44535f524f4c450000000000000000000000000000"
+        );
         paymentSplitter.releaseAll();
         vm.stopPrank();
     }
@@ -135,8 +143,7 @@ contract PaymentSplitterTest is Test {
         assertEq(payee2.balance, 80);
         assertEq(address(paymentSplitter).balance, 0);
 
-
-        address payable [] memory newPayees = new address payable[](2);
+        address payable[] memory newPayees = new address payable[](2);
         uint256[] memory newShares = new uint256[](2);
         newPayees[0] = payable(payee3);
         newPayees[1] = payable(payee4);
@@ -165,7 +172,6 @@ contract PaymentSplitterTest is Test {
 
         mockToken1.mint(address(paymentSplitter), 100);
         mockToken2.mint(address(paymentSplitter), 100);
-        
 
         vm.prank(fundsAdmin);
         vm.expectEmit(true, true, true, false, address(paymentSplitter));
@@ -181,7 +187,6 @@ contract PaymentSplitterTest is Test {
 
         assertEq(mockToken1.balanceOf(address(paymentSplitter)), 0);
         assertEq(mockToken2.balanceOf(address(paymentSplitter)), 0);
-
 
         mockToken1.mint(address(paymentSplitter), 10);
         mockToken2.mint(address(paymentSplitter), 10);
@@ -203,7 +208,6 @@ contract PaymentSplitterTest is Test {
 
         mockToken1.mint(address(paymentSplitter), 100);
         mockToken2.mint(address(paymentSplitter), 100);
-        
 
         vm.prank(fundsAdmin);
         paymentSplitter.releaseAll();
@@ -216,17 +220,15 @@ contract PaymentSplitterTest is Test {
         assertEq(mockToken1.balanceOf(address(paymentSplitter)), 0);
         assertEq(mockToken2.balanceOf(address(paymentSplitter)), 0);
 
-
         mockToken1.mint(address(paymentSplitter), 10);
         mockToken2.mint(address(paymentSplitter), 10);
 
-        address payable [] memory newPayees = new address payable[](2);
+        address payable[] memory newPayees = new address payable[](2);
         uint256[] memory newShares = new uint256[](2);
         newPayees[0] = payable(payee3);
         newPayees[1] = payable(payee4);
         newShares[0] = 1;
         newShares[1] = 1;
-
 
         vm.prank(defaultAdmin);
         paymentSplitter.overridePayees(newPayees, newShares);
@@ -251,7 +253,7 @@ contract PaymentSplitterTest is Test {
 
         vm.deal(address(paymentSplitter), 100);
 
-        address payable [] memory newPayees = new address payable[](2);
+        address payable[] memory newPayees = new address payable[](2);
         uint256[] memory newShares = new uint256[](2);
         newPayees[0] = payable(payee3);
         newPayees[1] = payable(payee4);
@@ -277,7 +279,6 @@ contract PaymentSplitterTest is Test {
         newErc20s[0] = token1;
         newErc20s[1] = token2;
 
-
         vm.startPrank(registrarAdmin);
         paymentSplitter.addToAllowlist(newErc20s);
         assertEq(paymentSplitter.erc20Allowlist().length, 4);
@@ -295,9 +296,8 @@ contract PaymentSplitterTest is Test {
 
     function testReceiveNativeTokenEvent() public {
         vm.deal(address(this), 100);
-        vm.expectEmit(true, true, false, false, address(paymentSplitter)); 
+        vm.expectEmit(true, true, false, false, address(paymentSplitter));
         emit PaymentReceived(address(this), 100);
         Address.sendValue(payable(address(paymentSplitter)), 100);
     }
-
 }

@@ -6,9 +6,7 @@ import "forge-std/Test.sol";
 import {ImmutableERC20MinterBurnerPermit} from "contracts/token/erc20/preset/ImmutableERC20MinterBurnerPermit.sol";
 import {IImmutableERC20Errors} from "contracts/token/erc20/preset/Errors.sol";
 
-
 contract ImmutableERC20MinterBurnerPermitTest is Test {
-
     ImmutableERC20MinterBurnerPermit public erc20;
 
     address public minter;
@@ -86,7 +84,9 @@ contract ImmutableERC20MinterBurnerPermitTest is Test {
         address to = makeAddr("to");
         uint256 amount = 100;
         vm.prank(hubOwner);
-        vm.expectRevert("AccessControl: account 0xa268ae5516b47694c3f15805a560258dbcdefd08 is missing role 0x4d494e5445525f524f4c45000000000000000000000000000000000000000000");
+        vm.expectRevert(
+            "AccessControl: account 0xa268ae5516b47694c3f15805a560258dbcdefd08 is missing role 0x4d494e5445525f524f4c45000000000000000000000000000000000000000000"
+        );
         erc20.mint(to, amount);
     }
 
@@ -144,16 +144,7 @@ contract ImmutableERC20MinterBurnerPermitTest is Test {
 
         uint256 deadline = block.timestamp + 1 days;
         uint256 nonce = erc20.nonces(owner);
-        bytes32 structHash = keccak256(
-            abi.encode(
-                PERMIT_TYPEHASH,
-                owner,
-                spender,
-                value,
-                nonce,
-                deadline
-            )
-        );
+        bytes32 structHash = keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonce, deadline));
         bytes32 hash = erc20.DOMAIN_SEPARATOR();
         hash = keccak256(abi.encodePacked("\x19\x01", hash, structHash));
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(ownerPrivateKey, hash);
@@ -164,6 +155,4 @@ contract ImmutableERC20MinterBurnerPermitTest is Test {
 
         assertEq(erc20.allowance(owner, spender), value);
     }
-
-
 }

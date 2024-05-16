@@ -9,11 +9,9 @@ import {RandomSeedProvider} from "contracts/random/RandomSeedProvider.sol";
 import {IOffchainRandomSource} from "contracts/random/offchainsources/IOffchainRandomSource.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-
-
-
 contract UninitializedRandomSeedProviderTest is Test {
     error WaitForRandom();
+
     event OffchainRandomSourceSet(address _offchainRandomSource);
     event RanDaoEnabled();
     event OffchainRandomConsumerAdded(address _consumer);
@@ -31,7 +29,6 @@ contract UninitializedRandomSeedProviderTest is Test {
     ERC1967Proxy public proxyRanDao;
     RandomSeedProvider public randomSeedProviderRanDao;
 
-
     address public roleAdmin;
     address public randomAdmin;
     address public upgradeAdmin;
@@ -41,15 +38,19 @@ contract UninitializedRandomSeedProviderTest is Test {
         randomAdmin = makeAddr("randomAdmin");
         upgradeAdmin = makeAddr("upgradeAdmin");
         impl = new RandomSeedProvider();
-        proxy = new ERC1967Proxy(address(impl), 
-            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, upgradeAdmin, false));
+        proxy = new ERC1967Proxy(
+            address(impl),
+            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, upgradeAdmin, false)
+        );
         randomSeedProvider = RandomSeedProvider(address(proxy));
 
-        proxyRanDao = new ERC1967Proxy(address(impl), 
-            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, upgradeAdmin, true));
+        proxyRanDao = new ERC1967Proxy(
+            address(impl),
+            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, upgradeAdmin, true)
+        );
         randomSeedProviderRanDao = RandomSeedProvider(address(proxyRanDao));
 
-        // Ensure we are on a new block number when we start the tests. In particular, don't 
+        // Ensure we are on a new block number when we start the tests. In particular, don't
         // be on the same block number as when the contracts were deployed.
         vm.roll(block.number + 1);
     }
@@ -58,8 +59,10 @@ contract UninitializedRandomSeedProviderTest is Test {
         // This set-up mirrors what is in the setUp function. Have this code here
         // so that the coverage tool picks up the use of the initialize function.
         RandomSeedProvider impl1 = new RandomSeedProvider();
-        ERC1967Proxy proxy1 = new ERC1967Proxy(address(impl1), 
-            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, upgradeAdmin, false));
+        ERC1967Proxy proxy1 = new ERC1967Proxy(
+            address(impl1),
+            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, upgradeAdmin, false)
+        );
         RandomSeedProvider randomSeedProvider1 = RandomSeedProvider(address(proxy1));
         vm.roll(block.number + 1);
 
@@ -79,7 +82,6 @@ contract UninitializedRandomSeedProviderTest is Test {
         vm.expectRevert();
         randomSeedProvider.initialize(roleAdmin, randomAdmin, upgradeAdmin, true);
     }
-
 
     function testGetRandomSeedInitTraditional() public {
         bytes32 seed = randomSeedProvider.getRandomSeed(0, ONCHAIN);
@@ -109,9 +111,9 @@ contract UninitializedRandomSeedProviderTest is Test {
     }
 }
 
-
 contract ControlRandomSeedProviderTest is UninitializedRandomSeedProviderTest {
     error CanNotUpgradeFrom(uint256 _storageVersion, uint256 _codeVersion);
+
     event Upgraded(address indexed implementation);
 
     address public constant NEW_SOURCE = address(10001);
@@ -204,8 +206,9 @@ contract ControlRandomSeedProviderTest is UninitializedRandomSeedProviderTest {
         vm.prank(upgradeAdmin);
         vm.expectEmit(true, true, true, true);
         emit Upgraded(address(randomSeedProviderV2));
-        randomSeedProvider.upgradeToAndCall(address(randomSeedProviderV2), 
-            abi.encodeWithSelector(randomSeedProviderV2.upgrade.selector));
+        randomSeedProvider.upgradeToAndCall(
+            address(randomSeedProviderV2), abi.encodeWithSelector(randomSeedProviderV2.upgrade.selector)
+        );
         assertEq(randomSeedProvider.version(), 2);
     }
 
@@ -213,8 +216,9 @@ contract ControlRandomSeedProviderTest is UninitializedRandomSeedProviderTest {
         MockRandomSeedProviderV2 randomSeedProviderV2 = new MockRandomSeedProviderV2();
 
         vm.expectRevert();
-        randomSeedProvider.upgradeToAndCall(address(randomSeedProviderV2), 
-            abi.encodeWithSelector(randomSeedProviderV2.upgrade.selector));
+        randomSeedProvider.upgradeToAndCall(
+            address(randomSeedProviderV2), abi.encodeWithSelector(randomSeedProviderV2.upgrade.selector)
+        );
     }
 
     function testNoUpgrade() public {
@@ -228,13 +232,15 @@ contract ControlRandomSeedProviderTest is UninitializedRandomSeedProviderTest {
         RandomSeedProvider randomSeedProviderV0 = new RandomSeedProvider();
 
         vm.prank(upgradeAdmin);
-        randomSeedProvider.upgradeToAndCall(address(randomSeedProviderV2), 
-            abi.encodeWithSelector(randomSeedProviderV2.upgrade.selector));
+        randomSeedProvider.upgradeToAndCall(
+            address(randomSeedProviderV2), abi.encodeWithSelector(randomSeedProviderV2.upgrade.selector)
+        );
 
         vm.prank(upgradeAdmin);
         vm.expectRevert(abi.encodeWithSelector(CanNotUpgradeFrom.selector, 2, 0));
-        randomSeedProvider.upgradeToAndCall(address(randomSeedProviderV0), 
-            abi.encodeWithSelector(randomSeedProviderV0.upgrade.selector));
+        randomSeedProvider.upgradeToAndCall(
+            address(randomSeedProviderV0), abi.encodeWithSelector(randomSeedProviderV0.upgrade.selector)
+        );
     }
 
     // Check that the downgrade code in MockRandomSeedProviderV2 works too.
@@ -248,11 +254,11 @@ contract ControlRandomSeedProviderTest is UninitializedRandomSeedProviderTest {
 
         vm.prank(upgradeAdmin);
         vm.expectRevert(abi.encodeWithSelector(CanNotUpgradeFrom.selector, badVersion, 2));
-        randomSeedProvider.upgradeToAndCall(address(randomSeedProviderV2), 
-            abi.encodeWithSelector(randomSeedProviderV2.upgrade.selector));
+        randomSeedProvider.upgradeToAndCall(
+            address(randomSeedProviderV2), abi.encodeWithSelector(randomSeedProviderV2.upgrade.selector)
+        );
     }
 }
-
 
 contract OperationalRandomSeedProviderTest is UninitializedRandomSeedProviderTest {
     MockOffchainSource public offchainSource = new MockOffchainSource();
@@ -291,7 +297,6 @@ contract OperationalRandomSeedProviderTest is UninitializedRandomSeedProviderTes
         bytes32 seed = randomSeedProviderRanDao.getRandomSeed(fulfilmentIndex, source);
         assertNotEq(seed, bytes32(0), "Should not be zero");
     }
-
 
     function testOffchainNextBlock() public {
         vm.prank(randomAdmin);
@@ -333,19 +338,18 @@ contract OperationalRandomSeedProviderTest is UninitializedRandomSeedProviderTes
         randomSeedProvider.getRandomSeed(fulfilmentIndex, source);
     }
 
-
     function testTradTwoInOneBlock() public {
-        (uint256 randomRequestId1, ) = randomSeedProvider.requestRandomSeed();
-        (uint256 randomRequestId2, ) = randomSeedProvider.requestRandomSeed();
-        (uint256 randomRequestId3, ) = randomSeedProvider.requestRandomSeed();
+        (uint256 randomRequestId1,) = randomSeedProvider.requestRandomSeed();
+        (uint256 randomRequestId2,) = randomSeedProvider.requestRandomSeed();
+        (uint256 randomRequestId3,) = randomSeedProvider.requestRandomSeed();
         assertEq(randomRequestId1, randomRequestId2, "Request id 1 and request id 2");
         assertEq(randomRequestId1, randomRequestId3, "Request id 1 and request id 3");
     }
 
     function testRanDaoTwoInOneBlock() public {
-        (uint256 randomRequestId1, ) = randomSeedProviderRanDao.requestRandomSeed();
-        (uint256 randomRequestId2, ) = randomSeedProviderRanDao.requestRandomSeed();
-        (uint256 randomRequestId3, ) = randomSeedProviderRanDao.requestRandomSeed();
+        (uint256 randomRequestId1,) = randomSeedProviderRanDao.requestRandomSeed();
+        (uint256 randomRequestId2,) = randomSeedProviderRanDao.requestRandomSeed();
+        (uint256 randomRequestId3,) = randomSeedProviderRanDao.requestRandomSeed();
         assertEq(randomRequestId1, randomRequestId2, "Request id 1 and request id 2");
         assertEq(randomRequestId1, randomRequestId3, "Request id 1 and request id 3");
     }
@@ -359,9 +363,9 @@ contract OperationalRandomSeedProviderTest is UninitializedRandomSeedProviderTes
         randomSeedProvider.addOffchainRandomConsumer(aConsumer);
 
         vm.prank(aConsumer);
-        (uint256 fulfilmentIndex1, ) = randomSeedProvider.requestRandomSeed();
+        (uint256 fulfilmentIndex1,) = randomSeedProvider.requestRandomSeed();
         vm.prank(aConsumer);
-        (uint256 fulfilmentIndex2, ) = randomSeedProvider.requestRandomSeed();
+        (uint256 fulfilmentIndex2,) = randomSeedProvider.requestRandomSeed();
         assertEq(fulfilmentIndex1, fulfilmentIndex2, "Request id 1 and request id 3");
     }
 
@@ -511,7 +515,6 @@ contract SwitchingRandomSeedProviderTest is UninitializedRandomSeedProviderTest 
         randomSeedProviderRanDao.getRandomSeed(fulfilmentIndex2, source2);
     }
 
-
     function testSwitchOffchainOnchain() public {
         address aConsumer = makeAddr("aConsumer");
         vm.prank(randomAdmin);
@@ -540,4 +543,3 @@ contract SwitchingRandomSeedProviderTest is UninitializedRandomSeedProviderTest 
         randomSeedProviderRanDao.getRandomSeed(fulfilmentIndex2, source2);
     }
 }
-

@@ -10,9 +10,9 @@ abstract contract MintingHubOwner is HubOwner {
     bytes32 public constant MINTER_ROLE = bytes32("MINTER_ROLE");
 
     /**
-     * @param _roleAdmin The account that administers other roles and other 
+     * @param _roleAdmin The account that administers other roles and other
      *                   accounts with DEFAULT_ADMIN_ROLE.
-     * @param _hubOwner The account associated with Immutable Hub. 
+     * @param _hubOwner The account associated with Immutable Hub.
      * @param _minterAdmin An account with minter role.
      */
     constructor(address _roleAdmin, address _hubOwner, address _minterAdmin) HubOwner(_roleAdmin, _hubOwner) {

@@ -6,7 +6,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 /**
- * @notice ERC 20 contract that mints a fixed total supply of tokens when the contract 
+ * @notice ERC 20 contract that mints a fixed total supply of tokens when the contract
  *  is deployed.
  * @dev This contract has the concept of an owner, called _hubOwner in the constructor.
  *  This account has no rights to execute any administrative actions within the contract,

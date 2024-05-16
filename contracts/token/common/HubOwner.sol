@@ -8,21 +8,20 @@ import {AccessControlEnumerable, AccessControl, IAccessControl} from "@openzeppe
  * @notice Adds the concept of a hub owner.
  * @dev This contract has the concept of a hubOwner, called _hubOwner in the constructor.
  *  This account has no rights to execute any administrative actions within the contract,
- *  with the exception of renouncing their ownership. 
- *  The Immutable Hub uses this function to help associate the ERC 20 contract 
+ *  with the exception of renouncing their ownership.
+ *  The Immutable Hub uses this function to help associate the ERC 20 contract
  *  with a specific Immutable Hub account.
  */
 abstract contract HubOwner is AccessControlEnumerable {
-    // Report an error if renounceRole is called for the last DEFAULT_ADMIN_ROLE or 
+    // Report an error if renounceRole is called for the last DEFAULT_ADMIN_ROLE or
     // OWNER_ROLE.
     error RenounceLastNotAllowed();
 
     /// @notice Role to indicate owner for Immutable Hub and other applications.
     bytes32 public constant HUB_OWNER_ROLE = bytes32("HUB_OWNER_ROLE");
 
-
     /**
-     * @param _roleAdmin The account that administers other roles and other 
+     * @param _roleAdmin The account that administers other roles and other
      *                   accounts with DEFAULT_ADMIN_ROLE.
      * @param _hubOwner The account associated with Immutable Hub and other applications that need an "owner".
      */
@@ -32,7 +31,7 @@ abstract contract HubOwner is AccessControlEnumerable {
     }
 
     /**
-     * @dev Renounces the role `role` from the calling account. Prevents the last hub owner and admin from 
+     * @dev Renounces the role `role` from the calling account. Prevents the last hub owner and admin from
      * renouncing their role.
      * @param role The role to renounce.
      * @param account The account to renounce the role from.
@@ -44,10 +43,10 @@ abstract contract HubOwner is AccessControlEnumerable {
         super.renounceRole(role, account);
     }
 
-    /** 
+    /**
      * @notice Returns the addresses which have a certain role.
      * @dev In the unlikely event that there are many accounts with a certain role,
-     *      this function might cause out of memory issues, and fail. 
+     *      this function might cause out of memory issues, and fail.
      * @param _role Role to return array of admins for.
      * @return admins The array of admins with the requested role.
      */
@@ -68,7 +67,7 @@ abstract contract HubOwner is AccessControlEnumerable {
     function owner() external view returns (address) {
         bytes32 role = HUB_OWNER_ROLE;
         if (getRoleMemberCount(role) == 0) {
-            // The only way that there could be no owners is if an account with DEFAULT_ADMIN_ROLE 
+            // The only way that there could be no owners is if an account with DEFAULT_ADMIN_ROLE
             // revoked all of the accounts with OWNER_ROLE.
             return address(0);
         }

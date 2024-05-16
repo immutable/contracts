@@ -11,8 +11,8 @@ import {MintingHubOwner} from "../../common/MintingHubOwner.sol";
  * @notice ERC 20 contract that wraps Open Zeppelin's ERC 20 Permit contract.
  * @dev This contract has the concept of a hubOwner, called _hubOwner in the constructor.
  * This account has no rights to execute any administrative actions within the contract,
- *  with the exception of renouncing their ownership. 
- *  The Immutable Hub uses this function to help associate the ERC 20 contract 
+ *  with the exception of renouncing their ownership.
+ *  The Immutable Hub uses this function to help associate the ERC 20 contract
  *  with a specific Immutable Hub account.
  */
 contract ImmutableERC20MinterBurnerPermitV2 is MintingHubOwner, ERC20Capped, ERC20Burnable, ERC20Permit {
@@ -20,14 +20,24 @@ contract ImmutableERC20MinterBurnerPermitV2 is MintingHubOwner, ERC20Capped, ERC
      * @dev Delegate to Open Zeppelin's contract.
      * @param _roleAdmin The account that has the DEFAULT_ADMIN_ROLE.
      * @param _minterAdmin The account that has the MINTER_ROLE.
-     * @param _hubOwner The account that owns the contract and is associated with Immutable Hub. 
+     * @param _hubOwner The account that owns the contract and is associated with Immutable Hub.
      * @param _name  Name of the token.
      * @param _symbol Token symbol.
      * @param _maxTokenSupply The maximum supply of the token.
      */
-    constructor(address _roleAdmin, address _minterAdmin, address _hubOwner, string memory _name, string memory _symbol, uint256 _maxTokenSupply) 
-        MintingHubOwner(_roleAdmin, _hubOwner, _minterAdmin) ERC20(_name, _symbol) ERC20Permit(_name) ERC20Capped(_maxTokenSupply) {
-    }
+    constructor(
+        address _roleAdmin,
+        address _minterAdmin,
+        address _hubOwner,
+        string memory _name,
+        string memory _symbol,
+        uint256 _maxTokenSupply
+    )
+        MintingHubOwner(_roleAdmin, _hubOwner, _minterAdmin)
+        ERC20(_name, _symbol)
+        ERC20Permit(_name)
+        ERC20Capped(_maxTokenSupply)
+    {}
 
     /**
      * @dev Mints `amount` number of token and transfers them to the `to` address.

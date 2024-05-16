@@ -26,10 +26,19 @@ contract HubOwnerTest is Test {
     }
 
     function testInit() public {
+        assertEq(tokenContract.owner(), hubOwner, "owner");
         assertTrue(tokenContract.hasRole(tokenContract.DEFAULT_ADMIN_ROLE(), admin));
         assertEq(tokenContract.getRoleMemberCount(tokenContract.DEFAULT_ADMIN_ROLE()), 1, "one admin");
         assertTrue(tokenContract.hasRole(tokenContract.HUB_OWNER_ROLE(), hubOwner), "hub owner");
         assertEq(tokenContract.getRoleMemberCount(tokenContract.HUB_OWNER_ROLE()), 1, "one hub owner");
+
+        address[] memory admins = tokenContract.getAdmins(tokenContract.DEFAULT_ADMIN_ROLE());
+        assertEq(admins.length, 1, "admins length");
+        assertEq(admins[0], admin, "admins[0]");
+
+        address[] memory hubOwners = tokenContract.getAdmins(tokenContract.HUB_OWNER_ROLE());
+        assertEq(hubOwners.length, 1, "hub owners length");
+        assertEq(hubOwners[0], hubOwner, "hub owners[0]");
     }
 
     function testRenounceAdmin() public {
@@ -68,5 +77,22 @@ contract HubOwnerTest is Test {
         vm.prank(hubOwner);
         vm.expectRevert(abi.encodeWithSelector(HubOwner.RenounceLastNotAllowed.selector));
         tokenContract.renounceRole(hubOwnerRole, hubOwner);
+    }
+
+    // Check what happens when owner() is called when there is no hub owner.
+    function testOwnerWhenNoHubOwner() public {
+        bytes32 hubOwnerRole = tokenContract.HUB_OWNER_ROLE();
+        vm.prank(admin);
+        tokenContract.revokeRole(hubOwnerRole, hubOwner);
+
+        // Check the revoke worked.
+        assertEq(tokenContract.getRoleMemberCount(hubOwnerRole), 0, "no hub owner");
+
+        // Check getAdmins worked in this situation too.
+        address[] memory hubOwners = tokenContract.getAdmins(hubOwnerRole);
+        assertEq(hubOwners.length, 0, "hub owners length");
+
+        address theOwner = tokenContract.owner();
+        assertEq(theOwner, address(0), "owner when there are now owners");
     }
 }

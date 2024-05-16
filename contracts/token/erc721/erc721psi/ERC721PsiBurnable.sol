@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: MIT
 /**
-  ______ _____   _____ ______ ___  __ _  _  _
- |  ____|  __ \ / ____|____  |__ \/_ | || || |
- | |__  | |__) | |        / /   ) || | \| |/ |
- |  __| |  _  /| |       / /   / / | |\_   _/
- | |____| | \ \| |____  / /   / /_ | |  | |
- |______|_|  \_\\_____|/_/   |____||_|  |_|
-
-
+ * ______ _____   _____ ______ ___  __ _  _  _
+ *  |  ____|  __ \ / ____|____  |__ \/_ | || || |
+ *  | |__  | |__) | |        / /   ) || | \| |/ |
+ *  |  __| |  _  /| |       / /   / / | |\_   _/
+ *  | |____| | \ \| |____  / /   / /_ | |  | |
+ *  |______|_|  \_\\_____|/_/   |____||_|  |_|
  */
 pragma solidity 0.8.19;
 
@@ -16,6 +14,7 @@ import {ERC721Psi} from "./ERC721Psi.sol";
 
 abstract contract ERC721PsiBurnable is ERC721Psi {
     using BitMaps for BitMaps.BitMap;
+
     BitMaps.BitMap private _burnedToken;
 
     /**
@@ -78,7 +77,9 @@ abstract contract ERC721PsiBurnable is ERC721Psi {
      */
     function _popcount(uint256 x) private pure returns (uint256 count) {
         unchecked {
-            for (count = 0; x != 0; count++) x &= x - 1;
+            for (count = 0; x != 0; count++) {
+                x &= x - 1;
+            }
         }
     }
 }

@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: MIT
 /**
-  ______ _____   _____ ______ ___  __ _  _  _
- |  ____|  __ \ / ____|____  |__ \/_ | || || |
- | |__  | |__) | |        / /   ) || | \| |/ |
- |  __| |  _  /| |       / /   / / | |\_   _/
- | |____| | \ \| |____  / /   / /_ | |  | |
- |______|_|  \_\\_____|/_/   |____||_|  |_|
-
- - github: https://github.com/estarriolvetch/ERC721Psi
- - npm: https://www.npmjs.com/package/erc721psi
-
+ * ______ _____   _____ ______ ___  __ _  _  _
+ *  |  ____|  __ \ / ____|____  |__ \/_ | || || |
+ *  | |__  | |__) | |        / /   ) || | \| |/ |
+ *  |  __| |  _  /| |       / /   / / | |\_   _/
+ *  | |____| | \ \| |____  / /   / /_ | |  | |
+ *  |______|_|  \_\\_____|/_/   |____||_|  |_|
+ *
+ *  - github: https://github.com/estarriolvetch/ERC721Psi
+ *  - npm: https://www.npmjs.com/package/erc721psi
  */
 // solhint-disable
 pragma solidity 0.8.19;
@@ -93,11 +92,11 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
     /**
      * @dev See {IERC721-balanceOf}.
      */
-    function balanceOf(address owner) public view virtual override returns (uint) {
+    function balanceOf(address owner) public view virtual override returns (uint256) {
         require(owner != address(0), "ERC721Psi: balance query for the zero address");
 
-        uint count = 0;
-        for (uint i = _startTokenId(); i < _nextTokenId(); ++i) {
+        uint256 count = 0;
+        for (uint256 i = _startTokenId(); i < _nextTokenId(); ++i) {
             if (_exists(i)) {
                 if (owner == ownerOf(i)) {
                     ++count;

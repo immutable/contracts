@@ -14,14 +14,16 @@ import {ERC721Hybrid} from "./ERC721Hybrid.sol";
  * @title ERC721HybridPermit: An extension of the ERC721Hybrid NFT standard that supports off-chain approval via permits.
  * @dev This contract implements ERC-4494 as well, allowing tokens to be approved via off-chain signed messages.
  */
-
 abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
-    /** @notice mapping used to keep track of nonces of each token ID for validating
+    /**
+     * @notice mapping used to keep track of nonces of each token ID for validating
      *  signatures
      */
     mapping(uint256 tokenId => uint256 nonce) private _nonces;
 
-    /** @dev the unique identifier for the permit struct to be EIP 712 compliant */
+    /**
+     * @dev the unique identifier for the permit struct to be EIP 712 compliant
+     */
     bytes32 private constant _PERMIT_TYPEHASH =
         keccak256(
             abi.encodePacked(

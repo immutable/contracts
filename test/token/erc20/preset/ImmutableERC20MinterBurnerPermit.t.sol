@@ -57,6 +57,4 @@ contract ImmutableERC20MinterBurnerPermitTest is ERC20MinterBurnerPermitCommonTe
         vm.expectRevert(abi.encodeWithSelector(ImmutableERC20MinterBurnerPermit.RenounceOwnershipNotAllowed.selector));
         erc20.renounceRole(hubOwnerRole, hubOwner);
     }
-
-
 }

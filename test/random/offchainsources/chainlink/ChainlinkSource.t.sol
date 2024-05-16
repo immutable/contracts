@@ -11,7 +11,7 @@ import {ChainlinkSourceAdaptor} from "contracts/random/offchainsources/chainlink
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract ChainlinkInitTests is Test {
-    event ConfigChanges( bytes32 _keyHash, uint64 _subId, uint32 _callbackGasLimit);
+    event ConfigChanges(bytes32 _keyHash, uint64 _subId, uint32 _callbackGasLimit);
 
     bytes32 public constant CONFIG_ADMIN_ROLE = keccak256("CONFIG_ADMIN_ROLE");
 
@@ -38,19 +38,22 @@ contract ChainlinkInitTests is Test {
         upgradeAdmin = makeAddr("upgradeAdmin");
 
         impl = new RandomSeedProvider();
-        proxy = new ERC1967Proxy(address(impl), 
-            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, upgradeAdmin, false));
+        proxy = new ERC1967Proxy(
+            address(impl),
+            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, upgradeAdmin, false)
+        );
         randomSeedProvider = RandomSeedProvider(address(proxy));
 
         mockChainlinkCoordinator = new MockCoordinator();
         chainlinkSourceAdaptor = new ChainlinkSourceAdaptor(
-            roleAdmin, configAdmin, address(mockChainlinkCoordinator), KEY_HASH, SUB_ID, CALLBACK_GAS_LIMIT);
+            roleAdmin, configAdmin, address(mockChainlinkCoordinator), KEY_HASH, SUB_ID, CALLBACK_GAS_LIMIT
+        );
         mockChainlinkCoordinator.setAdaptor(address(chainlinkSourceAdaptor));
 
         vm.prank(randomAdmin);
         randomSeedProvider.setOffchainRandomSource(address(chainlinkSourceAdaptor));
 
-        // Ensure we are on a new block number when we start the tests. In particular, don't 
+        // Ensure we are on a new block number when we start the tests. In particular, don't
         // be on the same block number as when the contracts were deployed.
         vm.roll(block.number + 1);
     }
@@ -58,15 +61,19 @@ contract ChainlinkInitTests is Test {
     function testInit() public {
         mockChainlinkCoordinator = new MockCoordinator();
         chainlinkSourceAdaptor = new ChainlinkSourceAdaptor(
-            roleAdmin, configAdmin, address(mockChainlinkCoordinator), KEY_HASH, SUB_ID, CALLBACK_GAS_LIMIT);
+            roleAdmin, configAdmin, address(mockChainlinkCoordinator), KEY_HASH, SUB_ID, CALLBACK_GAS_LIMIT
+        );
 
-        assertEq(address(chainlinkSourceAdaptor.vrfCoordinator()), address(mockChainlinkCoordinator), "vrfCoord not set correctly");
+        assertEq(
+            address(chainlinkSourceAdaptor.vrfCoordinator()),
+            address(mockChainlinkCoordinator),
+            "vrfCoord not set correctly"
+        );
         assertEq(chainlinkSourceAdaptor.keyHash(), KEY_HASH, "keyHash not set correctly");
         assertEq(chainlinkSourceAdaptor.subId(), SUB_ID, "subId not set correctly");
         assertEq(chainlinkSourceAdaptor.callbackGasLimit(), CALLBACK_GAS_LIMIT, "callbackGasLimit not set correctly");
     }
 }
-
 
 contract ChainlinkControlTests is ChainlinkInitTests {
     function testRoleAdmin() public {
@@ -104,15 +111,15 @@ contract ChainlinkControlTests is ChainlinkInitTests {
         uint64 subId = uint64(5);
         uint32 callbackGasLimit = uint32(200001);
 
-        vm.expectRevert(); 
+        vm.expectRevert();
         chainlinkSourceAdaptor.configureRequests(keyHash, subId, callbackGasLimit);
     }
 }
 
-
 contract ChainlinkOperationalTests is ChainlinkInitTests {
     error WaitForRandom();
     error UnexpectedRandomWordsLength(uint256 _length);
+
     event RequestId(uint256 _requestId);
 
     bytes32 public constant RAND1 = bytes32(uint256(0x1a));
@@ -126,7 +133,6 @@ contract ChainlinkOperationalTests is ChainlinkInitTests {
         assertEq(entries[0].topics[0], keccak256("RequestId(uint256)"));
         uint256 requestId = abi.decode(entries[0].data, (uint256));
         assertEq(fulfilmentIndex, requestId, "Must be the same");
-
 
         bool ready = chainlinkSourceAdaptor.isOffchainRandomReady(fulfilmentIndex);
         assertFalse(ready, "Should not be ready yet");
@@ -196,8 +202,6 @@ contract ChainlinkOperationalTests is ChainlinkInitTests {
     }
 }
 
-
-
 contract ChainlinkIntegrationTests is ChainlinkOperationalTests {
     function testEndToEnd() public {
         MockGame game = new MockGame(address(randomSeedProvider));
@@ -212,11 +216,19 @@ contract ChainlinkIntegrationTests is ChainlinkOperationalTests {
         assertEq(entries[0].topics[0], keccak256("RequestId(uint256)"));
         uint256 fulfilmentIndex = abi.decode(entries[0].data, (uint256));
 
-        assertEq(uint256(game.isRandomValueReady(randomRequestId)), uint256(RandomValues.RequestStatus.IN_PROGRESS), "Should not be ready yet");
+        assertEq(
+            uint256(game.isRandomValueReady(randomRequestId)),
+            uint256(RandomValues.RequestStatus.IN_PROGRESS),
+            "Should not be ready yet"
+        );
 
         mockChainlinkCoordinator.sendFulfill(fulfilmentIndex, uint256(RAND1));
 
-        assertEq(uint256(game.isRandomValueReady(randomRequestId)), uint256(RandomValues.RequestStatus.READY), "Should be ready");
+        assertEq(
+            uint256(game.isRandomValueReady(randomRequestId)),
+            uint256(RandomValues.RequestStatus.READY),
+            "Should be ready"
+        );
 
         bytes32[] memory randomValue = game.fetchRandomValues(randomRequestId);
         assertEq(randomValue.length, 1, "length");
@@ -245,9 +257,13 @@ contract ChainlinkCoverageFakeTests is ChainlinkInitTests {
     function testV2BaseChecksCoverage() public {
         MockCoordinator mockChainlinkCoordinator2 = new MockCoordinator();
         mockChainlinkCoordinator2.setAdaptor(address(chainlinkSourceAdaptor));
-        vm.expectRevert(abi.encodeWithSelector(
-            OnlyCoordinatorCanFulfill.selector, address(mockChainlinkCoordinator2), address(mockChainlinkCoordinator)));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                OnlyCoordinatorCanFulfill.selector,
+                address(mockChainlinkCoordinator2),
+                address(mockChainlinkCoordinator)
+            )
+        );
         mockChainlinkCoordinator2.sendFulfill(0, 0);
     }
 }
-

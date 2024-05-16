@@ -41,7 +41,8 @@ contract ImmutableERC721MintByID is ImmutableERC721Base {
         )
     {}
 
-    /** @notice Allows minter to mint `tokenID` to `to`
+    /**
+     * @notice Allows minter to mint `tokenID` to `to`
      *  @param to the address to mint the token to
      *  @param tokenID the ID of the token to mint
      */
@@ -50,7 +51,8 @@ contract ImmutableERC721MintByID is ImmutableERC721Base {
         _safeMint(to, tokenID, "");
     }
 
-    /** @notice Allows minter to safe mint `tokenID` to `to`
+    /**
+     * @notice Allows minter to safe mint `tokenID` to `to`
      *  @param to the address to mint the token to
      *  @param tokenID the ID of the token to mint
      */
@@ -97,7 +99,8 @@ contract ImmutableERC721MintByID is ImmutableERC721Base {
         _safeBurnBatch(burns);
     }
 
-    /** @notice Allows caller to a transfer a number of tokens by ID from a specified
+    /**
+     * @notice Allows caller to a transfer a number of tokens by ID from a specified
      *  address to a number of specified addresses
      *  @param tr the TransferRequest struct containing the from, tos, and tokenIds
      */

@@ -5,7 +5,6 @@ import {IERC20Metadata, ERC20TestCommon} from "./ERC20TestCommon.t.sol";
 import {ImmutableERC20FixedSupplyNoBurn} from "contracts/token/erc20/preset/ImmutableERC20FixedSupplyNoBurn.sol";
 
 contract ImmutableERC20FixedSupplyNoBurnTest is ERC20TestCommon {
-
     ImmutableERC20FixedSupplyNoBurn public erc20;
 
     function setUp() public virtual override {
@@ -25,5 +24,4 @@ contract ImmutableERC20FixedSupplyNoBurnTest is ERC20TestCommon {
         vm.expectRevert(abi.encodeWithSelector(ImmutableERC20FixedSupplyNoBurn.RenounceOwnershipNotAllowed.selector));
         erc20.renounceOwnership();
     }
-
 }

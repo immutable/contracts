@@ -86,7 +86,8 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
         contractURI = contractURI_;
     }
 
-    /** @notice Set the default royalty receiver address
+    /**
+     * @notice Set the default royalty receiver address
      *  @param receiver the address to receive the royalty
      *  @param feeNumerator the royalty fee numerator
      *  @dev This can only be called by the an admin. See ERC2981 for more details on _setDefaultRoyalty
@@ -95,7 +96,8 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
         _setDefaultRoyalty(receiver, feeNumerator);
     }
 
-    /** @notice Set the royalty receiver address for a specific tokenId
+    /**
+     * @notice Set the royalty receiver address for a specific tokenId
      *  @param tokenId the token to set the royalty for
      *  @param receiver the address to receive the royalty
      *  @param feeNumerator the royalty fee numerator
@@ -109,7 +111,8 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
         _setTokenRoyalty(tokenId, receiver, feeNumerator);
     }
 
-    /** @notice Set the royalty receiver address for a list of tokenId
+    /**
+     * @notice Set the royalty receiver address for a list of tokenId
      *  @param tokenIds the list of tokens to set the royalty for
      *  @param receiver the address to receive the royalty
      *  @param feeNumerator the royalty fee numerator
@@ -125,7 +128,8 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
         }
     }
 
-    /** @notice allows owner or operator to burn a single token
+    /**
+     * @notice allows owner or operator to burn a single token
      *  @param tokenId the token to burn
      *  @dev see ERC721Burnable for more details
      */
@@ -136,7 +140,8 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
         _totalSupply--;
     }
 
-    /** @notice Burn a token, checking the owner of the token against the parameter first.
+    /**
+     * @notice Burn a token, checking the owner of the token against the parameter first.
      *  @param owner the owner of the token
      *  @param tokenId the token to burn
      */
@@ -149,7 +154,8 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
         burn(tokenId);
     }
 
-    /** @notice Burn a batch of tokens, checking the owner of the token against the parameter first.
+    /**
+     * @notice Burn a batch of tokens, checking the owner of the token against the parameter first.
      *  @param burns list of burn requests including token id and owner address
      */
     function _safeBurnBatch(IDBurn[] calldata burns) public virtual {
@@ -185,7 +191,8 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
         super.setApprovalForAll(operator, approved);
     }
 
-    /** @notice Returns the supported interfaces
+    /**
+     * @notice Returns the supported interfaces
      *  @param interfaceId the interface to check for support
      */
     function supportsInterface(
@@ -200,7 +207,9 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
         return super.supportsInterface(interfaceId);
     }
 
-    /** @notice returns the number of minted - burned tokens */
+    /**
+     * @notice returns the number of minted - burned tokens
+     */
     function totalSupply() public view virtual returns (uint256) {
         return _totalSupply;
     }
@@ -227,7 +236,8 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
 
     ///     =====  Internal functions  =====
 
-    /** @notice mints a batch of tokens with specified ids to a specified address
+    /**
+     * @notice mints a batch of tokens with specified ids to a specified address
      *  @param mintRequest list of mint requests including token id and owner address
      *  @dev see ERC721 for more details on _mint
      */
@@ -243,7 +253,8 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
         }
     }
 
-    /** @notice safe mints a batch of tokens with specified ids to a specified address
+    /**
+     * @notice safe mints a batch of tokens with specified ids to a specified address
      *  @param mintRequest list of burn requests including token id and owner address
      *  @dev see ERC721 for more details on _safeMint
      */
@@ -258,7 +269,8 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
         _totalSupply = _totalSupply + mintRequest.tokenIds.length;
     }
 
-    /** @notice mints specified token id to specified address
+    /**
+     * @notice mints specified token id to specified address
      *  @param to the address to mint to
      *  @param tokenId the token to mint
      *  @dev see ERC721 for more details on _mint
@@ -270,7 +282,8 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
         super._mint(to, tokenId);
     }
 
-    /** @notice safe mints specified token id to specified address
+    /**
+     * @notice safe mints specified token id to specified address
      *  @param to the address to mint to
      *  @param tokenId the token to mint
      *  @dev see ERC721 for more details on _safeMint

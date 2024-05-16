@@ -8,7 +8,7 @@ import {IImmutableERC1155Errors} from "../../../contracts/errors/Errors.sol";
 import {OperatorAllowlistEnforcementErrors} from "../../../contracts/errors/Errors.sol";
 import {OperatorAllowlistUpgradeable} from "../../../contracts/allowlist/OperatorAllowlistUpgradeable.sol";
 import {Sign} from "../../utils/Sign.sol";
-import {DeployOperatorAllowlist} from  "../../utils/DeployAllowlistProxy.sol";
+import {DeployOperatorAllowlist} from "../../utils/DeployAllowlistProxy.sol";
 import {MockWallet} from "../../../contracts/mocks/MockWallet.sol";
 import {MockWalletFactory} from "../../../contracts/mocks/MockWalletFactory.sol";
 
@@ -21,7 +21,6 @@ contract ImmutableERC1155Test is Test {
     MockWallet public scw;
     MockWallet public anotherScw;
     address[] private operatorAddrs;
-
 
     uint256 deployerPrivateKey = 1;
     uint256 ownerPrivateKey = 2;
@@ -51,13 +50,7 @@ contract ImmutableERC1155Test is Test {
         operatorAllowlist = OperatorAllowlistUpgradeable(proxyAddr);
 
         immutableERC1155 = new ImmutableERC1155(
-            owner,
-            "test",
-            "test-base-uri",
-            "test-contract-uri",
-            address(operatorAllowlist),
-            feeReceiver,
-            0
+            owner, "test", "test-base-uri", "test-contract-uri", address(operatorAllowlist), feeReceiver, 0
         );
 
         operatorAddrs.push(minter);
@@ -156,7 +149,9 @@ contract ImmutableERC1155Test is Test {
 
     function test_RevertIfNonAdminAttemptsToSetContractURI() public {
         vm.prank(vm.addr(anotherPrivateKey));
-        vm.expectRevert("AccessControl: account 0x1eff47bc3a10a45d4b230b5d10e37751fe6aa718 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+        vm.expectRevert(
+            "AccessControl: account 0x1eff47bc3a10a45d4b230b5d10e37751fe6aa718 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
+        );
         immutableERC1155.setContractURI("new-contract-uri");
     }
 
@@ -168,7 +163,9 @@ contract ImmutableERC1155Test is Test {
 
     function test_RevertIfNonAdminAttemptsToSetBaseURI() public {
         vm.prank(vm.addr(anotherPrivateKey));
-        vm.expectRevert("AccessControl: account 0x1eff47bc3a10a45d4b230b5d10e37751fe6aa718 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+        vm.expectRevert(
+            "AccessControl: account 0x1eff47bc3a10a45d4b230b5d10e37751fe6aa718 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
+        );
         immutableERC1155.setBaseURI("new-base-uri");
     }
 
@@ -348,10 +345,10 @@ contract ImmutableERC1155Test is Test {
         vm.stopPrank();
     }
 
-   /*
-   * Burn
-   */
-   function test_Burn() public {
+    /*
+    * Burn
+    */
+    function test_Burn() public {
         vm.prank(minter);
         immutableERC1155.safeMint(owner, 1, 1, "");
         vm.prank(owner);

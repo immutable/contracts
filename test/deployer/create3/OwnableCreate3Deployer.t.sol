@@ -3,16 +3,19 @@
 pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
-import {ERC20Mock} from "@openzeppelin/contracts/mocks/ERC20Mock.sol";
 import {IDeploy} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/interfaces/IDeploy.sol";
-import {ERC20MintableBurnable} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnable.sol";
-import {ERC20MintableBurnableInit} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnableInit.sol";
+import {ERC20Mock} from "@openzeppelin/contracts/mocks/ERC20Mock.sol";
+import {ERC20MintableBurnable} from
+    "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnable.sol";
+import {ERC20MintableBurnableInit} from
+    "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnableInit.sol";
 import {ContractAddress} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/libs/ContractAddress.sol";
 
 import {OwnableCreate3Deployer} from "../../../contracts/deployer/create3/OwnableCreate3Deployer.sol";
 import {OwnableCreateDeploy} from "../../../contracts/deployer/create/OwnableCreateDeploy.sol";
+import {Create3Utils} from "./Create3Utils.sol";
 
-contract OwnableCreate3DeployerTest is Test {
+contract OwnableCreate3DeployerTest is Test, Create3Utils {
     OwnableCreate3Deployer private factory;
     bytes private erc20MockBytecode;
     bytes32 private erc20MockSalt;
@@ -58,7 +61,7 @@ contract OwnableCreate3DeployerTest is Test {
 
     /// @dev ensure contracts are deployed at the expected address
     function test_deploy_DeploysContractAtExpectedAddress() public {
-        address expectedAddress = _predictCreate3Address(address(factoryOwner), erc20MockSalt);
+        address expectedAddress = predictCreate3Address(factory, address(factoryOwner), erc20MockSalt);
 
         /// forward the nonce of the owner and the factory, to confirm they doesn't influence address
         vm.setNonce(factoryOwner, vm.getNonce(factoryOwner) + 10);
@@ -77,7 +80,7 @@ contract OwnableCreate3DeployerTest is Test {
             abi.encodePacked(type(ERC20MintableBurnable).creationCode, abi.encode("Test Token", "TEST", 18));
         bytes32 erc20MintableSalt = _createSaltFromKey("erc20-mintable-burnable-v1");
 
-        address expectedAddress = _predictCreate3Address(address(factoryOwner), erc20MintableSalt);
+        address expectedAddress = predictCreate3Address(factory, address(factoryOwner), erc20MintableSalt);
 
         vm.expectEmit();
         emit Deployed(expectedAddress, address(factoryOwner), erc20MintableSalt, keccak256(erc20MintableBytecode));
@@ -112,7 +115,7 @@ contract OwnableCreate3DeployerTest is Test {
 
         // test that the new owner can deploy
         vm.startPrank(newOwner);
-        address expectedAddress = _predictCreate3Address(address(newOwner), erc20MockSalt);
+        address expectedAddress = predictCreate3Address(factory, address(newOwner), erc20MockSalt);
 
         vm.expectEmit();
         emit Deployed(expectedAddress, address(newOwner), erc20MockSalt, keccak256(erc20MockBytecode));
@@ -161,7 +164,7 @@ contract OwnableCreate3DeployerTest is Test {
 
         bytes32 mintableInitSalt = _createSaltFromKey("erc20-mintable-burnable-init-v1");
 
-        address expectedAddress = _predictCreate3Address(address(factoryOwner), mintableInitSalt);
+        address expectedAddress = predictCreate3Address(factory, address(factoryOwner), mintableInitSalt);
 
         bytes memory initPayload = abi.encodeWithSelector(ERC20MintableBurnableInit.init.selector, "Test Token", "TEST");
         vm.expectEmit();
@@ -234,10 +237,6 @@ contract OwnableCreate3DeployerTest is Test {
     /**
      * private helper functions
      */
-    function _predictCreate3Address(address _sender, bytes32 _salt) private view returns (address) {
-        return factory.deployedAddress("", _sender, _salt);
-    }
-
     function _createSaltFromKey(string memory key) private view returns (bytes32) {
         return keccak256(abi.encode(address(factoryOwner), key));
     }

@@ -53,10 +53,7 @@ contract ImmutableSignedZoneV2Test is
     function test_contructor_grantsAdminRoleToOwner() public {
         address owner = makeAddr("owner");
         ImmutableSignedZoneV2 zone = new ImmutableSignedZoneV2(
-            "MyZoneName",
-            "https://www.immutable.com",
-            "https://www.immutable.com/docs",
-            owner
+            "MyZoneName", "https://www.immutable.com", "https://www.immutable.com/docs", owner
         );
         bool ownerHasAdminRole = zone.hasRole(zone.DEFAULT_ADMIN_ROLE(), owner);
         assertTrue(ownerHasAdminRole);
@@ -66,10 +63,7 @@ contract ImmutableSignedZoneV2Test is
         vm.expectEmit();
         emit SeaportCompatibleContractDeployed();
         new ImmutableSignedZoneV2(
-            "MyZoneName",
-            "https://www.immutable.com",
-            "https://www.immutable.com/docs",
-            makeAddr("owner")
+            "MyZoneName", "https://www.immutable.com", "https://www.immutable.com/docs", makeAddr("owner")
         );
     }
 
@@ -345,12 +339,8 @@ contract ImmutableSignedZoneV2Test is
         string memory expectedApiEndpoint = "https://www.immutable.com";
         string memory expectedDocumentationURI = "https://www.immutable.com/docs";
 
-        ImmutableSignedZoneV2Harness zone = new ImmutableSignedZoneV2Harness(
-            expectedZoneName,
-            expectedApiEndpoint,
-            expectedDocumentationURI,
-            OWNER
-        );
+        ImmutableSignedZoneV2Harness zone =
+            new ImmutableSignedZoneV2Harness(expectedZoneName, expectedApiEndpoint, expectedDocumentationURI, OWNER);
 
         bytes32 expectedDomainSeparator = zone.exposed_deriveDomainSeparator();
         uint256[] memory expectedSubstandards = zone.exposed_getSupportedSubstandards();
@@ -378,12 +368,8 @@ contract ImmutableSignedZoneV2Test is
         string memory expectedApiEndpoint = "https://www.immutable.com";
         string memory expectedDocumentationURI = "https://www.immutable.com/docs";
 
-        ImmutableSignedZoneV2Harness zone = new ImmutableSignedZoneV2Harness(
-            "MyZoneName",
-            expectedApiEndpoint,
-            expectedDocumentationURI,
-            OWNER
-        );
+        ImmutableSignedZoneV2Harness zone =
+            new ImmutableSignedZoneV2Harness("MyZoneName", expectedApiEndpoint, expectedDocumentationURI, OWNER);
 
         bytes32 expectedDomainSeparator = zone.exposed_deriveDomainSeparator();
         uint256[] memory expectedSubstandards = zone.exposed_getSupportedSubstandards();
@@ -455,7 +441,7 @@ contract ImmutableSignedZoneV2Test is
             consideration: new ReceivedItem[](0),
             extraData: bytes(
                 hex"01f39fd6e51aad88f6f4ce6ab8827279cfffb9226600000000660f3027d9ef9e6e50a74cc24433373b9cdd97693a02adcc94e562bb59a5af68190ecaea4414dcbe74618f6c77d11cbcf4a8345bbdf46e665249904925c95929ba6606638b779c6b502204fca6bb0539cdc3dc258fe3ce7b53be0c4ad620899167fedaa8"
-                ),
+            ),
             orderHashes: new bytes32[](0),
             startTime: 0,
             endTime: 0,
@@ -608,7 +594,8 @@ contract ImmutableSignedZoneV2Test is
         bytes32[] memory orderHashes = new bytes32[](1);
         orderHashes[0] = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
 
-        bytes memory extraData = _buildExtraDataWithoutContext(zone, SIGNER_PRIVATE_KEY, FULFILLER, expiration, orderHash, new bytes(0));
+        bytes memory extraData =
+            _buildExtraDataWithoutContext(zone, SIGNER_PRIVATE_KEY, FULFILLER, expiration, orderHash, new bytes(0));
 
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
@@ -624,7 +611,9 @@ contract ImmutableSignedZoneV2Test is
         });
 
         vm.expectRevert(
-            abi.encodeWithSelector(InvalidExtraData.selector, "invalid context, no substandards present", zoneParameters.orderHash)
+            abi.encodeWithSelector(
+                InvalidExtraData.selector, "invalid context, no substandards present", zoneParameters.orderHash
+            )
         );
         zone.validateOrder(zoneParameters);
     }
@@ -760,7 +749,7 @@ contract ImmutableSignedZoneV2Test is
             zoneHash: bytes32(0)
         });
 
-         vm.expectRevert(
+        vm.expectRevert(
             abi.encodeWithSelector(
                 InvalidExtraData.selector, "invalid context, no substandards present", zoneParameters.orderHash
             )
@@ -1479,19 +1468,13 @@ contract ImmutableSignedZoneV2Test is
 
     function _newZone(address owner) private returns (ImmutableSignedZoneV2) {
         return new ImmutableSignedZoneV2(
-            "MyZoneName",
-            "https://www.immutable.com",
-            "https://www.immutable.com/docs",
-            owner
+            "MyZoneName", "https://www.immutable.com", "https://www.immutable.com/docs", owner
         );
     }
 
     function _newZoneHarness(address owner) private returns (ImmutableSignedZoneV2Harness) {
         return new ImmutableSignedZoneV2Harness(
-            "MyZoneName",
-            "https://www.immutable.com",
-            "https://www.immutable.com/docs",
-            owner
+            "MyZoneName", "https://www.immutable.com", "https://www.immutable.com/docs", owner
         );
     }
 

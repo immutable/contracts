@@ -5,6 +5,7 @@ coverage.json
 typechain
 typechain-types
 node.json
+.idea/
 
 # Hardhat files
 cache

@@ -20,9 +20,12 @@ contract RegistrationV4 {
         imx = CoreV4(_imx);
     }
 
-    function registerAndWithdrawAll(address ethKey, uint256 starkKey, bytes calldata signature, uint256 assetType)
-        external
-    {
+    function registerAndWithdrawAll(
+        address ethKey,
+        uint256 starkKey,
+        bytes calldata signature,
+        uint256 assetType
+    ) external {
         if (!isRegistered(starkKey)) {
             imx.registerEthAddress(ethKey, starkKey, signature);
         }

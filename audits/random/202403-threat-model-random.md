@@ -96,9 +96,10 @@ Typically with random number generation, multiple low quality sources can be com
 This section describes the possible sources of random values on Immutable zkEVM. These sources have the advantage over off-chain sources that they are free. The disadvantage of these approaches is that they are susceptible to block producer manipulation.
 
 ### Previous Block’s RANDAO
-`PREVRANDAO` is an EVM opcode, previously called `DIFFICULTY`, that returns the output of the last block's decentralized random number generation process. How this value is generated depends on the release (hard fork) of Immutable zkEVM being used.
+`PREVRANDAO` is an EVM opcode, previously called `DIFFICULTY`, that returns the output of the last block's decentralized random number generation process. How this value is generated depends on the release (hard fork) of Immutable zkEVM being used. 
 
 Solidity contract code obtains the value by calling block.prevrandao. This in turn calls the PREVRANDAO opcode. The value is also included in the block header, thus adding uncertainty to the block's blockhash.
+
 
 #### Shanghai Hard Fork
 For the Shanghai Hard Fork (released in April 2024), `PREVRANDAO` always returns 0x00.
@@ -131,6 +132,7 @@ Blocks are only deemed valid if:
 * The block producer's BLS signature can be verified, based on the known plain text.
 * The PrevRANDAO block header field matches the calculation shown above.
 
+Once the BFT hardfork is active, the value of `prevrandao` for each block will be recorded in the `ValidatorSet` contract. At that point, the random number generator code will be upgraded to fetch the value from the `ValidatorSet` contract.
 
 ### Previous Block’s Block Hash
 In Ethereum based blockchains, including Immutable zkEVM, the Block Hash is the message digest of the block header of a block, exlcuding the Extra Data field. This is the “finger print” of all transactions that have occurred on the chain since genesis. 
@@ -170,6 +172,8 @@ The `RandomSeedProvider.sol` contract by default uses an on-chain random number 
 The `RandomSeedProvider.sol` contract uses a queue implemented in `RandomSeedProviderRequestQueue.sol` to hold outstanding requests for on-chain generated random seed values. Having a separate implementation more easily allows the code to be easily unit tested. 
 
 The architecture diagram shows a ChainLink VRF source and a Supra VRF source. This is purely to show the possibility of integrating with one off-chain service and then, at a later point choosing to switch to an alternative off-chain source. At present, there is no agreement to use any specific off-chain source.
+
+The architecture diagram shows the `RandomSeedProvider.sol` contract using the `ValidatorSet.sol` contract to fetch random values. The `RandomSeedProvider.sol` does not implement this in the initial version. It will be updated to be able to do this one the BFT hardfork is active.
 
 `RandomValues.sol` provides an API in which random numbers are requested in one transaction and then 
 fulfilled in a later transaction. `RandomSequences.sol` provides an API in which a random number
@@ -513,19 +517,25 @@ Functions that *do not change* state:
 | vrfCoordinator()                            | a3e56fa8          |
 
 
-## TODO Immutable zkEVM Validators: Block Hash Attack
+## Immutable zkEVM Validators: Block Hash Attack
+Immutable validators could insert a specially crafted transaction into a block to influence the block hash. As they would have limited time (at most the block period, two seconds), they will be able to influence the block hash value, but not specify it. 
+
+## Immutable zkEVM Validators: RANDAO Attack
+Once the BFT hardfork is active, `prevrandao` will be used as the on chain random source. A validator could choose to generate a block or not generate a block. In this way, they could determine that the `prevrandao` value that they were going to generate would not be favourable. Instead of geneating a block that they don't want, they could choose to not produce a block, thus allowing the next validator to create the block.
 
 
+## VRF Key Compromise
+VRFs use private keys to sign data. Random seed values could be know ahead of time if the private key is compromised. However, the value of the random seed generated can not be changed.
 
 
+## Reuse a Random Value 
+A game could reuse a random value. The attacker would then know ahead of time the random value. The `RandomValues` API prevents games from fetching the same number twice, thus removing this possible attack surface.
 
-## TODO Immutable zkEVM Validators: RANDAO Attack
+## Random Value Size
+A game could request a set of random values. It could then decide more values were needed, and request the `RandomValues` contract expand the seed value more. Attackers could predict the expanded value and then continue to ask for mre values. The `RandomValues` API prevents games from changing the number of random values to be returned. They reserve the number of values when submitting their original request.
 
-## TODO VRF Key Compromise
-
-## TODO Reuse a Random Value 
-## TODO Random Value Size
-## TODO Random Sequence for Same Usage
+## Random Sequence for Same Usage
+A game could use the `RandomSequence` API, but use the same sequence for multiple usages. Game players could then use numbers that were favourable for one use, and not for others. Documentation in `RandomSequences` contract explains the problems with this approach, and that separate sequences need to be used for each usage.
 
 
 ## Admin Roles
@@ -545,11 +555,7 @@ An account with DEFAULT_ADMIN role on the RandomSeedProvider contract could crea
 
 ### Accounts with CONTROL_ADMIN Role on SourceAdaptorBase Contract
 
-Accounts with CONTROL_ADMIN role 
-
-TODO
-could change the off-chain source to a deterministic sequence that they controlled. They could set the delay to 30 seconds, making games less responsive. They could add games to the list of off-chain random consumers, providing game studios with free access to a feature which might otherwise be charged for. They could remove games from the list of off-chain random consumers, depriving game studios of higher quality random numbers. They could add all games to be off-chain consumers and change the off-chain source to a deterministic sequence that they controlled. Exploiting this attack surface requires compromising the administrative accounts with the RANDOM_ADMIN roles.
-
+Accounts with CONTROL_ADMIN role could change the configuration of the off-chain random source. This might compromise the integrity of the random source.
 
 
 ## Upgrade and Storage Slots
@@ -606,11 +612,9 @@ forge inspect RandomSequences --pretty storage
 
 
 
-
-
 # Perceived Attackers
 
-This section lists the attackers that could attack the ERC 20 bridge system.
+This section lists the attackers that could attack the random number system.
 
 It is assumed that all attackers have access to all documentation and source code of all systems related to the Immutable zkEVM, irrespective of whether the information resides in a public or private GitHub repository, email, Slack, Confluence, or any other information system.
 
@@ -622,127 +626,60 @@ The General Public attacker can submit transactions on Ethereum or on the Immuta
 
 MEV Bots observe transactions in the transaction pool either on Immutable zkEVM. They can front run transactions.
 
-## Immutable zkEVM Block Proposer
+## Immutable zkEVM Validator / Block Producer
 
-TODO: Operator of an Ethereum Block Proposer could, within narrow limits, alter the block time stamp of the block they produce. If this block included transactions related to the withdrawal queue or flow rate mechanism, they might be able to have an affect on this mechanism.
+The validator could insert their own transaction, thus manipulating the value of the block hash. They could, within narrow limits, alter the block time stamp of the block they produce. They could choose to not submit a block.
 
-## TODO: Spear Phisher
+## Spear Phisher
 
 This attacker compromises accounts of people by using Spear Phishing attacks. For example they send a malicious PDF file to a user, which the user opens, the PDF file then installs malware on the user's computer. At this point, it is assumed that the Spear Phisher Attacker can detect all key strokes, mouse clicks, see all information retrieved, see any file in the user's file system, and execute any program on the user's computer.
 
-## TODO: Server Powner
+## Server Powner
 
-This attacker is able to compromise any server computer, _Powerfully Owning_ the computer. For instance, they can compromise a validator node on the Immutable zkEVM. They might do this by finding a buffer overflow vulnerability in the public API of the computer. They can read values from the computer's RAM. Importantly, they can access the BLS private key of the validator node.
+This attacker is able to compromise any server computer, _Powerfully Owning_ the computer. For instance, they can compromise a validator node on the Immutable zkEVM. They might do this by finding a buffer overflow vulnerability in the public API of the computer. They can read values from the computer's RAM. Importantly, they can access the validator keys of the validator node.
 
-## TODO: Insider
+## Insider
 
 This attacker works for a company helping operate the Immutable zkEVM. This attacker could be being bribed or blackmailed. They can access the keys that they as an individual employee has access to. For instance, they might be one of the signers of the multi-signer administrative role.
 
+
 # Attack Mitigation
 
-## TODO Immutable zkEVM Validators: Block Hash Attack
+## Game Player Attack
+Game players could observe blocks as they are being produced, and hence know the value of the block hash for the previous block. They might observe that at that point in time, the blockchain had low utilisation. They could assume that the there would be no transactions for the block that they submit their random seed request in and subsequent blocks until they fulfil their request. They could predict the block producer, and hence the value of the coinbase account. 
 
-## TODO Immutable zkEVM Validators: RANDAO Attack
+The Game Player could attempt to submit a transaction based on the random value and have it submitted in time for inclusion in the next block. They could choose when to do this based on their estimation of when an advantageous block hash will be generated.
 
-## TODO VRF Key Compromise
+To mitigate this attack, a delay of at least one block is imposed between when a game player requests a number and when the random number is fulfilled. Additioanlly, the `prevrandao` value will be used when the BFT hardfork goes live.
 
-## TODO Reuse a Random Value 
-
-
-
-*Game Player Attacks*: Game players could observe blocks as they are being produced, and hence know the value of the block hash for the previous block. They might observe that at that point in time, the blockchain had low utilisation. They could assume that the there would be no transactions for the block that they submit their random seed request in and subsequent blocks until they fulfil their request. They could predict the block producer, and hence the value of the coinbase account. 
-
-The Game Player could attempt to submit a transaction based on the random value and have it submitted in time for inclusion in the next block. They could choose when to do this based on their estimation of when 
-
-Hence, a delay of at least one block should be imposed between when a game player requests a number and when the random number is fulfilled.
-
-Block Producer Manipulation: The block producer could manipulate the block hash by crafting a transaction that included a number that the block producer controls. A malicious block producer could produce many candidate blocks, in an attempt to produce a specific block hash value. In this attack, block producers will be limited to four seconds (which will probably be only one or two seconds in practice) to mount their attack. They would need to have received the previous block (which takes somewhere between 0 and 2 seconds to generate), generate the transaction to manipulate the block hash value, and then send the propose block through the consensus process (which takes between 0 and 2 seconds to generate).
-
-TODO: Attack where another game requests one number per block, but never fulfils, thus forcing other games to absorb the cost / pay for the cost. 
-
-### RanDAO Attacks
-
-Game Player Attacks: Same as for Block Hash approach.
-
-Block Producer Manipulation: The RanDAO value can be influenced by a block producer deciding to produce or not produce a block. This limits the block producer's influence to one of two values: the value which it will produce, or the value that another replacement block producer will generate. A priori, it doesn’t know the value that the replacement block producer will generate, so it is left with the choice of a value it knows or an unknown value. 
-
-If a block producer chose to not produce a block, it will not earn block rewards that it could have earned. Additionally, this behaviour of not producing a block could be tracked.
+The practicality of this attack is questionable as the blockchain rarely has blocks with no transactions. 
 
 
+## Immutable zkEVM Validators: Block Hash Attack
+The validator (block producer) could manipulate the block hash by crafting a transaction that included a number that the block producer controls. A malicious block producer could produce many candidate blocks, in an attempt to produce a specific block hash value. In this attack, block producers will be limited to four seconds (which will probably be only one or two seconds in practice) to mount their attack. They would need to have received the previous block (which takes somewhere between 0 and 2 seconds to generate), generate the transaction to manipulate the block hash value, and then send the proposed block through the consensus process (which takes between 0 and 2 seconds to generate).
 
-This section outlines possible attacks against the attack surfaces by the attackers, and how those attacks are mitigated.
+There is no mitigation for this attack. Using  `prevrandao` once the BFT hardfork goes live will prevent this attack.
 
-## Overview of Attacks on Functions in RootERC20PredicateFlowRate
+## Immutable zkEVM Validators: RANDAO Attack
+Once the BFT hardfork goes live, the RanDAO value can be influenced by a block producer deciding to produce or not produce a block. This limits the block producer's influence to one of two values: the value which it will produce, or the value that another replacement block producer will generate. A priori, it doesn’t know the value that the replacement block producer will generate, so it is left with the choice of a value it knows or an unknown value. 
 
-The functions in RootERC20PredicateFlowRate fall into five categories:
+There is no mitigation for this attack. If a block producer chose to not produce a block, it will not earn block rewards that it could have earned. Additionally, this behaviour of not producing a block could be tracked, with possible slashing consequences.
 
-- View functions that don't update state. These functions can not be used to attack the system as they do not alter the state of the blockchain.
-- Transaction functions that have access control. These functions are considered in the section [Functions with Access Control](#functions-with-access-control).
-- Transaction functions that have no access control. These functions are considered in the section [Functions with no Access Control](#functions-with-no-access-control).
-- The `onL2StateReceive(uint256,address,bytes)` function has a form of access control, being limited to only being called by the `ExitHelper`. It is considered in the section [onL2StateReceiver](#onl2statereceive).
-- The `initialize(address,address,address,address,address)` function is needed for compatibility with `RootERC20Predicate`. Transactions that call this function in the context of `RootERC20PredicateFlowRate` revert.
-- The `initialize(address,address,address,address,address, address,address,address,address)` function can only be called once. It is called by the [TransparentUpgradeProxy](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/17c1a3a4584e2cbbca4131f2f1d16168c92f2310/contracts/proxy/transparent/TransparentUpgradeableProxy.sol) during the `TransparentUpgradeProxy`'s [constructor](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/17c1a3a4584e2cbbca4131f2f1d16168c92f2310/contracts/proxy/ERC1967/ERC1967Proxy.sol#L23), in the [context of the `TransparentUpgradeProxy`](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/17c1a3a4584e2cbbca4131f2f1d16168c92f2310/contracts/proxy/ERC1967/ERC1967Upgrade.sol#L62). An attacker could not call this function again in the context of the `TransparentUpgradeProxy`, as it reverts when called a second time. Calling this function on the `RootERC20PredicateFlowRate` contract directly would only change the state of `RootERC20PredicateFlowRate`, and not that of the `TransparentUpgradeProxy`.
 
-## Attacks on RootERC20PredicateFlowRate Functions with no Access Control
+## VRF Key Compromise
+If a VRF private key is compromised, then attackers could predict random values.
 
-The [General Public Attacker](#general-public) could attempt to attack functions with no access control. The [MEV Bot Attacker](#mev-bot) could see transactions to these functions and attempt to front run them. The following sections analyse what a [General Public Attacker](#general-public) and an [MEV Bot Attacker](#mev-bot) could achieve.
+The mitigation for this attack is to use reputable VRF providers who have good operational security.
 
-### deposit(address,uint256), depositTo(address,address,uint256), and depositNativeTo(address)
+## Admin Role Compromise
+If any of the admin roles are compromised, the random system will be compromised. 
 
-The `deposit` and `depositTo` functions allow users to deposit ERC 20 tokens into the bridge, and have them bridged to the Immutable zkEVM. The `depositNativeTo` allows users to deposit Ether into the bridge, and wrapped Ether tokens bridge to the Immutable zkEVM. For the function variants ending in `To`, the recipient account on the Immutable zkEVM can be specified.
+The mitigation for this attack is to have multi-sig wallets for all admin roles.
 
-Attackers need to supply their own tokens. They are unable to switch the type of token to a more desirable token, or increase the amount of tokens they receive. The [General Public Attacker](#general-public) and the [MEV Bot Attacker](#mev-bot) are unable to mount successful attacks on these functions.
-
-### finaliseQueuedWithdrawal(address,uint256) and finaliseQueuedWithdrawalsAggregated(address,address,uint256[])
-
-The `finaliseQueuedWithdrawal` and the `finaliseQueuedWithdrawalsAggregated` allow withdrawals that are in the withdrawal queue to be dequeued and the funds distributed. Whereas the `finaliseQueuedWithdrawal` finalises one withdrawal, the `finaliseQueuedWithdrawalsAggregated` allows multiple withdrawals for the same token to be accumulated into a single withdrawal, thus saving on gas cost of executing multiple ERC 20 transfers or multiple Ether transfers.
-
-The receiver of the funds is specified in the function call. The receiver only receives tokens or Ether that are in their withdrawal queue, and which have been in the withdrawal queue longer than the withdrawal period. The `finaliseQueuedWithdrawalsAggregated` checks that all withdrawals are for the same specified token.
-
-The [General Public Attacker](#general-public) could send the receiver some coins that the receiver did not want. For example, they could attempt to implicate the receiver in a scandal, by sending the receiver tainted coins. Then, despite the receiver not finalising the tainted coins, a [General Public Attacker](#general-public) could finalise the coins on the receiver's behalf. This is not deemed to be an attack as the account submitting the transaction to `finaliseQueuedWithdrawal` or `finaliseQueuedWithdrawalsAggregated` to dequeue the tainted coins is recorded in Ethereum, and could be readily identified as not being associated with the receiver.
-
-The [MEV Bot Attacker](#mev-bot) can not front run these calls as the tokens are sent to the receiver, and not to `msg.sender`.
-
-The [Ethereum Block Proposer](#ethereum-block-proposer) could mount an attack by slightly altering the [block timestamp](#ethereum-block-timing-attacks). The attacker could force a withdrawal that was on the very of becoming available to have to wait an extra block. Any transactions hoping to finalise the withdrawal would revert as the finalise function call would be deemed too early. The attacker could change the block timestamp slightly, thus causing a withdrawal to cause the automatic flow rate detection mechanism to activate. These attacks seem unlikely to occur because [Ethereum Block Proposers](#ethereum-block-proposer) are not focused on attacking the Immutable zkEVM, a single system within the larger Ethereum ecosystem. Additionally, these attacks on withdrawal time or flow rate are only slightly moving the timing and thresholds, in a way that is insignificant relative to the standard settings. That is, the default withdrawal delay is one day. Causing the delay to be even one second longer appears insignificant. Assuming the flow rate bucket has its capacity set such that it is averaging the flow rate over a period of an hour or more, changing the block timestamp by even a second will have little effect.
-
-### mapToken(address)
-
-The `mapToken` function sets the mapping between a token contract address on Ethereum and the corresponding token contract on the Immutable zkEVM. The mapping algorithm is deterministic. The function call initiates a crosschain transaction, which results in the token contract on the Immutable zkEVM being deployed.
-
-The [General Public Attacker](#general-public) could call this function multiple times for any token. They could then complete the crosschain transaction on the Immutable zkEVM, calling `commit` on the `StateReceiver` contract. The first time the function was called, the `ChildERC20Predicate` contract would deploy the contract. On the second attempt the function call would revert when the `ChildERC20Predicate` contract attempted to re-deploy the token contract. As such, the only possible attack could be that the [General Public Attacker](#general-public) deploys a multitude of ERC 20 contracts, filling up the Immutable zkEVM state. This is not deemed a significant attack.
-
-The [MEV Bot Attacker](#mev-bot) would gain no benefit from front running calls to this function. As such, it would not call this function.
-
-## Attacks on RootERC20PredicateFlowRate Functions with Access Control
-
-The table below outlines functions in `RootERC20PredicateFlowRate` that have access control. The mitigation for all is to assume that all roles will be operated by multi-signature addresses such that an attacker would need to compromise multiple signers simultaneously. As such, even if some keys are compromised due to the [Spear Phishing Attacker](#spear-phisher) or the [Insider Attacker](#insider), the administrative actions will not be able to be executed as a threshold number of keys will not be available.
-
-It should be noted that the intention is to have the threshold of number of signatures for the PAUSE role lower than for the other roles to make it easier for administrators to pause the bridge in a time of attack. However, the threshold will still be high enough that it will be difficult for an attacker to successfully mount such an attack. Even if they did successfully mount this attack, they would cause reputational damage, but would be unable to steal funds.
-
-| Name                                                     | Function Selector | Type        | Access Control       |
-| -------------------------------------------------------- | ----------------- | ----------- | -------------------- |
-| activateWithdrawalQueue()                                | af8bbb5e          | transaction | RATE role            |
-| deactivateWithdrawalQueue()                              | 1657a6e5          | transaction | RATE role            |
-| grantRole(bytes32,address)                               | 2f2ff15d          | transaction | Role Admin for role. |
-| pause()                                                  | 8456cb59          | transaction | PAUSE role           |
-| renounceRole(bytes32,address)                            | 36568abe          | transaction | msg.sender           |
-| revokeRole(bytes32,address)                              | d547741f          | transaction | Role Admin for role. |
-| setRateControlThreshold(address,uint256,uint256,uint256) | 8f3a4e4f          | transaction | RATE role            |
-| setWithdrawalDelay(uint256)                              | d2c13da5          | transaction | RATE role            |
-| unpause()                                                | 3f4ba83a          | transaction | UNPAUSE role         |
-
-## Attacks on RootERC20PredicateFlowRate onL2StateReceive Function
-
-Attacks related to compromising the attack surfaces [Root Chain Bridge Contracts](#root-chain-bridge-contracts), [Child Chain Bridge Contracts](#child-chain-bridge-contracts), [Immutable zkEVM Validators](#immutable-zkevm-validators), and [Custom Supernets Manager, Owner role](#custom-supernets-manager-owner-role) all result in creating a malicious `exit`. `Exits` supplied to the `ExitHelper` call the `RootERC20PredicateFlowRate`'s `onL2StateReceive` function. These are used to execute withdrawals. These attacks are mitigated by the high value withdrawal threshold and flow rate detection mechanisms that will detect large outflows, and add the withdrawals to the withdrawal queue. The administrators of the system would then have time to make the determination that the system was under attack and pause the bridge. Once the bridge has been paused, the attack could be mitigated, possibly by upgrading the RootERC20PredicateFlowRate to remove the malicious withdrawals.
-
-The [Server Powner Attacker](#server-powner) or other attacker that could create a malicious `exit`. They could then work with a [Spear Phishing Attacker](#spear-phisher) or the [Insider Attacker](#insider), to attempt to unpause the bridge and reduce the withdrawal delay so that they could finalise their malicious withdrawal. As per the [Attacks on RootERC20PredicateFlowRate Functions with Access Control](#attacks-on-rooterc20predicateflowrate-functions-with-access-control) section, the mitigation for this attack is to assume that all roles will be operated by multi-signature addresses such that an attacker would need to compromise multiple signers simultaneously.
-
-## Upgrade Attacks
-
-As described in the [RootERC20PredicateFlowRate, ExitHelper, CheckpointManager, CustomSupernetsManager Contract Upgrade](#rooterc20predicateflowrate-exithelper-checkpointmanager-customsupernetsmanager-contract-upgrade) section, a Proxy Administrator can upgrade the RootERC20PredicateFlowRate contract and other important contracts, changing the functionality to allow them to steal funds. As per the [Attacks on RootERC20PredicateFlowRate Functions with Access Control](#attacks-on-rooterc20predicateflowrate-functions-with-access-control) section, the mitigation for this attack is to assume that the Proxy Administrator will be operated by multi-signature addresses such that an attacker would need to compromise multiple signers simultaneously.
 
 # Conclusion
 
 This thread model has presented the architecture of the system, determined attack surfaces, and identified possible attackers and their capabilities. It has walked through each attack surface and based on the attackers, determined how the attacks are mitigated.
 
-The most likely attack will be compromising administrative keys that are part of multi-signature systems that control administrative roles via a combination of insider attacks or spear phishing attacks. The threshold number of signatures will be high for all but the PAUSE role, and hence attackers are extremely unlikely to compromise enough keys to mount an attack. The threshold number of signers for the PAUSE role is lower, so could possibly enough keys could be compromised to mount an attack. Pausing the bridge though disruptive, will not allow attackers to steal funds.
+The most likely attack is related to the use of block hash for on-chain random. Once the BFT hard fork is active, the onchain random provider will be migrated to use `prevrandao`. An additional mitigation is to move to using an offchain VRF provider.
+

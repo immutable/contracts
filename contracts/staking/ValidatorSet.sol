@@ -5,12 +5,11 @@ pragma solidity 0.8.19;
 import {UUPSUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/proxy/utils/UUPSUpgradeable.sol";
 import {AccessControlEnumerableUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/access/AccessControlEnumerableUpgradeable.sol";
 
-
-
 /**
  * @dev This contract is upgradeable.
  */
-contract ValidatorSet is  AccessControlEnumerableUpgradeable {
+contract ValidatorSet is  AccessControlEnumerableUpgradeable, UUPSUpgradeable {
+    error CanNotUpgradeFrom(uint256 _newVersion, uint256 _currentVersion);
     error ValidatorNodeAlreadyAdded(address _nodeAccount);
     error StakerForOtherValidator(address _stakingAccount);
     error StakerNotConfigured(address _stakingAccount);
@@ -50,16 +49,15 @@ contract ValidatorSet is  AccessControlEnumerableUpgradeable {
     // @dev This storage slot will be used during upgrades.
     uint256 public version;
 
-
     // Mapping node validator's node address => Validator Info.
     mapping (address nodeAddress => ValidatorInfo info) public validatorSetByValidatorAccount;
 
     // Mapping validator's staking account => validator's node address.
-    mapping (address => address) public validatorSetByStakingAccount;
+    mapping (address stakingAddress => address nodeAddress) public validatorSetByStakingAccount;
 
     address[] public validatorsCurrentEpoch;
     address[] public validatorsNextEpoch;
-
+    uint256 public nextEpochStart;
 
 
     // The last block that block rewards were paid out on. Ensures block rewards are not paid 
@@ -67,9 +65,10 @@ contract ValidatorSet is  AccessControlEnumerableUpgradeable {
     uint256 public blockNumberBlockRewardPaidUpTo;
 
     // Block rewards yet to be paid out.
-    mapping (address => uint256) public pendingBlockRewards;
+    mapping (address stakingAddress => uint256 amount) public pendingBlockRewards;
 
-
+    // Record of the previous RAN DAO values for each block.
+    mapping (uint256 blockNumber => uint256 prevRanDao) public prevRanDao;
 
     /**
      * @notice Initialize the contract for use with a transparent proxy.
@@ -89,8 +88,6 @@ contract ValidatorSet is  AccessControlEnumerableUpgradeable {
         version = VERSION0;
     }
 
-
-
     /**
      * @notice Called during contract upgrade.
      * @dev This function will be overridden in future versions of this contract.
@@ -102,8 +99,6 @@ contract ValidatorSet is  AccessControlEnumerableUpgradeable {
         //   That is, we mistakenly attempt to downgrade the contract.
         revert CanNotUpgradeFrom(version, VERSION0);
     }
-
-
 
     /**
      * @notice Add a validator it the validator set at the start of the next epoch.
@@ -120,17 +115,25 @@ contract ValidatorSet is  AccessControlEnumerableUpgradeable {
             revert StakerForOtherValidator(_stakingAccount);
         }
 
-        ValidatorInfoBFT storage valInfo = validatorSetByValidatorAccount[_nodeAccount];
+        ValidatorInfo storage valInfo = validatorSetByValidatorAccount[_nodeAccount];
         valInfo.stakingAccount = _stakingAccount;
         valInfo.blsPublicKey = _blsPublicKey;
         valInfo.lastTimeBlockProducer = block.number;
-        valInfo.index = validators.length;
-        validators.push(_nodeAccount);
+        valInfo.index = validatorsNextEpoch.length;
+
+        validatorSetByStakingAccount[_stakingAccount] = _nodeAccount;
+
+        updateValidatorSetForEpoch();
+        // Add the validator from the list for next epoch.
+        validatorsNextEpoch.push(_nodeAccount);
     }
 
-    // TODO only validator controller.
+    /**
+     * @notice Remove a validator from the validator set for the next epoch.
+     * @param _stakingAccount The staking account for a validator.
+     */
     function removeValidator(address _stakingAccount) external  onlyRole(VALIDATOR_ADMIN_ROLE) {
-        uint256 numValidators = validators.length;
+        uint256 numValidators = validatorsNextEpoch.length;
         if (numValidators == 1) {
             revert MustHaveAtLeastOneValidator(_stakingAccount);
         }
@@ -141,17 +144,24 @@ contract ValidatorSet is  AccessControlEnumerableUpgradeable {
         }
 
         validatorSetByStakingAccount[_stakingAccount] = address(0);
-        ValidatorInfoBFT storage info = validatorSetByValidatorAccount[nodeAccount];
+        ValidatorInfo storage info = validatorSetByValidatorAccount[nodeAccount];
         info.stakingAccount = address(0);
 
+        updateValidatorSetForEpoch();
+        // Remove the validator from the list for next epoch.
         uint256 index = info.index;
         if (index != numValidators - 1) {
-            validators[index] = validators[numValidators - 1];
+            validatorsNextEpoch[index] = validatorsNextEpoch[numValidators - 1];
         }
-        validators.pop();
+        validatorsNextEpoch.pop();
     }
 
-
+    /**
+     * @notice Function to be called once per block to pay block rewards for this block.
+     * @dev This function has some secondary purposes:
+     *      - Records the last time a validator produced a block. This will be used in slashing.
+     *      - Records the Prev RAN DAO value for the block. This is used by the on-chain random system.
+     */
    function payBlockReward() external {
         if (blockNumberBlockRewardPaidUpTo == block.number) {
             revert BlockRewardAlreadyPaid(block.number);
@@ -163,17 +173,20 @@ contract ValidatorSet is  AccessControlEnumerableUpgradeable {
         // Determine the staker account associated with the validator node account.
         address staker = validatorSetByValidatorAccount[block.coinbase].stakingAccount;
 
-        // Pay the block reward.
-        // TODO use the formula
-        // TODO handle multi-ERC 20 block rewards
-        uint256 amount = 1000;
-        pendingBlockRewards[staker] += amount;
+        // Pay the block reward. For the moment, this is zero, and native IMX only. 
+        pendingBlockRewards[staker] += 0;
 
-        // Update when this validator produced its more recent block.
+        // Update when this validator produced its most recent block. This information 
+        // could in future be used for slashing.
         validatorSetByValidatorAccount[block.coinbase].lastTimeBlockProducer = block.number;
+
+        // Record the prevrandao for this block.
+        prevRanDao[block.number] = block.prevrandao;
     }
 
-    // TODO handle multi-ERC 20 block rewards
+    /**
+     * @notice For the moment, block rewards are native IMX only. 
+     */
     function withdrawBlockRewards() external {
         uint256 amount = pendingBlockRewards[msg.sender];
         // Zero before sending to prevent re-entrancy attacks.
@@ -182,9 +195,41 @@ contract ValidatorSet is  AccessControlEnumerableUpgradeable {
     }
 
 
+    /**
+     * @notice Get the node addresses of the validator set for the current epoch.
+     * @return Validator set for current epoch.
+     */
+    function getValidators() external view returns (address[] memory) {
+        // If no validators have been added or removed since the start of 
+        // nextEpochStart, then validatorsNextEpoch is the current validator set.
+        if (block.number < nextEpochStart) {
+            return validatorsCurrentEpoch;
+        }
+        else {
+            return validatorsNextEpoch;
+        }
+    }
 
-    function getValidators() override external view returns (address[] memory) {
-        return validators;
+    /**
+     * @notice Return the block number of the start of the next epoch.
+     */
+    function getStartNextEpoch() public view returns (uint256) {
+        uint256 epoch = block.number / BLOCKS_PER_EPOCH;
+        return (epoch + 1) * BLOCKS_PER_EPOCH;
+    }
+
+    /**
+     * @notice When the validator set changes, first update the current validator set.
+     */
+    function updateValidatorSetForEpoch() private {
+        if (block.number >= nextEpochStart) {
+            delete validatorsCurrentEpoch;
+            uint256 len = validatorsNextEpoch.length;
+            for (uint256 i = 0; i < len; i++) {
+                validatorsCurrentEpoch[i] = validatorsNextEpoch[i];
+            }
+            nextEpochStart = getStartNextEpoch();
+        }
     }
 
     /**

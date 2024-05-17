@@ -162,6 +162,7 @@ contract ValidatorSet is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
      *      - Records the Prev RAN DAO value for the block. This is used by the on-chain random system.
      */
     function payBlockReward() external {
+        // slither-disable-next-line incorrect-equality
         if (blockNumberBlockRewardPaidUpTo == block.number) {
             revert BlockRewardAlreadyPaid(block.number);
         }

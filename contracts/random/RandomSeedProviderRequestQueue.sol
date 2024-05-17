@@ -34,6 +34,7 @@ contract RandomSeedProviderRequestQueue {
         uint256 tail = outstandingRequestsTail;
         uint256 head = outstandingRequestsHead;
         if (head != tail) {
+            // slither-disable-next-line incorrect-equality
             if (outstandingRequests[tail] == _blockNumber) {
                 return;
             }
@@ -70,6 +71,7 @@ contract RandomSeedProviderRequestQueue {
 
         while (current != tail) {
             current++;
+            // slither-disable-next-line incorrect-equality
             if (outstandingRequests[current] == _blockNumber) {
                 // The entry for the block number has been found.
                 // Remove the entry plus update the head or tail if the removed entry was
@@ -79,6 +81,7 @@ contract RandomSeedProviderRequestQueue {
                     head++;
                     // Oldest entry in the queue. Move the head until the entry is
                     // non-zero or the queue is empty.
+                    // slither-disable-next-line incorrect-equality
                     while (outstandingRequests[head + 1] == 0 && head != tail) {
                         head++;
                     }
@@ -90,6 +93,7 @@ contract RandomSeedProviderRequestQueue {
                     // at head that wasn't the block number. As such, there is no need to
                     // check for an empty queue here.
                     tail--;
+                    // slither-disable-next-line incorrect-equality
                     while (outstandingRequests[tail] == 0) {
                         tail--;
                     }
@@ -120,6 +124,7 @@ contract RandomSeedProviderRequestQueue {
                 break;
             }
             head++;
+            // slither-disable-next-line incorrect-equality
             if (blockNumber == 0) {
                 // Skip if the block was consumed using dequeueBlockNumber.
                 continue;

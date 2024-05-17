@@ -30,7 +30,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
     //// @notice Prevent the on-chain delay from being set to values that will cause issues.
     error InvalidOnchainDelay(uint256 _proposedDelay);
 
-    /// @notice A seed could not be generate for a block because too long had elapsed between 
+    /// @notice A seed could not be generate for a block because too long had elapsed between
     /// requesting and a call to fulfilRandomSeedRequest or generateNextSeedOnChain.
     event TooLateToGenerateRandom(uint256 _blockNumber);
 
@@ -55,7 +55,6 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
         // The seed generation process has failed.
         FAILED
     }
-
 
     // Code and storage layout version number.
     uint256 internal constant VERSION0 = 0;
@@ -101,7 +100,6 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
     /// @dev thus incurring cost on Immutable for no benefit.
     mapping(address gameContract => bool approved) public approvedForOffchainRandom;
 
-
     /**
      * @notice Initialize the contract for use with a transparent proxy.
      * @param _roleAdmin is the account that can add and remove addresses that have
@@ -109,11 +107,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
      * @param _randomAdmin is the account that has RANDOM_ADMIN_ROLE privilege.
      * @param _upgradeAdmin is the account that has UPGRADE_ADMIN_ROLE privilege.
      */
-    function initialize(
-        address _roleAdmin,
-        address _randomAdmin,
-        address _upgradeAdmin
-    ) public virtual initializer {
+    function initialize(address _roleAdmin, address _randomAdmin, address _upgradeAdmin) public virtual initializer {
         _grantRole(DEFAULT_ADMIN_ROLE, _roleAdmin);
         _grantRole(RANDOM_ADMIN_ROLE, _randomAdmin);
         _grantRole(UPGRADE_ADMIN_ROLE, _upgradeAdmin);
@@ -160,11 +154,11 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
      */
     function setOnChainDelay(uint256 _onChainDelay) external onlyRole(RANDOM_ADMIN_ROLE) {
         // A delay of 0 would be mean using the block hash for the block that the player requested
-        // the random seed in. This would not be secure as the player could observe the 
+        // the random seed in. This would not be secure as the player could observe the
         // transaction pool, see the previous block's block hash, and attempt to determine
-        // a range of likely block hashes. They could then alter their transaction, in an 
+        // a range of likely block hashes. They could then alter their transaction, in an
         // attempt of generating a block hash that is favourable to them.
-        // 30 x 2 second block time would mean a one minute delay between requests and 
+        // 30 x 2 second block time would mean a one minute delay between requests and
         // fulfillment. This seems like a large maximum value.
         if (_onChainDelay == 0 || _onChainDelay > 30) {
             revert InvalidOnchainDelay(_onChainDelay);
@@ -270,18 +264,22 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
         }
     }
 
-
     /**
      * @notice Check whether a random seed is ready.
      * @param _randomFulfilmentIndex Index indicating which random seed to check the status of.
      * @param _randomSource The source to use when retrieving the status of the random seed.
      * @return bool indicates a random seed is ready to be fetched.
      */
-    function isRandomSeedReady(uint256 _randomFulfilmentIndex, address _randomSource) external view returns (SeedRequestStatus) {
+    function isRandomSeedReady(
+        uint256 _randomFulfilmentIndex,
+        address _randomSource
+    ) external view returns (SeedRequestStatus) {
         if (_randomSource == ONCHAIN) {
             // slither-disable-next-line incorrect-equality
-            if ((randomOutput[_randomFulfilmentIndex] != bytes32(0)) ||
-                    (_randomFulfilmentIndex < block.number && _randomFulfilmentIndex + 256 > block.number)) {
+            if (
+                (randomOutput[_randomFulfilmentIndex] != bytes32(0)) ||
+                (_randomFulfilmentIndex < block.number && _randomFulfilmentIndex + 256 > block.number)
+            ) {
                 return SeedRequestStatus.READY;
             }
             // slither-disable-next-line incorrect-equality
@@ -290,8 +288,10 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
             }
             return SeedRequestStatus.FAILED;
         } else {
-            return IOffchainRandomSource(_randomSource).isOffchainRandomReady(_randomFulfilmentIndex) ? 
-                SeedRequestStatus.READY : SeedRequestStatus.IN_PROGRESS;
+            return
+                IOffchainRandomSource(_randomSource).isOffchainRandomReady(_randomFulfilmentIndex)
+                    ? SeedRequestStatus.READY
+                    : SeedRequestStatus.IN_PROGRESS;
         }
     }
 
@@ -309,7 +309,7 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
      * @param _blockNumber The block to generate the block hash for.
      * @return block hash at the block
      */
-    function generateSeedOnChain(uint256 _blockNumber) private returns(bytes32) {
+    function generateSeedOnChain(uint256 _blockNumber) private returns (bytes32) {
         if (_blockNumber + 256 < block.number) {
             // Too late to call blockhash.
             revert GenerationFailedTryAgain(_blockNumber);
@@ -318,29 +318,28 @@ contract RandomSeedProvider is AccessControlEnumerableUpgradeable, UUPSUpgradeab
         return generateEntropy(_blockNumber);
     }
 
-
     /**
      * @notice Generate entropy using block hash.
      * @dev The block number must be one of the previous 256 blocks.
-     * @param _blockNumber is the block to fetch the block hash for. 
+     * @param _blockNumber is the block to fetch the block hash for.
      */
     function generateEntropy(uint256 _blockNumber) private view returns (bytes32) {
         // The block producer could manipulate the block hash by crafting a
         // transaction that included a number that the block producer controls. A
         // malicious block producer could produce many candidate blocks, in an attempt
         // to produce a specific value.
-        // If the blockchain has no transactions in multiple sequential blocks, a 
-        // deterministic block producer, and a stable block period, then a game player 
-        // could predict a range of possible block hash values. They could obverve a block 
-        // being produced and then, if advantageous to them, immeditately submit a 
+        // If the blockchain has no transactions in multiple sequential blocks, a
+        // deterministic block producer, and a stable block period, then a game player
+        // could predict a range of possible block hash values. They could obverve a block
+        // being produced and then, if advantageous to them, immeditately submit a
         // transaction, hoping that the transaction will be gossiped to the block producer
         // in time for block inclusion. That is, they could request a random seed be
         // produced in one block, knowing that the block hash some blocks later will
         // be used as the entropy for the random seed generator. They could craft their
-        // transaction, in the hope of crafting a specific seed, and resultant random 
+        // transaction, in the hope of crafting a specific seed, and resultant random
         // number.
-        // The mitigation for this attack is for a transaction to be put onto the 
-        // blockchain regularly that reveals a new layer of a hash onion, thus 
+        // The mitigation for this attack is for a transaction to be put onto the
+        // blockchain regularly that reveals a new layer of a hash onion, thus
         // inserting unchangeable random values onto the chain.
         return blockhash(_blockNumber);
     }

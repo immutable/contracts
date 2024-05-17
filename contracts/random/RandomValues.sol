@@ -133,8 +133,10 @@ abstract contract RandomValues {
         if (request.size == 0) {
             return RequestStatus.ALREADY_FETCHED;
         }
-        RandomSeedProvider.SeedRequestStatus status = 
-            randomSeedProvider.isRandomSeedReady(request.fulfilmentId, request.source);
+        RandomSeedProvider.SeedRequestStatus status = randomSeedProvider.isRandomSeedReady(
+            request.fulfilmentId,
+            request.source
+        );
         if (status == RandomSeedProvider.SeedRequestStatus.READY) {
             return RequestStatus.READY;
         }

@@ -52,7 +52,12 @@ contract SupraSourceAdaptor is SourceAdaptorBase {
     /**
      * @inheritdoc IOffchainRandomSource
      */
-    function requestOffchainRandom() external override(IOffchainRandomSource) onlyRandomSeedProvider returns (uint256 _requestId) {
+    function requestOffchainRandom()
+        external
+        override(IOffchainRandomSource)
+        onlyRandomSeedProvider
+        returns (uint256 _requestId)
+    {
         return
             ISupraRouter(vrfCoordinator).generateRequest(
                 "fulfillRandomWords(uint256,uint256[])",

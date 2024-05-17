@@ -54,11 +54,10 @@ contract RandomSeedProviderRequestQueue {
         if (head == tail) {
             return 0;
         }
-        // Note: Due to how dequeueBlockNumber works, there is no chance that 
+        // Note: Due to how dequeueBlockNumber works, there is no chance that
         // outstandingRequests[head + 1] will have been set to zero.
         return outstandingRequests[head + 1];
     }
-
 
     /**
      * @notice Locate a specific block number in the queue and remove it from the queue.
@@ -78,18 +77,17 @@ contract RandomSeedProviderRequestQueue {
                 delete outstandingRequests[current];
                 if (current == head + 1) {
                     head++;
-                    // Oldest entry in the queue. Move the head until the entry is 
+                    // Oldest entry in the queue. Move the head until the entry is
                     // non-zero or the queue is empty.
                     while (outstandingRequests[head + 1] == 0 && head != tail) {
                         head++;
                     }
                     outstandingRequestsHead = head;
-                }
-                else if (current == tail) {
-                    // Newest entry in the queue. Move the tail until the entry is 
+                } else if (current == tail) {
+                    // Newest entry in the queue. Move the tail until the entry is
                     // non-zero. It is impossible to get to this point in the queue if
                     // the queue could be empty. That is, there must have been an element
-                    // at head that wasn't the block number. As such, there is no need to 
+                    // at head that wasn't the block number. As such, there is no need to
                     // check for an empty queue here.
                     tail--;
                     while (outstandingRequests[tail] == 0) {
@@ -104,7 +102,7 @@ contract RandomSeedProviderRequestQueue {
     }
 
     /**
-     * @notice Return an array of all block numbers in the queue prior to the current block. 
+     * @notice Return an array of all block numbers in the queue prior to the current block.
      * @return _blockNumbers Array of block numbers. Is likely to be only partially filled.
      * @return _lengthUsed The number of entries in the _blockNumbers array used.
      */
@@ -116,7 +114,7 @@ contract RandomSeedProviderRequestQueue {
         _lengthUsed = 0;
 
         while (head != tail) {
-            uint256 blockNumber = outstandingRequests[head+1];
+            uint256 blockNumber = outstandingRequests[head + 1];
             if (blockNumber >= block.number) {
                 // The block is in the future, no more blocks to find.
                 break;
@@ -135,7 +133,7 @@ contract RandomSeedProviderRequestQueue {
 
     /**
      * @notice Length of the queue.
-     * @dev The returned length could include the current and future block numbers, 
+     * @dev The returned length could include the current and future block numbers,
      *      and empty array entries for numbers previously using dequeueBlockNumber.
      * @return The length of the queue.
      */

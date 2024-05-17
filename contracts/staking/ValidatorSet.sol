@@ -8,7 +8,7 @@ import {AccessControlEnumerableUpgradeable} from "openzeppelin-contracts-upgrade
 /**
  * @dev This contract is upgradeable.
  */
-contract ValidatorSet is  AccessControlEnumerableUpgradeable, UUPSUpgradeable {
+contract ValidatorSet is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
     error CanNotUpgradeFrom(uint256 _newVersion, uint256 _currentVersion);
     error ValidatorNodeAlreadyAdded(address _nodeAccount);
     error StakerForOtherValidator(address _stakingAccount);
@@ -17,9 +17,9 @@ contract ValidatorSet is  AccessControlEnumerableUpgradeable, UUPSUpgradeable {
     error BlockRewardAlreadyPaid(uint256 _blockNumber);
 
     /**
-     * @notice This structure is indexed per nodeAccount. 
-     * @dev For a single multi-chain validator, the nodeAccount and blsPublicKey 
-     *      are different on each chain, and the stakingAccount is the same 
+     * @notice This structure is indexed per nodeAccount.
+     * @dev For a single multi-chain validator, the nodeAccount and blsPublicKey
+     *      are different on each chain, and the stakingAccount is the same
      *      across all chains.
      */
     struct ValidatorInfo {
@@ -43,32 +43,31 @@ contract ValidatorSet is  AccessControlEnumerableUpgradeable, UUPSUpgradeable {
     bytes32 private constant VALIDATOR_ADMIN_ROLE = bytes32("VALIDATOR_ROLE");
 
     // Number of blocks per epoch.
-    uint256 private constant BLOCKS_PER_EPOCH = 300; 
+    uint256 private constant BLOCKS_PER_EPOCH = 300;
 
     // @notice The version of the storage layout.
     // @dev This storage slot will be used during upgrades.
     uint256 public version;
 
     // Mapping node validator's node address => Validator Info.
-    mapping (address nodeAddress => ValidatorInfo info) public validatorSetByValidatorAccount;
+    mapping(address nodeAddress => ValidatorInfo info) public validatorSetByValidatorAccount;
 
     // Mapping validator's staking account => validator's node address.
-    mapping (address stakingAddress => address nodeAddress) public validatorSetByStakingAccount;
+    mapping(address stakingAddress => address nodeAddress) public validatorSetByStakingAccount;
 
     address[] public validatorsCurrentEpoch;
     address[] public validatorsNextEpoch;
     uint256 public nextEpochStart;
 
-
-    // The last block that block rewards were paid out on. Ensures block rewards are not paid 
+    // The last block that block rewards were paid out on. Ensures block rewards are not paid
     // out twice on the same block.
     uint256 public blockNumberBlockRewardPaidUpTo;
 
     // Block rewards yet to be paid out.
-    mapping (address stakingAddress => uint256 amount) public pendingBlockRewards;
+    mapping(address stakingAddress => uint256 amount) public pendingBlockRewards;
 
     // Record of the previous RAN DAO values for each block.
-    mapping (uint256 blockNumber => uint256 prevRanDao) public prevRanDao;
+    mapping(uint256 blockNumber => uint256 prevRanDao) public prevRanDao;
 
     /**
      * @notice Initialize the contract for use with a transparent proxy.
@@ -76,11 +75,7 @@ contract ValidatorSet is  AccessControlEnumerableUpgradeable, UUPSUpgradeable {
      *        RANDOM_ADMIN_ROLE privilege.
      * @param _upgradeAdmin is the account that has UPGRADE_ADMIN_ROLE privilege.
      */
-    function initialize(
-        address _roleAdmin,
-        address _upgradeAdmin,
-        address _validatorAdmin
-    ) public virtual initializer {
+    function initialize(address _roleAdmin, address _upgradeAdmin, address _validatorAdmin) public virtual initializer {
         _grantRole(DEFAULT_ADMIN_ROLE, _roleAdmin);
         _grantRole(UPGRADE_ADMIN_ROLE, _upgradeAdmin);
         _grantRole(VALIDATOR_ADMIN_ROLE, _validatorAdmin);
@@ -107,7 +102,11 @@ contract ValidatorSet is  AccessControlEnumerableUpgradeable, UUPSUpgradeable {
      * @param _stakingAccount Used for staking and access control to fetch rewards.
      * @param _blsPublicKey Used for RAN DAO.
      */
-    function addValidator(address _nodeAccount, address _stakingAccount, bytes calldata _blsPublicKey) external onlyRole(VALIDATOR_ADMIN_ROLE) {
+    function addValidator(
+        address _nodeAccount,
+        address _stakingAccount,
+        bytes calldata _blsPublicKey
+    ) external onlyRole(VALIDATOR_ADMIN_ROLE) {
         if (validatorSetByValidatorAccount[_nodeAccount].stakingAccount != address(0)) {
             revert ValidatorNodeAlreadyAdded(_nodeAccount);
         }
@@ -132,7 +131,7 @@ contract ValidatorSet is  AccessControlEnumerableUpgradeable, UUPSUpgradeable {
      * @notice Remove a validator from the validator set for the next epoch.
      * @param _stakingAccount The staking account for a validator.
      */
-    function removeValidator(address _stakingAccount) external  onlyRole(VALIDATOR_ADMIN_ROLE) {
+    function removeValidator(address _stakingAccount) external onlyRole(VALIDATOR_ADMIN_ROLE) {
         uint256 numValidators = validatorsNextEpoch.length;
         if (numValidators == 1) {
             revert MustHaveAtLeastOneValidator(_stakingAccount);
@@ -162,21 +161,21 @@ contract ValidatorSet is  AccessControlEnumerableUpgradeable, UUPSUpgradeable {
      *      - Records the last time a validator produced a block. This will be used in slashing.
      *      - Records the Prev RAN DAO value for the block. This is used by the on-chain random system.
      */
-   function payBlockReward() external {
+    function payBlockReward() external {
         if (blockNumberBlockRewardPaidUpTo == block.number) {
             revert BlockRewardAlreadyPaid(block.number);
         }
-        // Indicate the block reward has been paid. 
+        // Indicate the block reward has been paid.
         // Setting this here also acts as re-entrancy protection.
         blockNumberBlockRewardPaidUpTo = block.number;
 
         // Determine the staker account associated with the validator node account.
         address staker = validatorSetByValidatorAccount[block.coinbase].stakingAccount;
 
-        // Pay the block reward. For the moment, this is zero, and native IMX only. 
+        // Pay the block reward. For the moment, this is zero, and native IMX only.
         pendingBlockRewards[staker] += 0;
 
-        // Update when this validator produced its most recent block. This information 
+        // Update when this validator produced its most recent block. This information
         // could in future be used for slashing.
         validatorSetByValidatorAccount[block.coinbase].lastTimeBlockProducer = block.number;
 
@@ -185,7 +184,7 @@ contract ValidatorSet is  AccessControlEnumerableUpgradeable, UUPSUpgradeable {
     }
 
     /**
-     * @notice For the moment, block rewards are native IMX only. 
+     * @notice For the moment, block rewards are native IMX only.
      */
     function withdrawBlockRewards() external {
         uint256 amount = pendingBlockRewards[msg.sender];
@@ -194,18 +193,16 @@ contract ValidatorSet is  AccessControlEnumerableUpgradeable, UUPSUpgradeable {
         payable(msg.sender).transfer(amount);
     }
 
-
     /**
      * @notice Get the node addresses of the validator set for the current epoch.
      * @return Validator set for current epoch.
      */
     function getValidators() external view returns (address[] memory) {
-        // If no validators have been added or removed since the start of 
+        // If no validators have been added or removed since the start of
         // nextEpochStart, then validatorsNextEpoch is the current validator set.
         if (block.number < nextEpochStart) {
             return validatorsCurrentEpoch;
-        }
-        else {
+        } else {
             return validatorsNextEpoch;
         }
     }

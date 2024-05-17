@@ -35,7 +35,7 @@ import {RandomValues} from "./RandomValues.sol";
  * Using a separate sequence type id for each class of random means that even though
  * the game player knows the outcome opening a Loot Box ahead of time, they can't
  * alter the outcome. They could choose to never open the Loot Box, or leave the game
- * and create a new player profile. However, within their current player profile, they 
+ * and create a new player profile. However, within their current player profile, they
  * could not change the outcome.
  *
  * An example of when this type of random number generation isn't appropriate is

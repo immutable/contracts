@@ -11,6 +11,18 @@ import {AccessControlEnumerableUpgradeable} from "openzeppelin-contracts-upgrade
  * @dev This contract is upgradeable.
  */
 contract ValidatorSet is  AccessControlEnumerableUpgradeable {
+    error ValidatorNodeAlreadyAdded(address _nodeAccount);
+    error StakerForOtherValidator(address _stakingAccount);
+    error StakerNotConfigured(address _stakingAccount);
+    error MustHaveAtLeastOneValidator(address _stakingAccount);
+    error BlockRewardAlreadyPaid(uint256 _blockNumber);
+
+    /**
+     * @notice This structure is indexed per nodeAccount. 
+     * @dev For a single multi-chain validator, the nodeAccount and blsPublicKey 
+     *      are different on each chain, and the stakingAccount is the same 
+     *      across all chains.
+     */
     struct ValidatorInfo {
         // Used for adding and removing stake and paying block rewards to.
         address stakingAccount;
@@ -22,25 +34,17 @@ contract ValidatorSet is  AccessControlEnumerableUpgradeable {
         uint256 index;
     }
 
-
-    error ValidatorNodeAlreadyAdded(address _nodeAccount);
-    error StakerForOtherValidator(address _stakingAccount);
-    error StakerNotConfigured(address _stakingAccount);
-    error MustHaveAtLeastOneValidator(address _stakingAccount);
-    error BlockRewardAlreadyPaid(uint256 _blockNumber);
-
-
-
     // Code and storage layout version number.
     uint256 internal constant VERSION0 = 0;
 
     /// @notice Only accounts with UPGRADE_ADMIN_ROLE can upgrade the contract.
     bytes32 private constant UPGRADE_ADMIN_ROLE = bytes32("UPGRADE_ROLE");
 
+    /// @notice Only accounts with VALIDATOR_ADMIN_ROLE can add and remove validators.
+    bytes32 private constant VALIDATOR_ADMIN_ROLE = bytes32("VALIDATOR_ROLE");
+
     // Number of blocks per epoch.
     uint256 private constant BLOCKS_PER_EPOCH = 300; 
-
-
 
     // @notice The version of the storage layout.
     // @dev This storage slot will be used during upgrades.
@@ -53,7 +57,10 @@ contract ValidatorSet is  AccessControlEnumerableUpgradeable {
     // Mapping validator's staking account => validator's node address.
     mapping (address => address) public validatorSetByStakingAccount;
 
-    address[] public validators;
+    address[] public validatorsCurrentEpoch;
+    address[] public validatorsNextEpoch;
+
+
 
     // The last block that block rewards were paid out on. Ensures block rewards are not paid 
     // out twice on the same block.
@@ -72,10 +79,12 @@ contract ValidatorSet is  AccessControlEnumerableUpgradeable {
      */
     function initialize(
         address _roleAdmin,
-        address _upgradeAdmin
+        address _upgradeAdmin,
+        address _validatorAdmin
     ) public virtual initializer {
         _grantRole(DEFAULT_ADMIN_ROLE, _roleAdmin);
         _grantRole(UPGRADE_ADMIN_ROLE, _upgradeAdmin);
+        _grantRole(VALIDATOR_ADMIN_ROLE, _validatorAdmin);
 
         version = VERSION0;
     }
@@ -96,10 +105,14 @@ contract ValidatorSet is  AccessControlEnumerableUpgradeable {
 
 
 
-    // TODO only validator controller
-    // Staking account same on all chains
-    // Node account different on all chains.
-    function addValidator(address _nodeAccount, address _stakingAccount, bytes calldata _blsPublicKey) external {
+    /**
+     * @notice Add a validator it the validator set at the start of the next epoch.
+     *
+     * @param _nodeAccount Account for verifying P2P signatures for node identification and consensus.
+     * @param _stakingAccount Used for staking and access control to fetch rewards.
+     * @param _blsPublicKey Used for RAN DAO.
+     */
+    function addValidator(address _nodeAccount, address _stakingAccount, bytes calldata _blsPublicKey) external onlyRole(VALIDATOR_ADMIN_ROLE) {
         if (validatorSetByValidatorAccount[_nodeAccount].stakingAccount != address(0)) {
             revert ValidatorNodeAlreadyAdded(_nodeAccount);
         }
@@ -116,7 +129,7 @@ contract ValidatorSet is  AccessControlEnumerableUpgradeable {
     }
 
     // TODO only validator controller.
-    function removeValidator(address _stakingAccount) external {
+    function removeValidator(address _stakingAccount) external  onlyRole(VALIDATOR_ADMIN_ROLE) {
         uint256 numValidators = validators.length;
         if (numValidators == 1) {
             revert MustHaveAtLeastOneValidator(_stakingAccount);

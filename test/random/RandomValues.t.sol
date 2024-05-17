@@ -3,13 +3,10 @@ pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
 
-import {MockGame,RandomValues} from "./MockGame.sol";
+import {MockGame, RandomValues} from "./MockGame.sol";
 import {RandomSeedProvider} from "contracts/random/RandomSeedProvider.sol";
 import {IOffchainRandomSource} from "contracts/random/offchainsources/IOffchainRandomSource.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-
-
-
 
 contract UninitializedRandomValuesTest is Test {
     error RequestForNoRandomBytes();
@@ -35,20 +32,26 @@ contract UninitializedRandomValuesTest is Test {
         upgradeAdmin = makeAddr("upgradeAdmin");
 
         impl = new RandomSeedProvider();
-        proxy = new ERC1967Proxy(address(impl), 
-            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, upgradeAdmin, false));
+        proxy = new ERC1967Proxy(
+            address(impl),
+            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, upgradeAdmin, false)
+        );
         randomSeedProvider = RandomSeedProvider(address(proxy));
 
         game1 = new MockGame(address(randomSeedProvider));
 
-        // Ensure we are on a new block number when we start the tests. In particular, don't 
+        // Ensure we are on a new block number when we start the tests. In particular, don't
         // be on the same block number as when the contracts were deployed.
         vm.roll(block.number + 1);
     }
 
     function testInit() public {
         assertEq(address(game1.randomSeedProvider()), address(randomSeedProvider), "randomSeedProvider");
-        assertEq(uint256(game1.isRandomValueReady(0)), uint256(RandomValues.RequestStatus.ALREADY_FETCHED), "Should not be ready");
+        assertEq(
+            uint256(game1.isRandomValueReady(0)),
+            uint256(RandomValues.RequestStatus.ALREADY_FETCHED),
+            "Should not be ready"
+        );
     }
 }
 
@@ -62,16 +65,28 @@ contract SingleGameRandomValuesTest is UninitializedRandomValuesTest {
 
     function testFirstValue() public returns (bytes32) {
         uint256 randomRequestId = game1.requestRandomValueCreation(1);
-        assertEq(uint256(game1.isRandomValueReady(randomRequestId)), uint256(RandomValues.RequestStatus.IN_PROGRESS), "Ready in same block!");
+        assertEq(
+            uint256(game1.isRandomValueReady(randomRequestId)),
+            uint256(RandomValues.RequestStatus.IN_PROGRESS),
+            "Ready in same block!"
+        );
 
         vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
-        assertEq(uint256(game1.isRandomValueReady(randomRequestId)), uint256(RandomValues.RequestStatus.READY), "Should be ready by next block!");
+        assertEq(
+            uint256(game1.isRandomValueReady(randomRequestId)),
+            uint256(RandomValues.RequestStatus.READY),
+            "Should be ready by next block!"
+        );
 
         bytes32[] memory randomValue = game1.fetchRandomValues(randomRequestId);
         assertEq(randomValue.length, 1, "Random Values length");
         assertNotEq(randomValue[0], bytes32(0), "Random Value zero");
 
-        assertEq(uint256(game1.isRandomValueReady(randomRequestId)), uint256(RandomValues.RequestStatus.ALREADY_FETCHED), "Should not be ready");
+        assertEq(
+            uint256(game1.isRandomValueReady(randomRequestId)),
+            uint256(RandomValues.RequestStatus.ALREADY_FETCHED),
+            "Should not be ready"
+        );
         return randomValue[0];
     }
 
@@ -115,12 +130,24 @@ contract SingleGameRandomValuesTest is UninitializedRandomValuesTest {
 
         uint256 randomRequestId1 = game1.requestRandomValueCreation(2);
         uint256 randomRequestId2 = game2.requestRandomValueCreation(4);
-        assertEq(uint256(game1.isRandomValueReady(randomRequestId1)), uint256(RandomValues.RequestStatus.IN_PROGRESS), "Ready in same block!");
-        assertEq(uint256(game2.isRandomValueReady(randomRequestId2)), uint256(RandomValues.RequestStatus.IN_PROGRESS), "Ready in same block!");
+        assertEq(
+            uint256(game1.isRandomValueReady(randomRequestId1)),
+            uint256(RandomValues.RequestStatus.IN_PROGRESS),
+            "Ready in same block!"
+        );
+        assertEq(
+            uint256(game2.isRandomValueReady(randomRequestId2)),
+            uint256(RandomValues.RequestStatus.IN_PROGRESS),
+            "Ready in same block!"
+        );
 
         vm.roll(block.number + STANDARD_ONCHAIN_DELAY + 1);
-        assertEq(uint256(game1.isRandomValueReady(randomRequestId1)), uint256(RandomValues.RequestStatus.READY), "Ready!");
-        assertEq(uint256(game2.isRandomValueReady(randomRequestId2)), uint256(RandomValues.RequestStatus.READY), "Ready!");
+        assertEq(
+            uint256(game1.isRandomValueReady(randomRequestId1)), uint256(RandomValues.RequestStatus.READY), "Ready!"
+        );
+        assertEq(
+            uint256(game2.isRandomValueReady(randomRequestId2)), uint256(RandomValues.RequestStatus.READY), "Ready!"
+        );
 
         bytes32[] memory randomValue1 = game1.fetchRandomValues(randomRequestId1);
         bytes32[] memory randomValue2 = game2.fetchRandomValues(randomRequestId2);

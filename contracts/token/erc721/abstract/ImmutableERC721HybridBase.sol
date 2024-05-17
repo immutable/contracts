@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
-import {AccessControlEnumerable, MintingAccessControl} from "./MintingAccessControl.sol";
+import {AccessControlEnumerable, MintingAccessControl} from "../../../access/MintingAccessControl.sol";
 import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
 import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnforced.sol";
 import {ERC721HybridPermit} from "./ERC721HybridPermit.sol";
@@ -68,7 +68,8 @@ abstract contract ImmutableERC721HybridBase is
         return baseURI;
     }
 
-    /** @notice Allows admin to set the base URI
+    /**
+     * @notice Allows admin to set the base URI
      *  @param baseURI_ The base URI to set
      */
     function setBaseURI(string memory baseURI_) public onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -114,7 +115,8 @@ abstract contract ImmutableERC721HybridBase is
         super._transfer(from, to, tokenId);
     }
 
-    /** @notice Set the default royalty receiver address
+    /**
+     * @notice Set the default royalty receiver address
      *  @param receiver the address to receive the royalty
      *  @param feeNumerator the royalty fee numerator
      *  @dev This can only be called by the an admin. See ERC2981 for more details on _setDefaultRoyalty
@@ -123,7 +125,8 @@ abstract contract ImmutableERC721HybridBase is
         _setDefaultRoyalty(receiver, feeNumerator);
     }
 
-    /** @notice Set the royalty receiver address for a specific tokenId
+    /**
+     * @notice Set the royalty receiver address for a specific tokenId
      *  @param tokenId the token to set the royalty for
      *  @param receiver the address to receive the royalty
      *  @param feeNumerator the royalty fee numerator
@@ -137,7 +140,8 @@ abstract contract ImmutableERC721HybridBase is
         _setTokenRoyalty(tokenId, receiver, feeNumerator);
     }
 
-    /** @notice Set the royalty receiver address for a list of tokenId
+    /**
+     * @notice Set the royalty receiver address for a list of tokenId
      *  @param tokenIds the list of tokens to set the royalty for
      *  @param receiver the address to receive the royalty
      *  @param feeNumerator the royalty fee numerator

@@ -1,4 +1,5 @@
 /clients @immutable/assets
+/abi @immutable/assets
 
 /contracts/allowlist @immutable/assets
 /contracts/token @immutable/assets

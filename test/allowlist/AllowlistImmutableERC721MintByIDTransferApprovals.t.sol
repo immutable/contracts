@@ -10,13 +10,12 @@ import {IImmutableERC721Errors} from "../../contracts/errors/Errors.sol";
 import {OperatorAllowlistEnforcementErrors} from "../../contracts/errors/Errors.sol";
 import {OperatorAllowlistUpgradeable} from "../../contracts/allowlist/OperatorAllowlistUpgradeable.sol";
 import {Sign} from "../utils/Sign.sol";
-import {DeployOperatorAllowlist} from  "../utils/DeployAllowlistProxy.sol";
+import {DeployOperatorAllowlist} from "../utils/DeployAllowlistProxy.sol";
 import {DeploySCWallet} from "../utils/DeploySCW.sol";
 import {DeployMockMarketPlace} from "../utils/DeployMockMarketPlace.sol";
 import {MockMarketplace} from "../../contracts/mocks/MockMarketplace.sol";
 import {MockDisguisedEOA} from "../../contracts/mocks/MockDisguisedEOA.sol";
 import {MockOnReceive} from "../../contracts/mocks/MockOnReceive.sol";
-
 
 contract AllowlistERC721TransferApprovals is Test {
     OperatorAllowlistUpgradeable public allowlist;
@@ -47,14 +46,7 @@ contract AllowlistERC721TransferApprovals is Test {
         allowlist = OperatorAllowlistUpgradeable(proxyAddr);
 
         immutableERC721MintByID = new ImmutableERC721MintByID(
-            admin,
-            "test",
-            "USDC",
-            "test-base-uri",
-            "test-contract-uri",
-            address(allowlist),
-            feeReceiver,
-            0
+            admin, "test", "USDC", "test-base-uri", "test-contract-uri", address(allowlist), feeReceiver, 0
         );
 
         mockEOAFactory = new MockFactory();
@@ -125,7 +117,7 @@ contract AllowlistERC721TransferApprovals is Test {
 
     function testShouldApproveWalletInOAL() public {
         bytes32 salt = keccak256(abi.encodePacked("0x1234"));
-        (scwAddr, ) = deploySCWScript.run(salt);
+        (scwAddr,) = deploySCWScript.run(salt);
 
         vm.prank(registrar);
         allowlist.addWalletToAllowlist(scwAddr);
@@ -168,7 +160,7 @@ contract AllowlistERC721TransferApprovals is Test {
 
     function testBlockTransferForNoneOALWallet() public {
         bytes32 salt = keccak256(abi.encodePacked("0x1234"));
-        (scwAddr, ) = deploySCWScript.run(salt);
+        (scwAddr,) = deploySCWScript.run(salt);
 
         vm.startPrank(minter, minter);
         immutableERC721MintByID.safeMint(minter, 1);
@@ -212,7 +204,7 @@ contract AllowlistERC721TransferApprovals is Test {
 
     function testTransferToWalletInOAL() public {
         bytes32 salt = keccak256(abi.encodePacked("0x1234"));
-        (scwAddr, ) = deploySCWScript.run(salt);
+        (scwAddr,) = deploySCWScript.run(salt);
 
         vm.prank(registrar);
         allowlist.addWalletToAllowlist(scwAddr);
@@ -226,11 +218,11 @@ contract AllowlistERC721TransferApprovals is Test {
 
     function testTransferBetweenSCWInOAL() public {
         bytes32 salt = keccak256(abi.encodePacked("0x1234"));
-        (address scwAddr1, ) = deploySCWScript.run(salt);
+        (address scwAddr1,) = deploySCWScript.run(salt);
         MockWallet scw1 = MockWallet(scwAddr1);
 
         bytes32 salt2 = keccak256(abi.encodePacked("0x5678"));
-        (address scwAddr2, ) = deploySCWScript.run(salt2);
+        (address scwAddr2,) = deploySCWScript.run(salt2);
 
         vm.startPrank(registrar);
         allowlist.addWalletToAllowlist(scwAddr1);
@@ -273,7 +265,4 @@ contract AllowlistERC721TransferApprovals is Test {
         immutableERC721MintByID.safeTransferFrom(minter, address(onReceive), 1, "");
         vm.stopPrank();
     }
-
-
-
 }

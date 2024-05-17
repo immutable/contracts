@@ -4,15 +4,13 @@ pragma solidity 0.8.19;
 
 import {RandomSeedProvider} from "contracts/random/RandomSeedProvider.sol";
 
-
 contract MockRandomSeedProviderV2 is RandomSeedProvider {
     uint256 internal constant VERSION2 = 2;
 
     function upgrade(bytes calldata /* data */) external override (RandomSeedProvider) {
         if (version == VERSION0) {
             version = VERSION2;
-        }
-        else {
+        } else {
             revert CanNotUpgradeFrom(version, VERSION2);
         }
     }

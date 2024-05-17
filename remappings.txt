@@ -1,7 +1,9 @@
 @openzeppelin/contracts/=lib/openzeppelin-contracts-4.9.3/contracts/
+openzeppelin-contracts-5.0.2/=lib/openzeppelin-contracts-5.0.2/contracts/
 openzeppelin-contracts-upgradeable-4.9.3/=lib/openzeppelin-contracts-upgradeable-4.9.3/contracts/
 solidity-bits/=lib/solidity-bits/
 solidity-bytes-utils/=lib/solidity-bytes-utils/
 seaport/contracts/=lib/immutable-seaport-1.5.0+im1.3/contracts/
 seaport-core/=lib/immutable-seaport-core-1.5.0+im1/
 seaport-types/=lib/immutable-seaport-1.5.0+im1.3/lib/seaport-types/
+@axelar-network/axelar-gmp-sdk-solidity=lib/axelar-gmp-sdk-solidity

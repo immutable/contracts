@@ -28,27 +28,24 @@ contract MockSupraRouter is ISupraRouter {
     }
 
     function generateRequest(
-        string memory /* _functionSig */,
-        uint8 /* _rngCount */,
-        uint256 /* _numConfirmations */,
+        string memory, /* _functionSig */
+        uint8, /* _rngCount */
+        uint256, /* _numConfirmations */
         address /* _clientWalletAddress */
     ) external returns (uint256 requestId) {
         requestId = nextIndex++;
         emit RequestId(requestId);
     }
-
 
     // Unused functions
     function generateRequest(
-        string memory /* _functionSig */,
-        uint8 /* _rngCount */,
-        uint256 /* _numConfirmations */,
-        uint256 /* _clientSeed */,
+        string memory, /* _functionSig */
+        uint8, /* _rngCount */
+        uint256, /* _numConfirmations */
+        uint256, /* _clientSeed */
         address /* _clientWalletAddress */
     ) external returns (uint256 requestId) {
         requestId = nextIndex++;
         emit RequestId(requestId);
     }
-
 }
-

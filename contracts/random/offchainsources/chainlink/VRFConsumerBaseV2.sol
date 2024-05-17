@@ -6,7 +6,8 @@ pragma solidity 0.8.19;
 // using the following command to dependency clashes.
 //   npm install @chainlink/contracts
 
-/** ****************************************************************************
+/**
+ *
  * @notice Interface for contracts using VRF randomness
  * *****************************************************************************
  * @dev PURPOSE
@@ -102,6 +103,7 @@ pragma solidity 0.8.19;
 abstract contract VRFConsumerBaseV2 {
     error OnlyCoordinatorCanFulfill(address have, address want);
     // solhint-disable-next-line chainlink-solidity/prefix-immutable-variables-with-i
+
     address private immutable vrfCoordinator;
 
     /**

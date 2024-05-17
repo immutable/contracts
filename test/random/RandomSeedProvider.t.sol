@@ -8,11 +8,11 @@ import {MockRandomSeedProviderV2} from "./MockRandomSeedProviderV2.sol";
 import {RandomSeedProvider} from "contracts/random/RandomSeedProvider.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
-
 contract RandomSeedProviderBase is Test {
     error OffchainWaitForRandom();
     error WaitForRandom(uint256 _fulfillmentId);
     error GenerationFailedTryAgain(uint256 _fulfillmentId);
+
     event OffchainRandomSourceSet(address _offchainRandomSource);
     event OffchainRandomConsumerAdded(address _consumer);
     event OffchainRandomConsumerRemoved(address _consumer);
@@ -31,7 +31,6 @@ contract RandomSeedProviderBase is Test {
     ERC1967Proxy public proxyRanDao;
     RandomSeedProvider public randomSeedProviderRanDao;
 
-
     address public roleAdmin;
     address public randomAdmin;
     address public upgradeAdmin;
@@ -41,8 +40,10 @@ contract RandomSeedProviderBase is Test {
         randomAdmin = makeAddr("randomAdmin");
         upgradeAdmin = makeAddr("upgradeAdmin");
         impl = new RandomSeedProvider();
-        proxy = new ERC1967Proxy(address(impl), 
-            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, upgradeAdmin, false));
+        proxy = new ERC1967Proxy(
+            address(impl),
+            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, upgradeAdmin, false)
+        );
         randomSeedProvider = RandomSeedProvider(address(proxy));
 
         // Don't be on the same block number as when the contracts were deployed.
@@ -55,8 +56,10 @@ contract UninitializedRandomSeedProviderTest is RandomSeedProviderBase {
         // This set-up mirrors what is in the setUp function. Have this code here
         // so that the coverage tool picks up the use of the initialize function.
         RandomSeedProvider impl1 = new RandomSeedProvider();
-        ERC1967Proxy proxy1 = new ERC1967Proxy(address(impl1), 
-            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, upgradeAdmin, false));
+        ERC1967Proxy proxy1 = new ERC1967Proxy(
+            address(impl1),
+            abi.encodeWithSelector(RandomSeedProvider.initialize.selector, roleAdmin, randomAdmin, upgradeAdmin, false)
+        );
         RandomSeedProvider randomSeedProvider1 = RandomSeedProvider(address(proxy1));
         vm.roll(block.number + 1);
 
@@ -94,7 +97,6 @@ contract UninitializedRandomSeedProviderTest is RandomSeedProviderBase {
         randomSeedProvider.fulfilRandomSeedRequest(0, address(1000));
     }
 }
-
 
 contract ControlRandomSeedProviderTest is RandomSeedProviderBase {
     error CanNotUpgradeFrom(uint256 _storageVersion, uint256 _codeVersion);
@@ -549,7 +551,6 @@ contract SwitchingRandomSeedProviderTest is UninitializedRandomSeedProviderTest 
         randomSeedProvider.fulfilRandomSeedRequest(fulfillmentIndex2, source2);
     }
 
-
     function testSwitchOffchainOnchain() public {
         address aConsumer = makeAddr("aConsumer");
         vm.prank(randomAdmin);
@@ -578,4 +579,3 @@ contract SwitchingRandomSeedProviderTest is UninitializedRandomSeedProviderTest 
         randomSeedProvider.fulfilRandomSeedRequest(fulfillmentIndex2, source2);
     }
 }
-

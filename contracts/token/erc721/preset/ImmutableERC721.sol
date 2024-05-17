@@ -41,7 +41,8 @@ contract ImmutableERC721 is ImmutableERC721HybridBase {
         )
     {}
 
-    /** @notice Allows minter to mint a token by ID to a specified address
+    /**
+     * @notice Allows minter to mint a token by ID to a specified address
      *  @param to the address to mint the token to
      *  @param tokenId the ID of the token to mint
      */
@@ -49,7 +50,8 @@ contract ImmutableERC721 is ImmutableERC721HybridBase {
         _mintByID(to, tokenId);
     }
 
-    /** @notice Allows minter to mint a token by ID to a specified address with hooks and checks
+    /**
+     * @notice Allows minter to mint a token by ID to a specified address with hooks and checks
      *  @param to the address to mint the token to
      *  @param tokenId the ID of the token to mint
      */
@@ -57,7 +59,8 @@ contract ImmutableERC721 is ImmutableERC721HybridBase {
         _safeMintByID(to, tokenId);
     }
 
-    /** @notice Allows minter to mint a number of tokens sequentially to a specified address
+    /**
+     * @notice Allows minter to mint a number of tokens sequentially to a specified address
      *  @param to the address to mint the token to
      *  @param quantity the number of tokens to mint
      */
@@ -65,7 +68,8 @@ contract ImmutableERC721 is ImmutableERC721HybridBase {
         _mintByQuantity(to, quantity);
     }
 
-    /** @notice Allows minter to mint a number of tokens sequentially to a specified address with hooks
+    /**
+     * @notice Allows minter to mint a number of tokens sequentially to a specified address with hooks
      *  and checks
      *  @param to the address to mint the token to
      *  @param quantity the number of tokens to mint
@@ -74,21 +78,24 @@ contract ImmutableERC721 is ImmutableERC721HybridBase {
         _safeMintByQuantity(to, quantity);
     }
 
-    /** @notice Allows minter to mint a number of tokens sequentially to a number of specified addresses
+    /**
+     * @notice Allows minter to mint a number of tokens sequentially to a number of specified addresses
      *  @param mints the list of Mint struct containing the to, and the number of tokens to mint
      */
     function mintBatchByQuantity(Mint[] calldata mints) external onlyRole(MINTER_ROLE) {
         _mintBatchByQuantity(mints);
     }
 
-    /** @notice Allows minter to safe mint a number of tokens sequentially to a number of specified addresses
+    /**
+     * @notice Allows minter to safe mint a number of tokens sequentially to a number of specified addresses
      *  @param mints the list of Mint struct containing the to, and the number of tokens to mint
      */
     function safeMintBatchByQuantity(Mint[] calldata mints) external onlyRole(MINTER_ROLE) {
         _safeMintBatchByQuantity(mints);
     }
 
-    /** @notice Allows minter to safe mint a number of tokens by ID to a number of specified
+    /**
+     * @notice Allows minter to safe mint a number of tokens by ID to a number of specified
      *  addresses with hooks and checks. Check ERC721Hybrid for details on _mintBatchByIDToMultiple
      *  @param mints the list of IDMint struct containing the to, and tokenIds
      */
@@ -96,7 +103,8 @@ contract ImmutableERC721 is ImmutableERC721HybridBase {
         _mintBatchByIDToMultiple(mints);
     }
 
-    /** @notice Allows minter to safe mint a number of tokens by ID to a number of specified
+    /**
+     * @notice Allows minter to safe mint a number of tokens by ID to a number of specified
      *  addresses with hooks and checks. Check ERC721Hybrid for details on _safeMintBatchByIDToMultiple
      *  @param mints the list of IDMint struct containing the to, and tokenIds
      */
@@ -104,14 +112,16 @@ contract ImmutableERC721 is ImmutableERC721HybridBase {
         _safeMintBatchByIDToMultiple(mints);
     }
 
-    /** @notice Allows caller to a burn a number of tokens by ID from a specified address
+    /**
+     * @notice Allows caller to a burn a number of tokens by ID from a specified address
      *  @param burns the IDBurn struct containing the to, and tokenIds
      */
     function safeBurnBatch(IDBurn[] calldata burns) external {
         _safeBurnBatch(burns);
     }
 
-    /** @notice Allows caller to a transfer a number of tokens by ID from a specified
+    /**
+     * @notice Allows caller to a transfer a number of tokens by ID from a specified
      *  address to a number of specified addresses
      *  @param tr the TransferRequest struct containing the from, tos, and tokenIds
      */

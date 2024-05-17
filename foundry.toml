@@ -3,6 +3,7 @@ src = 'contracts'
 out = 'foundry-out'
 # libs = ["lib", "node_modules"]
 libs = ["lib"]
+fs_permissions = [{ access = "read", path = "./foundry-out" }]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 

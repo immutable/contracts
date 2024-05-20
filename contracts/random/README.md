@@ -30,7 +30,7 @@ The RandomSeedProvider contract has not yet been deployed.
 
 The Random Number Generation system on the Immutable platform is shown in the diagram below.
 
-![Random number genration](./random-architecture.png)
+![Random number generation](./random-architecture.png)
 
 Game contracts can extend ```RandomValues.sol``` or ```RandomSequences.sol```. 
 ```RandomSequences.sol``` is an extension of ```RandomValues.sol```. 

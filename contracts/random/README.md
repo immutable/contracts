@@ -6,7 +6,7 @@ The reasons for using these contracts are that:
 
 * Enables you to leverage a random number generation system designed by Immutable's cryptographers.
 * Allows you to build your game against an API that won't change.
-* The quality of the random numbers generated will improve as new capabilities are added to the platform. 
+* The quality of the random numbers generated will improve as new capabilities are added to the platform. For example, in the initial release, `block.hash` is used. Once the BFT hardfork is available, `block.prevrandao` will be used.
 * For off-chain randomness, allows you to leverage the random number provider that Immutable has agreements with.
 
 # Status

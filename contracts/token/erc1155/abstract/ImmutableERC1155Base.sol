@@ -8,15 +8,15 @@ import {ERC1155, ERC1155Permit} from "../../../token/erc1155/abstract/ERC1155Per
 import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
 import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnforced.sol";
 
-abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Permit, ERC2981 {
+import {AccessControlEnumerable, MintingAccessControl} from "../../../access/MintingAccessControl.sol";
+
+
+abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Permit, ERC2981, MintingAccessControl {
     /// @dev Contract level metadata
     string public contractURI;
 
     /// @dev Common URIs for individual token URIs
     string private _baseURI;
-
-    /// @dev Only MINTER_ROLE can invoke permissioned mint.
-    bytes32 public constant MINTER_ROLE = bytes32("MINTER_ROLE");
 
     /// @dev mapping of each token id supply
     mapping(uint256 tokenId => uint256 totalSupply) private _totalSupply;
@@ -93,22 +93,6 @@ abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Perm
     }
 
     /**
-     * @notice Grants minter role to the user
-     * @param user The address to grant the MINTER_ROLE to
-     */
-    function grantMinterRole(address user) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        grantRole(MINTER_ROLE, user);
-    }
-
-    /**
-     * @notice Allows admin to revoke `MINTER_ROLE` role from `user`
-     * @param user The address to revoke the MINTER_ROLE from
-     */
-    function revokeMinterRole(address user) public onlyRole(DEFAULT_ADMIN_ROLE) {
-        revokeRole(MINTER_ROLE, user);
-    }
-
-    /**
      * @notice Override of setApprovalForAll from {ERC721}, with added Allowlist approval validation
      * @param operator The address to approve as an operator for the caller.
      * @param approved True if the operator is approved, false to revoke approval.
@@ -154,7 +138,7 @@ abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Perm
      */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(ERC1155Permit, ERC2981, OperatorAllowlistEnforced) returns (bool) {
+    ) public view virtual override(ERC1155Permit, ERC2981, AccessControlEnumerable) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 
@@ -188,19 +172,6 @@ abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Perm
      */
     function uri(uint256) public view virtual override returns (string memory) {
         return _baseURI;
-    }
-
-    /**
-     * @notice Returns the addresses which have DEFAULT_ADMIN_ROLE
-     * @return admins The addresses which have DEFAULT_ADMIN_ROLE
-     */
-    function getAdmins() public view returns (address[] memory) {
-        uint256 adminCount = getRoleMemberCount(DEFAULT_ADMIN_ROLE);
-        address[] memory admins = new address[](adminCount);
-        for (uint256 i; i < adminCount; i++) {
-            admins[i] = getRoleMember(DEFAULT_ADMIN_ROLE, i);
-        }
-        return admins;
     }
 
     /**

@@ -6,8 +6,8 @@ pragma solidity 0.8.19;
 // Allowlist Registry
 import {IOperatorAllowlist} from "./IOperatorAllowlist.sol";
 
-// Access Control
-import {AccessControlEnumerable, IERC165} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
+// Interface
+import {IERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 
 // Errors
 import {OperatorAllowlistEnforcementErrors} from "../errors/Errors.sol";
@@ -19,7 +19,7 @@ import {OperatorAllowlistEnforcementErrors} from "../errors/Errors.sol";
     OperatorAllowlistEnforced is not designed to be upgradeable or extended.
 */
 
-abstract contract OperatorAllowlistEnforced is AccessControlEnumerable, OperatorAllowlistEnforcementErrors {
+abstract contract OperatorAllowlistEnforced is OperatorAllowlistEnforcementErrors {
     ///     =====   State Variables  =====
 
     /// @notice Interface that implements the `IOperatorAllowlist` interface
@@ -87,14 +87,6 @@ abstract contract OperatorAllowlistEnforced is AccessControlEnumerable, Operator
     }
 
     ///     =====  External functions  =====
-
-    /**
-     * @notice ERC-165 interface support
-     * @param interfaceId The interface identifier, which is a 4-byte selector.
-     */
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return super.supportsInterface(interfaceId);
-    }
 
     /**
      * @notice Internal function to set the operator allowlist the calling contract will interface with

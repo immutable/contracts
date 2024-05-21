@@ -57,7 +57,7 @@ abstract contract ImmutableERC721HybridBase is
         public
         view
         virtual
-        override(ERC721HybridPermit, ERC2981, OperatorAllowlistEnforced, AccessControlEnumerable)
+        override(ERC721HybridPermit, ERC2981, AccessControlEnumerable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

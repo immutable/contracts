@@ -7,6 +7,22 @@ import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 
+/**
+ * @title AccessControlledDeployer
+ * @notice Enables role-based access control for deploying contracts using any `Ownable` deployer
+ *         that is owned by this contract, and adheres to the `IDeployer` interface.
+ * @dev The `OwnableCreate2Deployer` and `OwnableCreate3Deployer` contracts only allow a single address, the owner, to deploy contracts.
+ *      This contract can be used to in-effect extend this permission to multiple addresses.
+ *      This is done by making it the owner of these deployers.
+ *      The contract layers role-based access controls to manage a list of addresses that can deploy contracts on its behalf.
+ * @dev The contract is pausable, meaning that the deployment of new contracts can be paused and unpaused
+ * @dev The contract does not maintain a list of deployers that it owns or manages, but rather relies on the address of the ownable deployers to be passed in as arguments.
+ * @dev The contract has four roles:
+ *       - DEFAULT_ADMIN_ROLE: can grant and revoke roles, and can transfer ownership of a deployer contract owned by this contract
+ *       - DEPLOYER_ROLE: can deploy contracts using any Ownable deployer that this contract owns that adheres to the `IDeployer` interface
+ *       - PAUSER_ROLE: can pause the deployment of new contract
+ *       - UNPAUSER_ROLE: can unpause a contract that was paused, re-enabling deployments
+ */
 contract AccessControlledDeployer is AccessControlEnumerable, Pausable {
     /// @notice Role identifier for those who can pause the deployer
     bytes32 public constant PAUSER_ROLE = keccak256("PAUSER");

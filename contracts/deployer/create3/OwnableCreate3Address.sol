@@ -10,7 +10,7 @@ import {OwnableCreateDeploy} from "../create/OwnableCreateDeploy.sol";
  * @dev This contract is a copy of the `Create3Address` contract in Axelar's SDK, with a minor modification to use `OwnableCreateDeploy` instead of `CreateDeploy`.
  *      See: https://github.com/axelarnetwork/axelar-gmp-sdk-solidity/blob/1d3dd9a42abd37a315c18ec51163ddc5e5a08c21/contracts/deploy/Create3Address.sol
  */
-contract OwnableCreate3Address {
+abstract contract OwnableCreate3Address {
     /// @dev bytecode hash of the CreateDeploy helper contract
     bytes32 internal immutable createDeployBytecodeHash;
 

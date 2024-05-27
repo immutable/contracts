@@ -70,8 +70,20 @@ export function hasDuplicates(array: string[]) {
     return (new Set(array)).size !== array.length;
 }
 
+function getContractObj(contract: string): string {
+    if (contract.includes("AccessControlledDeployer")) {
+        return fs.readFileSync(`../../../../artifacts/contracts/deployer/${contract}.sol/${contract}.json`, 'utf8')
+    } else if (contract.includes("Create2")) {
+        return fs.readFileSync(`../../../../artifacts/contracts/deployer/create2/${contract}.sol/${contract}.json`, 'utf8')
+    } else if (contract.includes("Create3")) {
+        return fs.readFileSync(`../../../../artifacts/contracts/deployer/create3/${contract}.sol/${contract}.json`, 'utf8')
+    } else {
+        return fs.readFileSync(`../../out/${contract}.sol/${contract}.json`, 'utf8')
+    }
+}
+
 export async function deployChildContract(contract: string, adminWallet: ethers.Wallet | LedgerSigner, reservedNonce: number | null, ...args: any) {
-    let contractObj = JSON.parse(fs.readFileSync(`../../out/${contract}.sol/${contract}.json`, 'utf8'));
+    let contractObj = JSON.parse(getContractObj(contract));
     let [priorityFee, maxFee] = await exports.getFee(adminWallet);
     let factory = new ContractFactory(contractObj.abi, contractObj.bytecode, adminWallet);
     let overrides;
@@ -91,7 +103,7 @@ export async function deployChildContract(contract: string, adminWallet: ethers.
 }
 
 export async function deployRootContract(contract: string, adminWallet: ethers.Wallet | LedgerSigner, reservedNonce: number | null, ...args: any) {
-    let contractObj = JSON.parse(fs.readFileSync(`../../out/${contract}.sol/${contract}.json`, 'utf8'));
+    let contractObj = JSON.parse(getContractObj(contract));
     let factory = new ContractFactory(contractObj.abi, contractObj.bytecode, adminWallet);
     if (reservedNonce == null) {
         return await factory.deploy(...args);
@@ -103,7 +115,7 @@ export async function deployRootContract(contract: string, adminWallet: ethers.W
 }
 
 export function getContract(contract: string, contractAddr: string, provider: providers.JsonRpcProvider) {
-    let contractObj = JSON.parse(fs.readFileSync(`../../out/${contract}.sol/${contract}.json`, 'utf8'));
+    let contractObj = JSON.parse(getContractObj(contract));
     return new ethers.Contract(contractAddr, contractObj.abi, provider);
 }
 

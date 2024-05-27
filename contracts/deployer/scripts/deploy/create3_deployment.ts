@@ -18,7 +18,7 @@ export async function run() {
     // Get deployer address
     let reservedDeployerWallet;
     if (nonceReservedDeployerSecret == "ledger") {
-        let index = requireEnv("NONCE_RESERVED_DEPLOYER_INDEX");
+        let index = requireEnv("CHILD_NONCE_RESERVED_DEPLOYER_INDEX");
         const derivationPath = `m/44'/60'/${parseInt(index)}'/0/0`;
         reservedDeployerWallet = new LedgerSigner(childProvider, derivationPath);
     } else {

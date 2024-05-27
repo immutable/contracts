@@ -18,7 +18,8 @@ import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessCont
  * @dev The contract is pausable, meaning that the deployment of new contracts can be paused and unpaused
  * @dev The contract does not maintain a list of deployers that it owns or manages, but rather relies on the address of the ownable deployers to be passed in as arguments.
  * @dev The contract has four roles:
- *       - DEFAULT_ADMIN_ROLE: can grant and revoke roles, and can transfer ownership of a deployer contract owned by this contract
+ *       - DEFAULT_ADMIN_ROLE: can grant and revoke roles
+ *       - OWNERSHIP_MANAGER_ROLE: can transfer ownership of a deployer contract owned by this contract to another address
  *       - DEPLOYER_ROLE: can deploy contracts using any Ownable deployer that this contract owns that adheres to the `IDeployer` interface
  *       - PAUSER_ROLE: can pause the deployment of new contract
  *       - UNPAUSER_ROLE: can unpause a contract that was paused, re-enabling deployments
@@ -33,6 +34,9 @@ contract AccessControlledDeployer is AccessControlEnumerable, Pausable {
     /// @notice Role identifier for those who can deploy contracts
     bytes32 public constant DEPLOYER_ROLE = keccak256("DEPLOYER");
 
+    /// @notice Role identifier for those who can transfer the ownership of a deployer from this contract to another address
+    bytes32 public constant OWNERSHIP_MANAGER_ROLE = keccak256("OWNERSHIP_MANAGER");
+
     /// @notice Emitted when the zero address is provided when it is not expected
     error ZeroAddress();
 
@@ -45,15 +49,17 @@ contract AccessControlledDeployer is AccessControlEnumerable, Pausable {
     /**
      * @notice Construct a new RBACDeployer contract
      * @param admin The address to grant the DEFAULT_ADMIN_ROLE
+     * @param ownershipManager The address to grant the OWNERSHIP_MANAGER_ROLE
      * @param pauser The address to grant the PAUSER_ROLE
      * @param unpauser The address to grant the UNPAUSER_ROLE
      */
-    constructor(address admin, address pauser, address unpauser) {
-        if (admin == address(0) || pauser == address(0) || unpauser == address(0)) {
+    constructor(address admin, address ownershipManager, address pauser, address unpauser) {
+        if (admin == address(0) || ownershipManager == address(0) || pauser == address(0) || unpauser == address(0)) {
             revert ZeroAddress();
         }
 
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        _grantRole(OWNERSHIP_MANAGER_ROLE, ownershipManager);
         _grantRole(PAUSER_ROLE, pauser);
         _grantRole(UNPAUSER_ROLE, unpauser);
     }
@@ -146,14 +152,14 @@ contract AccessControlledDeployer is AccessControlEnumerable, Pausable {
      * @notice Transfers the ownership of `ownableDeployer` from this contract to `newOwner`
      * @param ownableDeployer The create2 or create3 ownable deployer contract to change the owner of
      * @param newOwner The new owner of the deployer contract
-     * @dev Only address with DEFAULT_ADMIN_ROLE can call this function
+     * @dev Only address with OWNERSHIP_MANAGER_ROLE can call this function
      * @dev This function requires that the current owner of `ownableDeployer` is this contract
      * @dev The function emits `OwnershipTransferred` event if the ownership is successfully transferred
      */
     function transferOwnershipOfDeployer(
         Ownable ownableDeployer,
         address newOwner
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    ) external onlyRole(OWNERSHIP_MANAGER_ROLE) {
         if (address(ownableDeployer) == address(0) || newOwner == address(0)) {
             revert ZeroAddress();
         }

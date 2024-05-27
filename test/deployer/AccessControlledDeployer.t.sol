@@ -5,10 +5,8 @@ pragma solidity 0.8.19;
 import "forge-std/Test.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IDeployer} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/interfaces/IDeployer.sol";
-import {ERC20MintableBurnable} from
-    "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnable.sol";
-import {ERC20MintableBurnableInit} from
-    "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnableInit.sol";
+import {ERC20MintableBurnable} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnable.sol";
+import {ERC20MintableBurnableInit} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnableInit.sol";
 
 import {OwnableCreate2Deployer} from "../../contracts/deployer/create2/OwnableCreate2Deployer.sol";
 import {AccessControlledDeployer} from "../../contracts/deployer/AccessControlledDeployer.sol";
@@ -18,7 +16,8 @@ import {Create2Utils} from "./create2/Create2Utils.sol";
 import {Create3Utils} from "./create3/Create3Utils.sol";
 
 contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
-    address private admin = makeAddr("admin");
+    address private roleAdmin = makeAddr("admin");
+    address private ownershipManager = makeAddr("ownershipManager");
     address private pauser = makeAddr("pauser");
     address private unpauser = makeAddr("unpauser");
     address[] private authDeployers;
@@ -31,33 +30,39 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
     error NotOwnerOfDeployer();
 
     function setUp() public {
-        rbacDeployer = new AccessControlledDeployer(admin, pauser, unpauser);
+        rbacDeployer = new AccessControlledDeployer(roleAdmin, ownershipManager, pauser, unpauser);
 
         authDeployers.push(makeAddr("deployer1"));
-        vm.prank(admin);
+        vm.prank(roleAdmin);
         rbacDeployer.grantDeployerRole(authDeployers);
     }
 
     /**
      * Constructor
      */
-    function test_Constructor_RevertIf_AdminIsZeroAddress() public {
+    function test_Constructor_RevertIf_RoleAdminIsZeroAddress() public {
         vm.expectRevert(ZeroAddress.selector);
-        new AccessControlledDeployer(address(0), pauser, unpauser);
+        new AccessControlledDeployer(address(0), ownershipManager, pauser, unpauser);
+    }
+
+    function test_Constructor_RevertIf_OwnershipManagerIsZeroAddress() public {
+        vm.expectRevert(ZeroAddress.selector);
+        new AccessControlledDeployer(roleAdmin, address(0), pauser, unpauser);
     }
 
     function test_Constructor_RevertIf_PauserIsZeroAddress() public {
         vm.expectRevert(ZeroAddress.selector);
-        new AccessControlledDeployer(admin, address(0), unpauser);
+        new AccessControlledDeployer(roleAdmin, ownershipManager, address(0), unpauser);
     }
 
     function test_Constructor_RevertIf_UnpauserIsZeroAddress() public {
         vm.expectRevert(ZeroAddress.selector);
-        new AccessControlledDeployer(admin, pauser, address(0));
+        new AccessControlledDeployer(roleAdmin, ownershipManager, pauser, address(0));
     }
 
     function test_Constructor_AssignsRoles() public {
-        assertTrue(rbacDeployer.hasRole(rbacDeployer.DEFAULT_ADMIN_ROLE(), admin));
+        assertTrue(rbacDeployer.hasRole(rbacDeployer.DEFAULT_ADMIN_ROLE(), roleAdmin));
+        assertTrue(rbacDeployer.hasRole(rbacDeployer.OWNERSHIP_MANAGER_ROLE(), ownershipManager));
         assertTrue(rbacDeployer.hasRole(rbacDeployer.PAUSER_ROLE(), pauser));
         assertTrue(rbacDeployer.hasRole(rbacDeployer.UNPAUSER_ROLE(), unpauser));
     }
@@ -68,28 +73,35 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
     function test_AdminCanAssignRoles() public {
         address newPauser = makeAddr("newPauser");
         address newUnpauser = makeAddr("newUnpauser");
+        address newOwnershipManager = makeAddr("newOwnershipManager");
 
         assertFalse(rbacDeployer.hasRole(rbacDeployer.PAUSER_ROLE(), newPauser));
         assertFalse(rbacDeployer.hasRole(rbacDeployer.UNPAUSER_ROLE(), newUnpauser));
+        assertFalse(rbacDeployer.hasRole(rbacDeployer.OWNERSHIP_MANAGER_ROLE(), newOwnershipManager));
 
-        vm.startPrank(admin);
+        vm.startPrank(roleAdmin);
         rbacDeployer.grantRole(rbacDeployer.PAUSER_ROLE(), newPauser);
         rbacDeployer.grantRole(rbacDeployer.UNPAUSER_ROLE(), newUnpauser);
+        rbacDeployer.grantRole(rbacDeployer.OWNERSHIP_MANAGER_ROLE(), newOwnershipManager);
 
         assertTrue(rbacDeployer.hasRole(rbacDeployer.PAUSER_ROLE(), newPauser));
         assertTrue(rbacDeployer.hasRole(rbacDeployer.UNPAUSER_ROLE(), newUnpauser));
+        assertTrue(rbacDeployer.hasRole(rbacDeployer.OWNERSHIP_MANAGER_ROLE(), newOwnershipManager));
     }
 
     function test_AdminCanRevokeRoles() public {
-        vm.startPrank(admin);
+        vm.startPrank(roleAdmin);
         assertTrue(rbacDeployer.hasRole(rbacDeployer.PAUSER_ROLE(), pauser));
         assertTrue(rbacDeployer.hasRole(rbacDeployer.UNPAUSER_ROLE(), unpauser));
+        assertTrue(rbacDeployer.hasRole(rbacDeployer.OWNERSHIP_MANAGER_ROLE(), ownershipManager));
 
         rbacDeployer.revokeRole(rbacDeployer.PAUSER_ROLE(), pauser);
         rbacDeployer.revokeRole(rbacDeployer.UNPAUSER_ROLE(), unpauser);
+        rbacDeployer.revokeRole(rbacDeployer.OWNERSHIP_MANAGER_ROLE(), ownershipManager);
 
         assertFalse(rbacDeployer.hasRole(rbacDeployer.PAUSER_ROLE(), pauser));
         assertFalse(rbacDeployer.hasRole(rbacDeployer.UNPAUSER_ROLE(), unpauser));
+        assertFalse(rbacDeployer.hasRole(rbacDeployer.OWNERSHIP_MANAGER_ROLE(), ownershipManager));
     }
 
     function test_RevertIf_TransferDeployerOwnership_ByNonAdmin() public {
@@ -98,22 +110,29 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
         rbacDeployer.transferOwnershipOfDeployer(create2Deployer, makeAddr("newOwner2"));
     }
 
+    function test_RevertIf_TransferDeployerOwnership_ByRoleAdmin() public {
+        OwnableCreate2Deployer create2Deployer = new OwnableCreate2Deployer(address(rbacDeployer));
+        vm.startPrank(roleAdmin);
+        vm.expectRevert();
+        rbacDeployer.transferOwnershipOfDeployer(create2Deployer, makeAddr("newOwner2"));
+    }
+
     function test_RevertIf_TransferDeployerOwnership_WithZeroOwnerAddress() public {
         OwnableCreate2Deployer create2Deployer = new OwnableCreate2Deployer(address(rbacDeployer));
-        vm.startPrank(admin);
+        vm.startPrank(ownershipManager);
         vm.expectRevert(ZeroAddress.selector);
         rbacDeployer.transferOwnershipOfDeployer(create2Deployer, address(0));
     }
 
     function test_RevertIf_TransferDeployerOwnership_WhenNotCurrentOwner() public {
         OwnableCreate2Deployer create2Deployer = new OwnableCreate2Deployer(makeAddr("currentOwner"));
-        vm.startPrank(admin);
+        vm.startPrank(ownershipManager);
         vm.expectRevert(NotOwnerOfDeployer.selector);
         rbacDeployer.transferOwnershipOfDeployer(create2Deployer, makeAddr("newOwner2"));
     }
 
     function test_RevertIf_TransferDeployerOwnership_WithZeroDeployerAddress() public {
-        vm.startPrank(admin);
+        vm.startPrank(ownershipManager);
         vm.expectRevert(ZeroAddress.selector);
         rbacDeployer.transferOwnershipOfDeployer(Ownable(address(0)), makeAddr("newOwner2"));
     }
@@ -123,7 +142,7 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
         assertTrue(create2Deployer.owner() == address(rbacDeployer));
 
         address newOwner = makeAddr("newOwner");
-        vm.startPrank(admin);
+        vm.startPrank(ownershipManager);
         rbacDeployer.transferOwnershipOfDeployer(create2Deployer, newOwner);
         assertTrue(create2Deployer.owner() == newOwner);
     }
@@ -133,7 +152,7 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
         assertTrue(create3Deployer.owner() == address(rbacDeployer));
 
         address newOwner = makeAddr("newOwner");
-        vm.startPrank(admin);
+        vm.startPrank(ownershipManager);
         rbacDeployer.transferOwnershipOfDeployer(create3Deployer, newOwner);
         assertTrue(create3Deployer.owner() == newOwner);
     }
@@ -147,7 +166,7 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
         rbacDeployer.pause();
 
         // check admin can't pause
-        vm.prank(admin);
+        vm.prank(roleAdmin);
         vm.expectRevert();
         rbacDeployer.pause();
 
@@ -168,7 +187,7 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
         rbacDeployer.pause();
 
         // check admin can't unpause
-        vm.prank(admin);
+        vm.prank(roleAdmin);
         vm.expectRevert();
         rbacDeployer.pause();
 
@@ -184,7 +203,7 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
     function test_RevertIf_GrantDeployerRole_WithEmptyArray() public {
         address[] memory emptyDeployers = new address[](0);
         vm.expectRevert(EmptyDeployerList.selector);
-        vm.prank(admin);
+        vm.prank(roleAdmin);
         rbacDeployer.grantDeployerRole(emptyDeployers);
     }
 
@@ -193,7 +212,7 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
         newDeployers[0] = makeAddr("deployer2");
         // note that second deployer in the array is the zero address
 
-        vm.prank(admin);
+        vm.prank(roleAdmin);
         vm.expectRevert(ZeroAddress.selector);
         rbacDeployer.grantDeployerRole(newDeployers);
     }
@@ -204,7 +223,7 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
 
         assertFalse(rbacDeployer.hasRole(rbacDeployer.DEPLOYER_ROLE(), newDeployers[0]));
 
-        vm.prank(admin);
+        vm.prank(roleAdmin);
         rbacDeployer.grantDeployerRole(newDeployers);
 
         assertTrue(rbacDeployer.hasRole(rbacDeployer.DEPLOYER_ROLE(), newDeployers[0]));
@@ -218,7 +237,7 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
         assertFalse(rbacDeployer.hasRole(rbacDeployer.DEPLOYER_ROLE(), newDeployers[0]));
         assertFalse(rbacDeployer.hasRole(rbacDeployer.DEPLOYER_ROLE(), newDeployers[1]));
 
-        vm.prank(admin);
+        vm.prank(roleAdmin);
         rbacDeployer.grantDeployerRole(newDeployers);
 
         assertTrue(rbacDeployer.hasRole(rbacDeployer.DEPLOYER_ROLE(), newDeployers[0]));
@@ -228,7 +247,7 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
     function test_RevertIf_RevokeDeployerRole_WithEmptyArray() public {
         address[] memory emptyDeployers = new address[](0);
         vm.expectRevert(EmptyDeployerList.selector);
-        vm.prank(admin);
+        vm.prank(roleAdmin);
         rbacDeployer.revokeDeployerRole(emptyDeployers);
     }
 
@@ -237,7 +256,7 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
         existingDeployers[0] = makeAddr("deployer1");
         // note that second deployer in the array is the zero address
 
-        vm.prank(admin);
+        vm.prank(roleAdmin);
         vm.expectRevert(ZeroAddress.selector);
         rbacDeployer.grantDeployerRole(existingDeployers);
     }
@@ -245,7 +264,7 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
     function test_RevokeDeployerRole_GivenOneDeployer() public {
         assertTrue(rbacDeployer.hasRole(rbacDeployer.DEPLOYER_ROLE(), authDeployers[0]));
 
-        vm.prank(admin);
+        vm.prank(roleAdmin);
         rbacDeployer.revokeDeployerRole(authDeployers);
 
         assertFalse(rbacDeployer.hasRole(rbacDeployer.DEPLOYER_ROLE(), authDeployers[0]));
@@ -256,13 +275,13 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
         newDeployers[0] = makeAddr("deployer2");
         newDeployers[1] = makeAddr("deployer3");
 
-        vm.prank(admin);
+        vm.prank(roleAdmin);
         rbacDeployer.grantDeployerRole(newDeployers);
 
         assertTrue(rbacDeployer.hasRole(rbacDeployer.DEPLOYER_ROLE(), newDeployers[0]));
         assertTrue(rbacDeployer.hasRole(rbacDeployer.DEPLOYER_ROLE(), newDeployers[1]));
 
-        vm.prank(admin);
+        vm.prank(roleAdmin);
         rbacDeployer.revokeDeployerRole(newDeployers);
 
         assertFalse(rbacDeployer.hasRole(rbacDeployer.DEPLOYER_ROLE(), newDeployers[0]));
@@ -279,12 +298,17 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
 
     function test_Deploy_UsingCreate2() public {
         OwnableCreate2Deployer create2Deployer = new OwnableCreate2Deployer(address(rbacDeployer));
-        bytes memory erc20MintableBytecode =
-            abi.encodePacked(type(ERC20MintableBurnable).creationCode, abi.encode("Test Token", "TEST", 10));
+        bytes memory erc20MintableBytecode = abi.encodePacked(
+            type(ERC20MintableBurnable).creationCode,
+            abi.encode("Test Token", "TEST", 10)
+        );
         bytes32 erc20MintableSalt = createSaltFromKey("erc20-mintable-burnable-v1", address(rbacDeployer));
 
         address expectedAddress = predictCreate2Address(
-            erc20MintableBytecode, address(create2Deployer), address(rbacDeployer), erc20MintableSalt
+            erc20MintableBytecode,
+            address(create2Deployer),
+            address(rbacDeployer),
+            erc20MintableSalt
         );
 
         vm.startPrank(authDeployers[0]);
@@ -301,21 +325,34 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
 
     function test_DeployAndInit_UsingCreate2() public {
         OwnableCreate2Deployer create2Deployer = new OwnableCreate2Deployer(address(rbacDeployer));
-        bytes memory mintableInitBytecode =
-            abi.encodePacked(type(ERC20MintableBurnableInit).creationCode, abi.encode(10));
+        bytes memory mintableInitBytecode = abi.encodePacked(
+            type(ERC20MintableBurnableInit).creationCode,
+            abi.encode(10)
+        );
 
         bytes32 mintableInitSalt = createSaltFromKey("erc20-mintable-burnable-init-v1", address(rbacDeployer));
 
         address expectedAddress = predictCreate2Address(
-            mintableInitBytecode, address(create2Deployer), address(rbacDeployer), mintableInitSalt
+            mintableInitBytecode,
+            address(create2Deployer),
+            address(rbacDeployer),
+            mintableInitSalt
         );
 
-        bytes memory initPayload = abi.encodeWithSelector(ERC20MintableBurnableInit.init.selector, "Test Token", "TEST");
+        bytes memory initPayload = abi.encodeWithSelector(
+            ERC20MintableBurnableInit.init.selector,
+            "Test Token",
+            "TEST"
+        );
         vm.startPrank(authDeployers[0]);
         vm.expectEmit();
         emit Deployed(expectedAddress, address(rbacDeployer), mintableInitSalt, keccak256(mintableInitBytecode));
-        address deployedAddress =
-            rbacDeployer.deployAndInit(create2Deployer, mintableInitBytecode, mintableInitSalt, initPayload);
+        address deployedAddress = rbacDeployer.deployAndInit(
+            create2Deployer,
+            mintableInitBytecode,
+            mintableInitSalt,
+            initPayload
+        );
         ERC20MintableBurnableInit deployed = ERC20MintableBurnableInit(deployedAddress);
 
         assertEq(deployedAddress, expectedAddress, "deployed address does not match expected");
@@ -326,8 +363,10 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
 
     function test_Deploy_UsingCreate3() public {
         OwnableCreate3Deployer create3Deployer = new OwnableCreate3Deployer(address(rbacDeployer));
-        bytes memory erc20MintableBytecode =
-            abi.encodePacked(type(ERC20MintableBurnable).creationCode, abi.encode("Test Token", "TEST", 10));
+        bytes memory erc20MintableBytecode = abi.encodePacked(
+            type(ERC20MintableBurnable).creationCode,
+            abi.encode("Test Token", "TEST", 10)
+        );
         bytes32 erc20MintableSalt = createSaltFromKey("erc20-mintable-burnable-v1", address(rbacDeployer));
 
         address expectedAddress = predictCreate3Address(create3Deployer, address(rbacDeployer), erc20MintableSalt);
@@ -346,19 +385,29 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
 
     function test_DeployAndInit_UsingCreate3() public {
         OwnableCreate3Deployer create3Deployer = new OwnableCreate3Deployer(address(rbacDeployer));
-        bytes memory erc20MintableInitBytcode =
-            abi.encodePacked(type(ERC20MintableBurnableInit).creationCode, abi.encode(10));
+        bytes memory erc20MintableInitBytcode = abi.encodePacked(
+            type(ERC20MintableBurnableInit).creationCode,
+            abi.encode(10)
+        );
 
         bytes32 erc20MintableSalt = createSaltFromKey("erc20-mintable-burnable-init-v1", address(rbacDeployer));
 
         address expectedAddress = predictCreate3Address(create3Deployer, address(rbacDeployer), erc20MintableSalt);
 
         vm.startPrank(authDeployers[0]);
-        bytes memory initPayload = abi.encodeWithSelector(ERC20MintableBurnableInit.init.selector, "Test Token", "TEST");
+        bytes memory initPayload = abi.encodeWithSelector(
+            ERC20MintableBurnableInit.init.selector,
+            "Test Token",
+            "TEST"
+        );
         vm.expectEmit();
         emit Deployed(expectedAddress, address(rbacDeployer), erc20MintableSalt, keccak256(erc20MintableInitBytcode));
-        address deployedAddress =
-            rbacDeployer.deployAndInit(create3Deployer, erc20MintableInitBytcode, erc20MintableSalt, initPayload);
+        address deployedAddress = rbacDeployer.deployAndInit(
+            create3Deployer,
+            erc20MintableInitBytcode,
+            erc20MintableSalt,
+            initPayload
+        );
         ERC20MintableBurnableInit deployed = ERC20MintableBurnableInit(deployedAddress);
 
         assertEq(deployedAddress, expectedAddress, "deployed address does not match expected");

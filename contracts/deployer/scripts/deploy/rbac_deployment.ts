@@ -12,6 +12,7 @@ export async function run() {
     let nonceReservedDeployerSecret = requireEnv("CHILD_NONCE_RESERVED_DEPLOYER_SECRET");
     let nonceReserved = Number(requireEnv("CHILD_NONCE_RESERVED"));
     let rbacAdmin = requireEnv("CHILD_RBAC_DEPLOYER_ADMIN");
+    let rbacOwnerMgr = requireEnv("CHILD_RBAC_DEPLOYER_OWNER_MANAGER");
     let rbacPauser = requireEnv("CHILD_RBAC_DEPLOYER_PAUSER");
     let rbacUnpauser = requireEnv("CHILD_RBAC_DEPLOYER_UNPAUSER");
 
@@ -38,7 +39,7 @@ export async function run() {
     await waitForConfirmation();
 
     console.log("Deploy RBAC deployer...");
-    let rbacDeployer = await deployChildContract("AccessControlledDeployer", reservedDeployerWallet, nonceReserved, rbacAdmin, rbacPauser, rbacUnpauser);
+    let rbacDeployer = await deployChildContract("AccessControlledDeployer", reservedDeployerWallet, nonceReserved, rbacAdmin, rbacOwnerMgr, rbacPauser, rbacUnpauser);
     console.log("Transaction submitted: ", JSON.stringify(rbacDeployer.deployTransaction, null, 2));
     await waitForReceipt(rbacDeployer.deployTransaction.hash, childProvider);
     console.log("Deployed to CHILD_RBAC_DEPLOYER: ", rbacDeployer.address);

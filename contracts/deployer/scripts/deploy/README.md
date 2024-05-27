@@ -1,5 +1,10 @@
 ## Deployment
 
+Build
+```
+forge build
+```
+
 Create `.env` file:
 ```
 cp .env.example .env

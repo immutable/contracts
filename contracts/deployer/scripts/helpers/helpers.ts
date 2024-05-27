@@ -71,15 +71,7 @@ export function hasDuplicates(array: string[]) {
 }
 
 function getContractObj(contract: string): string {
-    if (contract.includes("AccessControlledDeployer")) {
-        return fs.readFileSync(`../../../../artifacts/contracts/deployer/${contract}.sol/${contract}.json`, 'utf8')
-    } else if (contract.includes("Create2")) {
-        return fs.readFileSync(`../../../../artifacts/contracts/deployer/create2/${contract}.sol/${contract}.json`, 'utf8')
-    } else if (contract.includes("Create3")) {
-        return fs.readFileSync(`../../../../artifacts/contracts/deployer/create3/${contract}.sol/${contract}.json`, 'utf8')
-    } else {
-        return fs.readFileSync(`../../out/${contract}.sol/${contract}.json`, 'utf8')
-    }
+    return fs.readFileSync(`../../../../foundry-out/${contract}.sol/${contract}.json`, 'utf8')
 }
 
 export async function deployChildContract(contract: string, adminWallet: ethers.Wallet | LedgerSigner, reservedNonce: number | null, ...args: any) {

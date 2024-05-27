@@ -2,6 +2,8 @@
 
 Build
 ```
+nvm use 18.16
+yarn
 forge build
 ```
 

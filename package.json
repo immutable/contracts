@@ -70,6 +70,8 @@
   },
   "dependencies": {
     "@axelar-network/axelar-gmp-sdk-solidity": "^5.8.0",
+    "@ledgerhq/hw-app-eth": "^6.36.1",
+    "@ledgerhq/hw-transport-node-hid": "^6.28.6",
     "@openzeppelin/contracts": "^4.9.3",
     "@openzeppelin/contracts-upgradeable": "^4.9.3",
     "@rari-capital/solmate": "^6.4.0",

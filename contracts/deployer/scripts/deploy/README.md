@@ -20,3 +20,8 @@ npx ts-node create2_deployment.ts
 
 npx ts-node create3_deployment.ts
 ```
+
+### Verification
+```
+forge verify-contract --verifier blockscout --verifier-url ${url} ${contractAddr} ${contract}
+```

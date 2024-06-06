@@ -90,7 +90,7 @@ abstract contract ERC1155Permit is ERC1155Burnable, EIP712, IERC1155Permit, IImm
       returns (bool)
     {
      return
-      interfaceId == type(IERC1155Permit).interfaceId || // 0x5604e225
+      interfaceId == type(IERC1155Permit).interfaceId || // 0x9e3ae8e4
       super.supportsInterface(interfaceId);
     }
 

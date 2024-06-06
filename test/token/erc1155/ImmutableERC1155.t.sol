@@ -129,6 +129,10 @@ contract ImmutableERC1155Test is Test {
         assertEq(immutableERC1155.baseURI(), "test-base-uri");
     }
 
+    function test_DeploymentShouldSetUri() public {
+        assertEq(immutableERC1155.uri(0), immutableERC1155.baseURI());
+    }
+
     function test_DeploymentAllowlistShouldGiveAdminToOwner() public {
         bytes32 adminRole = operatorAllowlist.DEFAULT_ADMIN_ROLE();
         assertTrue(operatorAllowlist.hasRole(adminRole, owner));
@@ -203,6 +207,14 @@ contract ImmutableERC1155Test is Test {
         vm.warp(block.timestamp + 2 days);
 
         vm.expectRevert(IImmutableERC1155Errors.PermitExpired.selector);
+
+        immutableERC1155.permit(owner, spender, true, 1 days, sig);
+    }
+
+    function test_PermitRevertsWhenInvalidSignature() public {
+        bytes memory sig = bytes("invalid_sig");
+
+        vm.expectRevert(IImmutableERC1155Errors.InvalidSignature.selector);
 
         immutableERC1155.permit(owner, spender, true, 1 days, sig);
     }
@@ -374,5 +386,58 @@ contract ImmutableERC1155Test is Test {
         assertEq(immutableERC1155.balanceOf(owner, 1), 5);
         assertEq(immutableERC1155.balanceOf(owner, 2), 7);
         assertEq(immutableERC1155.totalSupply(1), 5);
+        assertTrue(immutableERC1155.exists(1));
+    }
+
+    /*
+    * SupportsInterface
+    */
+    function test_SupportsInterface() public {
+        assertTrue(immutableERC1155.supportsInterface(0x9e3ae8e4));
+    }
+
+    function test_SupportsInterface_delegatesToSuper() public {
+        assertTrue(immutableERC1155.supportsInterface(0x01ffc9a7)); //IERC165
+    }
+
+    /*
+    * Royalties
+    */
+    function test_setDefaultRoyaltyReceiver() public {
+        vm.prank(owner);
+        address newFeeReceiver = vm.addr(anotherPrivateKey);
+        immutableERC1155.setDefaultRoyaltyReceiver(newFeeReceiver, 500);
+        (address receiver, uint256 royaltyAmount) = immutableERC1155.royaltyInfo(1, 20000);
+        assertEq(receiver, newFeeReceiver);
+        // 1000 = 20000 (salePrice) * 500 (new royalty amount) / 10000 (feeDenominator)
+        assertEq(1000, royaltyAmount);
+    }
+
+    function test_setNFTRoyaltyReceiver() public {
+        vm.prank(minter);
+        address newFeeReceiver = vm.addr(anotherPrivateKey);
+        uint256 tokenID = 10;
+        immutableERC1155.setNFTRoyaltyReceiver(tokenID, newFeeReceiver, 100);
+        (address receiver, uint256 royaltyAmount) = immutableERC1155.royaltyInfo(tokenID, 10000);
+        assertEq(receiver, newFeeReceiver);
+        // 100 = 10000 (salePrice) * 100 (new royalty amount) / 10000 (feeDenominator)
+        assertEq(100, royaltyAmount);
+    }
+
+    function test_setNFTRoyaltyReceiverBatch() public {
+        vm.prank(minter);
+        address newFeeReceiver = vm.addr(anotherPrivateKey);
+        uint256[] memory tokenIDs = new uint256[](3);
+        tokenIDs[0] = 20;
+        tokenIDs[1] = 21;
+        tokenIDs[2] = 22;
+
+        immutableERC1155.setNFTRoyaltyReceiverBatch(tokenIDs, newFeeReceiver, 100);
+
+        for (uint i = 0; i < tokenIDs.length; i++) {
+            (address receiver, uint256 royaltyAmount) = immutableERC1155.royaltyInfo(tokenIDs[i], 10000);
+            assertEq(receiver, newFeeReceiver);
+            assertEq(100, royaltyAmount);
+        }
     }
 }

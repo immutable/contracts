@@ -11,6 +11,7 @@ import {Sign} from "../../utils/Sign.sol";
 import {DeployOperatorAllowlist} from "../../utils/DeployAllowlistProxy.sol";
 import {MockWallet} from "../../../contracts/mocks/MockWallet.sol";
 import {MockWalletFactory} from "../../../contracts/mocks/MockWalletFactory.sol";
+import {MockEIP1271Wallet} from "../../../contracts/mocks/MockEIP1271Wallet.sol";
 
 contract ImmutableERC1155Test is Test {
     ImmutableERC1155 public immutableERC1155;
@@ -20,6 +21,7 @@ contract ImmutableERC1155Test is Test {
     MockWallet public mockWalletModule;
     MockWallet public scw;
     MockWallet public anotherScw;
+    MockEIP1271Wallet public eip1271Wallet;
     address[] private operatorAddrs;
 
     uint256 deployerPrivateKey = 1;
@@ -72,6 +74,8 @@ contract ImmutableERC1155Test is Test {
         scmf.deploy(address(mockWalletModule), anotherSalt);
         anotherScwAddress = scmf.getAddress(address(mockWalletModule), anotherSalt);
         anotherScw = MockWallet(anotherScwAddress);
+
+        eip1271Wallet = new MockEIP1271Wallet(owner);
     }
 
     function _sign(
@@ -217,6 +221,15 @@ contract ImmutableERC1155Test is Test {
         vm.expectRevert(IImmutableERC1155Errors.InvalidSignature.selector);
 
         immutableERC1155.permit(owner, spender, true, 1 days, sig);
+    }
+
+    function test_PermitSuccess_UsingSmartContractWalletAsOwner() public {
+        bytes memory sig = _sign(ownerPrivateKey, address(eip1271Wallet), owner, true, 0, 1 days);
+
+        immutableERC1155.permit(address(eip1271Wallet), owner, true, 1 days, sig);
+
+        assertEq(immutableERC1155.isApprovedForAll(address(eip1271Wallet), owner), true);
+        assertEq(immutableERC1155.nonces(address(eip1271Wallet)), 1);
     }
 
     /*

@@ -120,6 +120,30 @@ contract ImmutableERC1155Test is Test {
     /*
     * Contract deployment
     */
+    function test_ValidateDeploymentConstructor() public {
+        string memory baseURI = "https://base-uri.com";
+        string memory contractURI = "https://contract-uri.com";
+        uint96 feeNumerator = 500;
+        address newFeeReceiver = vm.addr(anotherPrivateKey);
+
+        ImmutableERC1155 anotherERC1155 = new ImmutableERC1155(
+        owner, "new erc1155", "https://base-uri.com", "https://contract-uri.com", address(operatorAllowlist), newFeeReceiver, feeNumerator
+        );
+
+        assertEq(anotherERC1155.contractURI(), contractURI);
+        assertEq(anotherERC1155.baseURI(), baseURI);
+
+        // check owner is admin
+        bytes32 adminRole = anotherERC1155.DEFAULT_ADMIN_ROLE();
+        assertTrue(anotherERC1155.hasRole(adminRole, owner));
+
+        // check default royalties
+        (address receiver, uint256 royaltyAmount) = anotherERC1155.royaltyInfo(1, 10000);
+        assertEq(receiver, newFeeReceiver);
+        // 500 = 10000 (salePrice) * 500 (feeNumerator) / 10000 (feeDenominator)
+        assertEq(500, royaltyAmount);
+    }
+
     function test_DeploymentShouldSetAdminRoleToOwner() public {
         bytes32 adminRole = immutableERC1155.DEFAULT_ADMIN_ROLE();
         assertTrue(immutableERC1155.hasRole(adminRole, owner));

@@ -11,6 +11,7 @@ import {Sign} from "../../utils/Sign.sol";
 import {DeployOperatorAllowlist} from "../../utils/DeployAllowlistProxy.sol";
 import {MockWallet} from "../../../contracts/mocks/MockWallet.sol";
 import {MockWalletFactory} from "../../../contracts/mocks/MockWalletFactory.sol";
+import {MockEIP1271Wallet} from "../../../contracts/mocks/MockEIP1271Wallet.sol";
 
 contract ImmutableERC1155Test is Test {
     ImmutableERC1155 public immutableERC1155;
@@ -20,6 +21,7 @@ contract ImmutableERC1155Test is Test {
     MockWallet public mockWalletModule;
     MockWallet public scw;
     MockWallet public anotherScw;
+    MockEIP1271Wallet public eip1271Wallet;
     address[] private operatorAddrs;
 
     uint256 deployerPrivateKey = 1;
@@ -72,6 +74,8 @@ contract ImmutableERC1155Test is Test {
         scmf.deploy(address(mockWalletModule), anotherSalt);
         anotherScwAddress = scmf.getAddress(address(mockWalletModule), anotherSalt);
         anotherScw = MockWallet(anotherScwAddress);
+
+        eip1271Wallet = new MockEIP1271Wallet(owner);
     }
 
     function _sign(
@@ -116,6 +120,30 @@ contract ImmutableERC1155Test is Test {
     /*
     * Contract deployment
     */
+    function test_ValidateDeploymentConstructor() public {
+        string memory baseURI = "https://base-uri.com";
+        string memory contractURI = "https://contract-uri.com";
+        uint96 feeNumerator = 500;
+        address newFeeReceiver = vm.addr(anotherPrivateKey);
+
+        ImmutableERC1155 anotherERC1155 = new ImmutableERC1155(
+        owner, "new erc1155", "https://base-uri.com", "https://contract-uri.com", address(operatorAllowlist), newFeeReceiver, feeNumerator
+        );
+
+        assertEq(anotherERC1155.contractURI(), contractURI);
+        assertEq(anotherERC1155.baseURI(), baseURI);
+
+        // check owner is admin
+        bytes32 adminRole = anotherERC1155.DEFAULT_ADMIN_ROLE();
+        assertTrue(anotherERC1155.hasRole(adminRole, owner));
+
+        // check default royalties
+        (address receiver, uint256 royaltyAmount) = anotherERC1155.royaltyInfo(1, 10000);
+        assertEq(receiver, newFeeReceiver);
+        // 500 = 10000 (salePrice) * 500 (feeNumerator) / 10000 (feeDenominator)
+        assertEq(500, royaltyAmount);
+    }
+
     function test_DeploymentShouldSetAdminRoleToOwner() public {
         bytes32 adminRole = immutableERC1155.DEFAULT_ADMIN_ROLE();
         assertTrue(immutableERC1155.hasRole(adminRole, owner));
@@ -127,6 +155,10 @@ contract ImmutableERC1155Test is Test {
 
     function test_DeploymentShouldSetBaseURI() public {
         assertEq(immutableERC1155.baseURI(), "test-base-uri");
+    }
+
+    function test_DeploymentShouldSetUri() public {
+        assertEq(immutableERC1155.uri(0), immutableERC1155.baseURI());
     }
 
     function test_DeploymentAllowlistShouldGiveAdminToOwner() public {
@@ -205,6 +237,23 @@ contract ImmutableERC1155Test is Test {
         vm.expectRevert(IImmutableERC1155Errors.PermitExpired.selector);
 
         immutableERC1155.permit(owner, spender, true, 1 days, sig);
+    }
+
+    function test_PermitRevertsWhenInvalidSignature() public {
+        bytes memory sig = bytes("invalid_sig");
+
+        vm.expectRevert(IImmutableERC1155Errors.InvalidSignature.selector);
+
+        immutableERC1155.permit(owner, spender, true, 1 days, sig);
+    }
+
+    function test_PermitSuccess_UsingSmartContractWalletAsOwner() public {
+        bytes memory sig = _sign(ownerPrivateKey, address(eip1271Wallet), owner, true, 0, 1 days);
+
+        immutableERC1155.permit(address(eip1271Wallet), owner, true, 1 days, sig);
+
+        assertEq(immutableERC1155.isApprovedForAll(address(eip1271Wallet), owner), true);
+        assertEq(immutableERC1155.nonces(address(eip1271Wallet)), 1);
     }
 
     /*
@@ -374,5 +423,58 @@ contract ImmutableERC1155Test is Test {
         assertEq(immutableERC1155.balanceOf(owner, 1), 5);
         assertEq(immutableERC1155.balanceOf(owner, 2), 7);
         assertEq(immutableERC1155.totalSupply(1), 5);
+        assertTrue(immutableERC1155.exists(1));
+    }
+
+    /*
+    * SupportsInterface
+    */
+    function test_SupportsInterface() public {
+        assertTrue(immutableERC1155.supportsInterface(0x9e3ae8e4));
+    }
+
+    function test_SupportsInterface_delegatesToSuper() public {
+        assertTrue(immutableERC1155.supportsInterface(0x01ffc9a7)); //IERC165
+    }
+
+    /*
+    * Royalties
+    */
+    function test_setDefaultRoyaltyReceiver() public {
+        vm.prank(owner);
+        address newFeeReceiver = vm.addr(anotherPrivateKey);
+        immutableERC1155.setDefaultRoyaltyReceiver(newFeeReceiver, 500);
+        (address receiver, uint256 royaltyAmount) = immutableERC1155.royaltyInfo(1, 20000);
+        assertEq(receiver, newFeeReceiver);
+        // 1000 = 20000 (salePrice) * 500 (new royalty amount) / 10000 (feeDenominator)
+        assertEq(1000, royaltyAmount);
+    }
+
+    function test_setNFTRoyaltyReceiver() public {
+        vm.prank(minter);
+        address newFeeReceiver = vm.addr(anotherPrivateKey);
+        uint256 tokenID = 10;
+        immutableERC1155.setNFTRoyaltyReceiver(tokenID, newFeeReceiver, 100);
+        (address receiver, uint256 royaltyAmount) = immutableERC1155.royaltyInfo(tokenID, 10000);
+        assertEq(receiver, newFeeReceiver);
+        // 100 = 10000 (salePrice) * 100 (new royalty amount) / 10000 (feeDenominator)
+        assertEq(100, royaltyAmount);
+    }
+
+    function test_setNFTRoyaltyReceiverBatch() public {
+        vm.prank(minter);
+        address newFeeReceiver = vm.addr(anotherPrivateKey);
+        uint256[] memory tokenIDs = new uint256[](3);
+        tokenIDs[0] = 20;
+        tokenIDs[1] = 21;
+        tokenIDs[2] = 22;
+
+        immutableERC1155.setNFTRoyaltyReceiverBatch(tokenIDs, newFeeReceiver, 100);
+
+        for (uint i = 0; i < tokenIDs.length; i++) {
+            (address receiver, uint256 royaltyAmount) = immutableERC1155.royaltyInfo(tokenIDs[i], 10000);
+            assertEq(receiver, newFeeReceiver);
+            assertEq(100, royaltyAmount);
+        }
     }
 }

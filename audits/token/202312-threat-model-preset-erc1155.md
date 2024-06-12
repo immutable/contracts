@@ -1,28 +1,30 @@
 ## Introduction
 
-This document is a thread model for the preset erc1155 token contracts built by Immutable.
+This document is a thread model for the preset ERC1155 token contracts built by Immutable.
 
-This document encompasses information for all contracts under the [token](../contracts/token/erc1155) directory
+Contracts covered under this model include:
+
+- [ImmutableERC1155](../../contracts/token/erc1155/preset/ImmutableERC1155.sol)
 
 ## Context
 
-The ERC1155 presets built by Immutable were done with the requirements of supply tracking and permits
+The ERC1155 presets built by Immutable were done with the requirements of supply tracking and permits.
 
 - Clients should be able to track how many tokens of a specific token id in a collection is in circulation
 
 - Clients should be able to create permits for unapproved wallets to operate on their behalf
 
-- Minting should be restricted to addresses that were granted the `minter` role.
+- Minting should be restricted to addresses that were granted the `minter` role
 
-- Only allow operators should be able to modify and assign roles to addresses for administering the collection on chain.
+- Only allow operators should be able to modify and assign roles to addresses for administering the collection on chain
 
-- Contracts should not be upgradeable to prevent external developers from getting around royalty requirements.
+- Contracts should not be upgradeable to prevent external developers from getting around royalty requirements
 
 ## Design and Implementation
 
 ### ImmutableERC1155
 
-The ImmutableERC1155 extends OZ's `ERC1155Burnable` contract inheriting the public burn methods to be used by the client.
+The ImmutableERC1155 extends the OpenZeppelin `ERC1155Burnable` contract inheriting the public burn methods to be used by the client.
 Permit is added to allow for Gasless transactions from the token owners.
 
 #### Modifications From Base Implementation

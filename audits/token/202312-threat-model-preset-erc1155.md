@@ -24,8 +24,16 @@ The ERC1155 presets built by Immutable were done with the requirements of supply
 
 ### ImmutableERC1155
 
-The ImmutableERC1155 extends the OpenZeppelin `ERC1155Burnable` contract inheriting the public burn methods to be used by the client.
-Permit is added to allow for Gasless transactions from the token owners.
+ImmutableERC1155 inherits the [ImmutableERC1155Base](../../contracts//token//erc1155//abstract/ImmutableERC1155Base.sol) contract and provides public functions for single and batch minting that are access controlled.
+
+ImmutableERC1155Base inherits contracts:
+
+- `OperatorAllowlistEnforced` - for setting an OperatorAllowlist that enables the restriction of approvals and transfers to allowlisted users
+- `ERC1155Permit` - an implementation of the ERC1155 Permit extension from Open Zeppelin allowing approvals to be made via EIP712 signatures, to allow for gasless transactions from the token owners.
+- `ERC2981` - an implementation of the NFT Royalty Standard for retrieving royalty payment information
+- `MintingAccessControl` - implements access control for the `minter` role
+
+The ERC1155Permit implementation inherits the OpenZeppelin [ERC1155Burnable](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC1155/extensions/ERC1155Burnable.sol) contract, which provides the public burn methods to be used by the client.
 
 #### Modifications From Base Implementation
 
@@ -36,9 +44,17 @@ Permit is added to allow for Gasless transactions from the token owners.
 
 ## Attack Surfaces
 
-ERC1155 only has `setApproveForAll` as it's approval method. Meaning any flow that requires a 3rd party to operator on a set of tokens owned by another wallet will grant the third party access to all of that specific wallet's tokens. The third party needs to be entirely trustworthy. The owner needs to be diligent on revoking unrestricted access when not needed.
+ERC1155 only has `setApproveForAll` as it's approval method. Meaning any flow that requires a 3rd party to operate on a set of tokens owned by another wallet will grant the third party access to all of that specific wallet's tokens. The third party needs to be entirely trustworthy. The owner needs to be diligent on revoking unrestricted access when not needed.
 
-We can consider implementing a more complicated approval schema if needed. i.e by token id or by token id and amount.
+The contract has no access to any funds. Additional risks can come from compromised keys that are responsible for managing the admin roles that control the collection. As well as permits and approves if an user was tricked into creating a permit that can be validated by a malicious eip1271 wallet giving them permissions to the user's token.
+
+Potential Attacks:
+
+- Compromised Admin Keys:
+  - The compromised keys are able to assign the `MINTER_ROLE` to malicious parties and allow them to mint tokens to themselves without restriction
+  - The compromised keys are able to update the `OperatorAllowList` to white list malicious contracts to be approved to operate on tokens within the collection
+- Compromised Offchain auth:
+  - Since EIP4494 combined with EIP1271 relies on off chain signatures that are not standard to the ethereum signature scheme, user auth info can be compromised and be used to create valid EIP1271 signatures.
 
 ## Tests
 

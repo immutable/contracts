@@ -43,3 +43,7 @@ We can consider implementing a more complicated approval schema if needed. i.e b
 ## Tests
 
 `forge test` will run all the related tests.
+
+## Diagram
+
+![](./202312-threat-model-preset-erc1155/ImmutableERC1155.jpg)

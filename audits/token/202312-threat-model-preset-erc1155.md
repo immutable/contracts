@@ -18,7 +18,7 @@ The ERC1155 presets built by Immutable were done with the requirements of supply
 
 - Minting should be restricted to addresses that were granted the `minter` role
 
-- Only allow operators should be able to modify and assign roles to addresses for administering the collection on chain
+- Only allowed operators should be able to modify and assign roles to addresses for administering the collection on chain
 
 - Contracts should not be upgradeable to prevent external developers from getting around royalty requirements
 

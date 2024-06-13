@@ -71,11 +71,11 @@ Functions that _change_ state:
 | renounceRole(bytes32,address) | 36568abe | None - permissionless |
 | revokeMinterRole(address) | 69e2f0fb | DEFAULT_ADMIN_ROLE |
 | revokeRole(bytes32,address) | d547741f | DEFAULT_ADMIN_ROLE |
-| safeBatchTransferFrom(address,address,uint256[],uint256[],bytes) | 2eb2c2d6 | allowlisted operator for non EOA's |
+| safeBatchTransferFrom(address,address,uint256[],uint256[],bytes) | 2eb2c2d6 | None - permisionless |
 | safeMint(address,uint256,uint256,bytes) | 5cfa9297 | MINTER_ROLE |
 | safeMintBatch(address,uint256[],uint256[],bytes) | c39dfed8 | MINTER_ROLE |
-| safeTransferFrom(address,address,uint256,uint256,bytes) | f242432a | allowlisted operator for non EOA's |
-| setApprovalForAll(address,bool) | a22cb465 | allowlisted operator for non EOA's |
+| safeTransferFrom(address,address,uint256,uint256,bytes) | f242432a | None - permisionless |
+| setApprovalForAll(address,bool) | a22cb465 | None - permisionless |
 | setBaseURI(string) | 55f804b3 | DEFAULT_ADMIN_ROLE |
 | setContractURI(string) | 938e3d7b | DEFAULT_ADMIN_ROLE |
 | setDefaultRoyaltyReceiver(address,uint96) | 885e7a08 | DEFAULT_ADMIN_ROLE |

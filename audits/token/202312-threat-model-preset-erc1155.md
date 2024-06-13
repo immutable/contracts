@@ -46,7 +46,7 @@ The `ERC1155Permit` implementation inherits the OpenZeppelin [ERC1155Burnable](h
 
 ## Attack Surfaces
 
-ERC1155 only has `setApproveForAll` as it's approval method. Meaning any flow that requires a 3rd party to operate on a set of tokens owned by another wallet will grant the third party access to all of that specific wallet's tokens. The third party needs to be entirely trustworthy. The owner needs to be diligent on revoking unrestricted access when not needed.
+ERC1155 only has `setApprovalForAll` as it's approval method. Meaning any flow that requires a 3rd party to operate on a set of tokens owned by another wallet will grant the third party access to all of that specific wallet's tokens. The third party needs to be entirely trustworthy. The owner needs to be diligent on revoking unrestricted access when not needed.
 
 The contract has no access to any funds. Additional risks can come from compromised keys that are responsible for managing the admin roles that control the collection. As well as permits and approves if an user was tricked into creating a permit that can be validated by a malicious eip1271 wallet giving them permissions to the user's token.
 

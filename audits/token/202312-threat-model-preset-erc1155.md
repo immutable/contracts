@@ -6,6 +6,8 @@ Contracts covered under this model include:
 
 - [ImmutableERC1155](../../contracts/token/erc1155/preset/ImmutableERC1155.sol)
 
+as found in the commit hash `1ddb3dd` of the Immutable [contracts repository](https://github.com/immutable/contracts).
+
 ## Context
 
 The ERC1155 presets built by Immutable were done with the requirements of supply tracking and permits.
@@ -24,16 +26,16 @@ The ERC1155 presets built by Immutable were done with the requirements of supply
 
 ### ImmutableERC1155
 
-ImmutableERC1155 inherits the [ImmutableERC1155Base](../../contracts//token//erc1155//abstract/ImmutableERC1155Base.sol) contract and provides public functions for single and batch minting that are access controlled.
+`ImmutableERC1155` inherits the [ImmutableERC1155Base](../../contracts//token//erc1155//abstract/ImmutableERC1155Base.sol) contract and provides public functions for single and batch minting that are access controlled.
 
-ImmutableERC1155Base inherits contracts:
+`ImmutableERC1155Base` inherits contracts:
 
-- `OperatorAllowlistEnforced` - for setting an OperatorAllowlist that enables the restriction of approvals and transfers to allowlisted users
-- `ERC1155Permit` - an implementation of the ERC1155 Permit extension from Open Zeppelin allowing approvals to be made via EIP712 signatures, to allow for gasless transactions from the token owners.
-- `ERC2981` - an implementation of the NFT Royalty Standard for retrieving royalty payment information
-- `MintingAccessControl` - implements access control for the `minter` role
+- [OperatorAllowlistEnforced](../../contracts/allowlist/OperatorAllowlistEnforced.sol) - for setting an OperatorAllowlist that enables the restriction of approvals and transfers to allowlisted users
+- [ERC1155Permit](../../contracts/token/erc1155/abstract/ERC1155Permit.sol) - an implementation of the ERC1155 Permit extension from Open Zeppelin allowing approvals to be made via EIP712 signatures, to allow for gasless transactions from the token owners
+- [ERC2981](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/common/ERC2981.sol) - an implementation of the NFT Royalty Standard for retrieving royalty payment information
+- [MintingAccessControl](../../contracts/access/MintingAccessControl.sol) - implements access control for the `minter` role
 
-The ERC1155Permit implementation inherits the OpenZeppelin [ERC1155Burnable](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC1155/extensions/ERC1155Burnable.sol) contract, which provides the public burn methods to be used by the client.
+The `ERC1155Permit` implementation inherits the OpenZeppelin [ERC1155Burnable](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC1155/extensions/ERC1155Burnable.sol) contract, which provides the public burn methods to be used by the client.
 
 #### Modifications From Base Implementation
 

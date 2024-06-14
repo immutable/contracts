@@ -31,7 +31,7 @@ The ERC1155 presets built by Immutable were done with the requirements of supply
 `ImmutableERC1155Base` inherits contracts:
 
 - [OperatorAllowlistEnforced](../../contracts/allowlist/OperatorAllowlistEnforced.sol) - for setting an OperatorAllowlist that enables the restriction of approvals and transfers to allowlisted users
-- [ERC1155Permit](../../contracts/token/erc1155/abstract/ERC1155Permit.sol) - an implementation of the ERC1155 Permit extension from Open Zeppelin allowing approvals to be made via EIP712 signatures, to allow for gasless transactions from the token owners
+- [ERC1155Permit](../../contracts/token/erc1155/abstract/ERC1155Permit.sol) - an implementation based on an [Open Zeppelin permit extension](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/extensions/IERC20Permit.sol), for allowing approvals to be made via EIP712 signatures in order to allow for gasless transactions from the token owners
 - [ERC2981](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/common/ERC2981.sol) - an implementation of the NFT Royalty Standard for retrieving royalty payment information
 - [MintingAccessControl](../../contracts/access/MintingAccessControl.sol) - implements access control for the `minter` role
 

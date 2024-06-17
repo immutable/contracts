@@ -58,6 +58,10 @@ Potential Attacks:
 - Compromised Offchain auth:
   - Since EIP4494 combined with EIP1271 relies on off chain signatures that are not standard to the ethereum signature scheme, user auth info can be compromised and be used to create valid EIP1271 signatures.
 
+## Attack Mitigation
+
+Admin keys used for deployment of preset contracts via the Immutable contract factory, used in contracts deployed via Hub, are managed by a nominated Immutable representative and stored on a hardware ledger that is securely stored and requires physical presence if required.
+
 ### Externally Visible Functions
 
 An attacker could formulate an attack in which they send one or more transactions that execute one or more of these functions.

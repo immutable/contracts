@@ -73,7 +73,7 @@ Functions that _change_ state:
 | burnBatch(address,uint256[],uint256[]) | 6b20c454 | Caller must be token owner or approved |
 | grantMinterRole(address) | 3dd1eb61 | DEFAULT_ADMIN_ROLE |
 | grantRole(bytes32,address) | 2f2ff15d | DEFAULT_ADMIN_ROLE |
-| permit(address,address,bool,uint256,bytes) | d6b0b3f1 | The approval of token spend is authorised by an EIP-1271 valid signature from the owner |
+| permit(address,address,bool,uint256,bytes) | d6b0b3f1 | The approval of token spend is authorised by the offchain signing of an EIP712 blob which is validated to be originating from the token owner |
 | renounceRole(bytes32,address) | 36568abe | Caller must be the account being revoked |
 | revokeMinterRole(address) | 69e2f0fb | DEFAULT_ADMIN_ROLE |
 | revokeRole(bytes32,address) | d547741f | DEFAULT_ADMIN_ROLE |

@@ -54,13 +54,13 @@ Potential Attacks:
 
 - Compromised Admin Keys:
   - The compromised keys are able to assign the `MINTER_ROLE` to malicious parties and allow them to mint tokens to themselves without restriction
-  - The compromised keys are able to update the `OperatorAllowList` to white list malicious contracts to be approved to operate on tokens within the collection
 - Compromised Offchain auth:
   - Since EIP4494 combined with EIP1271 relies on off chain signatures that are not standard to the ethereum signature scheme, user auth info can be compromised and be used to create valid EIP1271 signatures.
 
 ## Attack Mitigation
 
-Admin keys used for deployment of preset contracts via the Immutable contract factory, used in contracts deployed via Hub, are managed by a nominated Immutable representative and stored on a hardware ledger that is securely stored and requires physical presence if required.
+- The contract contains access control patterns to limit the vulnerabilty of compromised roles
+- The keys associated with the `DEFAULT_ADMIN_ROLE` should be operated by secure measures, for example a multi-signature wallet such that an attacker would need to compromise multiple signers simultaneously, or a securely stored hardware wallet.
 
 ### Externally Visible Functions
 

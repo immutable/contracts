@@ -4,7 +4,7 @@ This document is a thread model for the preset ERC1155 token contracts built by 
 
 Contracts covered under this model include:
 
-- [ImmutableERC1155](../../contracts/token/erc1155/preset/ImmutableERC1155.sol)
+- [ImmutableERC1155](https://github.com/immutable/contracts/blob/1ddb3dd78a7d9352572a226d56e39e7a82776585/contracts/token/erc1155/preset/ImmutableERC1155.sol)
 
 as found in the commit hash `1ddb3dd` of the Immutable [contracts repository](https://github.com/immutable/contracts).
 
@@ -69,49 +69,49 @@ An attacker could formulate an attack in which they send one or more transaction
 Functions that _change_ state:
 | Name | Function Selector | Access Control |
 | ------------------------------------------------------------- | ----------------- | --------------------- |
-| burn(address,uint256,uint256) | f5298aca | None - permisionless |
-| burnBatch(address,uint256[],uint256[]) | 6b20c454 | None - permisionless |
+| burn(address,uint256,uint256) | f5298aca | Caller must be token owner or approved |
+| burnBatch(address,uint256[],uint256[]) | 6b20c454 | Caller must be token owner or approved |
 | grantMinterRole(address) | 3dd1eb61 | DEFAULT_ADMIN_ROLE |
 | grantRole(bytes32,address) | 2f2ff15d | DEFAULT_ADMIN_ROLE |
-| permit(address,address,bool,uint256,bytes) | d6b0b3f1 | None - permissionless |
-| renounceRole(bytes32,address) | 36568abe | None - permissionless |
+| permit(address,address,bool,uint256,bytes) | d6b0b3f1 | The approval of token spend is authorised by an EIP-1271 valid signature from the owner |
+| renounceRole(bytes32,address) | 36568abe | Caller must be the account being revoked |
 | revokeMinterRole(address) | 69e2f0fb | DEFAULT_ADMIN_ROLE |
 | revokeRole(bytes32,address) | d547741f | DEFAULT_ADMIN_ROLE |
-| safeBatchTransferFrom(address,address,uint256[],uint256[],bytes) | 2eb2c2d6 | None - permisionless |
+| safeBatchTransferFrom(address,address,uint256[],uint256[],bytes) | 2eb2c2d6 | Caller must be token owner or approved |
 | safeMint(address,uint256,uint256,bytes) | 5cfa9297 | MINTER_ROLE |
 | safeMintBatch(address,uint256[],uint256[],bytes) | c39dfed8 | MINTER_ROLE |
-| safeTransferFrom(address,address,uint256,uint256,bytes) | f242432a | None - permisionless |
-| setApprovalForAll(address,bool) | a22cb465 | None - permisionless |
+| safeTransferFrom(address,address,uint256,uint256,bytes) | f242432a | Caller must be token owner or approved |
+| setApprovalForAll(address,bool) | a22cb465 | None - permisionless. Caller can only set approval for their own tokens |
 | setBaseURI(string) | 55f804b3 | DEFAULT_ADMIN_ROLE |
 | setContractURI(string) | 938e3d7b | DEFAULT_ADMIN_ROLE |
 | setDefaultRoyaltyReceiver(address,uint96) | 885e7a08 | DEFAULT_ADMIN_ROLE |
 | setNFTRoyaltyReceiver(uint256,address,uint96) | 439aed34 | MINTER_ROLE |
 | setNFTRoyaltyReceiverBatch(uint256[],address,uint96) | a7012816 | MINTER_ROLE |
 
-Functions that _do not change_ state:
-| Name | Function Selector | Access Control |
-| ------------------------------------------------------------- | ----------------- | --------------------- |
-| DEFAULT_ADMIN_ROLE() | a217fddf | None - permissionless |
-| DOMAIN_SEPARATOR() | 3644e515 | None - permissionless |
-| MINTER_ROLE() | d5391393 | None - permissionless |
-| balanceOf(address,uint256) | 00fdd58e | None - permissionless |
-| balanceOfBatch(address[],uint256[]) | 4e1273f4 | None - permissionless |
-| baseURI() | 6c0360eb | None - permissionless |
-| contractURI() | e8a3d485 | None - permissionless |
-| eip712Domain() | 84b0196e | None - permissionless |
-| exists(uint256) | 4f558e79 | None - permissionless |
-| getAdmins() | 31ae450b | None - permissionless |
-| getRoleAdmin(bytes32) | 248a9ca3 | None - permissionless |
-| getRoleMember(bytes32,uint256) | 9010d07c | None - permissionless |
-| getRoleMemberCount(bytes32) | ca15c873 | None - permissionless |
-| hasRole(bytes32,address) | 91d14854 | None - permissionless |
-| isApprovedForAll(address,address) | e985e9c5 | None - permissionless |
-| nonces(address) | 7ecebe00 | None - permissionless |
-| operatorAllowlist() | 29326f29 | None - permissionless |
-| royaltyInfo(uint256,uint256) | 2a55205a | None - permissionless |
-| supportsInterface(bytes4) | 01ffc9a7 | None - permissionless |
-| totalSupply(uint256) | bd85b039 | None - permissionless |
-| uri(uint256) | 0e89341c | None - permissionless |
+Functions that _do not change_ state (they are all permissionless):
+| Name | Function Selector |
+| ------------------------------------------------------------- | ----------------- |
+| DEFAULT_ADMIN_ROLE() | a217fddf |
+| DOMAIN_SEPARATOR() | 3644e515 |
+| MINTER_ROLE() | d5391393 |
+| balanceOf(address,uint256) | 00fdd58e |
+| balanceOfBatch(address[],uint256[]) | 4e1273f4 |
+| baseURI() | 6c0360eb |
+| contractURI() | e8a3d485 |
+| eip712Domain() | 84b0196e |
+| exists(uint256) | 4f558e79 |
+| getAdmins() | 31ae450b |
+| getRoleAdmin(bytes32) | 248a9ca3 |
+| getRoleMember(bytes32,uint256) | 9010d07c |
+| getRoleMemberCount(bytes32) | ca15c873 |
+| hasRole(bytes32,address) | 91d14854 |
+| isApprovedForAll(address,address) | e985e9c5 |
+| nonces(address) | 7ecebe00 |
+| operatorAllowlist() | 29326f29 |
+| royaltyInfo(uint256,uint256) | 2a55205a |
+| supportsInterface(bytes4) | 01ffc9a7 |
+| totalSupply(uint256) | bd85b039 |
+| uri(uint256) | 0e89341c |
 
 ## Tests
 

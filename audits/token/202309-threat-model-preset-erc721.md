@@ -1,11 +1,12 @@
 ## Introduction
+
 This document is a thread model for two preset erc721 token contracts built by Immutable.
 
-This document encompasses information for all contracts under the [token](../contracts/token/) directory as well as the [allowlist](../contracts/allowlist/) directory. 
+This document encompasses information for all contracts under the [token](../contracts/token/) directory as well as the [allowlist](../contracts/allowlist/) directory.
 
 ## Context
 
-The ERC721 presets built by immutable were done with the requirements of cheaper onchain minting and flexible project management for games. Namely:
+The ERC721 presets built by Immutable were done with the requirements of cheaper onchain minting and flexible project management for games. Namely:
 
 - Studios should be able to mint multiple tokens efficiently to multiple addresses.
 
@@ -17,12 +18,11 @@ The ERC721 presets built by immutable were done with the requirements of cheaper
 
 - Contracts should not be upgradeable to prevent external developers from getting around royalty requirements.
 
-
 ## Design and Implementation
 
 ### ImmutableERC721
 
-The ImmutableERC721 contract is a hybrid of Openzepplin implementation of [ERC721Burnable](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/extensions/ERC721Burnable.sol) and the [ERC721Psi](https://github.com/estarriolvetch/ERC721Psi/blob/main/contracts/ERC721Psi.sol) implementation. This is to give the studios flexibility on their minting strategies depending on their use cases. 
+The ImmutableERC721 contract is a hybrid of Openzepplin implementation of [ERC721Burnable](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/extensions/ERC721Burnable.sol) and the [ERC721Psi](https://github.com/estarriolvetch/ERC721Psi/blob/main/contracts/ERC721Psi.sol) implementation. This is to give the studios flexibility on their minting strategies depending on their use cases.
 
 The contract interface allows users to call methods to bulk mint multiple tokens either by ID or by quantity to multiple addresses.
 
@@ -41,23 +41,25 @@ The ImmutableERC721MintByID contract is a subset of the ImmutableERC721 contract
 - Modified ERC721Psi `_safeMint` and `safeMint` methods to not call the overridden `_mint` methods but to call its own internally defined `_mint`
 - Added a `_idMintTotalSupply` to help keep track of how many tokens have been minted and belong to a non-zero address for the `totalSupply()` method.
 - Added Modifiers to `transfer` and `approve` related methods to enforce correct operator permissions.
-- Added various bulk minting methods to allow the minting of multiple tokens to multiple addresses. These methods come with new structs. 
-- Added support for EIP4494 Permits. This feature comes with an additional nonce mapping that is needed to help keep track of the validity of permits. We decided to remove support for allowing `approved` contract addresses to validate and use permits as it does not fit any of the uses cases in Immutable's ecosystem, and there is no reliable method of getting all of the approved operators of a token. 
-
+- Added various bulk minting methods to allow the minting of multiple tokens to multiple addresses. These methods come with new structs.
+- Added support for EIP4494 Permits. This feature comes with an additional nonce mapping that is needed to help keep track of the validity of permits. We decided to remove support for allowing `approved` contract addresses to validate and use permits as it does not fit any of the uses cases in Immutable's ecosystem, and there is no reliable method of getting all of the approved operators of a token.
 
 ## Attack Surfaces
 
-The contract has no access to any funds. The risks will come from compromised keys that are responsible for managing the admin roles that control the collection. As well as permits and approves if an user was tricked into creating a permit that can be validated by a malicious eip1271 wallet giving them permissions to the user's token. 
+The contract has no access to any funds. The risks will come from compromised keys that are responsible for managing the admin roles that control the collection. As well as permits and approves if an user was tricked into creating a permit that can be validated by a malicious eip1271 wallet giving them permissions to the user's token.
 
 Potential Attacks:
+
 - Compromised Admin Keys:
-    - The compromised keys are able to assign the `MINTER_ROLE` to malicious parties and allow them to mint tokens to themselves without restriction
-    - The compromised keys are able to update the `OperatorAllowList` to white list malicious contracts to be approved to operate on tokens within the collection
+  - The compromised keys are able to assign the `MINTER_ROLE` to malicious parties and allow them to mint tokens to themselves without restriction
+  - The compromised keys are able to update the `OperatorAllowList` to white list malicious contracts to be approved to operate on tokens within the collection
 - Compromised Offchain auth:
-    - Since EIP4494 combined with EIP1271 relies on off chain signatures that are not standard to the ethereum signature scheme, user auth info can be compromised and be used to create valid EIP1271 signatures.
+  - Since EIP4494 combined with EIP1271 relies on off chain signatures that are not standard to the ethereum signature scheme, user auth info can be compromised and be used to create valid EIP1271 signatures.
 
 ## Tests
-`npx hardhat test` will run all the related tests for the above mentioned repos. The test plan and cases are written in the test files describing the scenario is it testing for. 
 
-## Diagram 
+`npx hardhat test` will run all the related tests for the above mentioned repos. The test plan and cases are written in the test files describing the scenario is it testing for.
+
+## Diagram
+
 ![](./202309-threat-model-preset-erc721/immutableERC721.png)

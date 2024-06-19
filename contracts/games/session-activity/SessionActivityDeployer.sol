@@ -17,21 +17,7 @@ error NameAlreadyRegistered();
  */
 contract SessionActivityDeployer is AccessControlEnumerable {
     /// @notice Indicates that an account has registered session activity
-    event SessionActivityDeployed(address indexed account, string indexed name);
-
-    /// @notice Mapping of deployed SessionActivity contract addresses to their names
-    /// @dev To get a list of all deployed contract names, iterate over the deployedContracts array and use this mapping
-    mapping(address deployedContract => string name) public sessionActivityNames;
-
-    /// @notice Mapping of SessionActivity contract names to their addresses
-    /// @dev To get a list of all deployed contract addresses, iterate over the names array and use this mapping
-    mapping(string name => address deployedContract) public sessionActivityContracts;
-
-    /// @notice Array of deployed SessionActivity contracts
-    address[] public deployedContracts;
-
-    /// @notice Array of deployed SessionActivity contract names
-    string[] public names;
+    event SessionActivityDeployed(address indexed account, address indexed deployedContract, string indexed name);
 
     /// @notice Role to allow deploying SessionActivity contracts
     bytes32 private constant _DEPLOYER_ROLE = keccak256("DEPLOYER");
@@ -65,26 +51,11 @@ contract SessionActivityDeployer is AccessControlEnumerable {
         // Ensure the caller has the deployer role
         if (!hasRole(_DEPLOYER_ROLE, msg.sender)) revert Unauthorized();
 
-        // Loop through names and ensure the provided name is unique
-        for (uint256 i = 0; i < names.length; i++) {
-            if (keccak256(abi.encodePacked(names[i])) == keccak256(abi.encodePacked(name))) {
-                revert NameAlreadyRegistered();
-            }
-        }
-
         // Get the existing admin role
         address admin = getRoleMember(DEFAULT_ADMIN_ROLE, 0);
 
         // Deploy the session activity contract
         SessionActivity sessionActivityContract = new SessionActivity(admin, _pauser, _unpauser, name);
-
-        // Register the contract address and name
-        sessionActivityNames[address(sessionActivityContract)] = name;
-        deployedContracts.push(address(sessionActivityContract));
-
-        sessionActivityContracts[name] = address(sessionActivityContract);
-        names.push(name);
-
-        emit SessionActivityDeployed(msg.sender, name);
+        emit SessionActivityDeployed(msg.sender, address(sessionActivityContract), name);
     }
 }

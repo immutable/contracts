@@ -28,22 +28,15 @@ interface IDeployer {
         returns (address deployedAddress_);
 }
 
-interface INewDeployer {
+interface IAccessControlledDeployer {
     function deploy(IDeployer deployer, bytes memory bytecode, bytes32 salt) external payable returns (address);
 }
 
 struct DeploymentArgs {
     address signer;
-    address factory;
-    address actualDeployer;
+    address create3Factory;
+    address accessControlledDeployer;
     string salt;
-}
-
-struct SessionActivityContractArgs {
-    address defaultAdmin;
-    address pauser;
-    address unpauser;
-    string name;
 }
 
 struct SessionActivityDeployerArgs {
@@ -65,8 +58,8 @@ contract DeploySessionActivityDeployer is Test {
         /// @dev These are Immutable zkEVM testnet values where necessary
         DeploymentArgs memory deploymentArgs = DeploymentArgs({
             signer: 0xE4D45C0277762CaD4EC40bE69406068DAE74E17d,
-            factory: 0xFB1Ecc73c3f3F505d66C055A3571362DE001D9C0,
-            actualDeployer: 0x0B5B1d92259b13D516cCd5a6E63d7D94Ea2A4836,
+            create3Factory: 0xFB1Ecc73c3f3F505d66C055A3571362DE001D9C0,
+            accessControlledDeployer: 0x0B5B1d92259b13D516cCd5a6E63d7D94Ea2A4836,
             salt: "salty"
         });
 
@@ -88,18 +81,18 @@ contract DeploySessionActivityDeployer is Test {
 
         // The DEFAULT_ADMIN_ROLE should be revoked from the deployer account and the factory contract address
         assertEq(false, deployerContract.hasRole(deployerContract.DEFAULT_ADMIN_ROLE(), deploymentArgs.signer));
-        assertEq(false, deployerContract.hasRole(deployerContract.DEFAULT_ADMIN_ROLE(), deploymentArgs.factory));
+        assertEq(false, deployerContract.hasRole(deployerContract.DEFAULT_ADMIN_ROLE(), deploymentArgs.create3Factory));
 
         // Try to deploy a contract without the deployer role expecting a revert
         vm.prank(makeAddr("notdeployer"));
         vm.expectRevert(Unauthorized.selector);
-        deployerContract.deploy("SessionActivity");
+        deployerContract.deploy("atestname");
 
         // Deploy a contract with the deployer role
         vm.prank(sessionActivityDeployerArgs.deployer);
         vm.expectEmit(true, false, true, false);
-        emit SessionActivityDeployed(sessionActivityDeployerArgs.deployer, address(0), "MyCoolGame");
-        SessionActivity deployedSessionActivityContract = deployerContract.deploy("MyCoolGame");
+        emit SessionActivityDeployed(sessionActivityDeployerArgs.deployer, address(0), "atestname");
+        SessionActivity deployedSessionActivityContract = deployerContract.deploy("atestname");
 
         // Asset roles are assigned correctly on the child contract
         assertEq(true, deployedSessionActivityContract.hasRole(keccak256("PAUSE"), sessionActivityDeployerArgs.pauser));
@@ -121,12 +114,16 @@ contract DeploySessionActivityDeployer is Test {
 
     function deploy() external {
         address signer = vm.envAddress("SIGNER_ADDRESS");
-        address factory = vm.envAddress("OWNABLE_CREATE3_FACTORY_ADDRESS");
-        address actualDeployer = vm.envAddress("ACTUAL_DEPLOYER_ADDRESS");
+        address create3Factory = vm.envAddress("OWNABLE_CREATE3_FACTORY_ADDRESS");
+        address accessControlledDeployer = vm.envAddress("ACCESS_CONTROLLED_DEPLOYER_ADDRESS");
         string memory salt = vm.envString("SESSION_ACTIVITY_DEPLOYER_SALT");
 
-        DeploymentArgs memory deploymentArgs =
-            DeploymentArgs({signer: signer, factory: factory, salt: salt, actualDeployer: actualDeployer});
+        DeploymentArgs memory deploymentArgs = DeploymentArgs({
+            signer: signer,
+            create3Factory: create3Factory,
+            salt: salt,
+            accessControlledDeployer: accessControlledDeployer
+        });
 
         address defaultAdmin = vm.envAddress("DEFAULT_ADMIN");
         address deployer = vm.envAddress("DEPLOYER");
@@ -143,8 +140,9 @@ contract DeploySessionActivityDeployer is Test {
         DeploymentArgs memory deploymentArgs,
         SessionActivityDeployerArgs memory sessionActivityDeployerArgs
     ) internal returns (SessionActivityDeployer sessionActivityDeployerContract) {
-        INewDeployer actualDeployer = INewDeployer(deploymentArgs.actualDeployer);
-        IDeployer ownableCreate3 = IDeployer(deploymentArgs.factory);
+        IAccessControlledDeployer accessControlledDeployer =
+            IAccessControlledDeployer(deploymentArgs.accessControlledDeployer);
+        IDeployer create3Factory = IDeployer(deploymentArgs.create3Factory);
 
         // Create deployment bytecode and encode constructor args
         bytes memory deploymentBytecode = abi.encodePacked(
@@ -162,7 +160,8 @@ contract DeploySessionActivityDeployer is Test {
         /// @dev Deploy the contract via the Ownable CREATE3 factory
         vm.startBroadcast(deploymentArgs.signer);
 
-        address sessionActivityDeployerAddress = actualDeployer.deploy(ownableCreate3, deploymentBytecode, saltBytes);
+        address sessionActivityDeployerAddress =
+            accessControlledDeployer.deploy(create3Factory, deploymentBytecode, saltBytes);
         sessionActivityDeployerContract = SessionActivityDeployer(sessionActivityDeployerAddress);
 
         vm.stopBroadcast();

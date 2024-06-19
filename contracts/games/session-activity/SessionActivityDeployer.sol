@@ -11,7 +11,7 @@ error Unauthorized();
 error NameAlreadyRegistered();
 
 /**
- * @title SessionActivityDeployer - A factory contract that deploys SessionActivity contracts and tracks their addresses and names
+ * @title SessionActivityDeployer - A factory contract that deploys SessionActivity contracts
  * @author Immutable
  * @dev The SessionActivityDeployer contract is not designed to be upgradeable or extended.
  */
@@ -47,7 +47,7 @@ contract SessionActivityDeployer is AccessControlEnumerable {
      *   @param name The name of the SessionActivity contract
      *   @dev Only accounts granted the _DEPLOYER_ROLE can call this function
      */
-    function deploy(string memory name) public {
+    function deploy(string memory name) public returns (SessionActivity) {
         // Ensure the caller has the deployer role
         if (!hasRole(_DEPLOYER_ROLE, msg.sender)) revert Unauthorized();
 
@@ -57,5 +57,7 @@ contract SessionActivityDeployer is AccessControlEnumerable {
         // Deploy the session activity contract
         SessionActivity sessionActivityContract = new SessionActivity(admin, _pauser, _unpauser, name);
         emit SessionActivityDeployed(msg.sender, address(sessionActivityContract), name);
+
+        return sessionActivityContract;
     }
 }

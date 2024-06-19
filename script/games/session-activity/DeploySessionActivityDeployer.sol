@@ -109,7 +109,7 @@ contract DeploySessionActivityDeployer is Test {
 
         // Record a session activity
         vm.expectEmit(true, true, true, false);
-        emit SessionActivityRecorded(address(0), block.timestamp);
+        emit SessionActivityRecorded(address(this), block.timestamp);
         deployedSessionActivityContract.recordSessionActivity();
     }
 

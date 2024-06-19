@@ -28,9 +28,14 @@ interface IDeployer {
         returns (address deployedAddress_);
 }
 
+interface INewDeployer {
+    function deploy(IDeployer deployer, bytes memory bytecode, bytes32 salt) external payable returns (address);
+}
+
 struct DeploymentArgs {
     address signer;
     address factory;
+    address actualDeployer;
     string salt;
 }
 
@@ -59,8 +64,9 @@ contract DeploySessionActivityDeployer is Test {
 
         /// @dev These are Immutable zkEVM testnet values where necessary
         DeploymentArgs memory deploymentArgs = DeploymentArgs({
-            signer: 0xdDA0d9448Ebe3eA43aFecE5Fa6401F5795c19333,
-            factory: 0x37a59A845Bb6eD2034098af8738fbFFB9D589610,
+            signer: 0xE4D45C0277762CaD4EC40bE69406068DAE74E17d,
+            factory: 0xFB1Ecc73c3f3F505d66C055A3571362DE001D9C0,
+            actualDeployer: 0x0B5B1d92259b13D516cCd5a6E63d7D94Ea2A4836,
             salt: "salty"
         });
 
@@ -116,9 +122,11 @@ contract DeploySessionActivityDeployer is Test {
     function deploy() external {
         address signer = vm.envAddress("SIGNER_ADDRESS");
         address factory = vm.envAddress("OWNABLE_CREATE3_FACTORY_ADDRESS");
+        address actualDeployer = vm.envAddress("ACTUAL_DEPLOYER_ADDRESS");
         string memory salt = vm.envString("SESSION_ACTIVITY_DEPLOYER_SALT");
 
-        DeploymentArgs memory deploymentArgs = DeploymentArgs({signer: signer, factory: factory, salt: salt});
+        DeploymentArgs memory deploymentArgs =
+            DeploymentArgs({signer: signer, factory: factory, salt: salt, actualDeployer: actualDeployer});
 
         address defaultAdmin = vm.envAddress("DEFAULT_ADMIN");
         address deployer = vm.envAddress("DEPLOYER");
@@ -135,6 +143,7 @@ contract DeploySessionActivityDeployer is Test {
         DeploymentArgs memory deploymentArgs,
         SessionActivityDeployerArgs memory sessionActivityDeployerArgs
     ) internal returns (SessionActivityDeployer sessionActivityDeployerContract) {
+        INewDeployer actualDeployer = INewDeployer(deploymentArgs.actualDeployer);
         IDeployer ownableCreate3 = IDeployer(deploymentArgs.factory);
 
         // Create deployment bytecode and encode constructor args
@@ -153,7 +162,7 @@ contract DeploySessionActivityDeployer is Test {
         /// @dev Deploy the contract via the Ownable CREATE3 factory
         vm.startBroadcast(deploymentArgs.signer);
 
-        address sessionActivityDeployerAddress = ownableCreate3.deploy(deploymentBytecode, saltBytes);
+        address sessionActivityDeployerAddress = actualDeployer.deploy(ownableCreate3, deploymentBytecode, saltBytes);
         sessionActivityDeployerContract = SessionActivityDeployer(sessionActivityDeployerAddress);
 
         vm.stopBroadcast();

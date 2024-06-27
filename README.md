@@ -116,7 +116,7 @@ const txHash = await contract.write.mint([recipient, tokenId]);
 console.log(`txHash: ${txHash}`);
 ```
 
-## Build and Test
+## Build, Test and Deploy
 
 Information about how to build and test the contracts can be found in our [build information](BUILD.md).
 

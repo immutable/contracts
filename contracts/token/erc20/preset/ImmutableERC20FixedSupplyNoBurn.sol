@@ -4,7 +4,6 @@ pragma solidity 0.8.19;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {IImmutableERC20Errors} from "./Errors.sol";
 
 /**
  * @notice ERC 20 contract that mints a fixed total supply of tokens when the contract
@@ -16,6 +15,9 @@ import {IImmutableERC20Errors} from "./Errors.sol";
  *  with a specific Immutable Hub account.
  */
 contract ImmutableERC20FixedSupplyNoBurn is Ownable, ERC20 {
+    // Report an error on attempts to renounce ownership.
+    error RenounceOwnershipNotAllowed();
+
     /**
      * @dev Mints `_totalSupply` number of token and transfers them to `_owner`.
      *
@@ -40,6 +42,6 @@ contract ImmutableERC20FixedSupplyNoBurn is Ownable, ERC20 {
      * @notice Prevent calls to renounce ownership.
      */
     function renounceOwnership() public pure override {
-        revert IImmutableERC20Errors.RenounceOwnershipNotAllowed();
+        revert RenounceOwnershipNotAllowed();
     }
 }

@@ -3,7 +3,7 @@
 pragma solidity 0.8.19;
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
+import {BitMaps} from "solidity-bits/contracts/BitMaps.sol";
 import {ERC721Psi, ERC721PsiBurnable} from "../erc721psi/ERC721PsiBurnable.sol";
 // Errors
 import {IImmutableERC721Errors} from "../../../errors/Errors.sol";

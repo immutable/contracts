@@ -36,29 +36,38 @@
         ]
     },
     {
-        "Contract Name": "ImmutableSignedZoneContract",
+        "Contract Name": "ImmutableSignedZone",
         "Testnet Address": "0x8831867E347AB87FA30199C5B695F0A31604Bb52",
         "Mainnet Address": "0x00338b92Bec262078B3e49BF12bbEA058916BF91",
-        "Contract Code Link": "",
+        "Contract Code Link": "https://explorer.immutable.com/address/0x00338b92Bec262078B3e49BF12bbEA058916BF91?tab=contract",
         "Tags": [
             "traders"
         ]
     },
     {
-        "Contract Name": "Seaport Validator",
+        "Contract Name": "ImmutableSignedZoneV2",
+        "Testnet Address": "0x1004f9615E79462c711Ff05a386BdbA91a7628C3",
+        "Mainnet Address": "0x1004f9615E79462c711Ff05a386BdbA91a7628C3",
+        "Contract Code Link": "https://explorer.immutable.com/address/0x1004f9615E79462c711Ff05a386BdbA91a7628C3?tab=contract",
+        "Tags": [
+            "traders"
+        ]
+    },
+    {
+        "Contract Name": "SeaportValidator",
         "Testnet Address": "0x47E927CdcCC7828db2D046d34706660537670F0F",
         "Mainnet Address": "0x7dd422357E860bbED7d992C276a54D44cD179818",
-        "Contract Code Link": "",
+        "Contract Code Link": "https://explorer.immutable.com/address/0x7dd422357E860bbED7d992C276a54D44cD179818?tab=contract",
         "Tags": [
             "traders",
             "allowlist"
         ]
     },
     {
-        "Contract Name": "Seaport Contract",
+        "Contract Name": "ImmutableSeaport",
         "Testnet Address": "0x7d117aA8BD6D31c4fa91722f246388f38ab1942c",
         "Mainnet Address": "0x6c12aD6F0bD274191075Eb2E78D7dA5ba6453424",
-        "Contract Code Link": "",
+        "Contract Code Link": "https://explorer.immutable.com/address/0x6c12aD6F0bD274191075Eb2E78D7dA5ba6453424?tab=contract",
         "Tags": [
             "traders",
             "allowlist"

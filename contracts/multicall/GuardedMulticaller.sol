@@ -1,6 +1,6 @@
 // Copyright Immutable Pty Ltd 2018 - 2023
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.18;
+pragma solidity ^0.8.19;
 
 // Signature Validation
 import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
@@ -25,21 +25,17 @@ import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
  */
 contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
     /// @dev Mapping of address to function selector to permitted status
-    mapping(address => mapping(bytes4 => bool))
-        private permittedFunctionSelectors;
+    mapping(address => mapping(bytes4 => bool)) private permittedFunctionSelectors;
 
     /// @dev Mapping of reference to executed status
     mapping(bytes32 => bool) private replayProtection;
 
     /// @dev Only those with MULTICALL_SIGNER_ROLE can generate valid signatures for execute function.
-    bytes32 public constant MULTICALL_SIGNER_ROLE =
-        bytes32("MULTICALL_SIGNER_ROLE");
+    bytes32 public constant MULTICALL_SIGNER_ROLE = bytes32("MULTICALL_SIGNER_ROLE");
 
     /// @dev EIP712 typehash for execute function
     bytes32 constant MULTICALL_TYPEHASH =
-        keccak256(
-            "Multicall(bytes32 ref,address[] targets,bytes[] data,uint256 deadline)"
-        );
+        keccak256("Multicall(bytes32 ref,address[] targets,bytes[] data,uint256 deadline)");
 
     /// @dev Struct for function permit
     struct FunctionPermit {
@@ -58,11 +54,7 @@ contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
     );
 
     /// @dev Event emitted when a function permit is updated
-    event FunctionPermitted(
-        address indexed _target,
-        bytes4 _functionSelector,
-        bool _permitted
-    );
+    event FunctionPermitted(address indexed _target, bytes4 _functionSelector, bool _permitted);
 
     /// @dev Error thrown when reference is invalid
     error InvalidReference(bytes32 _reference);
@@ -77,10 +69,7 @@ contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
     error EmptyFunctionPermitArray();
 
     /// @dev Error thrown when address array and data array have different lengths
-    error AddressDataArrayLengthsMismatch(
-        uint256 _addressLength,
-        uint256 _dataLength
-    );
+    error AddressDataArrayLengthsMismatch(uint256 _addressLength, uint256 _dataLength);
 
     /// @dev Error thrown when deadline is expired
     error Expired(uint256 _deadline);
@@ -110,11 +99,7 @@ contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
      * @param _name Name of the contract
      * @param _version Version of the contract
      */
-    constructor(
-        address _owner,
-        string memory _name,
-        string memory _version
-    ) EIP712(_name, _version) {
+    constructor(address _owner, string memory _name, string memory _version) EIP712(_name, _version) {
         _grantRole(DEFAULT_ADMIN_ROLE, _owner);
     }
 
@@ -124,10 +109,7 @@ contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
      * @param _target Contract address
      * @param _functionSelector Function selector
      */
-    function isFunctionPermitted(
-        address _target,
-        bytes4 _functionSelector
-    ) public view returns (bool) {
+    function isFunctionPermitted(address _target, bytes4 _functionSelector) public view returns (bool) {
         return permittedFunctionSelectors[_target][_functionSelector];
     }
 
@@ -137,9 +119,7 @@ contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
      *
      * @param _data Array of bytes
      */
-    function hashBytesArray(
-        bytes[] memory _data
-    ) public pure returns (bytes32) {
+    function hashBytesArray(bytes[] memory _data) public pure returns (bytes32) {
         bytes32[] memory hashedBytesArr = new bytes32[](_data.length);
         for (uint256 i = 0; i < _data.length; i++) {
             hashedBytesArr[i] = keccak256(_data[i]);
@@ -186,10 +166,7 @@ contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
             revert EmptyAddressArray();
         }
         if (_targets.length != _data.length) {
-            revert AddressDataArrayLengthsMismatch(
-                _targets.length,
-                _data.length
-            );
+            revert AddressDataArrayLengthsMismatch(_targets.length, _data.length);
         }
         for (uint256 i = 0; i < _targets.length; i++) {
             if (_data[i].length < 4) {
@@ -222,9 +199,7 @@ contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
 
         // Multicall
         for (uint256 i = 0; i < _targets.length; i++) {
-            (bool success, bytes memory returnData) = _targets[i].call(
-                _data[i]
-            );
+            (bool success, bytes memory returnData) = _targets[i].call(_data[i]);
             if (!success) {
                 if (returnData.length == 0) {
                     revert FailedCall(_targets[i], _data[i]);
@@ -235,13 +210,7 @@ contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
             }
         }
 
-        emit Multicalled(
-            _multicallSigner,
-            _reference,
-            _targets,
-            _data,
-            _deadline
-        );
+        emit Multicalled(_multicallSigner, _reference, _targets, _data, _deadline);
     }
 
     /**
@@ -249,9 +218,7 @@ contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
      *
      * @param _functionPermits List of function permits
      */
-    function setFunctionPermits(
-        FunctionPermit[] calldata _functionPermits
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function setFunctionPermits(FunctionPermit[] calldata _functionPermits) external onlyRole(DEFAULT_ADMIN_ROLE) {
         if (_functionPermits.length == 0) {
             revert EmptyFunctionPermitArray();
         }
@@ -275,9 +242,7 @@ contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
      *
      * @param _user User to grant MULTICALL_SIGNER_ROLE to
      */
-    function grantMulticallSignerRole(
-        address _user
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function grantMulticallSignerRole(address _user) external onlyRole(DEFAULT_ADMIN_ROLE) {
         grantRole(MULTICALL_SIGNER_ROLE, _user);
     }
 
@@ -286,9 +251,7 @@ contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
      *
      * @param _user User to grant MULTICALL_SIGNER_ROLE to
      */
-    function revokeMulticallSignerRole(
-        address _user
-    ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    function revokeMulticallSignerRole(address _user) external onlyRole(DEFAULT_ADMIN_ROLE) {
         revokeRole(MULTICALL_SIGNER_ROLE, _user);
     }
 

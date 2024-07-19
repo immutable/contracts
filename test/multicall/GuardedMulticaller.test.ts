@@ -5,7 +5,7 @@ import moment from "moment";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { randomUUID } from "crypto";
 import { hexlify, keccak256 } from "ethers/lib/utils";
-import { GuardedMulticaller, MockFunctions, functionFragment } from "../../typechain-types";
+import { GuardedMulticaller, MockFunctions } from "../../typechain-types";
 
 describe("GuardedMulticaller", function () {
   let deployerAccount: SignerWithAddress;

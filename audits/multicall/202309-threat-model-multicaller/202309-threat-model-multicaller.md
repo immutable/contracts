@@ -6,7 +6,7 @@ Currently the Primary Sales product uses the pattern of Multicall to transfer ER
 ---
 ### Contract High-Level Design
 ---
-![alt text](docs/images/high-level.png "High Level")
+![alt text](high-level.png "High Level")
 
 The core of the `Guarded Multi-caller` system is `Multi-call`, allowing for the minting and burning of multiple NFTs from various collections in a single transaction. Due to the high level of security needed when working with NFTs, additional safety measures have been implemented to meet security standards.
 

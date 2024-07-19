@@ -5,7 +5,7 @@ import moment from "moment";
 import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { randomUUID } from "crypto";
 import { hexlify, keccak256 } from "ethers/lib/utils";
-import { GuardedMulticaller, MockFunctions } from "../../typechain-types";
+import { GuardedMulticaller, MockFunctions, functionFragment } from "../../typechain-types";
 
 describe("GuardedMulticaller", function () {
   let deployerAccount: SignerWithAddress;
@@ -63,7 +63,7 @@ describe("GuardedMulticaller", function () {
 
     it("Should successfully execute if valid", async function () {
       const targets = [mock.address];
-      const data = [mock.interface.encodeFunctionData("succeed", [])];
+      const data = [mock.interface.encodeFunctionData("succeed")];
       const sig = await signMulticallTypedData(signerAccount, ref, targets, data, deadline, domain);
       await expect(
         guardedMulticaller.connect(userAccount).execute(signerAccount.address, ref, targets, data, deadline, sig),
@@ -74,7 +74,7 @@ describe("GuardedMulticaller", function () {
 
     it("Should revert with custom error with empty return data", async function () {
       const targets = [mock.address];
-      const data = [mock.interface.encodeFunctionData("revertWithNoReason", [])];
+      const data = [mock.interface.encodeFunctionData("revertWithNoReason")];
       const sig = await signMulticallTypedData(signerAccount, ref, targets, data, deadline, domain);
       await expect(
         guardedMulticaller.connect(userAccount).execute(signerAccount.address, ref, targets, data, deadline, sig),
@@ -84,7 +84,7 @@ describe("GuardedMulticaller", function () {
     it("Should revert if deadline has passed", async function () {
       const expiredDeadline = moment.utc().subtract(30, "minute").unix();
       const targets = [mock.address];
-      const data = [mock.interface.encodeFunctionData("succeed", [])];
+      const data = [mock.interface.encodeFunctionData("succeed")];
       const sig = await signMulticallTypedData(signerAccount, ref, targets, data, expiredDeadline, domain);
       await expect(
         guardedMulticaller
@@ -95,7 +95,7 @@ describe("GuardedMulticaller", function () {
 
     it("Should revert if reference is reused - anti-replay", async function () {
       const targets = [mock.address];
-      const data = [mock.interface.encodeFunctionData("succeed", [])];
+      const data = [mock.interface.encodeFunctionData("succeed")];
       const sig = await signMulticallTypedData(signerAccount, ref, targets, data, deadline, domain);
       await guardedMulticaller.connect(userAccount).execute(signerAccount.address, ref, targets, data, deadline, sig);
       await expect(
@@ -105,7 +105,7 @@ describe("GuardedMulticaller", function () {
 
     it("Should revert if ref is invalid", async function () {
       const targets = [mock.address];
-      const data = [mock.interface.encodeFunctionData("succeed", [])];
+      const data = [mock.interface.encodeFunctionData("succeed")];
       const sig = await signMulticallTypedData(signerAccount, ref, targets, data, deadline, domain);
       const invalidRef = `0x${"0".repeat(64)}`;
       await expect(
@@ -117,7 +117,7 @@ describe("GuardedMulticaller", function () {
 
     it("Should revert if signer does not have MULTICALLER role", async function () {
       const targets = [mock.address];
-      const data = [mock.interface.encodeFunctionData("succeed", [])];
+      const data = [mock.interface.encodeFunctionData("succeed")];
       const sig = await signMulticallTypedData(userAccount, ref, targets, data, deadline, domain);
       await expect(
         guardedMulticaller.connect(userAccount).execute(userAccount.address, ref, targets, data, deadline, sig),
@@ -126,7 +126,7 @@ describe("GuardedMulticaller", function () {
 
     it("Should revert if signer and signature do not match", async function () {
       const targets = [mock.address];
-      const data = [mock.interface.encodeFunctionData("succeed", [])];
+      const data = [mock.interface.encodeFunctionData("succeed")];
       const sig = await signMulticallTypedData(userAccount, ref, targets, data, deadline, domain);
       await expect(
         guardedMulticaller.connect(userAccount).execute(signerAccount.address, ref, targets, data, deadline, sig),
@@ -135,7 +135,7 @@ describe("GuardedMulticaller", function () {
 
     it("Should revert if targets are empty", async function () {
       const targets: string[] = [];
-      const data = [mock.interface.encodeFunctionData("succeed", [])];
+      const data = [mock.interface.encodeFunctionData("succeed")];
       const sig = await signMulticallTypedData(signerAccount, ref, targets, data, deadline, domain);
       await expect(
         guardedMulticaller.connect(userAccount).execute(signerAccount.address, ref, targets, data, deadline, sig),
@@ -144,7 +144,7 @@ describe("GuardedMulticaller", function () {
 
     it("Should revert if targets and data sizes do not match", async function () {
       const targets = [mock.address, mock.address];
-      const data = [mock.interface.encodeFunctionData("succeed", [])];
+      const data = [mock.interface.encodeFunctionData("succeed")];
       const sig = await signMulticallTypedData(signerAccount, ref, targets, data, deadline, domain);
       await expect(
         guardedMulticaller.connect(userAccount).execute(signerAccount.address, ref, targets, data, deadline, sig),
@@ -153,7 +153,7 @@ describe("GuardedMulticaller", function () {
 
     it("Should revert if function not permitted", async function () {
       const targets = [mock.address];
-      const data = [mock.interface.encodeFunctionData("nonPermitted", [])];
+      const data = [mock.interface.encodeFunctionData("nonPermitted")];
       const sig = await signMulticallTypedData(signerAccount, ref, targets, data, deadline, domain);
       await expect(
         guardedMulticaller.connect(userAccount).execute(signerAccount.address, ref, targets, data, deadline, sig),
@@ -169,7 +169,7 @@ describe("GuardedMulticaller", function () {
         },
       ]);
       const targets = [mock.address];
-      const data = [mock.interface.encodeFunctionData("succeed", [])];
+      const data = [mock.interface.encodeFunctionData("succeed")];
       const sig = await signMulticallTypedData(signerAccount, ref, targets, data, deadline, domain);
       await expect(
         guardedMulticaller.connect(userAccount).execute(signerAccount.address, ref, targets, data, deadline, sig),
@@ -178,7 +178,7 @@ describe("GuardedMulticaller", function () {
 
     it("Should revert if signature is invalid", async function () {
       const targets = [mock.address];
-      const data = [mock.interface.encodeFunctionData("succeed", [])];
+      const data = [mock.interface.encodeFunctionData("succeed")];
       const maliciousRef = `0x${randomUUID().replace(/-/g, "").padEnd(64, "0")}`;
       const sig = await signMulticallTypedData(signerAccount, maliciousRef, targets, data, deadline, domain);
       await expect(
@@ -247,7 +247,7 @@ describe("GuardedMulticaller", function () {
 
     it("Should return hasBeenExecuted = true if the call has been executed", async function () {
       const targets = [mock.address];
-      const data = [mock.interface.encodeFunctionData("succeed", [])];
+      const data = [mock.interface.encodeFunctionData("succeed")];
       const sig = await signMulticallTypedData(signerAccount, ref, targets, data, deadline, domain);
       await expect(
         guardedMulticaller.connect(userAccount).execute(signerAccount.address, ref, targets, data, deadline, sig),

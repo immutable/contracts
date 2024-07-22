@@ -3,16 +3,16 @@
 pragma solidity ^0.8.19;
 
 // Signature Validation
-import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
+import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 
 // Access Control
-import "@openzeppelin/contracts/access/AccessControl.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
 // Reentrancy Guard
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 // EIP-712 Typed Structs
-import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 /**
  *
@@ -25,16 +25,18 @@ import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
  */
 contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
     /// @dev Mapping of address to function selector to permitted status
+    // solhint-disable-next-line named-parameters-mapping
     mapping(address => mapping(bytes4 => bool)) private permittedFunctionSelectors;
 
     /// @dev Mapping of reference to executed status
+    // solhint-disable-next-line named-parameters-mapping
     mapping(bytes32 => bool) private replayProtection;
 
     /// @dev Only those with MULTICALL_SIGNER_ROLE can generate valid signatures for execute function.
     bytes32 public constant MULTICALL_SIGNER_ROLE = bytes32("MULTICALL_SIGNER_ROLE");
 
     /// @dev EIP712 typehash for execute function
-    bytes32 constant MULTICALL_TYPEHASH =
+    bytes32 internal constant MULTICALL_TYPEHASH =
         keccak256("Multicall(bytes32 ref,address[] targets,bytes[] data,uint256 deadline)");
 
     /// @dev Struct for function permit
@@ -99,6 +101,7 @@ contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
      * @param _name Name of the contract
      * @param _version Version of the contract
      */
+    // solhint-disable-next-line no-unused-vars
     constructor(address _owner, string memory _name, string memory _version) EIP712(_name, _version) {
         _grantRole(DEFAULT_ADMIN_ROLE, _owner);
     }
@@ -145,6 +148,7 @@ contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
      * @param _deadline Expiration timestamp
      * @param _signature Signature of the multicall signer
      */
+    // solhint-disable-next-line code-complexity
     function execute(
         address _multicallSigner,
         bytes32 _reference,
@@ -153,6 +157,7 @@ contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
         uint256 _deadline,
         bytes calldata _signature
     ) external nonReentrant {
+        // solhint-disable-next-line not-rely-on-time
         if (_deadline < block.timestamp) {
             revert Expired(_deadline);
         }
@@ -199,11 +204,13 @@ contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
 
         // Multicall
         for (uint256 i = 0; i < _targets.length; i++) {
+            // solhint-disable-next-line avoid-low-level-calls
             (bool success, bytes memory returnData) = _targets[i].call(_data[i]);
             if (!success) {
                 if (returnData.length == 0) {
                     revert FailedCall(_targets[i], _data[i]);
                 }
+                // solhint-disable-next-line no-inline-assembly
                 assembly {
                     revert(add(returnData, 32), mload(returnData))
                 }

@@ -148,7 +148,7 @@ contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
      * @param _deadline Expiration timestamp
      * @param _signature Signature of the multicall signer
      */
-    // slither-disable-start low-level-calls,calls-inside-a-loop,cyclomatic-complexity
+    // slither-disable-start low-level-calls,cyclomatic-complexity
     // solhint-disable-next-line code-complexity
     function execute(
         address _multicallSigner,
@@ -205,6 +205,7 @@ contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
 
         // Multicall
         for (uint256 i = 0; i < _targets.length; i++) {
+            // slither-disable-next-line calls-inside-a-loop
             // solhint-disable-next-line avoid-low-level-calls
             (bool success, bytes memory returnData) = _targets[i].call(_data[i]);
             if (!success) {
@@ -220,7 +221,7 @@ contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
 
         emit Multicalled(_multicallSigner, _reference, _targets, _data, _deadline);
     }
-    // slither-disable-end low-level-calls,calls-inside-a-loop,cyclomatic-complexity
+    // slither-disable-end low-level-calls,cyclomatic-complexity
 
     /**
      * @notice Update function permits for a list of function selectors on target contracts. Only DEFAULT_ADMIN_ROLE can call this function.

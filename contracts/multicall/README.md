@@ -15,7 +15,8 @@ Contract audits and threat models:
 
 | Description               | Date             |Version Audited  | Link to Report |
 |---------------------------|------------------|-----------------|----------------|
-| External audit            | Sept 26, 2023     | --- | [202309-external-audit-multicaller](../../audits/multicall/202309-external-audit-multicaller.pdf) |
+| Threat Model              | Sept 26, 2023     | --- | [202309-threat-model-multicaller](../../audits/multicall/202309-threat-model-multicaller.md) |
+| External audit            | Sept 26, 2023     | [e59b72a](https://github.com/immutable/contracts/blob/e59b72a69294bd6d5857a1e2d019044bbfb14632/contracts/multicall) | [202309-external-audit-multicaller](../../audits/multicall/202309-external-audit-multicaller.pdf) |
 
 
 # Architecture

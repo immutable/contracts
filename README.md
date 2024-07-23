@@ -49,7 +49,7 @@ contract MyERC721 is ImmutableERC721 {
         string memory baseURI,
         string memory contractURI,
         address operatorAllowlist,
-        address receiver,
+        address royaltyReceiver,
         uint96 feeNumerator
     ) ImmutableERC721(
         owner,
@@ -58,7 +58,7 @@ contract MyERC721 is ImmutableERC721 {
         baseURI,
         contractURI,
         operatorAllowlist,
-        receiver,
+        royaltyReceiver,
         feeNumerator
     )
     {}

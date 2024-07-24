@@ -1,78 +1,169 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ImmutableERC1155
+// GuardedMulticaller
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const immutableErc1155Abi = [
+export const guardedMulticallerAbi = [
   {
     type: 'constructor',
     inputs: [
-      { name: 'owner', internalType: 'address', type: 'address' },
-      { name: 'name_', internalType: 'string', type: 'string' },
-      { name: 'baseURI_', internalType: 'string', type: 'string' },
-      { name: 'contractURI_', internalType: 'string', type: 'string' },
-      { name: '_operatorAllowlist', internalType: 'address', type: 'address' },
-      { name: '_receiver', internalType: 'address', type: 'address' },
-      { name: '_feeNumerator', internalType: 'uint96', type: 'uint96' },
+      { name: '_owner', internalType: 'address', type: 'address' },
+      { name: '_name', internalType: 'string', type: 'string' },
+      { name: '_version', internalType: 'string', type: 'string' },
     ],
     stateMutability: 'nonpayable',
   },
   {
-    type: 'error',
+    type: 'function',
     inputs: [],
-    name: 'AllowlistDoesNotImplementIOperatorAllowlist',
+    name: 'DEFAULT_ADMIN_ROLE',
+    outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
+    stateMutability: 'view',
   },
   {
-    type: 'error',
-    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
-    name: 'ApproveTargetNotInAllowlist',
+    type: 'function',
+    inputs: [],
+    name: 'MULTICALL_SIGNER_ROLE',
+    outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
+    stateMutability: 'view',
   },
   {
-    type: 'error',
-    inputs: [{ name: 'approver', internalType: 'address', type: 'address' }],
-    name: 'ApproverNotInAllowlist',
+    type: 'function',
+    inputs: [],
+    name: 'eip712Domain',
+    outputs: [
+      { name: 'fields', internalType: 'bytes1', type: 'bytes1' },
+      { name: 'name', internalType: 'string', type: 'string' },
+      { name: 'version', internalType: 'string', type: 'string' },
+      { name: 'chainId', internalType: 'uint256', type: 'uint256' },
+      { name: 'verifyingContract', internalType: 'address', type: 'address' },
+      { name: 'salt', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'extensions', internalType: 'uint256[]', type: 'uint256[]' },
+    ],
+    stateMutability: 'view',
   },
   {
-    type: 'error',
-    inputs: [{ name: 'caller', internalType: 'address', type: 'address' }],
-    name: 'CallerNotInAllowlist',
-  },
-  { type: 'error', inputs: [], name: 'InvalidShortString' },
-  { type: 'error', inputs: [], name: 'InvalidSignature' },
-  { type: 'error', inputs: [], name: 'PermitExpired' },
-  {
-    type: 'error',
-    inputs: [{ name: 'str', internalType: 'string', type: 'string' }],
-    name: 'StringTooLong',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'from', internalType: 'address', type: 'address' }],
-    name: 'TransferFromNotInAllowlist',
+    type: 'function',
+    inputs: [
+      { name: '_multicallSigner', internalType: 'address', type: 'address' },
+      { name: '_reference', internalType: 'bytes32', type: 'bytes32' },
+      { name: '_targets', internalType: 'address[]', type: 'address[]' },
+      { name: '_data', internalType: 'bytes[]', type: 'bytes[]' },
+      { name: '_deadline', internalType: 'uint256', type: 'uint256' },
+      { name: '_signature', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'execute',
+    outputs: [],
+    stateMutability: 'nonpayable',
   },
   {
-    type: 'error',
-    inputs: [{ name: 'to', internalType: 'address', type: 'address' }],
-    name: 'TransferToNotInAllowlist',
+    type: 'function',
+    inputs: [{ name: 'role', internalType: 'bytes32', type: 'bytes32' }],
+    name: 'getRoleAdmin',
+    outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
+    stateMutability: 'view',
   },
   {
-    type: 'event',
-    anonymous: false,
+    type: 'function',
+    inputs: [{ name: '_user', internalType: 'address', type: 'address' }],
+    name: 'grantMulticallSignerRole',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'role', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'account', internalType: 'address', type: 'address' },
+    ],
+    name: 'grantRole',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: '_reference', internalType: 'bytes32', type: 'bytes32' }],
+    name: 'hasBeenExecuted',
+    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'role', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'account', internalType: 'address', type: 'address' },
+    ],
+    name: 'hasRole',
+    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: '_data', internalType: 'bytes[]', type: 'bytes[]' }],
+    name: 'hashBytesArray',
+    outputs: [{ name: '', internalType: 'bytes32', type: 'bytes32' }],
+    stateMutability: 'pure',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: '_target', internalType: 'address', type: 'address' },
+      { name: '_functionSelector', internalType: 'bytes4', type: 'bytes4' },
+    ],
+    name: 'isFunctionPermitted',
+    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'role', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'account', internalType: 'address', type: 'address' },
+    ],
+    name: 'renounceRole',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: '_user', internalType: 'address', type: 'address' }],
+    name: 'revokeMulticallSignerRole',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [
+      { name: 'role', internalType: 'bytes32', type: 'bytes32' },
+      { name: 'account', internalType: 'address', type: 'address' },
+    ],
+    name: 'revokeRole',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
     inputs: [
       {
-        name: 'account',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
+        name: '_functionPermits',
+        internalType: 'struct GuardedMulticaller.FunctionPermit[]',
+        type: 'tuple[]',
+        components: [
+          { name: 'target', internalType: 'address', type: 'address' },
+          { name: 'functionSelector', internalType: 'bytes4', type: 'bytes4' },
+          { name: 'permitted', internalType: 'bool', type: 'bool' },
+        ],
       },
-      {
-        name: 'operator',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      { name: 'approved', internalType: 'bool', type: 'bool', indexed: false },
     ],
-    name: 'ApprovalForAll',
+    name: 'setFunctionPermits',
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    inputs: [{ name: 'interfaceId', internalType: 'bytes4', type: 'bytes4' }],
+    name: 'supportsInterface',
+    outputs: [{ name: '', internalType: 'bool', type: 'bool' }],
+    stateMutability: 'view',
   },
   { type: 'event', anonymous: false, inputs: [], name: 'EIP712DomainChanged' },
   {
@@ -80,19 +171,62 @@ export const immutableErc1155Abi = [
     anonymous: false,
     inputs: [
       {
-        name: 'oldRegistry',
+        name: '_target',
         internalType: 'address',
         type: 'address',
+        indexed: true,
+      },
+      {
+        name: '_functionSelector',
+        internalType: 'bytes4',
+        type: 'bytes4',
         indexed: false,
       },
       {
-        name: 'newRegistry',
-        internalType: 'address',
-        type: 'address',
+        name: '_permitted',
+        internalType: 'bool',
+        type: 'bool',
         indexed: false,
       },
     ],
-    name: 'OperatorAllowlistRegistryUpdated',
+    name: 'FunctionPermitted',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: '_multicallSigner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: '_reference',
+        internalType: 'bytes32',
+        type: 'bytes32',
+        indexed: true,
+      },
+      {
+        name: '_targets',
+        internalType: 'address[]',
+        type: 'address[]',
+        indexed: false,
+      },
+      {
+        name: '_data',
+        internalType: 'bytes[]',
+        type: 'bytes[]',
+        indexed: false,
+      },
+      {
+        name: '_deadline',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'Multicalled',
   },
   {
     type: 'event',
@@ -155,62 +289,96 @@ export const immutableErc1155Abi = [
     name: 'RoleRevoked',
   },
   {
-    type: 'event',
-    anonymous: false,
+    type: 'error',
     inputs: [
-      {
-        name: 'operator',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      { name: 'from', internalType: 'address', type: 'address', indexed: true },
-      { name: 'to', internalType: 'address', type: 'address', indexed: true },
-      {
-        name: 'ids',
-        internalType: 'uint256[]',
-        type: 'uint256[]',
-        indexed: false,
-      },
-      {
-        name: 'values',
-        internalType: 'uint256[]',
-        type: 'uint256[]',
-        indexed: false,
-      },
+      { name: '_addressLength', internalType: 'uint256', type: 'uint256' },
+      { name: '_dataLength', internalType: 'uint256', type: 'uint256' },
     ],
-    name: 'TransferBatch',
+    name: 'AddressDataArrayLengthsMismatch',
+  },
+  { type: 'error', inputs: [], name: 'EmptyAddressArray' },
+  { type: 'error', inputs: [], name: 'EmptyFunctionPermitArray' },
+  {
+    type: 'error',
+    inputs: [{ name: '_deadline', internalType: 'uint256', type: 'uint256' }],
+    name: 'Expired',
   },
   {
-    type: 'event',
-    anonymous: false,
+    type: 'error',
     inputs: [
-      {
-        name: 'operator',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      { name: 'from', internalType: 'address', type: 'address', indexed: true },
-      { name: 'to', internalType: 'address', type: 'address', indexed: true },
-      { name: 'id', internalType: 'uint256', type: 'uint256', indexed: false },
-      {
-        name: 'value',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: false,
-      },
+      { name: '_target', internalType: 'address', type: 'address' },
+      { name: '_data', internalType: 'bytes', type: 'bytes' },
     ],
-    name: 'TransferSingle',
+    name: 'FailedCall',
   },
   {
-    type: 'event',
-    anonymous: false,
+    type: 'error',
     inputs: [
-      { name: 'value', internalType: 'string', type: 'string', indexed: false },
-      { name: 'id', internalType: 'uint256', type: 'uint256', indexed: true },
+      { name: '_target', internalType: 'address', type: 'address' },
+      { name: '_data', internalType: 'bytes', type: 'bytes' },
     ],
-    name: 'URI',
+    name: 'InvalidCallData',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: '_reference', internalType: 'bytes32', type: 'bytes32' }],
+    name: 'InvalidReference',
+  },
+  { type: 'error', inputs: [], name: 'InvalidShortString' },
+  {
+    type: 'error',
+    inputs: [{ name: '_target', internalType: 'address', type: 'address' }],
+    name: 'NonContractAddress',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: '_reference', internalType: 'bytes32', type: 'bytes32' }],
+    name: 'ReusedReference',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'str', internalType: 'string', type: 'string' }],
+    name: 'StringTooLong',
+  },
+  {
+    type: 'error',
+    inputs: [
+      { name: '_target', internalType: 'address', type: 'address' },
+      { name: '_data', internalType: 'bytes', type: 'bytes' },
+    ],
+    name: 'UnauthorizedFunction',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: '_signature', internalType: 'bytes', type: 'bytes' }],
+    name: 'UnauthorizedSignature',
+  },
+  {
+    type: 'error',
+    inputs: [
+      { name: '_multicallSigner', internalType: 'address', type: 'address' },
+    ],
+    name: 'UnauthorizedSigner',
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ImmutableERC1155
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const immutableErc1155Abi = [
+  {
+    type: 'constructor',
+    inputs: [
+      { name: 'owner', internalType: 'address', type: 'address' },
+      { name: 'name_', internalType: 'string', type: 'string' },
+      { name: 'baseURI_', internalType: 'string', type: 'string' },
+      { name: 'contractURI_', internalType: 'string', type: 'string' },
+      { name: '_operatorAllowlist', internalType: 'address', type: 'address' },
+      { name: '_receiver', internalType: 'address', type: 'address' },
+      { name: '_feeNumerator', internalType: 'uint96', type: 'uint96' },
+    ],
+    stateMutability: 'nonpayable',
   },
   {
     type: 'function',
@@ -579,126 +747,12 @@ export const immutableErc1155Abi = [
     outputs: [{ name: '', internalType: 'string', type: 'string' }],
     stateMutability: 'view',
   },
-] as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ImmutableERC721
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const immutableErc721Abi = [
-  {
-    type: 'constructor',
-    inputs: [
-      { name: 'owner_', internalType: 'address', type: 'address' },
-      { name: 'name_', internalType: 'string', type: 'string' },
-      { name: 'symbol_', internalType: 'string', type: 'string' },
-      { name: 'baseURI_', internalType: 'string', type: 'string' },
-      { name: 'contractURI_', internalType: 'string', type: 'string' },
-      { name: 'operatorAllowlist_', internalType: 'address', type: 'address' },
-      { name: 'royaltyReceiver_', internalType: 'address', type: 'address' },
-      { name: 'feeNumerator_', internalType: 'uint96', type: 'uint96' },
-    ],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'error',
-    inputs: [],
-    name: 'AllowlistDoesNotImplementIOperatorAllowlist',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
-    name: 'ApproveTargetNotInAllowlist',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'approver', internalType: 'address', type: 'address' }],
-    name: 'ApproverNotInAllowlist',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'caller', internalType: 'address', type: 'address' }],
-    name: 'CallerNotInAllowlist',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'tokenId', internalType: 'uint256', type: 'uint256' }],
-    name: 'IImmutableERC721IDAboveThreshold',
-  },
-  {
-    type: 'error',
-    inputs: [
-      { name: 'tokenId', internalType: 'uint256', type: 'uint256' },
-      { name: 'currentOwner', internalType: 'address', type: 'address' },
-    ],
-    name: 'IImmutableERC721MismatchedTokenOwner',
-  },
-  {
-    type: 'error',
-    inputs: [],
-    name: 'IImmutableERC721MismatchedTransferLengths',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'tokenId', internalType: 'uint256', type: 'uint256' }],
-    name: 'IImmutableERC721NotOwnerOrOperator',
-  },
-  { type: 'error', inputs: [], name: 'IImmutableERC721SendingToZerothAddress' },
-  {
-    type: 'error',
-    inputs: [{ name: 'tokenId', internalType: 'uint256', type: 'uint256' }],
-    name: 'IImmutableERC721TokenAlreadyBurned',
-  },
-  { type: 'error', inputs: [], name: 'InvalidShortString' },
-  { type: 'error', inputs: [], name: 'InvalidSignature' },
-  { type: 'error', inputs: [], name: 'PermitExpired' },
-  { type: 'error', inputs: [], name: 'SignerCannotBeZerothAddress' },
-  {
-    type: 'error',
-    inputs: [{ name: 'str', internalType: 'string', type: 'string' }],
-    name: 'StringTooLong',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'from', internalType: 'address', type: 'address' }],
-    name: 'TransferFromNotInAllowlist',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'to', internalType: 'address', type: 'address' }],
-    name: 'TransferToNotInAllowlist',
-  },
   {
     type: 'event',
     anonymous: false,
     inputs: [
       {
-        name: 'owner',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'approved',
-        internalType: 'address',
-        type: 'address',
-        indexed: true,
-      },
-      {
-        name: 'tokenId',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: true,
-      },
-    ],
-    name: 'Approval',
-  },
-  {
-    type: 'event',
-    anonymous: false,
-    inputs: [
-      {
-        name: 'owner',
+        name: 'account',
         internalType: 'address',
         type: 'address',
         indexed: true,
@@ -797,16 +851,118 @@ export const immutableErc721Abi = [
     type: 'event',
     anonymous: false,
     inputs: [
+      {
+        name: 'operator',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
       { name: 'from', internalType: 'address', type: 'address', indexed: true },
       { name: 'to', internalType: 'address', type: 'address', indexed: true },
       {
-        name: 'tokenId',
-        internalType: 'uint256',
-        type: 'uint256',
-        indexed: true,
+        name: 'ids',
+        internalType: 'uint256[]',
+        type: 'uint256[]',
+        indexed: false,
+      },
+      {
+        name: 'values',
+        internalType: 'uint256[]',
+        type: 'uint256[]',
+        indexed: false,
       },
     ],
-    name: 'Transfer',
+    name: 'TransferBatch',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'operator',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      { name: 'from', internalType: 'address', type: 'address', indexed: true },
+      { name: 'to', internalType: 'address', type: 'address', indexed: true },
+      { name: 'id', internalType: 'uint256', type: 'uint256', indexed: false },
+      {
+        name: 'value',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: false,
+      },
+    ],
+    name: 'TransferSingle',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      { name: 'value', internalType: 'string', type: 'string', indexed: false },
+      { name: 'id', internalType: 'uint256', type: 'uint256', indexed: true },
+    ],
+    name: 'URI',
+  },
+  {
+    type: 'error',
+    inputs: [],
+    name: 'AllowlistDoesNotImplementIOperatorAllowlist',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'ApproveTargetNotInAllowlist',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'approver', internalType: 'address', type: 'address' }],
+    name: 'ApproverNotInAllowlist',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'caller', internalType: 'address', type: 'address' }],
+    name: 'CallerNotInAllowlist',
+  },
+  { type: 'error', inputs: [], name: 'InvalidShortString' },
+  { type: 'error', inputs: [], name: 'InvalidSignature' },
+  { type: 'error', inputs: [], name: 'PermitExpired' },
+  {
+    type: 'error',
+    inputs: [{ name: 'str', internalType: 'string', type: 'string' }],
+    name: 'StringTooLong',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'from', internalType: 'address', type: 'address' }],
+    name: 'TransferFromNotInAllowlist',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'to', internalType: 'address', type: 'address' }],
+    name: 'TransferToNotInAllowlist',
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ImmutableERC721
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const immutableErc721Abi = [
+  {
+    type: 'constructor',
+    inputs: [
+      { name: 'owner_', internalType: 'address', type: 'address' },
+      { name: 'name_', internalType: 'string', type: 'string' },
+      { name: 'symbol_', internalType: 'string', type: 'string' },
+      { name: 'baseURI_', internalType: 'string', type: 'string' },
+      { name: 'contractURI_', internalType: 'string', type: 'string' },
+      { name: 'operatorAllowlist_', internalType: 'address', type: 'address' },
+      { name: 'royaltyReceiver_', internalType: 'address', type: 'address' },
+      { name: 'feeNumerator_', internalType: 'uint96', type: 'uint96' },
+    ],
+    stateMutability: 'nonpayable',
   },
   {
     type: 'function',
@@ -1337,95 +1493,6 @@ export const immutableErc721Abi = [
     outputs: [],
     stateMutability: 'nonpayable',
   },
-] as const
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ImmutableERC721MintByID
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-export const immutableErc721MintByIdAbi = [
-  {
-    type: 'constructor',
-    inputs: [
-      { name: 'owner_', internalType: 'address', type: 'address' },
-      { name: 'name_', internalType: 'string', type: 'string' },
-      { name: 'symbol_', internalType: 'string', type: 'string' },
-      { name: 'baseURI_', internalType: 'string', type: 'string' },
-      { name: 'contractURI_', internalType: 'string', type: 'string' },
-      { name: 'operatorAllowlist_', internalType: 'address', type: 'address' },
-      { name: 'royaltyReceiver_', internalType: 'address', type: 'address' },
-      { name: 'feeNumerator_', internalType: 'uint96', type: 'uint96' },
-    ],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'error',
-    inputs: [],
-    name: 'AllowlistDoesNotImplementIOperatorAllowlist',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
-    name: 'ApproveTargetNotInAllowlist',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'approver', internalType: 'address', type: 'address' }],
-    name: 'ApproverNotInAllowlist',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'caller', internalType: 'address', type: 'address' }],
-    name: 'CallerNotInAllowlist',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'tokenId', internalType: 'uint256', type: 'uint256' }],
-    name: 'IImmutableERC721IDAboveThreshold',
-  },
-  {
-    type: 'error',
-    inputs: [
-      { name: 'tokenId', internalType: 'uint256', type: 'uint256' },
-      { name: 'currentOwner', internalType: 'address', type: 'address' },
-    ],
-    name: 'IImmutableERC721MismatchedTokenOwner',
-  },
-  {
-    type: 'error',
-    inputs: [],
-    name: 'IImmutableERC721MismatchedTransferLengths',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'tokenId', internalType: 'uint256', type: 'uint256' }],
-    name: 'IImmutableERC721NotOwnerOrOperator',
-  },
-  { type: 'error', inputs: [], name: 'IImmutableERC721SendingToZerothAddress' },
-  {
-    type: 'error',
-    inputs: [{ name: 'tokenId', internalType: 'uint256', type: 'uint256' }],
-    name: 'IImmutableERC721TokenAlreadyBurned',
-  },
-  { type: 'error', inputs: [], name: 'InvalidShortString' },
-  { type: 'error', inputs: [], name: 'InvalidSignature' },
-  { type: 'error', inputs: [], name: 'PermitExpired' },
-  { type: 'error', inputs: [], name: 'SignerCannotBeZerothAddress' },
-  {
-    type: 'error',
-    inputs: [{ name: 'str', internalType: 'string', type: 'string' }],
-    name: 'StringTooLong',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'from', internalType: 'address', type: 'address' }],
-    name: 'TransferFromNotInAllowlist',
-  },
-  {
-    type: 'error',
-    inputs: [{ name: 'to', internalType: 'address', type: 'address' }],
-    name: 'TransferToNotInAllowlist',
-  },
   {
     type: 'event',
     anonymous: false,
@@ -1565,6 +1632,95 @@ export const immutableErc721MintByIdAbi = [
       },
     ],
     name: 'Transfer',
+  },
+  {
+    type: 'error',
+    inputs: [],
+    name: 'AllowlistDoesNotImplementIOperatorAllowlist',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'ApproveTargetNotInAllowlist',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'approver', internalType: 'address', type: 'address' }],
+    name: 'ApproverNotInAllowlist',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'caller', internalType: 'address', type: 'address' }],
+    name: 'CallerNotInAllowlist',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'tokenId', internalType: 'uint256', type: 'uint256' }],
+    name: 'IImmutableERC721IDAboveThreshold',
+  },
+  {
+    type: 'error',
+    inputs: [
+      { name: 'tokenId', internalType: 'uint256', type: 'uint256' },
+      { name: 'currentOwner', internalType: 'address', type: 'address' },
+    ],
+    name: 'IImmutableERC721MismatchedTokenOwner',
+  },
+  {
+    type: 'error',
+    inputs: [],
+    name: 'IImmutableERC721MismatchedTransferLengths',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'tokenId', internalType: 'uint256', type: 'uint256' }],
+    name: 'IImmutableERC721NotOwnerOrOperator',
+  },
+  { type: 'error', inputs: [], name: 'IImmutableERC721SendingToZerothAddress' },
+  {
+    type: 'error',
+    inputs: [{ name: 'tokenId', internalType: 'uint256', type: 'uint256' }],
+    name: 'IImmutableERC721TokenAlreadyBurned',
+  },
+  { type: 'error', inputs: [], name: 'InvalidShortString' },
+  { type: 'error', inputs: [], name: 'InvalidSignature' },
+  { type: 'error', inputs: [], name: 'PermitExpired' },
+  { type: 'error', inputs: [], name: 'SignerCannotBeZerothAddress' },
+  {
+    type: 'error',
+    inputs: [{ name: 'str', internalType: 'string', type: 'string' }],
+    name: 'StringTooLong',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'from', internalType: 'address', type: 'address' }],
+    name: 'TransferFromNotInAllowlist',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'to', internalType: 'address', type: 'address' }],
+    name: 'TransferToNotInAllowlist',
+  },
+] as const
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ImmutableERC721MintByID
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+export const immutableErc721MintByIdAbi = [
+  {
+    type: 'constructor',
+    inputs: [
+      { name: 'owner_', internalType: 'address', type: 'address' },
+      { name: 'name_', internalType: 'string', type: 'string' },
+      { name: 'symbol_', internalType: 'string', type: 'string' },
+      { name: 'baseURI_', internalType: 'string', type: 'string' },
+      { name: 'contractURI_', internalType: 'string', type: 'string' },
+      { name: 'operatorAllowlist_', internalType: 'address', type: 'address' },
+      { name: 'royaltyReceiver_', internalType: 'address', type: 'address' },
+      { name: 'feeNumerator_', internalType: 'uint96', type: 'uint96' },
+    ],
+    stateMutability: 'nonpayable',
   },
   {
     type: 'function',
@@ -2050,5 +2206,213 @@ export const immutableErc721MintByIdAbi = [
     name: 'transferFrom',
     outputs: [],
     stateMutability: 'nonpayable',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'owner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'approved',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'tokenId',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: true,
+      },
+    ],
+    name: 'Approval',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'owner',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'operator',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      { name: 'approved', internalType: 'bool', type: 'bool', indexed: false },
+    ],
+    name: 'ApprovalForAll',
+  },
+  { type: 'event', anonymous: false, inputs: [], name: 'EIP712DomainChanged' },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      {
+        name: 'oldRegistry',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+      {
+        name: 'newRegistry',
+        internalType: 'address',
+        type: 'address',
+        indexed: false,
+      },
+    ],
+    name: 'OperatorAllowlistRegistryUpdated',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      { name: 'role', internalType: 'bytes32', type: 'bytes32', indexed: true },
+      {
+        name: 'previousAdminRole',
+        internalType: 'bytes32',
+        type: 'bytes32',
+        indexed: true,
+      },
+      {
+        name: 'newAdminRole',
+        internalType: 'bytes32',
+        type: 'bytes32',
+        indexed: true,
+      },
+    ],
+    name: 'RoleAdminChanged',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      { name: 'role', internalType: 'bytes32', type: 'bytes32', indexed: true },
+      {
+        name: 'account',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'sender',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'RoleGranted',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      { name: 'role', internalType: 'bytes32', type: 'bytes32', indexed: true },
+      {
+        name: 'account',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+      {
+        name: 'sender',
+        internalType: 'address',
+        type: 'address',
+        indexed: true,
+      },
+    ],
+    name: 'RoleRevoked',
+  },
+  {
+    type: 'event',
+    anonymous: false,
+    inputs: [
+      { name: 'from', internalType: 'address', type: 'address', indexed: true },
+      { name: 'to', internalType: 'address', type: 'address', indexed: true },
+      {
+        name: 'tokenId',
+        internalType: 'uint256',
+        type: 'uint256',
+        indexed: true,
+      },
+    ],
+    name: 'Transfer',
+  },
+  {
+    type: 'error',
+    inputs: [],
+    name: 'AllowlistDoesNotImplementIOperatorAllowlist',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'target', internalType: 'address', type: 'address' }],
+    name: 'ApproveTargetNotInAllowlist',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'approver', internalType: 'address', type: 'address' }],
+    name: 'ApproverNotInAllowlist',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'caller', internalType: 'address', type: 'address' }],
+    name: 'CallerNotInAllowlist',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'tokenId', internalType: 'uint256', type: 'uint256' }],
+    name: 'IImmutableERC721IDAboveThreshold',
+  },
+  {
+    type: 'error',
+    inputs: [
+      { name: 'tokenId', internalType: 'uint256', type: 'uint256' },
+      { name: 'currentOwner', internalType: 'address', type: 'address' },
+    ],
+    name: 'IImmutableERC721MismatchedTokenOwner',
+  },
+  {
+    type: 'error',
+    inputs: [],
+    name: 'IImmutableERC721MismatchedTransferLengths',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'tokenId', internalType: 'uint256', type: 'uint256' }],
+    name: 'IImmutableERC721NotOwnerOrOperator',
+  },
+  { type: 'error', inputs: [], name: 'IImmutableERC721SendingToZerothAddress' },
+  {
+    type: 'error',
+    inputs: [{ name: 'tokenId', internalType: 'uint256', type: 'uint256' }],
+    name: 'IImmutableERC721TokenAlreadyBurned',
+  },
+  { type: 'error', inputs: [], name: 'InvalidShortString' },
+  { type: 'error', inputs: [], name: 'InvalidSignature' },
+  { type: 'error', inputs: [], name: 'PermitExpired' },
+  { type: 'error', inputs: [], name: 'SignerCannotBeZerothAddress' },
+  {
+    type: 'error',
+    inputs: [{ name: 'str', internalType: 'string', type: 'string' }],
+    name: 'StringTooLong',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'from', internalType: 'address', type: 'address' }],
+    name: 'TransferFromNotInAllowlist',
+  },
+  {
+    type: 'error',
+    inputs: [{ name: 'to', internalType: 'address', type: 'address' }],
+    name: 'TransferToNotInAllowlist',
   },
 ] as const

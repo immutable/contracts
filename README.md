@@ -27,7 +27,7 @@ These contracts are feature-rich and are the recommended standard on Immutable z
 ### Installation
 
 ```
-$ yarn install @imtbl/contracts
+$ yarn add @imtbl/contracts
 ```
 
 ### Usage

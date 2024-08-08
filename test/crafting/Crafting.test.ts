@@ -39,10 +39,10 @@ describe("Crafting", () => {
           {
             token: erc721.address,
             commandType: commandTypeERC721Burn,
-            data: ethers.utils.defaultAbiCoder.encode(["address", "uint256"], [user.address, 1]),
+            data: ethers.utils.defaultAbiCoder.encode(["uint256"], [1]),
           },
         ];
-        expect(await crafting.execute(commands)).to.not.reverted;
+        expect(await crafting.connect(user).execute(commands)).to.not.reverted;
         await expect(erc721.ownerOf(1)).to.be.reverted;
       });
 
@@ -52,10 +52,12 @@ describe("Crafting", () => {
           {
             token: erc721.address,
             commandType: commandTypeERC721Burn,
-            data: ethers.utils.defaultAbiCoder.encode(["address", "uint256"], [user.address, 1]),
+            data: ethers.utils.defaultAbiCoder.encode(["uint256"], [1]),
           },
         ];
-        await expect(crafting.execute(commands)).to.be.revertedWith("ERC721: caller is not token owner or approved");
+        await expect(crafting.connect(user).execute(commands)).to.be.revertedWith(
+          "ERC721: caller is not token owner or approved",
+        );
       });
 
       it("Should mint item if role is granted", async () => {
@@ -64,11 +66,11 @@ describe("Crafting", () => {
           {
             token: erc721.address,
             commandType: commandTypeERC721Mint,
-            data: ethers.utils.defaultAbiCoder.encode(["address", "uint256"], [user.address, 1]),
+            data: ethers.utils.defaultAbiCoder.encode(["uint256"], [1]),
           },
         ];
-        expect(await crafting.execute(commands)).to.not.reverted;
-        expect(await erc721.ownerOf(1)).to.be.equal(user.address);
+        expect(await crafting.connect(user).execute(commands)).to.not.reverted;
+        expect(await erc721.connect(user).ownerOf(1)).to.be.equal(user.address);
       });
 
       it("Should revert mint if role is not granted", async () => {
@@ -76,10 +78,10 @@ describe("Crafting", () => {
           {
             token: erc721.address,
             commandType: commandTypeERC721Mint,
-            data: ethers.utils.defaultAbiCoder.encode(["address", "uint256"], [user.address, 1]),
+            data: ethers.utils.defaultAbiCoder.encode(["uint256"], [1]),
           },
         ];
-        await expect(crafting.execute(commands)).to.be.reverted;
+        await expect(crafting.connect(user).execute(commands)).to.be.reverted;
       });
 
       it("Should run multiple commands", async () => {
@@ -92,23 +94,20 @@ describe("Crafting", () => {
           {
             token: erc721.address,
             commandType: commandTypeERC721Burn,
-            data: ethers.utils.defaultAbiCoder.encode(["address", "uint256"], [user.address, 1]),
+            data: ethers.utils.defaultAbiCoder.encode(["uint256"], [1]),
           },
           {
             token: erc721.address,
             commandType: commandTypeERC721Transfer,
-            data: ethers.utils.defaultAbiCoder.encode(
-              ["address", "address", "uint256"],
-              [user.address, user2.address, 2],
-            ),
+            data: ethers.utils.defaultAbiCoder.encode(["address", "uint256"], [user2.address, 2]),
           },
           {
             token: erc721.address,
             commandType: commandTypeERC721Mint,
-            data: ethers.utils.defaultAbiCoder.encode(["address", "uint256"], [user.address, 3]),
+            data: ethers.utils.defaultAbiCoder.encode(["uint256"], [3]),
           },
         ];
-        expect(await crafting.execute(commands)).to.not.reverted;
+        expect(await crafting.connect(user).execute(commands)).to.not.reverted;
         await expect(erc721.ownerOf(1)).to.be.reverted;
         expect(await erc721.ownerOf(2)).to.be.equal(user2.address);
         expect(await erc721.ownerOf(3)).to.be.equal(user.address);

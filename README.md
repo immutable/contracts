@@ -144,7 +144,7 @@ Immutable zkEVM Contracts are released under the Apache-2.0 license. See [LICENS
 
 ### Socials
 
-- [Twitter](https://twitter.com/Immutable)
+- [X (Twitter)](https://x.com/Immutable)
 - [Discord](https://discord.gg/6GjgPkp464)
 - [Telegram](https://t.me/immutablex)
 - [Reddit](https://www.reddit.com/r/ImmutableX/)

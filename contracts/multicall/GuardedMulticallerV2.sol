@@ -24,6 +24,13 @@ import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
  *  a new version is deployed. Approvals will be granted to the new contract.
  */
 contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
+    /// @dev Struct for call data
+    struct Call {
+        address target;
+        string functionSignature;
+        bytes data;
+    }
+
     /// @dev Mapping of reference to executed status
     // solhint-disable-next-line named-parameters-mapping
     mapping(bytes32 => bool) private replayProtection;
@@ -39,8 +46,7 @@ contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
     event Multicalled(
         address indexed _multicallSigner,
         bytes32 indexed _reference,
-        address[] _targets,
-        bytes[] _data,
+        Call[] _calls,
         uint256 _deadline
     );
 
@@ -50,8 +56,8 @@ contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
     /// @dev Error thrown when reference has already been executed
     error ReusedReference(bytes32 _reference);
 
-    /// @dev Error thrown when address array is empty
-    error EmptyAddressArray();
+    /// @dev Error thrown when call array is empty
+    error EmptyCallArray();
 
     /// @dev Error thrown when address array and data array have different lengths
     error AddressDataArrayLengthsMismatch(uint256 _addressLength, uint256 _dataLength);
@@ -60,7 +66,7 @@ contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
     error Expired(uint256 _deadline);
 
     /// @dev Error thrown when target address is not a contract
-    error NonContractAddress(address _target);
+    error NonContractAddress(Call _call);
 
     /// @dev Error thrown when signer is not authorized
     error UnauthorizedSigner(address _multicallSigner);
@@ -69,7 +75,7 @@ contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
     error UnauthorizedSignature(bytes _signature);
 
     /// @dev Error thrown when call reverts
-    error FailedCall(address _target, string functionSignature, bytes _data);
+    error FailedCall(Call _call);
 
     /// @dev Error thrown when call data is invalid
     error InvalidCallData(address _target, bytes _data);
@@ -91,34 +97,16 @@ contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
 
     /**
      *
-     * @dev Returns hash of array of bytes
+     * @dev Returns hash of array of calls
      *
-     * @param _data Array of bytes
+     * @param _calls Array of calls
      */
-    function hashBytesArray(bytes[] memory _data) public pure returns (bytes32) {
-        bytes32[] memory hashedBytesArr = new bytes32[](_data.length);
-        for (uint256 i = 0; i < _data.length; i++) {
-            hashedBytesArr[i] = keccak256(_data[i]);
+    function hashCallArray(Call[] calldata _calls) public pure returns (bytes32) {
+        bytes32[] memory hashedCallArr = new bytes32[](_calls.length);
+        for (uint256 i = 0; i < _calls.length; i++) {
+            hashedCallArr[i] = keccak256(abi.encodePacked(_calls[i].target, _calls[i].functionSignature, _calls[i].data));
         }
-        return keccak256(abi.encodePacked(hashedBytesArr));
-    }
-
-    /**
-     *
-     * @dev Returns hash of array of strings
-     *
-     * @param _data Array of strings
-     */
-    function hashStringArray(string[] calldata _data) public pure returns (bytes32) {
-        bytes32[] memory hashedStringArr = new bytes32[](_data.length);
-        for (uint256 i = 0; i < _data.length; i++) {
-            hashedStringArr[i] = keccak256(bytes(_data[i]));
-        }
-        return keccak256(abi.encodePacked(hashedStringArr));
-    }
-
-    function stringBytes(string calldata _data) public pure returns (bytes memory) {
-        return bytes(_data);
+        return keccak256(abi.encodePacked(hashedCallArr));
     }
 
     /**
@@ -134,9 +122,7 @@ contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
      *
      * @param _multicallSigner Address of an approved signer
      * @param _reference Reference
-     * @param _targets List of addresses to call
-     * @param _functionSignatures List of function signatures
-     * @param _data List of call data
+     * @param _calls List of calls
      * @param _deadline Expiration timestamp
      * @param _signature Signature of the multicall signer
      */
@@ -145,9 +131,7 @@ contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
     function execute(
         address _multicallSigner,
         bytes32 _reference,
-        address[] calldata _targets,
-        string[] calldata _functionSignatures,
-        bytes[] calldata _data,
+        Call[] calldata _calls,
         uint256 _deadline,
         bytes calldata _signature
     ) external nonReentrant {
@@ -161,15 +145,12 @@ contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
         if (replayProtection[_reference]) {
             revert ReusedReference(_reference);
         }
-        if (_targets.length == 0) {
-            revert EmptyAddressArray();
+        if (_calls.length == 0) {
+            revert EmptyCallArray();
         }
-        if (_targets.length != _data.length) {
-            revert AddressDataArrayLengthsMismatch(_targets.length, _data.length);
-        }
-        for (uint256 i = 0; i < _targets.length; i++) {
-            if (_targets[i].code.length == 0) {
-                revert NonContractAddress(_targets[i]);
+        for (uint256 i = 0; i < _calls.length; i++) {
+            if (_calls[i].target.code.length == 0) {
+                revert NonContractAddress(_calls[i]);
             }
         }
         if (!hasRole(MULTICALL_SIGNER_ROLE, _multicallSigner)) {
@@ -180,7 +161,7 @@ contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
         if (
             !SignatureChecker.isValidSignatureNow(
                 _multicallSigner,
-                _hashTypedData(_reference, _targets, _functionSignatures, _data, _deadline),
+                _hashTypedData(_reference, _calls, _deadline),
                 _signature
             )
         ) {
@@ -190,15 +171,15 @@ contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
         replayProtection[_reference] = true;
 
         // Multicall
-        for (uint256 i = 0; i < _targets.length; i++) {
-            bytes4 functionSelector = bytes4(keccak256(bytes(_functionSignatures[i])));
-            bytes memory callData = abi.encodePacked(functionSelector, _data[i]);
+        for (uint256 i = 0; i < _calls.length; i++) {
+            bytes4 functionSelector = bytes4(keccak256(bytes(_calls[i].functionSignature)));
+            bytes memory callData = abi.encodePacked(functionSelector, _calls[i].data);
             // solhint-disable avoid-low-level-calls
             // slither-disable-next-line calls-loop
-            (bool success, bytes memory returnData) = _targets[i].call(callData);
+            (bool success, bytes memory returnData) = _calls[i].target.call(callData);
             if (!success) {
                 if (returnData.length == 0) {
-                    revert FailedCall(_targets[i], _functionSignatures[i], _data[i]);
+                    revert FailedCall(_calls[i]);
                 }
                 // solhint-disable-next-line no-inline-assembly
                 assembly {
@@ -207,7 +188,7 @@ contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
             }
         }
 
-        emit Multicalled(_multicallSigner, _reference, _targets, _data, _deadline);
+        emit Multicalled(_multicallSigner, _reference, _calls, _deadline);
     }
     // slither-disable-end low-level-calls,cyclomatic-complexity
 
@@ -243,15 +224,12 @@ contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
      * @dev Returns EIP712 message hash for given parameters
      *
      * @param _reference Reference
-     * @param _targets List of addresses to call
-     * @param _data List of call data
+     * @param _calls List of calls 
      * @param _deadline Expiration timestamp
      */
     function _hashTypedData(
         bytes32 _reference,
-        address[] calldata _targets,
-        string[] calldata _functionSignatures,
-        bytes[] calldata _data,
+        Call[] calldata _calls,
         uint256 _deadline
     ) internal view returns (bytes32) {
         return
@@ -260,9 +238,7 @@ contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
                     abi.encode(
                         MULTICALL_TYPEHASH,
                         _reference,
-                        keccak256(abi.encodePacked(_targets)),
-                        hashStringArray(_functionSignatures),
-                        hashBytesArray(_data),
+                        hashCallArray(_calls),
                         _deadline
                     )
                 )

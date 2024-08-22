@@ -38,9 +38,14 @@ contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
     /// @dev Only those with MULTICALL_SIGNER_ROLE can generate valid signatures for execute function.
     bytes32 public constant MULTICALL_SIGNER_ROLE = bytes32("MULTICALL_SIGNER_ROLE");
 
+    /// @dev EIP712 typehash for call
+    bytes32 internal constant CALL_TYPEHASH = keccak256("Call(address target,string functionSignature,bytes data)");
+
     /// @dev EIP712 typehash for execute function
     bytes32 internal constant MULTICALL_TYPEHASH =
-        keccak256("Multicall(bytes32 ref,address[] targets,bytes[] data,uint256 deadline)");
+        keccak256(
+            "Multicall(bytes32 ref,Call[] call,uint256 deadline)Call(address target,string functionSignature,bytes data)"
+        );
 
     /// @dev Event emitted when execute function is called
     event Multicalled(address indexed _multicallSigner, bytes32 indexed _reference, Call[] _calls, uint256 _deadline);
@@ -88,22 +93,6 @@ contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
     // solhint-disable-next-line no-unused-vars
     constructor(address _owner, string memory _name, string memory _version) EIP712(_name, _version) {
         _grantRole(DEFAULT_ADMIN_ROLE, _owner);
-    }
-
-    /**
-     *
-     * @dev Returns hash of array of calls
-     *
-     * @param _calls Array of calls
-     */
-    function hashCallArray(Call[] calldata _calls) public pure returns (bytes32) {
-        bytes32[] memory hashedCallArr = new bytes32[](_calls.length);
-        for (uint256 i = 0; i < _calls.length; i++) {
-            hashedCallArr[i] = keccak256(
-                abi.encodePacked(_calls[i].target, _calls[i].functionSignature, _calls[i].data)
-            );
-        }
-        return keccak256(abi.encodePacked(hashedCallArr));
     }
 
     /**
@@ -219,6 +208,22 @@ contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
 
     /**
      *
+     * @dev Returns hash of array of calls
+     *
+     * @param _calls Array of calls
+     */
+    function _hashCallArray(Call[] calldata _calls) internal pure returns (bytes32) {
+        bytes32[] memory hashedCallArr = new bytes32[](_calls.length);
+        for (uint256 i = 0; i < _calls.length; i++) {
+            hashedCallArr[i] = keccak256(
+                abi.encode(CALL_TYPEHASH, _calls[i].target, _calls[i].functionSignature, _calls[i].data)
+            );
+        }
+        return keccak256(abi.encodePacked(hashedCallArr));
+    }
+
+    /**
+     *
      * @dev Returns EIP712 message hash for given parameters
      *
      * @param _reference Reference
@@ -229,8 +234,8 @@ contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
         bytes32 _reference,
         Call[] calldata _calls,
         uint256 _deadline
-    ) internal view returns (bytes32) {
+    ) public view returns (bytes32) {
         return
-            _hashTypedDataV4(keccak256(abi.encode(MULTICALL_TYPEHASH, _reference, hashCallArray(_calls), _deadline)));
+            _hashTypedDataV4(keccak256(abi.encode(MULTICALL_TYPEHASH, _reference, _hashCallArray(_calls), _deadline)));
     }
 }

@@ -16,14 +16,14 @@ import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
 /**
  *
- * @title GuardedMulticaller contract
- * @author Immutable Game Studio
+ * @title GuardedMulticallerV2 contract
+ * @author Immutable
  * @notice This contract is used to batch calls to other contracts.
  * @dev This contract is not designed to be upgradeable. If an issue is found with this contract,
  *  a new version will be deployed. All approvals granted to this contract will be revoked before
  *  a new version is deployed. Approvals will be granted to the new contract.
  */
-contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
+contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
     /// @dev Mapping of reference to executed status
     // solhint-disable-next-line named-parameters-mapping
     mapping(bytes32 => bool) private replayProtection;

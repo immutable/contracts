@@ -43,12 +43,7 @@ contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
         keccak256("Multicall(bytes32 ref,address[] targets,bytes[] data,uint256 deadline)");
 
     /// @dev Event emitted when execute function is called
-    event Multicalled(
-        address indexed _multicallSigner,
-        bytes32 indexed _reference,
-        Call[] _calls,
-        uint256 _deadline
-    );
+    event Multicalled(address indexed _multicallSigner, bytes32 indexed _reference, Call[] _calls, uint256 _deadline);
 
     /// @dev Error thrown when reference is invalid
     error InvalidReference(bytes32 _reference);
@@ -104,7 +99,9 @@ contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
     function hashCallArray(Call[] calldata _calls) public pure returns (bytes32) {
         bytes32[] memory hashedCallArr = new bytes32[](_calls.length);
         for (uint256 i = 0; i < _calls.length; i++) {
-            hashedCallArr[i] = keccak256(abi.encodePacked(_calls[i].target, _calls[i].functionSignature, _calls[i].data));
+            hashedCallArr[i] = keccak256(
+                abi.encodePacked(_calls[i].target, _calls[i].functionSignature, _calls[i].data)
+            );
         }
         return keccak256(abi.encodePacked(hashedCallArr));
     }
@@ -190,6 +187,7 @@ contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
 
         emit Multicalled(_multicallSigner, _reference, _calls, _deadline);
     }
+
     // slither-disable-end low-level-calls,cyclomatic-complexity
 
     /**
@@ -224,7 +222,7 @@ contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
      * @dev Returns EIP712 message hash for given parameters
      *
      * @param _reference Reference
-     * @param _calls List of calls 
+     * @param _calls List of calls
      * @param _deadline Expiration timestamp
      */
     function _hashTypedData(
@@ -233,15 +231,6 @@ contract GuardedMulticallerV2 is AccessControl, ReentrancyGuard, EIP712 {
         uint256 _deadline
     ) internal view returns (bytes32) {
         return
-            _hashTypedDataV4(
-                keccak256(
-                    abi.encode(
-                        MULTICALL_TYPEHASH,
-                        _reference,
-                        hashCallArray(_calls),
-                        _deadline
-                    )
-                )
-            );
+            _hashTypedDataV4(keccak256(abi.encode(MULTICALL_TYPEHASH, _reference, hashCallArray(_calls), _deadline)));
     }
 }

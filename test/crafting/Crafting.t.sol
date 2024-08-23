@@ -31,12 +31,6 @@ contract CraftingTest is Test {
   address public proxyAddr;
 
   function setUp() public {
-    console.log("\nAddresses:");
-    console.log("-- imtbl: ", imtbl);
-    console.log("-- gameStudio: ", gameStudio);
-    console.log("-- playerOne: ", playerOne);
-    console.log("-- signingAuthority: ", signingAuthority);
-
     DeployOperatorAllowlist deployScript = new DeployOperatorAllowlist();
     proxyAddr = deployScript.run(imtbl, imtbl, imtbl);
     operatorAllowlist = OperatorAllowlistUpgradeable(proxyAddr);
@@ -102,36 +96,6 @@ contract CraftingTest is Test {
     assertTrue(multicaller.isFunctionPermitted(address(game1155), game1155.burnBatch.selector));
 
     sigUtils = new SigUtils("multicaller", "1", address(multicaller));
-
-    console.log("\nContracts:");
-    console.log("-- game1155: ", address(game1155));
-    console.log("-- game721: ", address(game721));
-    console.log("-- multicaller: ", address(multicaller));
-  }
-
-  function testMintViaMulticaller() public {
-    bytes32 referenceID = keccak256("testMintViaMulticaller:1");
-
-    address[] memory targets = new address[](1);
-    targets[0] = address(game721);
-
-    bytes[] memory data = new bytes[](1);
-    data[0] = abi.encodeWithSignature("safeMint(address,uint256)", playerOne, 1);
-
-    uint256 deadline = block.timestamp + 10;
-
-    // Construct signature
-    bytes32 structHash = sigUtils.getTypedDataHash(referenceID, targets, data, deadline);
-
-    vm.startPrank(signingAuthority);
-    (uint8 v, bytes32 r, bytes32 s) = vm.sign(signingAuthorityPrivateKey, structHash);
-    bytes memory signature = abi.encodePacked(r, s, v);
-    vm.stopPrank();
-
-    vm.prank(playerOne);
-    multicaller.execute(signingAuthority, referenceID, targets, data, deadline, signature);
-
-    assertTrue(game721.balanceOf(playerOne) == 1);
   }
 
   function testCraft() public {

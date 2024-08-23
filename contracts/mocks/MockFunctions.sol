@@ -17,4 +17,8 @@ contract MockFunctions {
     function nonPermitted() public pure {
         // This function is intentionally left empty to simulate a non-permitted action
     }
+
+    function succeedWithUint256(uint256 value) public pure returns (uint256) {
+        return value;
+    }
 }

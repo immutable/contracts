@@ -10,7 +10,7 @@
     "max-states-count": ["off", 15],
     "no-console": "error",
     "no-empty-blocks": "warn",
-    "no-global-import": "off",
+    "no-global-import": "warn",
     "no-unused-import": "warn",
     "no-unused-vars": "warn",
     "one-contract-per-file": "warn",
@@ -32,7 +32,7 @@
     "var-name-mixedcase": "warn",
     "imports-on-top": "warn",
     "visibility-modifier-order": "warn",
-    
+
     "avoid-call-value": "error",
     "avoid-low-level-calls": "error",
     "avoid-sha3": "error",

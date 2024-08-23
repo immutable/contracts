@@ -74,7 +74,7 @@ contract CraftingTest is Test {
     multicaller.setFunctionPermits(functionPermits);
     assertTrue(multicaller.isFunctionPermitted(address(game721), game721.safeMint.selector));
 
-    sigUtils = new SigUtils("multicaller", "1");
+    sigUtils = new SigUtils("multicaller", "1", address(multicaller));
   }
 
   function testMintViaMulticaller() public {
@@ -102,7 +102,6 @@ contract CraftingTest is Test {
     multicaller.execute(signingAuthority, referenceID, targets, data, deadline, signature);
 
     assertTrue(game721.balanceOf(playerOne) == 1);
-
   }
 
   // function testSimpleCraft() public {

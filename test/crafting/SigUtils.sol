@@ -1,15 +1,23 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
-import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
-
-contract SigUtils is EIP712 {
+contract SigUtils {
     bytes32 internal _DOMAIN_SEPARATOR;
 
     bytes32 internal constant MULTICALL_TYPEHASH =
         keccak256("Multicall(bytes32 ref,address[] targets,bytes[] data,uint256 deadline)");
 
-    constructor(string memory _name, string memory _version) EIP712(_name, _version) {}
+    constructor(string memory _name, string memory _version, address _verifyingContract) {
+      _DOMAIN_SEPARATOR = keccak256(
+          abi.encode(
+            keccak256("EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"),
+            keccak256(bytes(_name)),
+            keccak256(bytes(_version)),
+            block.chainid,
+            _verifyingContract
+          )
+      );
+    }
 
     /**
      *
@@ -25,6 +33,36 @@ contract SigUtils is EIP712 {
         return keccak256(abi.encodePacked(hashedBytesArr));
     }
 
+    // computes the hash of a permit
+    function getStructHash(
+      bytes32 _reference,
+      address[] calldata _targets,
+      bytes[] calldata _data,
+      uint256 _deadline
+    ) internal pure returns (bytes32)
+    {
+      // return _hashTypedDataV4(
+      //   keccak256(
+      //     abi.encode(
+      //       MULTICALL_TYPEHASH,
+      //       _reference,
+      //       keccak256(abi.encodePacked(_targets)),
+      //       hashBytesArray(_data),
+      //       _deadline
+      //     )
+      //   )
+      // );
+      return keccak256(
+        abi.encode(
+          MULTICALL_TYPEHASH,
+          _reference,
+          keccak256(abi.encodePacked(_targets)),
+          hashBytesArray(_data),
+          _deadline
+        )
+      );
+    }
+
     /**
      *
      * @dev Returns EIP712 message hash for given parameters
@@ -35,22 +73,17 @@ contract SigUtils is EIP712 {
      * @param _deadline Expiration timestamp
      */
     function getTypedDataHash(
-        bytes32 _reference,
+      bytes32 _reference,
         address[] calldata _targets,
         bytes[] calldata _data,
         uint256 _deadline
     ) public view returns (bytes32) {
-        return
-            _hashTypedDataV4(
-                keccak256(
-                    abi.encode(
-                        MULTICALL_TYPEHASH,
-                        _reference,
-                        keccak256(abi.encodePacked(_targets)),
-                        hashBytesArray(_data),
-                        _deadline
-                    )
-                )
-            );
+      return keccak256(
+        abi.encodePacked(
+          "\x19\x01",
+          _DOMAIN_SEPARATOR,
+          getStructHash(_reference, _targets, _data, _deadline)
+        )
+      );
     }
 }

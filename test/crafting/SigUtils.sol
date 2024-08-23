@@ -33,7 +33,6 @@ contract SigUtils {
         return keccak256(abi.encodePacked(hashedBytesArr));
     }
 
-    // computes the hash of a permit
     function getStructHash(
       bytes32 _reference,
       address[] calldata _targets,
@@ -41,17 +40,6 @@ contract SigUtils {
       uint256 _deadline
     ) internal pure returns (bytes32)
     {
-      // return _hashTypedDataV4(
-      //   keccak256(
-      //     abi.encode(
-      //       MULTICALL_TYPEHASH,
-      //       _reference,
-      //       keccak256(abi.encodePacked(_targets)),
-      //       hashBytesArray(_data),
-      //       _deadline
-      //     )
-      //   )
-      // );
       return keccak256(
         abi.encode(
           MULTICALL_TYPEHASH,

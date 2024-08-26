@@ -275,4 +275,7 @@ contract GuardedMulticaller2Test is Test {
 
         gmc.execute(signer, ref, calls, deadline, signature);
     }
+
+    // TODO: test reentrancy
+    function test_RevertWhen_ExecuteReentrant() public {}
 }

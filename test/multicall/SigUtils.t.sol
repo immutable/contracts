@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {GuardedMulticallerV2} from "../../contracts/multicall/GuardedMulticallerV2.sol";
+import {GuardedMulticaller2} from "../../contracts/multicall/GuardedMulticaller2.sol";
 
 contract SigUtils {
     bytes32 private constant _TYPE_HASH =
@@ -20,7 +20,7 @@ contract SigUtils {
         cachedDomainSeparator = keccak256(abi.encode(_TYPE_HASH, keccak256(bytes(_name)), keccak256(bytes(_version)), block.chainid, _verifyingContract));
     }
 
-    function _hashCallArray(GuardedMulticallerV2.Call[] calldata _calls) internal pure returns (bytes32) {
+    function _hashCallArray(GuardedMulticaller2.Call[] calldata _calls) internal pure returns (bytes32) {
         bytes32[] memory hashedCallArr = new bytes32[](_calls.length);
         for (uint256 i = 0; i < _calls.length; i++) {
             hashedCallArr[i] = keccak256(
@@ -32,7 +32,7 @@ contract SigUtils {
 
     function hashTypedData(
         bytes32 _reference,
-        GuardedMulticallerV2.Call[] calldata _calls,
+        GuardedMulticaller2.Call[] calldata _calls,
         uint256 _deadline
     ) public view returns (bytes32) {
         bytes32 digest = keccak256(abi.encode(MULTICALL_TYPEHASH, _reference, _hashCallArray(_calls), _deadline));

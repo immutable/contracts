@@ -3,13 +3,13 @@
 pragma solidity 0.8.19;
 
 import "forge-std/Test.sol";
-import {GuardedMulticallerV2} from "../../contracts/multicall/GuardedMulticallerV2.sol";
+import {GuardedMulticaller2} from "../../contracts/multicall/GuardedMulticaller2.sol";
 import {MockFunctions} from "../../contracts/mocks/MockFunctions.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {SigUtils} from "./SigUtils.t.sol";
 
-contract GuardedMulticallerV2Test is Test {
-    GuardedMulticallerV2 gmc;
+contract GuardedMulticaller2Test is Test {
+    GuardedMulticaller2 gmc;
     SigUtils sigUtils;
     MockFunctions target;
     MockFunctions target1;
@@ -21,7 +21,7 @@ contract GuardedMulticallerV2Test is Test {
     event Multicalled(
         address indexed _multicallSigner,
         bytes32 indexed _reference,
-        GuardedMulticallerV2.Call[] _calls,
+        GuardedMulticaller2.Call[] _calls,
         uint256 _deadline
     );
 
@@ -30,7 +30,7 @@ contract GuardedMulticallerV2Test is Test {
         target1 = new MockFunctions();
         (signer, signerPk) = makeAddrAndKey("signer");
 
-        gmc = new GuardedMulticallerV2(defaultAdmin, "name", "1");
+        gmc = new GuardedMulticaller2(defaultAdmin, "name", "1");
         vm.prank(defaultAdmin);
         gmc.grantMulticallSignerRole(signer);
 
@@ -45,14 +45,14 @@ contract GuardedMulticallerV2Test is Test {
     function test_Execute() public {
         bytes32 ref = keccak256("ref");
         uint256 deadline = block.timestamp + 1;
-        GuardedMulticallerV2.Call[] memory calls = new GuardedMulticallerV2.Call[](3);
-        calls[0] = GuardedMulticallerV2.Call(
+        GuardedMulticaller2.Call[] memory calls = new GuardedMulticaller2.Call[](3);
+        calls[0] = GuardedMulticaller2.Call(
             address(target),
             "succeedWithUint256(uint256)",
             abi.encodePacked(uint256(42))
         );
-        calls[1] = GuardedMulticallerV2.Call(address(target), "succeed()", "");
-        calls[2] = GuardedMulticallerV2.Call(
+        calls[1] = GuardedMulticaller2.Call(address(target), "succeed()", "");
+        calls[2] = GuardedMulticaller2.Call(
             address(target1),
             "succeedWithUint256(uint256)",
             abi.encodePacked(uint256(42))
@@ -76,8 +76,8 @@ contract GuardedMulticallerV2Test is Test {
     function test_RevertWhen_Expired() public {
         bytes32 ref = keccak256("ref");
         uint256 deadline = block.timestamp - 1;
-        GuardedMulticallerV2.Call[] memory calls = new GuardedMulticallerV2.Call[](1);
-        calls[0] = GuardedMulticallerV2.Call(
+        GuardedMulticaller2.Call[] memory calls = new GuardedMulticaller2.Call[](1);
+        calls[0] = GuardedMulticaller2.Call(
             address(target),
             "succeedWithUint256(uint256)",
             abi.encodePacked(uint256(42))
@@ -87,7 +87,7 @@ contract GuardedMulticallerV2Test is Test {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, digest);
         bytes memory signature = abi.encodePacked(r, s, v);
 
-        vm.expectRevert(abi.encodeWithSelector(GuardedMulticallerV2.Expired.selector, deadline));
+        vm.expectRevert(abi.encodeWithSelector(GuardedMulticaller2.Expired.selector, deadline));
 
         gmc.execute(signer, ref, calls, deadline, signature);
     }
@@ -95,8 +95,8 @@ contract GuardedMulticallerV2Test is Test {
     function test_RevertWhen_InvalidReference() public {
         bytes32 ref = "";
         uint256 deadline = block.timestamp + 1;
-        GuardedMulticallerV2.Call[] memory calls = new GuardedMulticallerV2.Call[](1);
-        calls[0] = GuardedMulticallerV2.Call(
+        GuardedMulticaller2.Call[] memory calls = new GuardedMulticaller2.Call[](1);
+        calls[0] = GuardedMulticaller2.Call(
             address(target),
             "succeedWithUint256(uint256)",
             abi.encodePacked(uint256(42))
@@ -106,7 +106,7 @@ contract GuardedMulticallerV2Test is Test {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, digest);
         bytes memory signature = abi.encodePacked(r, s, v);
 
-        vm.expectRevert(abi.encodeWithSelector(GuardedMulticallerV2.InvalidReference.selector, ref));
+        vm.expectRevert(abi.encodeWithSelector(GuardedMulticaller2.InvalidReference.selector, ref));
 
         gmc.execute(signer, ref, calls, deadline, signature);
     }
@@ -114,8 +114,8 @@ contract GuardedMulticallerV2Test is Test {
     function test_RevertWhen_ReusedReference() public {
         bytes32 ref = "ref";
         uint256 deadline = block.timestamp + 1;
-        GuardedMulticallerV2.Call[] memory calls = new GuardedMulticallerV2.Call[](1);
-        calls[0] = GuardedMulticallerV2.Call(
+        GuardedMulticaller2.Call[] memory calls = new GuardedMulticaller2.Call[](1);
+        calls[0] = GuardedMulticaller2.Call(
             address(target),
             "succeedWithUint256(uint256)",
             abi.encodePacked(uint256(42))
@@ -127,20 +127,20 @@ contract GuardedMulticallerV2Test is Test {
 
         gmc.execute(signer, ref, calls, deadline, signature);
 
-        vm.expectRevert(abi.encodeWithSelector(GuardedMulticallerV2.ReusedReference.selector, ref));
+        vm.expectRevert(abi.encodeWithSelector(GuardedMulticaller2.ReusedReference.selector, ref));
         gmc.execute(signer, ref, calls, deadline, signature);
     }
 
     function test_RevertWhen_EmptyCallArray() public {
         bytes32 ref = "ref";
         uint256 deadline = block.timestamp + 1;
-        GuardedMulticallerV2.Call[] memory calls = new GuardedMulticallerV2.Call[](0);
+        GuardedMulticaller2.Call[] memory calls = new GuardedMulticaller2.Call[](0);
 
         bytes32 digest = sigUtils.hashTypedData(ref, calls, deadline);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, digest);
         bytes memory signature = abi.encodePacked(r, s, v);
 
-        vm.expectRevert(GuardedMulticallerV2.EmptyCallArray.selector);
+        vm.expectRevert(GuardedMulticaller2.EmptyCallArray.selector);
 
         gmc.execute(signer, ref, calls, deadline, signature);
     }
@@ -148,14 +148,14 @@ contract GuardedMulticallerV2Test is Test {
     function test_RevertWhen_NonContractAddress() public {
         bytes32 ref = "ref";
         uint256 deadline = block.timestamp + 1;
-        GuardedMulticallerV2.Call[] memory calls = new GuardedMulticallerV2.Call[](1);
-        calls[0] = GuardedMulticallerV2.Call(address(0), "succeedWithUint256(uint256)", abi.encodePacked(uint256(42)));
+        GuardedMulticaller2.Call[] memory calls = new GuardedMulticaller2.Call[](1);
+        calls[0] = GuardedMulticaller2.Call(address(0), "succeedWithUint256(uint256)", abi.encodePacked(uint256(42)));
 
         bytes32 digest = sigUtils.hashTypedData(ref, calls, deadline);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, digest);
         bytes memory signature = abi.encodePacked(r, s, v);
 
-        vm.expectRevert(abi.encodeWithSelector(GuardedMulticallerV2.NonContractAddress.selector, calls[0]));
+        vm.expectRevert(abi.encodeWithSelector(GuardedMulticaller2.NonContractAddress.selector, calls[0]));
 
         gmc.execute(signer, ref, calls, deadline, signature);
     }
@@ -164,8 +164,8 @@ contract GuardedMulticallerV2Test is Test {
         (address fakeSigner, uint256 fakeSignerPk) = makeAddrAndKey("fakeSigner");
         bytes32 ref = keccak256("ref");
         uint256 deadline = block.timestamp + 1;
-        GuardedMulticallerV2.Call[] memory calls = new GuardedMulticallerV2.Call[](1);
-        calls[0] = GuardedMulticallerV2.Call(
+        GuardedMulticaller2.Call[] memory calls = new GuardedMulticaller2.Call[](1);
+        calls[0] = GuardedMulticaller2.Call(
             address(target),
             "succeedWithUint256(uint256)",
             abi.encodePacked(uint256(42))
@@ -175,7 +175,7 @@ contract GuardedMulticallerV2Test is Test {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(fakeSignerPk, digest);
         bytes memory signature = abi.encodePacked(r, s, v);
 
-        vm.expectRevert(abi.encodeWithSelector(GuardedMulticallerV2.UnauthorizedSigner.selector, fakeSigner));
+        vm.expectRevert(abi.encodeWithSelector(GuardedMulticaller2.UnauthorizedSigner.selector, fakeSigner));
 
         gmc.execute(fakeSigner, ref, calls, deadline, signature);
     }
@@ -184,8 +184,8 @@ contract GuardedMulticallerV2Test is Test {
         (, uint256 fakeSignerPk) = makeAddrAndKey("fakeSigner");
         bytes32 ref = keccak256("ref");
         uint256 deadline = block.timestamp + 1;
-        GuardedMulticallerV2.Call[] memory calls = new GuardedMulticallerV2.Call[](1);
-        calls[0] = GuardedMulticallerV2.Call(
+        GuardedMulticaller2.Call[] memory calls = new GuardedMulticaller2.Call[](1);
+        calls[0] = GuardedMulticaller2.Call(
             address(target),
             "succeedWithUint256(uint256)",
             abi.encodePacked(uint256(42))
@@ -195,7 +195,7 @@ contract GuardedMulticallerV2Test is Test {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(fakeSignerPk, digest);
         bytes memory signature = abi.encodePacked(r, s, v);
 
-        vm.expectRevert(abi.encodeWithSelector(GuardedMulticallerV2.UnauthorizedSignature.selector, signature));
+        vm.expectRevert(abi.encodeWithSelector(GuardedMulticaller2.UnauthorizedSignature.selector, signature));
 
         gmc.execute(signer, ref, calls, deadline, signature);
     }
@@ -203,14 +203,14 @@ contract GuardedMulticallerV2Test is Test {
     function test_RevertWhen_FailedCall() public {
         bytes32 ref = keccak256("ref");
         uint256 deadline = block.timestamp + 1;
-        GuardedMulticallerV2.Call[] memory calls = new GuardedMulticallerV2.Call[](1);
-        calls[0] = GuardedMulticallerV2.Call(address(target), "revertWithNoReason()", "");
+        GuardedMulticaller2.Call[] memory calls = new GuardedMulticaller2.Call[](1);
+        calls[0] = GuardedMulticaller2.Call(address(target), "revertWithNoReason()", "");
 
         bytes32 digest = sigUtils.hashTypedData(ref, calls, deadline);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, digest);
         bytes memory signature = abi.encodePacked(r, s, v);
 
-        vm.expectRevert(abi.encodeWithSelector(GuardedMulticallerV2.FailedCall.selector, calls[0]));
+        vm.expectRevert(abi.encodeWithSelector(GuardedMulticaller2.FailedCall.selector, calls[0]));
 
         gmc.execute(signer, ref, calls, deadline, signature);
     }

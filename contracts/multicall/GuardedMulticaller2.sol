@@ -56,17 +56,8 @@ contract GuardedMulticaller2 is AccessControl, ReentrancyGuard, EIP712 {
     /// @dev Error thrown when reference has already been executed
     error ReusedReference(bytes32 _reference);
 
-    /// @dev Error thrown when call array is empty
-    error EmptyCallArray();
-
-    /// @dev Error thrown when address array and data array have different lengths
-    error AddressDataArrayLengthsMismatch(uint256 _addressLength, uint256 _dataLength);
-
     /// @dev Error thrown when deadline is expired
     error Expired(uint256 _deadline);
-
-    /// @dev Error thrown when target address is not a contract
-    error NonContractAddress(Call _call);
 
     /// @dev Error thrown when signer is not authorized
     error UnauthorizedSigner(address _multicallSigner);
@@ -74,14 +65,17 @@ contract GuardedMulticaller2 is AccessControl, ReentrancyGuard, EIP712 {
     /// @dev Error thrown when signature is invalid
     error UnauthorizedSignature(bytes _signature);
 
+    /// @dev Error thrown when call array is empty
+    error EmptyCallArray();
+
     /// @dev Error thrown when call reverts
     error FailedCall(Call _call);
 
-    /// @dev Error thrown when call data is invalid
-    error InvalidCallData(address _target, bytes _data);
+    /// @dev Error thrown when target address is not a contract
+    error NonContractAddress(Call _call);
 
-    /// @dev Error thrown when call data is unauthorized
-    error UnauthorizedFunction(address _target, string _functionSignature);
+    /// @dev Error thrown when function signature is invalid
+    error InvalidFunctionSignature(Call _call);
 
     /**
      *
@@ -135,6 +129,9 @@ contract GuardedMulticaller2 is AccessControl, ReentrancyGuard, EIP712 {
             revert EmptyCallArray();
         }
         for (uint256 i = 0; i < _calls.length; i++) {
+            if (bytes(_calls[i].functionSignature).length == 0) {
+                revert InvalidFunctionSignature(_calls[i]);
+            }
             if (_calls[i].target.code.length == 0) {
                 revert NonContractAddress(_calls[i]);
             }

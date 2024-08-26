@@ -260,4 +260,19 @@ contract GuardedMulticaller2Test is Test {
 
         gmc.execute(signer, ref, calls, deadline, signature);
     }
+
+    function test_RevertWhen_ExecuteInvalidFunctionSignature() public {
+        bytes32 ref = keccak256("ref");
+        uint256 deadline = block.timestamp + 1;
+        GuardedMulticaller2.Call[] memory calls = new GuardedMulticaller2.Call[](1);
+        calls[0] = GuardedMulticaller2.Call(address(target), "", abi.encodePacked(uint256(42)));
+
+        bytes32 digest = sigUtils.hashTypedData(ref, calls, deadline);
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, digest);
+        bytes memory signature = abi.encodePacked(r, s, v);
+
+        vm.expectRevert(abi.encodeWithSelector(GuardedMulticaller2.InvalidFunctionSignature.selector, calls[0]));
+
+        gmc.execute(signer, ref, calls, deadline, signature);
+    }
 }

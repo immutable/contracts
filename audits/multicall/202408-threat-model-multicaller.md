@@ -1,5 +1,5 @@
 # Background
-Currently the Primary Sales product uses the pattern of Multicall to transfer ERC20 tokens and mint ERC721/ERC1155 tokens in a single transaction. The Multicaller contract is a common pattern in the space and is used by many projects, this has some added security features that will be mentioned below.
+The Multicaller contract is a common pattern in the space and is used by many projects, this has some added security features that will be mentioned below.
 
 # Architecture
 

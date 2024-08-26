@@ -164,11 +164,13 @@ contract GuardedMulticaller2 is AccessControl, ReentrancyGuard, EIP712 {
             // slither-disable-next-line calls-loop
             (bool success, bytes memory returnData) = _calls[i].target.call(callData);
             if (!success) {
+                // Look for revert reason and bubble it up if present
                 if (returnData.length == 0) {
                     revert FailedCall(_calls[i]);
                 }
                 // solhint-disable-next-line no-inline-assembly
                 assembly {
+                    // The easiest way to bubble the revert reason is using memory via assembly
                     revert(add(returnData, 32), mload(returnData))
                 }
             }

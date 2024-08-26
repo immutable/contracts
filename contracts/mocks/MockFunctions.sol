@@ -3,6 +3,8 @@
 pragma solidity ^0.8.19;
 
 contract MockFunctions {
+    error RevertWithData(uint256 value);
+
     // solhint-disable-next-line no-empty-blocks
     function succeed() public pure {
         // This function is intentionally left empty to simulate a successful call
@@ -20,5 +22,10 @@ contract MockFunctions {
 
     function succeedWithUint256(uint256 value) public pure returns (uint256) {
         return value;
+    }
+
+    function revertWithData(uint256 value) public pure {
+        // solhint-disable-next-line custom-errors,reason-string
+        revert RevertWithData(value);
     }
 }

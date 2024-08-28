@@ -218,7 +218,7 @@ contract GuardedMulticaller2 is AccessControl, ReentrancyGuard, EIP712 {
                 abi.encode(CALL_TYPEHASH, _calls[i].target, _calls[i].functionSignature, _calls[i].data)
             );
         }
-        return keccak256(abi.encodePacked(hashedCallArr));
+        return keccak256(abi.encode(hashedCallArr));
     }
 
     /**

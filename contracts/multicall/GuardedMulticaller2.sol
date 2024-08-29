@@ -1,4 +1,4 @@
-// Copyright Immutable Pty Ltd 2018 - 2023
+// Copyright Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
@@ -32,7 +32,6 @@ contract GuardedMulticaller2 is AccessControl, ReentrancyGuard, EIP712 {
     }
 
     /// @dev Mapping of reference to executed status
-    // solhint-disable-next-line named-parameters-mapping
     mapping(bytes32 => bool) private replayProtection;
 
     /// @dev Only those with MULTICALL_SIGNER_ROLE can generate valid signatures for execute function.
@@ -69,7 +68,7 @@ contract GuardedMulticaller2 is AccessControl, ReentrancyGuard, EIP712 {
     error EmptyCallArray();
 
     /// @dev Error thrown when call reverts
-    error FailedCall(Call _call);
+    error FailedCall(Call _call, bytes _returnData);
 
     /// @dev Error thrown when target address is not a contract
     error NonContractAddress(Call _call);
@@ -162,8 +161,8 @@ contract GuardedMulticaller2 is AccessControl, ReentrancyGuard, EIP712 {
             (bool success, bytes memory returnData) = _calls[i].target.call(callData);
             if (!success) {
                 // Look for revert reason and bubble it up if present
-                if (returnData.length == 0) {
-                    revert FailedCall(_calls[i]);
+                if (returnData.length < 4) {
+                    revert FailedCall(_calls[i], returnData);
                 }
                 // solhint-disable-next-line no-inline-assembly
                 assembly {

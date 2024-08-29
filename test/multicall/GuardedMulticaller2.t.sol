@@ -210,7 +210,7 @@ contract GuardedMulticaller2Test is Test {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, digest);
         bytes memory signature = abi.encodePacked(r, s, v);
 
-        vm.expectRevert(abi.encodeWithSelector(GuardedMulticaller2.FailedCall.selector, calls[0]));
+        vm.expectRevert(abi.encodeWithSelector(GuardedMulticaller2.FailedCall.selector, calls[0], ""));
 
         gmc.execute(signer, ref, calls, deadline, signature);
     }

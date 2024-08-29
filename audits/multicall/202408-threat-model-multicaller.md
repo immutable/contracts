@@ -23,7 +23,7 @@ The core of the `Guarded Multi-caller` system is `Multi-call`, allowing for the 
 |------------------------------	|-----------	|-------------------------------------------------------------------------------------------------------------------------	|
 | Client                       	| Customer  	| This can be a game client or a mobile client that the players interact with.                                            	|
 | Central Authority            	| Customer  	| It generates a list of function calls to be executed and gets a valid signature for those calls from `Multi-call Signer`. 	|
-| Multi-call Signer            	| Customer 	  |  It takes a list of function calls and generates a valid signature using a `EOA` with `MULTICALL_SIGNER_ROLE`.              	|
+| Multi-call Signer            	| Customer 	  | It takes a list of function calls and generates a valid signature using a `EOA` with `MULTICALL_SIGNER_ROLE`.              	|
 | Guarded Multicaller Contract 	| Customer  	| It validates an input signature and executes an authorized list of function calls.                                      	|
 
 ### Flow
@@ -53,6 +53,10 @@ The compromised signer keys can generate signatures that are valid to invoke fun
 - If admin keys are compromised, admins of token contracts should revoke `MINTER_ROLE` granted on the Guarded Multi-caller contract.
 - If signer keys are compromised, admins of Guarded Multi-caller contracts should revoke the signer keys.
 - If users grant access to their tokens, they should only grant approvals to the tokens needed for the multi-call transaction. If users have to grant access to all of their tokens, they should revoke the access immediately after the multi-call transaction is completed. With smart contract wallet's batch transaction, users can batch approvals, multi-call transaction, or approval revocation in one batch transaction.
+- If the last account with DEFAULT_ADMIN_ROLE accidentally renounces or revokes their role, the contract becomes permissionless, and admins can no longer grant/revoke accesses. The following should happen:
+  - Accounts with `MULTICALL_SIGNER_ROLE` should renounce their roles
+  - A new Guarded Multi-caller contract should be deployed. 
+  - All roles/accesses granted to the contract should be revoked. 
 
 # Functions
 

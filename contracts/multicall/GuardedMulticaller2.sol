@@ -32,7 +32,7 @@ contract GuardedMulticaller2 is AccessControl, ReentrancyGuard, EIP712 {
     }
 
     /// @dev Mapping of reference to executed status
-    mapping(bytes32 => bool) private replayProtection;
+    mapping(bytes32 ref => bool executed) private replayProtection;
 
     /// @dev Only those with MULTICALL_SIGNER_ROLE can generate valid signatures for execute function.
     bytes32 public constant MULTICALL_SIGNER_ROLE = bytes32("MULTICALL_SIGNER_ROLE");

@@ -1,6 +1,6 @@
 // Copyright Immutable Pty Ltd 2018 - 2023
 // SPDX-License-Identifier: Apache 2.0
-pragma solidity 0.8.20;
+pragma solidity ^0.8.20;
 
 import {AccessControlEnumerable, MintingAccessControl} from "../../../access/MintingAccessControl.sol";
 import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";

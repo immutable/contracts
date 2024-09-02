@@ -7,7 +7,7 @@
  *  | |____| | \ \| |____  / /   / /_ | |  | |
  *  |______|_|  \_\\_____|/_/   |____||_|  |_|
  */
-pragma solidity 0.8.20;
+pragma solidity ^0.8.20;
 
 import {BitMaps} from "solidity-bits/contracts/BitMaps.sol";
 import {ERC721Psi} from "./ERC721Psi.sol";

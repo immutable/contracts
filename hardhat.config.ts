@@ -27,7 +27,7 @@ const config: HardhatUserConfig = {
   solidity: {
     compilers: [
       {
-        version: "0.8.20",
+        version: "^0.8.20",
         settings: {
           optimizer: {
             enabled: true,
@@ -36,7 +36,7 @@ const config: HardhatUserConfig = {
         },
       },
       {
-        version: "0.8.20",
+        version: "^0.8.20",
         settings: {
           optimizer: {
             enabled: true,

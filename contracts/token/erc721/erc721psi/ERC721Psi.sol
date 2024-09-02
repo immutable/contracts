@@ -11,7 +11,7 @@
  *  - npm: https://www.npmjs.com/package/erc721psi
  */
 // solhint-disable
-pragma solidity 0.8.20;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";

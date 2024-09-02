@@ -1,6 +1,6 @@
 // Copyright Immutable Pty Ltd 2018 - 2023
 // SPDX-License-Identifier: Apache 2.0
-pragma solidity 0.8.20;
+pragma solidity ^0.8.20;
 
 import {ImmutableERC1155Base} from "../abstract/ImmutableERC1155Base.sol";
 

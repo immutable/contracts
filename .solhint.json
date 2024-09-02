@@ -40,7 +40,7 @@
     "avoid-throw": "error",
     "avoid-tx-origin": "error",
     "check-send-result": "error",
-    "compiler-version": ["error", "0.8.20"],
+    "compiler-version": ["error", "^0.8.20"],
     "func-visibility": ["error", {"ignoreConstructors": true}],
     "multiple-sends": "warn",
     "no-complex-fallback": "warn",

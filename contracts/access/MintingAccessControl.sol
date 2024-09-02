@@ -1,6 +1,6 @@
 // Copyright Immutable Pty Ltd 2018 - 2023
 // SPDX-License-Identifier: Apache 2.0
-pragma solidity 0.8.19;
+pragma solidity 0.8.20;
 
 // solhint-disable no-unused-import
 import {AccessControlEnumerable, AccessControl, IAccessControl} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";

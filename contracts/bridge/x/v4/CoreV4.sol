@@ -7,7 +7,7 @@
 //
 // This file was generated using the abi-to-sol tool.
 // the StarkEx contract ABI that was provided by StarkWare via slack.
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 interface CoreV4 {
     fallback() external payable;

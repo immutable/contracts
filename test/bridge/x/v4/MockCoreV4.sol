@@ -1,6 +1,6 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 import {CoreV4} from "../../../../contracts/bridge/x/v4/CoreV4.sol";
 import {Asset} from "../../../../contracts/token/erc721/x/Asset.sol";

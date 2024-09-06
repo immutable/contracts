@@ -11,7 +11,7 @@ contract SigUtils {
 
     bytes32 internal constant MULTICALL_TYPEHASH =
         keccak256(
-            "Multicall(bytes32 ref,Call[] call,uint256 deadline)Call(address target,string functionSignature,bytes data)"
+            "Multicall(bytes32 ref,Call[] calls,uint256 deadline)Call(address target,string functionSignature,bytes data)"
         );
 
     bytes32 private immutable cachedDomainSeparator;

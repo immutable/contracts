@@ -1,6 +1,6 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity 0.8.24;
 
 import {RegistrationV4, NoFundsToWithdraw} from "../../../../contracts/bridge/x/v4/RegistrationV4.sol";
 import {Test} from "forge-std/Test.sol";

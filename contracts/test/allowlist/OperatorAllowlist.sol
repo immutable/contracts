@@ -1,6 +1,6 @@
 // Copyright Immutable Pty Ltd 2018 - 2023
 // SPDX-License-Identifier: Apache 2.0
-pragma solidity ^0.8.20;
+pragma solidity 0.8.24;
 
 // Access Control
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";

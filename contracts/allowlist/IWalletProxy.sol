@@ -1,6 +1,6 @@
 // Copyright Immutable Pty Ltd 2018 - 2023
 // SPDX-License-Identifier: Apache 2.0
-pragma solidity ^0.8.20;
+pragma solidity 0.8.24;
 
 // Interface to retrieve the implemention stored inside the Proxy contract
 /// Interface for Passport Wallet's proxy contract.

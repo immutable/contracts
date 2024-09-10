@@ -1,6 +1,6 @@
 // Copyright Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: Apache 2.0
-pragma solidity ^0.8.20;
+pragma solidity 0.8.24;
 
 import {IDeployer} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/interfaces/IDeployer.sol";
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";

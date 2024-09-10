@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache-2
 
 // solhint-disable-next-line compiler-version
-pragma solidity ^0.8.20;
+pragma solidity 0.8.24;
 
 import {AccessControlEnumerable} from "openzeppelin-contracts-5.0.2/access/extensions/AccessControlEnumerable.sol";
 import {ECDSA} from "openzeppelin-contracts-5.0.2/utils/cryptography/ECDSA.sol";

@@ -1,7 +1,7 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2023
 // SPDX-License-Identifier: Apache-2.0
 
-pragma solidity 0.8.24;
+pragma solidity ^0.8.24;
 
 import "forge-std/Test.sol";
 import {GemGame} from "../../../contracts/games/gems/GemGame.sol";

@@ -1,6 +1,6 @@
 // Copyright Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity ^0.8.24;
 
 import {IDeploy} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/interfaces/IDeploy.sol";
 import {ContractAddress} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/libs/ContractAddress.sol";

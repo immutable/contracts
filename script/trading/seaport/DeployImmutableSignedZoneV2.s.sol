@@ -1,7 +1,7 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: Apache-2
 // solhint-disable-next-line compiler-version
-pragma solidity 0.8.24;
+pragma solidity ^0.8.24;
 
 import "forge-std/Test.sol";
 import {ImmutableSignedZoneV2} from

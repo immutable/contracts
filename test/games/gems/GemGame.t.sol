@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache 2.0
 // solhint-disable not-rely-on-time
 
-pragma solidity 0.8.24;
+pragma solidity ^0.8.24;
 
 import "forge-std/Test.sol";
 import {GemGame, Unauthorized, ContractPaused} from "../../../contracts/games/gems/GemGame.sol";

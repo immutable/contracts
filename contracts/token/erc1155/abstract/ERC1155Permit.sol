@@ -1,6 +1,6 @@
 // Copyright Immutable Pty Ltd 2018 - 2023
 // SPDX-License-Identifier: Apache 2.0
-pragma solidity 0.8.24;
+pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";

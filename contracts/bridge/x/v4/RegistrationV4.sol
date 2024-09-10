@@ -1,6 +1,6 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity ^0.8.24;
 
 import {CoreV4} from "./CoreV4.sol";
 

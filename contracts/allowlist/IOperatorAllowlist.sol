@@ -1,6 +1,6 @@
 // Copyright Immutable Pty Ltd 2018 - 2023
 // SPDX-License-Identifier: Apache 2.0
-pragma solidity 0.8.24;
+pragma solidity ^0.8.24;
 
 /**
  * @notice Required interface of an OperatorAllowlist compliant contract

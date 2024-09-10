@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.24;
+pragma solidity ^0.8.24;
 
 import {GuardedMulticaller2} from "../../contracts/multicall/GuardedMulticaller2.sol";
 

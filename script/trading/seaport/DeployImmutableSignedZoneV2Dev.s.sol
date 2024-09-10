@@ -6,7 +6,7 @@ import {ImmutableSignedZoneV2} from
     "../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/ImmutableSignedZoneV2.sol";
 
 // solhint-disable-next-line compiler-version
-pragma solidity 0.8.24;
+pragma solidity ^0.8.24;
 
 // Deploy ImmutableSignedZoneV2 to dev environment (without create3)
 contract DeployImmutableSignedZoneV2Dev is Script {

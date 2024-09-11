@@ -618,6 +618,7 @@ export const guardedMulticaller2Abi = [
           { name: 'data', internalType: 'bytes', type: 'bytes' },
         ],
       },
+      { name: '_returnData', internalType: 'bytes', type: 'bytes' },
     ],
     name: 'FailedCall',
   },

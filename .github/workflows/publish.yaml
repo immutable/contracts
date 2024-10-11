@@ -9,6 +9,8 @@ jobs:
   publish:
     name: Publish to NPM
     runs-on: ubuntu-latest
+    permissions:
+      attestations: write
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -58,6 +60,11 @@ jobs:
         run: |
           rm -rf dist && yarn build
 
+      - name: Generate SDK attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: './dist'
+  
       - name: Publish package
         uses: JS-DevTools/npm-publish@v1
         with:

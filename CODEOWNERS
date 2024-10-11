@@ -1,3 +1,5 @@
+.github @immutable/assets @immutable/traders @immutable/prodsec
+
 /clients @immutable/assets
 /abi @immutable/assets
 

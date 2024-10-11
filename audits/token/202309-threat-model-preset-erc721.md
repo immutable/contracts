@@ -10,7 +10,7 @@ The ERC721 presets built by Immutable were done with the requirements of cheaper
 
 - Studios should be able to mint multiple tokens efficiently to multiple addresses.
 
-- Studios should be able to to mint by token id out of order for metadata association.
+- Studios should be able to mint by token id out of order for metadata association.
 
 - Minting should be restricted to addresses that were granted the `minter` role.
 

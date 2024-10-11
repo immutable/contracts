@@ -168,7 +168,7 @@ export class ERC721Client {
   }
 
   /**
-   * @returns a booolean that tells whether an operator is approved by a given owner.
+   * @returns a boolean that tells whether an operator is approved by a given owner.
    */
   public async isApprovedForAll(
     provider: Provider,

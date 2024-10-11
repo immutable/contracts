@@ -102,6 +102,10 @@ jobs:
       with:
         # Possible values: "critical", "high", "moderate", "low"
         fail-on-severity: critical
+
+        # Address https://github.com/actions/dependency-review-action/issues/456
+        base-ref: ${{ github.event.pull_request.base.sha || github.event.repository.default_branch }}
+        head-ref: ${{ github.event.pull_request.head.sha || github.ref }}
   publish:
     name: Publish to NPM (dry run)
     runs-on: ubuntu-latest

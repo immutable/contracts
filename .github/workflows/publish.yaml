@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write # Required for GitHub Attestation
-      attestations: write # Required for GitHub Attestation
+      attestations: write # Required for GitHub Attestation 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -64,7 +64,9 @@ jobs:
       - name: Generate SDK attestation
         uses: actions/attest-build-provenance@v1
         with:
-          subject-path: './dist'
+          subject-path: |
+            dist
+            contracts
   
       - name: Publish package
         uses: JS-DevTools/npm-publish@v1

@@ -10,7 +10,8 @@ jobs:
     name: Publish to NPM
     runs-on: ubuntu-latest
     permissions:
-      attestations: write
+      id-token: write # Required for GitHub Attestation
+      attestations: write # Required for GitHub Attestation
     steps:
       - name: Checkout
         uses: actions/checkout@v2

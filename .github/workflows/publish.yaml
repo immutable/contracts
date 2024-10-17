@@ -67,6 +67,9 @@ jobs:
           subject-path: |
             dist
             contracts
+            README.md
+            LICENSE.md
+            package.json
   
       - name: Publish package
         uses: JS-DevTools/npm-publish@v1

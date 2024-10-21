@@ -15,7 +15,7 @@ Contract threat models and audits:
 
 | Description               | Date             |Version Audited  | Link to Report |
 |---------------------------|------------------|-----------------|----------------|
-| Not audited and no threat model              | -                | -               | -              |
+| Threat model              | Oct 21, 2024     | [`fd982abc49884af41e05f18349b13edc9eefbc1e`](https://github.com/immutable/contracts/blob/fd982abc49884af41e05f18349b13edc9eefbc1e/contracts/staking/README.md) | [202410-threat-model-stake-holder.md](../../audits/staking/202410-threat-model-stake-holder.md)              |
 
 
 
@@ -56,3 +56,14 @@ The `StakeHolder` contract is `AccessControlEnumerableUpgradeable`, with the fol
 * `_revokeRole(bytes32 _role, address _account)` has been overridden to prevent the last DEFAULT_ADMIN_ROLE (the last role admin) from either being revoked or renounced. 
 
 The `StakeHolder` contract is `UUPSUpgradeable`. Only accounts with `UPGRADE_ROLE` are authorised to upgrade the contract.
+
+## Upgrade Concept
+
+The `upgradeStorage` function should be updated each new contract version. It should do the following:
+
+* Check the value returned by `version`. This is the version of the code and associated storage format from the previous version prior to the upgrade. Three alternatives are possible:
+  * The value is less than the new version: Upgrade as per the bullet points below.
+  * The value is higher than the new version: This probably indicates that an attempt to upgrade the contract has mistakenly downgraded the contract to a previous version. The function should revert. 
+  * The value is the same as the newt version: Someone (an attacker) has called the `upgradeStorage` function after the code has been upgraded. The function should revert.
+* Based on the old code version and storage format indicated by the `version`, update the storage variables. Typically, upgrades only involve code changes, and require no storage variable changes. However, in some circumstances storage variables should also be updated.
+* Update the `version` storage variable to indicate the new code version.

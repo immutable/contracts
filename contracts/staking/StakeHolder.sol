@@ -267,6 +267,6 @@ contract StakeHolder is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
     /// @notice storage gap for additional variables for upgrades
     // slither-disable-start unused-state
     // solhint-disable-next-line var-name-mixedcase
-    uint256[20] private __StakeHolderGap;
+    uint256[50] private __StakeHolderGap;
     // slither-disable-end unused-state
 }

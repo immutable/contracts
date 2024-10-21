@@ -39,8 +39,8 @@ struct StakeHolderContractArgs {
 /**
  * @notice Deployment script and test code for the deployment script.
  * @dev testDeploy is the test.
- * @dev deploy() is the function the script should call:
- * 
+ * @dev deploy() is the function the script should call.
+ * For more details on deployment see ../../contracts/staking/README.md
  */
 contract DeployStakeHolder is Test {
     function testDeploy() external {

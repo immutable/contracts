@@ -12,6 +12,7 @@ import {ERC1967Proxy} from "openzeppelin-contracts-4.9.3/proxy/ERC1967/ERC1967Pr
 
 
 contract StakeHolderBaseTest is Test {
+
     bytes32 public defaultAdminRole;
     bytes32 public upgradeRole;
 

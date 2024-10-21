@@ -17,13 +17,13 @@ Configuration tests (in [StakeHolderConfig.t.sol](../../contracts/staking/StakeH
 |---------------------------------|------------------------------------------------------------|------------|-------------|
 | testUpgradeToV1                 | Check upgrade process.                                     | Yes        | Yes         |
 | testUpgradeToV0                 | Check upgrade to V0 fails.                                 | No         | Yes         |
-| testDowngradeV1ToV0             | Check downgrade from V1 to V0 fails.                       | No         | No          |
-| testUpgradeAuthFail             | Try upgrade from account that doesn't have upgrade role.   | No         | No          |
-| testAddRevokeRenounceRoleAdmin  | Check adding, removing, and renouncing role admins.        | Yes        | No          |
-| testAddRevokeRenounceUpgradeAdmin | Check adding, removing, and renouncing upgrade admins.   | Yes        | No          |
-| testRenounceLastRoleAdmin       | Check that attempting to renounce last role admin fails.   | No         | No          |
-| testRevokeLastRoleAdmin         | Check that attempting to revoke last role admin fails.     | No         | No          |
-| testRoleAdminAuthFail           | Attempt to add an upgrade admin from a non-role admin.     | No         | No          |
+| testDowngradeV1ToV0             | Check downgrade from V1 to V0 fails.                       | No         | Yes         |
+| testUpgradeAuthFail             | Try upgrade from account that doesn't have upgrade role.   | No         | Yes         |
+| testAddRevokeRenounceRoleAdmin  | Check adding, removing, and renouncing role admins.        | Yes        | Yes         |
+| testAddRevokeRenounceUpgradeAdmin | Check adding, removing, and renouncing upgrade admins.   | Yes        | Yes         |
+| testRenounceLastRoleAdmin       | Check that attempting to renounce last role admin fails.   | No         | Yes         |
+| testRevokeLastRoleAdmin         | Check that attempting to revoke last role admin fails.     | No         | Yes         |
+| testRoleAdminAuthFail           | Attempt to add an upgrade admin from a non-role admin.     | No         | Yes         |
 
 
 Operational tests (in [StakeHolderOperational.t.sol](../../contracts/staking/StakeHolderOperational.t.sol))::
@@ -39,13 +39,13 @@ Operational tests (in [StakeHolderOperational.t.sol](../../contracts/staking/Sta
 | testUnstakePartial             | Check that an account can unstake part of their value.      | Yes        | Yes         |
 | testUnstakeMultiple            | Unstake in multiple parts.                                  | Yes        | Yes         |
 | testUnstakeReentrantAttack     | Attempt a reentrancy attack on unstaking.                   | No         | Yes         |
-| testRestaking                  | Stake, unstake, restake.                                    | Yes        | No          |
-| testGetStakers                 | Check getStakers in various scenarios.                      | Yes        | No          |
-| testGetStakersOutOfRange       | Check getStakers for out of range request.                  | No         | No          |
+| testRestaking                  | Stake, unstake, restake.                                    | Yes        | Yes         |
+| testGetStakers                 | Check getStakers in various scenarios.                      | Yes        | Yes         |
+| testGetStakersOutOfRange       | Check getStakers for out of range request.                  | No         | Yes         |
 | testDistributeRewardsOne       | Distribute rewards to one account.                          | Yes        | Yes         |
-| testDistributeRewardsMultiple  | Distribute rewards to multiple accounts.                    | Yes        | No          |
-| testDistributeZeroReward       | Fail when distributing zero reward.                         | No         | No          |
-| testDistributeMismatch         | Fail if the total to distribute does not equal msg.value.   | No         | No          |
-| testDistributeToEmptyAccount   | Stake, unstake, distribute rewards.                         | Yes        | No          |
-| testDistributeToUnusedAccount  | Attempt to distribute rewards to an account that has never staked. | No  | No          |
+| testDistributeRewardsMultiple  | Distribute rewards to multiple accounts.                    | Yes        | Yes         |
+| testDistributeZeroReward       | Fail when distributing zero reward.                         | No         | Yes         |
+| testDistributeMismatch         | Fail if the total to distribute does not equal msg.value.   | No         | Yes         |
+| testDistributeToEmptyAccount   | Stake, unstake, distribute rewards.                         | Yes        | Yes         |
+| testDistributeToUnusedAccount  | Attempt to distribute rewards to an account that has never staked. | No  | Yes         |
 

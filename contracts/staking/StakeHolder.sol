@@ -18,7 +18,7 @@ struct AccountAmount {
  */
 contract StakeHolder is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
     /// @notice Error: Attempting to upgrade contract storage to version 0.
-    error CanNotUpgradeToV0(uint256 _storageVersion);
+    error CanNotUpgradeToLowerOrSameVersion(uint256 _storageVersion);
 
     /// @notice Error: Attempting to renounce the last role admin / default admin.
     error MustHaveOneRoleAdmin();
@@ -100,20 +100,7 @@ contract StakeHolder is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
      * @ param _data ABI encoded data to be used as part of the contract storage upgrade.
      */
     function upgradeStorage(bytes memory /* _data */) external virtual {
-        revert CanNotUpgradeToV0(version);
-    }
-
-    /**
-     * @notice Renounce a role assigned to msg.sender.
-     * @dev Prevents the last default admin role from renouncing the role.
-     * @param _role The role to be renounced.
-     * @param _account Must equal msg.sender. Used as an additional check.
-     */
-    function renounceRole(bytes32 _role, address _account) public override(IAccessControlUpgradeable, AccessControlUpgradeable) {
-        if (_role == DEFAULT_ADMIN_ROLE && getRoleMemberCount(_role) == 1) {
-            revert MustHaveOneRoleAdmin();
-        }
-        super.renounceRole(_role, _account);
+        revert CanNotUpgradeToLowerOrSameVersion(version);
     }
 
     /**
@@ -263,6 +250,19 @@ contract StakeHolder is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
     // Override the _authorizeUpgrade function
     // solhint-disable-next-line no-empty-blocks
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADE_ROLE) {}
+
+
+    /**
+     * @notice Prevent revoke or renounce role for the last DEFAULT_ADMIN_ROLE / the last role admin.
+     * @param _role The role to be renounced.
+     * @param _account Account to be revoked.
+     */
+    function _revokeRole(bytes32 _role, address _account) internal override {
+        if (_role == DEFAULT_ADMIN_ROLE && getRoleMemberCount(_role) == 1) {
+            revert MustHaveOneRoleAdmin();
+        }
+        super._revokeRole(_role, _account);
+    }
 
     /// @notice storage gap for additional variables for upgrades
     // slither-disable-start unused-state

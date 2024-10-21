@@ -3,8 +3,7 @@
 pragma solidity ^0.8.20;
 
 import {UUPSUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/proxy/utils/UUPSUpgradeable.sol";
-import {AccessControlEnumerableUpgradeable, IAccessControlUpgradeable, AccessControlUpgradeable} from
-    "openzeppelin-contracts-upgradeable-4.9.3/access/AccessControlEnumerableUpgradeable.sol";
+import {AccessControlEnumerableUpgradeable, IAccessControlUpgradeable, AccessControlUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/access/AccessControlEnumerableUpgradeable.sol";
 
 /// @notice Struct to combine an account and an amount.
 struct AccountAmount {
@@ -56,9 +55,9 @@ contract StakeHolder is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
     /// @notice Holds staking information for a single staker.
     struct StakeInfo {
         /// @notice Amount of stake.
-        uint256 stake;  
+        uint256 stake;
         /// @notice True if this account has ever staked.
-        bool hasStaked; 
+        bool hasStaked;
     }
 
     /// @notice The amount of value owned by each staker
@@ -66,7 +65,7 @@ contract StakeHolder is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
     mapping(address staker => StakeInfo stakeInfo) private balances;
 
     /// @notice A list of all stakers who have ever staked.
-    /// @dev The list make contain stakers who have completely unstaked (that is, have 
+    /// @dev The list make contain stakers who have completely unstaked (that is, have
     ///    a balance of 0). This array is never re-ordered. As such, off-chain services
     ///    could cache the results of getStakers().
     // solhint-disable-next-line private-vars-leading-underscore
@@ -91,11 +90,11 @@ contract StakeHolder is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
     /**
      * @notice Function to be called when upgrading this contract.
      * @dev Call this function as part of upgradeToAndCall().
-     *      This initial version of this function reverts. There is no situation 
+     *      This initial version of this function reverts. There is no situation
      *      in which it makes sense to upgrade to the V0 storage layout.
-     *      Note that this function is permissionless. Future versions must 
-     *      compare the code version and the storage version and upgrade 
-     *      appropriately. As such, the code will revert if an attacker calls 
+     *      Note that this function is permissionless. Future versions must
+     *      compare the code version and the storage version and upgrade
+     *      appropriately. As such, the code will revert if an attacker calls
      *      this function attempting a malicious upgrade.
      * @ param _data ABI encoded data to be used as part of the contract storage upgrade.
      */
@@ -139,15 +138,12 @@ contract StakeHolder is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
     /**
      * @notice Any account can distribute tokens to any set of accounts.
      * @dev The total amount to distribute must match msg.value.
-     *  This function does not need re-entrancy guard as the distribution mechanism 
+     *  This function does not need re-entrancy guard as the distribution mechanism
      *  does not call out to another contract.
-     * @param _recipientsAndAmounts An array of recipients to distribute value to and 
+     * @param _recipientsAndAmounts An array of recipients to distribute value to and
      *          amounts to be distributed to each recipient.
      */
-    function distributeRewards(AccountAmount[] calldata _recipientsAndAmounts)
-        external
-        payable
-    {
+    function distributeRewards(AccountAmount[] calldata _recipientsAndAmounts) external payable {
         // Initial validity checks
         if (msg.value == 0) {
             revert MustDistributeMoreThanZero();
@@ -160,7 +156,7 @@ contract StakeHolder is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
             AccountAmount calldata accountAmount = _recipientsAndAmounts[i];
             uint256 amount = accountAmount.amount;
             // Add stake, but require the acount to either currently be staking or have
-            // previously staked. 
+            // previously staked.
             _addStake(accountAmount.account, amount, true);
             total += amount;
         }
@@ -192,9 +188,9 @@ contract StakeHolder is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
 
     /**
      * @notice Get the length of the stakers array.
-     * @dev This will be equal to the number of staker accounts that have ever staked. 
+     * @dev This will be equal to the number of staker accounts that have ever staked.
      *  Some of the accounts might have a zero balance, having staked and then
-     *  unstaked. 
+     *  unstaked.
      * @return _len The length of the stakers array.
      */
     function getNumStakers() external view returns (uint256 _len) {
@@ -213,11 +209,10 @@ contract StakeHolder is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
      * @param _numberToReturn The number of accounts to return.
      * @return _stakers A subset of the stakers array.
      */
-    function getStakers(uint256 _startOffset, uint256 _numberToReturn)
-        external
-        view
-        returns (address[] memory _stakers)
-    {
+    function getStakers(
+        uint256 _startOffset,
+        uint256 _numberToReturn
+    ) external view returns (address[] memory _stakers) {
         address[] memory stakerPartialArray = new address[](_numberToReturn);
         for (uint256 i = 0; i < _numberToReturn; i++) {
             stakerPartialArray[i] = stakers[_startOffset + i];
@@ -250,7 +245,6 @@ contract StakeHolder is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
     // Override the _authorizeUpgrade function
     // solhint-disable-next-line no-empty-blocks
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADE_ROLE) {}
-
 
     /**
      * @notice Prevent revoke or renounce role for the last DEFAULT_ADMIN_ROLE / the last role admin.

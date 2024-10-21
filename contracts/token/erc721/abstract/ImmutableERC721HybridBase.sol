@@ -52,13 +52,7 @@ abstract contract ImmutableERC721HybridBase is
     /// @dev Returns the supported interfaces
     function supportsInterface(
         bytes4 interfaceId
-    )
-        public
-        view
-        virtual
-        override(ERC721HybridPermit, ERC2981, AccessControlEnumerable)
-        returns (bool)
-    {
+    ) public view virtual override(ERC721HybridPermit, ERC2981, AccessControlEnumerable) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 

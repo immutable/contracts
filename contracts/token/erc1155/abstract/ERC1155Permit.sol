@@ -10,16 +10,12 @@ import "./IERC1155Permit.sol";
 import {IImmutableERC1155Errors} from "../../../errors/Errors.sol";
 
 abstract contract ERC1155Permit is ERC1155Burnable, EIP712, IERC1155Permit, IImmutableERC1155Errors {
-
     bytes32 private immutable _PERMIT_TYPEHASH =
         keccak256("Permit(address owner,address spender,bool approved,uint256 nonce,uint256 deadline)");
 
     mapping(address => uint256) private _nonces;
 
-    constructor(string memory name, string memory uri)
-        ERC1155(uri)
-        EIP712(name, "1")
-    {}
+    constructor(string memory name, string memory uri) ERC1155(uri) EIP712(name, "1") {}
 
     function permit(address owner, address spender, bool approved, uint256 deadline, bytes memory sig) external {
         if (deadline < block.timestamp) {
@@ -30,7 +26,7 @@ abstract contract ERC1155Permit is ERC1155Burnable, EIP712, IERC1155Permit, IImm
 
         // smart contract signature validation
         if (_isValidERC1271Signature(owner, digest, sig)) {
-             _setApprovalForAll(owner, spender, approved);
+            _setApprovalForAll(owner, spender, approved);
             return;
         }
 
@@ -63,9 +59,7 @@ abstract contract ERC1155Permit is ERC1155Burnable, EIP712, IERC1155Permit, IImm
      * @param owner The address for which to retrieve the nonce.
      * @return Current nonce of the given token.
      */
-    function nonces(
-        address owner
-    ) external view returns (uint256) {
+    function nonces(address owner) external view returns (uint256) {
         return _nonces[owner];
     }
 
@@ -82,16 +76,10 @@ abstract contract ERC1155Permit is ERC1155Burnable, EIP712, IERC1155Permit, IImm
      * @param interfaceId The interface identifier, which is a 4-byte selector.
      * @return True if the contract implements `interfaceId` and the call doesn't revert, otherwise false.
      */
-    function supportsInterface(bytes4 interfaceId)
-      public
-      view
-      virtual
-      override(ERC1155)
-      returns (bool)
-    {
-     return
-      interfaceId == type(IERC1155Permit).interfaceId || // 0x9e3ae8e4
-      super.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155) returns (bool) {
+        return
+            interfaceId == type(IERC1155Permit).interfaceId || // 0x9e3ae8e4
+            super.supportsInterface(interfaceId);
     }
 
     /**
@@ -107,18 +95,10 @@ abstract contract ERC1155Permit is ERC1155Burnable, EIP712, IERC1155Permit, IImm
         bool approved,
         uint256 deadline
     ) internal returns (bytes32) {
-        return _hashTypedDataV4(
-            keccak256(
-                abi.encode(
-                    _PERMIT_TYPEHASH,
-                    owner,
-                    spender,
-                    approved,
-                    _nonces[owner]++,
-                    deadline
-                )
-            )
-        );
+        return
+            _hashTypedDataV4(
+                keccak256(abi.encode(_PERMIT_TYPEHASH, owner, spender, approved, _nonces[owner]++, deadline))
+            );
     }
 
     /**
@@ -128,14 +108,10 @@ abstract contract ERC1155Permit is ERC1155Burnable, EIP712, IERC1155Permit, IImm
      * @param sig The actual signature bytes.
      * @return True if the signature is valid according to EIP-1271, otherwise false.
      */
-    function _isValidERC1271Signature(address spender, bytes32 digest, bytes memory sig) private view returns(bool) {
+    function _isValidERC1271Signature(address spender, bytes32 digest, bytes memory sig) private view returns (bool) {
         // slither-disable-next-line low-level-calls
         (bool success, bytes memory res) = spender.staticcall(
-            abi.encodeWithSelector(
-                IERC1271.isValidSignature.selector,
-                digest,
-                sig
-            )
+            abi.encodeWithSelector(IERC1271.isValidSignature.selector, digest, sig)
         );
 
         if (success && res.length == 32) {
@@ -154,8 +130,7 @@ abstract contract ERC1155Permit is ERC1155Burnable, EIP712, IERC1155Permit, IImm
      * @param owner The owner of the tokens.
      * @return True if the signature is from an approved operator or owner, otherwise false.
      */
-    function _isValidEOASignature(address recoveredSigner, address owner) private pure returns(bool) {
+    function _isValidEOASignature(address recoveredSigner, address owner) private pure returns (bool) {
         return recoveredSigner != address(0) && recoveredSigner == owner;
     }
-
 }

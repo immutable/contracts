@@ -197,13 +197,7 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
      */
     function supportsInterface(
         bytes4 interfaceId
-    )
-        public
-        view
-        virtual
-        override(ERC721Permit, ERC2981, AccessControlEnumerable)
-        returns (bool)
-    {
+    ) public view virtual override(ERC721Permit, ERC2981, AccessControlEnumerable) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 

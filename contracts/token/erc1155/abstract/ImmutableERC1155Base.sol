@@ -10,7 +10,6 @@ import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnf
 
 import {AccessControlEnumerable, MintingAccessControl} from "../../../access/MintingAccessControl.sol";
 
-
 abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Permit, ERC2981, MintingAccessControl {
     /// @dev Contract level metadata
     string public contractURI;

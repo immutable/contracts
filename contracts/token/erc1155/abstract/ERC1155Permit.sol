@@ -2,22 +2,23 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol";
-import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
-import "@openzeppelin/contracts/interfaces/IERC1271.sol";
-import "solidity-bytes-utils/contracts/BytesLib.sol";
-import "./IERC1155Permit.sol";
+import {ERC1155Burnable, ERC1155} from "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol";
+import {EIP712, ECDSA} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
+import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
+import {IERC1155Permit} from "./IERC1155Permit.sol";
 import {IImmutableERC1155Errors} from "../../../errors/Errors.sol";
 
 abstract contract ERC1155Permit is ERC1155Burnable, EIP712, IERC1155Permit, IImmutableERC1155Errors {
     bytes32 private immutable _PERMIT_TYPEHASH =
         keccak256("Permit(address owner,address spender,bool approved,uint256 nonce,uint256 deadline)");
 
-    mapping(address => uint256) private _nonces;
+    mapping(address account => uint256 nonce) private _nonces;
 
     constructor(string memory name, string memory uri) ERC1155(uri) EIP712(name, "1") {}
 
     function permit(address owner, address spender, bool approved, uint256 deadline, bytes memory sig) external {
+        // solhint-disable-next-line not-rely-on-time
         if (deadline < block.timestamp) {
             revert PermitExpired();
         }
@@ -67,6 +68,7 @@ abstract contract ERC1155Permit is ERC1155Burnable, EIP712, IERC1155Permit, IImm
      * @notice Returns the domain separator used in the encoding of the signature for permits, as defined by EIP-712
      * @return the bytes32 domain separator
      */
+    // solhint-disable-next-line func-name-mixedcase
     function DOMAIN_SEPARATOR() external view override returns (bytes32) {
         return _domainSeparatorV4();
     }

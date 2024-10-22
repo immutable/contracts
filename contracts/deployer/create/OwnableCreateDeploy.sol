@@ -22,7 +22,6 @@ contract OwnableCreateDeploy {
      * @param bytecode The bytecode of the contract to be deployed
      */
     // slither-disable-next-line locked-ether
-
     function deploy(bytes memory bytecode) external payable {
         // solhint-disable-next-line custom-errors, reason-string
         require(msg.sender == owner, "CreateDeploy: caller is not the owner");

@@ -8,6 +8,8 @@ pragma solidity ^0.8.17;
  * @notice SIP7EventsAndErrors contains errors and events
  *         related to zone interaction as specified in the SIP-7.
  */
+// This contract name re-use is OK because the SIP7EventsAndErrors is an interface and not a deployable contract.
+// slither-disable-next-line name-reused      
 interface SIP7EventsAndErrors {
     /**
      * @dev Emit an event when a new signer is added.

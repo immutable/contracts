@@ -130,9 +130,9 @@ contract StakeHolder is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
         uint256 newBalance = currentStake - _amountToUnstake;
         stakeInfo.stake = newBalance;
 
-        payable(msg.sender).transfer(_amountToUnstake);
-
         emit StakeRemoved(msg.sender, _amountToUnstake, newBalance);
+
+        payable(msg.sender).transfer(_amountToUnstake);
     }
 
     /**

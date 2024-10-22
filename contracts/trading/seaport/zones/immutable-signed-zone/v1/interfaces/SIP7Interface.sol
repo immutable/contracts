@@ -11,6 +11,8 @@ pragma solidity ^0.8.17;
  *         https://github.com/ProjectOpenSea/SIPs/blob/main/SIPS/sip-7.md
  *
  */
+// This contract name re-use is OK because the SIP7Interface is an interface and not a deployable contract.
+// slither-disable-next-line name-reused      
 interface SIP7Interface {
     /**
      * @dev The struct for storing signer info.

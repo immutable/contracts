@@ -9,6 +9,8 @@ import {Schema} from "seaport-types/src/lib/ConsiderationStructs.sol";
  * @dev SIP-5: Contract Metadata Interface for Seaport Contracts
  *      https://github.com/ProjectOpenSea/SIPs/blob/main/SIPS/sip-5.md
  */
+// This contract name re-use is OK because the SIP5Interface is an interface and not a deployable contract.
+// slither-disable-next-line name-reused      
 interface SIP5Interface {
     /**
      * @dev An event that is emitted when a SIP-5 compatible contract is deployed.

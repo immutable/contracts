@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
-// solhint-disable no-unused-import
 import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 
 abstract contract MintingAccessControl is AccessControlEnumerable {

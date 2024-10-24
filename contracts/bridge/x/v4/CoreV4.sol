@@ -9,6 +9,7 @@
 // the StarkEx contract ABI that was provided by StarkWare via slack.
 pragma solidity ^0.8.19;
 
+// solhint-disable func-name-mixedcase
 interface CoreV4 {
     fallback() external payable;
 

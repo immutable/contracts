@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Deployer} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/deploy/Deployer.sol";
 import {Create2} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/deploy/Create2.sol";
 
@@ -32,6 +32,8 @@ contract OwnableCreate2Deployer is Ownable, Create2, Deployer {
      * @param deploySalt A salt which is a hash of the salt provided by the sender and the sender's address.
      * @return The address of the deployed contract
      */
+    // Slither 0.10.4 is mistakenly seeing this as dead code. It is called from Deployer.deploy
+    // slither-disable-next-line dead-code
     function _deploy(bytes memory bytecode, bytes32 deploySalt) internal override onlyOwner returns (address) {
         return _create2(bytecode, deploySalt);
     }

@@ -5,7 +5,8 @@ pragma solidity 0.8.19;
 import {ERC20Permit, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
 import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
 import {ERC20Capped} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
-import {MintingAccessControl, AccessControl, IAccessControl} from "../../../access/MintingAccessControl.sol";
+import {AccessControl, IAccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {MintingAccessControl} from "../../../access/MintingAccessControl.sol";
 import {IImmutableERC20Errors} from "./Errors.sol";
 
 /**

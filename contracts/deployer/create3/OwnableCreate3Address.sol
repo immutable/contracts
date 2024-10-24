@@ -15,6 +15,9 @@ abstract contract OwnableCreate3Address {
     bytes32 internal immutable createDeployBytecodeHash;
 
     constructor() {
+        // Slither is mistakenly seeing the expansion of type(OwnableCreateDeploy).creationCode
+        // as a very large number.
+        // slither-disable-next-line too-many-digits
         createDeployBytecodeHash = keccak256(type(OwnableCreateDeploy).creationCode);
     }
 

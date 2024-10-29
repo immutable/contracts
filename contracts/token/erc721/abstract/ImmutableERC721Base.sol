@@ -15,7 +15,7 @@ import {AccessControlEnumerable, MintingAccessControl} from "../../../access/Min
 
 /*
     ImmutableERC721Base is an abstract contract that offers minimum preset functionality without
-    an opinionated form of minting. This contract is intended to be inherited and implement it's
+    an opinionated form of minting. This contract is intended to be inherited and implement its
     own minting functionality to meet the needs of the inheriting contract.
 */
 

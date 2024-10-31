@@ -10,8 +10,8 @@ jobs:
     name: Publish to NPM
     runs-on: ubuntu-latest
     permissions:
-      id-token: write # Required for GitHub Attestation
-      attestations: write # Required for GitHub Attestation 
+      id-token: write # ! Required for GitHub Attestations, removing will create a Sev 0 incident !
+      attestations: write # ! Required for GitHub Attestations, removing will create a Sev 0 incident !
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -61,6 +61,7 @@ jobs:
         run: |
           rm -rf dist && yarn build
 
+      # ! Do NOT remove - this will cause a Sev 0 incident !
       - name: Generate SDK attestation
         uses: actions/attest-build-provenance@v1
         with:

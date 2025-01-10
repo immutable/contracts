@@ -23,6 +23,7 @@ abstract contract ERC721BaseTest is Test {
     address public operatorAllowListAdmin;
     address public operatorAllowListUpgrader;
     address public operatorAllowListRegistrar;
+    address public minter;
 
     string public name;
     string public symbol;
@@ -31,16 +32,27 @@ abstract contract ERC721BaseTest is Test {
     address public royaltyReceiver;
     uint96 public feeNumerator;
 
+    address public user1;
+    address public user2;
+
     function setUp() public virtual {
         owner = makeAddr("hubOwner");
         feeReceiver = makeAddr("feeReceiver");
+        minter = makeAddr("minter");
+        operatorAllowListAdmin = makeAddr("operatorAllowListAdmin");
+        operatorAllowListUpgrader = makeAddr("operatorAllowListUpgrader");
+        operatorAllowListRegistrar = makeAddr("operatorAllowListRegistrar");
+
         name = "ERC721Preset";
         symbol = "EP";
         baseURI = "https://baseURI.com/";
-        contractURI = "https://contractURI.com";
+        contractURI = "https://contractURI.com";        
 
         DeployOperatorAllowlist deployScript = new DeployOperatorAllowlist();
         address proxyAddr = deployScript.run(operatorAllowListAdmin, operatorAllowListUpgrader, operatorAllowListRegistrar);
         allowlist = OperatorAllowlistUpgradeable(proxyAddr);
+
+        user1 = makeAddr("user1");
+        user2 = makeAddr("user2");
     }
 }

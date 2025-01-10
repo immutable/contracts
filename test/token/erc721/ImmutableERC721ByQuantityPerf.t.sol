@@ -21,5 +21,9 @@ contract ImmutableERC721ByQuantityPerfTest is ERC721ByQuantityPerfTest {
         // ImmutableERC721 does not implement the interface, and hence must be cast to the 
         // interface type.
         erc721BQ = IImmutableERC721ByQuantity(address(immutableERC721));
+
+        vm.prank(owner);
+        erc721BQ.grantMinterRole(minter);
+
     }
 }

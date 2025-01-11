@@ -249,8 +249,8 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
 
     /**
      * @notice safe mints a batch of tokens with specified ids to a specified address
-     *  @param mintRequest list of burn requests including token id and owner address
-     *  @dev see ERC721 for more details on _safeMint
+     * @param mintRequest list of mint requests including token id and owner address
+     * @dev see ERC721 for more details on _safeMint
      */
     function _safeBatchMint(IDMint calldata mintRequest) internal {
         if (mintRequest.to == address(0)) {

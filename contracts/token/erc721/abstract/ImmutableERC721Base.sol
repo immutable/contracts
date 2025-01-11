@@ -101,7 +101,7 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
      * @param tokenId the token to set the royalty for
      * @param receiver the address to receive the royalty
      * @param feeNumerator the royalty fee numerator
-     * @dev This can only be called by the a minter. See ERC2981 for more details on _setTokenRoyalty
+     * @dev This can only be called by a minter. See ERC2981 for more details on _setTokenRoyalty
      */
     function setNFTRoyaltyReceiver(
         uint256 tokenId,
@@ -116,7 +116,7 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
      * @param tokenIds the list of tokens to set the royalty for
      * @param receiver the address to receive the royalty
      * @param feeNumerator the royalty fee numerator
-     * @dev This can only be called by the a minter. See ERC2981 for more details on _setTokenRoyalty
+     * @dev This can only be called by a minter. See ERC2981 for more details on _setTokenRoyalty
      */
     function setNFTRoyaltyReceiverBatch(
         uint256[] calldata tokenIds,

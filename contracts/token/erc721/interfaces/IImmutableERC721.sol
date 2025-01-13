@@ -52,17 +52,20 @@ interface IImmutableERC721 is IERC721, IERC721Metadata {
         uint256[] tokenIds;
     }
 
-    /// @notice A singular Mint by quantity request
-    struct Mint {
-        address to;
-        uint256 quantity;
-    }
-
     /// @notice A singular Mint by id request
     struct IDMint {
         address to;
         uint256[] tokenIds;
     }
+
+    /**
+     * @dev Burns `tokenId`.
+     *
+     * @param tokenId The token id to burn.
+     *
+     * Note: The caller must own `tokenId` or be an approved operator.
+     */
+    function burn(uint256 tokenId) external;
 
 
     /**
@@ -94,6 +97,13 @@ interface IImmutableERC721 is IERC721, IERC721Metadata {
     function safeMintBatch(IDMint[] calldata mints) external;
 
     /**
+     * @notice Allows owner or operator to burn a batch of tokens
+     * @param tokenIDs an array of token IDs to burn
+     */
+    function burnBatch(uint256[] calldata tokenIDs) external;
+
+
+    /**
      * @notice Allows caller to a burn a number of tokens by ID from a specified address
      *  @param burns the IDBurn struct containing the to, and tokenIds
      */
@@ -105,6 +115,11 @@ interface IImmutableERC721 is IERC721, IERC721Metadata {
      *  @param tr the TransferRequest struct containing the from, tos, and tokenIds
      */
     function safeTransferFromBatch(TransferRequest calldata tr) external;
+
+    /**
+     * @notice returns the number of minted - burned tokens
+     */
+    function totalSupply() external view returns (uint256);
 
     /**
      * @notice Allows admin grant `user` `MINTER` role

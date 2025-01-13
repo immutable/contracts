@@ -34,6 +34,10 @@ abstract contract ERC721BaseTest is Test {
 
     address public user1;
     address public user2;
+    address public user3;
+
+    // Used in gas tests
+    address public prefillUser1;
 
     function setUp() public virtual {
         owner = makeAddr("hubOwner");
@@ -54,5 +58,7 @@ abstract contract ERC721BaseTest is Test {
 
         user1 = makeAddr("user1");
         user2 = makeAddr("user2");
+        user3 = makeAddr("user3");
+        prefillUser1 = makeAddr("prefillUser1");
     }
 }

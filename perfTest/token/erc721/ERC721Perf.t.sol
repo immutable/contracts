@@ -30,8 +30,8 @@ abstract contract ERC721PerfTest is ERC721BaseTest {
      * the contract with lots of NFTs.
      */
     function setUpLastNft() public {
-        uint256 startId = mintLots(user1, 1000000000, 1000);
-        lastNftId = startId + 999;
+        uint256 startId = mintLots(user1, 1000000000, 15000);
+        lastNftId = startId + 14999;
     }
 
 
@@ -99,7 +99,7 @@ abstract contract ERC721PerfTest is ERC721BaseTest {
     }
 
     function testBurnBatch() public {
-        uint256 first = mintLots(user3, 2000000000, 2000);
+        uint256 first = mintLots(user3, 2000000000, 5000);
 
         uint256[] memory nfts = new uint256[](1500);
         for (uint256 i = 0; i < nfts.length; i++) {

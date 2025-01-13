@@ -28,7 +28,8 @@ abstract contract ERC721ByQuantityPerfTest is ERC721PerfTest {
     }
 
     function testSafeMintByQuantity() public {
-        uint256 quantity = 5200;
+        // 15000 results in 29,557,863 gas.
+        uint256 quantity = 15000;
         uint256 gasStart = gasleft();
         vm.prank(minter);
         erc721BQ.safeMintByQuantity(user3, quantity);

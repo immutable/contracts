@@ -138,4 +138,26 @@ interface IImmutableERC721 is IERC721, IERC721Metadata {
      */
     function getAdmins() external view returns (address[] memory);
 
+
+
+    /**
+     * The role for default admin.
+     */
+    // solhint-disable-next-line func-name-mixedcase
+    function DEFAULT_ADMIN_ROLE() external view returns(bytes32);
+
+    /**
+     * The role for minter.
+     */
+    // solhint-disable-next-line func-name-mixedcase
+    function MINTER_ROLE() external view returns(bytes32);
+
+    /**
+     * @notice Returns the domain separator used in the encoding of the signature for permits, as defined by EIP-712
+     * @return the bytes32 domain separator
+     */
+    // solhint-disable-next-line func-name-mixedcase
+    function DOMAIN_SEPARATOR() external view returns (bytes32);
+
+
 }

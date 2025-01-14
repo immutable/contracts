@@ -28,49 +28,44 @@ abstract contract ERC721ByQuantityPerfTest is ERC721PerfTest {
         emit log_named_uint("exists (last):  ", gasStart - gasEnd);
     }
 
-    function testSafeMintByQuantity() public {
+    function testMintByQuantity() public {
         uint256 gasUsed = mintByQuantity(10);
-        emit log_named_uint("safeMintByQuantity    (10) gas: ", gasUsed);
+        emit log_named_uint("mintByQuantity    (10) gas: ", gasUsed);
         gasUsed = mintByQuantity(100);
-        emit log_named_uint("safeMintByQuantity   (100) gas: ", gasUsed);
+        emit log_named_uint("mintByQuantity   (100) gas: ", gasUsed);
         gasUsed = mintByQuantity(1000);
-        emit log_named_uint("safeMintByQuantity  (1000) gas: ", gasUsed);
+        emit log_named_uint("mintByQuantity  (1000) gas: ", gasUsed);
         gasUsed = mintByQuantity(5000);
-        emit log_named_uint("safeMintByQuantity  (5000) gas: ", gasUsed);
+        emit log_named_uint("mintByQuantity  (5000) gas: ", gasUsed);
         gasUsed = mintByQuantity(10000);
-        emit log_named_uint("safeMintByQuantity (10000) gas: ", gasUsed);
+        emit log_named_uint("mintByQuantity (10000) gas: ", gasUsed);
         gasUsed = mintByQuantity(15000);
+        emit log_named_uint("mintByQuantity (15000) gas: ", gasUsed);
+    }
+    function mintByQuantity(uint256 _quantity) public returns(uint256) {
+        uint256 gasStart = gasleft();
+        vm.prank(minter);
+        erc721BQ.mintByQuantity(user3, _quantity);
+        uint256 gasEnd = gasleft();
+        return gasStart - gasEnd;
+    }
+
+    function testSafeMintByQuantity() public {
+        uint256 gasUsed = safeMintByQuantity(10);
+        emit log_named_uint("safeMintByQuantity    (10) gas: ", gasUsed);
+        gasUsed = safeMintByQuantity(100);
+        emit log_named_uint("safeMintByQuantity   (100) gas: ", gasUsed);
+        gasUsed = safeMintByQuantity(1000);
+        emit log_named_uint("safeMintByQuantity  (1000) gas: ", gasUsed);
+        gasUsed = safeMintByQuantity(5000);
+        emit log_named_uint("safeMintByQuantity  (5000) gas: ", gasUsed);
+        gasUsed = safeMintByQuantity(10000);
+        emit log_named_uint("safeMintByQuantity (10000) gas: ", gasUsed);
+        gasUsed = safeMintByQuantity(15000);
         emit log_named_uint("safeMintByQuantity (15000) gas: ", gasUsed);
     }
 
-    function testSafeMintByQuantity2() public {
-        uint256 quantity = 1000;
-        uint256 gasStart = gasleft();
-        vm.prank(minter);
-        erc721BQ.safeMintByQuantity(user3, quantity);
-        uint256 gasEnd = gasleft();
-        emit log_named_uint("safeMintByQuantity (1000) gas: ", gasStart - gasEnd);
-    }
-
-    function testSafeMintByQuantity3() public {
-        uint256 quantity = 10000;
-        uint256 gasStart = gasleft();
-        vm.prank(minter);
-        erc721BQ.safeMintByQuantity(user3, quantity);
-        uint256 gasEnd = gasleft();
-        emit log_named_uint("safeMintByQuantity (10000) gas: ", gasStart - gasEnd);
-    }
-
-    function testSafeMintByQuantity4() public {
-        // 15000 results in 29,557,863 gas.
-        uint256 quantity = 15000;
-        uint256 gasStart = gasleft();
-        vm.prank(minter);
-        erc721BQ.safeMintByQuantity(user3, quantity);
-        uint256 gasEnd = gasleft();
-        emit log_named_uint("safeMintByQuantity (15000) gas: ", gasStart - gasEnd);
-    }
-    function mintByQuantity(uint256 _quantity) public returns(uint256) {
+    function safeMintByQuantity(uint256 _quantity) public returns(uint256) {
         uint256 gasStart = gasleft();
         vm.prank(minter);
         erc721BQ.safeMintByQuantity(user3, _quantity);
@@ -78,7 +73,71 @@ abstract contract ERC721ByQuantityPerfTest is ERC721PerfTest {
         return gasStart - gasEnd;
     }
 
+    function testMintBatchByQuantity() public {
+        uint256 gasUsed = mintBatchByQuantity(10);
+        emit log_named_uint("mintBatchByQuantity    (10x10) gas: ", gasUsed);
+        gasUsed = mintBatchByQuantity(100);
+        emit log_named_uint("mintBatchByQuantity  (100x100) gas: ", gasUsed);
+    }
+    function mintBatchByQuantity(uint256 _quantity) public returns(uint256) {
+        IImmutableERC721ByQuantity.Mint[] memory mints = new IImmutableERC721ByQuantity.Mint[](_quantity);
+        for (uint256 i = 0; i < _quantity; i++) {
+            IImmutableERC721ByQuantity.Mint memory mint = IImmutableERC721ByQuantity.Mint(user1, _quantity);
+            mints[i] = mint;
+        }
+        uint256 gasStart = gasleft();
+        vm.prank(minter);
+        erc721BQ.mintBatchByQuantity(mints);
+        uint256 gasEnd = gasleft();
+        return gasStart - gasEnd;
+    }
 
+    function testSafeMintBatchByQuantity() public {
+        uint256 gasUsed = safeMintBatchByQuantity(10);
+        emit log_named_uint("safeMintBatchByQuantity    (10x10) gas: ", gasUsed);
+        gasUsed = safeMintBatchByQuantity(100);
+        emit log_named_uint("safeMintBatchByQuantity  (100x100) gas: ", gasUsed);
+    }
+    function safeMintBatchByQuantity(uint256 _quantity) public returns(uint256) {
+        IImmutableERC721ByQuantity.Mint[] memory mints = new IImmutableERC721ByQuantity.Mint[](_quantity);
+        for (uint256 i = 0; i < _quantity; i++) {
+            IImmutableERC721ByQuantity.Mint memory mint = IImmutableERC721ByQuantity.Mint(user1, _quantity);
+            mints[i] = mint;
+        }
+        uint256 gasStart = gasleft();
+        vm.prank(minter);
+        erc721BQ.safeMintBatchByQuantity(mints);
+        uint256 gasEnd = gasleft();
+        return gasStart - gasEnd;
+    }
+
+    function testTotalSupply3() public {
+        uint256 startId = 100000000;
+        for (uint256 i = 0; i < 20; i++) {
+            uint256 actualStartId = mintLots(prefillUser1, startId, 1000);
+            startId = actualStartId + 1000;
+        }
+
+        uint256 gasStart = gasleft();
+        uint256 supply = erc721.totalSupply();
+        uint256 gasEnd = gasleft();
+        emit log_named_uint("totalSupply", supply);
+        emit log_named_uint("totalSupply gas", gasStart - gasEnd);
+    }
+
+    function testTotalSupply4() public {
+        uint256 startId = 100000000;
+        for (uint256 i = 0; i < 30; i++) {
+            uint256 actualStartId = mintLots(prefillUser1, startId, 1000);
+            startId = actualStartId + 1000;
+        }
+
+        uint256 gasStart = gasleft();
+        uint256 supply = erc721.totalSupply();
+        uint256 gasEnd = gasleft();
+        emit log_named_uint("totalSupply", supply);
+        emit log_named_uint("totalSupply gas", gasStart - gasEnd);
+    }
 
     function mintLots(address _recipient, uint256, uint256 _quantity) public override returns (uint256) {
         vm.recordLogs();

@@ -5,12 +5,6 @@ pragma solidity 0.8.19;
 import {IImmutableERC721} from "./IImmutableERC721.sol";
 
 interface IImmutableERC721ByQuantity is IImmutableERC721 {
-    /// @notice A singular Mint by quantity request
-    struct Mint {
-        address to;
-        uint256 quantity;
-    }
-
     /**
      * @notice Allows minter to mint a number of tokens sequentially to a specified address
      *  @param to the address to mint the token to

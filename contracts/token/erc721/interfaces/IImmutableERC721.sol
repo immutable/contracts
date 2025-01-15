@@ -1,62 +1,19 @@
-// Copyright Immutable Pty Ltd 2018 - 2023
+// Copyright Immutable Pty Ltd 2018 - 2025
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+import {IERC721Metadata} from "@openzeppelin/contracts/interfaces/IERC721Metadata.sol";
+import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
+import {IERC5267} from "@openzeppelin/contracts/interfaces/IERC5267.sol";
+import {IERC4494} from "../abstract/IERC4494.sol";
+import {IMintingAccessControl} from "../../../access/IMintingAccessControl.sol";
+
+import {IImmutableERC721Structs} from "./IImmutableERC721Structs.sol";
+import {IImmutableERC721Errors} from "./IImmutableERC721Errors.sol";
 
 
-interface IImmutableERC721 is IERC721, IERC721Metadata {
-    /// @dev Caller tried to mint an already burned token
-    error IImmutableERC721TokenAlreadyBurned(uint256 tokenId);
-
-    /// @dev Caller tried to mint an already burned token
-    error IImmutableERC721SendingToZerothAddress();
-
-    /// @dev Caller tried to mint an already burned token
-    error IImmutableERC721MismatchedTransferLengths();
-
-    /// @dev Caller tried to mint a tokenid that is above the hybrid threshold
-    error IImmutableERC721IDAboveThreshold(uint256 tokenId);
-
-    /// @dev Caller is not approved or owner
-    error IImmutableERC721NotOwnerOrOperator(uint256 tokenId);
-
-    /// @dev Current token owner is not what was expected
-    error IImmutableERC721MismatchedTokenOwner(uint256 tokenId, address currentOwner);
-
-    /// @dev Signer is zeroth address
-    error SignerCannotBeZerothAddress();
-
-    /// @dev Deadline exceeded for permit
-    error PermitExpired();
-
-    /// @dev Derived signature is invalid (EIP721 and EIP1271)
-    error InvalidSignature();
-
-
-    /**
-     * @notice A singular batch transfer request. The length of the tos and tokenIds must be matching
-     *  batch transfers will transfer the specified ids to their matching address via index.
-     *
-     */
-    struct TransferRequest {
-        address from;
-        address[] tos;
-        uint256[] tokenIds;
-    }
-
-    /// @notice A singular safe burn request.
-    struct IDBurn {
-        address owner;
-        uint256[] tokenIds;
-    }
-
-    /// @notice A singular Mint by id request
-    struct IDMint {
-        address to;
-        uint256[] tokenIds;
-    }
+interface IImmutableERC721 is IMintingAccessControl, IERC2981, IERC721Metadata, 
+           IImmutableERC721Structs, IImmutableERC721Errors, IERC4494, IERC5267 {
 
     /**
      * @dev Burns `tokenId`.
@@ -121,36 +78,9 @@ interface IImmutableERC721 is IERC721, IERC721Metadata {
      */
     function totalSupply() external view returns (uint256);
 
-    /**
-     * @notice Allows admin grant `user` `MINTER` role
-     *  @param user The address to grant the `MINTER` role to
-     */
-    function grantMinterRole(address user) external;
-
-    /**
-     * @notice Allows admin to revoke `MINTER_ROLE` role from `user`
-     *  @param user The address to revoke the `MINTER` role from
-     */
-    function revokeMinterRole(address user) external;
-
-    /**
-     * @notice Returns the addresses which have DEFAULT_ADMIN_ROLE
-     */
-    function getAdmins() external view returns (address[] memory);
 
 
 
-    /**
-     * The role for default admin.
-     */
-    // solhint-disable-next-line func-name-mixedcase
-    function DEFAULT_ADMIN_ROLE() external view returns(bytes32);
-
-    /**
-     * The role for minter.
-     */
-    // solhint-disable-next-line func-name-mixedcase
-    function MINTER_ROLE() external view returns(bytes32);
 
     /**
      * @notice Returns the domain separator used in the encoding of the signature for permits, as defined by EIP-712

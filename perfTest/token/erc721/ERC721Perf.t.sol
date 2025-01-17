@@ -6,6 +6,7 @@ pragma solidity ^0.8.19;
 import "forge-std/Test.sol";
 import {ERC721BaseTest} from "../../../test/token/erc721/ERC721Base.t.sol";
 import {IImmutableERC721} from "../../../contracts/token/erc721/interfaces/IImmutableERC721.sol";
+import {IImmutableERC721Structs} from "../../../contracts/token/erc721/interfaces/IImmutableERC721Structs.sol";
 
 
 /**
@@ -124,8 +125,8 @@ abstract contract ERC721PerfTest is ERC721BaseTest {
         for (uint256 i = 0; i < nfts.length; i++) {
             nfts[i] = first + 100 + i;
         }
-        IImmutableERC721.IDBurn memory burn = IImmutableERC721.IDBurn(user3, nfts);
-        IImmutableERC721.IDBurn[] memory burns = new IImmutableERC721.IDBurn[](1);
+        IImmutableERC721Structs.IDBurn memory burn = IImmutableERC721Structs.IDBurn(user3, nfts);
+        IImmutableERC721Structs.IDBurn[] memory burns = new IImmutableERC721Structs.IDBurn[](1);
         burns[0] = burn;
 
 
@@ -172,8 +173,8 @@ abstract contract ERC721PerfTest is ERC721BaseTest {
         for (uint256 i = 0; i < _quantity; i++) {
             ids[i] = i + _startId;
         }
-        IImmutableERC721.IDMint memory mint = IImmutableERC721.IDMint(user1, ids);
-        IImmutableERC721.IDMint[] memory mints = new IImmutableERC721.IDMint[](1);
+        IImmutableERC721Structs.IDMint memory mint = IImmutableERC721Structs.IDMint(user1, ids);
+        IImmutableERC721Structs.IDMint[] memory mints = new IImmutableERC721Structs.IDMint[](1);
         mints[0] = mint;
         uint256 gasStart = gasleft();
         vm.prank(minter);
@@ -199,8 +200,8 @@ abstract contract ERC721PerfTest is ERC721BaseTest {
         for (uint256 i = 0; i < _quantity; i++) {
             ids[i] = i + _startId;
         }
-        IImmutableERC721.IDMint memory mint = IImmutableERC721.IDMint(user1, ids);
-        IImmutableERC721.IDMint[] memory mints = new IImmutableERC721.IDMint[](1);
+        IImmutableERC721Structs.IDMint memory mint = IImmutableERC721Structs.IDMint(user1, ids);
+        IImmutableERC721Structs.IDMint[] memory mints = new IImmutableERC721Structs.IDMint[](1);
         mints[0] = mint;
         uint256 gasStart = gasleft();
         vm.prank(minter);
@@ -323,14 +324,27 @@ abstract contract ERC721PerfTest is ERC721BaseTest {
             ids[i] = i + _start;
         }
         vm.recordLogs();
-        IImmutableERC721.IDMint memory mint = IImmutableERC721.IDMint(_recipient, ids);
-        IImmutableERC721.IDMint[] memory mints = new IImmutableERC721.IDMint[](1);
+        IImmutableERC721Structs.IDMint memory mint = IImmutableERC721Structs.IDMint(_recipient, ids);
+        IImmutableERC721Structs.IDMint[] memory mints = new IImmutableERC721Structs.IDMint[](1);
         mints[0] = mint;
         vm.prank(minter);
         erc721.mintBatch(mints);
+        return findFirstNftId();
+    }
+
+    function findFirstNftId() internal returns (uint256) {
+        bytes32 transferEventSig = 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef;
         Vm.Log[] memory entries = vm.getRecordedLogs();
-        uint256 firstId = uint256(entries[0].topics[3]);
-        return firstId;
+        // event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
+        // In production, entries[0] is the Transfer event. However, there might be debug events 
+        // being emitted during development.
+        for (uint256 i = 0; i < entries.length; i++) {
+            bytes32[] memory topics = entries[i].topics;
+            if (topics[0] == transferEventSig) {
+                return uint256(topics[3]);
+            }
+        }
+        revert("No tranfer event found");
     }
 
     function prefillWithNfts() public {

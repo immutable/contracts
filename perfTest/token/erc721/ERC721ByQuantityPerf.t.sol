@@ -6,6 +6,7 @@ pragma solidity ^0.8.19;
 import "forge-std/Test.sol";
 import {ERC721PerfTest} from "./ERC721Perf.t.sol";
 import {IImmutableERC721ByQuantity} from "../../../contracts/token/erc721/interfaces/IImmutableERC721ByQuantity.sol";
+import {IImmutableERC721Structs} from "../../../contracts/token/erc721/interfaces/IImmutableERC721Structs.sol";
 
 
 /**
@@ -80,9 +81,9 @@ abstract contract ERC721ByQuantityPerfTest is ERC721PerfTest {
         emit log_named_uint("mintBatchByQuantity  (100x100) gas: ", gasUsed);
     }
     function mintBatchByQuantity(uint256 _quantity) public returns(uint256) {
-        IImmutableERC721ByQuantity.Mint[] memory mints = new IImmutableERC721ByQuantity.Mint[](_quantity);
+        IImmutableERC721Structs.Mint[] memory mints = new IImmutableERC721Structs.Mint[](_quantity);
         for (uint256 i = 0; i < _quantity; i++) {
-            IImmutableERC721ByQuantity.Mint memory mint = IImmutableERC721ByQuantity.Mint(user1, _quantity);
+            IImmutableERC721Structs.Mint memory mint = IImmutableERC721Structs.Mint(user1, _quantity);
             mints[i] = mint;
         }
         uint256 gasStart = gasleft();
@@ -99,9 +100,9 @@ abstract contract ERC721ByQuantityPerfTest is ERC721PerfTest {
         emit log_named_uint("safeMintBatchByQuantity  (100x100) gas: ", gasUsed);
     }
     function safeMintBatchByQuantity(uint256 _quantity) public returns(uint256) {
-        IImmutableERC721ByQuantity.Mint[] memory mints = new IImmutableERC721ByQuantity.Mint[](_quantity);
+        IImmutableERC721Structs.Mint[] memory mints = new IImmutableERC721Structs.Mint[](_quantity);
         for (uint256 i = 0; i < _quantity; i++) {
-            IImmutableERC721ByQuantity.Mint memory mint = IImmutableERC721ByQuantity.Mint(user1, _quantity);
+            IImmutableERC721Structs.Mint memory mint = IImmutableERC721Structs.Mint(user1, _quantity);
             mints[i] = mint;
         }
         uint256 gasStart = gasleft();
@@ -143,10 +144,6 @@ abstract contract ERC721ByQuantityPerfTest is ERC721PerfTest {
         vm.recordLogs();
         vm.prank(minter);
         erc721BQ.safeMintByQuantity(_recipient, _quantity);
-        Vm.Log[] memory entries = vm.getRecordedLogs();
-        uint256 firstId = uint256(entries[0].topics[3]);
-        return firstId;
+        return findFirstNftId();
     }
-
-
 }

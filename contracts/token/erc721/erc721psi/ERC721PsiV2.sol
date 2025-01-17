@@ -2,6 +2,8 @@
 /**
  * Inspired by ERC721Psi: https://github.com/estarriolvetch/ERC721Psi
  */
+pragma solidity 0.8.19;
+
 // solhint-disable
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
@@ -35,8 +37,8 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     // Mapping from token ID to owner address
     mapping(uint256 => address) private owners;
 
-    mapping(address => uint256) private balances;
-    uint256 supply;
+    mapping(address => uint256) internal balances;
+    uint256 internal supply;
 
     uint256 private nextGroup;
 
@@ -57,8 +59,20 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     constructor(string memory _name, string memory _symbol) {
         aName = _name;
         aSymbol = _symbol;
-        nextGroup = 0;
+        // Have the first by-quantity NFT to be a multiple of 256 above the base token id.
+        uint256 baseId = _startTokenId();
+        nextGroup = baseId / 256 + 1;
     }
+
+    /**
+     * @dev Returns the starting token ID.
+     * To change the starting token ID, please override this function.
+     */
+    function _startTokenId() internal pure virtual returns (uint256) {
+        // It will become modifiable in the future versions
+        return 0;
+    }
+
 
     /**
      * @dev See {IERC165-supportsInterface}.
@@ -167,11 +181,10 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     /**
      * @dev See {IERC721-transferFrom}.
      */
-    function transferFrom(address from, address to, uint256 tokenId) public virtual override {
+    function transferFrom(address _from, address _to, uint256 _tokenId) public virtual override {
         //solhint-disable-next-line max-line-length
-        require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721Psi: transfer caller is not owner nor approved");
-
-        _transfer(from, to, tokenId);
+        require(_isApprovedOrOwner(_msgSender(), _tokenId), "ERC721Psi: transfer caller is not owner nor approved");
+        _transfer(_from, _to, _tokenId);
     }
 
     /**
@@ -261,14 +274,19 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     function _safeMint(address _to, uint256 _quantity, bytes memory _data) internal virtual {
         // need to specify the specific implementation to avoid calling the
         // mint method of erc721 due to matching func signatures
-        uint256 firstMintedTokenId = ERC721PsiV2._mint(_to, _quantity);
+        uint256 firstMintedTokenId = ERC721PsiV2._mintInternal(_to, _quantity);
         require(
             _checkOnERC721Received(address(0), _to, firstMintedTokenId, _quantity, _data),
             "ERC721Psi: transfer to non ERC721Receiver implementer"
         );
     }
 
-    function _mint(address _to, uint256 _quantity) internal virtual returns (uint256) {
+    function _mint(address _to, uint256 _quantity) internal virtual {
+        _mintInternal(_to, _quantity);
+    }
+
+
+    function _mintInternal(address _to, uint256 _quantity) internal virtual returns (uint256) {
         uint256 firstTokenId = groupToTokenId(nextGroup);
 
         require(_quantity > 0, "ERC721Psi: quantity must be greater 0");
@@ -387,6 +405,20 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
      *
      * Emits a {Approval} event.
      */
+    function _approve(address _to, uint256 _tokenId) internal virtual {
+        (, , , address owner) = _tokenInfo(_tokenId);
+        // Clear approvals from the previous owner
+        _approve(owner, _to, _tokenId);
+
+
+    }
+
+
+    /**
+     * @dev Approve `to` to operate on `tokenId`
+     *
+     * Emits a {Approval} event.
+     */
     function _approve(address _owner, address _to, uint256 _tokenId) internal virtual {
         tokenApprovals[_tokenId] = _to;
         emit Approval(_owner, _to, _tokenId);
@@ -398,7 +430,7 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
      *
      * @param _from address representing the previous owner of the given token ID
      * @param _to target address that will receive the tokens
-     * @param _startTokenId uint256 the first ID of the tokens to be transferred
+     * @param _firstTokenId uint256 the first ID of the tokens to be transferred
      * @param _quantity uint256 amount of the tokens to be transfered.
      * @param _data bytes optional data to send along with the call
      * @return r bool whether the call correctly returned the expected magic value
@@ -406,13 +438,13 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     function _checkOnERC721Received(
         address _from,
         address _to,
-        uint256 _startTokenId,
+        uint256 _firstTokenId,
         uint256 _quantity,
         bytes memory _data
     ) private returns (bool r) {
         if (_to.isContract()) {
             r = true;
-            for (uint256 tokenId = _startTokenId; tokenId < _startTokenId + _quantity; tokenId++) {
+            for (uint256 tokenId = _firstTokenId; tokenId < _firstTokenId + _quantity; tokenId++) {
                 // slither-disable-start calls-loop
                 try IERC721Receiver(_to).onERC721Received(_msgSender(), _from, tokenId, _data) returns (bytes4 retval) {
                     r = r && retval == IERC721Receiver.onERC721Received.selector;
@@ -464,7 +496,6 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     }
 
 
-
     /**
      * Convert from a token id to a group number and an offset. 
      */
@@ -477,21 +508,24 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     }
 
     function bitIsSet(uint256 _bitMask, uint256 _offset) internal pure returns (bool) {
-        uint256 bitSet = 1 << (_offset - 1);
+        uint256 bitSet = 1 << _offset;
         return (bitSet & _bitMask != 0);
     }
 
     function setBitIfNotSet(uint256 _bitMask, uint256 _offset) internal pure returns (bool, uint256) {
-        uint256 bitSet = 1 << (_offset - 1);
+        uint256 bitSet = 1 << _offset;
         bool changed = ((bitSet & _bitMask) == 0);
         uint256 updatedBitMask = bitSet | _bitMask;
         return (changed, updatedBitMask);
     }
 
     function bitMaskToBurn(uint256 _offset) internal pure returns(uint256) {
+        // Offset will range between 1 and 255. 256 if handled separately.
         // If offset = 1, mask should be 0xffff...ffe
-        uint256 inverseBitMask = (1 << (_offset)) - 1;
-        return 0x00 ^ inverseBitMask;
+        // If offset = 2, mask should be 0xffff...ffc
+        // If offset = 3, mask should be 0xffff...ff8
+        uint256 inverseBitMask = (1 << _offset) - 1;
+        return ~inverseBitMask;
     }
 
     /**

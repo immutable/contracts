@@ -4,10 +4,9 @@ pragma solidity 0.8.19;
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
-import {ERC721Psi, ERC721PsiBurnable} from "../erc721psi/ERC721PsiBurnable.sol";
+import {ERC721PsiV2, ERC721PsiBurnableV2} from "../erc721psi/ERC721PsiBurnableV2.sol";
 import {IImmutableERC721Errors} from "../interfaces/IImmutableERC721Errors.sol";
 import {IImmutableERC721Structs} from "../interfaces/IImmutableERC721Structs.sol";
-import {IImmutableERC721ByQuantity, IImmutableERC721} from "../interfaces/IImmutableERC721ByQuantity.sol";
 
 /*
 This contract allows for minting with one of two strategies:
@@ -16,8 +15,7 @@ This contract allows for minting with one of two strategies:
 
 All other ERC721 functions are supported, with routing logic depending on the tokenId.
 */
-
-abstract contract ERC721HybridV2 is ERC721PsiBurnable, ERC721, IImmutableERC721Structs, IImmutableERC721Errors {
+abstract contract ERC721HybridV2 is ERC721PsiBurnableV2, ERC721, IImmutableERC721Structs, IImmutableERC721Errors {
     using BitMaps for BitMaps.BitMap;
 
     /// @notice The total number of tokens minted by ID, used in totalSupply()
@@ -27,7 +25,7 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnable, ERC721, IImmutableERC721S
     BitMaps.BitMap private _burnedTokens;
 
 
-    constructor(string memory name_, string memory symbol_) ERC721(name_, symbol_) ERC721Psi(name_, symbol_) {}
+    constructor(string memory name_, string memory symbol_) ERC721(name_, symbol_) ERC721PsiV2(name_, symbol_) {}
 
     /**
      * @notice allows caller to burn multiple tokens by id
@@ -85,25 +83,25 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnable, ERC721, IImmutableERC721S
      * @notice Overwritten functions with combined implementations, supply for the collection is summed as they
      *  are tracked differently by each minting strategy
      */
-    function balanceOf(address owner) public view virtual override(ERC721, ERC721Psi) returns (uint256) {
-        return ERC721.balanceOf(owner) + ERC721Psi.balanceOf(owner);
+    function balanceOf(address owner) public view virtual override(ERC721, ERC721PsiV2) returns (uint256) {
+        return ERC721.balanceOf(owner) + ERC721PsiV2.balanceOf(owner);
     }
 
     /* @notice Overwritten functions with combined implementations, supply for the collection is summed as they
      *  are tracked differently by each minting strategy
      */
-    function totalSupply() public view override(ERC721PsiBurnable) returns (uint256) {
-        return ERC721PsiBurnable.totalSupply() + _idMintTotalSupply;
+    function totalSupply() public view override(ERC721PsiV2) returns (uint256) {
+        return ERC721PsiV2.totalSupply() + _idMintTotalSupply;
     }
 
     /**
      * @notice refer to erc721 or erc721psi
      */
-    function ownerOf(uint256 tokenId) public view virtual override(ERC721, ERC721Psi) returns (address) {
+    function ownerOf(uint256 tokenId) public view virtual override(ERC721, ERC721PsiV2) returns (address) {
         if (tokenId < mintBatchByQuantityThreshold()) {
             return ERC721.ownerOf(tokenId);
         }
-        return ERC721Psi.ownerOf(tokenId);
+        return ERC721PsiV2.ownerOf(tokenId);
     }
 
     /**
@@ -114,42 +112,42 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnable, ERC721, IImmutableERC721S
     /**
      * @inheritdoc ERC721
      */
-    function tokenURI(uint256 tokenId) public view virtual override(ERC721, ERC721Psi) returns (string memory) {
+    function tokenURI(uint256 tokenId) public view virtual override(ERC721, ERC721PsiV2) returns (string memory) {
         return ERC721.tokenURI(tokenId);
     }
 
     /**
      * @inheritdoc ERC721
      */
-    function name() public view virtual override(ERC721, ERC721Psi) returns (string memory) {
+    function name() public view virtual override(ERC721, ERC721PsiV2) returns (string memory) {
         return ERC721.name();
     }
 
     /**
      * @inheritdoc ERC721
      */
-    function symbol() public view virtual override(ERC721, ERC721Psi) returns (string memory) {
+    function symbol() public view virtual override(ERC721, ERC721PsiV2) returns (string memory) {
         return ERC721.symbol();
     }
 
     /**
      * @inheritdoc ERC721
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721Psi, ERC721) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721PsiV2, ERC721) returns (bool) {
         return ERC721.supportsInterface(interfaceId);
     }
 
     /**
      * @inheritdoc ERC721
      */
-    function setApprovalForAll(address operator, bool approved) public virtual override(ERC721, ERC721Psi) {
+    function setApprovalForAll(address operator, bool approved) public virtual override(ERC721, ERC721PsiV2) {
         return ERC721.setApprovalForAll(operator, approved);
     }
 
     /**
      * @inheritdoc ERC721
      */
-    function safeTransferFrom(address from, address to, uint256 tokenId) public virtual override(ERC721, ERC721Psi) {
+    function safeTransferFrom(address from, address to, uint256 tokenId) public virtual override(ERC721, ERC721PsiV2) {
         safeTransferFrom(from, to, tokenId, "");
     }
 
@@ -161,11 +159,11 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnable, ERC721, IImmutableERC721S
         address to,
         uint256 tokenId,
         bytes memory _data
-    ) public virtual override(ERC721, ERC721Psi) {
+    ) public virtual override(ERC721, ERC721PsiV2) {
         if (tokenId < mintBatchByQuantityThreshold()) {
             return ERC721.safeTransferFrom(from, to, tokenId, _data);
         }
-        return ERC721Psi.safeTransferFrom(from, to, tokenId, _data);
+        return ERC721PsiV2.safeTransferFrom(from, to, tokenId, _data);
     }
 
     /**
@@ -174,38 +172,38 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnable, ERC721, IImmutableERC721S
     function isApprovedForAll(
         address owner,
         address operator
-    ) public view virtual override(ERC721, ERC721Psi) returns (bool) {
+    ) public view virtual override(ERC721, ERC721PsiV2) returns (bool) {
         return ERC721.isApprovedForAll(owner, operator);
     }
 
     /**
      * @notice refer to erc721 or erc721psi
      */
-    function getApproved(uint256 tokenId) public view virtual override(ERC721, ERC721Psi) returns (address) {
+    function getApproved(uint256 tokenId) public view virtual override(ERC721, ERC721PsiV2) returns (address) {
         if (tokenId < mintBatchByQuantityThreshold()) {
             return ERC721.getApproved(tokenId);
         }
-        return ERC721Psi.getApproved(tokenId);
+        return ERC721PsiV2.getApproved(tokenId);
     }
 
     /**
      * @notice refer to erc721 or erc721psi
      */
-    function approve(address to, uint256 tokenId) public virtual override(ERC721, ERC721Psi) {
+    function approve(address to, uint256 tokenId) public virtual override(ERC721, ERC721PsiV2) {
         if (tokenId < mintBatchByQuantityThreshold()) {
             return ERC721.approve(to, tokenId);
         }
-        return ERC721Psi.approve(to, tokenId);
+        return ERC721PsiV2.approve(to, tokenId);
     }
 
     /**
      * @notice refer to erc721 or erc721psi
      */
-    function transferFrom(address from, address to, uint256 tokenId) public virtual override(ERC721, ERC721Psi) {
+    function transferFrom(address from, address to, uint256 tokenId) public virtual override(ERC721, ERC721PsiV2) {
         if (tokenId < mintBatchByQuantityThreshold()) {
             return ERC721.transferFrom(from, to, tokenId);
         }
-        return ERC721Psi.transferFrom(from, to, tokenId);
+        return ERC721PsiV2.transferFrom(from, to, tokenId);
     }
 
     /**
@@ -214,7 +212,7 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnable, ERC721, IImmutableERC721S
      *  @param quantity the number of tokens to mint
      */
     function _mintByQuantity(address to, uint256 quantity) internal {
-        ERC721Psi._mint(to, quantity);
+        ERC721PsiV2._mint(to, quantity);
     }
 
     /**
@@ -223,7 +221,7 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnable, ERC721, IImmutableERC721S
      *  @param quantity the number of tokens to mint
      */
     function _safeMintByQuantity(address to, uint256 quantity) internal {
-        ERC721Psi._safeMint(to, quantity);
+        ERC721PsiV2._safeMint(to, quantity);
     }
 
     /**
@@ -345,11 +343,11 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnable, ERC721, IImmutableERC721S
     /**
      * @notice refer to erc721 or erc721psi
      */
-    function _transfer(address from, address to, uint256 tokenId) internal virtual override(ERC721, ERC721Psi) {
+    function _transfer(address from, address to, uint256 tokenId) internal virtual override(ERC721, ERC721PsiV2) {
         if (tokenId < mintBatchByQuantityThreshold()) {
             ERC721._transfer(from, to, tokenId);
         } else {
-            ERC721Psi._transfer(from, to, tokenId);
+            ERC721PsiV2._transfer(from, to, tokenId);
         }
     }
 
@@ -358,25 +356,25 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnable, ERC721, IImmutableERC721S
      *  additional tracking is added for erc721 to prevent re-minting. Refer to erc721 or erc721psi
      *  @param tokenId the id of the token to burn
      */
-    function _burn(uint256 tokenId) internal virtual override(ERC721, ERC721PsiBurnable) {
+    function _burn(uint256 tokenId) internal virtual override(ERC721, ERC721PsiBurnableV2) {
         if (tokenId < mintBatchByQuantityThreshold()) {
             ERC721._burn(tokenId);
             _burnedTokens.set(tokenId);
             // slither-disable-next-line costly-loop
             _idMintTotalSupply--;
         } else {
-            ERC721PsiBurnable._burn(tokenId);
+            ERC721PsiBurnableV2._burn(tokenId);
         }
     }
 
     /**
      * @notice refer to erc721 or erc721psi
      */
-    function _approve(address to, uint256 tokenId) internal virtual override(ERC721, ERC721Psi) {
+    function _approve(address to, uint256 tokenId) internal virtual override(ERC721, ERC721PsiV2) {
         if (tokenId < mintBatchByQuantityThreshold()) {
             return ERC721._approve(to, tokenId);
         }
-        return ERC721Psi._approve(to, tokenId);
+        return ERC721PsiV2._approve(to, tokenId);
     }
 
     /**
@@ -387,11 +385,11 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnable, ERC721, IImmutableERC721S
         address to,
         uint256 tokenId,
         bytes memory _data
-    ) internal virtual override(ERC721, ERC721Psi) {
+    ) internal virtual override(ERC721, ERC721PsiV2) {
         if (tokenId < mintBatchByQuantityThreshold()) {
             return ERC721._safeTransfer(from, to, tokenId, _data);
         }
-        return ERC721Psi._safeTransfer(from, to, tokenId, _data);
+        return ERC721PsiV2._safeTransfer(from, to, tokenId, _data);
     }
 
     /**
@@ -405,7 +403,7 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnable, ERC721, IImmutableERC721S
      *  the erc721 implementation due to inheritance linearisation. Refer to erc721
      */
     // slither-disable-next-line dead-code
-    function _safeMint(address to, uint256 tokenId) internal virtual override(ERC721, ERC721Psi) {
+    function _safeMint(address to, uint256 tokenId) internal virtual override(ERC721, ERC721PsiV2) {
         super._safeMint(to, tokenId);
     }
 
@@ -413,15 +411,15 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnable, ERC721, IImmutableERC721S
      * @notice overriding erc721 and erc721psi _safemint, super calls the `_safeMint` method of
      *  the erc721 implementation due to inheritance linearisation. Refer to erc721
      */
-    function _safeMint(address to, uint256 tokenId, bytes memory _data) internal virtual override(ERC721, ERC721Psi) {
+    function _safeMint(address to, uint256 tokenId, bytes memory _data) internal virtual override(ERC721, ERC721PsiV2) {
         super._safeMint(to, tokenId, _data);
     }
 
     /**
-     * @notice overriding erc721 and erc721psi _safemint, super calls the `_mint` method of
+     * @notice overriding erc721 and erc721psi _mint, super calls the `_mint` method of
      *  the erc721 implementation due to inheritance linearisation. Refer to erc721
      */
-    function _mint(address to, uint256 tokenId) internal virtual override(ERC721, ERC721Psi) {
+    function _mint(address to, uint256 tokenId) internal virtual override(ERC721, ERC721PsiV2) {
         super._mint(to, tokenId);
     }
 
@@ -431,25 +429,25 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnable, ERC721, IImmutableERC721S
     function _isApprovedOrOwner(
         address spender,
         uint256 tokenId
-    ) internal view virtual override(ERC721, ERC721Psi) returns (bool) {
+    ) internal view virtual override(ERC721, ERC721PsiV2) returns (bool) {
         if (tokenId < mintBatchByQuantityThreshold()) {
             return ERC721._isApprovedOrOwner(spender, tokenId);
         }
-        return ERC721Psi._isApprovedOrOwner(spender, tokenId);
+        return ERC721PsiV2._isApprovedOrOwner(spender, tokenId);
     }
 
     /**
      * @notice refer to erc721 or erc721psi
      */
-    function _exists(uint256 tokenId) internal view virtual override(ERC721, ERC721PsiBurnable) returns (bool) {
+    function _exists(uint256 tokenId) internal view virtual override(ERC721, ERC721PsiV2) returns (bool) {
         if (tokenId < mintBatchByQuantityThreshold()) {
             return ERC721._ownerOf(tokenId) != address(0) && (!_burnedTokens.get(tokenId));
         }
-        return ERC721PsiBurnable._exists(tokenId);
+        return ERC721PsiV2._exists(tokenId);
     }
 
     /// @notice returns the startTokenID for the minting by quantity section of the contract
-    function _startTokenId() internal pure virtual override(ERC721Psi) returns (uint256) {
+    function _startTokenId() internal pure virtual override(ERC721PsiV2) returns (uint256) {
         return mintBatchByQuantityThreshold();
     }
 
@@ -457,7 +455,7 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnable, ERC721, IImmutableERC721S
      * @inheritdoc ERC721
      */
     // slither-disable-next-line dead-code
-    function _baseURI() internal view virtual override(ERC721, ERC721Psi) returns (string memory) {
+    function _baseURI() internal view virtual override(ERC721, ERC721PsiV2) returns (string memory) {
         return ERC721._baseURI();
     }
 }

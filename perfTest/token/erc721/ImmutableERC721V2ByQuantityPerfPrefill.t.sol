@@ -3,12 +3,12 @@
 
 pragma solidity ^0.8.19;
 
-import {ImmutableERC721ByQuantityPerfTest} from "./ImmutableERC721ByQuantityPerf.t.sol";
+import {ImmutableERC721V2ByQuantityPerfTest} from "./ImmutableERC721V2ByQuantityPerf.t.sol";
 
 /**
  * ImmutableERC721ByQuantityPerfTest, but prefilling the contract with data.
  */
-contract ImmutableERC721ByQuantityPerfPrefillTest is ImmutableERC721ByQuantityPerfTest {
+contract ImmutableERC721V2ByQuantityPerfPrefillTest is ImmutableERC721V2ByQuantityPerfTest {
     function setUpStart() public override {
         super.setUpStart();
         prefillWithNfts();

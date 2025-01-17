@@ -380,8 +380,24 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
 
         _beforeTokenTransfers(_from, _to, _tokenId, 1);
 
+        // Check that tokenId was not transferred by `_beforeTokenTransfer` hook
+        // TODO: This is not done in PSI, but is done in open zeppelin
+        //require(ownerOf(_tokenId) == _from, "ERC721: transfer from incorrect owner");
+
         // Clear approvals from the previous owner
-        _approve(owner, address(0), _tokenId);
+        // Do this in the ERC 721 way, and not the PSI way. That is, don't emit an event.
+        delete tokenApprovals[_tokenId];
+
+        // Update balances
+        // Copied from Open Zeppelin ERC721 implementation
+        unchecked {
+            // `_balances[from]` cannot overflow. `from`'s balance is the number of token held, 
+            // which is at least one before the current transfer.
+            // `_balances[to]` could overflow. However, that would require all 2**256 token ids to 
+            // be minted, which in practice is impossible.
+            balances[_from] -= 1;
+            balances[_to] += 1;
+        }
 
 
         TokenGroup storage group = tokenOwners[groupNumber];
@@ -390,10 +406,6 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
             group.ownership = updatedBitMask;
         }
         owners[_tokenId] = _to;
-
-        // Update balances
-        balances[_from]--;
-        balances[_to]++;
 
         emit Transfer(_from, _to, _tokenId);
 
@@ -476,21 +488,26 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
      * @param _tokenId The NFT to determine information about.
      * @return groupNumber The group the NFT is part of.
      * @return offset The bit offset within the group.
-     * @return exists True if the NFT have been minted and not burned.
+     * @return exists True if the NFT has been minted and not burned.
      * @return owner The owner of the NFT.
      */
     function _tokenInfo(uint256 _tokenId) internal view returns (uint256, uint256, bool, address) {
         (uint256 groupNumber, uint256 offset) = groupNumerAndOffset(_tokenId);
         TokenGroup storage group = tokenOwners[groupNumber];
-        address owner;
-        bool exists;
-        if (bitIsSet(group.ownership, offset)) {
-            owner = owners[_tokenId];
-            exists = true;
-        }
-        else {
-            owner = group.defaultOwner; 
-            exists = owner != address(0)  && !bitIsSet(group.burned, offset);
+        address owner = address(0);
+        bool exists = false;
+        bool changedOwnershipAfterMint = bitIsSet(group.ownership, offset);
+        bool burned = bitIsSet(group.burned, offset);
+        if (!burned) {
+            if (changedOwnershipAfterMint) {
+                owner = owners[_tokenId];
+                exists = true;
+            }
+            else {
+                owner = group.defaultOwner; 
+                // Default owner will be zero if the group has never been minted.
+                exists = owner != address(0);
+            }
         }
         return (groupNumber, offset, exists, owner);
     }

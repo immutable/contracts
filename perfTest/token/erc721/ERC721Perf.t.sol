@@ -30,9 +30,11 @@ abstract contract ERC721PerfTest is ERC721BaseTest {
      * Allow this to be called separately as extending contracts might prefill 
      * the contract with lots of NFTs.
      */
-    function setUpLastNft() public {
+    function setUpLastNft() public virtual {
         uint256 startId = mintLots(user1, 1000000000, 15000);
         lastNftId = startId + 14999;
+        // uint256 startId = mintLots(user1, 1000000000, 1000);
+        // lastNftId = startId + 999;
     }
 
 
@@ -347,7 +349,7 @@ abstract contract ERC721PerfTest is ERC721BaseTest {
         revert("No tranfer event found");
     }
 
-    function prefillWithNfts() public {
+    function prefillWithNfts() public virtual {
         uint256 startId = 10000;
 
         for (uint256 i = 0; i < 5; i++) {

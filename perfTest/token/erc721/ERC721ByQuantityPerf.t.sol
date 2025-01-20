@@ -15,6 +15,16 @@ import {IImmutableERC721Structs} from "../../../contracts/token/erc721/interface
 abstract contract ERC721ByQuantityPerfTest is ERC721PerfTest {
     IImmutableERC721ByQuantity public erc721BQ;
 
+    function prefillWithNfts() public override {
+        uint256 startId = 10000;
+
+        for (uint256 i = 0; i < 150; i++) {
+            uint256 actualStartId = mintLots(prefillUser1, startId, 1000);
+            startId = actualStartId + 1000;
+        }
+    }
+
+
 
     function testExists1() public {
         uint256 gasStart = gasleft();

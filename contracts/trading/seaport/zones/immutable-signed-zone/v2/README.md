@@ -44,7 +44,7 @@ flowchart LR
 The sequence of events is as follows:
 
 1. The client makes a HTTP `POST .../fulfillment-data` request to the Immutable Orderbook, which will construct and sign an `extraData` payload to return to the client
-2. The client calls `fulfillAdvancedOrder` or `fulfillAvailableAdavancedOrders` on `ImmutableSeaport.sol` to fulfill an order
+2. The client calls `fulfillAdvancedOrder` or `fulfillAvailableAdvancedOrders` on `ImmutableSeaport.sol` to fulfill an order
 3. `ImmutableSeaport.sol` executes the fufilment by transferring items between parties
 4. `ImmutableSeaport.sol` calls `validateOrder` on `ImmutableSignedZoneV2.sol`, passing it the fulfilment execution details as well as the `extraData` parameter
 5. `ImmutableSignedZoneV2.sol` validates the fulfilment execution details using the `extraData` payload, reverting if expectations are not met

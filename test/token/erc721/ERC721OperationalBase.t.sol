@@ -170,65 +170,52 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
         assertEq(erc721.totalSupply(), 1);
     }
 
-    function testBurnTokenNotOwned() public {
+    function testSafeBurn() public {
+        vm.prank(minter);
+        erc721.mint(user1, 1);
+        vm.prank(minter);
+        erc721.mint(user1, 2);
+        assertEq(erc721.balanceOf(user1), 2);
+        assertEq(erc721.totalSupply(), 2);
+
+        vm.prank(user1);
+        erc721.safeBurn(user1, 1);
+        assertEq(erc721.balanceOf(user1), 1);
+        assertEq(erc721.totalSupply(), 1);
+    }
+
+    function testSafeBurnTokenNotOwned() public {
         vm.prank(minter);
         erc721.mint(user1, 1);
         vm.prank(minter);
         erc721.mint(user1, 2);
 
         vm.prank(user2);
-        vm.expectRevert(notOwnedRevertError(2));
-        erc721.burn(2);
+        vm.expectRevert(abi.encodeWithSelector(IImmutableERC721Errors.IImmutableERC721MismatchedTokenOwner.selector, 2, user1));
+        erc721.safeBurn(user2, 2);
     }
 
-    function testBurnNonExistentToken() public {
+    function testSafeBurnIncorrectOwner() public {
+        vm.prank(minter);
+        erc721.mint(user1, 1);
+        vm.prank(minter);
+        erc721.mint(user1, 2);
+
+        vm.prank(user1);
+        vm.expectRevert(abi.encodeWithSelector(IImmutableERC721Errors.IImmutableERC721MismatchedTokenOwner.selector, 2, user1));
+        erc721.safeBurn(user2, 2);
+    }
+
+    function testSafeBurnNonExistentToken() public {
         vm.prank(user1);
         vm.expectRevert("ERC721: invalid token ID");
-        erc721.burn(999);
+        erc721.safeBurn(user1, 999);
     }
 
 
 
 
 
-//  function test_RevertBurnWithIncorrectOwner() public {
-//         vm.prank(minter);
-//         vm.expectRevert("ERC721: token already minted");
-//         erc721.mint(user1, 5);
-
-
-//         vm.startPrank(user1);
-//         vm.expectRevert(
-//             abi.encodeWithSignature(
-//                 "IImmutableERC721MismatchedTokenOwner(uint256,address)",
-//                 5,
-//                 user1
-//             )
-//         );
-//         erc721.safeBurn(owner, 5);
-//         vm.stopPrank();
-//     }
-
-//     function test_SafeBurnWithCorrectOwner() public {
-//         // First mint a token to user
-//         IImmutableERC721.IDMint[] memory requests = new IImmutableERC721.IDMint[](1);
-//         uint256[] memory tokenIds1 = new uint256[](1);
-//         tokenIds1[0] = 5;
-//         requests[0].to = user1;
-//         requests[0].tokenIds = tokenIds1;
-        
-//         vm.prank(minter);
-//         erc721.mintBatch(requests);
-
-//         uint256 originalBalance = erc721.balanceOf(user1);
-//         uint256 originalSupply = erc721.totalSupply();
-
-//         vm.prank(user1);
-//         erc721.safeBurn(user1, 5);
-
-//         assertEq(erc721.balanceOf(user1), originalBalance - 1);
-//         assertEq(erc721.totalSupply(), originalSupply - 1);
-//     }
 
 //     function test_RevertBatchBurnWithIncorrectOwners() public {
 //         // Setup: First mint tokens

@@ -1,6 +1,5 @@
 // Copyright Immutable Pty Ltd 2018 - 2025
 // SPDX-License-Identifier: Apache 2.0
-
 pragma solidity ^0.8.19;
 
 // solhint-disable-next-line no-global-import
@@ -14,6 +13,12 @@ import {DeployOperatorAllowlist} from "../../utils/DeployAllowlistProxy.sol";
  * Base contract for all ERC 721 tests.
  */
 abstract contract ERC721BaseTest is Test {
+    string public constant BASE_URI = "https://baseURI.com/";
+    string public constant CONTRACT_URI = "https://contractURI.com";
+    string public constant NAME = "ERC721Preset";
+    string public constant SYMBOL = "EP";
+
+
     IImmutableERC721 public erc721;
 
     OperatorAllowlistUpgradeable public allowlist;
@@ -39,6 +44,8 @@ abstract contract ERC721BaseTest is Test {
     // Used in gas tests
     address public prefillUser1;
 
+
+
     function setUp() public virtual {
         owner = makeAddr("hubOwner");
         feeReceiver = makeAddr("feeReceiver");
@@ -47,10 +54,10 @@ abstract contract ERC721BaseTest is Test {
         operatorAllowListUpgrader = makeAddr("operatorAllowListUpgrader");
         operatorAllowListRegistrar = makeAddr("operatorAllowListRegistrar");
 
-        name = "ERC721Preset";
-        symbol = "EP";
-        baseURI = "https://baseURI.com/";
-        contractURI = "https://contractURI.com";        
+        name = NAME;
+        symbol = SYMBOL;
+        baseURI = BASE_URI;
+        contractURI = CONTRACT_URI;        
 
         DeployOperatorAllowlist deployScript = new DeployOperatorAllowlist();
         address proxyAddr = deployScript.run(operatorAllowListAdmin, operatorAllowListUpgrader, operatorAllowListRegistrar);
@@ -61,4 +68,9 @@ abstract contract ERC721BaseTest is Test {
         user3 = makeAddr("user3");
         prefillUser1 = makeAddr("prefillUser1");
     }
+
+
+    // Return the type of revert message of abi encoding if an NFT is attempted 
+    // to be burned when it isn't owned.
+    function notOwnedRevertError(uint256 _tokenIdToBeBurned) public pure virtual returns (bytes memory);
 }

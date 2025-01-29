@@ -39,6 +39,15 @@ interface IImmutableERC721 is IMintingAccessControl, IERC2981, IERC721Metadata,
      */
     function safeMint(address to, uint256 tokenId) external;
 
+
+    /**
+     * @notice Burn a token, checking the owner of the token against the parameter first.
+     *  @param owner the owner of the token
+     *  @param tokenId the id of the token to burn
+     */
+    function safeBurn(address owner, uint256 tokenId) external;
+
+
     /**
      * @notice Allows minter to safe mint a number of tokens by ID to a number of specified
      *  addresses with hooks and checks. Check ERC721Hybrid for details on _mintBatchByIDToMultiple
@@ -73,10 +82,8 @@ interface IImmutableERC721 is IMintingAccessControl, IERC2981, IERC721Metadata,
      */
     function safeTransferFromBatch(TransferRequest calldata tr) external;
 
-    /**
-     * @notice returns the number of minted - burned tokens
-     */
-    function totalSupply() external view returns (uint256);
+
+
 
 
 
@@ -89,5 +96,30 @@ interface IImmutableERC721 is IMintingAccessControl, IERC2981, IERC721Metadata,
     // solhint-disable-next-line func-name-mixedcase
     function DOMAIN_SEPARATOR() external view returns (bytes32);
 
+
+    /**
+     * @notice Return the value for the default admin role.
+     */
+    // solhint-disable-next-line func-name-mixedcase
+    function DEFAULT_ADMIN_ROLE() external pure returns (bytes32);
+
+
+    /**
+     * @notice Common URIs for individual token URIs
+     */
+    // solhint-disable-next-line func-name-mixedcase
+    function baseURI() external view returns (string memory);
+
+
+    /**
+     * @notice Contract level metadata
+     */
+    // solhint-disable-next-line func-name-mixedcase
+    function contractURI() external view returns (string memory);
+
+    /**
+     * @notice returns the number of minted - burned tokens
+     */
+    function totalSupply() external view returns (uint256);
 
 }

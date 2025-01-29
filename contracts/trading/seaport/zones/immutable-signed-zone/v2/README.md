@@ -57,7 +57,7 @@ The contract was developed based on ImmutableSignedZone, with the addition of:
 
 ### ZoneAccessControl
 
-The contract now uses a finer grained access control with role based access with the `ZoneAccessControl` interface, rather than the `Ownable` interface in the v1 contract. A seperate `zoneManager` roles is used to manage signers and an admin role used to control roles.
+The contract now uses a finer grained access control with role based access with the `ZoneAccessControl` interface, rather than the `Ownable` interface in the v1 contract. A separate `zoneManager` roles is used to manage signers and an admin role used to control roles.
 
 ### Support of SIP7 substandard 6
 

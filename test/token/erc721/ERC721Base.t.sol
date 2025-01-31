@@ -13,6 +13,8 @@ import {DeployOperatorAllowlist} from "../../utils/DeployAllowlistProxy.sol";
  * Base contract for all ERC 721 tests.
  */
 abstract contract ERC721BaseTest is Test {
+    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
+
     string public constant BASE_URI = "https://baseURI.com/";
     string public constant CONTRACT_URI = "https://contractURI.com";
     string public constant NAME = "ERC721Preset";

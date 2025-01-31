@@ -157,38 +157,25 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
     }
 
     function testBurn() public {
-        vm.prank(minter);
-        erc721.mint(user1, 1);
-        vm.prank(minter);
-        erc721.mint(user1, 2);
-        assertEq(erc721.balanceOf(user1), 2);
-        assertEq(erc721.totalSupply(), 2);
+        mintSomeTokens();
 
         vm.prank(user1);
         erc721.burn(1);
-        assertEq(erc721.balanceOf(user1), 1);
-        assertEq(erc721.totalSupply(), 1);
+        assertEq(erc721.balanceOf(user1), 2);
+        assertEq(erc721.totalSupply(), 4);
     }
 
     function testSafeBurn() public {
-        vm.prank(minter);
-        erc721.mint(user1, 1);
-        vm.prank(minter);
-        erc721.mint(user1, 2);
-        assertEq(erc721.balanceOf(user1), 2);
-        assertEq(erc721.totalSupply(), 2);
+        mintSomeTokens();
 
         vm.prank(user1);
         erc721.safeBurn(user1, 1);
-        assertEq(erc721.balanceOf(user1), 1);
-        assertEq(erc721.totalSupply(), 1);
+        assertEq(erc721.balanceOf(user1), 2);
+        assertEq(erc721.totalSupply(), 4);
     }
 
     function testSafeBurnTokenNotOwned() public {
-        vm.prank(minter);
-        erc721.mint(user1, 1);
-        vm.prank(minter);
-        erc721.mint(user1, 2);
+        mintSomeTokens();
 
         vm.prank(user2);
         vm.expectRevert(abi.encodeWithSelector(IImmutableERC721Errors.IImmutableERC721MismatchedTokenOwner.selector, 2, user1));
@@ -196,10 +183,7 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
     }
 
     function testSafeBurnIncorrectOwner() public {
-        vm.prank(minter);
-        erc721.mint(user1, 1);
-        vm.prank(minter);
-        erc721.mint(user1, 2);
+        mintSomeTokens();
 
         vm.prank(user1);
         vm.expectRevert(abi.encodeWithSelector(IImmutableERC721Errors.IImmutableERC721MismatchedTokenOwner.selector, 2, user1));
@@ -207,108 +191,126 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
     }
 
     function testSafeBurnNonExistentToken() public {
+        mintSomeTokens();
+
         vm.prank(user1);
         vm.expectRevert("ERC721: invalid token ID");
         erc721.safeBurn(user1, 999);
     }
 
+    function testBurnBatch() public {
+        mintSomeTokens();
+
+        uint256[] memory tokenIds1 = new uint256[](2);
+        tokenIds1[0] = 2;
+        tokenIds1[1] = 3;
+
+        vm.prank(user1);
+        erc721.burnBatch(tokenIds1);
+    }
+
+    function testBurnBatchIncorrectOwner() public {
+        mintSomeTokens();
+
+        uint256[] memory tokenIds1 = new uint256[](2);
+        tokenIds1[0] = 2;
+        tokenIds1[1] = 3;
+
+        vm.prank(user2);
+        vm.expectRevert(notOwnedRevertError(2));
+        erc721.burnBatch(tokenIds1);
+    }
+
+    function testBurnBatchNonExistentToken() public {
+        mintSomeTokens();
+
+        uint256[] memory tokenIds1 = new uint256[](2);
+        tokenIds1[0] = 2;
+        tokenIds1[1] = 11;
+
+        vm.prank(user1);
+        vm.expectRevert("ERC721: invalid token ID");
+        erc721.burnBatch(tokenIds1);
+    }
+
+    function testSafeBurnBatch() public {
+        mintSomeTokens();
+
+        uint256[] memory tokenIds1 = new uint256[](2);
+        tokenIds1[0] = 2;
+        tokenIds1[1] = 3;
+        IImmutableERC721.IDBurn[] memory burnRequests = new IImmutableERC721.IDBurn[](1);
+        burnRequests[0].owner = user1;
+        burnRequests[0].tokenIds = tokenIds1;
+
+        vm.prank(user1);
+        erc721.safeBurnBatch(burnRequests);
+    }
+
+    function testSafeBurnBatchIncorrectOwner() public {
+        mintSomeTokens();
+
+        uint256[] memory tokenIds1 = new uint256[](2);
+        tokenIds1[0] = 2;
+        tokenIds1[1] = 3;
+        IImmutableERC721.IDBurn[] memory burnRequests = new IImmutableERC721.IDBurn[](1);
+        burnRequests[0].owner = user1;
+        burnRequests[0].tokenIds = tokenIds1;
+
+        vm.prank(user2);
+        vm.expectRevert(notOwnedRevertError(2));
+        erc721.safeBurnBatch(burnRequests);
+    }
+
+    function testSafeBurnBatchNonExistentToken() public {
+        mintSomeTokens();
+
+        uint256[] memory tokenIds1 = new uint256[](2);
+        tokenIds1[0] = 2;
+        tokenIds1[1] = 11;
+        IImmutableERC721.IDBurn[] memory burnRequests = new IImmutableERC721.IDBurn[](1);
+        burnRequests[0].owner = user1;
+        burnRequests[0].tokenIds = tokenIds1;
+
+        vm.prank(user1);
+        vm.expectRevert("ERC721: invalid token ID");
+        erc721.safeBurnBatch(burnRequests);
+    }
 
 
 
 
+    function testPreventMintingBurnedTokens() public {
+        mintSomeTokens();
 
-//     function test_RevertBatchBurnWithIncorrectOwners() public {
-//         // Setup: First mint tokens
-//         IImmutableERC721.IDMint[] memory requests = new IImmutableERC721.IDMint[](2);
-//         uint256[] memory tokenIds1 = new uint256[](3);
-//         tokenIds1[0] = 12;
-//         tokenIds1[1] = 13;
-//         tokenIds1[2] = 14;
-//         requests[0].to = owner;
-//         requests[0].tokenIds = tokenIds1;
+        vm.prank(user1);
+        erc721.safeBurn(user1, 1);
 
-//         uint256[] memory tokenIds2 = new uint256[](3);
-//         tokenIds2[0] = 9;
-//         tokenIds2[1] = 10;
-//         tokenIds2[2] = 11;
-//         requests[0].to = user1;
-//         requests[0].tokenIds = tokenIds2;
-
-//         vm.prank(minter);
-//         erc721.mintBatch(requests);
-
-//         IImmutableERC721.IDBurn[] memory burns = new IImmutableERC721.IDBurn[](2);
-//         tokenIds1 = new uint256[](3);
-//         tokenIds1[0] = 12;
-//         tokenIds1[1] = 13;
-//         tokenIds1[2] = 14;
-//         burns[0].owner = owner;
-//         burns[0].tokenIds = tokenIds1;
-
-//         tokenIds2 = new uint256[](3);
-//         tokenIds2[0] = 9;
-//         tokenIds2[1] = 10;
-//         tokenIds2[2] = 11;
-//         burns[1].owner = owner;
-//         burns[1].tokenIds = tokenIds1;
-
-//         vm.prank(user1);
-//         vm.expectRevert(
-//             abi.encodeWithSignature(
-//                 "IImmutableERC721MismatchedTokenOwner(uint256,address)",
-//                 12,
-//                 owner
-//             )
-//         );
-//         erc721.safeBurnBatch(burns);
-//     }
-
-    // function test_PreventMintingBurnedTokens() public {
-    //     // First mint and burn a token
-    //     IImmutableERC721.IDMint[] memory requests = new IImmutableERC721.IDMint[](1);
-    //     requests[0] = IImmutableERC721.IDMint({
-    //         to: user1,
-    //         tokenIds: new uint256[](2)
-    //     });
-    //     requests[0].tokenIds = [1, 2];
-
-    //     vm.prank(minter);
-    //     erc721.mintBatch(requests);
-
-    //     vm.prank(user1);
-    //     erc721.safeBurn(user1, 1);
-
-    //     // Try to mint the burned token
-    //     vm.prank(minter);
-    //     vm.expectRevert(
-    //         abi.encodeWithSignature(
-    //             "IImmutableERC721TokenAlreadyBurned(uint256)",
-    //             1
-    //         )
-    //     );
-    //     erc721.mintBatch(requests);
-    // }
-
-    // function test_RevertMintAboveThreshold() public {
-    //     uint256 first = erc721.mintBatchByQuantityThreshold();
-        
-    //     IImmutableERC721.IDMint[] memory requests = new IImmutableERC721.IDMint[](1);
-    //     requests[0] = IImmutableERC721.IDMint({
-    //         to: user1,
-    //         tokenIds: new uint256[](1)
-    //     });
-    //     requests[0].tokenIds[0] = first;
-
-    //     vm.prank(minter);
-    //     vm.expectRevert(
-    //         abi.encodeWithSignature(
-    //             "IImmutableERC721IDAboveThreshold(uint256)",
-    //             first
-    //         )
-    //     );
-    //     erc721.mintBatch(requests);
-    // }
+        // Try to mint the burned token
+        vm.prank(minter);
+        vm.expectRevert(
+            abi.encodeWithSelector(IImmutableERC721Errors.IImmutableERC721TokenAlreadyBurned.selector, 1)
+        );
+        erc721.mint(user3, 1);
+    }
 
 
-    // Additional test functions would follow...
+
+
+    function mintSomeTokens() internal {
+        vm.prank(minter);
+        erc721.mint(user1, 1);
+        vm.prank(minter);
+        erc721.mint(user1, 2);
+        vm.prank(minter);
+        erc721.mint(user1, 3);
+        vm.prank(minter);
+        erc721.mint(user2, 5);
+        vm.prank(minter);
+        erc721.mint(user2, 6);
+        assertEq(erc721.balanceOf(user1), 3);
+        assertEq(erc721.balanceOf(user2), 2);
+        assertEq(erc721.totalSupply(), 5);
+    }
+
 }

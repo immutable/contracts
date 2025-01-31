@@ -30,4 +30,10 @@ contract ERC721OperationalV2Test is ERC721OperationalByQuantityBaseTest {
     function notOwnedRevertError(uint256 _tokenIdToBeBurned) public pure override returns (bytes memory) {
         return abi.encodeWithSelector(IImmutableERC721Errors.IImmutableERC721NotOwnerOrOperator.selector, _tokenIdToBeBurned);
     }
+
+    function getFirst() internal override view returns (uint256) {
+        uint256 nominalFirst = erc721BQ.mintBatchByQuantityThreshold();
+        return ((nominalFirst / 256) + 1) * 256;
+    }
+
 }

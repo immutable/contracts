@@ -38,4 +38,11 @@ interface IImmutableERC721ByQuantity is IImmutableERC721 {
      *
      */
     function exists(uint256 tokenId) external view returns (bool);
+
+    /**
+     * @notice returns the threshold that divides tokens that are minted by id and
+     *  minted by quantity
+     */
+    function mintBatchByQuantityThreshold() external pure returns (uint256);
+
 }

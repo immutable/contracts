@@ -19,16 +19,16 @@ abstract contract ERC721PsiBurnableV2 is ERC721PsiV2 {
      * Emits a {Transfer} event.
      */
     function _burn(uint256 _tokenId) internal virtual {
-        (uint256 groupNumber, uint256 groupOffset, bool exists, address owner) = _tokenInfo(_tokenId);
-        require(exists, "ERC721Psi: owner query for nonexistent token");
+        // Note: To get here, exists must be true. Hence, it is OK to ignore exists.
+        uint256 groupNumber;
+        uint256 groupOffset;
+        address owner;
+        (groupNumber, groupOffset, , owner) = _tokenInfo(_tokenId);
 
         _beforeTokenTransfers(owner, address(0), _tokenId, 1);
 
         TokenGroup storage group = tokenOwners[groupNumber];
-        (bool changed, uint256 updatedBitMask) = setBitIfNotSet(group.burned, groupOffset);
-        if (changed) {
-            group.burned = updatedBitMask;
-        }
+        group.burned = setBit(group.burned, groupOffset);
 
         // Update balances
         balances[owner]--;

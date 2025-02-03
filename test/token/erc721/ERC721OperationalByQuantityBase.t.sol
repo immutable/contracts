@@ -108,6 +108,42 @@ abstract contract ERC721OperationalByQuantityBaseTest is ERC721OperationalBaseTe
         }
     }
 
+    function testMintByQuantityBurn() public {
+        uint256 qty = 5;
+        uint256 first = getFirst();
+        vm.prank(minter);
+        erc721BQ.mintByQuantity(user1, qty);
+
+        vm.prank(user1);
+        erc721BQ.burn(first+1);
+        assertEq(erc721.balanceOf(user1), qty - 1);
+        assertEq(erc721.totalSupply(), qty - 1);
+
+    }
+
+    function testMintByQuantityBurnAlreadyBurnt() public {
+        uint256 qty = 5;
+        uint256 first = getFirst();
+        vm.prank(minter);
+        erc721BQ.mintByQuantity(user1, qty);
+
+        vm.prank(user1);
+        erc721BQ.burn(first+1);
+        assertEq(erc721.balanceOf(user1), qty - 1);
+        assertEq(erc721.totalSupply(), qty - 1);
+
+        // Burn a token that has already been burnt
+        vm.prank(user1);
+        vm.expectRevert("ERC721Psi: operator query for nonexistent token");
+        erc721BQ.burn(first+1);
+    }
+
+    function testMintByQuantityBurnNonExistentToken() public {
+        uint256 first = getFirst();
+        vm.prank(user1);
+        vm.expectRevert("ERC721Psi: operator query for nonexistent token");
+        erc721BQ.burn(first+1);
+    }
 
 
     // function test_BurnBatch() public {

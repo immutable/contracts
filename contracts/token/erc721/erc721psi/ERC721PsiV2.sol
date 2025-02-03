@@ -401,10 +401,7 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
 
 
         TokenGroup storage group = tokenOwners[groupNumber];
-        (bool changed, uint256 updatedBitMask) = setBitIfNotSet(group.ownership, groupOffset);
-        if (changed) {
-            group.ownership = updatedBitMask;
-        }
+        group.ownership = setBit(group.ownership, groupOffset);
         owners[_tokenId] = _to;
 
         emit Transfer(_from, _to, _tokenId);
@@ -529,11 +526,10 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
         return (bitSet & _bitMask != 0);
     }
 
-    function setBitIfNotSet(uint256 _bitMask, uint256 _offset) internal pure returns (bool, uint256) {
+    function setBit(uint256 _bitMask, uint256 _offset) internal pure returns (uint256) {
         uint256 bitSet = 1 << _offset;
-        bool changed = ((bitSet & _bitMask) == 0);
         uint256 updatedBitMask = bitSet | _bitMask;
-        return (changed, updatedBitMask);
+        return updatedBitMask;
     }
 
     function bitMaskToBurn(uint256 _offset) internal pure returns(uint256) {

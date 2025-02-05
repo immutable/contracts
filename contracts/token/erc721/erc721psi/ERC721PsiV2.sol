@@ -40,6 +40,7 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     mapping(address => uint256) internal balances;
     uint256 internal supply;
 
+    // The next group to allocated tokens form.
     uint256 private nextGroup;
 
     mapping(uint256 => address) private tokenApprovals;
@@ -203,6 +204,22 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     }
 
     /**
+     * @notice Return the total number of NFTs minted that have not been burned.
+     */
+    function totalSupply() public view virtual returns (uint256) {
+        return supply;
+    }
+
+    /**
+     * @notice returns the next token id that will be minted for the first 
+     *  NFT in a call to mintByQuantity or safeMintByQuantity.
+     */
+    function mintBatchByQuantityNextTokenId() external view returns (uint256) {
+        return _groupToTokenId(nextGroup);
+    }
+
+
+    /**
      * @dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients
      * are aware of the ERC721 protocol to prevent tokens from being forever locked.
      *
@@ -287,7 +304,7 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
 
 
     function _mintInternal(address _to, uint256 _quantity) internal virtual returns (uint256) {
-        uint256 firstTokenId = groupToTokenId(nextGroup);
+        uint256 firstTokenId = _groupToTokenId(nextGroup);
 
         require(_quantity > 0, "ERC721Psi: quantity must be greater 0");
         require(_to != address(0), "ERC721Psi: mint to the zero address");
@@ -295,7 +312,7 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
         _beforeTokenTransfers(address(0), _to, firstTokenId, _quantity);
 
         // Mint tokens
-        (uint256 numberOfGroupsToMint, uint256 numberWithinGroup) = groupNumerAndOffset(_quantity);
+        (uint256 numberOfGroupsToMint, uint256 numberWithinGroup) = _groupNumerAndOffset(_quantity);
         uint256 nextGroupOnStack = nextGroup;
         uint256 nextGroupAfterMint = nextGroupOnStack + numberOfGroupsToMint;
         for (uint256 i = nextGroupOnStack; i < nextGroupAfterMint; i++) {
@@ -314,7 +331,7 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
             TokenGroup storage group = tokenOwners[nextGroupAfterMint];
             group.defaultOwner = _to;
             // Burn the rest of the group.
-            group.burned = bitMaskToBurn(numberWithinGroup);
+            group.burned = _bitMaskToBurn(numberWithinGroup);
             nextGroup = nextGroupAfterMint + 1;
         }
 
@@ -401,7 +418,7 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
 
 
         TokenGroup storage group = tokenOwners[groupNumber];
-        group.ownership = setBit(group.ownership, groupOffset);
+        group.ownership = _setBit(group.ownership, groupOffset);
         owners[_tokenId] = _to;
 
         emit Transfer(_from, _to, _tokenId);
@@ -474,10 +491,6 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
         }
     }
 
-    function totalSupply() public view virtual returns (uint256) {
-        return supply;
-    }
-
 
     /**
      * @notice Fetch token information.
@@ -489,12 +502,12 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
      * @return owner The owner of the NFT.
      */
     function _tokenInfo(uint256 _tokenId) internal view returns (uint256, uint256, bool, address) {
-        (uint256 groupNumber, uint256 offset) = groupNumerAndOffset(_tokenId);
+        (uint256 groupNumber, uint256 offset) = _groupNumerAndOffset(_tokenId);
         TokenGroup storage group = tokenOwners[groupNumber];
         address owner = address(0);
         bool exists = false;
-        bool changedOwnershipAfterMint = bitIsSet(group.ownership, offset);
-        bool burned = bitIsSet(group.burned, offset);
+        bool changedOwnershipAfterMint = _bitIsSet(group.ownership, offset);
+        bool burned = _bitIsSet(group.burned, offset);
         if (!burned) {
             if (changedOwnershipAfterMint) {
                 owner = owners[_tokenId];
@@ -513,26 +526,26 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     /**
      * Convert from a token id to a group number and an offset. 
      */
-    function groupNumerAndOffset(uint256 _tokenId) private pure returns(uint256, uint256) {
+    function _groupNumerAndOffset(uint256 _tokenId) private pure returns(uint256, uint256) {
         return (_tokenId / 256, _tokenId % 256);
     }
 
-    function groupToTokenId(uint256 _nextGroup) private pure returns(uint256) {
+    function _groupToTokenId(uint256 _nextGroup) private pure returns(uint256) {
         return _nextGroup * 256;
     }
 
-    function bitIsSet(uint256 _bitMask, uint256 _offset) internal pure returns (bool) {
+    function _bitIsSet(uint256 _bitMask, uint256 _offset) internal pure returns (bool) {
         uint256 bitSet = 1 << _offset;
         return (bitSet & _bitMask != 0);
     }
 
-    function setBit(uint256 _bitMask, uint256 _offset) internal pure returns (uint256) {
+    function _setBit(uint256 _bitMask, uint256 _offset) internal pure returns (uint256) {
         uint256 bitSet = 1 << _offset;
         uint256 updatedBitMask = bitSet | _bitMask;
         return updatedBitMask;
     }
 
-    function bitMaskToBurn(uint256 _offset) internal pure returns(uint256) {
+    function _bitMaskToBurn(uint256 _offset) internal pure returns(uint256) {
         // Offset will range between 1 and 255. 256 if handled separately.
         // If offset = 1, mask should be 0xffff...ffe
         // If offset = 2, mask should be 0xffff...ffc

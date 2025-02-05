@@ -28,7 +28,7 @@ abstract contract ERC721PsiBurnableV2 is ERC721PsiV2 {
         _beforeTokenTransfers(owner, address(0), _tokenId, 1);
 
         TokenGroup storage group = tokenOwners[groupNumber];
-        group.burned = setBit(group.burned, groupOffset);
+        group.burned = _setBit(group.burned, groupOffset);
 
         // Update balances
         balances[owner]--;

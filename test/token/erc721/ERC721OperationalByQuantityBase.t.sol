@@ -145,24 +145,51 @@ abstract contract ERC721OperationalByQuantityBaseTest is ERC721OperationalBaseTe
         erc721BQ.burn(first+1);
     }
 
+    function testMintByQuantityBurnBatch() public {
+        mintSomeTokens();
+        uint256 originalSupply = erc721.totalSupply();
+        uint256 user1Bal = erc721.balanceOf(user1);
 
-    // function test_BurnBatch() public {
-    //     uint256 originalBalance = erc721.balanceOf(user);
-    //     uint256 originalSupply = erc721.totalSupply();
-    //     uint256 first = erc721.mintBatchByQuantityThreshold();
-        
-    //     uint256[] memory batch = new uint256[](4);
-    //     batch[0] = 3;
-    //     batch[1] = 4;
-    //     batch[2] = first;
-    //     batch[3] = first + 1;
+        uint256 qty = 4;
+        uint256 first = getFirst();
+        vm.prank(minter);
+        erc721BQ.mintByQuantity(user1, qty);
+        assertEq(erc721.balanceOf(user1), qty + user1Bal);
+        assertEq(erc721.totalSupply(), qty + originalSupply);
 
-    //     vm.prank(user);
-    //     erc721.burnBatch(batch);
+        uint256[] memory batch = new uint256[](4);
+        batch[0] = 2;
+        batch[1] = 3;
+        batch[2] = first;
+        batch[3] = first + 1;
 
-    //     assertEq(erc721.balanceOf(user), originalBalance - batch.length);
-    //     assertEq(erc721.totalSupply(), originalSupply - batch.length);
-    // }
+        vm.prank(user1);
+        erc721.burnBatch(batch);
+        assertEq(erc721.balanceOf(user1), qty + user1Bal - batch.length, "Final balance");
+        assertEq(erc721.totalSupply(), originalSupply + qty - batch.length, "Final supply");
+    }
+
+    function testMintByQuantityBurnBatchNotApproved() public {
+        mintSomeTokens();
+        uint256 originalSupply = erc721.totalSupply();
+        uint256 user1Bal = erc721.balanceOf(user1);
+
+        uint256 qty = 4;
+        uint256 first = getFirst();
+        vm.prank(minter);
+        erc721BQ.mintByQuantity(user1, qty);
+
+        uint256[] memory batch = new uint256[](1);
+        batch[0] = first + 1;
+
+        vm.prank(user2);
+        vm.expectRevert(abi.encodeWithSelector(
+            IImmutableERC721Errors.IImmutableERC721NotOwnerOrOperator.selector, first+1));
+        erc721.burnBatch(batch);
+        assertEq(erc721.balanceOf(user1), qty + user1Bal, "Final balance");
+        assertEq(erc721.totalSupply(), originalSupply + qty, "Final supply");
+    }
+
 
     // function test_RevertWhenNotApprovedToBurn() public {
     //     uint256 first = erc721.mintBatchByQuantityThreshold();

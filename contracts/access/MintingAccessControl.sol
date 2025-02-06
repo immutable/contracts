@@ -10,7 +10,7 @@ abstract contract MintingAccessControl is AccessControlEnumerable {
 
     /**
      * @notice Allows admin grant `user` `MINTER` role
-     *  @param user The address to grant the `MINTER` role to
+     * @param user The address to grant the `MINTER` role to
      */
     function grantMinterRole(address user) public onlyRole(DEFAULT_ADMIN_ROLE) {
         grantRole(MINTER_ROLE, user);
@@ -18,7 +18,7 @@ abstract contract MintingAccessControl is AccessControlEnumerable {
 
     /**
      * @notice Allows admin to revoke `MINTER_ROLE` role from `user`
-     *  @param user The address to revoke the `MINTER` role from
+     * @param user The address to revoke the `MINTER` role from
      */
     function revokeMinterRole(address user) public onlyRole(DEFAULT_ADMIN_ROLE) {
         revokeRole(MINTER_ROLE, user);

@@ -83,11 +83,44 @@ interface IImmutableERC721 is IMintingAccessControl, IERC2981, IERC721Metadata,
     function safeTransferFromBatch(TransferRequest calldata tr) external;
 
 
+    /**
+     * @notice Set the default royalty receiver address
+     *  @param receiver the address to receive the royalty
+     *  @param feeNumerator the royalty fee numerator
+     *  @dev This can only be called by the an admin. See ERC2981 for more details on _setDefaultRoyalty
+     */
+    function setDefaultRoyaltyReceiver(address receiver, uint96 feeNumerator) external;
+
+    /**
+     * @notice Set the royalty receiver address for a specific tokenId
+     *  @param tokenId the token to set the royalty for
+     *  @param receiver the address to receive the royalty
+     *  @param feeNumerator the royalty fee numerator
+     *  @dev This can only be called by the a minter. See ERC2981 for more details on _setTokenRoyalty
+     */
+    function setNFTRoyaltyReceiver(uint256 tokenId, address receiver, uint96 feeNumerator) external;
+
+    /**
+     * @notice Set the royalty receiver address for a list of tokenId
+     *  @param tokenIds the list of tokens to set the royalty for
+     *  @param receiver the address to receive the royalty
+     *  @param feeNumerator the royalty fee numerator
+     *  @dev This can only be called by the a minter. See ERC2981 for more details on _setTokenRoyalty
+     */
+    function setNFTRoyaltyReceiverBatch(uint256[] calldata tokenIds, address receiver, uint96 feeNumerator) external;
 
 
+    /**
+     * @notice Allows admin to set the base URI
+     *  @param baseURI_ The base URI to set
+     */
+    function setBaseURI(string memory baseURI_) external;
 
-
-
+    /**
+     * @notice sets the contract uri for the collection. Permissioned to only the admin role
+     * @param _contractURI the new baseURI to set
+     */
+    function setContractURI(string memory _contractURI) external;
 
     /**
      * @notice Returns the domain separator used in the encoding of the signature for permits, as defined by EIP-712

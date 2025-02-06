@@ -118,7 +118,6 @@ abstract contract ERC721OperationalByQuantityBaseTest is ERC721OperationalBaseTe
         erc721BQ.burn(first+1);
         assertEq(erc721.balanceOf(user1), qty - 1);
         assertEq(erc721.totalSupply(), qty - 1);
-
     }
 
     function testMintByQuantityBurnAlreadyBurnt() public {
@@ -190,44 +189,32 @@ abstract contract ERC721OperationalByQuantityBaseTest is ERC721OperationalBaseTe
         assertEq(erc721.totalSupply(), originalSupply + qty, "Final supply");
     }
 
+    function testSingleMintAboveMintByQuantityThreshold() public {
+        uint256 tokenId = getFirst();
+        vm.prank(minter);
+        vm.expectRevert(abi.encodeWithSelector(
+            IImmutableERC721Errors.IImmutableERC721IDAboveThreshold.selector, tokenId));
+        erc721BQ.mint(user1, tokenId);
+    }
 
-    // function test_RevertWhenNotApprovedToBurn() public {
-    //     uint256 first = erc721.mintBatchByQuantityThreshold();
-        
-    //     uint256[] memory batch = new uint256[](2);
-    //     batch[0] = first + 2;
-    //     batch[1] = first + 3;
+    function testMintByQuantityBurnWhenApproved() public {
+        uint256 qty = 5;
+        uint256 first = getFirst();
+        vm.prank(minter);
+        erc721BQ.mintByQuantity(user1, qty);
+        uint256 tokenId = first + 1;
+        vm.prank(user1);
+        erc721BQ.approve(user2, tokenId);
 
-    //     vm.prank(minter);
-    //     vm.expectRevert(
-    //         abi.encodeWithSelector(
-    //             IImmutableERC721.IImmutableERC721NotOwnerOrOperator.selector,
-    //             first + 2
-    //         )
-    //     );
-    //     erc721.burnBatch(batch);
-    // }
+        vm.prank(user2);
+        erc721BQ.burn(tokenId);
+        assertEq(erc721.balanceOf(user1), qty - 1);
+    }
 
-    // function test_RevertWhenMintingAboveThreshold() public {
-    //     uint256 first = erc721.mintBatchByQuantityThreshold();
-        
-    //     ImmutableERC721.MintRequest[] memory mintRequests = new ImmutableERC721.MintRequest[](1);
-    //     uint256[] memory tokenIds = new uint256[](1);
-    //     tokenIds[0] = first;
-    //     mintRequests[0] = ImmutableERC721.MintRequest({
-    //         to: user,
-    //         tokenIds: tokenIds
-    //     });
 
-    //     vm.prank(minter);
-    //     vm.expectRevert(
-    //         abi.encodeWithSelector(
-    //             IImmutableERC721.IImmutableERC721IDAboveThreshold.selector,
-    //             first
-    //         )
-    //     );
-    //     erc721.mintBatch(mintRequests);
-    // }
+// TODO check everyting for approved
+// Transfers
+
 
     function testExistsForQuantityMinted() public {
         testMintByQuantity();

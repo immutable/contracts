@@ -277,9 +277,6 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
         erc721.safeBurnBatch(burnRequests);
     }
 
-
-
-
     function testPreventMintingBurnedTokens() public {
         mintSomeTokens();
 
@@ -294,23 +291,25 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
         erc721.mint(user3, 1);
     }
 
+    function testBurnWhenApproved() public {
+        uint256 tokenId = 5;
+        vm.prank(minter);
+        erc721.mint(user1, tokenId);
+        vm.prank(user1);
+        erc721.approve(user2, tokenId);
 
-
-
-    function mintSomeTokens() internal {
-        vm.prank(minter);
-        erc721.mint(user1, 1);
-        vm.prank(minter);
-        erc721.mint(user1, 2);
-        vm.prank(minter);
-        erc721.mint(user1, 3);
-        vm.prank(minter);
-        erc721.mint(user2, 5);
-        vm.prank(minter);
-        erc721.mint(user2, 6);
-        assertEq(erc721.balanceOf(user1), 3);
-        assertEq(erc721.balanceOf(user2), 2);
-        assertEq(erc721.totalSupply(), 5);
+        vm.prank(user2);
+        erc721.burn(tokenId);
+        assertEq(erc721.balanceOf(user1), 0);
     }
+
+
+
+
+// Royalties
+// Transfers
+
+
+
 
 }

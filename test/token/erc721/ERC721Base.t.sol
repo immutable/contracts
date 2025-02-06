@@ -36,7 +36,6 @@ abstract contract ERC721BaseTest is Test {
     string public symbol;
     string public baseURI;
     string public contractURI;
-    address public royaltyReceiver;
     uint96 public feeNumerator;
 
     address public user1;
@@ -59,7 +58,8 @@ abstract contract ERC721BaseTest is Test {
         name = NAME;
         symbol = SYMBOL;
         baseURI = BASE_URI;
-        contractURI = CONTRACT_URI;        
+        contractURI = CONTRACT_URI;   
+        feeNumerator = 200; // 2%     
 
         DeployOperatorAllowlist deployScript = new DeployOperatorAllowlist();
         address proxyAddr = deployScript.run(operatorAllowListAdmin, operatorAllowListUpgrader, operatorAllowListRegistrar);
@@ -75,4 +75,24 @@ abstract contract ERC721BaseTest is Test {
     // Return the type of revert message of abi encoding if an NFT is attempted 
     // to be burned when it isn't owned.
     function notOwnedRevertError(uint256 _tokenIdToBeBurned) public pure virtual returns (bytes memory);
+
+    function calcFee(uint256 _salePrice) public view returns(uint96) {
+        return uint96(feeNumerator * _salePrice / 10000);
+    }
+
+    function mintSomeTokens() internal {
+        vm.prank(minter);
+        erc721.mint(user1, 1);
+        vm.prank(minter);
+        erc721.mint(user1, 2);
+        vm.prank(minter);
+        erc721.mint(user1, 3);
+        vm.prank(minter);
+        erc721.mint(user2, 5);
+        vm.prank(minter);
+        erc721.mint(user2, 6);
+        assertEq(erc721.balanceOf(user1), 3);
+        assertEq(erc721.balanceOf(user2), 2);
+        assertEq(erc721.totalSupply(), 5);
+    }
 }

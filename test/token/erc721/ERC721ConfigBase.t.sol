@@ -101,4 +101,132 @@ abstract contract ERC721ConfigBaseTest is ERC721BaseTest {
         //vm.expectRevert("ERC721: caller is not token owner or approved");
         erc721.burn(2);
     }
+
+    function testTokenURIWithBaseURISet() public {
+        uint256 tokenId = 15;
+        vm.prank(minter);
+        erc721.mint(user1, tokenId);
+        
+        assertEq(
+            erc721.tokenURI(tokenId),
+            string(abi.encodePacked(baseURI, vm.toString(tokenId)))
+        );
+    }
+
+    function testRevertBurntTokenURI() public {
+        uint256 tokenId = 20;
+        vm.prank(minter);
+        erc721.mint(user1, tokenId);
+        vm.prank(user1);
+        erc721.burn(tokenId);
+        
+        vm.expectRevert("ERC721: invalid token ID");
+        erc721.tokenURI(tokenId);
+    }
+
+    function testAdminCanUpdateBaseURI() public {
+        string memory newBaseURI = "New Base URI";
+        vm.prank(owner);
+        erc721.setBaseURI(newBaseURI);
+        assertEq(erc721.baseURI(), newBaseURI);
+    }
+
+    function testRevertNonExistentTokenURI() public {
+        vm.expectRevert("ERC721: invalid token ID");
+        erc721.tokenURI(1001);
+    }
+
+    function testRevertNonAdminSetBaseURI() public {
+        vm.prank(user1);
+        vm.expectRevert("AccessControl: account 0x29e3b139f4393adda86303fcdaa35f60bb7092bf is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+        erc721.setBaseURI("New Base URI");
+    }
+
+    function testAdminCanUpdateContractURI() public {
+        string memory newContractURI = "New Contract URI";
+        vm.prank(owner);
+        erc721.setContractURI(newContractURI);
+        assertEq(erc721.contractURI(), newContractURI);
+    }
+
+    function testRevertNonAdminSetContractURI() public {
+        vm.prank(user1);
+        vm.expectRevert("AccessControl: account 0x29e3b139f4393adda86303fcdaa35f60bb7092bf is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
+        erc721.setContractURI("New Contract URI");
+    }
+
+    function testSupportedInterfaces() public {
+        // ERC165
+        assertTrue(erc721.supportsInterface(0x01ffc9a7));
+        // ERC721
+        assertTrue(erc721.supportsInterface(0x80ac58cd));
+        // ERC721Metadata
+        assertTrue(erc721.supportsInterface(0x5b5e139f));
+    }
+
+    function testRoyaltiesCorrectRoyalties() public {
+        mintSomeTokens();
+        uint256 salePrice = 1 ether;
+        (address receiver, uint256 royaltyAmount) = erc721.royaltyInfo(2, salePrice);
+        assertEq(receiver, feeReceiver);
+        assertEq(royaltyAmount, calcFee(salePrice));
+    }
+
+    function testRoyaltiesAdminCanSetDefaultRoyaltyReceiver() public {
+        mintSomeTokens();
+        uint256 salePrice = 1 ether;
+        feeNumerator = 500;
+        vm.prank(owner);
+        erc721.setDefaultRoyaltyReceiver(user1, feeNumerator);
+        (address receiver, uint256 royaltyAmount) = erc721.royaltyInfo(2, salePrice);
+        assertEq(receiver, user1);
+        assertEq(royaltyAmount, calcFee(salePrice));
+    }
+
+    function testRoyaltyMinterCanSetTokenRoyaltyReceiver() public {
+        mintSomeTokens();
+        uint256 salePrice = 1 ether;
+        
+        vm.prank(minter);
+        erc721.setNFTRoyaltyReceiver(2, user2, feeNumerator);
+        
+        (address receiver1,) = erc721.royaltyInfo(1, salePrice);
+        (address receiver2,) = erc721.royaltyInfo(2, salePrice);
+        
+        assertEq(receiver1, feeReceiver);
+        assertEq(receiver2, user2);
+    }
+
+    function testMinterCanSetBatchTokenRoyaltyReceiver() public {
+        mintSomeTokens();
+        uint256 salePrice = 1 ether;
+        
+        // Check initial receivers
+        (address receiver3,) = erc721.royaltyInfo(3, salePrice);
+        (address receiver4,) = erc721.royaltyInfo(4, salePrice);
+        (address receiver5,) = erc721.royaltyInfo(5, salePrice);
+        
+        assertEq(receiver3, feeReceiver);
+        assertEq(receiver4, feeReceiver);
+        assertEq(receiver5, feeReceiver);
+        
+        // Set batch receivers
+        uint256[] memory tokenIds = new uint256[](3);
+        tokenIds[0] = 3;
+        tokenIds[1] = 4;
+        tokenIds[2] = 5;
+        
+        vm.prank(minter);
+        erc721.setNFTRoyaltyReceiverBatch(tokenIds, user2, feeNumerator);
+        
+        // Verify new receivers
+        (receiver3,) = erc721.royaltyInfo(3, salePrice);
+        (receiver4,) = erc721.royaltyInfo(4, salePrice);
+        (receiver5,) = erc721.royaltyInfo(5, salePrice);
+        
+        assertEq(receiver3, user2);
+        assertEq(receiver4, user2);
+        assertEq(receiver5, user2);
+    }
+
 }

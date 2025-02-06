@@ -31,89 +31,33 @@ describe("ImmutableERC721a", function () {
   });
 
 
-
-  it("Should allow batch minting of tokens by quantity", async function () {
-    const qty = 5;
-    const mintRequests = [{ to: user.address, quantity: qty }];
-    const first = await erc721.mintBatchByQuantityThreshold();
-    const originalBalance = await erc721.balanceOf(user.address);
-    const originalSupply = await erc721.totalSupply();
-    await erc721.connect(minter).mintBatchByQuantity(mintRequests);
-    expect(await erc721.balanceOf(user.address)).to.equal(originalBalance.add(qty));
-    expect(await erc721.totalSupply()).to.equal(originalSupply.add(qty));
-    for (let i = 0; i < qty; i++) {
-      expect(await erc721.ownerOf(first.add(i))).to.equal(user.address);
-    }
-  });
-
-  it("Should allow safe batch minting of tokens by quantity", async function () {
-    const qty = 5;
-    const mintRequests = [{ to: user2.address, quantity: qty }];
-    const first = await erc721.mintBatchByQuantityThreshold();
-    const originalBalance = await erc721.balanceOf(user2.address);
-    const originalSupply = await erc721.totalSupply();
-    await erc721.connect(minter).safeMintBatchByQuantity(mintRequests);
-    expect(await erc721.balanceOf(user2.address)).to.equal(originalBalance.add(qty));
-    expect(await erc721.totalSupply()).to.equal(originalSupply.add(qty));
-    for (let i = 5; i < 10; i++) {
-      expect(await erc721.ownerOf(first.add(i))).to.equal(user2.address);
-    }
-  });
-
-  it("Should safe mint by quantity", async function () {
-    const qty = 5;
-    const first = await erc721.mintBatchByQuantityThreshold();
-    const originalBalance = await erc721.balanceOf(user2.address);
-    const originalSupply = await erc721.totalSupply();
-    await erc721.connect(minter).safeMintByQuantity(user2.address, qty);
-    expect(await erc721.balanceOf(user2.address)).to.equal(originalBalance.add(qty));
-    expect(await erc721.totalSupply()).to.equal(originalSupply.add(qty));
-    for (let i = 10; i < 15; i++) {
-      expect(await erc721.ownerOf(first.add(i))).to.equal(user2.address);
-    }
-  });
-
-
-  it("Should allow owner or approved to burn a batch of mixed ID/PSI tokens", async function () {
-    const originalBalance = await erc721.balanceOf(user.address);
-    const originalSupply = await erc721.totalSupply();
-    const first = await erc721.mintBatchByQuantityThreshold();
-    const batch = [3, 4, first.toString(), first.add(1).toString()];
-    await erc721.connect(user).burnBatch(batch);
-    expect(await erc721.balanceOf(user.address)).to.equal(originalBalance.sub(batch.length));
-    expect(await erc721.totalSupply()).to.equal(originalSupply.sub(batch.length));
-  });
-
-  it("Should prevent not approved to burn a batch of tokens", async function () {
-    const first = await erc721.mintBatchByQuantityThreshold();
-    await expect(erc721.connect(minter).burnBatch([first.add(2), first.add(3)]))
-      .to.be.revertedWith("IImmutableERC721NotOwnerOrOperator")
-      .withArgs(first.add(2));
-  });
-
-    it("Should revert if minting by id with id above threshold", async function () {
-      const first = await erc721.mintBatchByQuantityThreshold();
-      const mintRequests = [{ to: user.address, tokenIds: [first] }];
-      await expect(erc721.connect(minter).mintBatch(mintRequests))
-        .to.be.revertedWith("IImmutableERC721IDAboveThreshold")
-        .withArgs(first);
+  describe("Base URI and Token URI", function () {
+    it("Should return a non-empty tokenURI when the base URI is set", async function () {
+      const tokenId = 15;
+      await erc721.connect(minter).mint(user.address, tokenId);
+      expect(await erc721.tokenURI(tokenId)).to.equal(`${baseURI}${tokenId}`);
     });
 
-
-  describe("exists", async function () {
-    it("verifies valid tokens minted by quantity", async function () {
-      const first = await erc721.mintBatchByQuantityThreshold();
-      expect(await erc721.exists(first.add(3))).to.equal(true);
+    it("Should revert with a burnt tokenId", async function () {
+      const tokenId = 20;
+      await erc721.connect(user).burn(tokenId);
+      await expect(erc721.tokenURI(tokenId)).to.be.revertedWith("ERC721: invalid token ID");
     });
 
-    it("verifies valid tokens minted by id", async function () {
-      expect(await erc721.exists(8)).to.equal(true);
+    it("Should allow the default admin to update the base URI", async function () {
+      const newBaseURI = "New Base URI";
+      await erc721.connect(owner).setBaseURI(newBaseURI);
+      expect(await erc721.baseURI()).to.equal(newBaseURI);
     });
 
-    it("verifies invalid tokens", async function () {
-      const first = await erc721.mintBatchByQuantityThreshold();
-      expect(await erc721.exists(first.add(15))).to.equal(false);
+    it("Should revert with a non-existent tokenId", async function () {
+      await expect(erc721.tokenURI(1001)).to.be.revertedWith("ERC721: invalid token ID");
     });
-  });
+
+    it("Should revert with a caller does not have admin role", async function () {
+      await expect(erc721.connect(user).setBaseURI("New Base URI")).to.be.revertedWith(
+        "AccessControl: account 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
+      );
+    });
 
 });

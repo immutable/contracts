@@ -4,7 +4,7 @@ ImmutableSignedZone is a implementation of the SIP-7 specification with substand
 
 ## E2E tests with signing server
 
-E2E tests will be handled in the server repository seperate to the contract.
+E2E tests will be handled in the server repository separate to the contract.
 
 ## Validate order unit tests
 

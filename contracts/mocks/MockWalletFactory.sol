@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity >=0.8.19 <0.8.29;
 
 contract MockWalletFactory {
     bytes private constant WALLET_CREATION_CODE =

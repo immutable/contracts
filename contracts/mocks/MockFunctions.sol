@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Unlicense
 // This file is part of the test code for GuardedMulticaller
-pragma solidity ^0.8.19;
+pragma solidity >=0.8.19 <0.8.29;
 
 contract MockFunctions {
     error RevertWithData(uint256 value);

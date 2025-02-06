@@ -1,6 +1,6 @@
 // Copyright Immutable Pty Ltd 2018 - 2023
 // SPDX-License-Identifier: Apache 2.0
-pragma solidity 0.8.19;
+pragma solidity >=0.8.19 <0.8.29;
 
 // Access Control
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
@@ -11,7 +11,7 @@ import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 // Interfaces
 import {IOperatorAllowlist} from "../../allowlist/IOperatorAllowlist.sol";
 
-// Interface to retrieve the implemention stored inside the Proxy contract
+// Interface to retrieve the implementation stored inside the Proxy contract
 interface IProxy {
     // Returns the current implementation address used by the proxy contract
     // solhint-disable-next-line func-name-mixedcase

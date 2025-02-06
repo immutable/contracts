@@ -211,9 +211,17 @@ abstract contract ERC721OperationalByQuantityBaseTest is ERC721OperationalBaseTe
         assertEq(erc721.balanceOf(user1), qty - 1);
     }
 
-
-// TODO check everyting for approved
-// Transfers
+    function testMintByQuantityTransferFrom() public {
+        hackAddUser1ToAllowlist();
+        uint256 qty = 5;
+        uint256 first = getFirst();
+        vm.prank(minter);
+        erc721BQ.mintByQuantity(user1, qty);
+        uint256 tokenId = first + 1;
+        vm.prank(user1);
+        erc721.transferFrom(user1, user3, tokenId);
+        assertEq(erc721.ownerOf(tokenId), user3);
+    }
 
 
     function testExistsForQuantityMinted() public {
@@ -232,13 +240,11 @@ abstract contract ERC721OperationalByQuantityBaseTest is ERC721OperationalBaseTe
         assertFalse(erc721BQ.exists(getFirst()+10));
     }
 
-
     function testExistsForInvalidTokenByID() public {
         vm.prank(minter);
         erc721.mint(user1, 1);
         assertFalse(erc721BQ.exists(2));
     }
-
 
     function getFirst() internal view virtual returns (uint256) {
         return erc721BQ.mintBatchByQuantityThreshold();

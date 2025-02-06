@@ -3,7 +3,7 @@
 pragma solidity ^0.8.19;
 
 import {ERC721BaseTest} from "./ERC721Base.t.sol";
-import {IImmutableERC721, IImmutableERC721Errors} from "../../../contracts/token/erc721/interfaces/IImmutableERC721.sol";
+import {IImmutableERC721, IImmutableERC721Structs, IImmutableERC721Errors} from "../../../contracts/token/erc721/interfaces/IImmutableERC721.sol";
 
 abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
 
@@ -303,11 +303,55 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
         assertEq(erc721.balanceOf(user1), 0);
     }
 
+    function testTransferFrom() public {
+        hackAddUser1ToAllowlist();
+        mintSomeTokens();
+        vm.prank(user1);
+        erc721.transferFrom(user1, user3, 1);
+        assertEq(erc721.ownerOf(1), user3);
+    }
+
+    function testSafeTransferFromBatch() public {
+        hackAddUser1ToAllowlist();
+        mintSomeTokens();
+
+        address[] memory tos = new address[](2);
+        tos[0] = user2;
+        tos[1] = user3;
+        
+        uint256[] memory tokenIds = new uint256[](2);
+        tokenIds[0] = 1;
+        tokenIds[1] = 2;
+        
+        IImmutableERC721Structs.TransferRequest memory transferRequest = IImmutableERC721Structs.TransferRequest({
+            from: user1,
+            tos: tos,
+            tokenIds: tokenIds
+        });
+        
+        vm.prank(user1);
+        erc721.safeTransferFromBatch(transferRequest);
+    }
+
+    function testRevertMismatchedTransferLengths() public {
+        mintSomeTokens();
+
+        address[] memory tos = new address[](5);
+        uint256[] memory tokenIds = new uint256[](4);
+        
+        IImmutableERC721Structs.TransferRequest memory transferRequest = IImmutableERC721Structs.TransferRequest({
+            from: user1,
+            tos: tos,
+            tokenIds: tokenIds
+        });
+        
+        vm.prank(user1);
+        vm.expectRevert(
+            abi.encodeWithSelector(IImmutableERC721Errors.IImmutableERC721MismatchedTransferLengths.selector));
+        erc721.safeTransferFromBatch(transferRequest);
+    }
 
 
-
-// Royalties
-// Transfers
 
 
 

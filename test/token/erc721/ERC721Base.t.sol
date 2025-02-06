@@ -95,4 +95,14 @@ abstract contract ERC721BaseTest is Test {
         assertEq(erc721.balanceOf(user2), 2);
         assertEq(erc721.totalSupply(), 5);
     }
+
+    // User1 is detected as a non-EOA as msg.sender != tx.origin. 
+    // Add it to the allowlist so that transfer can be tested.
+    function hackAddUser1ToAllowlist() internal {
+        vm.prank(operatorAllowListRegistrar);
+        address[] memory addresses = new address[](1);
+        addresses[0] = user1;
+        allowlist.addAddressesToAllowlist(addresses);
+    }
+
 }

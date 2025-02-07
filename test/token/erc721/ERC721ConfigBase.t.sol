@@ -113,7 +113,7 @@ abstract contract ERC721ConfigBaseTest is ERC721BaseTest {
         );
     }
 
-    function testRevertBurntTokenURI() public {
+    function testTokenURIRevertBurnt() public {
         uint256 tokenId = 20;
         vm.prank(minter);
         erc721.mint(user1, tokenId);
@@ -124,32 +124,32 @@ abstract contract ERC721ConfigBaseTest is ERC721BaseTest {
         erc721.tokenURI(tokenId);
     }
 
-    function testAdminCanUpdateBaseURI() public {
+    function testBaseURIAdminCanUpdate() public {
         string memory newBaseURI = "New Base URI";
         vm.prank(owner);
         erc721.setBaseURI(newBaseURI);
         assertEq(erc721.baseURI(), newBaseURI);
     }
 
-    function testRevertNonExistentTokenURI() public {
+    function testTokenURIRevertNonExistent() public {
         vm.expectRevert("ERC721: invalid token ID");
         erc721.tokenURI(1001);
     }
 
-    function testRevertNonAdminSetBaseURI() public {
+    function testBaseURIRevertNonAdminSet() public {
         vm.prank(user1);
         vm.expectRevert("AccessControl: account 0x29e3b139f4393adda86303fcdaa35f60bb7092bf is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
         erc721.setBaseURI("New Base URI");
     }
 
-    function testAdminCanUpdateContractURI() public {
+    function testContractURIAdminCanUpdate() public {
         string memory newContractURI = "New Contract URI";
         vm.prank(owner);
         erc721.setContractURI(newContractURI);
         assertEq(erc721.contractURI(), newContractURI);
     }
 
-    function testRevertNonAdminSetContractURI() public {
+    function testContractURIRevertNonAdminSet() public {
         vm.prank(user1);
         vm.expectRevert("AccessControl: account 0x29e3b139f4393adda86303fcdaa35f60bb7092bf is missing role 0x0000000000000000000000000000000000000000000000000000000000000000");
         erc721.setContractURI("New Contract URI");

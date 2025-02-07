@@ -9,7 +9,7 @@ import {IImmutableERC721, IImmutableERC721Errors} from "../../../contracts/token
 
 
 // Test the original ImmutableERC721 contract: Operational tests
-contract ERC721OperationalV2Test is ERC721OperationalByQuantityBaseTest {
+contract ERC721OperationalByQuantityV2Test is ERC721OperationalByQuantityBaseTest {
     ImmutableERC721V2 erc721BQv2;
 
     function setUp() public virtual override {

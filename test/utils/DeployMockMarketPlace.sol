@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache 2.0
-pragma solidity ^0.8.19;
+pragma solidity >=0.8.19 <0.8.29;
 
 import {MockMarketplace} from "../../contracts/mocks/MockMarketplace.sol";
 

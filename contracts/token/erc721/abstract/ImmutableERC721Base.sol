@@ -1,6 +1,6 @@
 // Copyright Immutable Pty Ltd 2018 - 2023
 // SPDX-License-Identifier: Apache 2.0
-pragma solidity 0.8.19;
+pragma solidity >=0.8.19 <0.8.29;
 
 // Token
 import {ERC721Permit, ERC721, ERC721Burnable} from "./ERC721Permit.sol";

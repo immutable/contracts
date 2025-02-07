@@ -33,4 +33,8 @@ contract ImmutableERC721ByIdPerfTest is ERC721PerfTest {
         vm.prank(minter);
         erc721.mint(prefillUser1, firstNftId);
    }
+
+    function notOwnedRevertError(uint256 /* _tokenIdToBeBurned */) public pure override returns (bytes memory) {
+        return "ERC721: caller is not token owner or approved";
+    }
 }

@@ -154,5 +154,4 @@ interface IImmutableERC721 is IMintingAccessControl, IERC2981, IERC721Metadata,
      * @notice returns the number of minted - burned tokens
      */
     function totalSupply() external view returns (uint256);
-
 }

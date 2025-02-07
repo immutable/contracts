@@ -162,6 +162,8 @@ abstract contract ERC721ConfigBaseTest is ERC721BaseTest {
         assertTrue(erc721.supportsInterface(0x80ac58cd));
         // ERC721Metadata
         assertTrue(erc721.supportsInterface(0x5b5e139f));
+        // ERC 4494
+        assertTrue(erc721.supportsInterface(0x5604e225));
     }
 
     function testRoyaltiesCorrectRoyalties() public {

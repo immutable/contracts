@@ -7,6 +7,7 @@ import "forge-std/Test.sol";
 import {ERC721PerfTest} from "./ERC721Perf.t.sol";
 import {IImmutableERC721ByQuantity} from "../../../contracts/token/erc721/interfaces/IImmutableERC721ByQuantity.sol";
 import {IImmutableERC721Structs} from "../../../contracts/token/erc721/interfaces/IImmutableERC721Structs.sol";
+import {IImmutableERC721Errors} from "../../../contracts/token/erc721/interfaces/IImmutableERC721Errors.sol";
 
 
 /**
@@ -156,4 +157,9 @@ abstract contract ERC721ByQuantityPerfTest is ERC721PerfTest {
         erc721BQ.safeMintByQuantity(_recipient, _quantity);
         return findFirstNftId();
     }
+
+    function notOwnedRevertError(uint256 _tokenIdToBeBurned) public pure override returns (bytes memory) {
+        return abi.encodeWithSelector(IImmutableERC721Errors.IImmutableERC721NotOwnerOrOperator.selector, _tokenIdToBeBurned);
+    }
+
 }

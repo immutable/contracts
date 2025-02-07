@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 
 import {ERC721BaseTest} from "./ERC721Base.t.sol";
 import {IImmutableERC721, IImmutableERC721Structs, IImmutableERC721Errors} from "../../../contracts/token/erc721/interfaces/IImmutableERC721.sol";
+import {MockEIP1271Wallet} from "../../../contracts/mocks/MockEIP1271Wallet.sol";
 
 abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
 
@@ -351,9 +352,136 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
         erc721.safeTransferFromBatch(transferRequest);
     }
 
+    function testPermitApproveSpenderMintedById() public {
+        uint256 tokenId = 1;
+        vm.prank(minter);
+        erc721.mint(user1, tokenId);
+        uint256 deadline = block.timestamp + 1 days;
+        uint256 nonce = erc721.nonces(tokenId);
+        assertEq(nonce, 0);
+
+        bytes memory signature = getSignature(user1Pkey, user2, tokenId, nonce, deadline);
+        assertEq(address(0), erc721.getApproved(tokenId));
+
+        vm.prank(user2);
+        erc721.permit(user2, tokenId, deadline, signature);
+
+        assertEq(erc721.getApproved(tokenId), user2);
+    }
+
+    function testPermitExpired() public {
+        uint256 tokenId = 1;
+        vm.prank(minter);
+        erc721.mint(user1, tokenId);
+        uint256 deadline = block.timestamp;
+        vm.warp(block.timestamp + 1 days);
+        uint256 nonce = erc721.nonces(tokenId);
+        assertEq(nonce, 0);
+
+        bytes memory signature = getSignature(user1Pkey, user2, tokenId, nonce, deadline);
+        assertEq(address(0), erc721.getApproved(tokenId));
+
+        vm.prank(user2);
+        vm.expectRevert(
+            abi.encodeWithSelector(IImmutableERC721Errors.PermitExpired.selector));
+        erc721.permit(user2, tokenId, deadline, signature);
+        assertEq(address(0), erc721.getApproved(tokenId));
+    }
+
+    function testPermitNotOwner() public {
+        uint256 tokenId = 1;
+        vm.prank(minter);
+        erc721.mint(user3, tokenId);
+        uint256 deadline = block.timestamp + 1 days;
+        uint256 nonce = erc721.nonces(tokenId);
+        bytes memory signature = getSignature(user1Pkey, user2, tokenId, nonce, deadline);
+
+        vm.prank(user2);
+        vm.expectRevert(
+            abi.encodeWithSelector(IImmutableERC721Errors.InvalidSignature.selector));
+        erc721.permit(user2, tokenId, deadline, signature);
+    }
+
+    function testPermitApprovedOperatorsCanPermit() public {
+        uint256 tokenId = 1;
+        vm.prank(minter);
+        erc721.mint(user3, tokenId);
+        uint256 deadline = block.timestamp + 1 days;
+        uint256 nonce = erc721.nonces(tokenId);
+
+        vm.prank(user3);
+        erc721.approve(user1, tokenId);
+        assertEq(user1, erc721.getApproved(tokenId));
+
+        bytes memory signature = getSignature(user1Pkey, user2, tokenId, nonce, deadline);
+
+        vm.prank(user2);
+        erc721.permit(user2, tokenId, deadline, signature);
+
+        assertEq(erc721.getApproved(tokenId), user2);
+    }
+
+    function testPermitNonceIncrementsOnTransfer() public {
+        hackAddUser1ToAllowlist();
+        uint256 tokenId = 1;
+        vm.prank(minter);
+        erc721.mint(user1, tokenId);
+        uint256 nonce = erc721.nonces(tokenId);
+        assertEq(nonce, 0);
+
+        vm.prank(user1);
+        erc721.safeTransferFrom(user1, user2, tokenId);
+        nonce = erc721.nonces(tokenId);
+        assertEq(nonce, 1);
+    }
+
+    function testPermitInvalidAfterTransfer() public {
+        hackAddUser1ToAllowlist();
+        hackAddUser3ToAllowlist();
+        uint256 tokenId = 1;
+        vm.prank(minter);
+        erc721.mint(user1, tokenId);
+        uint256 deadline = block.timestamp + 1 days;
+        uint256 nonce = erc721.nonces(tokenId);
+
+        bytes memory signature = getSignature(user1Pkey, user2, tokenId, nonce, deadline);
+        vm.prank(user1);
+        erc721.safeTransferFrom(user1, user3, tokenId);
+
+        // Expect to fail as user1 is no longer the owner.
+        vm.prank(user2);
+        vm.expectRevert(
+            abi.encodeWithSelector(IImmutableERC721Errors.InvalidSignature.selector));
+        erc721.permit(user2, tokenId, deadline, signature);
+
+        vm.prank(user3);
+        erc721.safeTransferFrom(user3, user1, tokenId);
+
+        // Expect to fail as ownership has changed. 
+        vm.prank(user2);
+        vm.expectRevert(
+            abi.encodeWithSelector(IImmutableERC721Errors.InvalidSignature.selector));
+        erc721.permit(user2, tokenId, deadline, signature);
+    }
 
 
+    function testPermitContractWallet() public {
+        MockEIP1271Wallet eip1271Wallet = new MockEIP1271Wallet(user1);
 
+        uint256 tokenId = 1;
+        vm.prank(minter);
+        erc721.mint(address(eip1271Wallet), tokenId);
+        assertEq(erc721.balanceOf(address(eip1271Wallet)), 1, "Balance of contract wallet");
 
+        uint256 deadline = block.timestamp + 1 days;
+        uint256 nonce = erc721.nonces(tokenId);
+        assertEq(nonce, 0);
 
+        bytes memory signature = getSignature(user1Pkey, user2, tokenId, nonce, deadline);
+        assertEq(address(0), erc721.getApproved(tokenId));
+
+        vm.prank(user2);
+        erc721.permit(user2, tokenId, deadline, signature);
+        assertEq(erc721.getApproved(tokenId), user2);
+    }
 }

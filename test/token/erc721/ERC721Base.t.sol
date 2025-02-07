@@ -41,6 +41,7 @@ abstract contract ERC721BaseTest is Test {
     address public user1;
     address public user2;
     address public user3;
+    uint256 public user1Pkey;
 
     // Used in gas tests
     address public prefillUser1;
@@ -65,7 +66,7 @@ abstract contract ERC721BaseTest is Test {
         address proxyAddr = deployScript.run(operatorAllowListAdmin, operatorAllowListUpgrader, operatorAllowListRegistrar);
         allowlist = OperatorAllowlistUpgradeable(proxyAddr);
 
-        user1 = makeAddr("user1");
+        (user1, user1Pkey) = makeAddrAndKey("user1");
         user2 = makeAddr("user2");
         user3 = makeAddr("user3");
         prefillUser1 = makeAddr("prefillUser1");
@@ -104,5 +105,35 @@ abstract contract ERC721BaseTest is Test {
         addresses[0] = user1;
         allowlist.addAddressesToAllowlist(addresses);
     }
+    function hackAddUser3ToAllowlist() internal {
+        vm.prank(operatorAllowListRegistrar);
+        address[] memory addresses = new address[](1);
+        addresses[0] = user3;
+        allowlist.addAddressesToAllowlist(addresses);
+    }
 
+    function getSignature(
+        uint256 signerPkey,
+        address spender,
+        uint256 tokenId,
+        uint256 nonce,
+        uint256 deadline
+    ) internal view returns (bytes memory) {
+        bytes32 structHash = keccak256(
+            abi.encode(
+                keccak256("Permit(address spender,uint256 tokenId,uint256 nonce,uint256 deadline)"),
+                spender,
+                tokenId,
+                nonce,
+                deadline
+            )
+        );
+
+        bytes32 hash = keccak256(
+            abi.encodePacked("\x19\x01", erc721.DOMAIN_SEPARATOR(), structHash)
+        );
+
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPkey, hash);
+        return abi.encodePacked(r, s, v);
+    }
 }

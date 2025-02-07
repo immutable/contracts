@@ -246,6 +246,22 @@ abstract contract ERC721OperationalByQuantityBaseTest is ERC721OperationalBaseTe
         assertFalse(erc721BQ.exists(2));
     }
 
+    function testPermitApproveSpenderMintedByQuantity() public {
+        testMintByQuantity();
+        uint256 tokenId = getFirst();
+        uint256 deadline = block.timestamp + 1 days;
+        uint256 nonce = erc721.nonces(tokenId);
+        assertEq(nonce, 0);
+
+        bytes memory signature = getSignature(user1Pkey, user2, tokenId, nonce, deadline);
+        assertFalse(user2 == erc721.getApproved(tokenId));
+
+        vm.prank(user2);
+        erc721.permit(user2, tokenId, deadline, signature);
+        assertEq(erc721.getApproved(tokenId), user2);
+    }
+
+
     function getFirst() internal view virtual returns (uint256) {
         return erc721BQ.mintBatchByQuantityThreshold();
     }

@@ -6,9 +6,8 @@ import {IImmutableERC721ByQuantity} from "./IImmutableERC721ByQuantity.sol";
 
 interface IImmutableERC721ByQuantityV2 is IImmutableERC721ByQuantity {
     /**
-     * @notice returns the next token id that will be minted for the first 
+     * @notice returns the next token id that will be minted for the first
      *  NFT in a call to mintByQuantity or safeMintByQuantity.
      */
     function mintBatchByQuantityNextTokenId() external pure returns (uint256);
-
 }

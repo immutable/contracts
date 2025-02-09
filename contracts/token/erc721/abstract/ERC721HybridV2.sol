@@ -24,7 +24,6 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnableV2, ERC721, IImmutableERC72
     /// @notice A mapping of tokens ids before the threshold that have been burned to prevent re-minting
     BitMaps.BitMap private _burnedTokens;
 
-
     constructor(string memory name_, string memory symbol_) ERC721(name_, symbol_) ERC721PsiV2(name_, symbol_) {}
 
     /**

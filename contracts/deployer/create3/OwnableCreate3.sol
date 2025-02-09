@@ -27,10 +27,10 @@ contract OwnableCreate3 is OwnableCreate3Address, IDeploy {
      * @param deploySalt A salt to influence the contract address
      * @return deployed The address of the deployed contract
      */
-    // Slither 0.10.4 is mistakenly seeing this as dead code. It is called 
+    // Slither 0.10.4 is mistakenly seeing this as dead code. It is called
     // from OwnableCreate3Deployer.deploy and could be called from other contracts.
     // slither-disable-next-line dead-code
-     function _create3(bytes memory bytecode, bytes32 deploySalt) internal returns (address deployed) {
+    function _create3(bytes memory bytecode, bytes32 deploySalt) internal returns (address deployed) {
         deployed = _create3Address(deploySalt);
 
         if (bytecode.length == 0) revert EmptyBytecode();

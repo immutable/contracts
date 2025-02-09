@@ -4,7 +4,6 @@ pragma solidity 0.8.19;
 
 import {IAccessControlEnumerable} from "@openzeppelin/contracts/access/IAccessControlEnumerable.sol";
 
-
 interface IMintingAccessControl is IAccessControlEnumerable {
     /**
      * @notice Role to mint tokens

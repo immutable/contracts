@@ -72,7 +72,9 @@ abstract contract ERC721HybridPermitV2 is ERC721HybridV2, IERC4494, EIP712 {
      * @param interfaceId The interface identifier, which is a 4-byte selector.
      * @return True if the contract implements `interfaceId` and the call doesn't revert, otherwise false.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165, ERC721HybridV2) returns (bool) {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(IERC165, ERC721HybridV2) returns (bool) {
         return
             interfaceId == type(IERC4494).interfaceId || // 0x5604e225
             super.supportsInterface(interfaceId);

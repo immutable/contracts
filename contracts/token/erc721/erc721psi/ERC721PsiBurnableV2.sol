@@ -7,7 +7,6 @@ pragma solidity 0.8.19;
 import {ERC721PsiV2} from "./ERC721PsiV2.sol";
 
 abstract contract ERC721PsiBurnableV2 is ERC721PsiV2 {
-
     /**
      * @dev Destroys `tokenId`.
      * The approval is cleared when the token is burned.
@@ -34,10 +33,8 @@ abstract contract ERC721PsiBurnableV2 is ERC721PsiV2 {
         balances[owner]--;
         supply--;
 
-
         emit Transfer(owner, address(0), _tokenId);
 
         _afterTokenTransfers(owner, address(0), _tokenId, 1);
     }
-
 }

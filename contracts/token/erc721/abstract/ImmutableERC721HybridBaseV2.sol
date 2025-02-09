@@ -9,10 +9,11 @@ import {ERC721HybridPermitV2} from "./ERC721HybridPermitV2.sol";
 import {ERC721HybridV2} from "./ERC721HybridV2.sol";
 
 abstract contract ImmutableERC721HybridBaseV2 is
-    ERC721HybridPermitV2, 
+    ERC721HybridPermitV2,
     MintingAccessControl,
     OperatorAllowlistEnforced,
-    ERC2981 {
+    ERC2981
+{
     /// @notice Contract level metadata
     string public contractURI;
 

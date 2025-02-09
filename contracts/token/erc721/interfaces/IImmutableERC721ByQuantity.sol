@@ -44,5 +44,4 @@ interface IImmutableERC721ByQuantity is IImmutableERC721 {
      *  minted by quantity
      */
     function mintBatchByQuantityThreshold() external pure returns (uint256);
-
 }

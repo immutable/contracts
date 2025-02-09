@@ -11,10 +11,15 @@ import {IMintingAccessControl} from "../../../access/IMintingAccessControl.sol";
 import {IImmutableERC721Structs} from "./IImmutableERC721Structs.sol";
 import {IImmutableERC721Errors} from "./IImmutableERC721Errors.sol";
 
-
-interface IImmutableERC721 is IMintingAccessControl, IERC2981, IERC721Metadata, 
-           IImmutableERC721Structs, IImmutableERC721Errors, IERC4494, IERC5267 {
-
+interface IImmutableERC721 is
+    IMintingAccessControl,
+    IERC2981,
+    IERC721Metadata,
+    IImmutableERC721Structs,
+    IImmutableERC721Errors,
+    IERC4494,
+    IERC5267
+{
     /**
      * @dev Burns `tokenId`.
      *
@@ -24,14 +29,13 @@ interface IImmutableERC721 is IMintingAccessControl, IERC2981, IERC721Metadata,
      */
     function burn(uint256 tokenId) external;
 
-
     /**
      * @notice Allows minter to mint a token by ID to a specified address
      *  @param to the address to mint the token to
      *  @param tokenId the ID of the token to mint
      */
     function mint(address to, uint256 tokenId) external;
-    
+
     /**
      * @notice Allows minter to mint a token by ID to a specified address with hooks and checks
      *  @param to the address to mint the token to
@@ -39,14 +43,12 @@ interface IImmutableERC721 is IMintingAccessControl, IERC2981, IERC721Metadata,
      */
     function safeMint(address to, uint256 tokenId) external;
 
-
     /**
      * @notice Burn a token, checking the owner of the token against the parameter first.
      *  @param owner the owner of the token
      *  @param tokenId the id of the token to burn
      */
     function safeBurn(address owner, uint256 tokenId) external;
-
 
     /**
      * @notice Allows minter to safe mint a number of tokens by ID to a number of specified
@@ -68,7 +70,6 @@ interface IImmutableERC721 is IMintingAccessControl, IERC2981, IERC721Metadata,
      */
     function burnBatch(uint256[] calldata tokenIDs) external;
 
-
     /**
      * @notice Allows caller to a burn a number of tokens by ID from a specified address
      *  @param burns the IDBurn struct containing the to, and tokenIds
@@ -81,7 +82,6 @@ interface IImmutableERC721 is IMintingAccessControl, IERC2981, IERC721Metadata,
      *  @param tr the TransferRequest struct containing the from, tos, and tokenIds
      */
     function safeTransferFromBatch(TransferRequest calldata tr) external;
-
 
     /**
      * @notice Set the default royalty receiver address
@@ -109,7 +109,6 @@ interface IImmutableERC721 is IMintingAccessControl, IERC2981, IERC721Metadata,
      */
     function setNFTRoyaltyReceiverBatch(uint256[] calldata tokenIds, address receiver, uint96 feeNumerator) external;
 
-
     /**
      * @notice Allows admin to set the base URI
      *  @param baseURI_ The base URI to set
@@ -129,20 +128,17 @@ interface IImmutableERC721 is IMintingAccessControl, IERC2981, IERC721Metadata,
     // solhint-disable-next-line func-name-mixedcase
     function DOMAIN_SEPARATOR() external view returns (bytes32);
 
-
     /**
      * @notice Return the value for the default admin role.
      */
     // solhint-disable-next-line func-name-mixedcase
     function DEFAULT_ADMIN_ROLE() external pure returns (bytes32);
 
-
     /**
      * @notice Common URIs for individual token URIs
      */
     // solhint-disable-next-line func-name-mixedcase
     function baseURI() external view returns (string memory);
-
 
     /**
      * @notice Contract level metadata

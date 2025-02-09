@@ -21,7 +21,7 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     string private aName;
     string private aSymbol;
 
-    struct TokenGroup{
+    struct TokenGroup {
         // Ownership is a bitmap of 256 NFTs. If a bit is 0, then the default
         // owner owns the NFT.
         uint256 ownership;
@@ -31,8 +31,8 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
         address defaultOwner;
     }
 
-    // Token group bitmap. 
-    mapping (uint256 => TokenGroup) internal tokenOwners;
+    // Token group bitmap.
+    mapping(uint256 => TokenGroup) internal tokenOwners;
 
     // Mapping from token ID to owner address
     mapping(uint256 => address) private owners;
@@ -45,7 +45,6 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
 
     mapping(uint256 => address) private tokenApprovals;
     mapping(address => mapping(address => bool)) private operatorApprovals;
-
 
     // The mask of the lower 160 bits for addresses.
     uint256 private constant _BITMASK_ADDRESS = (1 << 160) - 1;
@@ -74,7 +73,6 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
         return 0;
     }
 
-
     /**
      * @dev See {IERC165-supportsInterface}.
      */
@@ -102,7 +100,6 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
         require(exists, "ERC721Psi: owner query for nonexistent token");
         return owner;
     }
-
 
     /**
      * @dev See {IERC721Metadata-name}.
@@ -211,13 +208,12 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     }
 
     /**
-     * @notice returns the next token id that will be minted for the first 
+     * @notice returns the next token id that will be minted for the first
      *  NFT in a call to mintByQuantity or safeMintByQuantity.
      */
     function mintBatchByQuantityNextTokenId() external view returns (uint256) {
         return _groupToTokenId(nextGroup);
     }
-
 
     /**
      * @dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients
@@ -302,7 +298,6 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
         _mintInternal(_to, _quantity);
     }
 
-
     function _mintInternal(address _to, uint256 _quantity) internal virtual returns (uint256) {
         uint256 firstTokenId = _groupToTokenId(nextGroup);
 
@@ -320,13 +315,12 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
             TokenGroup storage group = tokenOwners[i];
             group.defaultOwner = _to;
         }
-        // If the number of NFTs to mint isn't perfectly a multiple of 256, then there 
-        // will be one final group that will be partially filled. The group will have 
+        // If the number of NFTs to mint isn't perfectly a multiple of 256, then there
+        // will be one final group that will be partially filled. The group will have
         // the "extra" NFTs burned.
         if (numberWithinGroup == 0) {
             nextGroup = nextGroupAfterMint;
-        }
-        else {
+        } else {
             // Set the default owner for the group.
             TokenGroup storage group = tokenOwners[nextGroupAfterMint];
             group.defaultOwner = _to;
@@ -408,14 +402,13 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
         // Update balances
         // Copied from Open Zeppelin ERC721 implementation
         unchecked {
-            // `_balances[from]` cannot overflow. `from`'s balance is the number of token held, 
+            // `_balances[from]` cannot overflow. `from`'s balance is the number of token held,
             // which is at least one before the current transfer.
-            // `_balances[to]` could overflow. However, that would require all 2**256 token ids to 
+            // `_balances[to]` could overflow. However, that would require all 2**256 token ids to
             // be minted, which in practice is impossible.
             balances[_from] -= 1;
             balances[_to] += 1;
         }
-
 
         TokenGroup storage group = tokenOwners[groupNumber];
         group.ownership = _setBit(group.ownership, groupOffset);
@@ -435,10 +428,7 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
         (, , , address owner) = _tokenInfo(_tokenId);
         // Clear approvals from the previous owner
         _approve(owner, _to, _tokenId);
-
-
     }
-
 
     /**
      * @dev Approve `to` to operate on `tokenId`
@@ -491,7 +481,6 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
         }
     }
 
-
     /**
      * @notice Fetch token information.
      *
@@ -512,9 +501,8 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
             if (changedOwnershipAfterMint) {
                 owner = owners[_tokenId];
                 exists = true;
-            }
-            else {
-                owner = group.defaultOwner; 
+            } else {
+                owner = group.defaultOwner;
                 // Default owner will be zero if the group has never been minted.
                 exists = owner != address(0);
             }
@@ -522,15 +510,14 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
         return (groupNumber, offset, exists, owner);
     }
 
-
     /**
-     * Convert from a token id to a group number and an offset. 
+     * Convert from a token id to a group number and an offset.
      */
-    function _groupNumerAndOffset(uint256 _tokenId) private pure returns(uint256, uint256) {
+    function _groupNumerAndOffset(uint256 _tokenId) private pure returns (uint256, uint256) {
         return (_tokenId / 256, _tokenId % 256);
     }
 
-    function _groupToTokenId(uint256 _nextGroup) private pure returns(uint256) {
+    function _groupToTokenId(uint256 _nextGroup) private pure returns (uint256) {
         return _nextGroup * 256;
     }
 
@@ -545,7 +532,7 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
         return updatedBitMask;
     }
 
-    function _bitMaskToBurn(uint256 _offset) internal pure returns(uint256) {
+    function _bitMaskToBurn(uint256 _offset) internal pure returns (uint256) {
         // Offset will range between 1 and 255. 256 if handled separately.
         // If offset = 1, mask should be 0xffff...ffe
         // If offset = 2, mask should be 0xffff...ffc

@@ -16,8 +16,10 @@ abstract contract ERC721ConfigBaseTest is ERC721BaseTest {
         assertEq(erc721.symbol(), symbol);
         assertEq(erc721.contractURI(), contractURI);
         assertEq(erc721.baseURI(), baseURI);
+        assertEq(erc721.totalSupply(), 0);
 
-        // TODO what else to check?
+        vm.expectRevert("ERC721: invalid token ID");
+        erc721.ownerOf(1);
     }
 
     function testMintingAccessControl() public {

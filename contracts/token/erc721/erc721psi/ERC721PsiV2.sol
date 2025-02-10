@@ -337,13 +337,9 @@ abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
 
         _beforeTokenTransfers(_from, _to, _tokenId, 1);
 
-        // Check that tokenId was not transferred by `_beforeTokenTransfer` hook
-        // TODO: This is not done in PSI, but is done in open zeppelin
-        //require(ownerOf(_tokenId) == _from, "ERC721: transfer from incorrect owner");
-
         // Clear approvals from the previous owner
         // Do this in the ERC 721 way, and not the PSI way. That is, don't emit an event.
-        delete tokenApprovals[_tokenId];
+        tokenApprovals[_tokenId] = address(0);
 
         // Update balances
         // Copied from Open Zeppelin ERC721 implementation

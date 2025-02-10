@@ -13,6 +13,13 @@ abstract contract ERC721ConfigByQuantityBaseTest is ERC721ConfigBaseTest {
         return abi.encodeWithSelector(IImmutableERC721Errors.IImmutableERC721NotOwnerOrOperator.selector, _tokenIdToBeBurned);
     }
 
+    function testByQuantityContractDeployment() public {
+        uint256 tokenId = getFirst();
+        vm.expectRevert("ERC721Psi: owner query for nonexistent token");
+        erc721.ownerOf(tokenId);
+    }
+
+
     // Note that Open Zeppelin ERC721 contract handles the tokenURI request
     function testByQuantityTokenURIWithBaseURISet() public {
         uint256 qty = 1;

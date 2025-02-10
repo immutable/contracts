@@ -46,6 +46,7 @@ abstract contract ERC721ConfigByQuantityBaseTest is ERC721ConfigBaseTest {
         erc721.tokenURI(tokenId);
     }
 
+
     function getFirst() internal view virtual returns (uint256) {
         return erc721BQ.mintBatchByQuantityThreshold();
     }

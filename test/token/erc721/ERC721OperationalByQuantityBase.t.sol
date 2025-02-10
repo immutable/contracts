@@ -5,6 +5,7 @@ pragma solidity >=0.8.19 <0.8.29;
 import {ERC721OperationalBaseTest} from "./ERC721OperationalBase.t.sol";
 import {IImmutableERC721ByQuantity} from "../../../contracts/token/erc721/interfaces/IImmutableERC721ByQuantity.sol";
 import {IImmutableERC721, IImmutableERC721Errors} from "../../../contracts/token/erc721/interfaces/IImmutableERC721.sol";
+import {MockEIP1271Wallet} from "../../../contracts/mocks/MockEIP1271Wallet.sol";
 
 
 // Test the original ImmutableERC721 contract: Operational tests
@@ -261,6 +262,55 @@ abstract contract ERC721OperationalByQuantityBaseTest is ERC721OperationalBaseTe
         assertEq(erc721.getApproved(tokenId), user2);
     }
 
+
+    function testByQuantitySafeTransferFrom() public {
+        hackAddUser1ToAllowlist();
+        uint256 qty = 1;
+        uint256 tokenId = getFirst();
+        vm.prank(minter);
+        erc721BQ.mintByQuantity(user1, qty);
+        vm.prank(user1);
+        erc721.safeTransferFrom(user1, user2, tokenId);
+        assertEq(erc721.ownerOf(tokenId), user2, "Incorrect owner");
+    }
+
+    function testByQuantitySafeTransferFromNotApproved() public {
+        hackAddUser1ToAllowlist();
+        uint256 qty = 1;
+        uint256 tokenId = getFirst();
+        vm.prank(minter);
+        erc721BQ.mintByQuantity(user1, qty);
+        vm.prank(user2);
+        vm.expectRevert("ERC721Psi: transfer caller is not owner nor approved");
+        erc721.safeTransferFrom(user1, user2, tokenId);
+    }
+
+    function testByQuantityTransferToContractWallet() public {
+        MockEIP1271Wallet eip1271Wallet = new MockEIP1271Wallet(user1);
+        hackAddUser1ToAllowlist();
+        addAccountToAllowlist(address(eip1271Wallet));
+        uint256 qty = 1;
+        uint256 tokenId = getFirst();
+        vm.prank(minter);
+        erc721BQ.mintByQuantity(user1, qty);
+
+        vm.prank(user1);
+        erc721.safeTransferFrom(user1, address(eip1271Wallet), tokenId);
+        assertEq(erc721.ownerOf(tokenId), address(eip1271Wallet), "Incorrect owner");
+    }
+
+    function testByQuantityTransferContractNotWallet() public {
+        hackAddUser1ToAllowlist();
+        addAccountToAllowlist(address(this));
+        uint256 qty = 1;
+        uint256 tokenId = getFirst();
+        vm.prank(minter);
+        erc721BQ.mintByQuantity(user1, qty);
+
+        vm.prank(user1);
+        vm.expectRevert("ERC721Psi: transfer to non ERC721Receiver implementer");
+        erc721.safeTransferFrom(user1, address(this), tokenId);
+    }
 
     function getFirst() internal view virtual returns (uint256) {
         return erc721BQ.mintBatchByQuantityThreshold();

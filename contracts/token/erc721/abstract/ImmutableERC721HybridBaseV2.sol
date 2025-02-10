@@ -1,7 +1,8 @@
 // Copyright Immutable Pty Ltd 2018 - 2025
 // SPDX-License-Identifier: Apache 2.0
-pragma solidity 0.8.19;
+pragma solidity >=0.8.19 <0.8.29;
 
+import {ERC721, IERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {AccessControlEnumerable, MintingAccessControl} from "../../../access/MintingAccessControl.sol";
 import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
 import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnforced.sol";
@@ -78,13 +79,13 @@ abstract contract ImmutableERC721HybridBaseV2 is
     }
 
     /**
-     * @inheritdoc ERC721HybridV2
+     * @inheritdoc ERC721
      * @dev Note it will validate the operator in the allowlist
      */
     function setApprovalForAll(
         address operator,
         bool approved
-    ) public virtual override(ERC721HybridV2) validateApproval(operator) {
+    ) public virtual override(ERC721, IERC721) validateApproval(operator) {
         super.setApprovalForAll(operator, approved);
     }
 

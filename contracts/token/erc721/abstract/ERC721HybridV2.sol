@@ -1,6 +1,6 @@
 // Copyright Immutable Pty Ltd 2018 - 2023
 // SPDX-License-Identifier: Apache 2.0
-pragma solidity 0.8.19;
+pragma solidity >=0.8.19 <0.8.29;
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
@@ -24,7 +24,7 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnableV2, ERC721, IImmutableERC72
     /// @notice A mapping of tokens ids before the threshold that have been burned to prevent re-minting
     BitMaps.BitMap private _burnedTokens;
 
-    constructor(string memory name_, string memory symbol_) ERC721(name_, symbol_) ERC721PsiV2(name_, symbol_) {}
+    constructor(string memory name_, string memory symbol_) ERC721(name_, symbol_) ERC721PsiV2() {}
 
     /**
      * @notice allows caller to burn multiple tokens by id
@@ -111,36 +111,8 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnableV2, ERC721, IImmutableERC72
     /**
      * @inheritdoc ERC721
      */
-    function tokenURI(uint256 tokenId) public view virtual override(ERC721, ERC721PsiV2) returns (string memory) {
-        return ERC721.tokenURI(tokenId);
-    }
-
-    /**
-     * @inheritdoc ERC721
-     */
-    function name() public view virtual override(ERC721, ERC721PsiV2) returns (string memory) {
-        return ERC721.name();
-    }
-
-    /**
-     * @inheritdoc ERC721
-     */
-    function symbol() public view virtual override(ERC721, ERC721PsiV2) returns (string memory) {
-        return ERC721.symbol();
-    }
-
-    /**
-     * @inheritdoc ERC721
-     */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721PsiV2, ERC721) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, ERC721PsiV2) returns (bool) {
         return ERC721.supportsInterface(interfaceId);
-    }
-
-    /**
-     * @inheritdoc ERC721
-     */
-    function setApprovalForAll(address operator, bool approved) public virtual override(ERC721, ERC721PsiV2) {
-        return ERC721.setApprovalForAll(operator, approved);
     }
 
     /**
@@ -448,13 +420,5 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnableV2, ERC721, IImmutableERC72
     /// @notice returns the startTokenID for the minting by quantity section of the contract
     function _startTokenId() internal pure virtual override(ERC721PsiV2) returns (uint256) {
         return mintBatchByQuantityThreshold();
-    }
-
-    /**
-     * @inheritdoc ERC721
-     */
-    // slither-disable-next-line dead-code
-    function _baseURI() internal view virtual override(ERC721, ERC721PsiV2) returns (string memory) {
-        return ERC721._baseURI();
     }
 }

@@ -2,7 +2,7 @@
 /**
  * Inspired by ERC721Psi: https://github.com/estarriolvetch/ERC721Psi
  */
-pragma solidity 0.8.19;
+pragma solidity >=0.8.19 <0.8.29;
 
 import {ERC721PsiV2} from "./ERC721PsiV2.sol";
 

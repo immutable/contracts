@@ -2,7 +2,7 @@
 /**
  * Inspired by ERC721Psi: https://github.com/estarriolvetch/ERC721Psi
  */
-pragma solidity 0.8.19;
+pragma solidity >=0.8.19 <0.8.29;
 
 // solhint-disable
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -14,12 +14,9 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/StorageSlot.sol";
 
-contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
+abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     using Address for address;
     using Strings for uint256;
-
-    string private aName;
-    string private aSymbol;
 
     struct TokenGroup {
         // Ownership is a bitmap of 256 NFTs. If a bit is 0, then the default
@@ -44,7 +41,6 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     uint256 private nextGroup;
 
     mapping(uint256 => address) private tokenApprovals;
-    mapping(address => mapping(address => bool)) private operatorApprovals;
 
     // The mask of the lower 160 bits for addresses.
     uint256 private constant _BITMASK_ADDRESS = (1 << 160) - 1;
@@ -54,11 +50,9 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
         0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef;
 
     /**
-     * @dev Initializes the contract by setting a `name` and a `symbol` to the token collection.
+     * @dev Initializes the contract.
      */
-    constructor(string memory _name, string memory _symbol) {
-        aName = _name;
-        aSymbol = _symbol;
+    constructor() {
         // Have the first by-quantity NFT to be a multiple of 256 above the base token id.
         uint256 baseId = _startTokenId();
         nextGroup = baseId / 256 + 1;
@@ -68,10 +62,7 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
      * @dev Returns the starting token ID.
      * To change the starting token ID, please override this function.
      */
-    function _startTokenId() internal pure virtual returns (uint256) {
-        // It will become modifiable in the future versions
-        return 0;
-    }
+    function _startTokenId() internal pure virtual returns (uint256);
 
     /**
      * @dev See {IERC165-supportsInterface}.
@@ -102,40 +93,6 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     }
 
     /**
-     * @dev See {IERC721Metadata-name}.
-     */
-    function name() public view virtual override returns (string memory) {
-        return aName;
-    }
-
-    /**
-     * @dev See {IERC721Metadata-symbol}.
-     */
-    function symbol() public view virtual override returns (string memory) {
-        return aSymbol;
-    }
-
-    /**
-     * @dev See {IERC721Metadata-tokenURI}.
-     */
-    function tokenURI(uint256 _tokenId) public view virtual override returns (string memory) {
-        require(_exists(_tokenId), "ERC721Psi: URI query for nonexistent token");
-
-        string memory baseURI = _baseURI();
-        return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, _tokenId.toString())) : "";
-    }
-
-    /**
-     * @dev Base URI for computing {tokenURI}. If set, the resulting URI for each
-     * token will be the concatenation of the `baseURI` and the `tokenId`. Empty
-     * by default, can be overriden in child contracts.
-     */
-    // slither-disable-next-line dead-code
-    function _baseURI() internal view virtual returns (string memory) {
-        return "";
-    }
-
-    /**
      * @dev See {IERC721-approve}.
      */
     function approve(address to, uint256 tokenId) public virtual override {
@@ -160,21 +117,9 @@ contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     }
 
     /**
-     * @dev See {IERC721-setApprovalForAll}.
-     */
-    function setApprovalForAll(address operator, bool approved) public virtual override {
-        require(operator != _msgSender(), "ERC721Psi: approve to caller");
-
-        operatorApprovals[_msgSender()][operator] = approved;
-        emit ApprovalForAll(_msgSender(), operator, approved);
-    }
-
-    /**
      * @dev See {IERC721-isApprovedForAll}.
      */
-    function isApprovedForAll(address owner, address operator) public view virtual override returns (bool) {
-        return operatorApprovals[owner][operator];
-    }
+    function isApprovedForAll(address owner, address operator) public view virtual override returns (bool);
 
     /**
      * @dev See {IERC721-transferFrom}.

@@ -62,14 +62,6 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnableV2, ERC721, IImmutableERC72
     }
 
     /**
-     * @notice returns the threshold that divides tokens that are minted by id and
-     *  minted by quantity
-     */
-    function mintBatchByQuantityThreshold() public pure virtual returns (uint256) {
-        return 2 ** 128;
-    }
-
-    /**
      * @notice checks to see if tokenID exists in the collection
      *  @param tokenId the id of the token to check
      *
@@ -415,10 +407,5 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnableV2, ERC721, IImmutableERC72
             return ERC721._ownerOf(tokenId) != address(0) && (!_burnedTokens.get(tokenId));
         }
         return ERC721PsiV2._exists(tokenId);
-    }
-
-    /// @notice returns the startTokenID for the minting by quantity section of the contract
-    function _startTokenId() internal pure virtual override(ERC721PsiV2) returns (uint256) {
-        return mintBatchByQuantityThreshold();
     }
 }

@@ -4,15 +4,14 @@
  */
 pragma solidity >=0.8.19 <0.8.29;
 
-// solhint-disable
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
-import "@openzeppelin/contracts/utils/Context.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
-import "@openzeppelin/contracts/utils/StorageSlot.sol";
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import {IERC165, ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 
 abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     using Address for address;
@@ -54,15 +53,17 @@ abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
      */
     constructor() {
         // Have the first by-quantity NFT to be a multiple of 256 above the base token id.
-        uint256 baseId = _startTokenId();
+        uint256 baseId = mintBatchByQuantityThreshold();
         nextGroup = baseId / 256 + 1;
     }
 
     /**
-     * @dev Returns the starting token ID.
-     * To change the starting token ID, please override this function.
+     * @notice returns the threshold that divides tokens that are minted by id and
+     *  minted by quantity
      */
-    function _startTokenId() internal pure virtual returns (uint256);
+    function mintBatchByQuantityThreshold() public pure virtual returns (uint256) {
+        return 2 ** 128;
+    }
 
     /**
      * @dev See {IERC165-supportsInterface}.

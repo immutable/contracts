@@ -15,7 +15,7 @@ import {SIP7EventsAndErrors} from "./SIP7EventsAndErrors.sol";
  *
  */
 // This contract name re-use is OK because the SIP7Interface is an interface and not a deployable contract.
-// slither-disable-next-line name-reused      
+// slither-disable-next-line name-reused
 interface SIP7Interface is SIP7EventsAndErrors {
     /**
      * @dev The struct for storing signer info.

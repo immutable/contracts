@@ -30,5 +30,4 @@ contract MockEIP1271Wallet is IERC1271 {
     ) external pure returns (bytes4) {
         return IERC721Receiver.onERC721Received.selector;
     }
-
 }

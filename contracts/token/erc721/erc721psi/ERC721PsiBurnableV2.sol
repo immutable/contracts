@@ -31,7 +31,7 @@ abstract contract ERC721PsiBurnableV2 is ERC721PsiV2 {
 
         // Update balances
         balances[owner]--;
-        // _burn is called in a loop in burn batch, and hence a more efficient batch 
+        // _burn is called in a loop in burn batch, and hence a more efficient batch
         // burning process would be to have this update to supply happen outside the loop.
         // However, this would mean changing code across the codebase.
         // slither-disable-next-line costly-loop

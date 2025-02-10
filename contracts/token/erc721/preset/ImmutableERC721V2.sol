@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
-import {ImmutableERC721HybridBaseV2, ERC721HybridV2} from "../abstract/ImmutableERC721HybridBaseV2.sol";
-import {IImmutableERC721ByQuantity, IImmutableERC721} from "../interfaces/IImmutableERC721ByQuantity.sol";
+import {ImmutableERC721HybridBaseV2} from "../abstract/ImmutableERC721HybridBaseV2.sol";
 
 contract ImmutableERC721V2 is ImmutableERC721HybridBaseV2 {
     ///     =====   Constructor  =====

@@ -11,8 +11,8 @@ import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IERC165, ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
-import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 
+// solhint-disable custom-errors, reason-string
 abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     using Address for address;
     using Strings for uint256;
@@ -28,18 +28,18 @@ abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     }
 
     // Token group bitmap.
-    mapping(uint256 => TokenGroup) internal tokenOwners;
+    mapping(uint256 tokenId => TokenGroup tokenGroup) internal tokenOwners;
 
     // Mapping from token ID to owner address
-    mapping(uint256 => address) private owners;
+    mapping(uint256 tokenId => address owner) private owners;
 
-    mapping(address => uint256) internal balances;
+    mapping(address owner => uint256 balance) internal balances;
     uint256 internal supply;
 
     // The next group to allocated tokens form.
     uint256 private nextGroup;
 
-    mapping(uint256 => address) private tokenApprovals;
+    mapping(uint256 tokenId => address approved) private tokenApprovals;
 
     // The mask of the lower 160 bits for addresses.
     uint256 private constant _BITMASK_ADDRESS = (1 << 160) - 1;
@@ -280,6 +280,7 @@ abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
         // The duplicated `log4` removes an extra check and reduces stack juggling.
         // The assembly, together with the surrounding Solidity code, have been
         // delicately arranged to nudge the compiler into producing optimized opcodes.
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             // Mask `to` to the lower 160 bits, in case the upper bits somehow aren't clean.
             toMasked := and(_to, _BITMASK_ADDRESS)

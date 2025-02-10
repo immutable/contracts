@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
-import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {IERC721, ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import {ERC721PsiV2, ERC721PsiBurnableV2} from "../erc721psi/ERC721PsiBurnableV2.sol";
 import {IImmutableERC721Errors} from "../interfaces/IImmutableERC721Errors.sol";
@@ -110,7 +110,7 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnableV2, ERC721, IImmutableERC72
     /**
      * @inheritdoc ERC721
      */
-    function safeTransferFrom(address from, address to, uint256 tokenId) public virtual override(ERC721, ERC721PsiV2) {
+    function safeTransferFrom(address from, address to, uint256 tokenId) public virtual override(IERC721, ERC721) {
         safeTransferFrom(from, to, tokenId, "");
     }
 

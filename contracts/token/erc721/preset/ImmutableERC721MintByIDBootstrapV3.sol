@@ -73,12 +73,10 @@ contract ImmutableERC721MintByIDBootstrapV3 is ImmutableERC721MintByIDUpgradeabl
         return StorageSlotUpgradeable.getUint256Slot(slot).value;
     }
     function _setBalance(address account, uint256 value) private {
-        // TODO does account need to be switched to a uint256?
         bytes32 slot = keccak256(abi.encode(STORAGE_SLOT_BALANCES, account));
         StorageSlotUpgradeable.getUint256Slot(slot).value = value;
     }
     function _setOwner(uint256 tokenId, address owner) private {
-        // TODO does account need to be switched to a uint256?
         bytes32 slot = keccak256(abi.encode(STORAGE_SLOT_OWNERS, tokenId));
         StorageSlotUpgradeable.getAddressSlot(slot).value = owner;
     }

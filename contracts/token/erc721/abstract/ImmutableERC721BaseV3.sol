@@ -81,7 +81,7 @@ abstract contract ImmutableERC721BaseV3 is OperatorAllowlistEnforcedUpgradeable,
         address operatorAllowlist_,
         address receiver_,
         uint96 feeNumerator_
-    ) internal {
+    ) internal onlyInitializing {
         __ERC721Permit_init(name_, symbol_);
 
         // Initialize state variables

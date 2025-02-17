@@ -44,7 +44,7 @@ abstract contract ERC721PermitV3 is ERC721BurnableUpgradeable, IERC4494, EIP712U
             )
         );
 
-    function __ERC721Permit_init(string memory name, string memory symbol) internal {
+    function __ERC721Permit_init(string memory name, string memory symbol) internal onlyInitializing {
         __ERC721_init(name, symbol);
         __ERC721Burnable_init();
         __EIP712_init(name, "1");

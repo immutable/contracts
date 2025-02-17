@@ -4,6 +4,7 @@ pragma solidity >=0.8.19 <0.8.29;
 
 import {ImmutableERC721MintByIDUpgradeableV3} from "./ImmutableERC721MintByIDUpgradeableV3.sol";
 import {ERC721Upgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/token/ERC721/ERC721Upgradeable.sol";
+import {StorageSlotUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/utils/StorageSlotUpgradeable.sol";
 
 
 contract ImmutableERC721MintByIDBootstrapV3 is ImmutableERC721MintByIDUpgradeableV3 {
@@ -26,43 +27,60 @@ contract ImmutableERC721MintByIDBootstrapV3 is ImmutableERC721MintByIDUpgradeabl
 
         for (uint256 i = 0; i < requests.length; i++) {
             BootstrapTransferRequest calldata request = requests[i];
+            address from = request.from;
+            address to = request.to;
+            uint256 tokenId = request.tokenId;
 
             // Clear approvals from the previous owner
-            // Leave this here just in case we add token approval support for bootstrap process
+            // TODO Leave this here just in case we add token approval support for bootstrap process
 //            delete _tokenApprovals[request.tokenId];
 
-            if (request.from != address(0)) {
+            if (from != address(0)) {
                 unchecked {
                     // `_balances[from]` cannot overflow for the same reason as described in `_burn`:
                     // `from`'s balance is the number of token held, which is at least one before the current
                     // transfer.
-//                    _balances[request.from] -= 1;
+                    uint256 bal = _getBalance(from);
+                    bal -= 1;
+                    _setBalance(from, bal);
                     supply -= 1;
                 }
             }
-            if (request.to != address(0)) {
+            if (to != address(0)) {
                 unchecked {
                     // `_balances[to]` could overflow in the conditions described in `_mint`. That would require
                     // all 2**256 token ids to be minted, which in practice is impossible.
-//                    _balances[request.to] += 1;
+                    uint256 bal = _getBalance(to);
+                    bal += 1;
+                    _setBalance(to, bal);
                     supply += 1;
                 }
             }
-//            _owners[request.tokenId] = request.to;
+            _setOwner(tokenId, to);
 
-            emit Transfer(request.from, request.to, request.tokenId);
+            emit Transfer(from, to, tokenId);
         }
         _totalSupply = supply;
     }
 
-    function getBalance(address account) private view returns (uint256) {
+    // Storage slots determined using 
+    // forge inspect ImmutableERC721MintByIDBootstrapV3 storage
+    uint256 private constant STORAGE_SLOT_BALANCES = 305;
+    uint256 private constant STORAGE_SLOT_OWNERS = 304;
 
+    function _getBalance(address account) private view returns (uint256) {
+        bytes32 slot = keccak256(abi.encode(STORAGE_SLOT_BALANCES, account));
+        return StorageSlotUpgradeable.getUint256Slot(slot).value;
     }
-    function setBalance(address account, uint256 value) private {
-        
+    function _setBalance(address account, uint256 value) private {
+        // TODO does account need to be switched to a uint256?
+        bytes32 slot = keccak256(abi.encode(STORAGE_SLOT_BALANCES, account));
+        StorageSlotUpgradeable.getUint256Slot(slot).value = value;
     }
-    function setOwner(uint256 tokenId, address owner) private {
-        
+    function _setOwner(uint256 tokenId, address owner) private {
+        // TODO does account need to be switched to a uint256?
+        bytes32 slot = keccak256(abi.encode(STORAGE_SLOT_OWNERS, tokenId));
+        StorageSlotUpgradeable.getAddressSlot(slot).value = owner;
     }
 
 

@@ -6,6 +6,8 @@ typechain
 typechain-types
 node.json
 .idea/
+.vscode/
+package-lock.json
 
 # Hardhat files
 cache
@@ -19,3 +21,12 @@ foundry-out/
 
 # Apple Mac files
 .DS_Store
+
+# Fuzz
+crytic-export
+echidna-corpus
+medusa-corpus
+med-logs
+slither.json
+slither.sarif
+solc-bin

@@ -1,0 +1,1783 @@
+/Users/tj/Work/contracts/contracts/token/erc721/erc721psi/ERC721PsiBurnableV2.sol
+  1 |     | // SPDX-License-Identifier: MIT
+  2 |     | /**
+  3 |     |  * Inspired by ERC721Psi: https://github.com/estarriolvetch/ERC721Psi
+  4 |     |  */
+  5 |     | pragma solidity >=0.8.19 <0.8.29;
+  6 |     | 
+  7 |     | import {ERC721PsiV2} from "./ERC721PsiV2.sol";
+  8 |     | 
+  9 |     | abstract contract ERC721PsiBurnableV2 is ERC721PsiV2 {
+ 10 |     |     /**
+ 11 |     |      * @dev Destroys `tokenId`.
+ 12 |     |      * The approval is cleared when the token is burned.
+ 13 |     |      *
+ 14 |     |      * Requirements:
+ 15 |     |      *
+ 16 |     |      * - `tokenId` must exist.
+ 17 |     |      *
+ 18 |     |      * Emits a {Transfer} event.
+ 19 |     |      */
+ 20 | *   |     function _burn(uint256 _tokenId) internal virtual {
+ 21 |     |         // Note: To get here, exists must be true. Hence, it is OK to ignore exists.
+ 22 | *   |         uint256 groupNumber;
+ 23 | *   |         uint256 groupOffset;
+ 24 | *   |         address owner;
+ 25 | *   |         (groupNumber, groupOffset, , owner) = _tokenInfo(_tokenId);
+ 26 |     | 
+ 27 | *   |         _beforeTokenTransfers(owner, address(0), _tokenId, 1);
+ 28 |     | 
+ 29 | *   |         TokenGroup storage group = tokenOwners[groupNumber];
+ 30 | *   |         group.burned = _setBit(group.burned, groupOffset);
+ 31 |     | 
+ 32 |     |         // Update balances
+ 33 | *   |         balances[owner]--;
+ 34 |     |         // _burn is called in a loop in burn batch, and hence a more efficient batch
+ 35 |     |         // burning process would be to have this update to supply happen outside the loop.
+ 36 |     |         // However, this would mean changing code across the codebase.
+ 37 |     |         // slither-disable-next-line costly-loop
+ 38 | *   |         supply--;
+ 39 |     | 
+ 40 | *   |         emit Transfer(owner, address(0), _tokenId);
+ 41 |     | 
+ 42 |     |         _afterTokenTransfers(owner, address(0), _tokenId, 1);
+ 43 |     |     }
+ 44 |     | }
+ 45 |     | 
+
+/Users/tj/Work/contracts/contracts/token/erc721/erc721psi/ERC721PsiV2.sol
+   1 |     | // SPDX-License-Identifier: MIT
+   2 |     | /**
+   3 |     |  * Inspired by ERC721Psi: https://github.com/estarriolvetch/ERC721Psi
+   4 |     |  */
+   5 |     | pragma solidity >=0.8.19 <0.8.29;
+   6 |     | 
+   7 |     | import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+   8 |     | import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+   9 |     | import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+  10 |     | import {Context} from "@openzeppelin/contracts/utils/Context.sol";
+  11 |     | import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+  12 |     | import {IERC165, ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+  13 |     | import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+  14 |     | 
+  15 |     | // solhint-disable custom-errors, reason-string
+  16 |     | abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
+  17 |     |     using Address for address;
+  18 |     |     using Strings for uint256;
+  19 |     | 
+  20 |     |     struct TokenGroup {
+  21 |     |         // Ownership is a bitmap of 256 NFTs. If a bit is 0, then the default
+  22 |     |         // owner owns the NFT.
+  23 |     |         uint256 ownership;
+  24 |     |         // Burned is a bitmap of 256 NFTs. If a bit is 1, then the NFT is burned.
+  25 |     |         uint256 burned;
+  26 |     |         // Owner who, but default, owns the NFTs in this group.
+  27 |     |         address defaultOwner;
+  28 |     |     }
+  29 |     | 
+  30 |     |     // Token group bitmap.
+  31 |     |     mapping(uint256 tokenId => TokenGroup tokenGroup) internal tokenOwners;
+  32 |     | 
+  33 |     |     // Mapping from token ID to owner address
+  34 |     |     mapping(uint256 tokenId => address owner) private owners;
+  35 |     | 
+  36 |     |     mapping(address owner => uint256 balance) internal balances;
+  37 |     |     uint256 internal supply;
+  38 |     | 
+  39 |     |     // The next group to allocated tokens form.
+  40 |     |     uint256 private nextGroup;
+  41 |     | 
+  42 |     |     mapping(uint256 tokenId => address approved) private tokenApprovals;
+  43 |     | 
+  44 |     |     // The mask of the lower 160 bits for addresses.
+  45 |     |     uint256 private constant _BITMASK_ADDRESS = (1 << 160) - 1;
+  46 |     |     // The `Transfer` event signature is given by:
+  47 |     |     // `keccak256(bytes("Transfer(address,address,uint256)"))`.
+  48 |     |     bytes32 private constant _TRANSFER_EVENT_SIGNATURE =
+  49 |     |         0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef;
+  50 |     | 
+  51 |     |     /**
+  52 |     |      * @dev Initializes the contract.
+  53 |     |      */
+  54 |     |     constructor() {
+  55 |     |         // Have the first by-quantity NFT to be a multiple of 256 above the base token id.
+  56 |     |         uint256 baseId = mintBatchByQuantityThreshold();
+  57 |     |         nextGroup = baseId / 256 + 1;
+  58 |     |     }
+  59 |     | 
+  60 |     |     /**
+  61 |     |      * @notice returns the threshold that divides tokens that are minted by id and
+  62 |     |      *  minted by quantity
+  63 |     |      */
+  64 | *   |     function mintBatchByQuantityThreshold() public pure virtual returns (uint256) {
+  65 |     |         return 2 ** 128;
+  66 |     |     }
+  67 |     | 
+  68 |     |     /**
+  69 |     |      * @dev See {IERC165-supportsInterface}.
+  70 |     |      */
+  71 | *   |     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
+  72 | *   |         return
+  73 | *   |             interfaceId == type(IERC721).interfaceId ||
+  74 | *   |             interfaceId == type(IERC721Metadata).interfaceId ||
+  75 | *   |             super.supportsInterface(interfaceId);
+  76 |     |     }
+  77 |     | 
+  78 |     |     /**
+  79 |     |      * @dev See {IERC721-balanceOf}.
+  80 |     |      */
+  81 | *   |     function balanceOf(address owner) public view virtual override returns (uint256) {
+  82 | *   |         return balances[owner];
+  83 |     |     }
+  84 |     | 
+  85 |     |     /**
+  86 |     |      * @dev See {IERC721-ownerOf}.
+  87 |     |      */
+  88 | *   |     function ownerOf(uint256 _tokenId) public view virtual override returns (address) {
+  89 | *   |         bool exists;
+  90 | *   |         address owner;
+  91 | *   |         (, , exists, owner) = _tokenInfo(_tokenId);
+  92 | *   |         require(exists, "ERC721Psi: owner query for nonexistent token");
+  93 | *   |         return owner;
+  94 |     |     }
+  95 |     | 
+  96 |     |     /**
+  97 |     |      * @dev See {IERC721-approve}.
+  98 |     |      */
+  99 | *   |     function approve(address to, uint256 tokenId) public virtual override {
+ 100 | *   |         address owner = ownerOf(tokenId);
+ 101 | *   |         require(to != owner, "ERC721Psi: approval to current owner");
+ 102 |     | 
+ 103 | *   |         require(
+ 104 | *   |             _msgSender() == owner || isApprovedForAll(owner, _msgSender()),
+ 105 |     |             "ERC721Psi: approve caller is not owner nor approved for all"
+ 106 |     |         );
+ 107 |     | 
+ 108 | *   |         _approve(owner, to, tokenId);
+ 109 |     |     }
+ 110 |     | 
+ 111 |     |     /**
+ 112 |     |      * @dev See {IERC721-getApproved}.
+ 113 |     |      */
+ 114 | *   |     function getApproved(uint256 tokenId) public view virtual override returns (address) {
+ 115 | *r  |         require(_exists(tokenId), "ERC721Psi: approved query for nonexistent token");
+ 116 |     | 
+ 117 | *   |         return tokenApprovals[tokenId];
+ 118 |     |     }
+ 119 |     | 
+ 120 |     |     /**
+ 121 |     |      * @dev See {IERC721-isApprovedForAll}.
+ 122 |     |      */
+ 123 |     |     function isApprovedForAll(address owner, address operator) public view virtual override returns (bool);
+ 124 |     | 
+ 125 |     |     /**
+ 126 |     |      * @dev See {IERC721-transferFrom}.
+ 127 |     |      */
+ 128 | *   |     function transferFrom(address _from, address _to, uint256 _tokenId) public virtual override {
+ 129 |     |         //solhint-disable-next-line max-line-length
+ 130 | *   |         require(_isApprovedOrOwner(_msgSender(), _tokenId), "ERC721Psi: transfer caller is not owner nor approved");
+ 131 | *   |         _transfer(_from, _to, _tokenId);
+ 132 |     |     }
+ 133 |     | 
+ 134 |     |     /**
+ 135 |     |      * @dev See {IERC721-safeTransferFrom}.
+ 136 |     |      */
+ 137 | *   |     function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public virtual override {
+ 138 | *   |         require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721Psi: transfer caller is not owner nor approved");
+ 139 | *   |         _safeTransfer(from, to, tokenId, _data);
+ 140 |     |     }
+ 141 |     | 
+ 142 |     |     /**
+ 143 |     |      * @notice Return the total number of NFTs minted that have not been burned.
+ 144 |     |      */
+ 145 | *   |     function totalSupply() public view virtual returns (uint256) {
+ 146 | *   |         return supply;
+ 147 |     |     }
+ 148 |     | 
+ 149 |     |     /**
+ 150 |     |      * @notice returns the next token id that will be minted for the first
+ 151 |     |      *  NFT in a call to mintByQuantity or safeMintByQuantity.
+ 152 |     |      */
+ 153 | *   |     function mintBatchByQuantityNextTokenId() external view returns (uint256) {
+ 154 | *   |         return _groupToTokenId(nextGroup);
+ 155 |     |     }
+ 156 |     | 
+ 157 |     |     /**
+ 158 |     |      * @dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients
+ 159 |     |      * are aware of the ERC721 protocol to prevent tokens from being forever locked.
+ 160 |     |      *
+ 161 |     |      * `_data` is additional data, it has no specified format and it is sent in call to `to`.
+ 162 |     |      *
+ 163 |     |      * This internal function is equivalent to {safeTransferFrom}, and can be used to e.g.
+ 164 |     |      * implement alternative mechanisms to perform token transfer, such as signature-based.
+ 165 |     |      *
+ 166 |     |      * Requirements:
+ 167 |     |      *
+ 168 |     |      * - `from` cannot be the zero address.
+ 169 |     |      * - `to` cannot be the zero address.
+ 170 |     |      * - `tokenId` token must exist and be owned by `from`.
+ 171 |     |      * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.
+ 172 |     |      *
+ 173 |     |      * Emits a {Transfer} event.
+ 174 |     |      */
+ 175 | *   |     function _safeTransfer(address from, address to, uint256 tokenId, bytes memory _data) internal virtual {
+ 176 | *   |         _transfer(from, to, tokenId);
+ 177 |     |         require(
+ 178 |     |             _checkOnERC721Received(from, to, tokenId, 1, _data),
+ 179 |     |             "ERC721Psi: transfer to non ERC721Receiver implementer"
+ 180 |     |         );
+ 181 |     |     }
+ 182 |     | 
+ 183 |     |     /**
+ 184 |     |      * @dev Returns whether `tokenId` exists.
+ 185 |     |      *
+ 186 |     |      * Tokens can be managed by their owner or approved accounts via {approve} or {setApprovalForAll}.
+ 187 |     |      *
+ 188 |     |      * Tokens start existing when they are minted (`_mint`).
+ 189 |     |      */
+ 190 | *   |     function _exists(uint256 _tokenId) internal view virtual returns (bool) {
+ 191 | *   |         bool exists;
+ 192 | *   |         (, , exists, ) = _tokenInfo(_tokenId);
+ 193 |     |         return exists;
+ 194 |     |     }
+ 195 |     | 
+ 196 |     |     /**
+ 197 |     |      * @dev Returns whether `spender` is allowed to manage `tokenId`.
+ 198 |     |      *
+ 199 |     |      * Requirements:
+ 200 |     |      *
+ 201 |     |      * - `tokenId` must exist.
+ 202 |     |      */
+ 203 | *   |     function _isApprovedOrOwner(address _spender, uint256 _tokenId) internal view virtual returns (bool) {
+ 204 | *   |         bool exists;
+ 205 | *   |         address owner;
+ 206 | *   |         (, , exists, owner) = _tokenInfo(_tokenId);
+ 207 | *   |         require(exists, "ERC721Psi: operator query for nonexistent token");
+ 208 |     | 
+ 209 | *   |         return ((_spender == owner) || (_spender == tokenApprovals[_tokenId]) || isApprovedForAll(owner, _spender));
+ 210 |     |     }
+ 211 |     | 
+ 212 |     |     /**
+ 213 |     |      * @dev Safely mints `quantity` tokens and transfers them to `to`.
+ 214 |     |      *
+ 215 |     |      * Requirements:
+ 216 |     |      *
+ 217 |     |      * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called for each safe transfer.
+ 218 |     |      * - `quantity` must be greater than 0.
+ 219 |     |      *
+ 220 |     |      * Emits a {Transfer} event.
+ 221 |     |      */
+ 222 |     |     function _safeMint(address _to, uint256 _quantity) internal virtual {
+ 223 |     |         ERC721PsiV2._safeMint(_to, _quantity, "");
+ 224 |     |     }
+ 225 |     | 
+ 226 |     |     function _safeMint(address _to, uint256 _quantity, bytes memory _data) internal virtual {
+ 227 |     |         // need to specify the specific implementation to avoid calling the
+ 228 |     |         // mint method of erc721 due to matching func signatures
+ 229 |     |         uint256 firstMintedTokenId = ERC721PsiV2._mintInternal(_to, _quantity);
+ 230 |     |         require(
+ 231 |     |             _checkOnERC721Received(address(0), _to, firstMintedTokenId, _quantity, _data),
+ 232 |     |             "ERC721Psi: transfer to non ERC721Receiver implementer"
+ 233 |     |         );
+ 234 |     |     }
+ 235 |     | 
+ 236 | *   |     function _mint(address _to, uint256 _quantity) internal virtual {
+ 237 | *   |         _mintInternal(_to, _quantity);
+ 238 |     |     }
+ 239 |     | 
+ 240 | *   |     function _mintInternal(address _to, uint256 _quantity) internal virtual returns (uint256) {
+ 241 | *   |         uint256 firstTokenId = _groupToTokenId(nextGroup);
+ 242 |     | 
+ 243 | *   |         require(_quantity > 0, "ERC721Psi: quantity must be greater 0");
+ 244 | *   |         require(_to != address(0), "ERC721Psi: mint to the zero address");
+ 245 |     | 
+ 246 |     |         _beforeTokenTransfers(address(0), _to, firstTokenId, _quantity);
+ 247 |     | 
+ 248 |     |         // Mint tokens
+ 249 | *   |         (uint256 numberOfGroupsToMint, uint256 numberWithinGroup) = _groupNumerAndOffset(_quantity);
+ 250 | *   |         uint256 nextGroupOnStack = nextGroup;
+ 251 | *   |         uint256 nextGroupAfterMint = nextGroupOnStack + numberOfGroupsToMint;
+ 252 | *   |         for (uint256 i = nextGroupOnStack; i < nextGroupAfterMint; i++) {
+ 253 |     |             // Set the default owner for the group.
+ 254 | *   |             TokenGroup storage group = tokenOwners[i];
+ 255 | *o  |             group.defaultOwner = _to;
+ 256 |     |         }
+ 257 |     |         // If the number of NFTs to mint isn't perfectly a multiple of 256, then there
+ 258 |     |         // will be one final group that will be partially filled. The group will have
+ 259 |     |         // the "extra" NFTs burned.
+ 260 | *   |         if (numberWithinGroup == 0) {
+ 261 | *   |             nextGroup = nextGroupAfterMint;
+ 262 |     |         } else {
+ 263 |     |             // Set the default owner for the group.
+ 264 | *   |             TokenGroup storage group = tokenOwners[nextGroupAfterMint];
+ 265 | *   |             group.defaultOwner = _to;
+ 266 |     |             // Burn the rest of the group.
+ 267 | *   |             group.burned = _bitMaskToBurn(numberWithinGroup);
+ 268 | *   |             nextGroup = nextGroupAfterMint + 1;
+ 269 |     |         }
+ 270 |     | 
+ 271 |     |         // Update balances
+ 272 | *   |         balances[_to] += _quantity;
+ 273 | *   |         supply += _quantity;
+ 274 |     | 
+ 275 |     |         // Emit transfer messages
+ 276 | *   |         uint256 toMasked;
+ 277 | *   |         uint256 end = firstTokenId + _quantity;
+ 278 |     | 
+ 279 |     |         // Use assembly to loop and emit the `Transfer` event for gas savings.
+ 280 |     |         // The duplicated `log4` removes an extra check and reduces stack juggling.
+ 281 |     |         // The assembly, together with the surrounding Solidity code, have been
+ 282 |     |         // delicately arranged to nudge the compiler into producing optimized opcodes.
+ 283 |     |         // solhint-disable-next-line no-inline-assembly
+ 284 |     |         assembly {
+ 285 |     |             // Mask `to` to the lower 160 bits, in case the upper bits somehow aren't clean.
+ 286 | *   |             toMasked := and(_to, _BITMASK_ADDRESS)
+ 287 |     |             // Emit the `Transfer` event.
+ 288 | *   |             log4(
+ 289 | *   |                 0, // Start of data (0, since no data).
+ 290 | *   |                 0, // End of data (0, since no data).
+ 291 |     |                 _TRANSFER_EVENT_SIGNATURE, // Signature.
+ 292 | *   |                 0, // `address(0)`.
+ 293 | *   |                 toMasked, // `to`.
+ 294 | *   |                 firstTokenId // `tokenId`.
+ 295 |     |             )
+ 296 |     | 
+ 297 |     |             // The `iszero(eq(,))` check ensures that large values of `quantity`
+ 298 |     |             // that overflows uint256 will make the loop run out of gas.
+ 299 |     |             // The compiler will optimize the `iszero` away for performance.
+ 300 | *   |             for {
+ 301 | *   |                 let tokenId := add(firstTokenId, 1)
+ 302 | *   |             } iszero(eq(tokenId, end)) {
+ 303 | *   |                 tokenId := add(tokenId, 1)
+ 304 |     |             } {
+ 305 |     |                 // Emit the `Transfer` event. Similar to above.
+ 306 | *o  |                 log4(0, 0, _TRANSFER_EVENT_SIGNATURE, 0, toMasked, tokenId)
+ 307 |     |             }
+ 308 |     |         }
+ 309 |     | 
+ 310 |     |         _afterTokenTransfers(address(0), _to, firstTokenId, _quantity);
+ 311 |     | 
+ 312 | *   |         return firstTokenId;
+ 313 |     |     }
+ 314 |     | 
+ 315 |     |     /**
+ 316 |     |      * @dev Transfers `tokenId` from `from` to `to`.
+ 317 |     |      *  As opposed to {transferFrom}, this imposes no restrictions on msg.sender.
+ 318 |     |      *
+ 319 |     |      * Requirements:
+ 320 |     |      *
+ 321 |     |      * - `to` cannot be the zero address.
+ 322 |     |      * - `tokenId` token must be owned by `from`.
+ 323 |     |      *
+ 324 |     |      * Emits a {Transfer} event.
+ 325 |     |      */
+ 326 | *   |     function _transfer(address _from, address _to, uint256 _tokenId) internal virtual {
+ 327 | *   |         (uint256 groupNumber, uint256 groupOffset, bool exists, address owner) = _tokenInfo(_tokenId);
+ 328 | *   |         require(exists, "ERC721Psi: owner query for nonexistent token");
+ 329 | *   |         require(owner == _from, "ERC721Psi: transfer of token that is not own");
+ 330 |     |         require(_to != address(0), "ERC721Psi: transfer to the zero address");
+ 331 |     | 
+ 332 |     |         _beforeTokenTransfers(_from, _to, _tokenId, 1);
+ 333 |     | 
+ 334 |     |         // Clear approvals from the previous owner
+ 335 |     |         // Do this in the ERC 721 way, and not the PSI way. That is, don't emit an event.
+ 336 |     |         tokenApprovals[_tokenId] = address(0);
+ 337 |     | 
+ 338 |     |         // Update balances
+ 339 |     |         // Copied from Open Zeppelin ERC721 implementation
+ 340 |     |         unchecked {
+ 341 |     |             // `_balances[from]` cannot overflow. `from`'s balance is the number of token held,
+ 342 |     |             // which is at least one before the current transfer.
+ 343 |     |             // `_balances[to]` could overflow. However, that would require all 2**256 token ids to
+ 344 |     |             // be minted, which in practice is impossible.
+ 345 |     |             balances[_from] -= 1;
+ 346 |     |             balances[_to] += 1;
+ 347 |     |         }
+ 348 |     | 
+ 349 |     |         TokenGroup storage group = tokenOwners[groupNumber];
+ 350 |     |         group.ownership = _setBit(group.ownership, groupOffset);
+ 351 |     |         owners[_tokenId] = _to;
+ 352 |     | 
+ 353 |     |         emit Transfer(_from, _to, _tokenId);
+ 354 |     | 
+ 355 |     |         _afterTokenTransfers(_from, _to, _tokenId, 1);
+ 356 |     |     }
+ 357 |     | 
+ 358 |     |     /**
+ 359 |     |      * @dev Approve `to` to operate on `tokenId`
+ 360 |     |      *
+ 361 |     |      * Emits a {Approval} event.
+ 362 |     |      */
+ 363 |     |     function _approve(address _to, uint256 _tokenId) internal virtual {
+ 364 |     |         (, , , address owner) = _tokenInfo(_tokenId);
+ 365 |     |         // Clear approvals from the previous owner
+ 366 |     |         _approve(owner, _to, _tokenId);
+ 367 |     |     }
+ 368 |     | 
+ 369 |     |     /**
+ 370 |     |      * @dev Approve `to` to operate on `tokenId`
+ 371 |     |      *
+ 372 |     |      * Emits a {Approval} event.
+ 373 |     |      */
+ 374 |     |     function _approve(address _owner, address _to, uint256 _tokenId) internal virtual {
+ 375 |     |         tokenApprovals[_tokenId] = _to;
+ 376 |     |         emit Approval(_owner, _to, _tokenId);
+ 377 |     |     }
+ 378 |     | 
+ 379 |     |     /**
+ 380 |     |      * @dev Internal function to invoke {IERC721Receiver-onERC721Received} on a target address.
+ 381 |     |      * The call is not executed if the target address is not a contract.
+ 382 |     |      *
+ 383 |     |      * @param _from address representing the previous owner of the given token ID
+ 384 |     |      * @param _to target address that will receive the tokens
+ 385 |     |      * @param _firstTokenId uint256 the first ID of the tokens to be transferred
+ 386 |     |      * @param _quantity uint256 amount of the tokens to be transfered.
+ 387 |     |      * @param _data bytes optional data to send along with the call
+ 388 |     |      * @return r bool whether the call correctly returned the expected magic value
+ 389 |     |      */
+ 390 |     |     function _checkOnERC721Received(
+ 391 |     |         address _from,
+ 392 |     |         address _to,
+ 393 |     |         uint256 _firstTokenId,
+ 394 |     |         uint256 _quantity,
+ 395 |     |         bytes memory _data
+ 396 |     |     ) private returns (bool r) {
+ 397 |     |         if (_to.isContract()) {
+ 398 |     |             r = true;
+ 399 |     |             for (uint256 tokenId = _firstTokenId; tokenId < _firstTokenId + _quantity; tokenId++) {
+ 400 |     |                 // slither-disable-start calls-loop
+ 401 |     |                 try IERC721Receiver(_to).onERC721Received(_msgSender(), _from, tokenId, _data) returns (bytes4 retval) {
+ 402 |     |                     r = r && retval == IERC721Receiver.onERC721Received.selector;
+ 403 |     |                 } catch (bytes memory reason) {
+ 404 |     |                     if (reason.length == 0) {
+ 405 |     |                         revert("ERC721Psi: transfer to non ERC721Receiver implementer");
+ 406 |     |                     } else {
+ 407 |     |                         assembly {
+ 408 |     |                             revert(add(32, reason), mload(reason))
+ 409 |     |                         }
+ 410 |     |                     }
+ 411 |     |                 }
+ 412 |     |                 // slither-disable-end calls-loop
+ 413 |     |             }
+ 414 |     |             return r;
+ 415 |     |         } else {
+ 416 |     |             return true;
+ 417 |     |         }
+ 418 |     |     }
+ 419 |     | 
+ 420 |     |     /**
+ 421 |     |      * @notice Fetch token information.
+ 422 |     |      *
+ 423 |     |      * @param _tokenId The NFT to determine information about.
+ 424 |     |      * @return groupNumber The group the NFT is part of.
+ 425 |     |      * @return offset The bit offset within the group.
+ 426 |     |      * @return exists True if the NFT has been minted and not burned.
+ 427 |     |      * @return owner The owner of the NFT.
+ 428 |     |      */
+ 429 | *   |     function _tokenInfo(uint256 _tokenId) internal view returns (uint256, uint256, bool, address) {
+ 430 | *   |         (uint256 groupNumber, uint256 offset) = _groupNumerAndOffset(_tokenId);
+ 431 | *   |         TokenGroup storage group = tokenOwners[groupNumber];
+ 432 |     |         address owner = address(0);
+ 433 |     |         bool exists = false;
+ 434 | *   |         bool changedOwnershipAfterMint = _bitIsSet(group.ownership, offset);
+ 435 | *   |         bool burned = _bitIsSet(group.burned, offset);
+ 436 | *   |         if (!burned) {
+ 437 | *   |             if (changedOwnershipAfterMint) {
+ 438 |     |                 owner = owners[_tokenId];
+ 439 |     |                 exists = true;
+ 440 |     |             } else {
+ 441 | *   |                 owner = group.defaultOwner;
+ 442 |     |                 // Default owner will be zero if the group has never been minted.
+ 443 | *   |                 exists = owner != address(0);
+ 444 |     |             }
+ 445 |     |         }
+ 446 | *   |         return (groupNumber, offset, exists, owner);
+ 447 |     |     }
+ 448 |     | 
+ 449 |     |     /**
+ 450 |     |      * Convert from a token id to a group number and an offset.
+ 451 |     |      */
+ 452 | *   |     function _groupNumerAndOffset(uint256 _tokenId) private pure returns (uint256, uint256) {
+ 453 | *   |         return (_tokenId / 256, _tokenId % 256);
+ 454 |     |     }
+ 455 |     | 
+ 456 | *   |     function _groupToTokenId(uint256 _nextGroup) private pure returns (uint256) {
+ 457 | *   |         return _nextGroup * 256;
+ 458 |     |     }
+ 459 |     | 
+ 460 |     |     function _bitIsSet(uint256 _bitMask, uint256 _offset) internal pure returns (bool) {
+ 461 | *   |         uint256 bitSet = 1 << _offset;
+ 462 | *   |         return (bitSet & _bitMask != 0);
+ 463 |     |     }
+ 464 |     | 
+ 465 |     |     function _setBit(uint256 _bitMask, uint256 _offset) internal pure returns (uint256) {
+ 466 | *   |         uint256 bitSet = 1 << _offset;
+ 467 | *   |         uint256 updatedBitMask = bitSet | _bitMask;
+ 468 |     |         return updatedBitMask;
+ 469 |     |     }
+ 470 |     | 
+ 471 | *   |     function _bitMaskToBurn(uint256 _offset) internal pure returns (uint256) {
+ 472 |     |         // Offset will range between 1 and 255. 256 if handled separately.
+ 473 |     |         // If offset = 1, mask should be 0xffff...ffe
+ 474 |     |         // If offset = 2, mask should be 0xffff...ffc
+ 475 |     |         // If offset = 3, mask should be 0xffff...ff8
+ 476 | *   |         uint256 inverseBitMask = (1 << _offset) - 1;
+ 477 | *   |         return ~inverseBitMask;
+ 478 |     |     }
+ 479 |     | 
+ 480 |     |     /**
+ 481 |     |      * @dev Hook that is called before a set of serially-ordered token ids are about to be transferred. This includes minting.
+ 482 |     |      *
+ 483 |     |      * startTokenId - the first token id to be transferred
+ 484 |     |      * quantity - the amount to be transferred
+ 485 |     |      *
+ 486 |     |      * Calling conditions:
+ 487 |     |      *
+ 488 |     |      * - When `from` and `to` are both non-zero, ``from``'s `tokenId` will be
+ 489 |     |      * transferred to `to`.
+ 490 |     |      * - When `from` is zero, `tokenId` will be minted for `to`.
+ 491 |     |      */
+ 492 |     |     // solhint-disable-next-line no-empty-blocks
+ 493 |     |     function _beforeTokenTransfers(address from, address to, uint256 startTokenId, uint256 quantity) internal virtual {}
+ 494 |     | 
+ 495 |     |     /**
+ 496 |     |      * @dev Hook that is called after a set of serially-ordered token ids have been transferred. This includes
+ 497 |     |      * minting.
+ 498 |     |      *
+ 499 |     |      * startTokenId - the first token id to be transferred
+ 500 |     |      * quantity - the amount to be transferred
+ 501 |     |      *
+ 502 |     |      * Calling conditions:
+ 503 |     |      *
+ 504 |     |      * - when `from` and `to` are both non-zero.
+ 505 |     |      * - `from` and `to` are never both zero.
+ 506 |     |      */
+ 507 |     |     // solhint-disable-next-line no-empty-blocks
+ 508 |     |     function _afterTokenTransfers(address from, address to, uint256 startTokenId, uint256 quantity) internal virtual {}
+ 509 |     | }
+ 510 |     | 
+
+/Users/tj/Work/contracts/lib/openzeppelin-contracts-4.9.3/contracts/token/ERC721/IERC721.sol
+   1 |     | // SPDX-License-Identifier: MIT
+   2 |     | // OpenZeppelin Contracts (last updated v4.9.0) (token/ERC721/IERC721.sol)
+   3 |     | 
+   4 |     | pragma solidity ^0.8.0;
+   5 |     | 
+   6 |     | import "../../utils/introspection/IERC165.sol";
+   7 |     | 
+   8 |     | /**
+   9 |     |  * @dev Required interface of an ERC721 compliant contract.
+  10 |     |  */
+  11 |     | interface IERC721 is IERC165 {
+  12 |     |     /**
+  13 |     |      * @dev Emitted when `tokenId` token is transferred from `from` to `to`.
+  14 |     |      */
+  15 |     |     event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
+  16 |     | 
+  17 |     |     /**
+  18 |     |      * @dev Emitted when `owner` enables `approved` to manage the `tokenId` token.
+  19 |     |      */
+  20 |     |     event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
+  21 |     | 
+  22 |     |     /**
+  23 |     |      * @dev Emitted when `owner` enables or disables (`approved`) `operator` to manage all of its assets.
+  24 |     |      */
+  25 |     |     event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
+  26 |     | 
+  27 |     |     /**
+  28 |     |      * @dev Returns the number of tokens in ``owner``'s account.
+  29 |     |      */
+  30 |     |     function balanceOf(address owner) external view returns (uint256 balance);
+  31 |     | 
+  32 |     |     /**
+  33 |     |      * @dev Returns the owner of the `tokenId` token.
+  34 |     |      *
+  35 |     |      * Requirements:
+  36 |     |      *
+  37 |     |      * - `tokenId` must exist.
+  38 |     |      */
+  39 |     |     function ownerOf(uint256 tokenId) external view returns (address owner);
+  40 |     | 
+  41 |     |     /**
+  42 |     |      * @dev Safely transfers `tokenId` token from `from` to `to`.
+  43 |     |      *
+  44 |     |      * Requirements:
+  45 |     |      *
+  46 |     |      * - `from` cannot be the zero address.
+  47 |     |      * - `to` cannot be the zero address.
+  48 |     |      * - `tokenId` token must exist and be owned by `from`.
+  49 |     |      * - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}.
+  50 |     |      * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.
+  51 |     |      *
+  52 |     |      * Emits a {Transfer} event.
+  53 |     |      */
+  54 |     |     function safeTransferFrom(address from, address to, uint256 tokenId, bytes calldata data) external;
+  55 |     | 
+  56 |     |     /**
+  57 |     |      * @dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients
+  58 |     |      * are aware of the ERC721 protocol to prevent tokens from being forever locked.
+  59 |     |      *
+  60 |     |      * Requirements:
+  61 |     |      *
+  62 |     |      * - `from` cannot be the zero address.
+  63 |     |      * - `to` cannot be the zero address.
+  64 |     |      * - `tokenId` token must exist and be owned by `from`.
+  65 |     |      * - If the caller is not `from`, it must have been allowed to move this token by either {approve} or {setApprovalForAll}.
+  66 |     |      * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.
+  67 |     |      *
+  68 |     |      * Emits a {Transfer} event.
+  69 |     |      */
+  70 |     |     function safeTransferFrom(address from, address to, uint256 tokenId) external;
+  71 |     | 
+  72 |     |     /**
+  73 |     |      * @dev Transfers `tokenId` token from `from` to `to`.
+  74 |     |      *
+  75 |     |      * WARNING: Note that the caller is responsible to confirm that the recipient is capable of receiving ERC721
+  76 |     |      * or else they may be permanently lost. Usage of {safeTransferFrom} prevents loss, though the caller must
+  77 |     |      * understand this adds an external call which potentially creates a reentrancy vulnerability.
+  78 |     |      *
+  79 |     |      * Requirements:
+  80 |     |      *
+  81 |     |      * - `from` cannot be the zero address.
+  82 |     |      * - `to` cannot be the zero address.
+  83 |     |      * - `tokenId` token must be owned by `from`.
+  84 |     |      * - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}.
+  85 |     |      *
+  86 |     |      * Emits a {Transfer} event.
+  87 |     |      */
+  88 |     |     function transferFrom(address from, address to, uint256 tokenId) external;
+  89 |     | 
+  90 |     |     /**
+  91 |     |      * @dev Gives permission to `to` to transfer `tokenId` token to another account.
+  92 |     |      * The approval is cleared when the token is transferred.
+  93 |     |      *
+  94 |     |      * Only a single account can be approved at a time, so approving the zero address clears previous approvals.
+  95 |     |      *
+  96 |     |      * Requirements:
+  97 |     |      *
+  98 |     |      * - The caller must own the token or be an approved operator.
+  99 |     |      * - `tokenId` must exist.
+ 100 |     |      *
+ 101 |     |      * Emits an {Approval} event.
+ 102 |     |      */
+ 103 |     |     function approve(address to, uint256 tokenId) external;
+ 104 |     | 
+ 105 |     |     /**
+ 106 |     |      * @dev Approve or remove `operator` as an operator for the caller.
+ 107 |     |      * Operators can call {transferFrom} or {safeTransferFrom} for any token owned by the caller.
+ 108 |     |      *
+ 109 |     |      * Requirements:
+ 110 |     |      *
+ 111 |     |      * - The `operator` cannot be the caller.
+ 112 |     |      *
+ 113 |     |      * Emits an {ApprovalForAll} event.
+ 114 |     |      */
+ 115 |     |     function setApprovalForAll(address operator, bool approved) external;
+ 116 |     | 
+ 117 |     |     /**
+ 118 |     |      * @dev Returns the account approved for `tokenId` token.
+ 119 |     |      *
+ 120 |     |      * Requirements:
+ 121 |     |      *
+ 122 |     |      * - `tokenId` must exist.
+ 123 |     |      */
+ 124 |     |     function getApproved(uint256 tokenId) external view returns (address operator);
+ 125 |     | 
+ 126 |     |     /**
+ 127 |     |      * @dev Returns if the `operator` is allowed to manage all of the assets of `owner`.
+ 128 |     |      *
+ 129 |     |      * See {setApprovalForAll}
+ 130 |     |      */
+ 131 |     |     function isApprovedForAll(address owner, address operator) external view returns (bool);
+ 132 |     | }
+ 133 |     | 
+
+/Users/tj/Work/contracts/lib/openzeppelin-contracts-4.9.3/contracts/token/ERC721/IERC721Receiver.sol
+  1 |     | // SPDX-License-Identifier: MIT
+  2 |     | // OpenZeppelin Contracts (last updated v4.6.0) (token/ERC721/IERC721Receiver.sol)
+  3 |     | 
+  4 |     | pragma solidity ^0.8.0;
+  5 |     | 
+  6 |     | /**
+  7 |     |  * @title ERC721 token receiver interface
+  8 |     |  * @dev Interface for any contract that wants to support safeTransfers
+  9 |     |  * from ERC721 asset contracts.
+ 10 |     |  */
+ 11 |     | interface IERC721Receiver {
+ 12 |     |     /**
+ 13 |     |      * @dev Whenever an {IERC721} `tokenId` token is transferred to this contract via {IERC721-safeTransferFrom}
+ 14 |     |      * by `operator` from `from`, this function is called.
+ 15 |     |      *
+ 16 |     |      * It must return its Solidity selector to confirm the token transfer.
+ 17 |     |      * If any other value is returned or the interface is not implemented by the recipient, the transfer will be reverted.
+ 18 |     |      *
+ 19 |     |      * The selector can be obtained in Solidity with `IERC721Receiver.onERC721Received.selector`.
+ 20 |     |      */
+ 21 |     |     function onERC721Received(
+ 22 |     |         address operator,
+ 23 |     |         address from,
+ 24 |     |         uint256 tokenId,
+ 25 |     |         bytes calldata data
+ 26 |     |     ) external returns (bytes4);
+ 27 |     | }
+ 28 |     | 
+
+/Users/tj/Work/contracts/lib/openzeppelin-contracts-4.9.3/contracts/token/ERC721/extensions/IERC721Metadata.sol
+  1 |     | // SPDX-License-Identifier: MIT
+  2 |     | // OpenZeppelin Contracts v4.4.1 (token/ERC721/extensions/IERC721Metadata.sol)
+  3 |     | 
+  4 |     | pragma solidity ^0.8.0;
+  5 |     | 
+  6 |     | import "../IERC721.sol";
+  7 |     | 
+  8 |     | /**
+  9 |     |  * @title ERC-721 Non-Fungible Token Standard, optional metadata extension
+ 10 |     |  * @dev See https://eips.ethereum.org/EIPS/eip-721
+ 11 |     |  */
+ 12 |     | interface IERC721Metadata is IERC721 {
+ 13 |     |     /**
+ 14 |     |      * @dev Returns the token collection name.
+ 15 |     |      */
+ 16 |     |     function name() external view returns (string memory);
+ 17 |     | 
+ 18 |     |     /**
+ 19 |     |      * @dev Returns the token collection symbol.
+ 20 |     |      */
+ 21 |     |     function symbol() external view returns (string memory);
+ 22 |     | 
+ 23 |     |     /**
+ 24 |     |      * @dev Returns the Uniform Resource Identifier (URI) for `tokenId` token.
+ 25 |     |      */
+ 26 |     |     function tokenURI(uint256 tokenId) external view returns (string memory);
+ 27 |     | }
+ 28 |     | 
+
+/Users/tj/Work/contracts/lib/openzeppelin-contracts-4.9.3/contracts/utils/Address.sol
+   1 |     | // SPDX-License-Identifier: MIT
+   2 |     | // OpenZeppelin Contracts (last updated v4.9.0) (utils/Address.sol)
+   3 |     | 
+   4 |     | pragma solidity ^0.8.1;
+   5 |     | 
+   6 |     | /**
+   7 |     |  * @dev Collection of functions related to the address type
+   8 |     |  */
+   9 |     | library Address {
+  10 |     |     /**
+  11 |     |      * @dev Returns true if `account` is a contract.
+  12 |     |      *
+  13 |     |      * [IMPORTANT]
+  14 |     |      * ====
+  15 |     |      * It is unsafe to assume that an address for which this function returns
+  16 |     |      * false is an externally-owned account (EOA) and not a contract.
+  17 |     |      *
+  18 |     |      * Among others, `isContract` will return false for the following
+  19 |     |      * types of addresses:
+  20 |     |      *
+  21 |     |      *  - an externally-owned account
+  22 |     |      *  - a contract in construction
+  23 |     |      *  - an address where a contract will be created
+  24 |     |      *  - an address where a contract lived, but was destroyed
+  25 |     |      *
+  26 |     |      * Furthermore, `isContract` will also return true if the target contract within
+  27 |     |      * the same transaction is already scheduled for destruction by `SELFDESTRUCT`,
+  28 |     |      * which only has an effect at the end of a transaction.
+  29 |     |      * ====
+  30 |     |      *
+  31 |     |      * [IMPORTANT]
+  32 |     |      * ====
+  33 |     |      * You shouldn't rely on `isContract` to protect against flash loan attacks!
+  34 |     |      *
+  35 |     |      * Preventing calls from contracts is highly discouraged. It breaks composability, breaks support for smart wallets
+  36 |     |      * like Gnosis Safe, and does not provide security since it can be circumvented by calling from a contract
+  37 |     |      * constructor.
+  38 |     |      * ====
+  39 |     |      */
+  40 |     |     function isContract(address account) internal view returns (bool) {
+  41 |     |         // This method relies on extcodesize/address.code.length, which returns 0
+  42 |     |         // for contracts in construction, since the code is only stored at the end
+  43 |     |         // of the constructor execution.
+  44 |     | 
+  45 |     |         return account.code.length > 0;
+  46 |     |     }
+  47 |     | 
+  48 |     |     /**
+  49 |     |      * @dev Replacement for Solidity's `transfer`: sends `amount` wei to
+  50 |     |      * `recipient`, forwarding all available gas and reverting on errors.
+  51 |     |      *
+  52 |     |      * https://eips.ethereum.org/EIPS/eip-1884[EIP1884] increases the gas cost
+  53 |     |      * of certain opcodes, possibly making contracts go over the 2300 gas limit
+  54 |     |      * imposed by `transfer`, making them unable to receive funds via
+  55 |     |      * `transfer`. {sendValue} removes this limitation.
+  56 |     |      *
+  57 |     |      * https://consensys.net/diligence/blog/2019/09/stop-using-soliditys-transfer-now/[Learn more].
+  58 |     |      *
+  59 |     |      * IMPORTANT: because control is transferred to `recipient`, care must be
+  60 |     |      * taken to not create reentrancy vulnerabilities. Consider using
+  61 |     |      * {ReentrancyGuard} or the
+  62 |     |      * https://solidity.readthedocs.io/en/v0.8.0/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].
+  63 |     |      */
+  64 |     |     function sendValue(address payable recipient, uint256 amount) internal {
+  65 |     |         require(address(this).balance >= amount, "Address: insufficient balance");
+  66 |     | 
+  67 |     |         (bool success, ) = recipient.call{value: amount}("");
+  68 |     |         require(success, "Address: unable to send value, recipient may have reverted");
+  69 |     |     }
+  70 |     | 
+  71 |     |     /**
+  72 |     |      * @dev Performs a Solidity function call using a low level `call`. A
+  73 |     |      * plain `call` is an unsafe replacement for a function call: use this
+  74 |     |      * function instead.
+  75 |     |      *
+  76 |     |      * If `target` reverts with a revert reason, it is bubbled up by this
+  77 |     |      * function (like regular Solidity function calls).
+  78 |     |      *
+  79 |     |      * Returns the raw returned data. To convert to the expected return value,
+  80 |     |      * use https://solidity.readthedocs.io/en/latest/units-and-global-variables.html?highlight=abi.decode#abi-encoding-and-decoding-functions[`abi.decode`].
+  81 |     |      *
+  82 |     |      * Requirements:
+  83 |     |      *
+  84 |     |      * - `target` must be a contract.
+  85 |     |      * - calling `target` with `data` must not revert.
+  86 |     |      *
+  87 |     |      * _Available since v3.1._
+  88 |     |      */
+  89 |     |     function functionCall(address target, bytes memory data) internal returns (bytes memory) {
+  90 |     |         return functionCallWithValue(target, data, 0, "Address: low-level call failed");
+  91 |     |     }
+  92 |     | 
+  93 |     |     /**
+  94 |     |      * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`], but with
+  95 |     |      * `errorMessage` as a fallback revert reason when `target` reverts.
+  96 |     |      *
+  97 |     |      * _Available since v3.1._
+  98 |     |      */
+  99 |     |     function functionCall(
+ 100 |     |         address target,
+ 101 |     |         bytes memory data,
+ 102 |     |         string memory errorMessage
+ 103 |     |     ) internal returns (bytes memory) {
+ 104 |     |         return functionCallWithValue(target, data, 0, errorMessage);
+ 105 |     |     }
+ 106 |     | 
+ 107 |     |     /**
+ 108 |     |      * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
+ 109 |     |      * but also transferring `value` wei to `target`.
+ 110 |     |      *
+ 111 |     |      * Requirements:
+ 112 |     |      *
+ 113 |     |      * - the calling contract must have an ETH balance of at least `value`.
+ 114 |     |      * - the called Solidity function must be `payable`.
+ 115 |     |      *
+ 116 |     |      * _Available since v3.1._
+ 117 |     |      */
+ 118 |     |     function functionCallWithValue(address target, bytes memory data, uint256 value) internal returns (bytes memory) {
+ 119 |     |         return functionCallWithValue(target, data, value, "Address: low-level call with value failed");
+ 120 |     |     }
+ 121 |     | 
+ 122 |     |     /**
+ 123 |     |      * @dev Same as {xref-Address-functionCallWithValue-address-bytes-uint256-}[`functionCallWithValue`], but
+ 124 |     |      * with `errorMessage` as a fallback revert reason when `target` reverts.
+ 125 |     |      *
+ 126 |     |      * _Available since v3.1._
+ 127 |     |      */
+ 128 |     |     function functionCallWithValue(
+ 129 |     |         address target,
+ 130 |     |         bytes memory data,
+ 131 |     |         uint256 value,
+ 132 |     |         string memory errorMessage
+ 133 |     |     ) internal returns (bytes memory) {
+ 134 |     |         require(address(this).balance >= value, "Address: insufficient balance for call");
+ 135 |     |         (bool success, bytes memory returndata) = target.call{value: value}(data);
+ 136 |     |         return verifyCallResultFromTarget(target, success, returndata, errorMessage);
+ 137 |     |     }
+ 138 |     | 
+ 139 |     |     /**
+ 140 |     |      * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
+ 141 |     |      * but performing a static call.
+ 142 |     |      *
+ 143 |     |      * _Available since v3.3._
+ 144 |     |      */
+ 145 |     |     function functionStaticCall(address target, bytes memory data) internal view returns (bytes memory) {
+ 146 |     |         return functionStaticCall(target, data, "Address: low-level static call failed");
+ 147 |     |     }
+ 148 |     | 
+ 149 |     |     /**
+ 150 |     |      * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],
+ 151 |     |      * but performing a static call.
+ 152 |     |      *
+ 153 |     |      * _Available since v3.3._
+ 154 |     |      */
+ 155 |     |     function functionStaticCall(
+ 156 |     |         address target,
+ 157 |     |         bytes memory data,
+ 158 |     |         string memory errorMessage
+ 159 |     |     ) internal view returns (bytes memory) {
+ 160 |     |         (bool success, bytes memory returndata) = target.staticcall(data);
+ 161 |     |         return verifyCallResultFromTarget(target, success, returndata, errorMessage);
+ 162 |     |     }
+ 163 |     | 
+ 164 |     |     /**
+ 165 |     |      * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
+ 166 |     |      * but performing a delegate call.
+ 167 |     |      *
+ 168 |     |      * _Available since v3.4._
+ 169 |     |      */
+ 170 |     |     function functionDelegateCall(address target, bytes memory data) internal returns (bytes memory) {
+ 171 |     |         return functionDelegateCall(target, data, "Address: low-level delegate call failed");
+ 172 |     |     }
+ 173 |     | 
+ 174 |     |     /**
+ 175 |     |      * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],
+ 176 |     |      * but performing a delegate call.
+ 177 |     |      *
+ 178 |     |      * _Available since v3.4._
+ 179 |     |      */
+ 180 |     |     function functionDelegateCall(
+ 181 |     |         address target,
+ 182 |     |         bytes memory data,
+ 183 |     |         string memory errorMessage
+ 184 |     |     ) internal returns (bytes memory) {
+ 185 |     |         (bool success, bytes memory returndata) = target.delegatecall(data);
+ 186 |     |         return verifyCallResultFromTarget(target, success, returndata, errorMessage);
+ 187 |     |     }
+ 188 |     | 
+ 189 |     |     /**
+ 190 |     |      * @dev Tool to verify that a low level call to smart-contract was successful, and revert (either by bubbling
+ 191 |     |      * the revert reason or using the provided one) in case of unsuccessful call or if target was not a contract.
+ 192 |     |      *
+ 193 |     |      * _Available since v4.8._
+ 194 |     |      */
+ 195 |     |     function verifyCallResultFromTarget(
+ 196 |     |         address target,
+ 197 |     |         bool success,
+ 198 |     |         bytes memory returndata,
+ 199 |     |         string memory errorMessage
+ 200 |     |     ) internal view returns (bytes memory) {
+ 201 |     |         if (success) {
+ 202 |     |             if (returndata.length == 0) {
+ 203 |     |                 // only check isContract if the call was successful and the return data is empty
+ 204 |     |                 // otherwise we already know that it was a contract
+ 205 |     |                 require(isContract(target), "Address: call to non-contract");
+ 206 |     |             }
+ 207 |     |             return returndata;
+ 208 |     |         } else {
+ 209 |     |             _revert(returndata, errorMessage);
+ 210 |     |         }
+ 211 |     |     }
+ 212 |     | 
+ 213 |     |     /**
+ 214 |     |      * @dev Tool to verify that a low level call was successful, and revert if it wasn't, either by bubbling the
+ 215 |     |      * revert reason or using the provided one.
+ 216 |     |      *
+ 217 |     |      * _Available since v4.3._
+ 218 |     |      */
+ 219 |     |     function verifyCallResult(
+ 220 |     |         bool success,
+ 221 |     |         bytes memory returndata,
+ 222 |     |         string memory errorMessage
+ 223 |     |     ) internal pure returns (bytes memory) {
+ 224 |     |         if (success) {
+ 225 |     |             return returndata;
+ 226 |     |         } else {
+ 227 |     |             _revert(returndata, errorMessage);
+ 228 |     |         }
+ 229 |     |     }
+ 230 |     | 
+ 231 |     |     function _revert(bytes memory returndata, string memory errorMessage) private pure {
+ 232 |     |         // Look for revert reason and bubble it up if present
+ 233 |     |         if (returndata.length > 0) {
+ 234 |     |             // The easiest way to bubble the revert reason is using memory via assembly
+ 235 |     |             /// @solidity memory-safe-assembly
+ 236 |     |             assembly {
+ 237 |     |                 let returndata_size := mload(returndata)
+ 238 |     |                 revert(add(32, returndata), returndata_size)
+ 239 |     |             }
+ 240 |     |         } else {
+ 241 |     |             revert(errorMessage);
+ 242 |     |         }
+ 243 |     |     }
+ 244 |     | }
+ 245 |     | 
+
+/Users/tj/Work/contracts/lib/openzeppelin-contracts-4.9.3/contracts/utils/Context.sol
+  1 |     | // SPDX-License-Identifier: MIT
+  2 |     | // OpenZeppelin Contracts v4.4.1 (utils/Context.sol)
+  3 |     | 
+  4 |     | pragma solidity ^0.8.0;
+  5 |     | 
+  6 |     | /**
+  7 |     |  * @dev Provides information about the current execution context, including the
+  8 |     |  * sender of the transaction and its data. While these are generally available
+  9 |     |  * via msg.sender and msg.data, they should not be accessed in such a direct
+ 10 |     |  * manner, since when dealing with meta-transactions the account sending and
+ 11 |     |  * paying for execution may not be the actual sender (as far as an application
+ 12 |     |  * is concerned).
+ 13 |     |  *
+ 14 |     |  * This contract is only required for intermediate, library-like contracts.
+ 15 |     |  */
+ 16 |     | abstract contract Context {
+ 17 |     |     function _msgSender() internal view virtual returns (address) {
+ 18 | *   |         return msg.sender;
+ 19 |     |     }
+ 20 |     | 
+ 21 |     |     function _msgData() internal view virtual returns (bytes calldata) {
+ 22 |     |         return msg.data;
+ 23 |     |     }
+ 24 |     | }
+ 25 |     | 
+
+/Users/tj/Work/contracts/lib/openzeppelin-contracts-4.9.3/contracts/utils/Strings.sol
+  1 |     | // SPDX-License-Identifier: MIT
+  2 |     | // OpenZeppelin Contracts (last updated v4.9.0) (utils/Strings.sol)
+  3 |     | 
+  4 |     | pragma solidity ^0.8.0;
+  5 |     | 
+  6 |     | import "./math/Math.sol";
+  7 |     | import "./math/SignedMath.sol";
+  8 |     | 
+  9 |     | /**
+ 10 |     |  * @dev String operations.
+ 11 |     |  */
+ 12 |     | library Strings {
+ 13 |     |     bytes16 private constant _SYMBOLS = "0123456789abcdef";
+ 14 |     |     uint8 private constant _ADDRESS_LENGTH = 20;
+ 15 |     | 
+ 16 |     |     /**
+ 17 |     |      * @dev Converts a `uint256` to its ASCII `string` decimal representation.
+ 18 |     |      */
+ 19 |     |     function toString(uint256 value) internal pure returns (string memory) {
+ 20 |     |         unchecked {
+ 21 |     |             uint256 length = Math.log10(value) + 1;
+ 22 |     |             string memory buffer = new string(length);
+ 23 |     |             uint256 ptr;
+ 24 |     |             /// @solidity memory-safe-assembly
+ 25 |     |             assembly {
+ 26 |     |                 ptr := add(buffer, add(32, length))
+ 27 |     |             }
+ 28 |     |             while (true) {
+ 29 |     |                 ptr--;
+ 30 |     |                 /// @solidity memory-safe-assembly
+ 31 |     |                 assembly {
+ 32 |     |                     mstore8(ptr, byte(mod(value, 10), _SYMBOLS))
+ 33 |     |                 }
+ 34 |     |                 value /= 10;
+ 35 |     |                 if (value == 0) break;
+ 36 |     |             }
+ 37 |     |             return buffer;
+ 38 |     |         }
+ 39 |     |     }
+ 40 |     | 
+ 41 |     |     /**
+ 42 |     |      * @dev Converts a `int256` to its ASCII `string` decimal representation.
+ 43 |     |      */
+ 44 |     |     function toString(int256 value) internal pure returns (string memory) {
+ 45 |     |         return string(abi.encodePacked(value < 0 ? "-" : "", toString(SignedMath.abs(value))));
+ 46 |     |     }
+ 47 |     | 
+ 48 |     |     /**
+ 49 |     |      * @dev Converts a `uint256` to its ASCII `string` hexadecimal representation.
+ 50 |     |      */
+ 51 |     |     function toHexString(uint256 value) internal pure returns (string memory) {
+ 52 |     |         unchecked {
+ 53 |     |             return toHexString(value, Math.log256(value) + 1);
+ 54 |     |         }
+ 55 |     |     }
+ 56 |     | 
+ 57 |     |     /**
+ 58 |     |      * @dev Converts a `uint256` to its ASCII `string` hexadecimal representation with fixed length.
+ 59 |     |      */
+ 60 |     |     function toHexString(uint256 value, uint256 length) internal pure returns (string memory) {
+ 61 |     |         bytes memory buffer = new bytes(2 * length + 2);
+ 62 |     |         buffer[0] = "0";
+ 63 |     |         buffer[1] = "x";
+ 64 |     |         for (uint256 i = 2 * length + 1; i > 1; --i) {
+ 65 |     |             buffer[i] = _SYMBOLS[value & 0xf];
+ 66 |     |             value >>= 4;
+ 67 |     |         }
+ 68 |     |         require(value == 0, "Strings: hex length insufficient");
+ 69 |     |         return string(buffer);
+ 70 |     |     }
+ 71 |     | 
+ 72 |     |     /**
+ 73 |     |      * @dev Converts an `address` with fixed length of 20 bytes to its not checksummed ASCII `string` hexadecimal representation.
+ 74 |     |      */
+ 75 |     |     function toHexString(address addr) internal pure returns (string memory) {
+ 76 |     |         return toHexString(uint256(uint160(addr)), _ADDRESS_LENGTH);
+ 77 |     |     }
+ 78 |     | 
+ 79 |     |     /**
+ 80 |     |      * @dev Returns true if the two strings are equal.
+ 81 |     |      */
+ 82 |     |     function equal(string memory a, string memory b) internal pure returns (bool) {
+ 83 |     |         return keccak256(bytes(a)) == keccak256(bytes(b));
+ 84 |     |     }
+ 85 |     | }
+ 86 |     | 
+
+/Users/tj/Work/contracts/lib/openzeppelin-contracts-4.9.3/contracts/utils/introspection/ERC165.sol
+  1 |     | // SPDX-License-Identifier: MIT
+  2 |     | // OpenZeppelin Contracts v4.4.1 (utils/introspection/ERC165.sol)
+  3 |     | 
+  4 |     | pragma solidity ^0.8.0;
+  5 |     | 
+  6 |     | import "./IERC165.sol";
+  7 |     | 
+  8 |     | /**
+  9 |     |  * @dev Implementation of the {IERC165} interface.
+ 10 |     |  *
+ 11 |     |  * Contracts that want to implement ERC165 should inherit from this contract and override {supportsInterface} to check
+ 12 |     |  * for the additional interface id that will be supported. For example:
+ 13 |     |  *
+ 14 |     |  * ```solidity
+ 15 |     |  * function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+ 16 |     |  *     return interfaceId == type(MyInterface).interfaceId || super.supportsInterface(interfaceId);
+ 17 |     |  * }
+ 18 |     |  * ```
+ 19 |     |  *
+ 20 |     |  * Alternatively, {ERC165Storage} provides an easier to use but more expensive implementation.
+ 21 |     |  */
+ 22 |     | abstract contract ERC165 is IERC165 {
+ 23 |     |     /**
+ 24 |     |      * @dev See {IERC165-supportsInterface}.
+ 25 |     |      */
+ 26 |     |     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+ 27 | *   |         return interfaceId == type(IERC165).interfaceId;
+ 28 |     |     }
+ 29 |     | }
+ 30 |     | 
+
+/Users/tj/Work/contracts/lib/openzeppelin-contracts-4.9.3/contracts/utils/introspection/IERC165.sol
+  1 |     | // SPDX-License-Identifier: MIT
+  2 |     | // OpenZeppelin Contracts v4.4.1 (utils/introspection/IERC165.sol)
+  3 |     | 
+  4 |     | pragma solidity ^0.8.0;
+  5 |     | 
+  6 |     | /**
+  7 |     |  * @dev Interface of the ERC165 standard, as defined in the
+  8 |     |  * https://eips.ethereum.org/EIPS/eip-165[EIP].
+  9 |     |  *
+ 10 |     |  * Implementers can declare support of contract interfaces, which can then be
+ 11 |     |  * queried by others ({ERC165Checker}).
+ 12 |     |  *
+ 13 |     |  * For an implementation, see {ERC165}.
+ 14 |     |  */
+ 15 |     | interface IERC165 {
+ 16 |     |     /**
+ 17 |     |      * @dev Returns true if this contract implements the interface defined by
+ 18 |     |      * `interfaceId`. See the corresponding
+ 19 |     |      * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]
+ 20 |     |      * to learn more about how these ids are created.
+ 21 |     |      *
+ 22 |     |      * This function call must use less than 30 000 gas.
+ 23 |     |      */
+ 24 |     |     function supportsInterface(bytes4 interfaceId) external view returns (bool);
+ 25 |     | }
+ 26 |     | 
+
+/Users/tj/Work/contracts/lib/openzeppelin-contracts-4.9.3/contracts/utils/math/Math.sol
+   1 |     | // SPDX-License-Identifier: MIT
+   2 |     | // OpenZeppelin Contracts (last updated v4.9.0) (utils/math/Math.sol)
+   3 |     | 
+   4 |     | pragma solidity ^0.8.0;
+   5 |     | 
+   6 |     | /**
+   7 |     |  * @dev Standard math utilities missing in the Solidity language.
+   8 |     |  */
+   9 |     | library Math {
+  10 |     |     enum Rounding {
+  11 |     |         Down, // Toward negative infinity
+  12 |     |         Up, // Toward infinity
+  13 |     |         Zero // Toward zero
+  14 |     |     }
+  15 |     | 
+  16 |     |     /**
+  17 |     |      * @dev Returns the largest of two numbers.
+  18 |     |      */
+  19 |     |     function max(uint256 a, uint256 b) internal pure returns (uint256) {
+  20 |     |         return a > b ? a : b;
+  21 |     |     }
+  22 |     | 
+  23 |     |     /**
+  24 |     |      * @dev Returns the smallest of two numbers.
+  25 |     |      */
+  26 |     |     function min(uint256 a, uint256 b) internal pure returns (uint256) {
+  27 |     |         return a < b ? a : b;
+  28 |     |     }
+  29 |     | 
+  30 |     |     /**
+  31 |     |      * @dev Returns the average of two numbers. The result is rounded towards
+  32 |     |      * zero.
+  33 |     |      */
+  34 |     |     function average(uint256 a, uint256 b) internal pure returns (uint256) {
+  35 |     |         // (a + b) / 2 can overflow.
+  36 |     |         return (a & b) + (a ^ b) / 2;
+  37 |     |     }
+  38 |     | 
+  39 |     |     /**
+  40 |     |      * @dev Returns the ceiling of the division of two numbers.
+  41 |     |      *
+  42 |     |      * This differs from standard division with `/` in that it rounds up instead
+  43 |     |      * of rounding down.
+  44 |     |      */
+  45 |     |     function ceilDiv(uint256 a, uint256 b) internal pure returns (uint256) {
+  46 |     |         // (a + b - 1) / b can overflow on addition, so we distribute.
+  47 |     |         return a == 0 ? 0 : (a - 1) / b + 1;
+  48 |     |     }
+  49 |     | 
+  50 |     |     /**
+  51 |     |      * @notice Calculates floor(x * y / denominator) with full precision. Throws if result overflows a uint256 or denominator == 0
+  52 |     |      * @dev Original credit to Remco Bloemen under MIT license (https://xn--2-umb.com/21/muldiv)
+  53 |     |      * with further edits by Uniswap Labs also under MIT license.
+  54 |     |      */
+  55 |     |     function mulDiv(uint256 x, uint256 y, uint256 denominator) internal pure returns (uint256 result) {
+  56 |     |         unchecked {
+  57 |     |             // 512-bit multiply [prod1 prod0] = x * y. Compute the product mod 2^256 and mod 2^256 - 1, then use
+  58 |     |             // use the Chinese Remainder Theorem to reconstruct the 512 bit result. The result is stored in two 256
+  59 |     |             // variables such that product = prod1 * 2^256 + prod0.
+  60 |     |             uint256 prod0; // Least significant 256 bits of the product
+  61 |     |             uint256 prod1; // Most significant 256 bits of the product
+  62 |     |             assembly {
+  63 |     |                 let mm := mulmod(x, y, not(0))
+  64 |     |                 prod0 := mul(x, y)
+  65 |     |                 prod1 := sub(sub(mm, prod0), lt(mm, prod0))
+  66 |     |             }
+  67 |     | 
+  68 |     |             // Handle non-overflow cases, 256 by 256 division.
+  69 |     |             if (prod1 == 0) {
+  70 |     |                 // Solidity will revert if denominator == 0, unlike the div opcode on its own.
+  71 |     |                 // The surrounding unchecked block does not change this fact.
+  72 |     |                 // See https://docs.soliditylang.org/en/latest/control-structures.html#checked-or-unchecked-arithmetic.
+  73 |     |                 return prod0 / denominator;
+  74 |     |             }
+  75 |     | 
+  76 |     |             // Make sure the result is less than 2^256. Also prevents denominator == 0.
+  77 |     |             require(denominator > prod1, "Math: mulDiv overflow");
+  78 |     | 
+  79 |     |             ///////////////////////////////////////////////
+  80 |     |             // 512 by 256 division.
+  81 |     |             ///////////////////////////////////////////////
+  82 |     | 
+  83 |     |             // Make division exact by subtracting the remainder from [prod1 prod0].
+  84 |     |             uint256 remainder;
+  85 |     |             assembly {
+  86 |     |                 // Compute remainder using mulmod.
+  87 |     |                 remainder := mulmod(x, y, denominator)
+  88 |     | 
+  89 |     |                 // Subtract 256 bit number from 512 bit number.
+  90 |     |                 prod1 := sub(prod1, gt(remainder, prod0))
+  91 |     |                 prod0 := sub(prod0, remainder)
+  92 |     |             }
+  93 |     | 
+  94 |     |             // Factor powers of two out of denominator and compute largest power of two divisor of denominator. Always >= 1.
+  95 |     |             // See https://cs.stackexchange.com/q/138556/92363.
+  96 |     | 
+  97 |     |             // Does not overflow because the denominator cannot be zero at this stage in the function.
+  98 |     |             uint256 twos = denominator & (~denominator + 1);
+  99 |     |             assembly {
+ 100 |     |                 // Divide denominator by twos.
+ 101 |     |                 denominator := div(denominator, twos)
+ 102 |     | 
+ 103 |     |                 // Divide [prod1 prod0] by twos.
+ 104 |     |                 prod0 := div(prod0, twos)
+ 105 |     | 
+ 106 |     |                 // Flip twos such that it is 2^256 / twos. If twos is zero, then it becomes one.
+ 107 |     |                 twos := add(div(sub(0, twos), twos), 1)
+ 108 |     |             }
+ 109 |     | 
+ 110 |     |             // Shift in bits from prod1 into prod0.
+ 111 |     |             prod0 |= prod1 * twos;
+ 112 |     | 
+ 113 |     |             // Invert denominator mod 2^256. Now that denominator is an odd number, it has an inverse modulo 2^256 such
+ 114 |     |             // that denominator * inv = 1 mod 2^256. Compute the inverse by starting with a seed that is correct for
+ 115 |     |             // four bits. That is, denominator * inv = 1 mod 2^4.
+ 116 |     |             uint256 inverse = (3 * denominator) ^ 2;
+ 117 |     | 
+ 118 |     |             // Use the Newton-Raphson iteration to improve the precision. Thanks to Hensel's lifting lemma, this also works
+ 119 |     |             // in modular arithmetic, doubling the correct bits in each step.
+ 120 |     |             inverse *= 2 - denominator * inverse; // inverse mod 2^8
+ 121 |     |             inverse *= 2 - denominator * inverse; // inverse mod 2^16
+ 122 |     |             inverse *= 2 - denominator * inverse; // inverse mod 2^32
+ 123 |     |             inverse *= 2 - denominator * inverse; // inverse mod 2^64
+ 124 |     |             inverse *= 2 - denominator * inverse; // inverse mod 2^128
+ 125 |     |             inverse *= 2 - denominator * inverse; // inverse mod 2^256
+ 126 |     | 
+ 127 |     |             // Because the division is now exact we can divide by multiplying with the modular inverse of denominator.
+ 128 |     |             // This will give us the correct result modulo 2^256. Since the preconditions guarantee that the outcome is
+ 129 |     |             // less than 2^256, this is the final result. We don't need to compute the high bits of the result and prod1
+ 130 |     |             // is no longer required.
+ 131 |     |             result = prod0 * inverse;
+ 132 |     |             return result;
+ 133 |     |         }
+ 134 |     |     }
+ 135 |     | 
+ 136 |     |     /**
+ 137 |     |      * @notice Calculates x * y / denominator with full precision, following the selected rounding direction.
+ 138 |     |      */
+ 139 |     |     function mulDiv(uint256 x, uint256 y, uint256 denominator, Rounding rounding) internal pure returns (uint256) {
+ 140 |     |         uint256 result = mulDiv(x, y, denominator);
+ 141 |     |         if (rounding == Rounding.Up && mulmod(x, y, denominator) > 0) {
+ 142 |     |             result += 1;
+ 143 |     |         }
+ 144 |     |         return result;
+ 145 |     |     }
+ 146 |     | 
+ 147 |     |     /**
+ 148 |     |      * @dev Returns the square root of a number. If the number is not a perfect square, the value is rounded down.
+ 149 |     |      *
+ 150 |     |      * Inspired by Henry S. Warren, Jr.'s "Hacker's Delight" (Chapter 11).
+ 151 |     |      */
+ 152 |     |     function sqrt(uint256 a) internal pure returns (uint256) {
+ 153 |     |         if (a == 0) {
+ 154 |     |             return 0;
+ 155 |     |         }
+ 156 |     | 
+ 157 |     |         // For our first guess, we get the biggest power of 2 which is smaller than the square root of the target.
+ 158 |     |         //
+ 159 |     |         // We know that the "msb" (most significant bit) of our target number `a` is a power of 2 such that we have
+ 160 |     |         // `msb(a) <= a < 2*msb(a)`. This value can be written `msb(a)=2**k` with `k=log2(a)`.
+ 161 |     |         //
+ 162 |     |         // This can be rewritten `2**log2(a) <= a < 2**(log2(a) + 1)`
+ 163 |     |         // → `sqrt(2**k) <= sqrt(a) < sqrt(2**(k+1))`
+ 164 |     |         // → `2**(k/2) <= sqrt(a) < 2**((k+1)/2) <= 2**(k/2 + 1)`
+ 165 |     |         //
+ 166 |     |         // Consequently, `2**(log2(a) / 2)` is a good first approximation of `sqrt(a)` with at least 1 correct bit.
+ 167 |     |         uint256 result = 1 << (log2(a) >> 1);
+ 168 |     | 
+ 169 |     |         // At this point `result` is an estimation with one bit of precision. We know the true value is a uint128,
+ 170 |     |         // since it is the square root of a uint256. Newton's method converges quadratically (precision doubles at
+ 171 |     |         // every iteration). We thus need at most 7 iteration to turn our partial result with one bit of precision
+ 172 |     |         // into the expected uint128 result.
+ 173 |     |         unchecked {
+ 174 |     |             result = (result + a / result) >> 1;
+ 175 |     |             result = (result + a / result) >> 1;
+ 176 |     |             result = (result + a / result) >> 1;
+ 177 |     |             result = (result + a / result) >> 1;
+ 178 |     |             result = (result + a / result) >> 1;
+ 179 |     |             result = (result + a / result) >> 1;
+ 180 |     |             result = (result + a / result) >> 1;
+ 181 |     |             return min(result, a / result);
+ 182 |     |         }
+ 183 |     |     }
+ 184 |     | 
+ 185 |     |     /**
+ 186 |     |      * @notice Calculates sqrt(a), following the selected rounding direction.
+ 187 |     |      */
+ 188 |     |     function sqrt(uint256 a, Rounding rounding) internal pure returns (uint256) {
+ 189 |     |         unchecked {
+ 190 |     |             uint256 result = sqrt(a);
+ 191 |     |             return result + (rounding == Rounding.Up && result * result < a ? 1 : 0);
+ 192 |     |         }
+ 193 |     |     }
+ 194 |     | 
+ 195 |     |     /**
+ 196 |     |      * @dev Return the log in base 2, rounded down, of a positive value.
+ 197 |     |      * Returns 0 if given 0.
+ 198 |     |      */
+ 199 |     |     function log2(uint256 value) internal pure returns (uint256) {
+ 200 |     |         uint256 result = 0;
+ 201 |     |         unchecked {
+ 202 |     |             if (value >> 128 > 0) {
+ 203 |     |                 value >>= 128;
+ 204 |     |                 result += 128;
+ 205 |     |             }
+ 206 |     |             if (value >> 64 > 0) {
+ 207 |     |                 value >>= 64;
+ 208 |     |                 result += 64;
+ 209 |     |             }
+ 210 |     |             if (value >> 32 > 0) {
+ 211 |     |                 value >>= 32;
+ 212 |     |                 result += 32;
+ 213 |     |             }
+ 214 |     |             if (value >> 16 > 0) {
+ 215 |     |                 value >>= 16;
+ 216 |     |                 result += 16;
+ 217 |     |             }
+ 218 |     |             if (value >> 8 > 0) {
+ 219 |     |                 value >>= 8;
+ 220 |     |                 result += 8;
+ 221 |     |             }
+ 222 |     |             if (value >> 4 > 0) {
+ 223 |     |                 value >>= 4;
+ 224 |     |                 result += 4;
+ 225 |     |             }
+ 226 |     |             if (value >> 2 > 0) {
+ 227 |     |                 value >>= 2;
+ 228 |     |                 result += 2;
+ 229 |     |             }
+ 230 |     |             if (value >> 1 > 0) {
+ 231 |     |                 result += 1;
+ 232 |     |             }
+ 233 |     |         }
+ 234 |     |         return result;
+ 235 |     |     }
+ 236 |     | 
+ 237 |     |     /**
+ 238 |     |      * @dev Return the log in base 2, following the selected rounding direction, of a positive value.
+ 239 |     |      * Returns 0 if given 0.
+ 240 |     |      */
+ 241 |     |     function log2(uint256 value, Rounding rounding) internal pure returns (uint256) {
+ 242 |     |         unchecked {
+ 243 |     |             uint256 result = log2(value);
+ 244 |     |             return result + (rounding == Rounding.Up && 1 << result < value ? 1 : 0);
+ 245 |     |         }
+ 246 |     |     }
+ 247 |     | 
+ 248 |     |     /**
+ 249 |     |      * @dev Return the log in base 10, rounded down, of a positive value.
+ 250 |     |      * Returns 0 if given 0.
+ 251 |     |      */
+ 252 |     |     function log10(uint256 value) internal pure returns (uint256) {
+ 253 |     |         uint256 result = 0;
+ 254 |     |         unchecked {
+ 255 |     |             if (value >= 10 ** 64) {
+ 256 |     |                 value /= 10 ** 64;
+ 257 |     |                 result += 64;
+ 258 |     |             }
+ 259 |     |             if (value >= 10 ** 32) {
+ 260 |     |                 value /= 10 ** 32;
+ 261 |     |                 result += 32;
+ 262 |     |             }
+ 263 |     |             if (value >= 10 ** 16) {
+ 264 |     |                 value /= 10 ** 16;
+ 265 |     |                 result += 16;
+ 266 |     |             }
+ 267 |     |             if (value >= 10 ** 8) {
+ 268 |     |                 value /= 10 ** 8;
+ 269 |     |                 result += 8;
+ 270 |     |             }
+ 271 |     |             if (value >= 10 ** 4) {
+ 272 |     |                 value /= 10 ** 4;
+ 273 |     |                 result += 4;
+ 274 |     |             }
+ 275 |     |             if (value >= 10 ** 2) {
+ 276 |     |                 value /= 10 ** 2;
+ 277 |     |                 result += 2;
+ 278 |     |             }
+ 279 |     |             if (value >= 10 ** 1) {
+ 280 |     |                 result += 1;
+ 281 |     |             }
+ 282 |     |         }
+ 283 |     |         return result;
+ 284 |     |     }
+ 285 |     | 
+ 286 |     |     /**
+ 287 |     |      * @dev Return the log in base 10, following the selected rounding direction, of a positive value.
+ 288 |     |      * Returns 0 if given 0.
+ 289 |     |      */
+ 290 |     |     function log10(uint256 value, Rounding rounding) internal pure returns (uint256) {
+ 291 |     |         unchecked {
+ 292 |     |             uint256 result = log10(value);
+ 293 |     |             return result + (rounding == Rounding.Up && 10 ** result < value ? 1 : 0);
+ 294 |     |         }
+ 295 |     |     }
+ 296 |     | 
+ 297 |     |     /**
+ 298 |     |      * @dev Return the log in base 256, rounded down, of a positive value.
+ 299 |     |      * Returns 0 if given 0.
+ 300 |     |      *
+ 301 |     |      * Adding one to the result gives the number of pairs of hex symbols needed to represent `value` as a hex string.
+ 302 |     |      */
+ 303 |     |     function log256(uint256 value) internal pure returns (uint256) {
+ 304 |     |         uint256 result = 0;
+ 305 |     |         unchecked {
+ 306 |     |             if (value >> 128 > 0) {
+ 307 |     |                 value >>= 128;
+ 308 |     |                 result += 16;
+ 309 |     |             }
+ 310 |     |             if (value >> 64 > 0) {
+ 311 |     |                 value >>= 64;
+ 312 |     |                 result += 8;
+ 313 |     |             }
+ 314 |     |             if (value >> 32 > 0) {
+ 315 |     |                 value >>= 32;
+ 316 |     |                 result += 4;
+ 317 |     |             }
+ 318 |     |             if (value >> 16 > 0) {
+ 319 |     |                 value >>= 16;
+ 320 |     |                 result += 2;
+ 321 |     |             }
+ 322 |     |             if (value >> 8 > 0) {
+ 323 |     |                 result += 1;
+ 324 |     |             }
+ 325 |     |         }
+ 326 |     |         return result;
+ 327 |     |     }
+ 328 |     | 
+ 329 |     |     /**
+ 330 |     |      * @dev Return the log in base 256, following the selected rounding direction, of a positive value.
+ 331 |     |      * Returns 0 if given 0.
+ 332 |     |      */
+ 333 |     |     function log256(uint256 value, Rounding rounding) internal pure returns (uint256) {
+ 334 |     |         unchecked {
+ 335 |     |             uint256 result = log256(value);
+ 336 |     |             return result + (rounding == Rounding.Up && 1 << (result << 3) < value ? 1 : 0);
+ 337 |     |         }
+ 338 |     |     }
+ 339 |     | }
+ 340 |     | 
+
+/Users/tj/Work/contracts/lib/openzeppelin-contracts-4.9.3/contracts/utils/math/SignedMath.sol
+  1 |     | // SPDX-License-Identifier: MIT
+  2 |     | // OpenZeppelin Contracts (last updated v4.8.0) (utils/math/SignedMath.sol)
+  3 |     | 
+  4 |     | pragma solidity ^0.8.0;
+  5 |     | 
+  6 |     | /**
+  7 |     |  * @dev Standard signed math utilities missing in the Solidity language.
+  8 |     |  */
+  9 |     | library SignedMath {
+ 10 |     |     /**
+ 11 |     |      * @dev Returns the largest of two signed numbers.
+ 12 |     |      */
+ 13 |     |     function max(int256 a, int256 b) internal pure returns (int256) {
+ 14 |     |         return a > b ? a : b;
+ 15 |     |     }
+ 16 |     | 
+ 17 |     |     /**
+ 18 |     |      * @dev Returns the smallest of two signed numbers.
+ 19 |     |      */
+ 20 |     |     function min(int256 a, int256 b) internal pure returns (int256) {
+ 21 |     |         return a < b ? a : b;
+ 22 |     |     }
+ 23 |     | 
+ 24 |     |     /**
+ 25 |     |      * @dev Returns the average of two signed numbers without overflow.
+ 26 |     |      * The result is rounded towards zero.
+ 27 |     |      */
+ 28 |     |     function average(int256 a, int256 b) internal pure returns (int256) {
+ 29 |     |         // Formula from the book "Hacker's Delight"
+ 30 |     |         int256 x = (a & b) + ((a ^ b) >> 1);
+ 31 |     |         return x + (int256(uint256(x) >> 255) & (a ^ b));
+ 32 |     |     }
+ 33 |     | 
+ 34 |     |     /**
+ 35 |     |      * @dev Returns the absolute unsigned value of a signed value.
+ 36 |     |      */
+ 37 |     |     function abs(int256 n) internal pure returns (uint256) {
+ 38 |     |         unchecked {
+ 39 |     |             // must be unchecked in order to support `n = type(int256).min`
+ 40 |     |             return uint256(n >= 0 ? n : -n);
+ 41 |     |         }
+ 42 |     |     }
+ 43 |     | }
+ 44 |     | 
+
+/Users/tj/Work/contracts/test/token/erc721/fuzz/ERC721PsiV2.Echidna.sol
+   1 |     | // SPDX-License-Identifier: MIT
+   2 |     | pragma solidity >=0.8.19 <0.8.29;
+   3 |     | 
+   4 |     | import {ERC721PsiV2} from "../../../../contracts/token/erc721/erc721psi/ERC721PsiV2.sol";
+   5 |     | import {ERC721PsiBurnableV2} from "../../../../contracts/token/erc721/erc721psi/ERC721PsiBurnableV2.sol";
+   6 |     | import {IERC721Receiver} from "@openzeppelin-contracts-4.9.3/token/ERC721/IERC721Receiver.sol";
+   7 |     | 
+   8 | *r  | contract ERC721PsiV2Echidna is ERC721PsiBurnableV2 {
+   9 |     |     address echidna_caller = msg.sender;
+  10 |     |     
+  11 |     |     // Track state for assertions
+  12 | *   |     mapping(uint256 => bool) public minted;
+  13 | *   |     mapping(uint256 => bool) public burned;
+  14 | *   |     mapping(uint256 => address) public tokenOwnersMap;
+  15 |     |     mapping(address => mapping(address => bool)) private _operatorApprovals;
+  16 | *   |     uint256 public totalMinted;
+  17 |     |     uint256 private currentTokenId;
+  18 |     |     
+  19 |     |     constructor() {
+  20 |     |         // Initialize with some tokens
+  21 |     |         _mint(address(this), 10);
+  22 |     |     }
+  23 |     | 
+  24 |     |     // Implement missing abstract functions
+  25 | *   |     function safeTransferFrom(address from, address to, uint256 tokenId) external {
+  26 | *   |         safeTransferFrom(from, to, tokenId, "");
+  27 |     |     }
+  28 |     | 
+  29 | *   |     function setApprovalForAll(address operator, bool approved) external override {
+  30 | *   |         require(operator != msg.sender, "ERC721: approve to caller");
+  31 | *   |         _operatorApprovals[msg.sender][operator] = approved;
+  32 | *   |         emit ApprovalForAll(msg.sender, operator, approved);
+  33 |     |     }
+  34 |     | 
+  35 | *   |     function isApprovedForAll(address owner, address operator) public view override returns (bool) {
+  36 | *   |         return _operatorApprovals[owner][operator];
+  37 |     |     }
+  38 |     | 
+  39 | *   |     function name() external pure returns (string memory) {
+  40 | *   |         return "EchidnaTest";
+  41 |     |     }
+  42 |     | 
+  43 | *   |     function symbol() external pure returns (string memory) {
+  44 | *   |         return "ECHD";
+  45 |     |     }
+  46 |     | 
+  47 | *   |     function tokenURI(uint256) external pure returns (string memory) {
+  48 | *   |         return "test";
+  49 |     |     }
+  50 |     | 
+  51 |     |     // Add mint function
+  52 | *   |     function mint(address to, uint256 quantity) external {
+  53 | *   |         _mint(to, quantity);
+  54 |     |     }
+  55 |     | 
+  56 |     |     // Add external burn function
+  57 | *   |     function burn(uint256 tokenId) external {
+  58 | *   |         _burn(tokenId);
+  59 |     |     }
+  60 |     | 
+  61 |     |     // Modified test functions without parameters
+  62 |     |     function echidna_mint_by_id() public returns (bool) {
+  63 |     |         uint256 tokenId = currentTokenId % 2**128;
+  64 |     |         currentTokenId++;
+  65 |     |         
+  66 |     |         if (minted[tokenId] || burned[tokenId]) return true;
+  67 |     |         
+  68 |     |         try this.mint(msg.sender, 1) {
+  69 |     |             minted[tokenId] = true;
+  70 |     |             tokenOwnersMap[tokenId] = msg.sender;
+  71 |     |             totalMinted++;
+  72 |     |             return true;
+  73 |     |         } catch {
+  74 |     |             return true;
+  75 |     |         }
+  76 |     |     }
+  77 |     | 
+  78 |     |     function echidna_mint_by_quantity() public returns (bool) {
+  79 |     |         uint256 quantity = (currentTokenId % 100) + 1;
+  80 |     |         currentTokenId++;
+  81 |     |         uint256 startTokenId = 2**128 + totalMinted;
+  82 |     |         
+  83 |     |         try this.mint(msg.sender, quantity) {
+  84 |     |             for(uint256 i = 0; i < quantity; i++) {
+  85 |     |                 uint256 tokenId = startTokenId + i;
+  86 |     |                 minted[tokenId] = true;
+  87 |     |                 tokenOwnersMap[tokenId] = msg.sender;
+  88 |     |             }
+  89 |     |             totalMinted += quantity;
+  90 |     |             return true;
+  91 |     |         } catch {
+  92 |     |             return true;
+  93 |     |         }
+  94 |     |     }
+  95 |     | 
+  96 |     |     function echidna_burn() public returns (bool) {
+  97 |     |         uint256 tokenId = currentTokenId % totalMinted;
+  98 |     |         currentTokenId++;
+  99 |     |         
+ 100 |     |         if (!minted[tokenId] || burned[tokenId]) return true;
+ 101 |     |         
+ 102 |     |         try this.burn(tokenId) {
+ 103 |     |             burned[tokenId] = true;
+ 104 |     |             delete tokenOwnersMap[tokenId];
+ 105 |     |             return true;
+ 106 |     |         } catch {
+ 107 |     |             return true;
+ 108 |     |         }
+ 109 |     |     }
+ 110 |     | 
+ 111 |     |     // Properties that Echidna will check
+ 112 |     |     function echidna_total_supply_matches() public view returns (bool) {
+ 113 |     |         return totalSupply() == totalMinted;
+ 114 |     |     }
+ 115 |     | 
+ 116 |     |     function echidna_burned_tokens_have_no_owner() public view returns (bool) {
+ 117 |     |         for (uint256 i = 0; i < totalMinted; i++) {
+ 118 |     |             if (burned[i]) {
+ 119 |     |                 try this.ownerOf(i) returns (address) {
+ 120 |     |                     return false;
+ 121 |     |                 } catch {
+ 122 |     |                     continue;
+ 123 |     |                 }
+ 124 |     |             }
+ 125 |     |         }
+ 126 |     |         return true;
+ 127 |     |     }
+ 128 |     | 
+ 129 |     |     function echidna_minted_tokens_have_owner() public view returns (bool) {
+ 130 |     |         for (uint256 i = 0; i < totalMinted; i++) {
+ 131 |     |             if (minted[i] && !burned[i]) {
+ 132 |     |                 try this.ownerOf(i) returns (address owner) {
+ 133 |     |                     if (owner == address(0)) return false;
+ 134 |     |                 } catch {
+ 135 |     |                     return false;
+ 136 |     |                 }
+ 137 |     |             }
+ 138 |     |         }
+ 139 |     |         return true;
+ 140 |     |     }
+ 141 |     | 
+ 142 |     |     function echidna_mint_threshold_respected() public view returns (bool) {
+ 143 |     |         for (uint256 i = 0; i < 2**128; i++) {
+ 144 |     |             if (minted[i]) {
+ 145 |     |                 if (i >= 2**128) return false;
+ 146 |     |             }
+ 147 |     |         }
+ 148 |     |         return true;
+ 149 |     |     }
+ 150 |     | 
+ 151 |     |     // Add approval checking invariant
+ 152 |     |     function echidna_approval_consistency() public view returns (bool) {
+ 153 |     |         for (uint256 i = 0; i < totalMinted; i++) {
+ 154 |     |             if (minted[i] && !burned[i]) {
+ 155 |     |                 address owner = tokenOwnersMap[i];
+ 156 |     |                 for (uint160 j = 0; j < 10; j++) {
+ 157 |     |                     address operator = address(j + 1);
+ 158 |     |                     if (_operatorApprovals[owner][operator]) {
+ 159 |     |                         if (!isApprovedForAll(owner, operator)) return false;
+ 160 |     |                     }
+ 161 |     |                 }
+ 162 |     |             }
+ 163 |     |         }
+ 164 |     |         return true;
+ 165 |     |     }
+ 166 |     | 
+ 167 |     |     function echidna_transfer_ownership_updates() public returns (bool) {
+ 168 |     |         if (totalMinted == 0) return true;
+ 169 |     |         uint256 tokenId = currentTokenId % totalMinted;
+ 170 |     |         address originalOwner = tokenOwnersMap[tokenId];
+ 171 |     |         address newOwner = address(uint160(currentTokenId % 100));
+ 172 |     |         
+ 173 |     |         try this.transferFrom(originalOwner, newOwner, tokenId) {
+ 174 |     |             return ownerOf(tokenId) == newOwner;
+ 175 |     |         } catch {
+ 176 |     |             return true;
+ 177 |     |         }
+ 178 |     |     }
+ 179 |     | 
+ 180 |     |     function echidna_balance_consistency() public view returns (bool) {
+ 181 |     |         for (uint160 i = 0; i < 100; i++) {
+ 182 |     |             address owner = address(i);
+ 183 |     |             uint256 expectedBalance = 0;
+ 184 |     |             for (uint256 j = 0; j < totalMinted; j++) {
+ 185 |     |                 if (tokenOwnersMap[j] == owner && !burned[j]) {
+ 186 |     |                     expectedBalance++;
+ 187 |     |                 }
+ 188 |     |             }
+ 189 |     |             if (balanceOf(owner) != expectedBalance) return false;
+ 190 |     |         }
+ 191 |     |         return true;
+ 192 |     |     }
+ 193 |     | 
+ 194 |     |     function echidna_sequential_token_ids() public view returns (bool) {
+ 195 |     |         uint256 lastId = type(uint256).max;
+ 196 |     |         for (uint256 i = 0; i < totalMinted; i++) {
+ 197 |     |             if (minted[i] && !burned[i]) {
+ 198 |     |                 if (lastId != type(uint256).max && i <= lastId) return false;
+ 199 |     |                 lastId = i;
+ 200 |     |             }
+ 201 |     |         }
+ 202 |     |         return true;
+ 203 |     |     }
+ 204 |     | 
+ 205 |     |     function echidna_token_id_uniqueness() public view returns (bool) {
+ 206 |     |         for (uint256 i = 0; i < totalMinted; i++) {
+ 207 |     |             if (!burned[i]) {
+ 208 |     |                 for (uint256 j = i + 1; j < totalMinted; j++) {
+ 209 |     |                     if (!burned[j] && tokenOwnersMap[i] == tokenOwnersMap[j]) {
+ 210 |     |                         return false;
+ 211 |     |                     }
+ 212 |     |                 }
+ 213 |     |             }
+ 214 |     |         }
+ 215 |     |         return true;
+ 216 |     |     }
+ 217 |     | } 
+

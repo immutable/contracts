@@ -4,6 +4,7 @@ out = 'foundry-out'
 # libs = ["lib", "node_modules"]
 libs = ["lib"]
 fs_permissions = [{ access = "read", path = "./foundry-out" }]
+solc = "0.8.19"
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 

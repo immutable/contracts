@@ -1,0 +1,1835 @@
+<style> code { white-space: pre-wrap; display: block; background-color: #eee; }.executed { background-color: #afa; }.reverted { background-color: #ffa; }.unexecuted { background-color: #faa; }.neutral { background-color: #eee; }</style><b>/Users/tj/Work/contracts/contracts/token/erc721/erc721psi/ERC721PsiBurnableV2.sol</b>
+<code>
+  1 |     | <span class='unexecuted'>// SPDX-License-Identifier: MIT</span>
+  2 |     | <span class='neutral'>/**</span>
+  3 |     | <span class='neutral'> * Inspired by ERC721Psi: https://github.com/estarriolvetch/ERC721Psi</span>
+  4 |     | <span class='neutral'> */</span>
+  5 |     | <span class='neutral'>pragma solidity &gt;=0.8.19 &lt;0.8.29;</span>
+  6 |     | <span class='neutral'></span>
+  7 |     | <span class='neutral'>import {ERC721PsiV2} from &quot;./ERC721PsiV2.sol&quot;;</span>
+  8 |     | <span class='neutral'></span>
+  9 |     | <span class='neutral'>abstract contract ERC721PsiBurnableV2 is ERC721PsiV2 {</span>
+ 10 |     | <span class='neutral'>    /**</span>
+ 11 |     | <span class='neutral'>     * @dev Destroys `tokenId`.</span>
+ 12 |     | <span class='neutral'>     * The approval is cleared when the token is burned.</span>
+ 13 |     | <span class='neutral'>     *</span>
+ 14 |     | <span class='neutral'>     * Requirements:</span>
+ 15 |     | <span class='neutral'>     *</span>
+ 16 |     | <span class='neutral'>     * - `tokenId` must exist.</span>
+ 17 |     | <span class='neutral'>     *</span>
+ 18 |     | <span class='neutral'>     * Emits a {Transfer} event.</span>
+ 19 |     | <span class='neutral'>     */</span>
+ 20 | *   | <span class='executed'>    function _burn(uint256 _tokenId) internal virtual {</span>
+ 21 |     | <span class='neutral'>        // Note: To get here, exists must be true. Hence, it is OK to ignore exists.</span>
+ 22 | *   | <span class='executed'>        uint256 groupNumber;</span>
+ 23 | *   | <span class='executed'>        uint256 groupOffset;</span>
+ 24 | *   | <span class='executed'>        address owner;</span>
+ 25 | *   | <span class='executed'>        (groupNumber, groupOffset, , owner) = _tokenInfo(_tokenId);</span>
+ 26 |     | <span class='neutral'></span>
+ 27 | *   | <span class='executed'>        _beforeTokenTransfers(owner, address(0), _tokenId, 1);</span>
+ 28 |     | <span class='neutral'></span>
+ 29 | *   | <span class='executed'>        TokenGroup storage group = tokenOwners[groupNumber];</span>
+ 30 | *   | <span class='executed'>        group.burned = _setBit(group.burned, groupOffset);</span>
+ 31 |     | <span class='neutral'></span>
+ 32 |     | <span class='neutral'>        // Update balances</span>
+ 33 | *   | <span class='executed'>        balances[owner]--;</span>
+ 34 |     | <span class='neutral'>        // _burn is called in a loop in burn batch, and hence a more efficient batch</span>
+ 35 |     | <span class='neutral'>        // burning process would be to have this update to supply happen outside the loop.</span>
+ 36 |     | <span class='neutral'>        // However, this would mean changing code across the codebase.</span>
+ 37 |     | <span class='neutral'>        // slither-disable-next-line costly-loop</span>
+ 38 | *   | <span class='executed'>        supply--;</span>
+ 39 |     | <span class='neutral'></span>
+ 40 | *   | <span class='executed'>        emit Transfer(owner, address(0), _tokenId);</span>
+ 41 |     | <span class='neutral'></span>
+ 42 |     | <span class='neutral'>        _afterTokenTransfers(owner, address(0), _tokenId, 1);</span>
+ 43 |     | <span class='neutral'>    }</span>
+ 44 |     | <span class='neutral'>}</span>
+ 45 |     | <span class='neutral'></span>
+
+</code>
+<br />
+
+<b>/Users/tj/Work/contracts/contracts/token/erc721/erc721psi/ERC721PsiV2.sol</b>
+<code>
+   1 |     | <span class='neutral'>// SPDX-License-Identifier: MIT</span>
+   2 |     | <span class='neutral'>/**</span>
+   3 |     | <span class='neutral'> * Inspired by ERC721Psi: https://github.com/estarriolvetch/ERC721Psi</span>
+   4 |     | <span class='neutral'> */</span>
+   5 |     | <span class='neutral'>pragma solidity &gt;=0.8.19 &lt;0.8.29;</span>
+   6 |     | <span class='neutral'></span>
+   7 |     | <span class='neutral'>import {IERC721} from &quot;@openzeppelin/contracts/token/ERC721/IERC721.sol&quot;;</span>
+   8 |     | <span class='neutral'>import {IERC721Receiver} from &quot;@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol&quot;;</span>
+   9 |     | <span class='neutral'>import {IERC721Metadata} from &quot;@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol&quot;;</span>
+  10 |     | <span class='neutral'>import {Context} from &quot;@openzeppelin/contracts/utils/Context.sol&quot;;</span>
+  11 |     | <span class='neutral'>import {Strings} from &quot;@openzeppelin/contracts/utils/Strings.sol&quot;;</span>
+  12 |     | <span class='neutral'>import {IERC165, ERC165} from &quot;@openzeppelin/contracts/utils/introspection/ERC165.sol&quot;;</span>
+  13 |     | <span class='neutral'>import {Address} from &quot;@openzeppelin/contracts/utils/Address.sol&quot;;</span>
+  14 |     | <span class='neutral'></span>
+  15 |     | <span class='neutral'>// solhint-disable custom-errors, reason-string</span>
+  16 |     | <span class='neutral'>abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {</span>
+  17 |     | <span class='neutral'>    using Address for address;</span>
+  18 |     | <span class='neutral'>    using Strings for uint256;</span>
+  19 |     | <span class='neutral'></span>
+  20 |     | <span class='neutral'>    struct TokenGroup {</span>
+  21 |     | <span class='neutral'>        // Ownership is a bitmap of 256 NFTs. If a bit is 0, then the default</span>
+  22 |     | <span class='neutral'>        // owner owns the NFT.</span>
+  23 |     | <span class='neutral'>        uint256 ownership;</span>
+  24 |     | <span class='neutral'>        // Burned is a bitmap of 256 NFTs. If a bit is 1, then the NFT is burned.</span>
+  25 |     | <span class='neutral'>        uint256 burned;</span>
+  26 |     | <span class='neutral'>        // Owner who, but default, owns the NFTs in this group.</span>
+  27 |     | <span class='neutral'>        address defaultOwner;</span>
+  28 |     | <span class='neutral'>    }</span>
+  29 |     | <span class='neutral'></span>
+  30 |     | <span class='neutral'>    // Token group bitmap.</span>
+  31 |     | <span class='neutral'>    mapping(uint256 tokenId =&gt; TokenGroup tokenGroup) internal tokenOwners;</span>
+  32 |     | <span class='neutral'></span>
+  33 |     | <span class='neutral'>    // Mapping from token ID to owner address</span>
+  34 |     | <span class='neutral'>    mapping(uint256 tokenId =&gt; address owner) private owners;</span>
+  35 |     | <span class='neutral'></span>
+  36 |     | <span class='neutral'>    mapping(address owner =&gt; uint256 balance) internal balances;</span>
+  37 |     | <span class='neutral'>    uint256 internal supply;</span>
+  38 |     | <span class='neutral'></span>
+  39 |     | <span class='neutral'>    // The next group to allocated tokens form.</span>
+  40 |     | <span class='neutral'>    uint256 private nextGroup;</span>
+  41 |     | <span class='neutral'></span>
+  42 |     | <span class='neutral'>    mapping(uint256 tokenId =&gt; address approved) private tokenApprovals;</span>
+  43 |     | <span class='neutral'></span>
+  44 |     | <span class='neutral'>    // The mask of the lower 160 bits for addresses.</span>
+  45 |     | <span class='neutral'>    uint256 private constant _BITMASK_ADDRESS = (1 &lt;&lt; 160) - 1;</span>
+  46 |     | <span class='neutral'>    // The `Transfer` event signature is given by:</span>
+  47 |     | <span class='neutral'>    // `keccak256(bytes(&quot;Transfer(address,address,uint256)&quot;))`.</span>
+  48 |     | <span class='neutral'>    bytes32 private constant _TRANSFER_EVENT_SIGNATURE =</span>
+  49 |     | <span class='neutral'>        0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef;</span>
+  50 |     | <span class='neutral'></span>
+  51 |     | <span class='neutral'>    /**</span>
+  52 |     | <span class='neutral'>     * @dev Initializes the contract.</span>
+  53 |     | <span class='neutral'>     */</span>
+  54 |     | <span class='neutral'>    constructor() {</span>
+  55 |     | <span class='neutral'>        // Have the first by-quantity NFT to be a multiple of 256 above the base token id.</span>
+  56 |     | <span class='neutral'>        uint256 baseId = mintBatchByQuantityThreshold();</span>
+  57 |     | <span class='unexecuted'>        nextGroup = baseId / 256 + 1;</span>
+  58 |     | <span class='neutral'>    }</span>
+  59 |     | <span class='neutral'></span>
+  60 |     | <span class='neutral'>    /**</span>
+  61 |     | <span class='neutral'>     * @notice returns the threshold that divides tokens that are minted by id and</span>
+  62 |     | <span class='neutral'>     *  minted by quantity</span>
+  63 |     | <span class='neutral'>     */</span>
+  64 | *   | <span class='executed'>    function mintBatchByQuantityThreshold() public pure virtual returns (uint256) {</span>
+  65 |     | <span class='unexecuted'>        return 2 ** 128;</span>
+  66 |     | <span class='neutral'>    }</span>
+  67 |     | <span class='neutral'></span>
+  68 |     | <span class='neutral'>    /**</span>
+  69 |     | <span class='neutral'>     * @dev See {IERC165-supportsInterface}.</span>
+  70 |     | <span class='neutral'>     */</span>
+  71 | *   | <span class='executed'>    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {</span>
+  72 | *   | <span class='executed'>        return</span>
+  73 | *   | <span class='executed'>            interfaceId == type(IERC721).interfaceId ||</span>
+  74 | *   | <span class='executed'>            interfaceId == type(IERC721Metadata).interfaceId ||</span>
+  75 | *   | <span class='executed'>            super.supportsInterface(interfaceId);</span>
+  76 |     | <span class='neutral'>    }</span>
+  77 |     | <span class='neutral'></span>
+  78 |     | <span class='neutral'>    /**</span>
+  79 |     | <span class='neutral'>     * @dev See {IERC721-balanceOf}.</span>
+  80 |     | <span class='neutral'>     */</span>
+  81 | *   | <span class='executed'>    function balanceOf(address owner) public view virtual override returns (uint256) {</span>
+  82 | *   | <span class='executed'>        return balances[owner];</span>
+  83 |     | <span class='neutral'>    }</span>
+  84 |     | <span class='neutral'></span>
+  85 |     | <span class='neutral'>    /**</span>
+  86 |     | <span class='neutral'>     * @dev See {IERC721-ownerOf}.</span>
+  87 |     | <span class='neutral'>     */</span>
+  88 | *   | <span class='executed'>    function ownerOf(uint256 _tokenId) public view virtual override returns (address) {</span>
+  89 | *   | <span class='executed'>        bool exists;</span>
+  90 | *   | <span class='executed'>        address owner;</span>
+  91 | *   | <span class='executed'>        (, , exists, owner) = _tokenInfo(_tokenId);</span>
+  92 | *   | <span class='executed'>        require(exists, &quot;ERC721Psi: owner query for nonexistent token&quot;);</span>
+  93 | *   | <span class='executed'>        return owner;</span>
+  94 |     | <span class='neutral'>    }</span>
+  95 |     | <span class='neutral'></span>
+  96 |     | <span class='neutral'>    /**</span>
+  97 |     | <span class='neutral'>     * @dev See {IERC721-approve}.</span>
+  98 |     | <span class='neutral'>     */</span>
+  99 | *   | <span class='executed'>    function approve(address to, uint256 tokenId) public virtual override {</span>
+ 100 | *   | <span class='executed'>        address owner = ownerOf(tokenId);</span>
+ 101 | *   | <span class='executed'>        require(to != owner, &quot;ERC721Psi: approval to current owner&quot;);</span>
+ 102 |     | <span class='neutral'></span>
+ 103 | *   | <span class='executed'>        require(</span>
+ 104 | *   | <span class='executed'>            _msgSender() == owner || isApprovedForAll(owner, _msgSender()),</span>
+ 105 |     | <span class='neutral'>            &quot;ERC721Psi: approve caller is not owner nor approved for all&quot;</span>
+ 106 |     | <span class='neutral'>        );</span>
+ 107 |     | <span class='neutral'></span>
+ 108 | *   | <span class='executed'>        _approve(owner, to, tokenId);</span>
+ 109 |     | <span class='neutral'>    }</span>
+ 110 |     | <span class='neutral'></span>
+ 111 |     | <span class='neutral'>    /**</span>
+ 112 |     | <span class='neutral'>     * @dev See {IERC721-getApproved}.</span>
+ 113 |     | <span class='neutral'>     */</span>
+ 114 | *   | <span class='executed'>    function getApproved(uint256 tokenId) public view virtual override returns (address) {</span>
+ 115 | *r  | <span class='executed'>        require(_exists(tokenId), &quot;ERC721Psi: approved query for nonexistent token&quot;);</span>
+ 116 |     | <span class='neutral'></span>
+ 117 | *   | <span class='executed'>        return tokenApprovals[tokenId];</span>
+ 118 |     | <span class='neutral'>    }</span>
+ 119 |     | <span class='neutral'></span>
+ 120 |     | <span class='neutral'>    /**</span>
+ 121 |     | <span class='neutral'>     * @dev See {IERC721-isApprovedForAll}.</span>
+ 122 |     | <span class='neutral'>     */</span>
+ 123 |     | <span class='neutral'>    function isApprovedForAll(address owner, address operator) public view virtual override returns (bool);</span>
+ 124 |     | <span class='neutral'></span>
+ 125 |     | <span class='neutral'>    /**</span>
+ 126 |     | <span class='neutral'>     * @dev See {IERC721-transferFrom}.</span>
+ 127 |     | <span class='neutral'>     */</span>
+ 128 | *   | <span class='executed'>    function transferFrom(address _from, address _to, uint256 _tokenId) public virtual override {</span>
+ 129 |     | <span class='neutral'>        //solhint-disable-next-line max-line-length</span>
+ 130 | *   | <span class='executed'>        require(_isApprovedOrOwner(_msgSender(), _tokenId), &quot;ERC721Psi: transfer caller is not owner nor approved&quot;);</span>
+ 131 | *   | <span class='executed'>        _transfer(_from, _to, _tokenId);</span>
+ 132 |     | <span class='neutral'>    }</span>
+ 133 |     | <span class='neutral'></span>
+ 134 |     | <span class='neutral'>    /**</span>
+ 135 |     | <span class='neutral'>     * @dev See {IERC721-safeTransferFrom}.</span>
+ 136 |     | <span class='neutral'>     */</span>
+ 137 | *   | <span class='executed'>    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data) public virtual override {</span>
+ 138 | *   | <span class='executed'>        require(_isApprovedOrOwner(_msgSender(), tokenId), &quot;ERC721Psi: transfer caller is not owner nor approved&quot;);</span>
+ 139 | *   | <span class='executed'>        _safeTransfer(from, to, tokenId, _data);</span>
+ 140 |     | <span class='neutral'>    }</span>
+ 141 |     | <span class='neutral'></span>
+ 142 |     | <span class='neutral'>    /**</span>
+ 143 |     | <span class='neutral'>     * @notice Return the total number of NFTs minted that have not been burned.</span>
+ 144 |     | <span class='neutral'>     */</span>
+ 145 | *   | <span class='executed'>    function totalSupply() public view virtual returns (uint256) {</span>
+ 146 | *   | <span class='executed'>        return supply;</span>
+ 147 |     | <span class='neutral'>    }</span>
+ 148 |     | <span class='neutral'></span>
+ 149 |     | <span class='neutral'>    /**</span>
+ 150 |     | <span class='neutral'>     * @notice returns the next token id that will be minted for the first</span>
+ 151 |     | <span class='neutral'>     *  NFT in a call to mintByQuantity or safeMintByQuantity.</span>
+ 152 |     | <span class='neutral'>     */</span>
+ 153 | *   | <span class='executed'>    function mintBatchByQuantityNextTokenId() external view returns (uint256) {</span>
+ 154 | *   | <span class='executed'>        return _groupToTokenId(nextGroup);</span>
+ 155 |     | <span class='neutral'>    }</span>
+ 156 |     | <span class='neutral'></span>
+ 157 |     | <span class='neutral'>    /**</span>
+ 158 |     | <span class='neutral'>     * @dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients</span>
+ 159 |     | <span class='neutral'>     * are aware of the ERC721 protocol to prevent tokens from being forever locked.</span>
+ 160 |     | <span class='neutral'>     *</span>
+ 161 |     | <span class='neutral'>     * `_data` is additional data, it has no specified format and it is sent in call to `to`.</span>
+ 162 |     | <span class='neutral'>     *</span>
+ 163 |     | <span class='neutral'>     * This internal function is equivalent to {safeTransferFrom}, and can be used to e.g.</span>
+ 164 |     | <span class='neutral'>     * implement alternative mechanisms to perform token transfer, such as signature-based.</span>
+ 165 |     | <span class='neutral'>     *</span>
+ 166 |     | <span class='neutral'>     * Requirements:</span>
+ 167 |     | <span class='neutral'>     *</span>
+ 168 |     | <span class='neutral'>     * - `from` cannot be the zero address.</span>
+ 169 |     | <span class='neutral'>     * - `to` cannot be the zero address.</span>
+ 170 |     | <span class='neutral'>     * - `tokenId` token must exist and be owned by `from`.</span>
+ 171 |     | <span class='neutral'>     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.</span>
+ 172 |     | <span class='neutral'>     *</span>
+ 173 |     | <span class='neutral'>     * Emits a {Transfer} event.</span>
+ 174 |     | <span class='neutral'>     */</span>
+ 175 | *   | <span class='executed'>    function _safeTransfer(address from, address to, uint256 tokenId, bytes memory _data) internal virtual {</span>
+ 176 | *   | <span class='executed'>        _transfer(from, to, tokenId);</span>
+ 177 |     | <span class='unexecuted'>        require(</span>
+ 178 |     | <span class='unexecuted'>            _checkOnERC721Received(from, to, tokenId, 1, _data),</span>
+ 179 |     | <span class='neutral'>            &quot;ERC721Psi: transfer to non ERC721Receiver implementer&quot;</span>
+ 180 |     | <span class='neutral'>        );</span>
+ 181 |     | <span class='neutral'>    }</span>
+ 182 |     | <span class='neutral'></span>
+ 183 |     | <span class='neutral'>    /**</span>
+ 184 |     | <span class='neutral'>     * @dev Returns whether `tokenId` exists.</span>
+ 185 |     | <span class='neutral'>     *</span>
+ 186 |     | <span class='neutral'>     * Tokens can be managed by their owner or approved accounts via {approve} or {setApprovalForAll}.</span>
+ 187 |     | <span class='neutral'>     *</span>
+ 188 |     | <span class='neutral'>     * Tokens start existing when they are minted (`_mint`).</span>
+ 189 |     | <span class='neutral'>     */</span>
+ 190 | *   | <span class='executed'>    function _exists(uint256 _tokenId) internal view virtual returns (bool) {</span>
+ 191 | *   | <span class='executed'>        bool exists;</span>
+ 192 | *   | <span class='executed'>        (, , exists, ) = _tokenInfo(_tokenId);</span>
+ 193 |     | <span class='neutral'>        return exists;</span>
+ 194 |     | <span class='neutral'>    }</span>
+ 195 |     | <span class='neutral'></span>
+ 196 |     | <span class='neutral'>    /**</span>
+ 197 |     | <span class='neutral'>     * @dev Returns whether `spender` is allowed to manage `tokenId`.</span>
+ 198 |     | <span class='neutral'>     *</span>
+ 199 |     | <span class='neutral'>     * Requirements:</span>
+ 200 |     | <span class='neutral'>     *</span>
+ 201 |     | <span class='neutral'>     * - `tokenId` must exist.</span>
+ 202 |     | <span class='neutral'>     */</span>
+ 203 | *   | <span class='executed'>    function _isApprovedOrOwner(address _spender, uint256 _tokenId) internal view virtual returns (bool) {</span>
+ 204 | *   | <span class='executed'>        bool exists;</span>
+ 205 | *   | <span class='executed'>        address owner;</span>
+ 206 | *   | <span class='executed'>        (, , exists, owner) = _tokenInfo(_tokenId);</span>
+ 207 | *   | <span class='executed'>        require(exists, &quot;ERC721Psi: operator query for nonexistent token&quot;);</span>
+ 208 |     | <span class='neutral'></span>
+ 209 | *   | <span class='executed'>        return ((_spender == owner) || (_spender == tokenApprovals[_tokenId]) || isApprovedForAll(owner, _spender));</span>
+ 210 |     | <span class='neutral'>    }</span>
+ 211 |     | <span class='neutral'></span>
+ 212 |     | <span class='neutral'>    /**</span>
+ 213 |     | <span class='neutral'>     * @dev Safely mints `quantity` tokens and transfers them to `to`.</span>
+ 214 |     | <span class='neutral'>     *</span>
+ 215 |     | <span class='neutral'>     * Requirements:</span>
+ 216 |     | <span class='neutral'>     *</span>
+ 217 |     | <span class='neutral'>     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called for each safe transfer.</span>
+ 218 |     | <span class='neutral'>     * - `quantity` must be greater than 0.</span>
+ 219 |     | <span class='neutral'>     *</span>
+ 220 |     | <span class='neutral'>     * Emits a {Transfer} event.</span>
+ 221 |     | <span class='neutral'>     */</span>
+ 222 |     | <span class='neutral'>    function _safeMint(address _to, uint256 _quantity) internal virtual {</span>
+ 223 |     | <span class='neutral'>        ERC721PsiV2._safeMint(_to, _quantity, &quot;&quot;);</span>
+ 224 |     | <span class='neutral'>    }</span>
+ 225 |     | <span class='neutral'></span>
+ 226 |     | <span class='neutral'>    function _safeMint(address _to, uint256 _quantity, bytes memory _data) internal virtual {</span>
+ 227 |     | <span class='neutral'>        // need to specify the specific implementation to avoid calling the</span>
+ 228 |     | <span class='neutral'>        // mint method of erc721 due to matching func signatures</span>
+ 229 |     | <span class='neutral'>        uint256 firstMintedTokenId = ERC721PsiV2._mintInternal(_to, _quantity);</span>
+ 230 |     | <span class='neutral'>        require(</span>
+ 231 |     | <span class='neutral'>            _checkOnERC721Received(address(0), _to, firstMintedTokenId, _quantity, _data),</span>
+ 232 |     | <span class='neutral'>            &quot;ERC721Psi: transfer to non ERC721Receiver implementer&quot;</span>
+ 233 |     | <span class='neutral'>        );</span>
+ 234 |     | <span class='neutral'>    }</span>
+ 235 |     | <span class='neutral'></span>
+ 236 | *   | <span class='executed'>    function _mint(address _to, uint256 _quantity) internal virtual {</span>
+ 237 | *   | <span class='executed'>        _mintInternal(_to, _quantity);</span>
+ 238 |     | <span class='neutral'>    }</span>
+ 239 |     | <span class='neutral'></span>
+ 240 | *   | <span class='executed'>    function _mintInternal(address _to, uint256 _quantity) internal virtual returns (uint256) {</span>
+ 241 | *   | <span class='executed'>        uint256 firstTokenId = _groupToTokenId(nextGroup);</span>
+ 242 |     | <span class='neutral'></span>
+ 243 | *   | <span class='executed'>        require(_quantity &gt; 0, &quot;ERC721Psi: quantity must be greater 0&quot;);</span>
+ 244 | *   | <span class='executed'>        require(_to != address(0), &quot;ERC721Psi: mint to the zero address&quot;);</span>
+ 245 |     | <span class='neutral'></span>
+ 246 |     | <span class='neutral'>        _beforeTokenTransfers(address(0), _to, firstTokenId, _quantity);</span>
+ 247 |     | <span class='neutral'></span>
+ 248 |     | <span class='neutral'>        // Mint tokens</span>
+ 249 | *   | <span class='executed'>        (uint256 numberOfGroupsToMint, uint256 numberWithinGroup) = _groupNumerAndOffset(_quantity);</span>
+ 250 | *   | <span class='executed'>        uint256 nextGroupOnStack = nextGroup;</span>
+ 251 | *   | <span class='executed'>        uint256 nextGroupAfterMint = nextGroupOnStack + numberOfGroupsToMint;</span>
+ 252 | *   | <span class='executed'>        for (uint256 i = nextGroupOnStack; i &lt; nextGroupAfterMint; i++) {</span>
+ 253 |     | <span class='neutral'>            // Set the default owner for the group.</span>
+ 254 | *   | <span class='executed'>            TokenGroup storage group = tokenOwners[i];</span>
+ 255 | *o  | <span class='executed'>            group.defaultOwner = _to;</span>
+ 256 |     | <span class='neutral'>        }</span>
+ 257 |     | <span class='neutral'>        // If the number of NFTs to mint isn&#39;t perfectly a multiple of 256, then there</span>
+ 258 |     | <span class='neutral'>        // will be one final group that will be partially filled. The group will have</span>
+ 259 |     | <span class='neutral'>        // the &quot;extra&quot; NFTs burned.</span>
+ 260 | *   | <span class='executed'>        if (numberWithinGroup == 0) {</span>
+ 261 | *   | <span class='executed'>            nextGroup = nextGroupAfterMint;</span>
+ 262 |     | <span class='neutral'>        } else {</span>
+ 263 |     | <span class='neutral'>            // Set the default owner for the group.</span>
+ 264 | *   | <span class='executed'>            TokenGroup storage group = tokenOwners[nextGroupAfterMint];</span>
+ 265 | *   | <span class='executed'>            group.defaultOwner = _to;</span>
+ 266 |     | <span class='neutral'>            // Burn the rest of the group.</span>
+ 267 | *   | <span class='executed'>            group.burned = _bitMaskToBurn(numberWithinGroup);</span>
+ 268 | *   | <span class='executed'>            nextGroup = nextGroupAfterMint + 1;</span>
+ 269 |     | <span class='neutral'>        }</span>
+ 270 |     | <span class='neutral'></span>
+ 271 |     | <span class='neutral'>        // Update balances</span>
+ 272 | *   | <span class='executed'>        balances[_to] += _quantity;</span>
+ 273 | *   | <span class='executed'>        supply += _quantity;</span>
+ 274 |     | <span class='neutral'></span>
+ 275 |     | <span class='neutral'>        // Emit transfer messages</span>
+ 276 | *   | <span class='executed'>        uint256 toMasked;</span>
+ 277 | *   | <span class='executed'>        uint256 end = firstTokenId + _quantity;</span>
+ 278 |     | <span class='neutral'></span>
+ 279 |     | <span class='neutral'>        // Use assembly to loop and emit the `Transfer` event for gas savings.</span>
+ 280 |     | <span class='neutral'>        // The duplicated `log4` removes an extra check and reduces stack juggling.</span>
+ 281 |     | <span class='neutral'>        // The assembly, together with the surrounding Solidity code, have been</span>
+ 282 |     | <span class='neutral'>        // delicately arranged to nudge the compiler into producing optimized opcodes.</span>
+ 283 |     | <span class='neutral'>        // solhint-disable-next-line no-inline-assembly</span>
+ 284 |     | <span class='neutral'>        assembly {</span>
+ 285 |     | <span class='neutral'>            // Mask `to` to the lower 160 bits, in case the upper bits somehow aren&#39;t clean.</span>
+ 286 | *   | <span class='executed'>            toMasked := and(_to, _BITMASK_ADDRESS)</span>
+ 287 |     | <span class='neutral'>            // Emit the `Transfer` event.</span>
+ 288 | *   | <span class='executed'>            log4(</span>
+ 289 | *   | <span class='executed'>                0, // Start of data (0, since no data).</span>
+ 290 | *   | <span class='executed'>                0, // End of data (0, since no data).</span>
+ 291 |     | <span class='neutral'>                _TRANSFER_EVENT_SIGNATURE, // Signature.</span>
+ 292 | *   | <span class='executed'>                0, // `address(0)`.</span>
+ 293 | *   | <span class='executed'>                toMasked, // `to`.</span>
+ 294 | *   | <span class='executed'>                firstTokenId // `tokenId`.</span>
+ 295 |     | <span class='neutral'>            )</span>
+ 296 |     | <span class='neutral'></span>
+ 297 |     | <span class='neutral'>            // The `iszero(eq(,))` check ensures that large values of `quantity`</span>
+ 298 |     | <span class='neutral'>            // that overflows uint256 will make the loop run out of gas.</span>
+ 299 |     | <span class='neutral'>            // The compiler will optimize the `iszero` away for performance.</span>
+ 300 | *   | <span class='executed'>            for {</span>
+ 301 | *   | <span class='executed'>                let tokenId := add(firstTokenId, 1)</span>
+ 302 | *   | <span class='executed'>            } iszero(eq(tokenId, end)) {</span>
+ 303 | *   | <span class='executed'>                tokenId := add(tokenId, 1)</span>
+ 304 |     | <span class='neutral'>            } {</span>
+ 305 |     | <span class='neutral'>                // Emit the `Transfer` event. Similar to above.</span>
+ 306 | *o  | <span class='executed'>                log4(0, 0, _TRANSFER_EVENT_SIGNATURE, 0, toMasked, tokenId)</span>
+ 307 |     | <span class='neutral'>            }</span>
+ 308 |     | <span class='neutral'>        }</span>
+ 309 |     | <span class='neutral'></span>
+ 310 |     | <span class='neutral'>        _afterTokenTransfers(address(0), _to, firstTokenId, _quantity);</span>
+ 311 |     | <span class='neutral'></span>
+ 312 | *   | <span class='executed'>        return firstTokenId;</span>
+ 313 |     | <span class='neutral'>    }</span>
+ 314 |     | <span class='neutral'></span>
+ 315 |     | <span class='neutral'>    /**</span>
+ 316 |     | <span class='neutral'>     * @dev Transfers `tokenId` from `from` to `to`.</span>
+ 317 |     | <span class='neutral'>     *  As opposed to {transferFrom}, this imposes no restrictions on msg.sender.</span>
+ 318 |     | <span class='neutral'>     *</span>
+ 319 |     | <span class='neutral'>     * Requirements:</span>
+ 320 |     | <span class='neutral'>     *</span>
+ 321 |     | <span class='neutral'>     * - `to` cannot be the zero address.</span>
+ 322 |     | <span class='neutral'>     * - `tokenId` token must be owned by `from`.</span>
+ 323 |     | <span class='neutral'>     *</span>
+ 324 |     | <span class='neutral'>     * Emits a {Transfer} event.</span>
+ 325 |     | <span class='neutral'>     */</span>
+ 326 | *   | <span class='executed'>    function _transfer(address _from, address _to, uint256 _tokenId) internal virtual {</span>
+ 327 | *   | <span class='executed'>        (uint256 groupNumber, uint256 groupOffset, bool exists, address owner) = _tokenInfo(_tokenId);</span>
+ 328 | *   | <span class='executed'>        require(exists, &quot;ERC721Psi: owner query for nonexistent token&quot;);</span>
+ 329 | *   | <span class='executed'>        require(owner == _from, &quot;ERC721Psi: transfer of token that is not own&quot;);</span>
+ 330 |     | <span class='unexecuted'>        require(_to != address(0), &quot;ERC721Psi: transfer to the zero address&quot;);</span>
+ 331 |     | <span class='neutral'></span>
+ 332 |     | <span class='neutral'>        _beforeTokenTransfers(_from, _to, _tokenId, 1);</span>
+ 333 |     | <span class='neutral'></span>
+ 334 |     | <span class='neutral'>        // Clear approvals from the previous owner</span>
+ 335 |     | <span class='neutral'>        // Do this in the ERC 721 way, and not the PSI way. That is, don&#39;t emit an event.</span>
+ 336 |     | <span class='unexecuted'>        tokenApprovals[_tokenId] = address(0);</span>
+ 337 |     | <span class='neutral'></span>
+ 338 |     | <span class='neutral'>        // Update balances</span>
+ 339 |     | <span class='neutral'>        // Copied from Open Zeppelin ERC721 implementation</span>
+ 340 |     | <span class='neutral'>        unchecked {</span>
+ 341 |     | <span class='neutral'>            // `_balances[from]` cannot overflow. `from`&#39;s balance is the number of token held,</span>
+ 342 |     | <span class='neutral'>            // which is at least one before the current transfer.</span>
+ 343 |     | <span class='neutral'>            // `_balances[to]` could overflow. However, that would require all 2**256 token ids to</span>
+ 344 |     | <span class='neutral'>            // be minted, which in practice is impossible.</span>
+ 345 |     | <span class='unexecuted'>            balances[_from] -= 1;</span>
+ 346 |     | <span class='unexecuted'>            balances[_to] += 1;</span>
+ 347 |     | <span class='neutral'>        }</span>
+ 348 |     | <span class='neutral'></span>
+ 349 |     | <span class='unexecuted'>        TokenGroup storage group = tokenOwners[groupNumber];</span>
+ 350 |     | <span class='unexecuted'>        group.ownership = _setBit(group.ownership, groupOffset);</span>
+ 351 |     | <span class='unexecuted'>        owners[_tokenId] = _to;</span>
+ 352 |     | <span class='neutral'></span>
+ 353 |     | <span class='unexecuted'>        emit Transfer(_from, _to, _tokenId);</span>
+ 354 |     | <span class='neutral'></span>
+ 355 |     | <span class='neutral'>        _afterTokenTransfers(_from, _to, _tokenId, 1);</span>
+ 356 |     | <span class='neutral'>    }</span>
+ 357 |     | <span class='neutral'></span>
+ 358 |     | <span class='neutral'>    /**</span>
+ 359 |     | <span class='neutral'>     * @dev Approve `to` to operate on `tokenId`</span>
+ 360 |     | <span class='neutral'>     *</span>
+ 361 |     | <span class='neutral'>     * Emits a {Approval} event.</span>
+ 362 |     | <span class='neutral'>     */</span>
+ 363 |     | <span class='neutral'>    function _approve(address _to, uint256 _tokenId) internal virtual {</span>
+ 364 |     | <span class='neutral'>        (, , , address owner) = _tokenInfo(_tokenId);</span>
+ 365 |     | <span class='neutral'>        // Clear approvals from the previous owner</span>
+ 366 |     | <span class='neutral'>        _approve(owner, _to, _tokenId);</span>
+ 367 |     | <span class='neutral'>    }</span>
+ 368 |     | <span class='neutral'></span>
+ 369 |     | <span class='neutral'>    /**</span>
+ 370 |     | <span class='neutral'>     * @dev Approve `to` to operate on `tokenId`</span>
+ 371 |     | <span class='neutral'>     *</span>
+ 372 |     | <span class='neutral'>     * Emits a {Approval} event.</span>
+ 373 |     | <span class='neutral'>     */</span>
+ 374 |     | <span class='unexecuted'>    function _approve(address _owner, address _to, uint256 _tokenId) internal virtual {</span>
+ 375 |     | <span class='unexecuted'>        tokenApprovals[_tokenId] = _to;</span>
+ 376 |     | <span class='unexecuted'>        emit Approval(_owner, _to, _tokenId);</span>
+ 377 |     | <span class='neutral'>    }</span>
+ 378 |     | <span class='neutral'></span>
+ 379 |     | <span class='neutral'>    /**</span>
+ 380 |     | <span class='neutral'>     * @dev Internal function to invoke {IERC721Receiver-onERC721Received} on a target address.</span>
+ 381 |     | <span class='neutral'>     * The call is not executed if the target address is not a contract.</span>
+ 382 |     | <span class='neutral'>     *</span>
+ 383 |     | <span class='neutral'>     * @param _from address representing the previous owner of the given token ID</span>
+ 384 |     | <span class='neutral'>     * @param _to target address that will receive the tokens</span>
+ 385 |     | <span class='neutral'>     * @param _firstTokenId uint256 the first ID of the tokens to be transferred</span>
+ 386 |     | <span class='neutral'>     * @param _quantity uint256 amount of the tokens to be transfered.</span>
+ 387 |     | <span class='neutral'>     * @param _data bytes optional data to send along with the call</span>
+ 388 |     | <span class='neutral'>     * @return r bool whether the call correctly returned the expected magic value</span>
+ 389 |     | <span class='neutral'>     */</span>
+ 390 |     | <span class='unexecuted'>    function _checkOnERC721Received(</span>
+ 391 |     | <span class='neutral'>        address _from,</span>
+ 392 |     | <span class='neutral'>        address _to,</span>
+ 393 |     | <span class='neutral'>        uint256 _firstTokenId,</span>
+ 394 |     | <span class='neutral'>        uint256 _quantity,</span>
+ 395 |     | <span class='neutral'>        bytes memory _data</span>
+ 396 |     | <span class='unexecuted'>    ) private returns (bool r) {</span>
+ 397 |     | <span class='unexecuted'>        if (_to.isContract()) {</span>
+ 398 |     | <span class='unexecuted'>            r = true;</span>
+ 399 |     | <span class='unexecuted'>            for (uint256 tokenId = _firstTokenId; tokenId &lt; _firstTokenId + _quantity; tokenId++) {</span>
+ 400 |     | <span class='neutral'>                // slither-disable-start calls-loop</span>
+ 401 |     | <span class='unexecuted'>                try IERC721Receiver(_to).onERC721Received(_msgSender(), _from, tokenId, _data) returns (bytes4 retval) {</span>
+ 402 |     | <span class='unexecuted'>                    r = r &amp;&amp; retval == IERC721Receiver.onERC721Received.selector;</span>
+ 403 |     | <span class='neutral'>                } catch (bytes memory reason) {</span>
+ 404 |     | <span class='unexecuted'>                    if (reason.length == 0) {</span>
+ 405 |     | <span class='unexecuted'>                        revert(&quot;ERC721Psi: transfer to non ERC721Receiver implementer&quot;);</span>
+ 406 |     | <span class='neutral'>                    } else {</span>
+ 407 |     | <span class='neutral'>                        assembly {</span>
+ 408 |     | <span class='unexecuted'>                            revert(add(32, reason), mload(reason))</span>
+ 409 |     | <span class='neutral'>                        }</span>
+ 410 |     | <span class='neutral'>                    }</span>
+ 411 |     | <span class='neutral'>                }</span>
+ 412 |     | <span class='neutral'>                // slither-disable-end calls-loop</span>
+ 413 |     | <span class='neutral'>            }</span>
+ 414 |     | <span class='unexecuted'>            return r;</span>
+ 415 |     | <span class='neutral'>        } else {</span>
+ 416 |     | <span class='unexecuted'>            return true;</span>
+ 417 |     | <span class='neutral'>        }</span>
+ 418 |     | <span class='neutral'>    }</span>
+ 419 |     | <span class='neutral'></span>
+ 420 |     | <span class='neutral'>    /**</span>
+ 421 |     | <span class='neutral'>     * @notice Fetch token information.</span>
+ 422 |     | <span class='neutral'>     *</span>
+ 423 |     | <span class='neutral'>     * @param _tokenId The NFT to determine information about.</span>
+ 424 |     | <span class='neutral'>     * @return groupNumber The group the NFT is part of.</span>
+ 425 |     | <span class='neutral'>     * @return offset The bit offset within the group.</span>
+ 426 |     | <span class='neutral'>     * @return exists True if the NFT has been minted and not burned.</span>
+ 427 |     | <span class='neutral'>     * @return owner The owner of the NFT.</span>
+ 428 |     | <span class='neutral'>     */</span>
+ 429 | *   | <span class='executed'>    function _tokenInfo(uint256 _tokenId) internal view returns (uint256, uint256, bool, address) {</span>
+ 430 | *   | <span class='executed'>        (uint256 groupNumber, uint256 offset) = _groupNumerAndOffset(_tokenId);</span>
+ 431 | *   | <span class='executed'>        TokenGroup storage group = tokenOwners[groupNumber];</span>
+ 432 |     | <span class='neutral'>        address owner = address(0);</span>
+ 433 |     | <span class='neutral'>        bool exists = false;</span>
+ 434 | *   | <span class='executed'>        bool changedOwnershipAfterMint = _bitIsSet(group.ownership, offset);</span>
+ 435 | *   | <span class='executed'>        bool burned = _bitIsSet(group.burned, offset);</span>
+ 436 | *   | <span class='executed'>        if (!burned) {</span>
+ 437 | *   | <span class='executed'>            if (changedOwnershipAfterMint) {</span>
+ 438 |     | <span class='unexecuted'>                owner = owners[_tokenId];</span>
+ 439 |     | <span class='neutral'>                exists = true;</span>
+ 440 |     | <span class='neutral'>            } else {</span>
+ 441 | *   | <span class='executed'>                owner = group.defaultOwner;</span>
+ 442 |     | <span class='neutral'>                // Default owner will be zero if the group has never been minted.</span>
+ 443 | *   | <span class='executed'>                exists = owner != address(0);</span>
+ 444 |     | <span class='neutral'>            }</span>
+ 445 |     | <span class='neutral'>        }</span>
+ 446 | *   | <span class='executed'>        return (groupNumber, offset, exists, owner);</span>
+ 447 |     | <span class='neutral'>    }</span>
+ 448 |     | <span class='neutral'></span>
+ 449 |     | <span class='neutral'>    /**</span>
+ 450 |     | <span class='neutral'>     * Convert from a token id to a group number and an offset.</span>
+ 451 |     | <span class='neutral'>     */</span>
+ 452 | *   | <span class='executed'>    function _groupNumerAndOffset(uint256 _tokenId) private pure returns (uint256, uint256) {</span>
+ 453 | *   | <span class='executed'>        return (_tokenId / 256, _tokenId % 256);</span>
+ 454 |     | <span class='neutral'>    }</span>
+ 455 |     | <span class='neutral'></span>
+ 456 | *   | <span class='executed'>    function _groupToTokenId(uint256 _nextGroup) private pure returns (uint256) {</span>
+ 457 | *   | <span class='executed'>        return _nextGroup * 256;</span>
+ 458 |     | <span class='neutral'>    }</span>
+ 459 |     | <span class='neutral'></span>
+ 460 |     | <span class='neutral'>    function _bitIsSet(uint256 _bitMask, uint256 _offset) internal pure returns (bool) {</span>
+ 461 | *   | <span class='executed'>        uint256 bitSet = 1 &lt;&lt; _offset;</span>
+ 462 | *   | <span class='executed'>        return (bitSet &amp; _bitMask != 0);</span>
+ 463 |     | <span class='neutral'>    }</span>
+ 464 |     | <span class='neutral'></span>
+ 465 |     | <span class='unexecuted'>    function _setBit(uint256 _bitMask, uint256 _offset) internal pure returns (uint256) {</span>
+ 466 | *   | <span class='executed'>        uint256 bitSet = 1 &lt;&lt; _offset;</span>
+ 467 | *   | <span class='executed'>        uint256 updatedBitMask = bitSet | _bitMask;</span>
+ 468 |     | <span class='neutral'>        return updatedBitMask;</span>
+ 469 |     | <span class='neutral'>    }</span>
+ 470 |     | <span class='neutral'></span>
+ 471 | *   | <span class='executed'>    function _bitMaskToBurn(uint256 _offset) internal pure returns (uint256) {</span>
+ 472 |     | <span class='neutral'>        // Offset will range between 1 and 255. 256 if handled separately.</span>
+ 473 |     | <span class='neutral'>        // If offset = 1, mask should be 0xffff...ffe</span>
+ 474 |     | <span class='neutral'>        // If offset = 2, mask should be 0xffff...ffc</span>
+ 475 |     | <span class='neutral'>        // If offset = 3, mask should be 0xffff...ff8</span>
+ 476 | *   | <span class='executed'>        uint256 inverseBitMask = (1 &lt;&lt; _offset) - 1;</span>
+ 477 | *   | <span class='executed'>        return ~inverseBitMask;</span>
+ 478 |     | <span class='neutral'>    }</span>
+ 479 |     | <span class='neutral'></span>
+ 480 |     | <span class='neutral'>    /**</span>
+ 481 |     | <span class='neutral'>     * @dev Hook that is called before a set of serially-ordered token ids are about to be transferred. This includes minting.</span>
+ 482 |     | <span class='neutral'>     *</span>
+ 483 |     | <span class='neutral'>     * startTokenId - the first token id to be transferred</span>
+ 484 |     | <span class='neutral'>     * quantity - the amount to be transferred</span>
+ 485 |     | <span class='neutral'>     *</span>
+ 486 |     | <span class='neutral'>     * Calling conditions:</span>
+ 487 |     | <span class='neutral'>     *</span>
+ 488 |     | <span class='neutral'>     * - When `from` and `to` are both non-zero, ``from``&#39;s `tokenId` will be</span>
+ 489 |     | <span class='neutral'>     * transferred to `to`.</span>
+ 490 |     | <span class='neutral'>     * - When `from` is zero, `tokenId` will be minted for `to`.</span>
+ 491 |     | <span class='neutral'>     */</span>
+ 492 |     | <span class='neutral'>    // solhint-disable-next-line no-empty-blocks</span>
+ 493 |     | <span class='neutral'>    function _beforeTokenTransfers(address from, address to, uint256 startTokenId, uint256 quantity) internal virtual {}</span>
+ 494 |     | <span class='neutral'></span>
+ 495 |     | <span class='neutral'>    /**</span>
+ 496 |     | <span class='neutral'>     * @dev Hook that is called after a set of serially-ordered token ids have been transferred. This includes</span>
+ 497 |     | <span class='neutral'>     * minting.</span>
+ 498 |     | <span class='neutral'>     *</span>
+ 499 |     | <span class='neutral'>     * startTokenId - the first token id to be transferred</span>
+ 500 |     | <span class='neutral'>     * quantity - the amount to be transferred</span>
+ 501 |     | <span class='neutral'>     *</span>
+ 502 |     | <span class='neutral'>     * Calling conditions:</span>
+ 503 |     | <span class='neutral'>     *</span>
+ 504 |     | <span class='neutral'>     * - when `from` and `to` are both non-zero.</span>
+ 505 |     | <span class='neutral'>     * - `from` and `to` are never both zero.</span>
+ 506 |     | <span class='neutral'>     */</span>
+ 507 |     | <span class='neutral'>    // solhint-disable-next-line no-empty-blocks</span>
+ 508 |     | <span class='neutral'>    function _afterTokenTransfers(address from, address to, uint256 startTokenId, uint256 quantity) internal virtual {}</span>
+ 509 |     | <span class='neutral'>}</span>
+ 510 |     | <span class='neutral'></span>
+
+</code>
+<br />
+
+<b>/Users/tj/Work/contracts/lib/openzeppelin-contracts-4.9.3/contracts/token/ERC721/IERC721.sol</b>
+<code>
+   1 |     | <span class='neutral'>// SPDX-License-Identifier: MIT</span>
+   2 |     | <span class='neutral'>// OpenZeppelin Contracts (last updated v4.9.0) (token/ERC721/IERC721.sol)</span>
+   3 |     | <span class='neutral'></span>
+   4 |     | <span class='neutral'>pragma solidity ^0.8.0;</span>
+   5 |     | <span class='neutral'></span>
+   6 |     | <span class='neutral'>import &quot;../../utils/introspection/IERC165.sol&quot;;</span>
+   7 |     | <span class='neutral'></span>
+   8 |     | <span class='neutral'>/**</span>
+   9 |     | <span class='neutral'> * @dev Required interface of an ERC721 compliant contract.</span>
+  10 |     | <span class='neutral'> */</span>
+  11 |     | <span class='neutral'>interface IERC721 is IERC165 {</span>
+  12 |     | <span class='neutral'>    /**</span>
+  13 |     | <span class='neutral'>     * @dev Emitted when `tokenId` token is transferred from `from` to `to`.</span>
+  14 |     | <span class='neutral'>     */</span>
+  15 |     | <span class='neutral'>    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);</span>
+  16 |     | <span class='neutral'></span>
+  17 |     | <span class='neutral'>    /**</span>
+  18 |     | <span class='neutral'>     * @dev Emitted when `owner` enables `approved` to manage the `tokenId` token.</span>
+  19 |     | <span class='neutral'>     */</span>
+  20 |     | <span class='neutral'>    event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);</span>
+  21 |     | <span class='neutral'></span>
+  22 |     | <span class='neutral'>    /**</span>
+  23 |     | <span class='neutral'>     * @dev Emitted when `owner` enables or disables (`approved`) `operator` to manage all of its assets.</span>
+  24 |     | <span class='neutral'>     */</span>
+  25 |     | <span class='neutral'>    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);</span>
+  26 |     | <span class='neutral'></span>
+  27 |     | <span class='neutral'>    /**</span>
+  28 |     | <span class='neutral'>     * @dev Returns the number of tokens in ``owner``&#39;s account.</span>
+  29 |     | <span class='neutral'>     */</span>
+  30 |     | <span class='neutral'>    function balanceOf(address owner) external view returns (uint256 balance);</span>
+  31 |     | <span class='neutral'></span>
+  32 |     | <span class='neutral'>    /**</span>
+  33 |     | <span class='neutral'>     * @dev Returns the owner of the `tokenId` token.</span>
+  34 |     | <span class='neutral'>     *</span>
+  35 |     | <span class='neutral'>     * Requirements:</span>
+  36 |     | <span class='neutral'>     *</span>
+  37 |     | <span class='neutral'>     * - `tokenId` must exist.</span>
+  38 |     | <span class='neutral'>     */</span>
+  39 |     | <span class='neutral'>    function ownerOf(uint256 tokenId) external view returns (address owner);</span>
+  40 |     | <span class='neutral'></span>
+  41 |     | <span class='neutral'>    /**</span>
+  42 |     | <span class='neutral'>     * @dev Safely transfers `tokenId` token from `from` to `to`.</span>
+  43 |     | <span class='neutral'>     *</span>
+  44 |     | <span class='neutral'>     * Requirements:</span>
+  45 |     | <span class='neutral'>     *</span>
+  46 |     | <span class='neutral'>     * - `from` cannot be the zero address.</span>
+  47 |     | <span class='neutral'>     * - `to` cannot be the zero address.</span>
+  48 |     | <span class='neutral'>     * - `tokenId` token must exist and be owned by `from`.</span>
+  49 |     | <span class='neutral'>     * - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}.</span>
+  50 |     | <span class='neutral'>     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.</span>
+  51 |     | <span class='neutral'>     *</span>
+  52 |     | <span class='neutral'>     * Emits a {Transfer} event.</span>
+  53 |     | <span class='neutral'>     */</span>
+  54 |     | <span class='neutral'>    function safeTransferFrom(address from, address to, uint256 tokenId, bytes calldata data) external;</span>
+  55 |     | <span class='neutral'></span>
+  56 |     | <span class='neutral'>    /**</span>
+  57 |     | <span class='neutral'>     * @dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients</span>
+  58 |     | <span class='neutral'>     * are aware of the ERC721 protocol to prevent tokens from being forever locked.</span>
+  59 |     | <span class='neutral'>     *</span>
+  60 |     | <span class='neutral'>     * Requirements:</span>
+  61 |     | <span class='neutral'>     *</span>
+  62 |     | <span class='neutral'>     * - `from` cannot be the zero address.</span>
+  63 |     | <span class='neutral'>     * - `to` cannot be the zero address.</span>
+  64 |     | <span class='neutral'>     * - `tokenId` token must exist and be owned by `from`.</span>
+  65 |     | <span class='neutral'>     * - If the caller is not `from`, it must have been allowed to move this token by either {approve} or {setApprovalForAll}.</span>
+  66 |     | <span class='neutral'>     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon a safe transfer.</span>
+  67 |     | <span class='neutral'>     *</span>
+  68 |     | <span class='neutral'>     * Emits a {Transfer} event.</span>
+  69 |     | <span class='neutral'>     */</span>
+  70 |     | <span class='neutral'>    function safeTransferFrom(address from, address to, uint256 tokenId) external;</span>
+  71 |     | <span class='neutral'></span>
+  72 |     | <span class='neutral'>    /**</span>
+  73 |     | <span class='neutral'>     * @dev Transfers `tokenId` token from `from` to `to`.</span>
+  74 |     | <span class='neutral'>     *</span>
+  75 |     | <span class='neutral'>     * WARNING: Note that the caller is responsible to confirm that the recipient is capable of receiving ERC721</span>
+  76 |     | <span class='neutral'>     * or else they may be permanently lost. Usage of {safeTransferFrom} prevents loss, though the caller must</span>
+  77 |     | <span class='neutral'>     * understand this adds an external call which potentially creates a reentrancy vulnerability.</span>
+  78 |     | <span class='neutral'>     *</span>
+  79 |     | <span class='neutral'>     * Requirements:</span>
+  80 |     | <span class='neutral'>     *</span>
+  81 |     | <span class='neutral'>     * - `from` cannot be the zero address.</span>
+  82 |     | <span class='neutral'>     * - `to` cannot be the zero address.</span>
+  83 |     | <span class='neutral'>     * - `tokenId` token must be owned by `from`.</span>
+  84 |     | <span class='neutral'>     * - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}.</span>
+  85 |     | <span class='neutral'>     *</span>
+  86 |     | <span class='neutral'>     * Emits a {Transfer} event.</span>
+  87 |     | <span class='neutral'>     */</span>
+  88 |     | <span class='neutral'>    function transferFrom(address from, address to, uint256 tokenId) external;</span>
+  89 |     | <span class='neutral'></span>
+  90 |     | <span class='neutral'>    /**</span>
+  91 |     | <span class='neutral'>     * @dev Gives permission to `to` to transfer `tokenId` token to another account.</span>
+  92 |     | <span class='neutral'>     * The approval is cleared when the token is transferred.</span>
+  93 |     | <span class='neutral'>     *</span>
+  94 |     | <span class='neutral'>     * Only a single account can be approved at a time, so approving the zero address clears previous approvals.</span>
+  95 |     | <span class='neutral'>     *</span>
+  96 |     | <span class='neutral'>     * Requirements:</span>
+  97 |     | <span class='neutral'>     *</span>
+  98 |     | <span class='neutral'>     * - The caller must own the token or be an approved operator.</span>
+  99 |     | <span class='neutral'>     * - `tokenId` must exist.</span>
+ 100 |     | <span class='neutral'>     *</span>
+ 101 |     | <span class='neutral'>     * Emits an {Approval} event.</span>
+ 102 |     | <span class='neutral'>     */</span>
+ 103 |     | <span class='neutral'>    function approve(address to, uint256 tokenId) external;</span>
+ 104 |     | <span class='neutral'></span>
+ 105 |     | <span class='neutral'>    /**</span>
+ 106 |     | <span class='neutral'>     * @dev Approve or remove `operator` as an operator for the caller.</span>
+ 107 |     | <span class='neutral'>     * Operators can call {transferFrom} or {safeTransferFrom} for any token owned by the caller.</span>
+ 108 |     | <span class='neutral'>     *</span>
+ 109 |     | <span class='neutral'>     * Requirements:</span>
+ 110 |     | <span class='neutral'>     *</span>
+ 111 |     | <span class='neutral'>     * - The `operator` cannot be the caller.</span>
+ 112 |     | <span class='neutral'>     *</span>
+ 113 |     | <span class='neutral'>     * Emits an {ApprovalForAll} event.</span>
+ 114 |     | <span class='neutral'>     */</span>
+ 115 |     | <span class='neutral'>    function setApprovalForAll(address operator, bool approved) external;</span>
+ 116 |     | <span class='neutral'></span>
+ 117 |     | <span class='neutral'>    /**</span>
+ 118 |     | <span class='neutral'>     * @dev Returns the account approved for `tokenId` token.</span>
+ 119 |     | <span class='neutral'>     *</span>
+ 120 |     | <span class='neutral'>     * Requirements:</span>
+ 121 |     | <span class='neutral'>     *</span>
+ 122 |     | <span class='neutral'>     * - `tokenId` must exist.</span>
+ 123 |     | <span class='neutral'>     */</span>
+ 124 |     | <span class='neutral'>    function getApproved(uint256 tokenId) external view returns (address operator);</span>
+ 125 |     | <span class='neutral'></span>
+ 126 |     | <span class='neutral'>    /**</span>
+ 127 |     | <span class='neutral'>     * @dev Returns if the `operator` is allowed to manage all of the assets of `owner`.</span>
+ 128 |     | <span class='neutral'>     *</span>
+ 129 |     | <span class='neutral'>     * See {setApprovalForAll}</span>
+ 130 |     | <span class='neutral'>     */</span>
+ 131 |     | <span class='neutral'>    function isApprovedForAll(address owner, address operator) external view returns (bool);</span>
+ 132 |     | <span class='neutral'>}</span>
+ 133 |     | <span class='neutral'></span>
+
+</code>
+<br />
+
+<b>/Users/tj/Work/contracts/lib/openzeppelin-contracts-4.9.3/contracts/token/ERC721/IERC721Receiver.sol</b>
+<code>
+  1 |     | <span class='neutral'>// SPDX-License-Identifier: MIT</span>
+  2 |     | <span class='neutral'>// OpenZeppelin Contracts (last updated v4.6.0) (token/ERC721/IERC721Receiver.sol)</span>
+  3 |     | <span class='neutral'></span>
+  4 |     | <span class='neutral'>pragma solidity ^0.8.0;</span>
+  5 |     | <span class='neutral'></span>
+  6 |     | <span class='neutral'>/**</span>
+  7 |     | <span class='neutral'> * @title ERC721 token receiver interface</span>
+  8 |     | <span class='neutral'> * @dev Interface for any contract that wants to support safeTransfers</span>
+  9 |     | <span class='neutral'> * from ERC721 asset contracts.</span>
+ 10 |     | <span class='neutral'> */</span>
+ 11 |     | <span class='neutral'>interface IERC721Receiver {</span>
+ 12 |     | <span class='neutral'>    /**</span>
+ 13 |     | <span class='neutral'>     * @dev Whenever an {IERC721} `tokenId` token is transferred to this contract via {IERC721-safeTransferFrom}</span>
+ 14 |     | <span class='neutral'>     * by `operator` from `from`, this function is called.</span>
+ 15 |     | <span class='neutral'>     *</span>
+ 16 |     | <span class='neutral'>     * It must return its Solidity selector to confirm the token transfer.</span>
+ 17 |     | <span class='neutral'>     * If any other value is returned or the interface is not implemented by the recipient, the transfer will be reverted.</span>
+ 18 |     | <span class='neutral'>     *</span>
+ 19 |     | <span class='neutral'>     * The selector can be obtained in Solidity with `IERC721Receiver.onERC721Received.selector`.</span>
+ 20 |     | <span class='neutral'>     */</span>
+ 21 |     | <span class='neutral'>    function onERC721Received(</span>
+ 22 |     | <span class='neutral'>        address operator,</span>
+ 23 |     | <span class='neutral'>        address from,</span>
+ 24 |     | <span class='neutral'>        uint256 tokenId,</span>
+ 25 |     | <span class='neutral'>        bytes calldata data</span>
+ 26 |     | <span class='neutral'>    ) external returns (bytes4);</span>
+ 27 |     | <span class='neutral'>}</span>
+ 28 |     | <span class='neutral'></span>
+
+</code>
+<br />
+
+<b>/Users/tj/Work/contracts/lib/openzeppelin-contracts-4.9.3/contracts/token/ERC721/extensions/IERC721Metadata.sol</b>
+<code>
+  1 |     | <span class='neutral'>// SPDX-License-Identifier: MIT</span>
+  2 |     | <span class='neutral'>// OpenZeppelin Contracts v4.4.1 (token/ERC721/extensions/IERC721Metadata.sol)</span>
+  3 |     | <span class='neutral'></span>
+  4 |     | <span class='neutral'>pragma solidity ^0.8.0;</span>
+  5 |     | <span class='neutral'></span>
+  6 |     | <span class='neutral'>import &quot;../IERC721.sol&quot;;</span>
+  7 |     | <span class='neutral'></span>
+  8 |     | <span class='neutral'>/**</span>
+  9 |     | <span class='neutral'> * @title ERC-721 Non-Fungible Token Standard, optional metadata extension</span>
+ 10 |     | <span class='neutral'> * @dev See https://eips.ethereum.org/EIPS/eip-721</span>
+ 11 |     | <span class='neutral'> */</span>
+ 12 |     | <span class='neutral'>interface IERC721Metadata is IERC721 {</span>
+ 13 |     | <span class='neutral'>    /**</span>
+ 14 |     | <span class='neutral'>     * @dev Returns the token collection name.</span>
+ 15 |     | <span class='neutral'>     */</span>
+ 16 |     | <span class='neutral'>    function name() external view returns (string memory);</span>
+ 17 |     | <span class='neutral'></span>
+ 18 |     | <span class='neutral'>    /**</span>
+ 19 |     | <span class='neutral'>     * @dev Returns the token collection symbol.</span>
+ 20 |     | <span class='neutral'>     */</span>
+ 21 |     | <span class='neutral'>    function symbol() external view returns (string memory);</span>
+ 22 |     | <span class='neutral'></span>
+ 23 |     | <span class='neutral'>    /**</span>
+ 24 |     | <span class='neutral'>     * @dev Returns the Uniform Resource Identifier (URI) for `tokenId` token.</span>
+ 25 |     | <span class='neutral'>     */</span>
+ 26 |     | <span class='neutral'>    function tokenURI(uint256 tokenId) external view returns (string memory);</span>
+ 27 |     | <span class='neutral'>}</span>
+ 28 |     | <span class='neutral'></span>
+
+</code>
+<br />
+
+<b>/Users/tj/Work/contracts/lib/openzeppelin-contracts-4.9.3/contracts/utils/Address.sol</b>
+<code>
+   1 |     | <span class='neutral'>// SPDX-License-Identifier: MIT</span>
+   2 |     | <span class='neutral'>// OpenZeppelin Contracts (last updated v4.9.0) (utils/Address.sol)</span>
+   3 |     | <span class='neutral'></span>
+   4 |     | <span class='neutral'>pragma solidity ^0.8.1;</span>
+   5 |     | <span class='neutral'></span>
+   6 |     | <span class='neutral'>/**</span>
+   7 |     | <span class='neutral'> * @dev Collection of functions related to the address type</span>
+   8 |     | <span class='neutral'> */</span>
+   9 |     | <span class='unexecuted'>library Address {</span>
+  10 |     | <span class='neutral'>    /**</span>
+  11 |     | <span class='neutral'>     * @dev Returns true if `account` is a contract.</span>
+  12 |     | <span class='neutral'>     *</span>
+  13 |     | <span class='neutral'>     * [IMPORTANT]</span>
+  14 |     | <span class='neutral'>     * ====</span>
+  15 |     | <span class='neutral'>     * It is unsafe to assume that an address for which this function returns</span>
+  16 |     | <span class='neutral'>     * false is an externally-owned account (EOA) and not a contract.</span>
+  17 |     | <span class='neutral'>     *</span>
+  18 |     | <span class='neutral'>     * Among others, `isContract` will return false for the following</span>
+  19 |     | <span class='neutral'>     * types of addresses:</span>
+  20 |     | <span class='neutral'>     *</span>
+  21 |     | <span class='neutral'>     *  - an externally-owned account</span>
+  22 |     | <span class='neutral'>     *  - a contract in construction</span>
+  23 |     | <span class='neutral'>     *  - an address where a contract will be created</span>
+  24 |     | <span class='neutral'>     *  - an address where a contract lived, but was destroyed</span>
+  25 |     | <span class='neutral'>     *</span>
+  26 |     | <span class='neutral'>     * Furthermore, `isContract` will also return true if the target contract within</span>
+  27 |     | <span class='neutral'>     * the same transaction is already scheduled for destruction by `SELFDESTRUCT`,</span>
+  28 |     | <span class='neutral'>     * which only has an effect at the end of a transaction.</span>
+  29 |     | <span class='neutral'>     * ====</span>
+  30 |     | <span class='neutral'>     *</span>
+  31 |     | <span class='neutral'>     * [IMPORTANT]</span>
+  32 |     | <span class='neutral'>     * ====</span>
+  33 |     | <span class='neutral'>     * You shouldn&#39;t rely on `isContract` to protect against flash loan attacks!</span>
+  34 |     | <span class='neutral'>     *</span>
+  35 |     | <span class='neutral'>     * Preventing calls from contracts is highly discouraged. It breaks composability, breaks support for smart wallets</span>
+  36 |     | <span class='neutral'>     * like Gnosis Safe, and does not provide security since it can be circumvented by calling from a contract</span>
+  37 |     | <span class='neutral'>     * constructor.</span>
+  38 |     | <span class='neutral'>     * ====</span>
+  39 |     | <span class='neutral'>     */</span>
+  40 |     | <span class='neutral'>    function isContract(address account) internal view returns (bool) {</span>
+  41 |     | <span class='neutral'>        // This method relies on extcodesize/address.code.length, which returns 0</span>
+  42 |     | <span class='neutral'>        // for contracts in construction, since the code is only stored at the end</span>
+  43 |     | <span class='neutral'>        // of the constructor execution.</span>
+  44 |     | <span class='neutral'></span>
+  45 |     | <span class='unexecuted'>        return account.code.length &gt; 0;</span>
+  46 |     | <span class='neutral'>    }</span>
+  47 |     | <span class='neutral'></span>
+  48 |     | <span class='neutral'>    /**</span>
+  49 |     | <span class='neutral'>     * @dev Replacement for Solidity&#39;s `transfer`: sends `amount` wei to</span>
+  50 |     | <span class='neutral'>     * `recipient`, forwarding all available gas and reverting on errors.</span>
+  51 |     | <span class='neutral'>     *</span>
+  52 |     | <span class='neutral'>     * https://eips.ethereum.org/EIPS/eip-1884[EIP1884] increases the gas cost</span>
+  53 |     | <span class='neutral'>     * of certain opcodes, possibly making contracts go over the 2300 gas limit</span>
+  54 |     | <span class='neutral'>     * imposed by `transfer`, making them unable to receive funds via</span>
+  55 |     | <span class='neutral'>     * `transfer`. {sendValue} removes this limitation.</span>
+  56 |     | <span class='neutral'>     *</span>
+  57 |     | <span class='neutral'>     * https://consensys.net/diligence/blog/2019/09/stop-using-soliditys-transfer-now/[Learn more].</span>
+  58 |     | <span class='neutral'>     *</span>
+  59 |     | <span class='neutral'>     * IMPORTANT: because control is transferred to `recipient`, care must be</span>
+  60 |     | <span class='neutral'>     * taken to not create reentrancy vulnerabilities. Consider using</span>
+  61 |     | <span class='neutral'>     * {ReentrancyGuard} or the</span>
+  62 |     | <span class='neutral'>     * https://solidity.readthedocs.io/en/v0.8.0/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].</span>
+  63 |     | <span class='neutral'>     */</span>
+  64 |     | <span class='neutral'>    function sendValue(address payable recipient, uint256 amount) internal {</span>
+  65 |     | <span class='neutral'>        require(address(this).balance &gt;= amount, &quot;Address: insufficient balance&quot;);</span>
+  66 |     | <span class='neutral'></span>
+  67 |     | <span class='neutral'>        (bool success, ) = recipient.call{value: amount}(&quot;&quot;);</span>
+  68 |     | <span class='neutral'>        require(success, &quot;Address: unable to send value, recipient may have reverted&quot;);</span>
+  69 |     | <span class='neutral'>    }</span>
+  70 |     | <span class='neutral'></span>
+  71 |     | <span class='neutral'>    /**</span>
+  72 |     | <span class='neutral'>     * @dev Performs a Solidity function call using a low level `call`. A</span>
+  73 |     | <span class='neutral'>     * plain `call` is an unsafe replacement for a function call: use this</span>
+  74 |     | <span class='neutral'>     * function instead.</span>
+  75 |     | <span class='neutral'>     *</span>
+  76 |     | <span class='neutral'>     * If `target` reverts with a revert reason, it is bubbled up by this</span>
+  77 |     | <span class='neutral'>     * function (like regular Solidity function calls).</span>
+  78 |     | <span class='neutral'>     *</span>
+  79 |     | <span class='neutral'>     * Returns the raw returned data. To convert to the expected return value,</span>
+  80 |     | <span class='neutral'>     * use https://solidity.readthedocs.io/en/latest/units-and-global-variables.html?highlight=abi.decode#abi-encoding-and-decoding-functions[`abi.decode`].</span>
+  81 |     | <span class='neutral'>     *</span>
+  82 |     | <span class='neutral'>     * Requirements:</span>
+  83 |     | <span class='neutral'>     *</span>
+  84 |     | <span class='neutral'>     * - `target` must be a contract.</span>
+  85 |     | <span class='neutral'>     * - calling `target` with `data` must not revert.</span>
+  86 |     | <span class='neutral'>     *</span>
+  87 |     | <span class='neutral'>     * _Available since v3.1._</span>
+  88 |     | <span class='neutral'>     */</span>
+  89 |     | <span class='neutral'>    function functionCall(address target, bytes memory data) internal returns (bytes memory) {</span>
+  90 |     | <span class='neutral'>        return functionCallWithValue(target, data, 0, &quot;Address: low-level call failed&quot;);</span>
+  91 |     | <span class='neutral'>    }</span>
+  92 |     | <span class='neutral'></span>
+  93 |     | <span class='neutral'>    /**</span>
+  94 |     | <span class='neutral'>     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`], but with</span>
+  95 |     | <span class='neutral'>     * `errorMessage` as a fallback revert reason when `target` reverts.</span>
+  96 |     | <span class='neutral'>     *</span>
+  97 |     | <span class='neutral'>     * _Available since v3.1._</span>
+  98 |     | <span class='neutral'>     */</span>
+  99 |     | <span class='neutral'>    function functionCall(</span>
+ 100 |     | <span class='neutral'>        address target,</span>
+ 101 |     | <span class='neutral'>        bytes memory data,</span>
+ 102 |     | <span class='neutral'>        string memory errorMessage</span>
+ 103 |     | <span class='neutral'>    ) internal returns (bytes memory) {</span>
+ 104 |     | <span class='neutral'>        return functionCallWithValue(target, data, 0, errorMessage);</span>
+ 105 |     | <span class='neutral'>    }</span>
+ 106 |     | <span class='neutral'></span>
+ 107 |     | <span class='neutral'>    /**</span>
+ 108 |     | <span class='neutral'>     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],</span>
+ 109 |     | <span class='neutral'>     * but also transferring `value` wei to `target`.</span>
+ 110 |     | <span class='neutral'>     *</span>
+ 111 |     | <span class='neutral'>     * Requirements:</span>
+ 112 |     | <span class='neutral'>     *</span>
+ 113 |     | <span class='neutral'>     * - the calling contract must have an ETH balance of at least `value`.</span>
+ 114 |     | <span class='neutral'>     * - the called Solidity function must be `payable`.</span>
+ 115 |     | <span class='neutral'>     *</span>
+ 116 |     | <span class='neutral'>     * _Available since v3.1._</span>
+ 117 |     | <span class='neutral'>     */</span>
+ 118 |     | <span class='neutral'>    function functionCallWithValue(address target, bytes memory data, uint256 value) internal returns (bytes memory) {</span>
+ 119 |     | <span class='neutral'>        return functionCallWithValue(target, data, value, &quot;Address: low-level call with value failed&quot;);</span>
+ 120 |     | <span class='neutral'>    }</span>
+ 121 |     | <span class='neutral'></span>
+ 122 |     | <span class='neutral'>    /**</span>
+ 123 |     | <span class='neutral'>     * @dev Same as {xref-Address-functionCallWithValue-address-bytes-uint256-}[`functionCallWithValue`], but</span>
+ 124 |     | <span class='neutral'>     * with `errorMessage` as a fallback revert reason when `target` reverts.</span>
+ 125 |     | <span class='neutral'>     *</span>
+ 126 |     | <span class='neutral'>     * _Available since v3.1._</span>
+ 127 |     | <span class='neutral'>     */</span>
+ 128 |     | <span class='neutral'>    function functionCallWithValue(</span>
+ 129 |     | <span class='neutral'>        address target,</span>
+ 130 |     | <span class='neutral'>        bytes memory data,</span>
+ 131 |     | <span class='neutral'>        uint256 value,</span>
+ 132 |     | <span class='neutral'>        string memory errorMessage</span>
+ 133 |     | <span class='neutral'>    ) internal returns (bytes memory) {</span>
+ 134 |     | <span class='neutral'>        require(address(this).balance &gt;= value, &quot;Address: insufficient balance for call&quot;);</span>
+ 135 |     | <span class='neutral'>        (bool success, bytes memory returndata) = target.call{value: value}(data);</span>
+ 136 |     | <span class='neutral'>        return verifyCallResultFromTarget(target, success, returndata, errorMessage);</span>
+ 137 |     | <span class='neutral'>    }</span>
+ 138 |     | <span class='neutral'></span>
+ 139 |     | <span class='neutral'>    /**</span>
+ 140 |     | <span class='neutral'>     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],</span>
+ 141 |     | <span class='neutral'>     * but performing a static call.</span>
+ 142 |     | <span class='neutral'>     *</span>
+ 143 |     | <span class='neutral'>     * _Available since v3.3._</span>
+ 144 |     | <span class='neutral'>     */</span>
+ 145 |     | <span class='neutral'>    function functionStaticCall(address target, bytes memory data) internal view returns (bytes memory) {</span>
+ 146 |     | <span class='neutral'>        return functionStaticCall(target, data, &quot;Address: low-level static call failed&quot;);</span>
+ 147 |     | <span class='neutral'>    }</span>
+ 148 |     | <span class='neutral'></span>
+ 149 |     | <span class='neutral'>    /**</span>
+ 150 |     | <span class='neutral'>     * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],</span>
+ 151 |     | <span class='neutral'>     * but performing a static call.</span>
+ 152 |     | <span class='neutral'>     *</span>
+ 153 |     | <span class='neutral'>     * _Available since v3.3._</span>
+ 154 |     | <span class='neutral'>     */</span>
+ 155 |     | <span class='neutral'>    function functionStaticCall(</span>
+ 156 |     | <span class='neutral'>        address target,</span>
+ 157 |     | <span class='neutral'>        bytes memory data,</span>
+ 158 |     | <span class='neutral'>        string memory errorMessage</span>
+ 159 |     | <span class='neutral'>    ) internal view returns (bytes memory) {</span>
+ 160 |     | <span class='neutral'>        (bool success, bytes memory returndata) = target.staticcall(data);</span>
+ 161 |     | <span class='neutral'>        return verifyCallResultFromTarget(target, success, returndata, errorMessage);</span>
+ 162 |     | <span class='neutral'>    }</span>
+ 163 |     | <span class='neutral'></span>
+ 164 |     | <span class='neutral'>    /**</span>
+ 165 |     | <span class='neutral'>     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],</span>
+ 166 |     | <span class='neutral'>     * but performing a delegate call.</span>
+ 167 |     | <span class='neutral'>     *</span>
+ 168 |     | <span class='neutral'>     * _Available since v3.4._</span>
+ 169 |     | <span class='neutral'>     */</span>
+ 170 |     | <span class='neutral'>    function functionDelegateCall(address target, bytes memory data) internal returns (bytes memory) {</span>
+ 171 |     | <span class='neutral'>        return functionDelegateCall(target, data, &quot;Address: low-level delegate call failed&quot;);</span>
+ 172 |     | <span class='neutral'>    }</span>
+ 173 |     | <span class='neutral'></span>
+ 174 |     | <span class='neutral'>    /**</span>
+ 175 |     | <span class='neutral'>     * @dev Same as {xref-Address-functionCall-address-bytes-string-}[`functionCall`],</span>
+ 176 |     | <span class='neutral'>     * but performing a delegate call.</span>
+ 177 |     | <span class='neutral'>     *</span>
+ 178 |     | <span class='neutral'>     * _Available since v3.4._</span>
+ 179 |     | <span class='neutral'>     */</span>
+ 180 |     | <span class='neutral'>    function functionDelegateCall(</span>
+ 181 |     | <span class='neutral'>        address target,</span>
+ 182 |     | <span class='neutral'>        bytes memory data,</span>
+ 183 |     | <span class='neutral'>        string memory errorMessage</span>
+ 184 |     | <span class='neutral'>    ) internal returns (bytes memory) {</span>
+ 185 |     | <span class='neutral'>        (bool success, bytes memory returndata) = target.delegatecall(data);</span>
+ 186 |     | <span class='neutral'>        return verifyCallResultFromTarget(target, success, returndata, errorMessage);</span>
+ 187 |     | <span class='neutral'>    }</span>
+ 188 |     | <span class='neutral'></span>
+ 189 |     | <span class='neutral'>    /**</span>
+ 190 |     | <span class='neutral'>     * @dev Tool to verify that a low level call to smart-contract was successful, and revert (either by bubbling</span>
+ 191 |     | <span class='neutral'>     * the revert reason or using the provided one) in case of unsuccessful call or if target was not a contract.</span>
+ 192 |     | <span class='neutral'>     *</span>
+ 193 |     | <span class='neutral'>     * _Available since v4.8._</span>
+ 194 |     | <span class='neutral'>     */</span>
+ 195 |     | <span class='neutral'>    function verifyCallResultFromTarget(</span>
+ 196 |     | <span class='neutral'>        address target,</span>
+ 197 |     | <span class='neutral'>        bool success,</span>
+ 198 |     | <span class='neutral'>        bytes memory returndata,</span>
+ 199 |     | <span class='neutral'>        string memory errorMessage</span>
+ 200 |     | <span class='neutral'>    ) internal view returns (bytes memory) {</span>
+ 201 |     | <span class='neutral'>        if (success) {</span>
+ 202 |     | <span class='neutral'>            if (returndata.length == 0) {</span>
+ 203 |     | <span class='neutral'>                // only check isContract if the call was successful and the return data is empty</span>
+ 204 |     | <span class='neutral'>                // otherwise we already know that it was a contract</span>
+ 205 |     | <span class='neutral'>                require(isContract(target), &quot;Address: call to non-contract&quot;);</span>
+ 206 |     | <span class='neutral'>            }</span>
+ 207 |     | <span class='neutral'>            return returndata;</span>
+ 208 |     | <span class='neutral'>        } else {</span>
+ 209 |     | <span class='neutral'>            _revert(returndata, errorMessage);</span>
+ 210 |     | <span class='neutral'>        }</span>
+ 211 |     | <span class='neutral'>    }</span>
+ 212 |     | <span class='neutral'></span>
+ 213 |     | <span class='neutral'>    /**</span>
+ 214 |     | <span class='neutral'>     * @dev Tool to verify that a low level call was successful, and revert if it wasn&#39;t, either by bubbling the</span>
+ 215 |     | <span class='neutral'>     * revert reason or using the provided one.</span>
+ 216 |     | <span class='neutral'>     *</span>
+ 217 |     | <span class='neutral'>     * _Available since v4.3._</span>
+ 218 |     | <span class='neutral'>     */</span>
+ 219 |     | <span class='neutral'>    function verifyCallResult(</span>
+ 220 |     | <span class='neutral'>        bool success,</span>
+ 221 |     | <span class='neutral'>        bytes memory returndata,</span>
+ 222 |     | <span class='neutral'>        string memory errorMessage</span>
+ 223 |     | <span class='neutral'>    ) internal pure returns (bytes memory) {</span>
+ 224 |     | <span class='neutral'>        if (success) {</span>
+ 225 |     | <span class='neutral'>            return returndata;</span>
+ 226 |     | <span class='neutral'>        } else {</span>
+ 227 |     | <span class='neutral'>            _revert(returndata, errorMessage);</span>
+ 228 |     | <span class='neutral'>        }</span>
+ 229 |     | <span class='neutral'>    }</span>
+ 230 |     | <span class='neutral'></span>
+ 231 |     | <span class='neutral'>    function _revert(bytes memory returndata, string memory errorMessage) private pure {</span>
+ 232 |     | <span class='neutral'>        // Look for revert reason and bubble it up if present</span>
+ 233 |     | <span class='neutral'>        if (returndata.length &gt; 0) {</span>
+ 234 |     | <span class='neutral'>            // The easiest way to bubble the revert reason is using memory via assembly</span>
+ 235 |     | <span class='neutral'>            /// @solidity memory-safe-assembly</span>
+ 236 |     | <span class='neutral'>            assembly {</span>
+ 237 |     | <span class='neutral'>                let returndata_size := mload(returndata)</span>
+ 238 |     | <span class='neutral'>                revert(add(32, returndata), returndata_size)</span>
+ 239 |     | <span class='neutral'>            }</span>
+ 240 |     | <span class='neutral'>        } else {</span>
+ 241 |     | <span class='neutral'>            revert(errorMessage);</span>
+ 242 |     | <span class='neutral'>        }</span>
+ 243 |     | <span class='neutral'>    }</span>
+ 244 |     | <span class='neutral'>}</span>
+ 245 |     | <span class='neutral'></span>
+
+</code>
+<br />
+
+<b>/Users/tj/Work/contracts/lib/openzeppelin-contracts-4.9.3/contracts/utils/Context.sol</b>
+<code>
+  1 |     | <span class='neutral'>// SPDX-License-Identifier: MIT</span>
+  2 |     | <span class='neutral'>// OpenZeppelin Contracts v4.4.1 (utils/Context.sol)</span>
+  3 |     | <span class='neutral'></span>
+  4 |     | <span class='neutral'>pragma solidity ^0.8.0;</span>
+  5 |     | <span class='neutral'></span>
+  6 |     | <span class='neutral'>/**</span>
+  7 |     | <span class='neutral'> * @dev Provides information about the current execution context, including the</span>
+  8 |     | <span class='neutral'> * sender of the transaction and its data. While these are generally available</span>
+  9 |     | <span class='neutral'> * via msg.sender and msg.data, they should not be accessed in such a direct</span>
+ 10 |     | <span class='neutral'> * manner, since when dealing with meta-transactions the account sending and</span>
+ 11 |     | <span class='neutral'> * paying for execution may not be the actual sender (as far as an application</span>
+ 12 |     | <span class='neutral'> * is concerned).</span>
+ 13 |     | <span class='neutral'> *</span>
+ 14 |     | <span class='neutral'> * This contract is only required for intermediate, library-like contracts.</span>
+ 15 |     | <span class='neutral'> */</span>
+ 16 |     | <span class='neutral'>abstract contract Context {</span>
+ 17 |     | <span class='neutral'>    function _msgSender() internal view virtual returns (address) {</span>
+ 18 | *   | <span class='executed'>        return msg.sender;</span>
+ 19 |     | <span class='neutral'>    }</span>
+ 20 |     | <span class='neutral'></span>
+ 21 |     | <span class='neutral'>    function _msgData() internal view virtual returns (bytes calldata) {</span>
+ 22 |     | <span class='neutral'>        return msg.data;</span>
+ 23 |     | <span class='neutral'>    }</span>
+ 24 |     | <span class='neutral'>}</span>
+ 25 |     | <span class='neutral'></span>
+
+</code>
+<br />
+
+<b>/Users/tj/Work/contracts/lib/openzeppelin-contracts-4.9.3/contracts/utils/Strings.sol</b>
+<code>
+  1 |     | <span class='neutral'>// SPDX-License-Identifier: MIT</span>
+  2 |     | <span class='neutral'>// OpenZeppelin Contracts (last updated v4.9.0) (utils/Strings.sol)</span>
+  3 |     | <span class='neutral'></span>
+  4 |     | <span class='neutral'>pragma solidity ^0.8.0;</span>
+  5 |     | <span class='neutral'></span>
+  6 |     | <span class='neutral'>import &quot;./math/Math.sol&quot;;</span>
+  7 |     | <span class='neutral'>import &quot;./math/SignedMath.sol&quot;;</span>
+  8 |     | <span class='neutral'></span>
+  9 |     | <span class='neutral'>/**</span>
+ 10 |     | <span class='neutral'> * @dev String operations.</span>
+ 11 |     | <span class='neutral'> */</span>
+ 12 |     | <span class='unexecuted'>library Strings {</span>
+ 13 |     | <span class='neutral'>    bytes16 private constant _SYMBOLS = &quot;0123456789abcdef&quot;;</span>
+ 14 |     | <span class='neutral'>    uint8 private constant _ADDRESS_LENGTH = 20;</span>
+ 15 |     | <span class='neutral'></span>
+ 16 |     | <span class='neutral'>    /**</span>
+ 17 |     | <span class='neutral'>     * @dev Converts a `uint256` to its ASCII `string` decimal representation.</span>
+ 18 |     | <span class='neutral'>     */</span>
+ 19 |     | <span class='neutral'>    function toString(uint256 value) internal pure returns (string memory) {</span>
+ 20 |     | <span class='neutral'>        unchecked {</span>
+ 21 |     | <span class='neutral'>            uint256 length = Math.log10(value) + 1;</span>
+ 22 |     | <span class='neutral'>            string memory buffer = new string(length);</span>
+ 23 |     | <span class='neutral'>            uint256 ptr;</span>
+ 24 |     | <span class='neutral'>            /// @solidity memory-safe-assembly</span>
+ 25 |     | <span class='neutral'>            assembly {</span>
+ 26 |     | <span class='neutral'>                ptr := add(buffer, add(32, length))</span>
+ 27 |     | <span class='neutral'>            }</span>
+ 28 |     | <span class='neutral'>            while (true) {</span>
+ 29 |     | <span class='neutral'>                ptr--;</span>
+ 30 |     | <span class='neutral'>                /// @solidity memory-safe-assembly</span>
+ 31 |     | <span class='neutral'>                assembly {</span>
+ 32 |     | <span class='neutral'>                    mstore8(ptr, byte(mod(value, 10), _SYMBOLS))</span>
+ 33 |     | <span class='neutral'>                }</span>
+ 34 |     | <span class='neutral'>                value /= 10;</span>
+ 35 |     | <span class='neutral'>                if (value == 0) break;</span>
+ 36 |     | <span class='neutral'>            }</span>
+ 37 |     | <span class='neutral'>            return buffer;</span>
+ 38 |     | <span class='neutral'>        }</span>
+ 39 |     | <span class='neutral'>    }</span>
+ 40 |     | <span class='neutral'></span>
+ 41 |     | <span class='neutral'>    /**</span>
+ 42 |     | <span class='neutral'>     * @dev Converts a `int256` to its ASCII `string` decimal representation.</span>
+ 43 |     | <span class='neutral'>     */</span>
+ 44 |     | <span class='neutral'>    function toString(int256 value) internal pure returns (string memory) {</span>
+ 45 |     | <span class='neutral'>        return string(abi.encodePacked(value &lt; 0 ? &quot;-&quot; : &quot;&quot;, toString(SignedMath.abs(value))));</span>
+ 46 |     | <span class='neutral'>    }</span>
+ 47 |     | <span class='neutral'></span>
+ 48 |     | <span class='neutral'>    /**</span>
+ 49 |     | <span class='neutral'>     * @dev Converts a `uint256` to its ASCII `string` hexadecimal representation.</span>
+ 50 |     | <span class='neutral'>     */</span>
+ 51 |     | <span class='neutral'>    function toHexString(uint256 value) internal pure returns (string memory) {</span>
+ 52 |     | <span class='neutral'>        unchecked {</span>
+ 53 |     | <span class='neutral'>            return toHexString(value, Math.log256(value) + 1);</span>
+ 54 |     | <span class='neutral'>        }</span>
+ 55 |     | <span class='neutral'>    }</span>
+ 56 |     | <span class='neutral'></span>
+ 57 |     | <span class='neutral'>    /**</span>
+ 58 |     | <span class='neutral'>     * @dev Converts a `uint256` to its ASCII `string` hexadecimal representation with fixed length.</span>
+ 59 |     | <span class='neutral'>     */</span>
+ 60 |     | <span class='neutral'>    function toHexString(uint256 value, uint256 length) internal pure returns (string memory) {</span>
+ 61 |     | <span class='neutral'>        bytes memory buffer = new bytes(2 * length + 2);</span>
+ 62 |     | <span class='neutral'>        buffer[0] = &quot;0&quot;;</span>
+ 63 |     | <span class='neutral'>        buffer[1] = &quot;x&quot;;</span>
+ 64 |     | <span class='neutral'>        for (uint256 i = 2 * length + 1; i &gt; 1; --i) {</span>
+ 65 |     | <span class='neutral'>            buffer[i] = _SYMBOLS[value &amp; 0xf];</span>
+ 66 |     | <span class='neutral'>            value &gt;&gt;= 4;</span>
+ 67 |     | <span class='neutral'>        }</span>
+ 68 |     | <span class='neutral'>        require(value == 0, &quot;Strings: hex length insufficient&quot;);</span>
+ 69 |     | <span class='neutral'>        return string(buffer);</span>
+ 70 |     | <span class='neutral'>    }</span>
+ 71 |     | <span class='neutral'></span>
+ 72 |     | <span class='neutral'>    /**</span>
+ 73 |     | <span class='neutral'>     * @dev Converts an `address` with fixed length of 20 bytes to its not checksummed ASCII `string` hexadecimal representation.</span>
+ 74 |     | <span class='neutral'>     */</span>
+ 75 |     | <span class='neutral'>    function toHexString(address addr) internal pure returns (string memory) {</span>
+ 76 |     | <span class='neutral'>        return toHexString(uint256(uint160(addr)), _ADDRESS_LENGTH);</span>
+ 77 |     | <span class='neutral'>    }</span>
+ 78 |     | <span class='neutral'></span>
+ 79 |     | <span class='neutral'>    /**</span>
+ 80 |     | <span class='neutral'>     * @dev Returns true if the two strings are equal.</span>
+ 81 |     | <span class='neutral'>     */</span>
+ 82 |     | <span class='neutral'>    function equal(string memory a, string memory b) internal pure returns (bool) {</span>
+ 83 |     | <span class='neutral'>        return keccak256(bytes(a)) == keccak256(bytes(b));</span>
+ 84 |     | <span class='neutral'>    }</span>
+ 85 |     | <span class='neutral'>}</span>
+ 86 |     | <span class='neutral'></span>
+
+</code>
+<br />
+
+<b>/Users/tj/Work/contracts/lib/openzeppelin-contracts-4.9.3/contracts/utils/introspection/ERC165.sol</b>
+<code>
+  1 |     | <span class='neutral'>// SPDX-License-Identifier: MIT</span>
+  2 |     | <span class='neutral'>// OpenZeppelin Contracts v4.4.1 (utils/introspection/ERC165.sol)</span>
+  3 |     | <span class='neutral'></span>
+  4 |     | <span class='neutral'>pragma solidity ^0.8.0;</span>
+  5 |     | <span class='neutral'></span>
+  6 |     | <span class='neutral'>import &quot;./IERC165.sol&quot;;</span>
+  7 |     | <span class='neutral'></span>
+  8 |     | <span class='neutral'>/**</span>
+  9 |     | <span class='neutral'> * @dev Implementation of the {IERC165} interface.</span>
+ 10 |     | <span class='neutral'> *</span>
+ 11 |     | <span class='neutral'> * Contracts that want to implement ERC165 should inherit from this contract and override {supportsInterface} to check</span>
+ 12 |     | <span class='neutral'> * for the additional interface id that will be supported. For example:</span>
+ 13 |     | <span class='neutral'> *</span>
+ 14 |     | <span class='neutral'> * ```solidity</span>
+ 15 |     | <span class='neutral'> * function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {</span>
+ 16 |     | <span class='neutral'> *     return interfaceId == type(MyInterface).interfaceId || super.supportsInterface(interfaceId);</span>
+ 17 |     | <span class='neutral'> * }</span>
+ 18 |     | <span class='neutral'> * ```</span>
+ 19 |     | <span class='neutral'> *</span>
+ 20 |     | <span class='neutral'> * Alternatively, {ERC165Storage} provides an easier to use but more expensive implementation.</span>
+ 21 |     | <span class='neutral'> */</span>
+ 22 |     | <span class='neutral'>abstract contract ERC165 is IERC165 {</span>
+ 23 |     | <span class='neutral'>    /**</span>
+ 24 |     | <span class='neutral'>     * @dev See {IERC165-supportsInterface}.</span>
+ 25 |     | <span class='neutral'>     */</span>
+ 26 |     | <span class='neutral'>    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {</span>
+ 27 | *   | <span class='executed'>        return interfaceId == type(IERC165).interfaceId;</span>
+ 28 |     | <span class='neutral'>    }</span>
+ 29 |     | <span class='neutral'>}</span>
+ 30 |     | <span class='neutral'></span>
+
+</code>
+<br />
+
+<b>/Users/tj/Work/contracts/lib/openzeppelin-contracts-4.9.3/contracts/utils/introspection/IERC165.sol</b>
+<code>
+  1 |     | <span class='neutral'>// SPDX-License-Identifier: MIT</span>
+  2 |     | <span class='neutral'>// OpenZeppelin Contracts v4.4.1 (utils/introspection/IERC165.sol)</span>
+  3 |     | <span class='neutral'></span>
+  4 |     | <span class='neutral'>pragma solidity ^0.8.0;</span>
+  5 |     | <span class='neutral'></span>
+  6 |     | <span class='neutral'>/**</span>
+  7 |     | <span class='neutral'> * @dev Interface of the ERC165 standard, as defined in the</span>
+  8 |     | <span class='neutral'> * https://eips.ethereum.org/EIPS/eip-165[EIP].</span>
+  9 |     | <span class='neutral'> *</span>
+ 10 |     | <span class='neutral'> * Implementers can declare support of contract interfaces, which can then be</span>
+ 11 |     | <span class='neutral'> * queried by others ({ERC165Checker}).</span>
+ 12 |     | <span class='neutral'> *</span>
+ 13 |     | <span class='neutral'> * For an implementation, see {ERC165}.</span>
+ 14 |     | <span class='neutral'> */</span>
+ 15 |     | <span class='neutral'>interface IERC165 {</span>
+ 16 |     | <span class='neutral'>    /**</span>
+ 17 |     | <span class='neutral'>     * @dev Returns true if this contract implements the interface defined by</span>
+ 18 |     | <span class='neutral'>     * `interfaceId`. See the corresponding</span>
+ 19 |     | <span class='neutral'>     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]</span>
+ 20 |     | <span class='neutral'>     * to learn more about how these ids are created.</span>
+ 21 |     | <span class='neutral'>     *</span>
+ 22 |     | <span class='neutral'>     * This function call must use less than 30 000 gas.</span>
+ 23 |     | <span class='neutral'>     */</span>
+ 24 |     | <span class='neutral'>    function supportsInterface(bytes4 interfaceId) external view returns (bool);</span>
+ 25 |     | <span class='neutral'>}</span>
+ 26 |     | <span class='neutral'></span>
+
+</code>
+<br />
+
+<b>/Users/tj/Work/contracts/lib/openzeppelin-contracts-4.9.3/contracts/utils/math/Math.sol</b>
+<code>
+   1 |     | <span class='neutral'>// SPDX-License-Identifier: MIT</span>
+   2 |     | <span class='neutral'>// OpenZeppelin Contracts (last updated v4.9.0) (utils/math/Math.sol)</span>
+   3 |     | <span class='neutral'></span>
+   4 |     | <span class='neutral'>pragma solidity ^0.8.0;</span>
+   5 |     | <span class='neutral'></span>
+   6 |     | <span class='neutral'>/**</span>
+   7 |     | <span class='neutral'> * @dev Standard math utilities missing in the Solidity language.</span>
+   8 |     | <span class='neutral'> */</span>
+   9 |     | <span class='unexecuted'>library Math {</span>
+  10 |     | <span class='neutral'>    enum Rounding {</span>
+  11 |     | <span class='neutral'>        Down, // Toward negative infinity</span>
+  12 |     | <span class='neutral'>        Up, // Toward infinity</span>
+  13 |     | <span class='neutral'>        Zero // Toward zero</span>
+  14 |     | <span class='neutral'>    }</span>
+  15 |     | <span class='neutral'></span>
+  16 |     | <span class='neutral'>    /**</span>
+  17 |     | <span class='neutral'>     * @dev Returns the largest of two numbers.</span>
+  18 |     | <span class='neutral'>     */</span>
+  19 |     | <span class='neutral'>    function max(uint256 a, uint256 b) internal pure returns (uint256) {</span>
+  20 |     | <span class='neutral'>        return a &gt; b ? a : b;</span>
+  21 |     | <span class='neutral'>    }</span>
+  22 |     | <span class='neutral'></span>
+  23 |     | <span class='neutral'>    /**</span>
+  24 |     | <span class='neutral'>     * @dev Returns the smallest of two numbers.</span>
+  25 |     | <span class='neutral'>     */</span>
+  26 |     | <span class='neutral'>    function min(uint256 a, uint256 b) internal pure returns (uint256) {</span>
+  27 |     | <span class='neutral'>        return a &lt; b ? a : b;</span>
+  28 |     | <span class='neutral'>    }</span>
+  29 |     | <span class='neutral'></span>
+  30 |     | <span class='neutral'>    /**</span>
+  31 |     | <span class='neutral'>     * @dev Returns the average of two numbers. The result is rounded towards</span>
+  32 |     | <span class='neutral'>     * zero.</span>
+  33 |     | <span class='neutral'>     */</span>
+  34 |     | <span class='neutral'>    function average(uint256 a, uint256 b) internal pure returns (uint256) {</span>
+  35 |     | <span class='neutral'>        // (a + b) / 2 can overflow.</span>
+  36 |     | <span class='neutral'>        return (a &amp; b) + (a ^ b) / 2;</span>
+  37 |     | <span class='neutral'>    }</span>
+  38 |     | <span class='neutral'></span>
+  39 |     | <span class='neutral'>    /**</span>
+  40 |     | <span class='neutral'>     * @dev Returns the ceiling of the division of two numbers.</span>
+  41 |     | <span class='neutral'>     *</span>
+  42 |     | <span class='neutral'>     * This differs from standard division with `/` in that it rounds up instead</span>
+  43 |     | <span class='neutral'>     * of rounding down.</span>
+  44 |     | <span class='neutral'>     */</span>
+  45 |     | <span class='neutral'>    function ceilDiv(uint256 a, uint256 b) internal pure returns (uint256) {</span>
+  46 |     | <span class='neutral'>        // (a + b - 1) / b can overflow on addition, so we distribute.</span>
+  47 |     | <span class='neutral'>        return a == 0 ? 0 : (a - 1) / b + 1;</span>
+  48 |     | <span class='neutral'>    }</span>
+  49 |     | <span class='neutral'></span>
+  50 |     | <span class='neutral'>    /**</span>
+  51 |     | <span class='neutral'>     * @notice Calculates floor(x * y / denominator) with full precision. Throws if result overflows a uint256 or denominator == 0</span>
+  52 |     | <span class='neutral'>     * @dev Original credit to Remco Bloemen under MIT license (https://xn--2-umb.com/21/muldiv)</span>
+  53 |     | <span class='neutral'>     * with further edits by Uniswap Labs also under MIT license.</span>
+  54 |     | <span class='neutral'>     */</span>
+  55 |     | <span class='neutral'>    function mulDiv(uint256 x, uint256 y, uint256 denominator) internal pure returns (uint256 result) {</span>
+  56 |     | <span class='neutral'>        unchecked {</span>
+  57 |     | <span class='neutral'>            // 512-bit multiply [prod1 prod0] = x * y. Compute the product mod 2^256 and mod 2^256 - 1, then use</span>
+  58 |     | <span class='neutral'>            // use the Chinese Remainder Theorem to reconstruct the 512 bit result. The result is stored in two 256</span>
+  59 |     | <span class='neutral'>            // variables such that product = prod1 * 2^256 + prod0.</span>
+  60 |     | <span class='neutral'>            uint256 prod0; // Least significant 256 bits of the product</span>
+  61 |     | <span class='neutral'>            uint256 prod1; // Most significant 256 bits of the product</span>
+  62 |     | <span class='neutral'>            assembly {</span>
+  63 |     | <span class='neutral'>                let mm := mulmod(x, y, not(0))</span>
+  64 |     | <span class='neutral'>                prod0 := mul(x, y)</span>
+  65 |     | <span class='neutral'>                prod1 := sub(sub(mm, prod0), lt(mm, prod0))</span>
+  66 |     | <span class='neutral'>            }</span>
+  67 |     | <span class='neutral'></span>
+  68 |     | <span class='neutral'>            // Handle non-overflow cases, 256 by 256 division.</span>
+  69 |     | <span class='neutral'>            if (prod1 == 0) {</span>
+  70 |     | <span class='neutral'>                // Solidity will revert if denominator == 0, unlike the div opcode on its own.</span>
+  71 |     | <span class='neutral'>                // The surrounding unchecked block does not change this fact.</span>
+  72 |     | <span class='neutral'>                // See https://docs.soliditylang.org/en/latest/control-structures.html#checked-or-unchecked-arithmetic.</span>
+  73 |     | <span class='neutral'>                return prod0 / denominator;</span>
+  74 |     | <span class='neutral'>            }</span>
+  75 |     | <span class='neutral'></span>
+  76 |     | <span class='neutral'>            // Make sure the result is less than 2^256. Also prevents denominator == 0.</span>
+  77 |     | <span class='neutral'>            require(denominator &gt; prod1, &quot;Math: mulDiv overflow&quot;);</span>
+  78 |     | <span class='neutral'></span>
+  79 |     | <span class='neutral'>            ///////////////////////////////////////////////</span>
+  80 |     | <span class='neutral'>            // 512 by 256 division.</span>
+  81 |     | <span class='neutral'>            ///////////////////////////////////////////////</span>
+  82 |     | <span class='neutral'></span>
+  83 |     | <span class='neutral'>            // Make division exact by subtracting the remainder from [prod1 prod0].</span>
+  84 |     | <span class='neutral'>            uint256 remainder;</span>
+  85 |     | <span class='neutral'>            assembly {</span>
+  86 |     | <span class='neutral'>                // Compute remainder using mulmod.</span>
+  87 |     | <span class='neutral'>                remainder := mulmod(x, y, denominator)</span>
+  88 |     | <span class='neutral'></span>
+  89 |     | <span class='neutral'>                // Subtract 256 bit number from 512 bit number.</span>
+  90 |     | <span class='neutral'>                prod1 := sub(prod1, gt(remainder, prod0))</span>
+  91 |     | <span class='neutral'>                prod0 := sub(prod0, remainder)</span>
+  92 |     | <span class='neutral'>            }</span>
+  93 |     | <span class='neutral'></span>
+  94 |     | <span class='neutral'>            // Factor powers of two out of denominator and compute largest power of two divisor of denominator. Always &gt;= 1.</span>
+  95 |     | <span class='neutral'>            // See https://cs.stackexchange.com/q/138556/92363.</span>
+  96 |     | <span class='neutral'></span>
+  97 |     | <span class='neutral'>            // Does not overflow because the denominator cannot be zero at this stage in the function.</span>
+  98 |     | <span class='neutral'>            uint256 twos = denominator &amp; (~denominator + 1);</span>
+  99 |     | <span class='neutral'>            assembly {</span>
+ 100 |     | <span class='neutral'>                // Divide denominator by twos.</span>
+ 101 |     | <span class='neutral'>                denominator := div(denominator, twos)</span>
+ 102 |     | <span class='neutral'></span>
+ 103 |     | <span class='neutral'>                // Divide [prod1 prod0] by twos.</span>
+ 104 |     | <span class='neutral'>                prod0 := div(prod0, twos)</span>
+ 105 |     | <span class='neutral'></span>
+ 106 |     | <span class='neutral'>                // Flip twos such that it is 2^256 / twos. If twos is zero, then it becomes one.</span>
+ 107 |     | <span class='neutral'>                twos := add(div(sub(0, twos), twos), 1)</span>
+ 108 |     | <span class='neutral'>            }</span>
+ 109 |     | <span class='neutral'></span>
+ 110 |     | <span class='neutral'>            // Shift in bits from prod1 into prod0.</span>
+ 111 |     | <span class='neutral'>            prod0 |= prod1 * twos;</span>
+ 112 |     | <span class='neutral'></span>
+ 113 |     | <span class='neutral'>            // Invert denominator mod 2^256. Now that denominator is an odd number, it has an inverse modulo 2^256 such</span>
+ 114 |     | <span class='neutral'>            // that denominator * inv = 1 mod 2^256. Compute the inverse by starting with a seed that is correct for</span>
+ 115 |     | <span class='neutral'>            // four bits. That is, denominator * inv = 1 mod 2^4.</span>
+ 116 |     | <span class='neutral'>            uint256 inverse = (3 * denominator) ^ 2;</span>
+ 117 |     | <span class='neutral'></span>
+ 118 |     | <span class='neutral'>            // Use the Newton-Raphson iteration to improve the precision. Thanks to Hensel&#39;s lifting lemma, this also works</span>
+ 119 |     | <span class='neutral'>            // in modular arithmetic, doubling the correct bits in each step.</span>
+ 120 |     | <span class='neutral'>            inverse *= 2 - denominator * inverse; // inverse mod 2^8</span>
+ 121 |     | <span class='neutral'>            inverse *= 2 - denominator * inverse; // inverse mod 2^16</span>
+ 122 |     | <span class='neutral'>            inverse *= 2 - denominator * inverse; // inverse mod 2^32</span>
+ 123 |     | <span class='neutral'>            inverse *= 2 - denominator * inverse; // inverse mod 2^64</span>
+ 124 |     | <span class='neutral'>            inverse *= 2 - denominator * inverse; // inverse mod 2^128</span>
+ 125 |     | <span class='neutral'>            inverse *= 2 - denominator * inverse; // inverse mod 2^256</span>
+ 126 |     | <span class='neutral'></span>
+ 127 |     | <span class='neutral'>            // Because the division is now exact we can divide by multiplying with the modular inverse of denominator.</span>
+ 128 |     | <span class='neutral'>            // This will give us the correct result modulo 2^256. Since the preconditions guarantee that the outcome is</span>
+ 129 |     | <span class='neutral'>            // less than 2^256, this is the final result. We don&#39;t need to compute the high bits of the result and prod1</span>
+ 130 |     | <span class='neutral'>            // is no longer required.</span>
+ 131 |     | <span class='neutral'>            result = prod0 * inverse;</span>
+ 132 |     | <span class='neutral'>            return result;</span>
+ 133 |     | <span class='neutral'>        }</span>
+ 134 |     | <span class='neutral'>    }</span>
+ 135 |     | <span class='neutral'></span>
+ 136 |     | <span class='neutral'>    /**</span>
+ 137 |     | <span class='neutral'>     * @notice Calculates x * y / denominator with full precision, following the selected rounding direction.</span>
+ 138 |     | <span class='neutral'>     */</span>
+ 139 |     | <span class='neutral'>    function mulDiv(uint256 x, uint256 y, uint256 denominator, Rounding rounding) internal pure returns (uint256) {</span>
+ 140 |     | <span class='neutral'>        uint256 result = mulDiv(x, y, denominator);</span>
+ 141 |     | <span class='neutral'>        if (rounding == Rounding.Up &amp;&amp; mulmod(x, y, denominator) &gt; 0) {</span>
+ 142 |     | <span class='neutral'>            result += 1;</span>
+ 143 |     | <span class='neutral'>        }</span>
+ 144 |     | <span class='neutral'>        return result;</span>
+ 145 |     | <span class='neutral'>    }</span>
+ 146 |     | <span class='neutral'></span>
+ 147 |     | <span class='neutral'>    /**</span>
+ 148 |     | <span class='neutral'>     * @dev Returns the square root of a number. If the number is not a perfect square, the value is rounded down.</span>
+ 149 |     | <span class='neutral'>     *</span>
+ 150 |     | <span class='neutral'>     * Inspired by Henry S. Warren, Jr.&#39;s &quot;Hacker&#39;s Delight&quot; (Chapter 11).</span>
+ 151 |     | <span class='neutral'>     */</span>
+ 152 |     | <span class='neutral'>    function sqrt(uint256 a) internal pure returns (uint256) {</span>
+ 153 |     | <span class='neutral'>        if (a == 0) {</span>
+ 154 |     | <span class='neutral'>            return 0;</span>
+ 155 |     | <span class='neutral'>        }</span>
+ 156 |     | <span class='neutral'></span>
+ 157 |     | <span class='neutral'>        // For our first guess, we get the biggest power of 2 which is smaller than the square root of the target.</span>
+ 158 |     | <span class='neutral'>        //</span>
+ 159 |     | <span class='neutral'>        // We know that the &quot;msb&quot; (most significant bit) of our target number `a` is a power of 2 such that we have</span>
+ 160 |     | <span class='neutral'>        // `msb(a) &lt;= a &lt; 2*msb(a)`. This value can be written `msb(a)=2**k` with `k=log2(a)`.</span>
+ 161 |     | <span class='neutral'>        //</span>
+ 162 |     | <span class='neutral'>        // This can be rewritten `2**log2(a) &lt;= a &lt; 2**(log2(a) + 1)`</span>
+ 163 |     | <span class='neutral'>        // → `sqrt(2**k) &lt;= sqrt(a) &lt; sqrt(2**(k+1))`</span>
+ 164 |     | <span class='neutral'>        // → `2**(k/2) &lt;= sqrt(a) &lt; 2**((k+1)/2) &lt;= 2**(k/2 + 1)`</span>
+ 165 |     | <span class='neutral'>        //</span>
+ 166 |     | <span class='neutral'>        // Consequently, `2**(log2(a) / 2)` is a good first approximation of `sqrt(a)` with at least 1 correct bit.</span>
+ 167 |     | <span class='neutral'>        uint256 result = 1 &lt;&lt; (log2(a) &gt;&gt; 1);</span>
+ 168 |     | <span class='neutral'></span>
+ 169 |     | <span class='neutral'>        // At this point `result` is an estimation with one bit of precision. We know the true value is a uint128,</span>
+ 170 |     | <span class='neutral'>        // since it is the square root of a uint256. Newton&#39;s method converges quadratically (precision doubles at</span>
+ 171 |     | <span class='neutral'>        // every iteration). We thus need at most 7 iteration to turn our partial result with one bit of precision</span>
+ 172 |     | <span class='neutral'>        // into the expected uint128 result.</span>
+ 173 |     | <span class='neutral'>        unchecked {</span>
+ 174 |     | <span class='neutral'>            result = (result + a / result) &gt;&gt; 1;</span>
+ 175 |     | <span class='neutral'>            result = (result + a / result) &gt;&gt; 1;</span>
+ 176 |     | <span class='neutral'>            result = (result + a / result) &gt;&gt; 1;</span>
+ 177 |     | <span class='neutral'>            result = (result + a / result) &gt;&gt; 1;</span>
+ 178 |     | <span class='neutral'>            result = (result + a / result) &gt;&gt; 1;</span>
+ 179 |     | <span class='neutral'>            result = (result + a / result) &gt;&gt; 1;</span>
+ 180 |     | <span class='neutral'>            result = (result + a / result) &gt;&gt; 1;</span>
+ 181 |     | <span class='neutral'>            return min(result, a / result);</span>
+ 182 |     | <span class='neutral'>        }</span>
+ 183 |     | <span class='neutral'>    }</span>
+ 184 |     | <span class='neutral'></span>
+ 185 |     | <span class='neutral'>    /**</span>
+ 186 |     | <span class='neutral'>     * @notice Calculates sqrt(a), following the selected rounding direction.</span>
+ 187 |     | <span class='neutral'>     */</span>
+ 188 |     | <span class='neutral'>    function sqrt(uint256 a, Rounding rounding) internal pure returns (uint256) {</span>
+ 189 |     | <span class='neutral'>        unchecked {</span>
+ 190 |     | <span class='neutral'>            uint256 result = sqrt(a);</span>
+ 191 |     | <span class='neutral'>            return result + (rounding == Rounding.Up &amp;&amp; result * result &lt; a ? 1 : 0);</span>
+ 192 |     | <span class='neutral'>        }</span>
+ 193 |     | <span class='neutral'>    }</span>
+ 194 |     | <span class='neutral'></span>
+ 195 |     | <span class='neutral'>    /**</span>
+ 196 |     | <span class='neutral'>     * @dev Return the log in base 2, rounded down, of a positive value.</span>
+ 197 |     | <span class='neutral'>     * Returns 0 if given 0.</span>
+ 198 |     | <span class='neutral'>     */</span>
+ 199 |     | <span class='neutral'>    function log2(uint256 value) internal pure returns (uint256) {</span>
+ 200 |     | <span class='neutral'>        uint256 result = 0;</span>
+ 201 |     | <span class='neutral'>        unchecked {</span>
+ 202 |     | <span class='neutral'>            if (value &gt;&gt; 128 &gt; 0) {</span>
+ 203 |     | <span class='neutral'>                value &gt;&gt;= 128;</span>
+ 204 |     | <span class='neutral'>                result += 128;</span>
+ 205 |     | <span class='neutral'>            }</span>
+ 206 |     | <span class='neutral'>            if (value &gt;&gt; 64 &gt; 0) {</span>
+ 207 |     | <span class='neutral'>                value &gt;&gt;= 64;</span>
+ 208 |     | <span class='neutral'>                result += 64;</span>
+ 209 |     | <span class='neutral'>            }</span>
+ 210 |     | <span class='neutral'>            if (value &gt;&gt; 32 &gt; 0) {</span>
+ 211 |     | <span class='neutral'>                value &gt;&gt;= 32;</span>
+ 212 |     | <span class='neutral'>                result += 32;</span>
+ 213 |     | <span class='neutral'>            }</span>
+ 214 |     | <span class='neutral'>            if (value &gt;&gt; 16 &gt; 0) {</span>
+ 215 |     | <span class='neutral'>                value &gt;&gt;= 16;</span>
+ 216 |     | <span class='neutral'>                result += 16;</span>
+ 217 |     | <span class='neutral'>            }</span>
+ 218 |     | <span class='neutral'>            if (value &gt;&gt; 8 &gt; 0) {</span>
+ 219 |     | <span class='neutral'>                value &gt;&gt;= 8;</span>
+ 220 |     | <span class='neutral'>                result += 8;</span>
+ 221 |     | <span class='neutral'>            }</span>
+ 222 |     | <span class='neutral'>            if (value &gt;&gt; 4 &gt; 0) {</span>
+ 223 |     | <span class='neutral'>                value &gt;&gt;= 4;</span>
+ 224 |     | <span class='neutral'>                result += 4;</span>
+ 225 |     | <span class='neutral'>            }</span>
+ 226 |     | <span class='neutral'>            if (value &gt;&gt; 2 &gt; 0) {</span>
+ 227 |     | <span class='neutral'>                value &gt;&gt;= 2;</span>
+ 228 |     | <span class='neutral'>                result += 2;</span>
+ 229 |     | <span class='neutral'>            }</span>
+ 230 |     | <span class='neutral'>            if (value &gt;&gt; 1 &gt; 0) {</span>
+ 231 |     | <span class='neutral'>                result += 1;</span>
+ 232 |     | <span class='neutral'>            }</span>
+ 233 |     | <span class='neutral'>        }</span>
+ 234 |     | <span class='neutral'>        return result;</span>
+ 235 |     | <span class='neutral'>    }</span>
+ 236 |     | <span class='neutral'></span>
+ 237 |     | <span class='neutral'>    /**</span>
+ 238 |     | <span class='neutral'>     * @dev Return the log in base 2, following the selected rounding direction, of a positive value.</span>
+ 239 |     | <span class='neutral'>     * Returns 0 if given 0.</span>
+ 240 |     | <span class='neutral'>     */</span>
+ 241 |     | <span class='neutral'>    function log2(uint256 value, Rounding rounding) internal pure returns (uint256) {</span>
+ 242 |     | <span class='neutral'>        unchecked {</span>
+ 243 |     | <span class='neutral'>            uint256 result = log2(value);</span>
+ 244 |     | <span class='neutral'>            return result + (rounding == Rounding.Up &amp;&amp; 1 &lt;&lt; result &lt; value ? 1 : 0);</span>
+ 245 |     | <span class='neutral'>        }</span>
+ 246 |     | <span class='neutral'>    }</span>
+ 247 |     | <span class='neutral'></span>
+ 248 |     | <span class='neutral'>    /**</span>
+ 249 |     | <span class='neutral'>     * @dev Return the log in base 10, rounded down, of a positive value.</span>
+ 250 |     | <span class='neutral'>     * Returns 0 if given 0.</span>
+ 251 |     | <span class='neutral'>     */</span>
+ 252 |     | <span class='neutral'>    function log10(uint256 value) internal pure returns (uint256) {</span>
+ 253 |     | <span class='neutral'>        uint256 result = 0;</span>
+ 254 |     | <span class='neutral'>        unchecked {</span>
+ 255 |     | <span class='neutral'>            if (value &gt;= 10 ** 64) {</span>
+ 256 |     | <span class='neutral'>                value /= 10 ** 64;</span>
+ 257 |     | <span class='neutral'>                result += 64;</span>
+ 258 |     | <span class='neutral'>            }</span>
+ 259 |     | <span class='neutral'>            if (value &gt;= 10 ** 32) {</span>
+ 260 |     | <span class='neutral'>                value /= 10 ** 32;</span>
+ 261 |     | <span class='neutral'>                result += 32;</span>
+ 262 |     | <span class='neutral'>            }</span>
+ 263 |     | <span class='neutral'>            if (value &gt;= 10 ** 16) {</span>
+ 264 |     | <span class='neutral'>                value /= 10 ** 16;</span>
+ 265 |     | <span class='neutral'>                result += 16;</span>
+ 266 |     | <span class='neutral'>            }</span>
+ 267 |     | <span class='neutral'>            if (value &gt;= 10 ** 8) {</span>
+ 268 |     | <span class='neutral'>                value /= 10 ** 8;</span>
+ 269 |     | <span class='neutral'>                result += 8;</span>
+ 270 |     | <span class='neutral'>            }</span>
+ 271 |     | <span class='neutral'>            if (value &gt;= 10 ** 4) {</span>
+ 272 |     | <span class='neutral'>                value /= 10 ** 4;</span>
+ 273 |     | <span class='neutral'>                result += 4;</span>
+ 274 |     | <span class='neutral'>            }</span>
+ 275 |     | <span class='neutral'>            if (value &gt;= 10 ** 2) {</span>
+ 276 |     | <span class='neutral'>                value /= 10 ** 2;</span>
+ 277 |     | <span class='neutral'>                result += 2;</span>
+ 278 |     | <span class='neutral'>            }</span>
+ 279 |     | <span class='neutral'>            if (value &gt;= 10 ** 1) {</span>
+ 280 |     | <span class='neutral'>                result += 1;</span>
+ 281 |     | <span class='neutral'>            }</span>
+ 282 |     | <span class='neutral'>        }</span>
+ 283 |     | <span class='neutral'>        return result;</span>
+ 284 |     | <span class='neutral'>    }</span>
+ 285 |     | <span class='neutral'></span>
+ 286 |     | <span class='neutral'>    /**</span>
+ 287 |     | <span class='neutral'>     * @dev Return the log in base 10, following the selected rounding direction, of a positive value.</span>
+ 288 |     | <span class='neutral'>     * Returns 0 if given 0.</span>
+ 289 |     | <span class='neutral'>     */</span>
+ 290 |     | <span class='neutral'>    function log10(uint256 value, Rounding rounding) internal pure returns (uint256) {</span>
+ 291 |     | <span class='neutral'>        unchecked {</span>
+ 292 |     | <span class='neutral'>            uint256 result = log10(value);</span>
+ 293 |     | <span class='neutral'>            return result + (rounding == Rounding.Up &amp;&amp; 10 ** result &lt; value ? 1 : 0);</span>
+ 294 |     | <span class='neutral'>        }</span>
+ 295 |     | <span class='neutral'>    }</span>
+ 296 |     | <span class='neutral'></span>
+ 297 |     | <span class='neutral'>    /**</span>
+ 298 |     | <span class='neutral'>     * @dev Return the log in base 256, rounded down, of a positive value.</span>
+ 299 |     | <span class='neutral'>     * Returns 0 if given 0.</span>
+ 300 |     | <span class='neutral'>     *</span>
+ 301 |     | <span class='neutral'>     * Adding one to the result gives the number of pairs of hex symbols needed to represent `value` as a hex string.</span>
+ 302 |     | <span class='neutral'>     */</span>
+ 303 |     | <span class='neutral'>    function log256(uint256 value) internal pure returns (uint256) {</span>
+ 304 |     | <span class='neutral'>        uint256 result = 0;</span>
+ 305 |     | <span class='neutral'>        unchecked {</span>
+ 306 |     | <span class='neutral'>            if (value &gt;&gt; 128 &gt; 0) {</span>
+ 307 |     | <span class='neutral'>                value &gt;&gt;= 128;</span>
+ 308 |     | <span class='neutral'>                result += 16;</span>
+ 309 |     | <span class='neutral'>            }</span>
+ 310 |     | <span class='neutral'>            if (value &gt;&gt; 64 &gt; 0) {</span>
+ 311 |     | <span class='neutral'>                value &gt;&gt;= 64;</span>
+ 312 |     | <span class='neutral'>                result += 8;</span>
+ 313 |     | <span class='neutral'>            }</span>
+ 314 |     | <span class='neutral'>            if (value &gt;&gt; 32 &gt; 0) {</span>
+ 315 |     | <span class='neutral'>                value &gt;&gt;= 32;</span>
+ 316 |     | <span class='neutral'>                result += 4;</span>
+ 317 |     | <span class='neutral'>            }</span>
+ 318 |     | <span class='neutral'>            if (value &gt;&gt; 16 &gt; 0) {</span>
+ 319 |     | <span class='neutral'>                value &gt;&gt;= 16;</span>
+ 320 |     | <span class='neutral'>                result += 2;</span>
+ 321 |     | <span class='neutral'>            }</span>
+ 322 |     | <span class='neutral'>            if (value &gt;&gt; 8 &gt; 0) {</span>
+ 323 |     | <span class='neutral'>                result += 1;</span>
+ 324 |     | <span class='neutral'>            }</span>
+ 325 |     | <span class='neutral'>        }</span>
+ 326 |     | <span class='neutral'>        return result;</span>
+ 327 |     | <span class='neutral'>    }</span>
+ 328 |     | <span class='neutral'></span>
+ 329 |     | <span class='neutral'>    /**</span>
+ 330 |     | <span class='neutral'>     * @dev Return the log in base 256, following the selected rounding direction, of a positive value.</span>
+ 331 |     | <span class='neutral'>     * Returns 0 if given 0.</span>
+ 332 |     | <span class='neutral'>     */</span>
+ 333 |     | <span class='neutral'>    function log256(uint256 value, Rounding rounding) internal pure returns (uint256) {</span>
+ 334 |     | <span class='neutral'>        unchecked {</span>
+ 335 |     | <span class='neutral'>            uint256 result = log256(value);</span>
+ 336 |     | <span class='neutral'>            return result + (rounding == Rounding.Up &amp;&amp; 1 &lt;&lt; (result &lt;&lt; 3) &lt; value ? 1 : 0);</span>
+ 337 |     | <span class='neutral'>        }</span>
+ 338 |     | <span class='neutral'>    }</span>
+ 339 |     | <span class='neutral'>}</span>
+ 340 |     | <span class='neutral'></span>
+
+</code>
+<br />
+
+<b>/Users/tj/Work/contracts/lib/openzeppelin-contracts-4.9.3/contracts/utils/math/SignedMath.sol</b>
+<code>
+  1 |     | <span class='neutral'>// SPDX-License-Identifier: MIT</span>
+  2 |     | <span class='neutral'>// OpenZeppelin Contracts (last updated v4.8.0) (utils/math/SignedMath.sol)</span>
+  3 |     | <span class='neutral'></span>
+  4 |     | <span class='neutral'>pragma solidity ^0.8.0;</span>
+  5 |     | <span class='neutral'></span>
+  6 |     | <span class='neutral'>/**</span>
+  7 |     | <span class='neutral'> * @dev Standard signed math utilities missing in the Solidity language.</span>
+  8 |     | <span class='neutral'> */</span>
+  9 |     | <span class='unexecuted'>library SignedMath {</span>
+ 10 |     | <span class='neutral'>    /**</span>
+ 11 |     | <span class='neutral'>     * @dev Returns the largest of two signed numbers.</span>
+ 12 |     | <span class='neutral'>     */</span>
+ 13 |     | <span class='neutral'>    function max(int256 a, int256 b) internal pure returns (int256) {</span>
+ 14 |     | <span class='neutral'>        return a &gt; b ? a : b;</span>
+ 15 |     | <span class='neutral'>    }</span>
+ 16 |     | <span class='neutral'></span>
+ 17 |     | <span class='neutral'>    /**</span>
+ 18 |     | <span class='neutral'>     * @dev Returns the smallest of two signed numbers.</span>
+ 19 |     | <span class='neutral'>     */</span>
+ 20 |     | <span class='neutral'>    function min(int256 a, int256 b) internal pure returns (int256) {</span>
+ 21 |     | <span class='neutral'>        return a &lt; b ? a : b;</span>
+ 22 |     | <span class='neutral'>    }</span>
+ 23 |     | <span class='neutral'></span>
+ 24 |     | <span class='neutral'>    /**</span>
+ 25 |     | <span class='neutral'>     * @dev Returns the average of two signed numbers without overflow.</span>
+ 26 |     | <span class='neutral'>     * The result is rounded towards zero.</span>
+ 27 |     | <span class='neutral'>     */</span>
+ 28 |     | <span class='neutral'>    function average(int256 a, int256 b) internal pure returns (int256) {</span>
+ 29 |     | <span class='neutral'>        // Formula from the book &quot;Hacker&#39;s Delight&quot;</span>
+ 30 |     | <span class='neutral'>        int256 x = (a &amp; b) + ((a ^ b) &gt;&gt; 1);</span>
+ 31 |     | <span class='neutral'>        return x + (int256(uint256(x) &gt;&gt; 255) &amp; (a ^ b));</span>
+ 32 |     | <span class='neutral'>    }</span>
+ 33 |     | <span class='neutral'></span>
+ 34 |     | <span class='neutral'>    /**</span>
+ 35 |     | <span class='neutral'>     * @dev Returns the absolute unsigned value of a signed value.</span>
+ 36 |     | <span class='neutral'>     */</span>
+ 37 |     | <span class='neutral'>    function abs(int256 n) internal pure returns (uint256) {</span>
+ 38 |     | <span class='neutral'>        unchecked {</span>
+ 39 |     | <span class='neutral'>            // must be unchecked in order to support `n = type(int256).min`</span>
+ 40 |     | <span class='neutral'>            return uint256(n &gt;= 0 ? n : -n);</span>
+ 41 |     | <span class='neutral'>        }</span>
+ 42 |     | <span class='neutral'>    }</span>
+ 43 |     | <span class='neutral'>}</span>
+ 44 |     | <span class='neutral'></span>
+
+</code>
+<br />
+
+<b>/Users/tj/Work/contracts/test/token/erc721/fuzz/ERC721PsiV2.Echidna.sol</b>
+<code>
+   1 |     | <span class='neutral'>// SPDX-License-Identifier: MIT</span>
+   2 |     | <span class='neutral'>pragma solidity &gt;=0.8.19 &lt;0.8.29;</span>
+   3 |     | <span class='neutral'></span>
+   4 |     | <span class='neutral'>import {ERC721PsiV2} from &quot;../../../../contracts/token/erc721/erc721psi/ERC721PsiV2.sol&quot;;</span>
+   5 |     | <span class='neutral'>import {ERC721PsiBurnableV2} from &quot;../../../../contracts/token/erc721/erc721psi/ERC721PsiBurnableV2.sol&quot;;</span>
+   6 |     | <span class='neutral'>import {IERC721Receiver} from &quot;@openzeppelin-contracts-4.9.3/token/ERC721/IERC721Receiver.sol&quot;;</span>
+   7 |     | <span class='neutral'></span>
+   8 | *r  | <span class='executed'>contract ERC721PsiV2Echidna is ERC721PsiBurnableV2 {</span>
+   9 |     | <span class='unexecuted'>    address echidna_caller = msg.sender;</span>
+  10 |     | <span class='neutral'>    </span>
+  11 |     | <span class='neutral'>    // Track state for assertions</span>
+  12 | *   | <span class='executed'>    mapping(uint256 =&gt; bool) public minted;</span>
+  13 | *   | <span class='executed'>    mapping(uint256 =&gt; bool) public burned;</span>
+  14 | *   | <span class='executed'>    mapping(uint256 =&gt; address) public tokenOwnersMap;</span>
+  15 |     | <span class='neutral'>    mapping(address =&gt; mapping(address =&gt; bool)) private _operatorApprovals;</span>
+  16 | *   | <span class='executed'>    uint256 public totalMinted;</span>
+  17 |     | <span class='neutral'>    uint256 private currentTokenId;</span>
+  18 |     | <span class='neutral'>    </span>
+  19 |     | <span class='unexecuted'>    constructor() {</span>
+  20 |     | <span class='neutral'>        // Initialize with some tokens</span>
+  21 |     | <span class='unexecuted'>        _mint(address(this), 10);</span>
+  22 |     | <span class='neutral'>    }</span>
+  23 |     | <span class='neutral'></span>
+  24 |     | <span class='neutral'>    // Implement missing abstract functions</span>
+  25 | *   | <span class='executed'>    function safeTransferFrom(address from, address to, uint256 tokenId) external {</span>
+  26 | *   | <span class='executed'>        safeTransferFrom(from, to, tokenId, &quot;&quot;);</span>
+  27 |     | <span class='neutral'>    }</span>
+  28 |     | <span class='neutral'></span>
+  29 | *   | <span class='executed'>    function setApprovalForAll(address operator, bool approved) external override {</span>
+  30 | *   | <span class='executed'>        require(operator != msg.sender, &quot;ERC721: approve to caller&quot;);</span>
+  31 | *   | <span class='executed'>        _operatorApprovals[msg.sender][operator] = approved;</span>
+  32 | *   | <span class='executed'>        emit ApprovalForAll(msg.sender, operator, approved);</span>
+  33 |     | <span class='neutral'>    }</span>
+  34 |     | <span class='neutral'></span>
+  35 | *   | <span class='executed'>    function isApprovedForAll(address owner, address operator) public view override returns (bool) {</span>
+  36 | *   | <span class='executed'>        return _operatorApprovals[owner][operator];</span>
+  37 |     | <span class='neutral'>    }</span>
+  38 |     | <span class='neutral'></span>
+  39 | *   | <span class='executed'>    function name() external pure returns (string memory) {</span>
+  40 | *   | <span class='executed'>        return &quot;EchidnaTest&quot;;</span>
+  41 |     | <span class='neutral'>    }</span>
+  42 |     | <span class='neutral'></span>
+  43 | *   | <span class='executed'>    function symbol() external pure returns (string memory) {</span>
+  44 | *   | <span class='executed'>        return &quot;ECHD&quot;;</span>
+  45 |     | <span class='neutral'>    }</span>
+  46 |     | <span class='neutral'></span>
+  47 | *   | <span class='executed'>    function tokenURI(uint256) external pure returns (string memory) {</span>
+  48 | *   | <span class='executed'>        return &quot;test&quot;;</span>
+  49 |     | <span class='neutral'>    }</span>
+  50 |     | <span class='neutral'></span>
+  51 |     | <span class='neutral'>    // Add mint function</span>
+  52 | *   | <span class='executed'>    function mint(address to, uint256 quantity) external {</span>
+  53 | *   | <span class='executed'>        _mint(to, quantity);</span>
+  54 |     | <span class='neutral'>    }</span>
+  55 |     | <span class='neutral'></span>
+  56 |     | <span class='neutral'>    // Add external burn function</span>
+  57 | *   | <span class='executed'>    function burn(uint256 tokenId) external {</span>
+  58 | *   | <span class='executed'>        _burn(tokenId);</span>
+  59 |     | <span class='neutral'>    }</span>
+  60 |     | <span class='neutral'></span>
+  61 |     | <span class='neutral'>    // Modified test functions without parameters</span>
+  62 |     | <span class='unexecuted'>    function echidna_mint_by_id() public returns (bool) {</span>
+  63 |     | <span class='unexecuted'>        uint256 tokenId = currentTokenId % 2**128;</span>
+  64 |     | <span class='unexecuted'>        currentTokenId++;</span>
+  65 |     | <span class='neutral'>        </span>
+  66 |     | <span class='unexecuted'>        if (minted[tokenId] || burned[tokenId]) return true;</span>
+  67 |     | <span class='neutral'>        </span>
+  68 |     | <span class='unexecuted'>        try this.mint(msg.sender, 1) {</span>
+  69 |     | <span class='unexecuted'>            minted[tokenId] = true;</span>
+  70 |     | <span class='unexecuted'>            tokenOwnersMap[tokenId] = msg.sender;</span>
+  71 |     | <span class='unexecuted'>            totalMinted++;</span>
+  72 |     | <span class='unexecuted'>            return true;</span>
+  73 |     | <span class='neutral'>        } catch {</span>
+  74 |     | <span class='unexecuted'>            return true;</span>
+  75 |     | <span class='neutral'>        }</span>
+  76 |     | <span class='neutral'>    }</span>
+  77 |     | <span class='neutral'></span>
+  78 |     | <span class='unexecuted'>    function echidna_mint_by_quantity() public returns (bool) {</span>
+  79 |     | <span class='unexecuted'>        uint256 quantity = (currentTokenId % 100) + 1;</span>
+  80 |     | <span class='unexecuted'>        currentTokenId++;</span>
+  81 |     | <span class='unexecuted'>        uint256 startTokenId = 2**128 + totalMinted;</span>
+  82 |     | <span class='neutral'>        </span>
+  83 |     | <span class='unexecuted'>        try this.mint(msg.sender, quantity) {</span>
+  84 |     | <span class='unexecuted'>            for(uint256 i = 0; i &lt; quantity; i++) {</span>
+  85 |     | <span class='unexecuted'>                uint256 tokenId = startTokenId + i;</span>
+  86 |     | <span class='unexecuted'>                minted[tokenId] = true;</span>
+  87 |     | <span class='unexecuted'>                tokenOwnersMap[tokenId] = msg.sender;</span>
+  88 |     | <span class='neutral'>            }</span>
+  89 |     | <span class='unexecuted'>            totalMinted += quantity;</span>
+  90 |     | <span class='unexecuted'>            return true;</span>
+  91 |     | <span class='neutral'>        } catch {</span>
+  92 |     | <span class='unexecuted'>            return true;</span>
+  93 |     | <span class='neutral'>        }</span>
+  94 |     | <span class='neutral'>    }</span>
+  95 |     | <span class='neutral'></span>
+  96 |     | <span class='unexecuted'>    function echidna_burn() public returns (bool) {</span>
+  97 |     | <span class='unexecuted'>        uint256 tokenId = currentTokenId % totalMinted;</span>
+  98 |     | <span class='unexecuted'>        currentTokenId++;</span>
+  99 |     | <span class='neutral'>        </span>
+ 100 |     | <span class='unexecuted'>        if (!minted[tokenId] || burned[tokenId]) return true;</span>
+ 101 |     | <span class='neutral'>        </span>
+ 102 |     | <span class='unexecuted'>        try this.burn(tokenId) {</span>
+ 103 |     | <span class='unexecuted'>            burned[tokenId] = true;</span>
+ 104 |     | <span class='unexecuted'>            delete tokenOwnersMap[tokenId];</span>
+ 105 |     | <span class='neutral'>            return true;</span>
+ 106 |     | <span class='neutral'>        } catch {</span>
+ 107 |     | <span class='unexecuted'>            return true;</span>
+ 108 |     | <span class='neutral'>        }</span>
+ 109 |     | <span class='neutral'>    }</span>
+ 110 |     | <span class='neutral'></span>
+ 111 |     | <span class='neutral'>    // Properties that Echidna will check</span>
+ 112 |     | <span class='unexecuted'>    function echidna_total_supply_matches() public view returns (bool) {</span>
+ 113 |     | <span class='unexecuted'>        return totalSupply() == totalMinted;</span>
+ 114 |     | <span class='neutral'>    }</span>
+ 115 |     | <span class='neutral'></span>
+ 116 |     | <span class='unexecuted'>    function echidna_burned_tokens_have_no_owner() public view returns (bool) {</span>
+ 117 |     | <span class='unexecuted'>        for (uint256 i = 0; i &lt; totalMinted; i++) {</span>
+ 118 |     | <span class='unexecuted'>            if (burned[i]) {</span>
+ 119 |     | <span class='unexecuted'>                try this.ownerOf(i) returns (address) {</span>
+ 120 |     | <span class='unexecuted'>                    return false;</span>
+ 121 |     | <span class='neutral'>                } catch {</span>
+ 122 |     | <span class='unexecuted'>                    continue;</span>
+ 123 |     | <span class='neutral'>                }</span>
+ 124 |     | <span class='neutral'>            }</span>
+ 125 |     | <span class='neutral'>        }</span>
+ 126 |     | <span class='neutral'>        return true;</span>
+ 127 |     | <span class='neutral'>    }</span>
+ 128 |     | <span class='neutral'></span>
+ 129 |     | <span class='unexecuted'>    function echidna_minted_tokens_have_owner() public view returns (bool) {</span>
+ 130 |     | <span class='unexecuted'>        for (uint256 i = 0; i &lt; totalMinted; i++) {</span>
+ 131 |     | <span class='unexecuted'>            if (minted[i] &amp;&amp; !burned[i]) {</span>
+ 132 |     | <span class='unexecuted'>                try this.ownerOf(i) returns (address owner) {</span>
+ 133 |     | <span class='unexecuted'>                    if (owner == address(0)) return false;</span>
+ 134 |     | <span class='neutral'>                } catch {</span>
+ 135 |     | <span class='unexecuted'>                    return false;</span>
+ 136 |     | <span class='neutral'>                }</span>
+ 137 |     | <span class='neutral'>            }</span>
+ 138 |     | <span class='neutral'>        }</span>
+ 139 |     | <span class='neutral'>        return true;</span>
+ 140 |     | <span class='neutral'>    }</span>
+ 141 |     | <span class='neutral'></span>
+ 142 |     | <span class='unexecuted'>    function echidna_mint_threshold_respected() public view returns (bool) {</span>
+ 143 |     | <span class='unexecuted'>        for (uint256 i = 0; i &lt; 2**128; i++) {</span>
+ 144 |     | <span class='unexecuted'>            if (minted[i]) {</span>
+ 145 |     | <span class='unexecuted'>                if (i &gt;= 2**128) return false;</span>
+ 146 |     | <span class='neutral'>            }</span>
+ 147 |     | <span class='neutral'>        }</span>
+ 148 |     | <span class='unexecuted'>        return true;</span>
+ 149 |     | <span class='neutral'>    }</span>
+ 150 |     | <span class='neutral'></span>
+ 151 |     | <span class='neutral'>    // Add approval checking invariant</span>
+ 152 |     | <span class='unexecuted'>    function echidna_approval_consistency() public view returns (bool) {</span>
+ 153 |     | <span class='unexecuted'>        for (uint256 i = 0; i &lt; totalMinted; i++) {</span>
+ 154 |     | <span class='unexecuted'>            if (minted[i] &amp;&amp; !burned[i]) {</span>
+ 155 |     | <span class='unexecuted'>                address owner = tokenOwnersMap[i];</span>
+ 156 |     | <span class='unexecuted'>                for (uint160 j = 0; j &lt; 10; j++) {</span>
+ 157 |     | <span class='unexecuted'>                    address operator = address(j + 1);</span>
+ 158 |     | <span class='unexecuted'>                    if (_operatorApprovals[owner][operator]) {</span>
+ 159 |     | <span class='unexecuted'>                        if (!isApprovedForAll(owner, operator)) return false;</span>
+ 160 |     | <span class='neutral'>                    }</span>
+ 161 |     | <span class='neutral'>                }</span>
+ 162 |     | <span class='neutral'>            }</span>
+ 163 |     | <span class='neutral'>        }</span>
+ 164 |     | <span class='neutral'>        return true;</span>
+ 165 |     | <span class='neutral'>    }</span>
+ 166 |     | <span class='neutral'></span>
+ 167 |     | <span class='unexecuted'>    function echidna_transfer_ownership_updates() public returns (bool) {</span>
+ 168 |     | <span class='unexecuted'>        if (totalMinted == 0) return true;</span>
+ 169 |     | <span class='unexecuted'>        uint256 tokenId = currentTokenId % totalMinted;</span>
+ 170 |     | <span class='unexecuted'>        address originalOwner = tokenOwnersMap[tokenId];</span>
+ 171 |     | <span class='unexecuted'>        address newOwner = address(uint160(currentTokenId % 100));</span>
+ 172 |     | <span class='neutral'>        </span>
+ 173 |     | <span class='unexecuted'>        try this.transferFrom(originalOwner, newOwner, tokenId) {</span>
+ 174 |     | <span class='unexecuted'>            return ownerOf(tokenId) == newOwner;</span>
+ 175 |     | <span class='neutral'>        } catch {</span>
+ 176 |     | <span class='unexecuted'>            return true;</span>
+ 177 |     | <span class='neutral'>        }</span>
+ 178 |     | <span class='neutral'>    }</span>
+ 179 |     | <span class='neutral'></span>
+ 180 |     | <span class='unexecuted'>    function echidna_balance_consistency() public view returns (bool) {</span>
+ 181 |     | <span class='unexecuted'>        for (uint160 i = 0; i &lt; 100; i++) {</span>
+ 182 |     | <span class='unexecuted'>            address owner = address(i);</span>
+ 183 |     | <span class='neutral'>            uint256 expectedBalance = 0;</span>
+ 184 |     | <span class='unexecuted'>            for (uint256 j = 0; j &lt; totalMinted; j++) {</span>
+ 185 |     | <span class='unexecuted'>                if (tokenOwnersMap[j] == owner &amp;&amp; !burned[j]) {</span>
+ 186 |     | <span class='unexecuted'>                    expectedBalance++;</span>
+ 187 |     | <span class='neutral'>                }</span>
+ 188 |     | <span class='neutral'>            }</span>
+ 189 |     | <span class='unexecuted'>            if (balanceOf(owner) != expectedBalance) return false;</span>
+ 190 |     | <span class='neutral'>        }</span>
+ 191 |     | <span class='neutral'>        return true;</span>
+ 192 |     | <span class='neutral'>    }</span>
+ 193 |     | <span class='neutral'></span>
+ 194 |     | <span class='unexecuted'>    function echidna_sequential_token_ids() public view returns (bool) {</span>
+ 195 |     | <span class='neutral'>        uint256 lastId = type(uint256).max;</span>
+ 196 |     | <span class='unexecuted'>        for (uint256 i = 0; i &lt; totalMinted; i++) {</span>
+ 197 |     | <span class='unexecuted'>            if (minted[i] &amp;&amp; !burned[i]) {</span>
+ 198 |     | <span class='unexecuted'>                if (lastId != type(uint256).max &amp;&amp; i &lt;= lastId) return false;</span>
+ 199 |     | <span class='unexecuted'>                lastId = i;</span>
+ 200 |     | <span class='neutral'>            }</span>
+ 201 |     | <span class='neutral'>        }</span>
+ 202 |     | <span class='unexecuted'>        return true;</span>
+ 203 |     | <span class='neutral'>    }</span>
+ 204 |     | <span class='neutral'></span>
+ 205 |     | <span class='unexecuted'>    function echidna_token_id_uniqueness() public view returns (bool) {</span>
+ 206 |     | <span class='unexecuted'>        for (uint256 i = 0; i &lt; totalMinted; i++) {</span>
+ 207 |     | <span class='unexecuted'>            if (!burned[i]) {</span>
+ 208 |     | <span class='unexecuted'>                for (uint256 j = i + 1; j &lt; totalMinted; j++) {</span>
+ 209 |     | <span class='unexecuted'>                    if (!burned[j] &amp;&amp; tokenOwnersMap[i] == tokenOwnersMap[j]) {</span>
+ 210 |     | <span class='unexecuted'>                        return false;</span>
+ 211 |     | <span class='neutral'>                    }</span>
+ 212 |     | <span class='neutral'>                }</span>
+ 213 |     | <span class='neutral'>            }</span>
+ 214 |     | <span class='neutral'>        }</span>
+ 215 |     | <span class='neutral'>        return true;</span>
+ 216 |     | <span class='neutral'>    }</span>
+ 217 |     | <span class='neutral'>} </span>
+
+</code>
+<br />
+

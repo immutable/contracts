@@ -27,6 +27,28 @@ contract ImmutableERC721MintByIDV3 is ImmutableERC721BaseV3 {
         address royaltyReceiver_,
         uint96 feeNumerator_
     ) {
+        _init(
+            owner_,
+            name_,
+            symbol_,
+            baseURI_,
+            contractURI_,
+            operatorAllowlist_,
+            royaltyReceiver_,
+            feeNumerator_
+        );
+    }
+
+    function _init(
+        address owner_,
+        string memory name_,
+        string memory symbol_,
+        string memory baseURI_,
+        string memory contractURI_,
+        address operatorAllowlist_,
+        address royaltyReceiver_,
+        uint96 feeNumerator_
+    ) public virtual initializer {
         __ImmutableERC721Base_init(
             owner_,
             name_,
@@ -38,6 +60,8 @@ contract ImmutableERC721MintByIDV3 is ImmutableERC721BaseV3 {
             feeNumerator_
         );
     }
+
+
 
     /**
      * @notice Allows minter to mint `tokenID` to `to`

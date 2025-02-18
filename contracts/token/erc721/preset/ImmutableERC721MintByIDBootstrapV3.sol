@@ -3,6 +3,9 @@
 pragma solidity >=0.8.19 <0.8.29;
 
 import {ImmutableERC721MintByIDUpgradeableV3} from "./ImmutableERC721MintByIDUpgradeableV3.sol";
+import {ImmutableERC721MintByIDV3} from "./ImmutableERC721MintByIDV3.sol";
+import {ImmutableERC721BaseV3} from "../abstract/ImmutableERC721BaseV3.sol";
+
 import {ERC721Upgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/token/ERC721/ERC721Upgradeable.sol";
 import {StorageSlotUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/utils/StorageSlotUpgradeable.sol";
 
@@ -68,16 +71,24 @@ contract ImmutableERC721MintByIDBootstrapV3 is ImmutableERC721MintByIDUpgradeabl
     uint256 private constant STORAGE_SLOT_BALANCES = 305;
     uint256 private constant STORAGE_SLOT_OWNERS = 304;
 
+    function getTheBalance(address account) public view returns (uint256) {
+        return _getBalance(account);
+    }
+    function getOwner(uint256 tokenId) external view returns (address) {
+        bytes32 slot = keccak256(abi.encode(tokenId, STORAGE_SLOT_OWNERS));
+        return StorageSlotUpgradeable.getAddressSlot(slot).value;
+    }
+
     function _getBalance(address account) private view returns (uint256) {
-        bytes32 slot = keccak256(abi.encode(STORAGE_SLOT_BALANCES, account));
+        bytes32 slot = keccak256(abi.encode(account, STORAGE_SLOT_BALANCES));
         return StorageSlotUpgradeable.getUint256Slot(slot).value;
     }
     function _setBalance(address account, uint256 value) private {
-        bytes32 slot = keccak256(abi.encode(STORAGE_SLOT_BALANCES, account));
+        bytes32 slot = keccak256(abi.encode(account, STORAGE_SLOT_BALANCES));
         StorageSlotUpgradeable.getUint256Slot(slot).value = value;
     }
     function _setOwner(uint256 tokenId, address owner) private {
-        bytes32 slot = keccak256(abi.encode(STORAGE_SLOT_OWNERS, tokenId));
+        bytes32 slot = keccak256(abi.encode(tokenId, STORAGE_SLOT_OWNERS));
         StorageSlotUpgradeable.getAddressSlot(slot).value = owner;
     }
 
@@ -87,28 +98,28 @@ contract ImmutableERC721MintByIDBootstrapV3 is ImmutableERC721MintByIDUpgradeabl
     /**
      * @dev See {IERC721-approve}.
      */
-    function approve(address /* to */, uint256 /* tokenId */) public virtual override {
+    function approve(address /* to */, uint256 /* tokenId */) public virtual override(ERC721Upgradeable) {
         revert NotSupportedDuringBootstrapPhase();
     }
 
     /**
      * @dev See {IERC721-setApprovalForAll}.
      */
-    function setApprovalForAll(address /* operator */, bool /* approved */) public virtual override {
+    function setApprovalForAll(address /* operator */, bool /* approved */) public virtual override(ImmutableERC721BaseV3) {
         revert NotSupportedDuringBootstrapPhase();
     }
 
     /**
      * @dev See {IERC721-transferFrom}.
      */
-    function transferFrom(address /* from */, address /* to */, uint256 /* tokenId */) public virtual override {
+    function transferFrom(address /* from */, address /* to */, uint256 /* tokenId */) public virtual override(ERC721Upgradeable) {
         revert NotSupportedDuringBootstrapPhase();
     }
 
     /**
      * @dev See {IERC721-safeTransferFrom}.
      */
-    function safeTransferFrom(address /* from */, address /* to */, uint256 /* tokenId */) public virtual override {
+    function safeTransferFrom(address /* from */, address /* to */, uint256 /* tokenId */) public virtual override(ERC721Upgradeable) {
         revert NotSupportedDuringBootstrapPhase();
     }
 
@@ -119,22 +130,20 @@ contract ImmutableERC721MintByIDBootstrapV3 is ImmutableERC721MintByIDUpgradeabl
         revert NotSupportedDuringBootstrapPhase();
     }
 
+    function safeTransferFromBatch(TransferRequest calldata /* tr */) external virtual override (ImmutableERC721MintByIDV3){
+        revert NotSupportedDuringBootstrapPhase();
+    }
+
+
 
 // TODO burn functions too need to be removed
-
-
-    function burnBatch(uint256[] calldata /* tokenIDs */) external pure override {
+    function burnBatch(uint256[] calldata /* tokenIDs */) external pure override(ImmutableERC721MintByIDV3) {
         revert NotSupportedDuringBootstrapPhase();
     }
 
-    function safeBurnBatch(IDBurn[] calldata /* burns */) external pure override {
+    function safeBurnBatch(IDBurn[] calldata /* burns */) external pure override(ImmutableERC721MintByIDV3) {
         revert NotSupportedDuringBootstrapPhase();
     }
-
-    function safeTransferFromBatch(TransferRequest calldata /* tr */) external virtual override {
-        revert NotSupportedDuringBootstrapPhase();
-    }
-
 
 
 

@@ -22,13 +22,13 @@ contract ImmutableERC721MintByIDUpgradeableV3 is ImmutableERC721MintByIDV3, UUPS
 
     // Dummy constructor overrides constructor of base.
     constructor() ImmutableERC721MintByIDV3(
-        address(0), // owner_
+        address(1), // owner_
         "", // name_,
         "", // symbol_,
         "", // baseURI_,
         "", // contractURI_,
-        address(0), // operatorAllowlist_,
-        address(0), // royaltyReceiver_,
+        address(1), // operatorAllowlist_,
+        address(1), // royaltyReceiver_,
         uint96(0) // feeNumerator_
     )
     {}
@@ -55,7 +55,7 @@ contract ImmutableERC721MintByIDUpgradeableV3 is ImmutableERC721MintByIDV3, UUPS
         address operatorAllowlist_,
         address royaltyReceiver_,
         uint96 feeNumerator_
-    ) public initializer {
+    ) public virtual initializer {
         __ImmutableERC721Base_init(
             owner_,
             name_,
@@ -70,7 +70,6 @@ contract ImmutableERC721MintByIDUpgradeableV3 is ImmutableERC721MintByIDV3, UUPS
         version = _VERSION1;
 
         _grantRole(UPGRADE_ROLE, owner_);
-
     }
 
     /**
@@ -87,7 +86,6 @@ contract ImmutableERC721MintByIDUpgradeableV3 is ImmutableERC721MintByIDV3, UUPS
     function upgradeStorage(bytes memory /* _data */) external virtual {
         revert CanNotUpgradeToLowerOrSameVersion(version);
     }
-    
 
     // Override the _authorizeUpgrade function
     // solhint-disable-next-line no-empty-blocks

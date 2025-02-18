@@ -7,6 +7,7 @@ import {ImmutableERC721MintByIDUpgradeableV3} from "../../../contracts/token/erc
 import {ImmutableERC721MintByIDBootstrapV3} from "../../../contracts/token/erc721/preset/ImmutableERC721MintByIDBootstrapV3.sol";
 import {ERC721BaseTest} from "./ERC721Base.t.sol";
 import {ERC1967Proxy} from "openzeppelin-contracts-4.9.3/proxy/ERC1967/ERC1967Proxy.sol";
+import {ERC721Upgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/token/ERC721/ERC721Upgradeable.sol";
 
 
 contract ERC721BootstrapTest is ERC721BaseTest {
@@ -17,8 +18,8 @@ contract ERC721BootstrapTest is ERC721BaseTest {
     function setUp() public virtual override {
         super.setUp();
 
-        ImmutableERC721MintByIDBootstrapV3 bootstrapImpl = new ImmutableERC721MintByIDBootstrapV3();
-        erc721Impl = new ImmutableERC721MintByIDUpgradeableV3();
+       ImmutableERC721MintByIDBootstrapV3 bootstrapImpl = new ImmutableERC721MintByIDBootstrapV3();
+       erc721Impl = new ImmutableERC721MintByIDUpgradeableV3();
 
         bytes memory initData = abi.encodeWithSelector(
             ImmutableERC721MintByIDUpgradeableV3.initialize.selector, 
@@ -80,19 +81,33 @@ contract ERC721BootstrapTest is ERC721BaseTest {
         vm.prank(owner);
         bootstrap.bootstrapPhaseChangeOwnership(requests);
 
-        assertEq(erc721.balanceOf(user1), 2);
-        assertEq(erc721.balanceOf(user2), 1);
-        assertEq(erc721.balanceOf(user3), 2);
-        assertEq(erc721.totalSupply(), 5);
-        assertEq(erc721.ownerOf(3), user1);
-        assertEq(erc721.ownerOf(4), user3);
-        assertEq(erc721.ownerOf(5), user1);
-        assertEq(erc721.ownerOf(6), user2);
-        assertEq(erc721.ownerOf(7), user3);
+        assertEq(erc721.balanceOf(user1), 2, "Balance user1 after change ownership");
+        assertEq(erc721.balanceOf(user2), 1, "Balance user2 after change ownership");
+        assertEq(erc721.balanceOf(user3), 2, "Balance user3 after change ownership");
+        assertEq(erc721.totalSupply(), 5, "Total supply");
+        assertEq(erc721.ownerOf(3), user1, "ownerOf 3");
+        assertEq(erc721.ownerOf(4), user3, "ownerOf 4");
+        assertEq(erc721.ownerOf(5), user1, "ownerOf 5");
+        assertEq(erc721.ownerOf(6), user2, "ownerOf 6");
+        assertEq(erc721.ownerOf(7), user3, "ownerOf 7");
 
         // Execute upgrade
+        // A function must be called, so just call the balanceOf view function.
+        bytes memory initData = abi.encodeWithSelector(ERC721Upgradeable.balanceOf.selector, address(1));
+        vm.prank(owner);
+        bootstrap.upgradeToAndCall(address(erc721Impl), initData);
+        assertEq(bootstrap.version(), 1, "version");
 
-        // Check ownership with upgraded contract
+        // Check ownership with upgraded
+        assertEq(erc721.balanceOf(user1), 2, "Balance user1 after upgrade");
+        assertEq(erc721.balanceOf(user2), 1, "Balance user2 after upgrade");
+        assertEq(erc721.balanceOf(user3), 2, "Balance user3 after upgrade");
+        assertEq(erc721.totalSupply(), 5, "Total supply after upgrade");
+        assertEq(erc721.ownerOf(3), user1, "ownerOf 3 after upgrade");
+        assertEq(erc721.ownerOf(4), user3, "ownerOf 4 after upgrade");
+        assertEq(erc721.ownerOf(5), user1, "ownerOf 5 after upgrade");
+        assertEq(erc721.ownerOf(6), user2, "ownerOf 6 after upgrade");
+        assertEq(erc721.ownerOf(7), user3, "ownerOf 7 after upgrade");
     }
 
 

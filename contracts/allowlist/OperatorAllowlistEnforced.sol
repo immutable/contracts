@@ -1,7 +1,7 @@
 // Copyright Immutable Pty Ltd 2018 - 2023
 // SPDX-License-Identifier: Apache 2.0
 // slither-disable-start calls-loop
-pragma solidity 0.8.19;
+pragma solidity >=0.8.19 <0.8.29;
 
 // Allowlist Registry
 import {IOperatorAllowlist} from "./IOperatorAllowlist.sol";

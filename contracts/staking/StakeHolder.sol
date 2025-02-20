@@ -1,6 +1,6 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: Apache 2
-pragma solidity ^0.8.19;
+pragma solidity >=0.8.19 <0.8.29;
 
 import {UUPSUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/proxy/utils/UUPSUpgradeable.sol";
 import {AccessControlEnumerableUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/access/AccessControlEnumerableUpgradeable.sol";

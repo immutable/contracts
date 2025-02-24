@@ -1,10 +1,7 @@
 @openzeppelin/contracts/=lib/openzeppelin-contracts-4.9.3/contracts/
-@openzeppelin-contracts-4.9.3/=lib/openzeppelin-contracts-4.9.3/contracts/
-ds-test/=lib/forge-std/lib/ds-test/src/
-forge-test/=lib/forge-std/lib/forge-test/src/
-forge-std/=lib/forge-std/src/
 openzeppelin-contracts-5.0.2/=lib/openzeppelin-contracts-5.0.2/contracts/
 openzeppelin-contracts-upgradeable-4.9.3/=lib/openzeppelin-contracts-upgradeable-4.9.3/contracts/
+openzeppelin-contracts-4.9.3/=lib/openzeppelin-contracts-4.9.3/contracts/
 solidity-bits/=lib/solidity-bits/
 solidity-bytes-utils/=lib/solidity-bytes-utils/
 seaport/contracts/=lib/immutable-seaport-1.5.0+im1.3/contracts/

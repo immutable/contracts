@@ -2,7 +2,7 @@
 pragma solidity >=0.8.19 <0.8.29;
 
 import {ERC721PsiBurnableV2} from "../../../../contracts/token/erc721/erc721psi/ERC721PsiBurnableV2.sol";
-import {IERC721Receiver} from "@openzeppelin-contracts-4.9.3/token/ERC721/IERC721Receiver.sol";
+import {IERC721Receiver} from "openzeppelin-contracts-4.9.3/token/ERC721/IERC721Receiver.sol";
 
 // Test receiver contract for safe transfer testing
 contract TestReceiver is IERC721Receiver {
@@ -161,7 +161,7 @@ contract ERC721PsiV2Echidna is ERC721PsiBurnableV2 {
         return true;
     }
 
-    function echidna_nonexistent_ownership() public view returns (bool) {
+    function echidna_nonexistent_ownership1() public view returns (bool) {
         uint256 nonexistentTokenId = totalMinted + 1;
         
         try this.ownerOf(nonexistentTokenId) {
@@ -169,7 +169,9 @@ contract ERC721PsiV2Echidna is ERC721PsiBurnableV2 {
         } catch {
             return true;
         }
-        
+    }
+
+    function echidna_nonexistent_ownership2() public view returns (bool) {
         // Also test burned tokens
         if (totalMinted > 0) {
             uint256 tokenId = currentTokenId % totalMinted;
@@ -270,8 +272,6 @@ contract ERC721PsiV2Echidna is ERC721PsiBurnableV2 {
     }
 
     function echidna_mint_boundary_check() public returns (bool) {
-        uint256 boundaryId = 2**128 - 1;
-        
         // Test exactly at boundary
         try this.mint(msg.sender, 1) {
             uint256 mintedId = totalMinted - 1;

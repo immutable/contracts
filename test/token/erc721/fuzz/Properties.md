@@ -8,7 +8,8 @@
 | CORE-03 | Balance sum matches total supply | ✅ | ✅ | `echidna_balance_sum_property()` |
 | CORE-04 | All minted tokens have valid owners | ✅ | ✅ | `echidna_minted_tokens_have_owner()` |
 | CORE-05 | Burned tokens have no owners | ✅ | ✅ | `echidna_burned_tokens_have_no_owner()` |
-| CORE-06 | Non-existent tokens revert ownership checks | ✅ | ✅ | `echidna_nonexistent_ownership()` |
+| CORE-06 | Non-existent tokens revert ownership checks | ✅ | ✅ | `echidna_nonexistent_ownership1()` |
+| CORE-07 | Non-existent tokens revert ownership checks | ✅ | ✅ | `echidna_nonexistent_ownership2()` |
 | **Batch Operations** |
 | BATCH-01 | Group operations maintain consistency | ✅ | ✅ | `echidna_group_operations_sequence()` |
 | BATCH-02 | Group occupancy limits respected | ✅ | ✅ | `echidna_group_occupancy()` |

@@ -18,30 +18,15 @@ All properties tested can be found in `Properties.md`.
 
 ## Setup
 
-1. Installing Echidna
-   ```bash
-   # Install using the latest master branch
-   pip install echidna-test
-   ```
-
-2. Install Foundry (for invariant tests)
-   ```bash
-   curl -L https://foundry.paradigm.xyz | bash
-   foundryup
-   ```
-
-3. Install dependencies
-   ```bash
-   forge install
-   ```
+1. Installing Echidna: [https://github.com/crytic/echidna](https://github.com/crytic/echidna)
 
 ## Running the Tests
 
 ### Echidna Fuzzing
 ```bash
-echidna-test contracts/test/ERC721PsiV2.Echidna.sol \
+echidna test/token/erc721/fuzz/ERC721PsiV2.Echidna.sol \
   --contract ERC721PsiV2Echidna \
-  --config echidna.config.yaml
+  --config test/token/erc721/fuzz/echidna.config.yaml
 ```
 
 ### Foundry Invariant Tests
@@ -51,30 +36,9 @@ forge test --match-contract ERC721PsiV2InvariantTest -vvv
 
 ## Test Configuration
 
-### Echidna Configuration (`echidna.config.yaml`)
-```yaml
-testMode: assertion
-testLimit: 50000
-corpusDir: corpus
-coverage: true
-seqLen: 100
-shrinkLimit: 5000
-prefix: "echidna_"
-```
+Echidna Configuration: [./echidna.config.yaml](echidna.config.yaml)
 
-### Foundry Configuration (`foundry.toml`)
-```toml
-[profile.default]
-src = 'contracts'
-out = 'out'
-libs = ['lib']
-solc = "0.8.19"
-optimizer = true
-optimizer_runs = 200
-
-[profile.default.fuzz]
-runs = 1000
-```
+Foundry Configuration: [../../../../foundry.toml](../../../../foundry.toml)
 
 ## Scope
 

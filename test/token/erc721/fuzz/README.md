@@ -29,11 +29,6 @@ echidna test/token/erc721/fuzz/ERC721PsiV2.Echidna.sol \
   --config test/token/erc721/fuzz/echidna.config.yaml
 ```
 
-### Foundry Invariant Tests
-```bash
-forge test --match-contract ERC721PsiV2InvariantTest -vvv
-```
-
 ## Test Configuration
 
 Echidna Configuration: [./echidna.config.yaml](echidna.config.yaml)

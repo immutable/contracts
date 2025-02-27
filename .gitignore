@@ -18,6 +18,7 @@ dist/
 
 # Forge files
 foundry-out/
+broadcast/
 
 # Apple Mac files
 .DS_Store

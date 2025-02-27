@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
+
 import {ImmutableERC721BaseV3} from "../abstract/ImmutableERC721BaseV3.sol";
 
 contract ImmutableERC721MintByIDV3 is ImmutableERC721BaseV3 {
@@ -127,12 +128,20 @@ contract ImmutableERC721MintByIDV3 is ImmutableERC721BaseV3 {
      *  @param tr the TransferRequest struct containing the from, tos, and tokenIds
      */
     function safeTransferFromBatch(TransferRequest calldata tr) external virtual {
-        if (tr.tokenIds.length != tr.tos.length) {
+        uint256 len = tr.tokenIds.length;
+        if (len != tr.tos.length) {
             revert IImmutableERC721MismatchedTransferLengths();
         }
 
-        for (uint256 i = 0; i < tr.tokenIds.length; i++) {
-            safeTransferFrom(tr.from, tr.tos[i], tr.tokenIds[i]);
+        // An unreachable code compiler warning is mistakenly show for the following line.
+        // The issue is that one implementation (ImmutableERC721MintByIDBootstrapV3) would 
+        // cause the safeTransferFrom to revert. However, other implementations (this contract
+        // and ImmutableERC721MintByIDUpgradeableV3) do not revert.
+        // This issue has been previously reported to the Solidity compiler team. 
+        //  See: https://github.com/ethereum/solidity/issues/14359
+        address from = tr.from;
+        for (uint256 i = 0; i < len; i++) {
+            safeTransferFrom(from, tr.tos[i], tr.tokenIds[i]);
         }
     }
 

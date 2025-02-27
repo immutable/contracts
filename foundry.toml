@@ -7,3 +7,6 @@ fs_permissions = [{ access = "read", path = "./foundry-out" }]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 
+# An unreachable code is mistakenly issued for ImmutableERC721MintByIDV3. See the 
+# source file for details.
+ignored_warnings_from = ["contracts/token/erc721/preset/ImmutableERC721MintByIDV3.sol"]

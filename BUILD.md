@@ -49,6 +49,18 @@ To check the test coverage based on Foundry tests use:
  forge coverage
  ```
 
+## Performance Tests
+
+To run tests that check the gas usage:
+
+```
+forge test -C perfTest --match-path "./perfTest/**" -vvv --block-gas-limit 1000000000000
+```
+
+## Fuzz Tests
+
+For ERC721 tests see: [./test/token/erc721/fuzz/README.md](./test/token/erc721/fuzz/README.md)
+
 ## Deploy
 
 To deploy the contract with foundry use the following command:

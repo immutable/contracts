@@ -23,6 +23,7 @@ Contract threat models and audits:
 |---------------------------|------------------|-----------------|----------------|
 | Threat model              | October 2023     |[4ff8003d](https://github.com/immutable/contracts/tree/4ff8003da7f1fd9a6e505646cc519cffe07e4994) | [202309-threat-model-preset-erc721.md](../../../audits/token/202309-threat-model-preset-erc721.md) |
 | Internal audit            | November 2023, revised February 2024 | [8ae72094](https://github.com/immutable/contracts/tree/8ae72094ab335c6a88ebabde852040e85cb77880) | [202402-internal-audit-preset-erc721.pdf](../../../audits/token/202402-internal-audit-preset-erc721.pdf)
+| Internal audit            | February 2025 | [2606a379](https://github.com/immutable/contracts/tree/2606a379573b892428254b83660b4bc91ed6e173) | [202502-internal-audit-preset-erc721v2.pdf](../../../audits/token/202502-internal-audit-preset-erc721v2.pdf)
 
 
 # Contracts
@@ -91,6 +92,3 @@ ImmutableERC721MintByID
    |- ERC721Permit
       |- Open Zeppelin's ERC721Burnable
 ```
-
-
-

@@ -155,7 +155,7 @@ contract StakeHolder is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
         for (uint256 i = 0; i < len; i++) {
             AccountAmount calldata accountAmount = _recipientsAndAmounts[i];
             uint256 amount = accountAmount.amount;
-            // Add stake, but require the acount to either currently be staking or have
+            // Add stake, but require the account to either currently be staking or have
             // previously staked.
             _addStake(accountAmount.account, amount, true);
             total += amount;

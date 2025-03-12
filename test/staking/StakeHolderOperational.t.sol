@@ -199,7 +199,7 @@ contract StakeHolderOperationalTest is StakeHolderBaseTest {
         vm.deal(staker1, 100 ether);
         vm.deal(staker2, 100 ether);
         vm.deal(staker3, 100 ether);
-        vm.deal(bank, 100 ether);
+        vm.deal(distributeAdmin, 100 ether);
 
         vm.prank(staker1);
         stakeHolder.stake{value: 10 ether}();
@@ -211,7 +211,7 @@ contract StakeHolderOperationalTest is StakeHolderBaseTest {
         // Distribute rewards to staker2 only.
         AccountAmount[] memory accountsAmounts = new AccountAmount[](1);
         accountsAmounts[0] = AccountAmount(staker2, 0.5 ether);
-        vm.prank(bank);
+        vm.prank(distributeAdmin);
         stakeHolder.distributeRewards{value: 0.5 ether}(accountsAmounts);
 
         assertEq(stakeHolder.getBalance(staker1), 10 ether, "Incorrect balance1");
@@ -223,7 +223,7 @@ contract StakeHolderOperationalTest is StakeHolderBaseTest {
         vm.deal(staker1, 100 ether);
         vm.deal(staker2, 100 ether);
         vm.deal(staker3, 100 ether);
-        vm.deal(bank, 100 ether);
+        vm.deal(distributeAdmin, 100 ether);
 
         vm.prank(staker1);
         stakeHolder.stake{value: 10 ether}();
@@ -236,7 +236,7 @@ contract StakeHolderOperationalTest is StakeHolderBaseTest {
         AccountAmount[] memory accountsAmounts = new AccountAmount[](2);
         accountsAmounts[0] = AccountAmount(staker2, 0.5 ether);
         accountsAmounts[1] = AccountAmount(staker3, 1 ether);
-        vm.prank(bank);
+        vm.prank(distributeAdmin);
         stakeHolder.distributeRewards{value: 1.5 ether}(accountsAmounts);
 
         assertEq(stakeHolder.getBalance(staker1), 10 ether, "Incorrect balance1");
@@ -246,7 +246,7 @@ contract StakeHolderOperationalTest is StakeHolderBaseTest {
 
     function testDistributeZeroReward() public {
         vm.deal(staker1, 100 ether);
-        vm.deal(bank, 100 ether);
+        vm.deal(distributeAdmin, 100 ether);
 
         vm.prank(staker1);
         stakeHolder.stake{value: 10 ether}();
@@ -255,7 +255,7 @@ contract StakeHolderOperationalTest is StakeHolderBaseTest {
         AccountAmount[] memory accountsAmounts = new AccountAmount[](1);
         accountsAmounts[0] = AccountAmount(staker2, 0 ether);
         vm.expectRevert(abi.encodeWithSelector(StakeHolder.MustDistributeMoreThanZero.selector));
-        vm.prank(bank);
+        vm.prank(distributeAdmin);
         stakeHolder.distributeRewards{value: 0 ether}(accountsAmounts);
     }
 
@@ -263,7 +263,7 @@ contract StakeHolderOperationalTest is StakeHolderBaseTest {
         vm.deal(staker1, 100 ether);
         vm.deal(staker2, 100 ether);
         vm.deal(staker3, 100 ether);
-        vm.deal(bank, 100 ether);
+        vm.deal(distributeAdmin, 100 ether);
 
         vm.prank(staker1);
         stakeHolder.stake{value: 10 ether}();
@@ -277,13 +277,13 @@ contract StakeHolderOperationalTest is StakeHolderBaseTest {
         accountsAmounts[0] = AccountAmount(staker2, 0.5 ether);
         accountsAmounts[1] = AccountAmount(staker3, 1 ether);
         vm.expectRevert(abi.encodeWithSelector(StakeHolder.DistributionAmountsDoNotMatchTotal.selector, 1 ether, 1.5 ether));
-        vm.prank(bank);
+        vm.prank(distributeAdmin);
         stakeHolder.distributeRewards{value: 1 ether}(accountsAmounts);
     }
 
     function testDistributeToEmptyAccount() public {
         vm.deal(staker1, 100 ether);
-        vm.deal(bank, 100 ether);
+        vm.deal(distributeAdmin, 100 ether);
 
         vm.prank(staker1);
         stakeHolder.stake{value: 10 ether}();
@@ -293,7 +293,7 @@ contract StakeHolderOperationalTest is StakeHolderBaseTest {
         // Distribute rewards to staker2 only.
         AccountAmount[] memory accountsAmounts = new AccountAmount[](1);
         accountsAmounts[0] = AccountAmount(staker1, 0.5 ether);
-        vm.prank(bank);
+        vm.prank(distributeAdmin);
         stakeHolder.distributeRewards{value: 0.5 ether}(accountsAmounts);
 
         assertEq(stakeHolder.getBalance(staker1), 0.5 ether, "Incorrect balance1");
@@ -302,13 +302,30 @@ contract StakeHolderOperationalTest is StakeHolderBaseTest {
     }
 
     function testDistributeToUnusedAccount() public {
-        vm.deal(bank, 100 ether);
+        vm.deal(distributeAdmin, 100 ether);
 
         // Distribute rewards to staker2 only.
         AccountAmount[] memory accountsAmounts = new AccountAmount[](1);
         accountsAmounts[0] = AccountAmount(staker1, 0.5 ether);
         vm.expectRevert(abi.encodeWithSelector(StakeHolder.AttemptToDistributeToNewAccount.selector, staker1, 0.5 ether));
+        vm.prank(distributeAdmin);
+        stakeHolder.distributeRewards{value: 0.5 ether}(accountsAmounts);
+    }
+
+    function testDistributeBadAuth() public {
+        vm.deal(staker1, 100 ether);
+        vm.deal(bank, 100 ether);
+
+        vm.prank(staker1);
+        stakeHolder.stake{value: 10 ether}();
+
+        // Distribute rewards to staker1 only, but not from distributeAdmin
+        AccountAmount[] memory accountsAmounts = new AccountAmount[](1);
+        accountsAmounts[0] = AccountAmount(staker1, 0.5 ether);
         vm.prank(bank);
+        // Error will be of the form: 
+        // AccessControl: account 0x7fa9385be102ac3eac297483dd6233d62b3e1496 is missing role 0x555047524144455f524f4c450000000000000000000000000000000000000000
+        vm.expectRevert();
         stakeHolder.distributeRewards{value: 0.5 ether}(accountsAmounts);
     }
 }

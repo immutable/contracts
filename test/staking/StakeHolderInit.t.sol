@@ -20,7 +20,9 @@ contract StakeHolderInitTest is StakeHolderBaseTest {
     function testAdmins() public {
         assertEq(stakeHolder.getRoleMemberCount(defaultAdminRole), 1, "Expect one role admin");
         assertEq(stakeHolder.getRoleMemberCount(upgradeRole), 1, "Expect one upgrade admin");
+        assertEq(stakeHolder.getRoleMemberCount(distributeRole), 1, "Expect one distribute admin");
         assertTrue(stakeHolder.hasRole(defaultAdminRole, roleAdmin), "Expect roleAdmin is role admin");
         assertTrue(stakeHolder.hasRole(upgradeRole, upgradeAdmin), "Expect upgradeAdmin is upgrade admin");
+        assertTrue(stakeHolder.hasRole(distributeRole, distributeAdmin), "Expect distributeAdmin is distribute admin");
     }
 }

@@ -15,12 +15,14 @@ contract StakeHolderBaseTest is Test {
 
     bytes32 public defaultAdminRole;
     bytes32 public upgradeRole;
+    bytes32 public distributeRole;
 
     ERC1967Proxy public proxy;
     StakeHolder public stakeHolder;
 
     address public roleAdmin;
     address public upgradeAdmin;
+    address public distributeAdmin;
 
     address public staker1;
     address public staker2;
@@ -30,6 +32,7 @@ contract StakeHolderBaseTest is Test {
     function setUp() public {
         roleAdmin = makeAddr("RoleAdmin");
         upgradeAdmin = makeAddr("UpgradeAdmin");
+        distributeAdmin = makeAddr("DistributeAdmin");
 
         staker1 = makeAddr("Staker1");
         staker2 = makeAddr("Staker2");
@@ -39,7 +42,7 @@ contract StakeHolderBaseTest is Test {
         StakeHolder impl = new StakeHolder();
 
         bytes memory initData = abi.encodeWithSelector(
-            StakeHolder.initialize.selector, roleAdmin, upgradeAdmin
+            StakeHolder.initialize.selector, roleAdmin, upgradeAdmin, distributeAdmin
         );
 
         proxy = new ERC1967Proxy(address(impl), initData);
@@ -47,5 +50,6 @@ contract StakeHolderBaseTest is Test {
 
         defaultAdminRole = stakeHolder.DEFAULT_ADMIN_ROLE();
         upgradeRole = stakeHolder.UPGRADE_ROLE();
+        distributeRole = stakeHolder.DISTRIBUTE_ROLE();
     }
 }

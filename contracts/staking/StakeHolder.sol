@@ -1,4 +1,4 @@
-// Copyright (c) Immutable Pty Ltd 2018 - 2024
+// Copyright (c) Immutable Pty Ltd 2018 - 2025
 // SPDX-License-Identifier: Apache 2
 pragma solidity >=0.8.19 <0.8.29;
 
@@ -49,6 +49,9 @@ contract StakeHolder is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
     /// @notice Only UPGRADE_ROLE can upgrade the contract
     bytes32 public constant UPGRADE_ROLE = bytes32("UPGRADE_ROLE");
 
+    /// @notice Only DISTRIBUTE_ROLE can call the distribute function
+    bytes32 public constant DISTRIBUTE_ROLE = bytes32("DISTRIBUTE_ROLE");
+
     /// @notice Version 0 version number
     uint256 private constant _VERSION0 = 0;
 
@@ -78,12 +81,14 @@ contract StakeHolder is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
      * @notice Initialises the upgradeable contract, setting up admin accounts.
      * @param _roleAdmin the address to grant `DEFAULT_ADMIN_ROLE` to
      * @param _upgradeAdmin the address to grant `UPGRADE_ROLE` to
+     * @param _distributeAdmin the address to grant `DISTRIBUTE_ROLE` to
      */
-    function initialize(address _roleAdmin, address _upgradeAdmin) public initializer {
+    function initialize(address _roleAdmin, address _upgradeAdmin, address _distributeAdmin) public initializer {
         __UUPSUpgradeable_init();
         __AccessControl_init();
         _grantRole(DEFAULT_ADMIN_ROLE, _roleAdmin);
         _grantRole(UPGRADE_ROLE, _upgradeAdmin);
+        _grantRole(DISTRIBUTE_ROLE, _distributeAdmin);
         version = _VERSION0;
     }
 
@@ -136,14 +141,16 @@ contract StakeHolder is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
     }
 
     /**
-     * @notice Any account can distribute tokens to any set of accounts.
+     * @notice Accounts with DISTRIBUTE_ROLE can distribute tokens to any set of accounts.
      * @dev The total amount to distribute must match msg.value.
      *  This function does not need re-entrancy guard as the distribution mechanism
      *  does not call out to another contract.
      * @param _recipientsAndAmounts An array of recipients to distribute value to and
      *          amounts to be distributed to each recipient.
      */
-    function distributeRewards(AccountAmount[] calldata _recipientsAndAmounts) external payable {
+    function distributeRewards(
+        AccountAmount[] calldata _recipientsAndAmounts
+    ) external payable onlyRole(DISTRIBUTE_ROLE) {
         // Initial validity checks
         if (msg.value == 0) {
             revert MustDistributeMoreThanZero();

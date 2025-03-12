@@ -40,7 +40,7 @@ To stake, any account should call `stake()`, passing in the amount to be staked 
 
 To unstake, the account that previously staked should call, `unstake(uint256 _amountToUnstake)`.
 
-Accounts that wish to distribute rewards should call, `distributeRewards(AccountAmount[] calldata _recipientsAndAmounts)`. The `AccountAmount` structure consists of recipient address and amount to distribute pairs. Distributions can only be made to accounts that have previously or are currently staking. The amount to be distributed must be passed in as msg.value and must equal to the sum of the amounts specified in the `_recipientsAndAmounts` array.
+Accounts that have DISTRIBUTE_ROLE that wish to distribute rewards should call, `distributeRewards(AccountAmount[] calldata _recipientsAndAmounts)`. The `AccountAmount` structure consists of recipient address and amount to distribute pairs. Distributions can only be made to accounts that have previously or are currently staking. The amount to be distributed must be passed in as msg.value and must equal to the sum of the amounts specified in the `_recipientsAndAmounts` array.
 
 The `stakers` array needs to be analysed to determine which accounts have staked and how much. The following functions provide access to this data structure:
 

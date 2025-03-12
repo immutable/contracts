@@ -1,4 +1,4 @@
-// Copyright Immutable Pty Ltd 2018 - 2023
+// Copyright Immutable Pty Ltd 2018 - 2025
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
@@ -6,10 +6,10 @@ interface IImmutableERC721Errors {
     /// @dev Caller tried to mint an already burned token
     error IImmutableERC721TokenAlreadyBurned(uint256 tokenId);
 
-    /// @dev Caller tried to mint an already burned token
+    /// @dev Caller tried to mint to address 0x00
     error IImmutableERC721SendingToZerothAddress();
 
-    /// @dev Caller tried to mint an already burned token
+    /// @dev SafeTransferFromBatch was called, and lengths of the tos and tokenIds arrays did not match
     error IImmutableERC721MismatchedTransferLengths();
 
     /// @dev Caller tried to mint a tokenid that is above the hybrid threshold

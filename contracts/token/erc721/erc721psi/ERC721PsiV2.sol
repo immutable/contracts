@@ -1,4 +1,5 @@
-// SPDX-License-Identifier: MIT
+// Copyright Immutable Pty Ltd 2018 - 2025
+// SPDX-License-Identifier: Apache 2.0
 /**
  * Inspired by ERC721Psi: https://github.com/estarriolvetch/ERC721Psi
  */

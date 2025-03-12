@@ -332,7 +332,6 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
         
         vm.prank(user1);
         erc721.safeTransferFromBatch(transferRequest);
-
         assertEq(erc721.ownerOf(1), user2);
         assertEq(erc721.ownerOf(2), user3);
         assertEq(erc721.ownerOf(3), user1);

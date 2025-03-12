@@ -1,4 +1,4 @@
-// Copyright Immutable Pty Ltd 2018 - 2023
+// Copyright Immutable Pty Ltd 2018 - 2025
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
@@ -81,7 +81,7 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnableV2, ERC721, IImmutableERC72
     /* @notice Overwritten functions with combined implementations, supply for the collection is summed as they
      *  are tracked differently by each minting strategy
      */
-    function totalSupply() public view override(ERC721PsiV2) returns (uint256) {
+    function totalSupply() public view virtual override(ERC721PsiV2) returns (uint256) {
         return ERC721PsiV2.totalSupply() + _idMintTotalSupply;
     }
 

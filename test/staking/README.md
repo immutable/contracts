@@ -48,4 +48,5 @@ Operational tests (in [StakeHolderOperational.t.sol](../../contracts/staking/Sta
 | testDistributeMismatch         | Fail if the total to distribute does not equal msg.value.   | No         | Yes         |
 | testDistributeToEmptyAccount   | Stake, unstake, distribute rewards.                         | Yes        | Yes         |
 | testDistributeToUnusedAccount  | Attempt to distribute rewards to an account that has never staked. | No  | Yes         |
+| testDistributeBadAuth  | Attempt to distribute rewards using an unauthorised account.        | No  | Yes         |
 

@@ -34,6 +34,7 @@ struct DeploymentArgs {
 struct StakeHolderContractArgs {
     address roleAdmin;
     address upgradeAdmin;
+    address distributeAdmin;
 }
 
 /**
@@ -58,7 +59,8 @@ contract DeployStakeHolder is Test {
 
         StakeHolderContractArgs memory stakeHolderContractArgs = StakeHolderContractArgs({
             roleAdmin: makeAddr("role"),
-            upgradeAdmin: makeAddr("upgrade")
+            upgradeAdmin: makeAddr("upgrade"),
+            distributeAdmin: makeAddr("distribute")
         });
 
         // Run deployment against forked testnet
@@ -75,13 +77,14 @@ contract DeployStakeHolder is Test {
         address factory = vm.envAddress("OWNABLE_CREATE3_FACTORY_ADDRESS");
         address roleAdmin = vm.envAddress("ROLE_ADMIN");
         address upgradeAdmin = vm.envAddress("UPGRADE_ADMIN");
+        address distributeAdmin = vm.envAddress("DISTRIBUTE_ADMIN");
         string memory salt1 = vm.envString("IMPL_SALT");
         string memory salt2 = vm.envString("PROXY_SALT");
 
         DeploymentArgs memory deploymentArgs = DeploymentArgs({signer: signer, factory: factory, salt1: salt1, salt2: salt2});
 
         StakeHolderContractArgs memory stakeHolderContractArgs =
-            StakeHolderContractArgs({roleAdmin: roleAdmin, upgradeAdmin: upgradeAdmin});
+            StakeHolderContractArgs({roleAdmin: roleAdmin, upgradeAdmin: upgradeAdmin, distributeAdmin: distributeAdmin});
 
         _deploy(deploymentArgs, stakeHolderContractArgs);
     }
@@ -107,7 +110,8 @@ contract DeployStakeHolder is Test {
 
         // Create init data for teh ERC1967 Proxy
         bytes memory initData = abi.encodeWithSelector(
-            StakeHolder.initialize.selector, stakeHolderContractArgs.roleAdmin, stakeHolderContractArgs.upgradeAdmin
+            StakeHolder.initialize.selector, stakeHolderContractArgs.roleAdmin, 
+            stakeHolderContractArgs.upgradeAdmin, stakeHolderContractArgs.distributeAdmin
         );
 
         // Deploy ERC1967Proxy via the Ownable Create3 factory.

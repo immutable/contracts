@@ -140,6 +140,7 @@ contract StakeHolder is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
 
         emit StakeRemoved(msg.sender, _amountToUnstake, newBalance);
 
+        // slither-disable-next-line low-level-calls
         (bool success, bytes memory returndata) = payable(msg.sender).call{value: _amountToUnstake}("");
         if (!success) {
             // Look for revert reason and bubble it up if present.

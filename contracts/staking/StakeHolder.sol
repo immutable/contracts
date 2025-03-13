@@ -31,6 +31,9 @@ contract StakeHolder is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
     /// @notice Error: Attempting to unstake amount greater than the balance.
     error UnstakeAmountExceedsBalance(uint256 _amountToUnstake, uint256 _currentStake);
 
+    /// @notice Error: Unstake transfer failed.
+    error UnstakeTransferFailed();
+
     /// @notice Error: The sum of all amounts to distribute did not equal msg.value of the distribute transaction.
     error DistributionAmountsDoNotMatchTotal(uint256 _msgValue, uint256 _calculatedTotalDistribution);
 
@@ -137,7 +140,21 @@ contract StakeHolder is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
 
         emit StakeRemoved(msg.sender, _amountToUnstake, newBalance);
 
-        payable(msg.sender).transfer(_amountToUnstake);
+        // slither-disable-next-line low-level-calls
+        (bool success, bytes memory returndata) = payable(msg.sender).call{value: _amountToUnstake}("");
+        if (!success) {
+            // Look for revert reason and bubble it up if present.
+            // Revert reasons should contain an error selector, which is four bytes long.
+            if (returndata.length >= 4) {
+                // solhint-disable-next-line no-inline-assembly
+                assembly {
+                    let returndata_size := mload(returndata)
+                    revert(add(32, returndata), returndata_size)
+                }
+            } else {
+                revert UnstakeTransferFailed();
+            }
+        }
     }
 
     /**

@@ -128,9 +128,9 @@ contract StakeHolderOperationalTest is StakeHolderBaseTest {
 
         attacker.stake(10 ether);
         // Attacker's reentracy attack will double the amount being unstaked.
-        // The attack fails due to an out of gas exception.
-        vm.expectRevert();
-        attacker.unstake{gas: 10000000}(1 ether);
+        // The attack fails due to attempting to withdraw more than balance (that is, 2 x 6 eth = 12)
+        vm.expectRevert(abi.encodeWithSelector(StakeHolder.UnstakeAmountExceedsBalance.selector, 6000000000000000001, 4 ether));
+        attacker.unstake{gas: 10000000}(6 ether);
     }
 
     function testRestaking() public {

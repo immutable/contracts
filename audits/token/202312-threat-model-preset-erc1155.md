@@ -59,7 +59,7 @@ Potential Attacks:
 
 ## Attack Mitigation
 
-- The contract contains access control patterns to limit the vulnerabilty of compromised roles
+- The contract contains access control patterns to limit the vulnerability of compromised roles
 - The keys associated with the `DEFAULT_ADMIN_ROLE` should be operated by secure measures, for example a multi-signature wallet such that an attacker would need to compromise multiple signers simultaneously, or a securely stored hardware wallet.
 
 ### Externally Visible Functions

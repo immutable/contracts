@@ -65,7 +65,7 @@ contract PaymentSplitter is AccessControlEnumerable, IPaymentSplitterErrors, Ree
     /**
      * @notice Payable fallback method to receive IMX. The IMX received will be logged with {PaymentReceived} events.
      * this contract has no other payable method, all IMX receives will be tracked by the events emitted by this event
-     * ERC20 receives will not be tracked by this contract but tranfers events will be emitted by the erc20 contracts themselves.
+     * ERC20 receives will not be tracked by this contract but transfers events will be emitted by the erc20 contracts themselves.
      */
     receive() external payable virtual {
         emit PaymentReceived(_msgSender(), msg.value);

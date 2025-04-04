@@ -87,13 +87,16 @@ contract ImmutableERC721MintByIDUpgradeableV3 is ImmutableERC721MintByIDV3, UUPS
         revert CanNotUpgradeToLowerOrSameVersion(version);
     }
 
-    // Override the _authorizeUpgrade function
+    /**
+     * @notice Authorise (or prevent) upgrades.
+     * @dev Override the _authorizeUpgrade function and change the implementation to revert to disable upgrades.
+     */
     // solhint-disable-next-line no-empty-blocks
-    function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADE_ROLE) {}
+    function _authorizeUpgrade(address newImplementation) internal virtual override onlyRole(UPGRADE_ROLE) {}
 
     /// @notice storage gap for additional variables for upgrades
     // slither-disable-start unused-state
     // solhint-disable-next-line var-name-mixedcase
-    uint256[50] private __ImmutableERC721MintByID2Gap;
+    uint256[50] private __ImmutableERC721MintByID3Gap;
     // slither-disable-end unused-state
 }

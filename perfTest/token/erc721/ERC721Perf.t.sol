@@ -320,6 +320,100 @@ abstract contract ERC721PerfTest is ERC721BaseTest {
         emit log_named_uint("totalSupply gas", gasStart - gasEnd);
     }
 
+
+    function testSetNFTRoyaltyReceiverBatch1() public {
+        emit log("Scenario: NFTs 10, different receiver and fee");
+        uint256 scenarioCount = 10;
+        uint96 newFeeNumerator = 100;
+        address newRoyaltyReceiver = makeAddr("newRoyaltyReceiver");
+
+        // Have a new fee receiver and different feeNumerator
+        assertNotEq(newFeeNumerator, feeNumerator, "Fee numerator should be different");
+        assertNotEq(newRoyaltyReceiver, feeReceiver, "newRoyaltyReceiver should be different");
+
+        checkSetNFTRoyaltyReceiverBatch(newRoyaltyReceiver, newFeeNumerator, scenarioCount);
+    }
+
+    function testSetNFTRoyaltyReceiverBatch2() public {
+        emit log("Scenario: NFTs 100, different receiver and fee");
+        uint256 scenarioCount = 100;
+        uint96 newFeeNumerator = 100;
+        address newRoyaltyReceiver = makeAddr("newRoyaltyReceiver");
+
+        // Have a new fee receiver and different feeNumerator
+        assertNotEq(newFeeNumerator, feeNumerator, "Fee numerator should be different");
+        assertNotEq(newRoyaltyReceiver, feeReceiver, "newRoyaltyReceiver should be different");
+
+        checkSetNFTRoyaltyReceiverBatch(newRoyaltyReceiver, newFeeNumerator, scenarioCount);
+    }
+
+    function testSetNFTRoyaltyReceiverBatch3() public {
+        emit log("Scenario: NFTs 1000, different receiver and fee");
+        uint256 scenarioCount = 1000;
+        uint96 newFeeNumerator = 100;
+        address newRoyaltyReceiver = makeAddr("newRoyaltyReceiver");
+
+        // Have a new fee receiver and different feeNumerator
+        assertNotEq(newFeeNumerator, feeNumerator, "Fee numerator should be different");
+        assertNotEq(newRoyaltyReceiver, feeReceiver, "newRoyaltyReceiver should be different");
+
+        checkSetNFTRoyaltyReceiverBatch(newRoyaltyReceiver, newFeeNumerator, scenarioCount);
+    }
+
+    function testSetNFTRoyaltyReceiverBatch4() public {
+        emit log("Scenario: NFTs 10000, different receiver and fee");
+        uint256 scenarioCount = 10000;
+        uint96 newFeeNumerator = 100;
+        address newRoyaltyReceiver = makeAddr("newRoyaltyReceiver");
+
+        // Have a new fee receiver and different feeNumerator
+        assertNotEq(newFeeNumerator, feeNumerator, "Fee numerator should be different");
+        assertNotEq(newRoyaltyReceiver, feeReceiver, "newRoyaltyReceiver should be different");
+
+        checkSetNFTRoyaltyReceiverBatch(newRoyaltyReceiver, newFeeNumerator, scenarioCount);
+    }
+
+    function testSetNFTRoyaltyReceiverBatch5() public {
+        emit log("Scenario: NFTs 1000, different fee");
+        uint256 scenarioCount = 1000;
+        uint96 newFeeNumerator = 100;
+
+        // Have a new fee receiver and different feeNumerator
+        assertNotEq(newFeeNumerator, feeNumerator, "Fee numerator should be different");
+
+        checkSetNFTRoyaltyReceiverBatch(feeReceiver, newFeeNumerator, scenarioCount);
+    }
+
+    function testSetNFTRoyaltyReceiverBatch6() public {
+        emit log("Scenario: NFTs 1000, different receiver");
+        uint256 scenarioCount = 1000;
+        address newRoyaltyReceiver = makeAddr("newRoyaltyReceiver");
+
+        // Have a new fee receiver and different feeNumerator
+        assertNotEq(newRoyaltyReceiver, feeReceiver, "newRoyaltyReceiver should be different");
+
+        checkSetNFTRoyaltyReceiverBatch(newRoyaltyReceiver, feeNumerator, scenarioCount);
+    }
+
+
+    function checkSetNFTRoyaltyReceiverBatch(address newRoyaltyReceiver, uint96 newFeeNumerator, uint256 scenarioCount) private {
+        // Mint tokens.
+        uint256 first = mintLots(user3, 100000, scenarioCount);
+
+        uint256[] memory nfts = new uint256[](scenarioCount);
+        for (uint256 i = 0; i < nfts.length; i++) {
+            nfts[i] = first + i;
+        }
+
+        uint256 gasStart = gasleft();
+        vm.prank(minter);
+        erc721.setNFTRoyaltyReceiverBatch(nfts, newRoyaltyReceiver, newFeeNumerator);
+        uint256 gasEnd = gasleft();
+        emit log_named_uint("setNFTRoyaltyReceiverBatch gas", gasStart - gasEnd);
+    }
+
+
+
     function mintLots(address _recipient, uint256 _start, uint256 _quantity) public virtual returns (uint256) {
         uint256[] memory ids = new uint256[](_quantity);
         for (uint256 i = 0; i < _quantity; i++) {

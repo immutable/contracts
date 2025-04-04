@@ -17,7 +17,7 @@ contract ImmutableERC721ByQuantityPerfTest is ERC721ByQuantityPerfTest {
         super.setUpStart();
 
         ImmutableERC721 immutableERC721 = new ImmutableERC721(
-            owner, name, symbol, baseURI, contractURI, address(allowlist), feeReceiver, 300
+            owner, name, symbol, baseURI, contractURI, address(allowlist), feeReceiver, feeNumerator
         );
 
         // ImmutableERC721 does not implement the interface, and hence must be cast to the 

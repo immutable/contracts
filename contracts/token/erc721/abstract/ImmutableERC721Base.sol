@@ -10,7 +10,7 @@ import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
 import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnforced.sol";
 
 // Utils
-import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
+import {BitMaps} from "solidity-bits/contracts/BitMaps.sol";
 import {AccessControlEnumerable, MintingAccessControl} from "../../../access/MintingAccessControl.sol";
 
 /*

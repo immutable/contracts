@@ -23,7 +23,12 @@ import {AccessControlEnumerableUpgradeable, MintingAccessControlUpgradeable} fro
     own minting functionality to meet the needs of the inheriting contract.
 */
 
-abstract contract ImmutableERC721BaseV3 is OperatorAllowlistEnforcedUpgradeable, MintingAccessControlUpgradeable, ERC721PermitV3, ERC2981Upgradeable {
+abstract contract ImmutableERC721BaseV3 is
+    OperatorAllowlistEnforcedUpgradeable,
+    MintingAccessControlUpgradeable,
+    ERC721PermitV3,
+    ERC2981Upgradeable
+{
     using BitMapsUpgradeable for BitMapsUpgradeable.BitMap;
     ///     =====   State Variables  =====
 
@@ -35,7 +40,6 @@ abstract contract ImmutableERC721BaseV3 is OperatorAllowlistEnforcedUpgradeable,
 
     /// @notice Total amount of minted tokens to a non zero address
     uint256 public _totalSupply;
-
 
     // TODO use interface
     /// @notice A singular batch mint request
@@ -193,7 +197,10 @@ abstract contract ImmutableERC721BaseV3 is OperatorAllowlistEnforcedUpgradeable,
      * @inheritdoc ERC721Upgradeable
      * @dev Note it will validate the operator in the allowlist
      */
-    function setApprovalForAll(address operator, bool approved) public virtual override(ERC721Upgradeable) validateApproval(operator) {
+    function setApprovalForAll(
+        address operator,
+        bool approved
+    ) public virtual override(ERC721Upgradeable) validateApproval(operator) {
         super.setApprovalForAll(operator, approved);
     }
 
@@ -203,7 +210,13 @@ abstract contract ImmutableERC721BaseV3 is OperatorAllowlistEnforcedUpgradeable,
      */
     function supportsInterface(
         bytes4 interfaceId
-    ) public view virtual override(ERC721PermitV3, ERC2981Upgradeable, AccessControlEnumerableUpgradeable) returns (bool) {
+    )
+        public
+        view
+        virtual
+        override(ERC721PermitV3, ERC2981Upgradeable, AccessControlEnumerableUpgradeable)
+        returns (bool)
+    {
         return super.supportsInterface(interfaceId);
     }
 

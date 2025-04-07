@@ -10,7 +10,6 @@ contract ImmutableERC721MintByIDUpgradeableV3 is ImmutableERC721MintByIDV3, UUPS
     /// @notice Error: Attempting to upgrade contract storage to version 0.
     error CanNotUpgradeToLowerOrSameVersion(uint256 _storageVersion);
 
-
     /// @notice Only UPGRADE_ROLE can upgrade the contract
     bytes32 public constant UPGRADE_ROLE = bytes32("UPGRADE_ROLE");
 
@@ -21,18 +20,18 @@ contract ImmutableERC721MintByIDUpgradeableV3 is ImmutableERC721MintByIDV3, UUPS
     uint256 public version;
 
     // Dummy constructor overrides constructor of base.
-    constructor() ImmutableERC721MintByIDV3(
-        address(1), // owner_
-        "", // name_,
-        "", // symbol_,
-        "", // baseURI_,
-        "", // contractURI_,
-        address(1), // operatorAllowlist_,
-        address(1), // royaltyReceiver_,
-        uint96(0) // feeNumerator_
-    )
+    constructor()
+        ImmutableERC721MintByIDV3(
+            address(1), // owner_
+            "", // name_,
+            "", // symbol_,
+            "", // baseURI_,
+            "", // contractURI_,
+            address(1), // operatorAllowlist_,
+            address(1), // royaltyReceiver_,
+            uint96(0) // feeNumerator_
+        )
     {}
-
 
     /**
      * @notice Initialises the upgradeable contract. Grants `DEFAULT_ADMIN_ROLE` to the supplied `owner` address

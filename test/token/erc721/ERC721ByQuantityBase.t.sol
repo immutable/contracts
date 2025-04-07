@@ -5,7 +5,6 @@ pragma solidity >=0.8.19 <0.8.29;
 import {ERC721BaseTest} from "./ERC721Base.t.sol";
 import {IImmutableERC721ByQuantity} from "../../../contracts/token/erc721/interfaces/IImmutableERC721ByQuantity.sol";
 
-
 /**
  * Base contract for all ERC 721 by quantity tests.
  */

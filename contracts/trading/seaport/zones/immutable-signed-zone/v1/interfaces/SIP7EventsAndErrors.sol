@@ -7,7 +7,6 @@ pragma solidity ^0.8.17;
  * @notice SIP7EventsAndErrors contains errors and events
  *         related to zone interaction as specified in the SIP7.
  */
-
 interface SIP7EventsAndErrors {
     /**
      * @dev Emit an event when a new signer is added.

@@ -127,7 +127,13 @@ contract ImmutableERC1155Test is Test {
         address newFeeReceiver = vm.addr(anotherPrivateKey);
 
         ImmutableERC1155 anotherERC1155 = new ImmutableERC1155(
-        owner, "new erc1155", "https://base-uri.com", "https://contract-uri.com", address(operatorAllowlist), newFeeReceiver, feeNumerator
+            owner,
+            "new erc1155",
+            "https://base-uri.com",
+            "https://contract-uri.com",
+            address(operatorAllowlist),
+            newFeeReceiver,
+            feeNumerator
         );
 
         assertEq(anotherERC1155.contractURI(), contractURI);
@@ -471,7 +477,7 @@ contract ImmutableERC1155Test is Test {
 
         immutableERC1155.setNFTRoyaltyReceiverBatch(tokenIDs, newFeeReceiver, 100);
 
-        for (uint i = 0; i < tokenIDs.length; i++) {
+        for (uint256 i = 0; i < tokenIDs.length; i++) {
             (address receiver, uint256 royaltyAmount) = immutableERC1155.royaltyInfo(tokenIDs[i], 10000);
             assertEq(receiver, newFeeReceiver);
             assertEq(100, royaltyAmount);

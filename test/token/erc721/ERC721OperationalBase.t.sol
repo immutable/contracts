@@ -3,12 +3,14 @@
 pragma solidity >=0.8.19 <0.8.29;
 
 import {ERC721BaseTest} from "./ERC721Base.t.sol";
-import {IImmutableERC721, IImmutableERC721Structs, IImmutableERC721Errors} from "../../../contracts/token/erc721/interfaces/IImmutableERC721.sol";
+import {
+    IImmutableERC721,
+    IImmutableERC721Structs,
+    IImmutableERC721Errors
+} from "../../../contracts/token/erc721/interfaces/IImmutableERC721.sol";
 import {MockEIP1271Wallet} from "../../../contracts/mocks/MockEIP1271Wallet.sol";
 
 abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
-
-
     function testMint() public {
         vm.prank(minter);
         erc721.mint(user1, 1);
@@ -34,7 +36,7 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
         uint256[] memory tokenIds2 = new uint256[](2);
         tokenIds2[0] = 6;
         tokenIds2[1] = 7;
-        
+
         mintRequests[0].to = user1;
         mintRequests[0].tokenIds = tokenIds1;
         mintRequests[1].to = user2;
@@ -42,7 +44,7 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
 
         vm.prank(minter);
         erc721.mintBatch(mintRequests);
-        
+
         assertEq(erc721.balanceOf(user1), 3);
         assertEq(erc721.balanceOf(user2), 2);
         assertEq(erc721.totalSupply(), 5);
@@ -62,7 +64,7 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
         uint256[] memory tokenIds2 = new uint256[](2);
         tokenIds2[0] = 6;
         tokenIds2[1] = 7;
-        
+
         mintRequests[0].to = user1;
         mintRequests[0].tokenIds = tokenIds1;
         mintRequests[1].to = user2;
@@ -70,7 +72,7 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
 
         vm.prank(minter);
         erc721.safeMintBatch(mintRequests);
-        
+
         assertEq(erc721.balanceOf(user1), 3);
         assertEq(erc721.balanceOf(user2), 2);
         assertEq(erc721.totalSupply(), 5);
@@ -102,7 +104,7 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
         tokenIds1[0] = 3;
         tokenIds1[1] = 1;
         tokenIds1[2] = 5;
-        
+
         mintRequests[0].to = user1;
         mintRequests[0].tokenIds = tokenIds1;
 
@@ -118,7 +120,7 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
         tokenIds1[0] = 3;
         tokenIds1[1] = 1;
         tokenIds1[2] = 5;
-        
+
         mintRequests[0].to = user1;
         mintRequests[0].tokenIds = tokenIds1;
 
@@ -133,7 +135,7 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
         tokenIds1[0] = 3;
         tokenIds1[1] = 1;
         tokenIds1[2] = 3;
-        
+
         mintRequests[0].to = user1;
         mintRequests[0].tokenIds = tokenIds1;
 
@@ -148,7 +150,7 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
         tokenIds1[0] = 3;
         tokenIds1[1] = 1;
         tokenIds1[2] = 3;
-        
+
         mintRequests[0].to = user1;
         mintRequests[0].tokenIds = tokenIds1;
 
@@ -179,7 +181,9 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
         mintSomeTokens();
 
         vm.prank(user2);
-        vm.expectRevert(abi.encodeWithSelector(IImmutableERC721Errors.IImmutableERC721MismatchedTokenOwner.selector, 2, user1));
+        vm.expectRevert(
+            abi.encodeWithSelector(IImmutableERC721Errors.IImmutableERC721MismatchedTokenOwner.selector, 2, user1)
+        );
         erc721.safeBurn(user2, 2);
     }
 
@@ -187,7 +191,9 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
         mintSomeTokens();
 
         vm.prank(user1);
-        vm.expectRevert(abi.encodeWithSelector(IImmutableERC721Errors.IImmutableERC721MismatchedTokenOwner.selector, 2, user1));
+        vm.expectRevert(
+            abi.encodeWithSelector(IImmutableERC721Errors.IImmutableERC721MismatchedTokenOwner.selector, 2, user1)
+        );
         erc721.safeBurn(user2, 2);
     }
 
@@ -286,9 +292,7 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
 
         // Try to mint the burned token
         vm.prank(minter);
-        vm.expectRevert(
-            abi.encodeWithSelector(IImmutableERC721Errors.IImmutableERC721TokenAlreadyBurned.selector, 1)
-        );
+        vm.expectRevert(abi.encodeWithSelector(IImmutableERC721Errors.IImmutableERC721TokenAlreadyBurned.selector, 1));
         erc721.mint(user3, 1);
     }
 
@@ -319,17 +323,14 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
         address[] memory tos = new address[](2);
         tos[0] = user2;
         tos[1] = user3;
-        
+
         uint256[] memory tokenIds = new uint256[](2);
         tokenIds[0] = 1;
         tokenIds[1] = 2;
-        
-        IImmutableERC721Structs.TransferRequest memory transferRequest = IImmutableERC721Structs.TransferRequest({
-            from: user1,
-            tos: tos,
-            tokenIds: tokenIds
-        });
-        
+
+        IImmutableERC721Structs.TransferRequest memory transferRequest =
+            IImmutableERC721Structs.TransferRequest({from: user1, tos: tos, tokenIds: tokenIds});
+
         vm.prank(user1);
         erc721.safeTransferFromBatch(transferRequest);
         assertEq(erc721.ownerOf(1), user2);
@@ -342,16 +343,14 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
 
         address[] memory tos = new address[](5);
         uint256[] memory tokenIds = new uint256[](4);
-        
-        IImmutableERC721Structs.TransferRequest memory transferRequest = IImmutableERC721Structs.TransferRequest({
-            from: user1,
-            tos: tos,
-            tokenIds: tokenIds
-        });
-        
+
+        IImmutableERC721Structs.TransferRequest memory transferRequest =
+            IImmutableERC721Structs.TransferRequest({from: user1, tos: tos, tokenIds: tokenIds});
+
         vm.prank(user1);
         vm.expectRevert(
-            abi.encodeWithSelector(IImmutableERC721Errors.IImmutableERC721MismatchedTransferLengths.selector));
+            abi.encodeWithSelector(IImmutableERC721Errors.IImmutableERC721MismatchedTransferLengths.selector)
+        );
         erc721.safeTransferFromBatch(transferRequest);
     }
 
@@ -385,8 +384,7 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
         assertEq(address(0), erc721.getApproved(tokenId));
 
         vm.prank(user2);
-        vm.expectRevert(
-            abi.encodeWithSelector(IImmutableERC721Errors.PermitExpired.selector));
+        vm.expectRevert(abi.encodeWithSelector(IImmutableERC721Errors.PermitExpired.selector));
         erc721.permit(user2, tokenId, deadline, signature);
         assertEq(address(0), erc721.getApproved(tokenId));
     }
@@ -400,8 +398,7 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
         bytes memory signature = getSignature(user1Pkey, user2, tokenId, nonce, deadline);
 
         vm.prank(user2);
-        vm.expectRevert(
-            abi.encodeWithSelector(IImmutableERC721Errors.InvalidSignature.selector));
+        vm.expectRevert(abi.encodeWithSelector(IImmutableERC721Errors.InvalidSignature.selector));
         erc721.permit(user2, tokenId, deadline, signature);
     }
 
@@ -453,20 +450,17 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
 
         // Expect to fail as user1 is no longer the owner.
         vm.prank(user2);
-        vm.expectRevert(
-            abi.encodeWithSelector(IImmutableERC721Errors.InvalidSignature.selector));
+        vm.expectRevert(abi.encodeWithSelector(IImmutableERC721Errors.InvalidSignature.selector));
         erc721.permit(user2, tokenId, deadline, signature);
 
         vm.prank(user3);
         erc721.safeTransferFrom(user3, user1, tokenId);
 
-        // Expect to fail as ownership has changed. 
+        // Expect to fail as ownership has changed.
         vm.prank(user2);
-        vm.expectRevert(
-            abi.encodeWithSelector(IImmutableERC721Errors.InvalidSignature.selector));
+        vm.expectRevert(abi.encodeWithSelector(IImmutableERC721Errors.InvalidSignature.selector));
         erc721.permit(user2, tokenId, deadline, signature);
     }
-
 
     function testPermitContractWallet() public {
         MockEIP1271Wallet eip1271Wallet = new MockEIP1271Wallet(user1);

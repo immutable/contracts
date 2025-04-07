@@ -3,9 +3,10 @@
 pragma solidity >=0.8.19 <0.8.29;
 
 import "forge-std/Script.sol";
-import {ImmutableERC721MintByIDUpgradeableV3} from "../../contracts/token/erc721/preset/ImmutableERC721MintByIDUpgradeableV3.sol";
-import {ImmutableERC721MintByIDBootstrapV3} from "../../contracts/token/erc721/preset/ImmutableERC721MintByIDBootstrapV3.sol";
-
+import {ImmutableERC721MintByIDUpgradeableV3} from
+    "../../contracts/token/erc721/preset/ImmutableERC721MintByIDUpgradeableV3.sol";
+import {ImmutableERC721MintByIDBootstrapV3} from
+    "../../contracts/token/erc721/preset/ImmutableERC721MintByIDBootstrapV3.sol";
 
 contract UpgradeToV3 is Script {
     function run() public {
@@ -13,8 +14,8 @@ contract UpgradeToV3 is Script {
         address v3Address = 0x6F00F52c2A27caD780FA945aAc56AE9792A061CA;
 
         ImmutableERC721MintByIDBootstrapV3 bootstrap = ImmutableERC721MintByIDBootstrapV3(proxyDeployedAddress);
-        bytes memory initData = abi.encodeWithSelector(
-            ImmutableERC721MintByIDUpgradeableV3.upgradeStorage.selector, bytes(""));
+        bytes memory initData =
+            abi.encodeWithSelector(ImmutableERC721MintByIDUpgradeableV3.upgradeStorage.selector, bytes(""));
 
         vm.broadcast();
         bootstrap.upgradeToAndCall(v3Address, initData);

@@ -93,7 +93,7 @@ abstract contract OperatorAllowlistEnforcedUpgradeable is OperatorAllowlistEnfor
      * @param _operatorAllowlist the address of the Allowlist registry
      */
     function _setOperatorAllowlistRegistry(address _operatorAllowlist) internal {
-        // TODO need to remove this as fake operator allow list used for 
+        // TODO need to remove this as fake operator allow list used for
         // TODO contract deployment for upgradeable contract fails here.
         // if (!IERC165Upgradeable(_operatorAllowlist).supportsInterface(type(IOperatorAllowlist).interfaceId)) {
         //     revert AllowlistDoesNotImplementIOperatorAllowlist();
@@ -108,6 +108,5 @@ abstract contract OperatorAllowlistEnforcedUpgradeable is OperatorAllowlistEnfor
     // solhint-disable-next-line var-name-mixedcase
     uint256[50] private __OperatorAllowlistEnforcedBaseGap;
     // slither-disable-end unused-state
-
 }
 // slither-disable-end calls-loop

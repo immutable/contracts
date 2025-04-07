@@ -14,13 +14,12 @@ import {IImmutableERC721Errors} from "../../../errors/Errors.sol";
 // TODO why is this needed for supportsInterface? Shouldn't the upgradeable variant be needed
 import {IERC165} from "@openzeppelin/contracts/interfaces/IERC165.sol";
 
-
 /**
  * @title ERC721Permit: An extension of the ERC721Burnable NFT standard that supports off-chain approval via permits.
  * @dev This contract implements ERC-4494 as well, allowing tokens to be approved via off-chain signed messages.
  * @dev This contract is designed to be used as either an upgradeable contract or non-upgradeable contract.
-*       Non-upgradeable implementations must call __Permit_init.
- *  
+ *       Non-upgradeable implementations must call __Permit_init.
+ *
  */
 abstract contract ERC721PermitV3 is ERC721BurnableUpgradeable, IERC4494, EIP712Upgradeable, IImmutableERC721Errors {
     /**
@@ -49,7 +48,6 @@ abstract contract ERC721PermitV3 is ERC721BurnableUpgradeable, IERC4494, EIP712U
         __ERC721Burnable_init();
         __EIP712_init(name, "1");
     }
-
 
     /**
      * @notice Function to approve by way of owner signature
@@ -85,8 +83,10 @@ abstract contract ERC721PermitV3 is ERC721BurnableUpgradeable, IERC4494, EIP712U
      * @param interfaceId The interface identifier, which is a 4-byte selector.
      * @return True if the contract implements `interfaceId` and the call doesn't revert, otherwise false.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165, ERC721Upgradeable) returns (bool) {
-//    function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165Upgradeable, ERC721Upgradeable) returns (bool) {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(IERC165, ERC721Upgradeable) returns (bool) {
+        //    function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165Upgradeable, ERC721Upgradeable) returns (bool) {
         return
             interfaceId == type(IERC4494).interfaceId || // 0x5604e225
             super.supportsInterface(interfaceId);

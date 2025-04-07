@@ -66,11 +66,13 @@ contract OperatorAllowlistTest is Test, OperatorAllowlistUpgradeable {
     function testUpgradeNoPerms() public {
         MockOperatorAllowlistUpgradeable oalImplV2 = new MockOperatorAllowlistUpgradeable();
         vm.prank(nonAuthorizedWallet);
-        vm.expectRevert(abi.encodePacked(
-            "AccessControl: account ",
-            vm.toString(nonAuthorizedWallet),
-            " is missing role 0x555047524144455f524f4c450000000000000000000000000000000000000000"
-        ));
+        vm.expectRevert(
+            abi.encodePacked(
+                "AccessControl: account ",
+                vm.toString(nonAuthorizedWallet),
+                " is missing role 0x555047524144455f524f4c450000000000000000000000000000000000000000"
+            )
+        );
         allowlist.upgradeTo(address(oalImplV2));
     }
 

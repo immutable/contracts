@@ -193,7 +193,7 @@ contract StakeHolderOperationalTest is StakeHolderBaseTest {
 
         vm.expectRevert(stdError.indexOOBError);
         stakeHolder.getStakers(1, 3);
-    }    
+    }
 
     function testDistributeRewardsOne() public {
         vm.deal(staker1, 100 ether);
@@ -276,7 +276,9 @@ contract StakeHolderOperationalTest is StakeHolderBaseTest {
         AccountAmount[] memory accountsAmounts = new AccountAmount[](2);
         accountsAmounts[0] = AccountAmount(staker2, 0.5 ether);
         accountsAmounts[1] = AccountAmount(staker3, 1 ether);
-        vm.expectRevert(abi.encodeWithSelector(StakeHolder.DistributionAmountsDoNotMatchTotal.selector, 1 ether, 1.5 ether));
+        vm.expectRevert(
+            abi.encodeWithSelector(StakeHolder.DistributionAmountsDoNotMatchTotal.selector, 1 ether, 1.5 ether)
+        );
         vm.prank(bank);
         stakeHolder.distributeRewards{value: 1 ether}(accountsAmounts);
     }
@@ -307,7 +309,9 @@ contract StakeHolderOperationalTest is StakeHolderBaseTest {
         // Distribute rewards to staker2 only.
         AccountAmount[] memory accountsAmounts = new AccountAmount[](1);
         accountsAmounts[0] = AccountAmount(staker1, 0.5 ether);
-        vm.expectRevert(abi.encodeWithSelector(StakeHolder.AttemptToDistributeToNewAccount.selector, staker1, 0.5 ether));
+        vm.expectRevert(
+            abi.encodeWithSelector(StakeHolder.AttemptToDistributeToNewAccount.selector, staker1, 0.5 ether)
+        );
         vm.prank(bank);
         stakeHolder.distributeRewards{value: 0.5 ether}(accountsAmounts);
     }

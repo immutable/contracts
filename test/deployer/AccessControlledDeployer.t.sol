@@ -5,8 +5,10 @@ pragma solidity >=0.8.19 <0.8.29;
 import "forge-std/Test.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IDeployer} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/interfaces/IDeployer.sol";
-import {ERC20MintableBurnable} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnable.sol";
-import {ERC20MintableBurnableInit} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnableInit.sol";
+import {ERC20MintableBurnable} from
+    "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnable.sol";
+import {ERC20MintableBurnableInit} from
+    "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnableInit.sol";
 
 import {OwnableCreate2Deployer} from "../../contracts/deployer/create2/OwnableCreate2Deployer.sol";
 import {AccessControlledDeployer} from "../../contracts/deployer/AccessControlledDeployer.sol";
@@ -298,17 +300,12 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
 
     function test_Deploy_UsingCreate2() public {
         OwnableCreate2Deployer create2Deployer = new OwnableCreate2Deployer(address(rbacDeployer));
-        bytes memory erc20MintableBytecode = abi.encodePacked(
-            type(ERC20MintableBurnable).creationCode,
-            abi.encode("Test Token", "TEST", 10)
-        );
+        bytes memory erc20MintableBytecode =
+            abi.encodePacked(type(ERC20MintableBurnable).creationCode, abi.encode("Test Token", "TEST", 10));
         bytes32 erc20MintableSalt = createSaltFromKey("erc20-mintable-burnable-v1", address(rbacDeployer));
 
         address expectedAddress = predictCreate2Address(
-            erc20MintableBytecode,
-            address(create2Deployer),
-            address(rbacDeployer),
-            erc20MintableSalt
+            erc20MintableBytecode, address(create2Deployer), address(rbacDeployer), erc20MintableSalt
         );
 
         vm.startPrank(authDeployers[0]);
@@ -325,34 +322,21 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
 
     function test_DeployAndInit_UsingCreate2() public {
         OwnableCreate2Deployer create2Deployer = new OwnableCreate2Deployer(address(rbacDeployer));
-        bytes memory mintableInitBytecode = abi.encodePacked(
-            type(ERC20MintableBurnableInit).creationCode,
-            abi.encode(10)
-        );
+        bytes memory mintableInitBytecode =
+            abi.encodePacked(type(ERC20MintableBurnableInit).creationCode, abi.encode(10));
 
         bytes32 mintableInitSalt = createSaltFromKey("erc20-mintable-burnable-init-v1", address(rbacDeployer));
 
         address expectedAddress = predictCreate2Address(
-            mintableInitBytecode,
-            address(create2Deployer),
-            address(rbacDeployer),
-            mintableInitSalt
+            mintableInitBytecode, address(create2Deployer), address(rbacDeployer), mintableInitSalt
         );
 
-        bytes memory initPayload = abi.encodeWithSelector(
-            ERC20MintableBurnableInit.init.selector,
-            "Test Token",
-            "TEST"
-        );
+        bytes memory initPayload = abi.encodeWithSelector(ERC20MintableBurnableInit.init.selector, "Test Token", "TEST");
         vm.startPrank(authDeployers[0]);
         vm.expectEmit();
         emit Deployed(expectedAddress, address(rbacDeployer), mintableInitSalt, keccak256(mintableInitBytecode));
-        address deployedAddress = rbacDeployer.deployAndInit(
-            create2Deployer,
-            mintableInitBytecode,
-            mintableInitSalt,
-            initPayload
-        );
+        address deployedAddress =
+            rbacDeployer.deployAndInit(create2Deployer, mintableInitBytecode, mintableInitSalt, initPayload);
         ERC20MintableBurnableInit deployed = ERC20MintableBurnableInit(deployedAddress);
 
         assertEq(deployedAddress, expectedAddress, "deployed address does not match expected");
@@ -363,10 +347,8 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
 
     function test_Deploy_UsingCreate3() public {
         OwnableCreate3Deployer create3Deployer = new OwnableCreate3Deployer(address(rbacDeployer));
-        bytes memory erc20MintableBytecode = abi.encodePacked(
-            type(ERC20MintableBurnable).creationCode,
-            abi.encode("Test Token", "TEST", 10)
-        );
+        bytes memory erc20MintableBytecode =
+            abi.encodePacked(type(ERC20MintableBurnable).creationCode, abi.encode("Test Token", "TEST", 10));
         bytes32 erc20MintableSalt = createSaltFromKey("erc20-mintable-burnable-v1", address(rbacDeployer));
 
         address expectedAddress = predictCreate3Address(create3Deployer, address(rbacDeployer), erc20MintableSalt);
@@ -385,29 +367,19 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
 
     function test_DeployAndInit_UsingCreate3() public {
         OwnableCreate3Deployer create3Deployer = new OwnableCreate3Deployer(address(rbacDeployer));
-        bytes memory erc20MintableInitBytcode = abi.encodePacked(
-            type(ERC20MintableBurnableInit).creationCode,
-            abi.encode(10)
-        );
+        bytes memory erc20MintableInitBytcode =
+            abi.encodePacked(type(ERC20MintableBurnableInit).creationCode, abi.encode(10));
 
         bytes32 erc20MintableSalt = createSaltFromKey("erc20-mintable-burnable-init-v1", address(rbacDeployer));
 
         address expectedAddress = predictCreate3Address(create3Deployer, address(rbacDeployer), erc20MintableSalt);
 
         vm.startPrank(authDeployers[0]);
-        bytes memory initPayload = abi.encodeWithSelector(
-            ERC20MintableBurnableInit.init.selector,
-            "Test Token",
-            "TEST"
-        );
+        bytes memory initPayload = abi.encodeWithSelector(ERC20MintableBurnableInit.init.selector, "Test Token", "TEST");
         vm.expectEmit();
         emit Deployed(expectedAddress, address(rbacDeployer), erc20MintableSalt, keccak256(erc20MintableInitBytcode));
-        address deployedAddress = rbacDeployer.deployAndInit(
-            create3Deployer,
-            erc20MintableInitBytcode,
-            erc20MintableSalt,
-            initPayload
-        );
+        address deployedAddress =
+            rbacDeployer.deployAndInit(create3Deployer, erc20MintableInitBytcode, erc20MintableSalt, initPayload);
         ERC20MintableBurnableInit deployed = ERC20MintableBurnableInit(deployedAddress);
 
         assertEq(deployedAddress, expectedAddress, "deployed address does not match expected");

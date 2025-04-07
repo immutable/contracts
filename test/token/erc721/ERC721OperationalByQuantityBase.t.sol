@@ -4,9 +4,10 @@ pragma solidity >=0.8.19 <0.8.29;
 
 import {ERC721OperationalBaseTest} from "./ERC721OperationalBase.t.sol";
 import {IImmutableERC721ByQuantity} from "../../../contracts/token/erc721/interfaces/IImmutableERC721ByQuantity.sol";
-import {IImmutableERC721, IImmutableERC721Errors} from "../../../contracts/token/erc721/interfaces/IImmutableERC721.sol";
+import {
+    IImmutableERC721, IImmutableERC721Errors
+} from "../../../contracts/token/erc721/interfaces/IImmutableERC721.sol";
 import {MockEIP1271Wallet} from "../../../contracts/mocks/MockEIP1271Wallet.sol";
-
 
 // Test the original ImmutableERC721 contract: Operational tests
 abstract contract ERC721OperationalByQuantityBaseTest is ERC721OperationalBaseTest {
@@ -14,7 +15,7 @@ abstract contract ERC721OperationalByQuantityBaseTest is ERC721OperationalBaseTe
 
     function testThreshold() public {
         uint256 first = erc721BQ.mintBatchByQuantityThreshold();
-        assertTrue(first >= 2**128);
+        assertTrue(first >= 2 ** 128);
     }
 
     function testMintByQuantity() public {
@@ -29,10 +30,10 @@ abstract contract ERC721OperationalByQuantityBaseTest is ERC721OperationalBaseTe
         vm.prank(minter);
         vm.expectEmit(true, true, false, false);
         emit Transfer(address(0), user1, first);
-        emit Transfer(address(0), user1, first+1);
-        emit Transfer(address(0), user1, first+2);
-        emit Transfer(address(0), user1, first+3);
-        emit Transfer(address(0), user1, first+4);
+        emit Transfer(address(0), user1, first + 1);
+        emit Transfer(address(0), user1, first + 2);
+        emit Transfer(address(0), user1, first + 3);
+        emit Transfer(address(0), user1, first + 4);
         erc721BQ.mintByQuantity(user1, qty);
 
         assertEq(erc721.balanceOf(user1), originalBalance + qty);
@@ -116,7 +117,7 @@ abstract contract ERC721OperationalByQuantityBaseTest is ERC721OperationalBaseTe
         erc721BQ.mintByQuantity(user1, qty);
 
         vm.prank(user1);
-        erc721BQ.burn(first+1);
+        erc721BQ.burn(first + 1);
         assertEq(erc721.balanceOf(user1), qty - 1);
         assertEq(erc721.totalSupply(), qty - 1);
     }
@@ -128,21 +129,21 @@ abstract contract ERC721OperationalByQuantityBaseTest is ERC721OperationalBaseTe
         erc721BQ.mintByQuantity(user1, qty);
 
         vm.prank(user1);
-        erc721BQ.burn(first+1);
+        erc721BQ.burn(first + 1);
         assertEq(erc721.balanceOf(user1), qty - 1);
         assertEq(erc721.totalSupply(), qty - 1);
 
         // Burn a token that has already been burnt
         vm.prank(user1);
         vm.expectRevert("ERC721Psi: operator query for nonexistent token");
-        erc721BQ.burn(first+1);
+        erc721BQ.burn(first + 1);
     }
 
     function testMintByQuantityBurnNonExistentToken() public {
         uint256 first = getFirst();
         vm.prank(user1);
         vm.expectRevert("ERC721Psi: operator query for nonexistent token");
-        erc721BQ.burn(first+1);
+        erc721BQ.burn(first + 1);
     }
 
     function testMintByQuantityBurnBatch() public {
@@ -183,8 +184,9 @@ abstract contract ERC721OperationalByQuantityBaseTest is ERC721OperationalBaseTe
         batch[0] = first + 1;
 
         vm.prank(user2);
-        vm.expectRevert(abi.encodeWithSelector(
-            IImmutableERC721Errors.IImmutableERC721NotOwnerOrOperator.selector, first+1));
+        vm.expectRevert(
+            abi.encodeWithSelector(IImmutableERC721Errors.IImmutableERC721NotOwnerOrOperator.selector, first + 1)
+        );
         erc721.burnBatch(batch);
         assertEq(erc721.balanceOf(user1), qty + user1Bal, "Final balance");
         assertEq(erc721.totalSupply(), originalSupply + qty, "Final supply");
@@ -193,8 +195,9 @@ abstract contract ERC721OperationalByQuantityBaseTest is ERC721OperationalBaseTe
     function testSingleMintAboveMintByQuantityThreshold() public {
         uint256 tokenId = getFirst();
         vm.prank(minter);
-        vm.expectRevert(abi.encodeWithSelector(
-            IImmutableERC721Errors.IImmutableERC721IDAboveThreshold.selector, tokenId));
+        vm.expectRevert(
+            abi.encodeWithSelector(IImmutableERC721Errors.IImmutableERC721IDAboveThreshold.selector, tokenId)
+        );
         erc721BQ.mint(user1, tokenId);
     }
 
@@ -224,7 +227,6 @@ abstract contract ERC721OperationalByQuantityBaseTest is ERC721OperationalBaseTe
         assertEq(erc721.ownerOf(tokenId), user3);
     }
 
-
     function testExistsForQuantityMinted() public {
         testMintByQuantity();
         assertTrue(erc721BQ.exists(getFirst()));
@@ -238,7 +240,7 @@ abstract contract ERC721OperationalByQuantityBaseTest is ERC721OperationalBaseTe
 
     function testExistsForInvalidTokenByQ() public {
         testMintByQuantity();
-        assertFalse(erc721BQ.exists(getFirst()+10));
+        assertFalse(erc721BQ.exists(getFirst() + 10));
     }
 
     function testExistsForInvalidTokenByID() public {
@@ -261,7 +263,6 @@ abstract contract ERC721OperationalByQuantityBaseTest is ERC721OperationalBaseTe
         erc721.permit(user2, tokenId, deadline, signature);
         assertEq(erc721.getApproved(tokenId), user2);
     }
-
 
     function testByQuantitySafeTransferFrom() public {
         hackAddUser1ToAllowlist();
@@ -315,5 +316,4 @@ abstract contract ERC721OperationalByQuantityBaseTest is ERC721OperationalBaseTe
     function getFirst() internal view virtual returns (uint256) {
         return erc721BQ.mintBatchByQuantityThreshold();
     }
-
 }

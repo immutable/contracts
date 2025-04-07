@@ -10,9 +10,7 @@ import {StakeHolder} from "../../contracts/staking/StakeHolder.sol";
 
 import {ERC1967Proxy} from "openzeppelin-contracts-4.9.3/proxy/ERC1967/ERC1967Proxy.sol";
 
-
 contract StakeHolderBaseTest is Test {
-
     bytes32 public defaultAdminRole;
     bytes32 public upgradeRole;
 
@@ -38,9 +36,7 @@ contract StakeHolderBaseTest is Test {
 
         StakeHolder impl = new StakeHolder();
 
-        bytes memory initData = abi.encodeWithSelector(
-            StakeHolder.initialize.selector, roleAdmin, upgradeAdmin
-        );
+        bytes memory initData = abi.encodeWithSelector(StakeHolder.initialize.selector, roleAdmin, upgradeAdmin);
 
         proxy = new ERC1967Proxy(address(impl), initData);
         stakeHolder = StakeHolder(address(proxy));

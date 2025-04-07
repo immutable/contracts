@@ -8,7 +8,7 @@ import {IImmutableERC1155Errors} from "../../../contracts/errors/Errors.sol";
 import {OperatorAllowlistEnforcementErrors} from "../../../contracts/errors/Errors.sol";
 import {OperatorAllowlistUpgradeable} from "../../../contracts/allowlist/OperatorAllowlistUpgradeable.sol";
 import {Sign} from "../../utils/Sign.sol";
-import {DeployOperatorAllowlist} from  "../../utils/DeployAllowlistProxy.sol";
+import {DeployOperatorAllowlist} from "../../utils/DeployAllowlistProxy.sol";
 import {MockWallet} from "../../../contracts/mocks/MockWallet.sol";
 import {MockWalletFactory} from "../../../contracts/mocks/MockWalletFactory.sol";
 
@@ -21,7 +21,6 @@ contract ImmutableERC1155Costs is Test {
     MockWallet public scw;
     MockWallet public anotherScw;
     address[] private operatorAddrs;
-
 
     uint256 deployerPrivateKey = 1;
     uint256 ownerPrivateKey = 2;
@@ -51,13 +50,7 @@ contract ImmutableERC1155Costs is Test {
         operatorAllowlist = OperatorAllowlistUpgradeable(proxyAddr);
 
         immutableERC1155 = new ImmutableERC1155(
-            owner,
-            "test",
-            "test-base-uri",
-            "test-contract-uri",
-            address(operatorAllowlist),
-            feeReceiver,
-            0
+            owner, "test", "test-base-uri", "test-contract-uri", address(operatorAllowlist), feeReceiver, 0
         );
 
         operatorAddrs.push(minter);
@@ -119,6 +112,7 @@ contract ImmutableERC1155Costs is Test {
     /*
     * Mints
     */
+
     function test_Mint1To5() public {
         vm.startPrank(minter);
         immutableERC1155.safeMint(minter, 1, 1, "");
@@ -136,7 +130,7 @@ contract ImmutableERC1155Costs is Test {
         // immutableERC1155.safeMint(feeReceiver, 1, 5, "");
         // immutableERC1155.safeMint(deployer, 1, 5, "");
     }
-    
+
     function test_Mint10To5() public {
         vm.startPrank(minter);
         immutableERC1155.safeMint(minter, 1, 10, "");

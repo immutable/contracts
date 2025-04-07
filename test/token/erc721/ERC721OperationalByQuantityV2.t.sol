@@ -5,8 +5,9 @@ pragma solidity >=0.8.19 <0.8.29;
 import {ERC721OperationalByQuantityBaseTest} from "./ERC721OperationalByQuantityBase.t.sol";
 import {ImmutableERC721V2} from "../../../contracts/token/erc721/preset/ImmutableERC721V2.sol";
 import {IImmutableERC721ByQuantity} from "../../../contracts/token/erc721/interfaces/IImmutableERC721ByQuantity.sol";
-import {IImmutableERC721, IImmutableERC721Errors} from "../../../contracts/token/erc721/interfaces/IImmutableERC721.sol";
-
+import {
+    IImmutableERC721, IImmutableERC721Errors
+} from "../../../contracts/token/erc721/interfaces/IImmutableERC721.sol";
 
 // Test the original ImmutableERC721 contract: Operational tests
 contract ERC721OperationalByQuantityV2Test is ERC721OperationalByQuantityBaseTest {
@@ -19,15 +20,14 @@ contract ERC721OperationalByQuantityV2Test is ERC721OperationalByQuantityBaseTes
             owner, name, symbol, baseURI, contractURI, address(allowlist), feeReceiver, feeNumerator
         );
 
-        // ImmutableERC721 does not implement the interface, and hence must be cast to the 
+        // ImmutableERC721 does not implement the interface, and hence must be cast to the
         // interface type.
         erc721BQ = IImmutableERC721ByQuantity(address(erc721BQv2));
         erc721 = IImmutableERC721(address(erc721BQv2));
 
         vm.prank(owner);
         erc721.grantMinterRole(minter);
-   }
-
+    }
 
     function testMintBatchByQuantityNextTokenId() public {
         uint256 nextId = erc721BQv2.mintBatchByQuantityNextTokenId();
@@ -52,12 +52,13 @@ contract ERC721OperationalByQuantityV2Test is ERC721OperationalByQuantityBaseTes
     }
 
     function notOwnedRevertError(uint256 _tokenIdToBeBurned) public pure override returns (bytes memory) {
-        return abi.encodeWithSelector(IImmutableERC721Errors.IImmutableERC721NotOwnerOrOperator.selector, _tokenIdToBeBurned);
+        return abi.encodeWithSelector(
+            IImmutableERC721Errors.IImmutableERC721NotOwnerOrOperator.selector, _tokenIdToBeBurned
+        );
     }
 
-    function getFirst() internal override view returns (uint256) {
+    function getFirst() internal view override returns (uint256) {
         uint256 nominalFirst = erc721BQ.mintBatchByQuantityThreshold();
         return ((nominalFirst / 256) + 1) * 256;
     }
-
 }

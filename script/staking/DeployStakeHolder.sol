@@ -56,18 +56,25 @@ contract DeployStakeHolder is Test {
             salt2: "salt2"
         });
 
-        StakeHolderContractArgs memory stakeHolderContractArgs = StakeHolderContractArgs({
-            roleAdmin: makeAddr("role"),
-            upgradeAdmin: makeAddr("upgrade")
-        });
+        StakeHolderContractArgs memory stakeHolderContractArgs =
+            StakeHolderContractArgs({roleAdmin: makeAddr("role"), upgradeAdmin: makeAddr("upgrade")});
 
         // Run deployment against forked testnet
         StakeHolder deployedContract = _deploy(deploymentArgs, stakeHolderContractArgs);
 
-        assertTrue(deployedContract.hasRole(deployedContract.UPGRADE_ROLE(), stakeHolderContractArgs.upgradeAdmin), "Upgrade admin should have upgrade role");
-        assertTrue(deployedContract.hasRole(deployedContract.DEFAULT_ADMIN_ROLE(), stakeHolderContractArgs.roleAdmin), "Role admin should have default admin role");
+        assertTrue(
+            deployedContract.hasRole(deployedContract.UPGRADE_ROLE(), stakeHolderContractArgs.upgradeAdmin),
+            "Upgrade admin should have upgrade role"
+        );
+        assertTrue(
+            deployedContract.hasRole(deployedContract.DEFAULT_ADMIN_ROLE(), stakeHolderContractArgs.roleAdmin),
+            "Role admin should have default admin role"
+        );
         // The DEFAULT_ADMIN_ROLE should be revoked from the deployer account
-        assertFalse(deployedContract.hasRole(deployedContract.DEFAULT_ADMIN_ROLE(), deploymentArgs.signer), "msg.sender should not be an admin");
+        assertFalse(
+            deployedContract.hasRole(deployedContract.DEFAULT_ADMIN_ROLE(), deploymentArgs.signer),
+            "msg.sender should not be an admin"
+        );
     }
 
     function deploy() external {
@@ -78,7 +85,8 @@ contract DeployStakeHolder is Test {
         string memory salt1 = vm.envString("IMPL_SALT");
         string memory salt2 = vm.envString("PROXY_SALT");
 
-        DeploymentArgs memory deploymentArgs = DeploymentArgs({signer: signer, factory: factory, salt1: salt1, salt2: salt2});
+        DeploymentArgs memory deploymentArgs =
+            DeploymentArgs({signer: signer, factory: factory, salt1: salt1, salt2: salt2});
 
         StakeHolderContractArgs memory stakeHolderContractArgs =
             StakeHolderContractArgs({roleAdmin: roleAdmin, upgradeAdmin: upgradeAdmin});
@@ -95,9 +103,7 @@ contract DeployStakeHolder is Test {
         // Deploy StakeHolder via the Ownable Create3 factory.
         // That is: StakeHolder impl = new StakeHolder();
         // Create deployment bytecode and encode constructor args
-        bytes memory deploymentBytecode = abi.encodePacked(
-            type(StakeHolder).creationCode
-        );
+        bytes memory deploymentBytecode = abi.encodePacked(type(StakeHolder).creationCode);
         bytes32 saltBytes = keccak256(abi.encode(deploymentArgs.salt1));
 
         /// @dev Deploy the contract via the Ownable CREATE3 factory
@@ -113,10 +119,8 @@ contract DeployStakeHolder is Test {
         // Deploy ERC1967Proxy via the Ownable Create3 factory.
         // That is: ERC1967Proxy proxy = new ERC1967Proxy(address(impl), initData);
         // Create deployment bytecode and encode constructor args
-        deploymentBytecode = abi.encodePacked(
-            type(ERC1967Proxy).creationCode,
-            abi.encode(stakeHolderImplAddress, initData)
-        );
+        deploymentBytecode =
+            abi.encodePacked(type(ERC1967Proxy).creationCode, abi.encode(stakeHolderImplAddress, initData));
         saltBytes = keccak256(abi.encode(deploymentArgs.salt2));
 
         /// @dev Deploy the contract via the Ownable CREATE3 factory

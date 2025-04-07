@@ -46,17 +46,11 @@ contract GuardedMulticaller2Test is Test {
         bytes32 ref = keccak256("ref");
         uint256 deadline = block.timestamp + 1;
         GuardedMulticaller2.Call[] memory calls = new GuardedMulticaller2.Call[](3);
-        calls[0] = GuardedMulticaller2.Call(
-            address(target),
-            "succeedWithUint256(uint256)",
-            abi.encodePacked(uint256(42))
-        );
+        calls[0] =
+            GuardedMulticaller2.Call(address(target), "succeedWithUint256(uint256)", abi.encodePacked(uint256(42)));
         calls[1] = GuardedMulticaller2.Call(address(target), "succeed()", "");
-        calls[2] = GuardedMulticaller2.Call(
-            address(target1),
-            "succeedWithUint256(uint256)",
-            abi.encodePacked(uint256(42))
-        );
+        calls[2] =
+            GuardedMulticaller2.Call(address(target1), "succeedWithUint256(uint256)", abi.encodePacked(uint256(42)));
 
         bytes32 digest = sigUtils.hashTypedData(ref, calls, deadline);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, digest);
@@ -77,11 +71,8 @@ contract GuardedMulticaller2Test is Test {
         bytes32 ref = keccak256("ref");
         uint256 deadline = block.timestamp - 1;
         GuardedMulticaller2.Call[] memory calls = new GuardedMulticaller2.Call[](1);
-        calls[0] = GuardedMulticaller2.Call(
-            address(target),
-            "succeedWithUint256(uint256)",
-            abi.encodePacked(uint256(42))
-        );
+        calls[0] =
+            GuardedMulticaller2.Call(address(target), "succeedWithUint256(uint256)", abi.encodePacked(uint256(42)));
 
         bytes32 digest = sigUtils.hashTypedData(ref, calls, deadline);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, digest);
@@ -96,11 +87,8 @@ contract GuardedMulticaller2Test is Test {
         bytes32 ref = "";
         uint256 deadline = block.timestamp + 1;
         GuardedMulticaller2.Call[] memory calls = new GuardedMulticaller2.Call[](1);
-        calls[0] = GuardedMulticaller2.Call(
-            address(target),
-            "succeedWithUint256(uint256)",
-            abi.encodePacked(uint256(42))
-        );
+        calls[0] =
+            GuardedMulticaller2.Call(address(target), "succeedWithUint256(uint256)", abi.encodePacked(uint256(42)));
 
         bytes32 digest = sigUtils.hashTypedData(ref, calls, deadline);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, digest);
@@ -115,11 +103,8 @@ contract GuardedMulticaller2Test is Test {
         bytes32 ref = "ref";
         uint256 deadline = block.timestamp + 1;
         GuardedMulticaller2.Call[] memory calls = new GuardedMulticaller2.Call[](1);
-        calls[0] = GuardedMulticaller2.Call(
-            address(target),
-            "succeedWithUint256(uint256)",
-            abi.encodePacked(uint256(42))
-        );
+        calls[0] =
+            GuardedMulticaller2.Call(address(target), "succeedWithUint256(uint256)", abi.encodePacked(uint256(42)));
 
         bytes32 digest = sigUtils.hashTypedData(ref, calls, deadline);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, digest);
@@ -165,11 +150,8 @@ contract GuardedMulticaller2Test is Test {
         bytes32 ref = keccak256("ref");
         uint256 deadline = block.timestamp + 1;
         GuardedMulticaller2.Call[] memory calls = new GuardedMulticaller2.Call[](1);
-        calls[0] = GuardedMulticaller2.Call(
-            address(target),
-            "succeedWithUint256(uint256)",
-            abi.encodePacked(uint256(42))
-        );
+        calls[0] =
+            GuardedMulticaller2.Call(address(target), "succeedWithUint256(uint256)", abi.encodePacked(uint256(42)));
 
         bytes32 digest = sigUtils.hashTypedData(ref, calls, deadline);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(fakeSignerPk, digest);
@@ -185,11 +167,8 @@ contract GuardedMulticaller2Test is Test {
         bytes32 ref = keccak256("ref");
         uint256 deadline = block.timestamp + 1;
         GuardedMulticaller2.Call[] memory calls = new GuardedMulticaller2.Call[](1);
-        calls[0] = GuardedMulticaller2.Call(
-            address(target),
-            "succeedWithUint256(uint256)",
-            abi.encodePacked(uint256(42))
-        );
+        calls[0] =
+            GuardedMulticaller2.Call(address(target), "succeedWithUint256(uint256)", abi.encodePacked(uint256(42)));
 
         bytes32 digest = sigUtils.hashTypedData(ref, calls, deadline);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(fakeSignerPk, digest);
@@ -219,11 +198,8 @@ contract GuardedMulticaller2Test is Test {
         bytes32 ref = keccak256("ref");
         uint256 deadline = block.timestamp + 1;
         GuardedMulticaller2.Call[] memory calls = new GuardedMulticaller2.Call[](1);
-        calls[0] = GuardedMulticaller2.Call(
-            address(target),
-            "succeedWithUint256(uint256)",
-            abi.encodePacked(uint256(42))
-        );
+        calls[0] =
+            GuardedMulticaller2.Call(address(target), "succeedWithUint256(uint256)", abi.encodePacked(uint256(42)));
 
         bytes32 digest = sigUtils.hashTypedData(ref, calls, deadline);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, digest);

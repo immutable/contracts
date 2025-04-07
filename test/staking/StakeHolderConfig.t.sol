@@ -8,7 +8,7 @@ import {StakeHolder} from "../../contracts/staking/StakeHolder.sol";
 import {StakeHolderBaseTest} from "./StakeHolderBase.t.sol";
 
 contract StakeHolderV2 is StakeHolder {
-    function upgradeStorage(bytes memory /* _data */) external override {
+    function upgradeStorage(bytes memory /* _data */ ) external override {
         version = 1;
     }
 }
@@ -49,7 +49,7 @@ contract StakeHolderConfigTest is StakeHolderBaseTest {
     function testUpgradeAuthFail() public {
         StakeHolderV2 v2Impl = new StakeHolderV2();
         bytes memory initData = abi.encodeWithSelector(StakeHolder.upgradeStorage.selector, bytes(""));
-        // Error will be of the form: 
+        // Error will be of the form:
         // AccessControl: account 0x7fa9385be102ac3eac297483dd6233d62b3e1496 is missing role 0x555047524144455f524f4c450000000000000000000000000000000000000000
         vm.expectRevert();
         stakeHolder.upgradeToAndCall(address(v2Impl), initData);
@@ -96,10 +96,10 @@ contract StakeHolderConfigTest is StakeHolderBaseTest {
         stakeHolder.revokeRole(role, roleAdmin);
     }
 
-    function testRoleAdminAuthFail () public {
+    function testRoleAdminAuthFail() public {
         bytes32 role = stakeHolder.DEFAULT_ADMIN_ROLE();
         address newRoleAdmin = makeAddr("NewRoleAdmin");
-        // Error will be of the form: 
+        // Error will be of the form:
         // AccessControl: account 0x7fa9385be102ac3eac297483dd6233d62b3e1496 is missing role 0x555047524144455f524f4c450000000000000000000000000000000000000000
         vm.expectRevert();
         stakeHolder.grantRole(role, newRoleAdmin);

@@ -1,6 +1,6 @@
 # Staking
 
-The Immutable zkEVM staking system consists of the Staking Holder contract. This contract holds staked native IMX. Any account (EOA or contract) can stake any amount at any time. An account can remove all or some of their stake at any time. The contract has the facility to distribute rewards to stakers. 
+The Immutable zkEVM staking system consists of the Staking Holder contract. This contract holds staked native IMX. Any account (EOA or contract) can stake any amount at any time. An account can remove all or some of their stake at any time. The contract has the facility to distribute rewards to stakers.
 
 ## Immutable Contract Addresses
 
@@ -28,7 +28,7 @@ This repo includes a script for deploying via a CREATE3 factory contract. The sc
 See the `.env.example` for required environment variables.
 
 ```sh
-forge script script/stake/DeployStakeHolder.sol --tc DeployStakeHolder --sig "deploy()" -vvv --rpc-url {rpc-url} --broadcast --verifier-url https://explorer.immutable.com/api --verifier blockscout --verify --gas-price 10gwei
+forge script script/staking/DeployStakeHolder.sol --tc DeployStakeHolder --sig "deploy()" -vvv --rpc-url {rpc-url} --broadcast --verifier-url https://explorer.immutable.com/api --verifier blockscout --verify --gas-price 10000000000
 ```
 
 Optionally, you can also specify `--ledger` or `--trezor` for hardware deployments. See docs [here](https://book.getfoundry.sh/reference/forge/forge-script#wallet-options---hardware-wallet).
@@ -53,7 +53,7 @@ The `stakers` array needs to be analysed to determine which accounts have staked
 
 The `StakeHolder` contract is `AccessControlEnumerableUpgradeable`, with the following minor modification:
 
-* `_revokeRole(bytes32 _role, address _account)` has been overridden to prevent the last DEFAULT_ADMIN_ROLE (the last role admin) from either being revoked or renounced. 
+* `_revokeRole(bytes32 _role, address _account)` has been overridden to prevent the last DEFAULT_ADMIN_ROLE (the last role admin) from either being revoked or renounced.
 
 The `StakeHolder` contract is `UUPSUpgradeable`. Only accounts with `UPGRADE_ROLE` are authorised to upgrade the contract.
 
@@ -63,7 +63,7 @@ The `upgradeStorage` function should be updated each new contract version. It sh
 
 * Check the value returned by `version`. This is the version of the code and associated storage format from the previous version prior to the upgrade. Three alternatives are possible:
   * The value is less than the new version: Upgrade as per the bullet points below.
-  * The value is higher than the new version: This probably indicates that an attempt to upgrade the contract has mistakenly downgraded the contract to a previous version. The function should revert. 
+  * The value is higher than the new version: This probably indicates that an attempt to upgrade the contract has mistakenly downgraded the contract to a previous version. The function should revert.
   * The value is the same as the newt version: Someone (an attacker) has called the `upgradeStorage` function after the code has been upgraded. The function should revert.
 * Based on the old code version and storage format indicated by the `version`, update the storage variables. Typically, upgrades only involve code changes, and require no storage variable changes. However, in some circumstances storage variables should also be updated.
 * Update the `version` storage variable to indicate the new code version.

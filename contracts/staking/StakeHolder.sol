@@ -41,10 +41,10 @@ contract StakeHolder is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
     error AttemptToDistributeToNewAccount(address _account, uint256 _amount);
 
     /// @notice Event when an amount has been staked or when an amount is distributed to an account.
-    event StakeAdded(address _staker, uint256 _amountAdded, uint256 _newBalance);
+    event StakeAdded(address _staker, uint256 _amountAdded, uint256 _newBalance, uint256 _timestamp);
 
     /// @notice Event when an amount has been unstaked.
-    event StakeRemoved(address _staker, uint256 _amountRemoved, uint256 _newBalance);
+    event StakeRemoved(address _staker, uint256 _amountRemoved, uint256 _newBalance, uint256 _timestamp);
 
     /// @notice Event summarising a distribution. There will also be one StakeAdded event for each recipient.
     event Distributed(address _distributor, uint256 _totalDistribution, uint256 _numRecipients);
@@ -138,7 +138,7 @@ contract StakeHolder is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
         uint256 newBalance = currentStake - _amountToUnstake;
         stakeInfo.stake = newBalance;
 
-        emit StakeRemoved(msg.sender, _amountToUnstake, newBalance);
+        emit StakeRemoved(msg.sender, _amountToUnstake, newBalance, block.timestamp);
 
         // slither-disable-next-line low-level-calls
         (bool success, bytes memory returndata) = payable(msg.sender).call{value: _amountToUnstake}("");
@@ -263,7 +263,7 @@ contract StakeHolder is AccessControlEnumerableUpgradeable, UUPSUpgradeable {
         }
         uint256 newBalance = currentStake + _amount;
         stakeInfo.stake = newBalance;
-        emit StakeAdded(_account, _amount, newBalance);
+        emit StakeAdded(_account, _amount, newBalance, block.timestamp);
     }
 
     // Override the _authorizeUpgrade function

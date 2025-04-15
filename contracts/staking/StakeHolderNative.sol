@@ -31,7 +31,7 @@ contract StakeHolderNative is StakeHolderBase {
      * @dev This function does not need re-entrancy guard as the add stake
      *  mechanism does not call out to any external function.
      */
-    function stake(uint256 _amount) external payable {
+    function stake(uint256 _amount) external payable nonReentrant {
         if (msg.value == 0) {
             revert MustStakeMoreThanZero();
         }
@@ -47,7 +47,7 @@ contract StakeHolderNative is StakeHolderBase {
      *  prior to the call to the user's wallet.
      * @param _amountToUnstake Amount of stake to remove.
      */
-    function unstake(uint256 _amountToUnstake) external {
+    function unstake(uint256 _amountToUnstake) external nonReentrant {
         StakeInfo storage stakeInfo = balances[msg.sender];
         uint256 currentStake = stakeInfo.stake;
         if (currentStake < _amountToUnstake) {
@@ -85,7 +85,7 @@ contract StakeHolderNative is StakeHolderBase {
      */
     function distributeRewards(
         AccountAmount[] calldata _recipientsAndAmounts
-    ) external payable onlyRole(DISTRIBUTE_ROLE) {
+    ) external payable onlyRole(DISTRIBUTE_ROLE) nonReentrant {
         // Initial validity checks
         if (msg.value == 0) {
             revert MustDistributeMoreThanZero();

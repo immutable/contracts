@@ -32,7 +32,7 @@ contract StakeHolderOperationalNativeTest is StakeHolderOperationalBaseTest {
         attacker.stake(10 ether);
         // Attacker's reentracy attack will double the amount being unstaked.
         // The attack fails due to attempting to withdraw more than balance (that is, 2 x 6 eth = 12)
-        vm.expectRevert(abi.encodeWithSelector(IStakeHolder.UnstakeAmountExceedsBalance.selector, 6000000000000000001, 4 ether));
+        vm.expectRevert(abi.encodePacked("ReentrancyGuard: reentrant call"));
         attacker.unstake{gas: 10000000}(6 ether);
     }
 

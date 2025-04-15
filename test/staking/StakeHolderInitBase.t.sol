@@ -4,10 +4,9 @@ pragma solidity >=0.8.19 <0.8.29;
 
 // solhint-disable-next-line no-global-import
 import "forge-std/Test.sol";
-import {StakeHolder} from "../../contracts/staking/StakeHolder.sol";
 import {StakeHolderBaseTest} from "./StakeHolderBase.t.sol";
 
-contract StakeHolderInitTest is StakeHolderBaseTest {
+abstract contract StakeHolderInitBaseTest is StakeHolderBaseTest {
     function testGetVersion() public {
         uint256 ver = stakeHolder.version();
         assertEq(ver, 0, "Expect initial version of storage layout to be V0");

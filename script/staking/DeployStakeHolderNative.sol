@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import {StakeHolder} from "../../contracts/staking/StakeHolder.sol";
+import {StakeHolderNative} from "../../contracts/staking/StakeHolderNative.sol";
 
 /**
  * @title IDeployer Interface
@@ -43,7 +43,7 @@ struct StakeHolderContractArgs {
  * @dev deploy() is the function the script should call.
  * For more details on deployment see ../../contracts/staking/README.md
  */
-contract DeployStakeHolder is Test {
+contract DeployStakeHolderNative is Test {
     function testDeploy() external {
         /// @dev Fork the Immutable zkEVM testnet for this test
         string memory rpcURL = "https://rpc.testnet.immutable.com";
@@ -64,7 +64,7 @@ contract DeployStakeHolder is Test {
         });
 
         // Run deployment against forked testnet
-        StakeHolder deployedContract = _deploy(deploymentArgs, stakeHolderContractArgs);
+        StakeHolderNative deployedContract = _deploy(deploymentArgs, stakeHolderContractArgs);
 
         assertTrue(deployedContract.hasRole(deployedContract.UPGRADE_ROLE(), stakeHolderContractArgs.upgradeAdmin), "Upgrade admin should have upgrade role");
         assertTrue(deployedContract.hasRole(deployedContract.DEFAULT_ADMIN_ROLE(), stakeHolderContractArgs.roleAdmin), "Role admin should have default admin role");
@@ -91,7 +91,7 @@ contract DeployStakeHolder is Test {
 
     function _deploy(DeploymentArgs memory deploymentArgs, StakeHolderContractArgs memory stakeHolderContractArgs)
         internal
-        returns (StakeHolder stakeHolderContract)
+        returns (StakeHolderNative stakeHolderContract)
     {
         IDeployer ownableCreate3 = IDeployer(deploymentArgs.factory);
 
@@ -99,7 +99,7 @@ contract DeployStakeHolder is Test {
         // That is: StakeHolder impl = new StakeHolder();
         // Create deployment bytecode and encode constructor args
         bytes memory deploymentBytecode = abi.encodePacked(
-            type(StakeHolder).creationCode
+            type(StakeHolderNative).creationCode
         );
         bytes32 saltBytes = keccak256(abi.encode(deploymentArgs.salt1));
 
@@ -110,7 +110,7 @@ contract DeployStakeHolder is Test {
 
         // Create init data for teh ERC1967 Proxy
         bytes memory initData = abi.encodeWithSelector(
-            StakeHolder.initialize.selector, stakeHolderContractArgs.roleAdmin, 
+            StakeHolderNative.initialize.selector, stakeHolderContractArgs.roleAdmin, 
             stakeHolderContractArgs.upgradeAdmin, stakeHolderContractArgs.distributeAdmin
         );
 
@@ -127,6 +127,6 @@ contract DeployStakeHolder is Test {
         vm.startBroadcast(deploymentArgs.signer);
         address stakeHolderContractAddress = ownableCreate3.deploy(deploymentBytecode, saltBytes);
         vm.stopBroadcast();
-        stakeHolderContract = StakeHolder(stakeHolderContractAddress);
+        stakeHolderContract = StakeHolderNative(stakeHolderContractAddress);
     }
 }

@@ -6,19 +6,16 @@ pragma solidity >=0.8.19 <0.8.29;
 
 // solhint-disable-next-line no-global-import
 import "forge-std/Test.sol";
-import {StakeHolder} from "../../contracts/staking/StakeHolder.sol";
+import {IStakeHolder} from "../../contracts/staking/IStakeHolder.sol";
+import {StakeHolderNative} from "../../contracts/staking/StakeHolderNative.sol";
 
-import {ERC1967Proxy} from "openzeppelin-contracts-4.9.3/proxy/ERC1967/ERC1967Proxy.sol";
-
-
-contract StakeHolderBaseTest is Test {
+abstract contract StakeHolderBaseTest is Test {
 
     bytes32 public defaultAdminRole;
     bytes32 public upgradeRole;
     bytes32 public distributeRole;
 
-    ERC1967Proxy public proxy;
-    StakeHolder public stakeHolder;
+    IStakeHolder public stakeHolder;
 
     address public roleAdmin;
     address public upgradeAdmin;
@@ -29,7 +26,7 @@ contract StakeHolderBaseTest is Test {
     address public staker3;
     address public bank;
 
-    function setUp() public {
+    function setUp() public virtual {
         roleAdmin = makeAddr("RoleAdmin");
         upgradeAdmin = makeAddr("UpgradeAdmin");
         distributeAdmin = makeAddr("DistributeAdmin");
@@ -39,17 +36,9 @@ contract StakeHolderBaseTest is Test {
         staker3 = makeAddr("Staker3");
         bank = makeAddr("bank");
 
-        StakeHolder impl = new StakeHolder();
-
-        bytes memory initData = abi.encodeWithSelector(
-            StakeHolder.initialize.selector, roleAdmin, upgradeAdmin, distributeAdmin
-        );
-
-        proxy = new ERC1967Proxy(address(impl), initData);
-        stakeHolder = StakeHolder(address(proxy));
-
-        defaultAdminRole = stakeHolder.DEFAULT_ADMIN_ROLE();
-        upgradeRole = stakeHolder.UPGRADE_ROLE();
-        distributeRole = stakeHolder.DISTRIBUTE_ROLE();
+        StakeHolderNative temp = new StakeHolderNative();
+        defaultAdminRole = temp.DEFAULT_ADMIN_ROLE();
+        upgradeRole = temp.UPGRADE_ROLE();
+        distributeRole = temp.DISTRIBUTE_ROLE();
     }
 }

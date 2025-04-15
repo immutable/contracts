@@ -78,20 +78,6 @@ abstract contract StakeHolderConfigBaseTest is StakeHolderBaseTest {
         assertFalse(stakeHolder.hasRole(role, upgradeAdmin), "Upgrade admin should not have role");
     }
 
-    function testRenounceLastRoleAdmin() public {
-        bytes32 role = defaultAdminRole;
-        vm.expectRevert(abi.encodeWithSelector(IStakeHolder.MustHaveOneRoleAdmin.selector));
-        vm.prank(roleAdmin);
-        stakeHolder.renounceRole(role, roleAdmin);
-    }
-
-    function testRevokeLastRoleAdmin() public {
-        bytes32 role = defaultAdminRole;
-        vm.expectRevert(abi.encodeWithSelector(IStakeHolder.MustHaveOneRoleAdmin.selector));
-        vm.prank(roleAdmin);
-        stakeHolder.revokeRole(role, roleAdmin);
-    }
-
     function testRoleAdminAuthFail () public {
         bytes32 role = defaultAdminRole;
         address newRoleAdmin = makeAddr("NewRoleAdmin");

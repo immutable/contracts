@@ -4,6 +4,8 @@ pragma solidity >=0.8.19 <0.8.29;
 
 import {UUPSUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/proxy/utils/UUPSUpgradeable.sol";
 import {AccessControlEnumerableUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/access/AccessControlEnumerableUpgradeable.sol";
+import {AccessControlUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/access/AccessControlUpgradeable.sol";
+import {IAccessControlUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/access/IAccessControlUpgradeable.sol";
 import {ReentrancyGuardUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/security/ReentrancyGuardUpgradeable.sol";
 import {IStakeHolder} from "./IStakeHolder.sol";
 import {StakeHolderBase} from "./StakeHolderBase.sol";
@@ -118,18 +120,6 @@ abstract contract StakeHolderBase is IStakeHolder, AccessControlEnumerableUpgrad
     // Override the _authorizeUpgrade function
     // solhint-disable-next-line no-empty-blocks
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADE_ROLE) {}
-
-    /**
-     * @notice Prevent revoke or renounce role for the last DEFAULT_ADMIN_ROLE / the last role admin.
-     * @param _role The role to be renounced.
-     * @param _account Account to be revoked.
-     */
-    function _revokeRole(bytes32 _role, address _account) internal override {
-        if (_role == DEFAULT_ADMIN_ROLE && getRoleMemberCount(_role) == 1) {
-            revert MustHaveOneRoleAdmin();
-        }
-        super._revokeRole(_role, _account);
-    }
 
     /// @notice storage gap for additional variables for upgrades
     // slither-disable-start unused-state

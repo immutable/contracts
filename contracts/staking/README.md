@@ -53,8 +53,6 @@ The `stakers` array needs to be analysed to determine which accounts have staked
 
 The `StakeHolder` contract is `AccessControlEnumerableUpgradeable`, with the following minor modification:
 
-* `_revokeRole(bytes32 _role, address _account)` has been overridden to prevent the last DEFAULT_ADMIN_ROLE (the last role admin) from either being revoked or renounced.
-
 The `StakeHolder` contract is `UUPSUpgradeable`. Only accounts with `UPGRADE_ROLE` are authorised to upgrade the contract.
 
 ## Upgrade Concept
@@ -67,3 +65,11 @@ The `upgradeStorage` function should be updated each new contract version. It sh
   * The value is the same as the newt version: Someone (an attacker) has called the `upgradeStorage` function after the code has been upgraded. The function should revert.
 * Based on the old code version and storage format indicated by the `version`, update the storage variables. Typically, upgrades only involve code changes, and require no storage variable changes. However, in some circumstances storage variables should also be updated.
 * Update the `version` storage variable to indicate the new code version.
+
+## Time Delay Upgrade and Admin
+
+A staking systems may wish to delay upgrade actions and the granting of additional administrative access. To do this, the only account with UPGRADE_ROLE and DEFAULT_ADMIN_ROLE roles should be an instance of Open Zeppelin's [TimelockController](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/governance/TimelockController.sol). This ensures any upgrade proposals or proposals to add more accounts with DEFAULT_ADMIN_ROLE, UPGRADE_ROLE or DISTRIBUTE_ROLE must go through a time delay before being actioned.
+
+## Preventing Upgrade
+
+A staking system should choose to have no account with DEFAULT_ADMIN_ROLE to To prevent additional accounts being granted UPGRADE_ROLE role. The system could have no acccounts with UPGRADE_ROLE, thus preventing upgrade. The system could configure this from start-up by passing in `address(0)` as the `roleAdmin` and `upgradeAdmin` to the constructor. Alternative, the `revokeRole` function can be used.

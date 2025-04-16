@@ -51,7 +51,7 @@ contract StakeHolderOperationalNativeTest is StakeHolderOperationalBaseTest {
         accountsAmounts[0] = IStakeHolder.AccountAmount(staker2, 0.5 ether);
         accountsAmounts[1] = IStakeHolder.AccountAmount(staker3, 1 ether);
         _distributeRewards(distributeAdmin, 1 ether, accountsAmounts,
-            abi.encodeWithSelector(IStakeHolder.DistributionAmountsDoNotMatchTotal.selector, 1 ether, 1.5 ether));
+            abi.encodeWithSelector(IStakeHolder.MismatchMsgValueAmount.selector, 1 ether, 1.5 ether));
     }
 
     function _deal(address _to, uint256 _amount) internal override {

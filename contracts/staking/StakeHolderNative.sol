@@ -26,40 +26,18 @@ contract StakeHolderNative is StakeHolderBase {
     }
 
     /**
-     * @notice Allow any account to stake more value.
-     * @dev The amount being staked is the value of msg.value.
-     * @dev This function does not need re-entrancy guard as the add stake
-     *  mechanism does not call out to any external function.
+     * @inheritdoc IStakeHolder
      */
-    function stake(uint256 _amount) external payable nonReentrant {
-        if (msg.value == 0) {
-            revert MustStakeMoreThanZero();
-        }
-        if (_amount != msg.value) {
-            revert MismatchMsgValueAmount(msg.value, _amount);
-        }
-        _addStake(msg.sender, msg.value, false);
+    function getToken() external pure returns(address) {
+        return address(0);
     }
 
     /**
-     * @notice Allow any account to remove some or all of their own stake.
-     * @dev This function does not need re-entrancy guard as the state is updated
-     *  prior to the call to the user's wallet.
-     * @param _amountToUnstake Amount of stake to remove.
+     * @inheritdoc StakeHolderBase
      */
-    function unstake(uint256 _amountToUnstake) external nonReentrant {
-        StakeInfo storage stakeInfo = balances[msg.sender];
-        uint256 currentStake = stakeInfo.stake;
-        if (currentStake < _amountToUnstake) {
-            revert UnstakeAmountExceedsBalance(_amountToUnstake, currentStake);
-        }
-        uint256 newBalance = currentStake - _amountToUnstake;
-        stakeInfo.stake = newBalance;
-
-        emit StakeRemoved(msg.sender, _amountToUnstake, newBalance, block.timestamp);
-
+    function _sendValue(address _to, uint256 _amount) internal override {
         // slither-disable-next-line low-level-calls
-        (bool success, bytes memory returndata) = payable(msg.sender).call{value: _amountToUnstake}("");
+        (bool success, bytes memory returndata) = payable(_to).call{value: _amount}("");
         if (!success) {
             // Look for revert reason and bubble it up if present.
             // Revert reasons should contain an error selector, which is four bytes long.
@@ -76,75 +54,18 @@ contract StakeHolderNative is StakeHolderBase {
     }
 
     /**
-     * @notice Accounts with DISTRIBUTE_ROLE can distribute tokens to any set of accounts.
-     * @dev The total amount to distribute must match msg.value.
-     *  This function does not need re-entrancy guard as the distribution mechanism
-     *  does not call out to another contract.
-     * @param _recipientsAndAmounts An array of recipients to distribute value to and
-     *          amounts to be distributed to each recipient.
+     * @inheritdoc StakeHolderBase
      */
-    function distributeRewards(
-        AccountAmount[] calldata _recipientsAndAmounts
-    ) external payable onlyRole(DISTRIBUTE_ROLE) nonReentrant {
-        // Initial validity checks
-        if (msg.value == 0) {
-            revert MustDistributeMoreThanZero();
+    function _checksAndTransfer(uint256 _amount) internal override {
+        // Check that the amount matches the msg.value.
+        if (_amount != msg.value) {
+            revert MismatchMsgValueAmount(msg.value, _amount);
         }
-        uint256 len = _recipientsAndAmounts.length;
-
-        // Distribute the value.
-        uint256 total = 0;
-        for (uint256 i = 0; i < len; i++) {
-            AccountAmount calldata accountAmount = _recipientsAndAmounts[i];
-            uint256 amount = accountAmount.amount;
-            // Add stake, but require the acount to either currently be staking or have
-            // previously staked.
-            _addStake(accountAmount.account, amount, true);
-            total += amount;
-        }
-
-        // Check that the total distributed matches the msg.value.
-        if (total != msg.value) {
-            revert DistributionAmountsDoNotMatchTotal(msg.value, total);
-        }
-        emit Distributed(msg.sender, msg.value, len);
     }
-
-
-    /**
-     * @inheritdoc IStakeHolder
-     */
-    function getToken() external pure returns(address) {
-        return address(0);
-    }
-
-
-    /**
-     * @notice Add more stake to an account.
-     * @dev If the account has a zero balance prior to this call, add the account to the stakers array.
-     * @param _account Account to add stake to.
-     * @param _amount The amount of stake to add.
-     * @param _existingAccountsOnly If true, revert if the account has never been used.
-     */
-    function _addStake(address _account, uint256 _amount, bool _existingAccountsOnly) private {
-        StakeInfo storage stakeInfo = balances[_account];
-        uint256 currentStake = stakeInfo.stake;
-        if (!stakeInfo.hasStaked) {
-            if (_existingAccountsOnly) {
-                revert AttemptToDistributeToNewAccount(_account, _amount);
-            }
-            stakers.push(_account);
-            stakeInfo.hasStaked = true;
-        }
-        uint256 newBalance = currentStake + _amount;
-        stakeInfo.stake = newBalance;
-        emit StakeAdded(_account, _amount, newBalance, block.timestamp);
-    }
-
 
     /// @notice storage gap for additional variables for upgrades
     // slither-disable-start unused-state
     // solhint-disable-next-line var-name-mixedcase
-    uint256[50] private __StakeHolderGap;
+    uint256[50] private __StakeHolderNativeGap;
     // slither-disable-end unused-state
 }

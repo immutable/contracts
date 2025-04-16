@@ -81,6 +81,60 @@ abstract contract StakeHolderBase is IStakeHolder, AccessControlEnumerableUpgrad
         revert CanNotUpgradeToLowerOrSameVersion(version);
     }
 
+    /**
+     * @notice Allow any account to stake more value.
+     * @param _amount The amount of tokens to be staked.
+     */
+    function stake(uint256 _amount) external payable nonReentrant {
+        if (_amount == 0) {
+            revert MustStakeMoreThanZero();
+        }
+        _checksAndTransfer(_amount);
+        _addStake(msg.sender, _amount, false);
+    }
+
+
+    /**
+     * @inheritdoc IStakeHolder
+     */
+    function unstake(uint256 _amountToUnstake) external nonReentrant {
+        StakeInfo storage stakeInfo = balances[msg.sender];
+        uint256 currentStake = stakeInfo.stake;
+        if (currentStake < _amountToUnstake) {
+            revert UnstakeAmountExceedsBalance(_amountToUnstake, currentStake);
+        }
+        uint256 newBalance = currentStake - _amountToUnstake;
+        stakeInfo.stake = newBalance;
+
+        emit StakeRemoved(msg.sender, _amountToUnstake, newBalance, block.timestamp);
+
+        _sendValue(msg.sender, _amountToUnstake);
+    }
+
+
+   /**
+     * @inheritdoc IStakeHolder
+     */
+    function distributeRewards(
+        AccountAmount[] calldata _recipientsAndAmounts
+    ) external payable nonReentrant onlyRole(DISTRIBUTE_ROLE) {
+        // Distribute the value.
+        uint256 total = 0;
+        uint256 len = _recipientsAndAmounts.length;
+        for (uint256 i = 0; i < len; i++) {
+            AccountAmount calldata accountAmount = _recipientsAndAmounts[i];
+            uint256 amount = accountAmount.amount;
+            // Add stake, but require the acount to either currently be staking or have
+            // previously staked.
+            _addStake(accountAmount.account, amount, true);
+            total += amount;
+        }
+        if (total == 0) {
+            revert MustDistributeMoreThanZero();
+        }
+        _checksAndTransfer(total);
+        emit Distributed(msg.sender, total, len);
+    }
 
     /**
      * @inheritdoc IStakeHolder
@@ -116,6 +170,44 @@ abstract contract StakeHolderBase is IStakeHolder, AccessControlEnumerableUpgrad
         }
         return stakerPartialArray;
     }
+
+
+    /**
+     * @notice Add more stake to an account.
+     * @dev If the account has a zero balance prior to this call, add the account to the stakers array.
+     * @param _account Account to add stake to.
+     * @param _amount The amount of stake to add.
+     * @param _existingAccountsOnly If true, revert if the account has never been used.
+     */
+    function _addStake(address _account, uint256 _amount, bool _existingAccountsOnly) internal {
+        StakeInfo storage stakeInfo = balances[_account];
+        uint256 currentStake = stakeInfo.stake;
+        if (!stakeInfo.hasStaked) {
+            if (_existingAccountsOnly) {
+                revert AttemptToDistributeToNewAccount(_account, _amount);
+            }
+            stakers.push(_account);
+            stakeInfo.hasStaked = true;
+        }
+        uint256 newBalance = currentStake + _amount;
+        stakeInfo.stake = newBalance;
+        emit StakeAdded(_account, _amount, newBalance, block.timestamp);
+    }
+
+    /**
+     * @notice Send value to an account.
+     * @param _to The account to sent value to.
+     * @param _amount The quantity to send.
+     */
+    function _sendValue(address _to, uint256 _amount) internal virtual;
+
+
+    /**
+     * @notice Complete validity checks and for ERC20 variant transfer tokens.
+     * @param _amount Amount to be transferred.
+     */
+    function _checksAndTransfer(uint256 _amount) internal virtual;
+
 
     // Override the _authorizeUpgrade function
     // solhint-disable-next-line no-empty-blocks

@@ -30,9 +30,6 @@ interface IStakeHolder is IAccessControlEnumerableUpgradeable {
     /// @notice Error: Distributions can only be made to accounts that have staked.
     error AttemptToDistributeToNewAccount(address _account, uint256 _amount);
 
-    /// @notice Error: The sum of all amounts to distribute did not equal msg.value of the distribute transaction.
-    error DistributionAmountsDoNotMatchTotal(uint256 _msgValue, uint256 _calculatedTotalDistribution);
-
     /// @notice Error: Call to stake for implementations that accept value require value and parameter to match.
     error MismatchMsgValueAmount(uint256 _msgValue, uint256 _amount);
 

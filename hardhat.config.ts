@@ -99,7 +99,7 @@ const config: HardhatUserConfig = {
   networks: {
     devnet: {
       url: "https://rpc.dev.immutable.com",
-      accounts:[""]
+      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     sepolia: {
       url: process.env.SEPOLIA_URL || "",

@@ -1,6 +1,20 @@
 # Staking
 
-The Immutable zkEVM staking system consists of the Staking Holder contract. This contract holds staked native IMX. Any account (EOA or contract) can stake any amount at any time. An account can remove all or some of their stake at any time. The contract has the facility to distribute rewards to stakers.
+The Immutable zkEVM staking system allows any account (EOA or contract) to stake any amount at any time. An account can remove all or some of their stake at any time. The contract has the facility to distribute rewards to stakers.
+
+The system consists of a set of contracts show in the diagram below.
+
+![Staking System](./staking.png)
+
+`IStakeHolder.sol` is the interface that all staking implementations comply with.
+
+`StakeHolderBase.sol` is the base contract that all staking implementation use.
+
+`StakeHolderERC20.sol` allows an ERC20 token to be used as the staking currency.
+
+`StakeHolderNative.sol` uses the native token, IMX, to be used as the staking currency.
+
+`TimelockController.sol` can be used with the staking contracts to provide a one week delay between upgrade or other admin changes are proposed and when they are executed.
 
 ## Immutable Contract Addresses
 
@@ -36,11 +50,11 @@ Optionally, you can also specify `--ledger` or `--trezor` for hardware deploymen
 
 # Usage
 
-To stake, any account should call `stake()`, passing in the amount to be staked as the msg.value.
+To stake, any account should call `stake(uint256 _amount)`. For the native IMX variant, the amount to be staked must be passed in as the msg.value.
 
 To unstake, the account that previously staked should call, `unstake(uint256 _amountToUnstake)`.
 
-Accounts that have DISTRIBUTE_ROLE that wish to distribute rewards should call, `distributeRewards(AccountAmount[] calldata _recipientsAndAmounts)`. The `AccountAmount` structure consists of recipient address and amount to distribute pairs. Distributions can only be made to accounts that have previously or are currently staking. The amount to be distributed must be passed in as msg.value and must equal to the sum of the amounts specified in the `_recipientsAndAmounts` array.
+Accounts that have DISTRIBUTE_ROLE that wish to distribute rewards should call, `distributeRewards(AccountAmount[] calldata _recipientsAndAmounts)`. The `AccountAmount` structure consists of recipient address and amount to distribute pairs. Distributions can only be made to accounts that have previously or are currently staking. For the native IMX variant, the amount to be distributed must be passed in as msg.value and must equal to the sum of the amounts specified in the `_recipientsAndAmounts` array.
 
 The `stakers` array needs to be analysed to determine which accounts have staked and how much. The following functions provide access to this data structure:
 
@@ -51,9 +65,7 @@ The `stakers` array needs to be analysed to determine which accounts have staked
 
 # Administration Notes
 
-The `StakeHolder` contract is `AccessControlEnumerableUpgradeable`, with the following minor modification:
-
-The `StakeHolder` contract is `UUPSUpgradeable`. Only accounts with `UPGRADE_ROLE` are authorised to upgrade the contract.
+The `StakeHolderBase` contract is `AccessControlEnumerableUpgradeable`. The `StakeHolder` contract is `UUPSUpgradeable`. Only accounts with `UPGRADE_ROLE` are authorised to upgrade the contract.
 
 ## Upgrade Concept
 

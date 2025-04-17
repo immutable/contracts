@@ -35,7 +35,7 @@ contract StakeHolderNative is StakeHolderBase {
      * @inheritdoc StakeHolderBase
      */
     function _sendValue(address _to, uint256 _amount) internal override {
-        // slither-disable-next-line low-level-calls
+        // slither-disable-next-line low-level-calls,arbitrary-send-eth
         (bool success, bytes memory returndata) = payable(_to).call{value: _amount}("");
         if (!success) {
             // Look for revert reason and bubble it up if present.

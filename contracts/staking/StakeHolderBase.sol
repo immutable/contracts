@@ -14,7 +14,12 @@ import {StakeHolderBase} from "./StakeHolderBase.sol";
  * @title StakeHolderBase: allows anyone to stake any amount of an ERC20 token and to then remove all or part of that stake.
  * @dev The StakeHolderERC20 contract is designed to be upgradeable.
  */
-abstract contract StakeHolderBase is IStakeHolder, AccessControlEnumerableUpgradeable, UUPSUpgradeable, ReentrancyGuardUpgradeable {
+abstract contract StakeHolderBase is
+    IStakeHolder,
+    AccessControlEnumerableUpgradeable,
+    UUPSUpgradeable,
+    ReentrancyGuardUpgradeable
+{
     /// @notice Only UPGRADE_ROLE can upgrade the contract
     bytes32 public constant UPGRADE_ROLE = bytes32("UPGRADE_ROLE");
 
@@ -52,11 +57,7 @@ abstract contract StakeHolderBase is IStakeHolder, AccessControlEnumerableUpgrad
      * @param _upgradeAdmin the address to grant `UPGRADE_ROLE` to
      * @param _distributeAdmin the address to grant `DISTRIBUTE_ROLE` to
      */
-    function __StakeHolderBase_init(
-        address _roleAdmin,
-        address _upgradeAdmin,
-        address _distributeAdmin
-    ) internal {
+    function __StakeHolderBase_init(address _roleAdmin, address _upgradeAdmin, address _distributeAdmin) internal {
         __UUPSUpgradeable_init();
         __AccessControl_init();
         __ReentrancyGuard_init();
@@ -93,7 +94,6 @@ abstract contract StakeHolderBase is IStakeHolder, AccessControlEnumerableUpgrad
         _addStake(msg.sender, _amount, false);
     }
 
-
     /**
      * @inheritdoc IStakeHolder
      */
@@ -111,8 +111,7 @@ abstract contract StakeHolderBase is IStakeHolder, AccessControlEnumerableUpgrad
         _sendValue(msg.sender, _amountToUnstake);
     }
 
-
-   /**
+    /**
      * @inheritdoc IStakeHolder
      */
     function distributeRewards(
@@ -139,21 +138,21 @@ abstract contract StakeHolderBase is IStakeHolder, AccessControlEnumerableUpgrad
     /**
      * @inheritdoc IStakeHolder
      */
-    function getBalance(address _account) external view override (IStakeHolder) returns (uint256 _balance) {
+    function getBalance(address _account) external view override(IStakeHolder) returns (uint256 _balance) {
         return balances[_account].stake;
     }
 
     /**
      * @inheritdoc IStakeHolder
      */
-    function hasStaked(address _account) external view override (IStakeHolder) returns (bool _everStaked) {
+    function hasStaked(address _account) external view override(IStakeHolder) returns (bool _everStaked) {
         return balances[_account].hasStaked;
     }
 
     /**
      * @inheritdoc IStakeHolder
      */
-    function getNumStakers() external view override (IStakeHolder) returns (uint256 _len) {
+    function getNumStakers() external view override(IStakeHolder) returns (uint256 _len) {
         return stakers.length;
     }
 
@@ -163,14 +162,13 @@ abstract contract StakeHolderBase is IStakeHolder, AccessControlEnumerableUpgrad
     function getStakers(
         uint256 _startOffset,
         uint256 _numberToReturn
-    ) external view override (IStakeHolder) returns (address[] memory _stakers) {
+    ) external view override(IStakeHolder) returns (address[] memory _stakers) {
         address[] memory stakerPartialArray = new address[](_numberToReturn);
         for (uint256 i = 0; i < _numberToReturn; i++) {
             stakerPartialArray[i] = stakers[_startOffset + i];
         }
         return stakerPartialArray;
     }
-
 
     /**
      * @notice Add more stake to an account.
@@ -201,13 +199,11 @@ abstract contract StakeHolderBase is IStakeHolder, AccessControlEnumerableUpgrad
      */
     function _sendValue(address _to, uint256 _amount) internal virtual;
 
-
     /**
      * @notice Complete validity checks and for ERC20 variant transfer tokens.
      * @param _amount Amount to be transferred.
      */
     function _checksAndTransfer(uint256 _amount) internal virtual;
-
 
     // Override the _authorizeUpgrade function
     // solhint-disable-next-line no-empty-blocks

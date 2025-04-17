@@ -37,7 +37,7 @@ contract StakeHolderERC20 is StakeHolderBase {
     /**
      * @inheritdoc IStakeHolder
      */
-    function getToken() external view returns(address) {
+    function getToken() external view returns (address) {
         return address(token);
     }
 
@@ -57,7 +57,6 @@ contract StakeHolderERC20 is StakeHolderBase {
         }
         token.safeTransferFrom(msg.sender, address(this), _amount);
     }
-
 
     /// @notice storage gap for additional variables for upgrades
     // slither-disable-start unused-state

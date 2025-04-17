@@ -6,13 +6,12 @@ pragma solidity >=0.8.19 <0.8.29;
 // import {AccessControlEnumerableUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/access/AccessControlEnumerableUpgradeable.sol";
 import {IStakeHolder, StakeHolderBase} from "./StakeHolderBase.sol";
 
-
 /**
  * @title StakeHolder: allows anyone to stake any amount of native IMX and to then remove all or part of that stake.
  * @dev The StakeHolder contract is designed to be upgradeable.
  */
 contract StakeHolderNative is StakeHolderBase {
-      /// @notice Error: Unstake transfer failed.
+    /// @notice Error: Unstake transfer failed.
     error UnstakeTransferFailed();
 
     /**
@@ -28,7 +27,7 @@ contract StakeHolderNative is StakeHolderBase {
     /**
      * @inheritdoc IStakeHolder
      */
-    function getToken() external pure returns(address) {
+    function getToken() external pure returns (address) {
         return address(0);
     }
 

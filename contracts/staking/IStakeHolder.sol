@@ -120,10 +120,10 @@ interface IStakeHolder is IAccessControlEnumerableUpgradeable {
     /**
      * @notice Only UPGRADE_ROLE can upgrade the contract
      */
-    function UPGRADE_ROLE() external pure returns(bytes32);
+    function UPGRADE_ROLE() external pure returns (bytes32);
 
     /**
      * @notice Only DISTRIBUTE_ROLE can call the distribute function
      */
-    function DISTRIBUTE_ROLE() external pure returns(bytes32);
+    function DISTRIBUTE_ROLE() external pure returns (bytes32);
 }

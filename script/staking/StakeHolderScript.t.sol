@@ -10,6 +10,7 @@ import {IERC20} from "openzeppelin-contracts-4.9.3/token/ERC20/IERC20.sol";
 
 import {IStakeHolder} from "../../contracts/staking/IStakeHolder.sol";
 import {StakeHolderERC20} from "../../contracts/staking/StakeHolderERC20.sol";
+import {OwnableCreate3Deployer} from "../../contracts/deployer/create3/OwnableCreate3Deployer.sol";
 
 /**
  * @title IDeployer Interface
@@ -66,6 +67,15 @@ struct SimpleStakeHolderContractArgs {
  * For more details on deployment see ../../contracts/staking/README.md
  */
 contract StakeHolderScript is Test {
+
+    /**
+     * Deploy the OwnableCreate3Deployer needed for the complex deployment.
+     */
+    function deployDeployer() external {
+        address signer = vm.envAddress("DEPLOYER_ADDRESS");
+        _deployDeployer(signer);
+    }
+
     /**
      * Deploy StakeHolderERC20 using Create3, with the TimelockController.
      */
@@ -122,6 +132,17 @@ contract StakeHolderScript is Test {
         _unstake(IStakeHolder(stakeHolder), staker, amount);
     }
 
+
+
+    /**
+     * Deploy the OwnableCreate3Deployer contract. Set the owner to the
+     * contract deployer.
+     */
+    function _deployDeployer(address _deployer) private {
+        vm.startBroadcast(_deployer);
+        new OwnableCreate3Deployer(_deployer);
+        vm.stopBroadcast();
+    }
 
     /**
      * Deploy StakeHolderERC20 using Create3, with the TimelockController.
@@ -228,6 +249,8 @@ contract StakeHolderScript is Test {
         IERC20 erc20 = IERC20(tokenAddress);
 
         uint256 bal = erc20.balanceOf(_staker);
+        console.log("Balance is: %x", bal);
+        console.log("Amount is: %x", bal);
         if (bal < _amount) {
             revert("Insufficient balance");
         }

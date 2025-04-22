@@ -4,7 +4,7 @@ useMainNet=0
 # useLedger: 1 for ledger, 0 for private key
 useLedger=0
 
-FUNCTION_TO_EXECUTE='deployComplex()'
+FUNCTION_TO_EXECUTE='deployDeployer()'
 
 # Set-up variables and execute forge
 source $(dirname "$0")/common.sh

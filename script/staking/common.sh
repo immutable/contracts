@@ -37,6 +37,12 @@ else
     fi
 fi
 
+if [ -z "${FUNCTION_TO_EXECUTE}" ]; then
+    echo "Error: FUNCTION_TO_EXECUTE variable is not set"
+    exit 1
+fi
+
+
 
 echo "Configuration"
 echo " RPC: $RPC"
@@ -47,4 +53,39 @@ then
     echo LEDGER_HD_PATH: $LEDGER_HD_PATH
 else
     echo " PRIVATE_KEY: <not echoed for your security>" # $PRIVATE_KEY
+fi
+echo "Function to execute: $FUNCTION_TO_EXECUTE"
+
+
+
+# NOTE WELL ---------------------------------------------
+# Add resume option if the script fails part way through:
+#     --resume \
+# NOTE WELL ---------------------------------------------
+if [[ $useLedger -eq 1 ]]
+then
+    forge script --rpc-url $RPC \
+        --priority-gas-price 10000000000 \
+        --with-gas-price     10000000100 \
+        -vvv \
+        --broadcast \
+        --verify \
+        --verifier blockscout \
+        --verifier-url $BLOCKSCOUT_URI$BLOCKSCOUT_APIKEY \
+        --sig "$FUNCTION_TO_EXECUTE" \
+        --ledger \
+        --hd-paths "$LEDGER_HD_PATH" \
+        script/staking/StakeHolderScript.t.sol:StakeHolderScript 
+else
+    forge script --rpc-url $RPC \
+        --priority-gas-price 10000000000 \
+        --with-gas-price     10000000100 \
+        -vvv \
+        --broadcast \
+        --verify \
+        --verifier blockscout \
+        --verifier-url $BLOCKSCOUT_URI$BLOCKSCOUT_APIKEY \
+        --sig "$FUNCTION_TO_EXECUTE" \
+        --private-key $PRIVATE_KEY \
+        script/staking/StakeHolderScript.t.sol:StakeHolderScript 
 fi

@@ -80,7 +80,7 @@ The `upgradeStorage` function should be updated each new contract version. It sh
 
 ## Time Delay Upgrade and Admin
 
-A staking systems may wish to delay upgrade actions and the granting of additional administrative access. To do this, the only account with UPGRADE_ROLE and DEFAULT_ADMIN_ROLE roles should be an instance of Open Zeppelin's [TimelockController](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/governance/TimelockController.sol). This ensures any upgrade proposals or proposals to add more accounts with DEFAULT_ADMIN_ROLE, UPGRADE_ROLE or DISTRIBUTE_ROLE must go through a time delay before being actioned.
+A staking systems may wish to delay upgrade actions and the granting of additional administrative access. To do this, the only account with UPGRADE_ROLE and DEFAULT_ADMIN_ROLE roles should be an instance of Open Zeppelin's [TimelockController](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/governance/TimelockController.sol). This ensures any upgrade proposals or proposals to add more accounts with `DEFAULT_ADMIN_ROLE`, `UPGRADE_ROLE` or `DISTRIBUTE_ROLE` must go through a time delay before being actioned. The account with `DEFAULT_ADMIN_ROLE` could choose to renounce this role to ensure the `TimelockController` can not be bypassed at a later date by having a compromised account with  `DEFAULT_ADMIN_ROLE` adding addtional accounts with `UPGRADE_ROLE`.
 
 ## Preventing Upgrade
 

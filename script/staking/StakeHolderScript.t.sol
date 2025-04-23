@@ -3,8 +3,8 @@
 pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
-import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
-import "@openzeppelin/contracts/governance/TimelockController.sol";
+import {ERC1967Proxy} from "openzeppelin-contracts-4.9.3/proxy/ERC1967/ERC1967Proxy.sol";
+import {TimelockController} from "openzeppelin-contracts-4.9.3/governance/TimelockController.sol";
 import {ERC20PresetFixedSupply} from "openzeppelin-contracts-4.9.3/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 import {IERC20} from "openzeppelin-contracts-4.9.3/token/ERC20/IERC20.sol";
 

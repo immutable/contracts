@@ -75,7 +75,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
       - name: Uninstall Debian package that slither needs to uninstall
-        run: pip uninstall typing_extensions
+        run: sudo apt remove python3-typing-extensions
       - name: Install Slither
         run: sudo pip3 install slither-analyzer
       - name: Show Slither Version

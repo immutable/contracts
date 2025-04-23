@@ -13,14 +13,14 @@ The StakeHolderERC20 contract can be used for any staking system that uses ERC20
 
 ## Threat Model Scope
 
-The threat model is limited to the stake holder Solidity files at GitHash [`67ca971bb214176d8e9481ffb4df33c85f0f6d8a`](https://github.com/immutable/contracts/tree/67ca971bb214176d8e9481ffb4df33c85f0f6d8a/contracts/staking):
+The threat model is limited to the stake holder Solidity files at GitHash [`bf327c7abdadd48fd51ae632500510ac2b07b5f0`](https://github.com/immutable/contracts/tree/bf327c7abdadd48fd51ae632500510ac2b07b5f0/contracts/staking):
 
-* [StakeHolder.sol](https://github.com/immutable/contracts/blob/fd982abc49884af41e05f18349b13edc9eefbc1e/contracts/staking/StakeHolder.sol)
+* [StakeHolder.sol](https://github.com/immutable/contracts/blob/bf327c7abdadd48fd51ae632500510ac2b07b5f0/contracts/staking/StakeHolder.sol)
 
-* [IStakeHolder.sol](https://github.com/immutable/contracts/blob/67ca971bb214176d8e9481ffb4df33c85f0f6d8a/contracts/staking/IStakeHolder.sol) is the interface that all staking implementations comply with.
-* [StakeHolderBase.sol](https://github.com/immutable/contracts/blob/67ca971bb214176d8e9481ffb4df33c85f0f6d8a/contracts/staking/StakeHolderBase.sol) is the abstract base contract that all staking implementation use.
-* [StakeHolderERC20.sol](https://github.com/immutable/contracts/blob/67ca971bb214176d8e9481ffb4df33c85f0f6d8a/contracts/staking/StakeHolderERC20.sol) allows an ERC20 token to be used as the staking currency.
-* [StakeHolderNative.sol](https://github.com/immutable/contracts/blob/67ca971bb214176d8e9481ffb4df33c85f0f6d8a/contracts/staking/StakeHolderNative.sol) uses the native token, IMX, to be used as the staking currency.
+* [IStakeHolder.sol](https://github.com/immutable/contracts/blob/bf327c7abdadd48fd51ae632500510ac2b07b5f0/contracts/staking/IStakeHolder.sol) is the interface that all staking implementations comply with.
+* [StakeHolderBase.sol](https://github.com/immutable/contracts/blob/bf327c7abdadd48fd51ae632500510ac2b07b5f0/contracts/staking/StakeHolderBase.sol) is the abstract base contract that all staking implementation use.
+* [StakeHolderERC20.sol](https://github.com/immutable/contracts/blob/bf327c7abdadd48fd51ae632500510ac2b07b5f0/contracts/staking/StakeHolderERC20.sol) allows an ERC20 token to be used as the staking currency.
+* [StakeHolderNative.sol](https://github.com/immutable/contracts/blob/bf327c7abdadd48fd51ae632500510ac2b07b5f0/contracts/staking/StakeHolderNative.sol) uses the native token, IMX, to be used as the staking currency.
 
 Additionally, this threat model analyses whether the documentation for the time controller contract correctly advises operators how to achieve the required time delay upgrade functionality:
 
@@ -29,7 +29,7 @@ Additionally, this threat model analyses whether the documentation for the time 
 
 ## Background
 
-See the [README](https://github.com/immutable/contracts/tree/67ca971bb214176d8e9481ffb4df33c85f0f6d8a/contracts/staking/README.md) file for information about the usage and design of the stake holder contract system.
+See the [README](https://github.com/immutable/contracts/tree/bf327c7abdadd48fd51ae632500510ac2b07b5f0/contracts/staking/README.md) file for information about the usage and design of the stake holder contract system.
 
 ### Other Information
 

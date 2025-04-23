@@ -1,22 +1,30 @@
 # Staking
 
-The Immutable zkEVM staking system allows any account (EOA or contract) to stake any amount at any time. An account can remove all or some of their stake at any time. The contract has the facility to distribute rewards to stakers.
+The Immutable zkEVM staking system allows any account (EOA or contract) to stake any amount of a token at any time. An account can remove all or some of their stake at any time. The contract has the facility to distribute rewards to stakers.
+
+The staking contracts are upgradeable and operate via a proxy contract. They use the [Universal Upgradeable Proxy Standard (UUPS)](https://eips.ethereum.org/EIPS/eip-1822) upgrade pattern, whether the authorisation and access control for upgrade resides within the application contract (the staking contract). 
 
 The system consists of a set of contracts show in the diagram below.
 
-![Staking System](./staking.png)
+![Staking Architecture](./staking-architecture.png)
 
 `IStakeHolder.sol` is the interface that all staking implementations comply with.
 
-`StakeHolderBase.sol` is the base contract that all staking implementation use.
+`StakeHolderBase.sol` is the abstract base contract that all staking implementation use.
 
 `StakeHolderERC20.sol` allows an ERC20 token to be used as the staking currency.
 
 `StakeHolderNative.sol` uses the native token, IMX, to be used as the staking currency.
 
-`TimelockController.sol` can be used with the staking contracts to provide a one week delay between upgrade or other admin changes are proposed and when they are executed.
+`ERC1967Proxy.sol` is a proxy contract. All calls to StakeHolder contracts go via the ERC1967Proxy contract.
+
+`TimelockController.sol` can be used with the staking contracts to provide a one week delay between upgrade or other admin changes are proposed and when they are executed. See below for information on how to configure the time lock controller.
+
+`OwnableCreate3Deployer.sol` ensures contracts are deployed to the same addresses across chains. The use of this contract is optional. See [deployment scripts](../../script/staking/README.md) for more information.
 
 ## Immutable Contract Addresses
+
+StakeHolderERC20.sol configured with IMX as the staking token:
 
 | Environment/Network      | Deployment Address | Commit Hash |
 |--------------------------|--------------------|-------------|
@@ -35,20 +43,12 @@ Contract threat models and audits:
 
 # Deployment
 
-**Deploy and verify using CREATE3 factory contract:**
-
-This repo includes a script for deploying via a CREATE3 factory contract. The script is defined as a test contract as per the examples [here](https://book.getfoundry.sh/reference/forge/forge-script#examples) and can be found in `./script/staking/DeployStakeHolder.t.sol`.
-
-See the `.env.example` for required environment variables.
-
-```sh
-forge script script/staking/DeployStakeHolder.t.sol --tc DeployStakeHolder --sig "deploy()" -vvv --rpc-url {rpc-url} --broadcast --verifier-url https://explorer.immutable.com/api --verifier blockscout --verify --gas-price 10000000000
-```
-
-Optionally, you can also specify `--ledger` or `--trezor` for hardware deployments. See docs [here](https://book.getfoundry.sh/reference/forge/forge-script#wallet-options---hardware-wallet).
+See [deployment scripts](../../script/staking/README.md).
 
 
 # Usage
+
+For StakeHolderERC20, the ERC20 staking token must be specified when the contract is being initialised. The token can not be changed.
 
 To stake, any account should call `stake(uint256 _amount)`. For the native IMX variant, the amount to be staked must be passed in as the msg.value.
 
@@ -65,7 +65,7 @@ The `stakers` array needs to be analysed to determine which accounts have staked
 
 # Administration Notes
 
-The `StakeHolderBase` contract is `AccessControlEnumerableUpgradeable`. The `StakeHolder` contract is `UUPSUpgradeable`. Only accounts with `UPGRADE_ROLE` are authorised to upgrade the contract.
+The `StakeHolderBase` contract is `AccessControlEnumerableUpgradeable`. The `StakeHolderERC20` and `StakeHolderNative` contracts are `UUPSUpgradeable`. Only accounts with `UPGRADE_ROLE` are authorised to upgrade the contract.
 
 ## Upgrade Concept
 
@@ -84,4 +84,4 @@ A staking systems may wish to delay upgrade actions and the granting of addition
 
 ## Preventing Upgrade
 
-A staking system should choose to have no account with DEFAULT_ADMIN_ROLE to To prevent additional accounts being granted UPGRADE_ROLE role. The system could have no acccounts with UPGRADE_ROLE, thus preventing upgrade. The system could configure this from start-up by passing in `address(0)` as the `roleAdmin` and `upgradeAdmin` to the constructor. Alternative, the `revokeRole` function can be used.
+A staking system could choose to have no account with DEFAULT_ADMIN_ROLE to to prevent additional accounts being granted UPGRADE_ROLE role. The system could have no acccounts with UPGRADE_ROLE, thus preventing upgrade. The system could configure this from start-up by passing in `address(0)` as the `roleAdmin` and `upgradeAdmin` to the constructor. Alternative, the `revokeRole` function can be used to revoke the roles from accounts.

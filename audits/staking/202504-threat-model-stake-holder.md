@@ -105,7 +105,7 @@ Accounts with administrative privileges could be used by attackers to facilitate
 
 #### Accounts with `DEFAULT_ADMIN_ROLE` on StakeHolderERC20 and StakeHolderNative contracts
 
-The `DEFAULT_ADMIN_ROLE` is the role is granted to the `roleAdmin` specified in the `initialize` function of the `StakeHolderERC20` and `StakeHolderNative` contracts. Accounts with the `DEFAULT_ADMIN_ROLE` can:
+The `DEFAULT_ADMIN_ROLE` is the role that is granted to the `roleAdmin` specified in the `initialize` function of the `StakeHolderERC20` and `StakeHolderNative` contracts. Accounts with the `DEFAULT_ADMIN_ROLE` can:
 
 * Grant administrator roles to any account, including the `DEFAULT_ADMIN_ROLE`.
 * Revoke administrator roles from any account, including the `DEFAULT_ADMIN_ROLE`.
@@ -195,7 +195,7 @@ forge inspect StakeHolderNative storage
 
 ### Timelock Controller Bypass
 
-To ensure time delay upgrades are enforced, the `StakeHolderERC20` or `StakeHolderNative` contracts should have the only account with `UPGRADE_ROLE` and `DEFAULT_ADMIN_ROLE` roles should be an instance of Open Zeppelin's [TimelockController](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/governance/TimelockController.sol). This ensures any upgrade proposals or proposals to add more accounts with `DEFAULT_ADMIN_ROLE`, `UPGRADE_ROLE` or `DISTRIBUTE_ROLE` must go through a time delay before being actioned. The account with `DEFAULT_ADMIN_ROLE` could choose to renounce this role to ensure the `TimelockController` can not be bypassed at a later date by having a compromised account with  `DEFAULT_ADMIN_ROLE` adding addtional accounts with `UPGRADE_ROLE`.
+To ensure time delay upgrades are enforced, the `StakeHolderERC20` or `StakeHolderNative` contracts should have the only account with `UPGRADE_ROLE` and `DEFAULT_ADMIN_ROLE` roles should be an instance of Open Zeppelin's [TimelockController](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/governance/TimelockController.sol). This ensures any upgrade proposals or proposals to add more accounts with `DEFAULT_ADMIN_ROLE`, `UPGRADE_ROLE` or `DISTRIBUTE_ROLE` must go through a time delay before being actioned. The account with `DEFAULT_ADMIN_ROLE` could choose to renounce this role to ensure the `TimelockController` can not be bypassed at a later date by having a compromised account with  `DEFAULT_ADMIN_ROLE` adding additional accounts with `UPGRADE_ROLE`.
 
 Once the `TimelockController` and staking contracts have been installed, the installation should be checked to ensure the configuration of the `TimelockController` is as expected. That is, check:
 

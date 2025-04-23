@@ -63,6 +63,15 @@ contract StakingHelper {
         emit StakingCompleted(msg.sender, amountToStake, block.timestamp);
     }
 
+    function depositOnly() external payable {
+        require(msg.value > 0, "Must send native tokens to wrap");
+
+        uint256 amountToStake = msg.value;
+
+        // 1. Wrap native tokens (ETH/IMX) to get WIMX
+        wimx.deposit{value: amountToStake}();
+    }
+
     /**
      * @notice View function to check a user's current stake
      * @param user The address to check the stake for

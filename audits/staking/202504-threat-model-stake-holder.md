@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This threat model document for the [StakeHolderERC20 and StakeHolderNative](../../contracts/staking/README.md) contracts has been created in preparation for internal audit.
+This threat model document for the [StakeHolderERC20 and StakeHolderNative](../../contracts/staking/README.md) contracts has been created in preparation for an internal audit.
 
 ## Rationale
 
@@ -15,8 +15,6 @@ The StakeHolderERC20 contract can be used for any staking system that uses ERC20
 
 The threat model is limited to the stake holder Solidity files at GitHash [`bf327c7abdadd48fd51ae632500510ac2b07b5f0`](https://github.com/immutable/contracts/tree/bf327c7abdadd48fd51ae632500510ac2b07b5f0/contracts/staking):
 
-* [StakeHolder.sol](https://github.com/immutable/contracts/blob/bf327c7abdadd48fd51ae632500510ac2b07b5f0/contracts/staking/StakeHolder.sol)
-
 * [IStakeHolder.sol](https://github.com/immutable/contracts/blob/bf327c7abdadd48fd51ae632500510ac2b07b5f0/contracts/staking/IStakeHolder.sol) is the interface that all staking implementations comply with.
 * [StakeHolderBase.sol](https://github.com/immutable/contracts/blob/bf327c7abdadd48fd51ae632500510ac2b07b5f0/contracts/staking/StakeHolderBase.sol) is the abstract base contract that all staking implementation use.
 * [StakeHolderERC20.sol](https://github.com/immutable/contracts/blob/bf327c7abdadd48fd51ae632500510ac2b07b5f0/contracts/staking/StakeHolderERC20.sol) allows an ERC20 token to be used as the staking currency.
@@ -24,7 +22,7 @@ The threat model is limited to the stake holder Solidity files at GitHash [`bf32
 
 Additionally, this threat model analyses whether the documentation for the time controller contract correctly advises operators how to achieve the required time delay upgrade functionality:
 
-* [TimelockController.sol](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.9.3/contracts/governance/TimelockController.sol) can be used with the staking contracts to provide a one week delay between upgrade or other admin changes are proposed and when they are executed. 
+* [TimelockController.sol](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.9.3/contracts/governance/TimelockController.sol) can be used with the staking contracts to provide a one week delay between when upgrade or other admin changes are proposed and when they are executed. 
 
 
 ## Background
@@ -37,7 +35,7 @@ This section provides links to test plans and test code.
 
 #### Test Plans and Test Code
 
-The test plan is available here: [Test Plan](../test/staking/README.md). The test code is contained in the same directory at the test plan.
+The test plan is available here: [Test Plan](../../test/staking/README.md). The test code is contained in the same directory at the test plan.
 
 #### Continuous Integration
 
@@ -156,7 +154,7 @@ forge inspect StakeHolderERC20 storage
 | \_\_gap                           | uint256[49]                                                    | 152  | 0      | 1568  | OpenZeppelin Contracts v4.9.3: access/AccessControlEnumerableUpgradeable.sol |
 | \_\_gap                           | uint256[50]                                                    | 201  | 0      | 1600  | OpenZeppelin Contracts v4.9.3: proxy/ERC1967/ERC1967Upgrade.sol |
 | \_\_gap                           | uint256[50]                                                    | 251  | 0      | 1600  | OpenZeppelin Contracts v4.9.3: proxy/utils/UUPSUpgradeable.sol  |
-| \_\status                         | uint256                                                        | 301  | 0      | 32    | OpenZeppelin Contracts v4.9.3: security/ReentrancyGuardUpgradeable.sol  |
+| \_status                         | uint256                                                        | 301  | 0      | 32    | OpenZeppelin Contracts v4.9.3: security/ReentrancyGuardUpgradeable.sol  |
 | \_\_gap                           | uint256[49]                                                    | 302  | 0      | 1568  | OpenZeppelin Contracts v4.9.3: security/ReentrancyGuardUpgradeable.sol  |
 | balances                          | mapping(address => struct StakeHolder.StakeInfo)               | 351  | 0      | 32    | StakeHolderBase.sol |
 | stakers                           | address[]                                                      | 352  | 0      | 32    | StakeHolderBase.sol |
@@ -192,7 +190,7 @@ forge inspect StakeHolderNative storage
 | stakers                           | address[]                                                      | 352  | 0      | 32    | StakeHolderBase.sol |
 | version                           | uint256                                                        | 353  | 0      | 32    | StakeHolderBase.sol |
 | \_\_StakeHolderBaseGap            | uint256[50]                                                    | 354  | 0      | 1600  | StakeHolderBase.sol |
-| \_\_StakeHolderERC20Gap           | uint256[50]                                                    | 404  | 0      | 1600  | StakeHolderNative.sol |
+| \_\_StakeHolderNativeGap           | uint256[50]                                                    | 404  | 0      | 1600  | StakeHolderNative.sol |
 
 
 ### Timelock Controller Bypass

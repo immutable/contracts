@@ -18,7 +18,7 @@ interface IWIMX is IERC20 {
  * @dev This contract handles the full process of converting native tokens to WIMX and staking them
  */
 contract StakingHelper {
-    IERC20 public immutable wimx;
+    IWIMX public immutable wimx;
     IStakeHolderERC20 public immutable stakeHolder;
 
     event StakingCompleted(
@@ -35,7 +35,7 @@ contract StakingHelper {
     constructor(address _wimx, address _stakeHolder) {
         require(_wimx != address(0), "Invalid WIMX address");
         require(_stakeHolder != address(0), "Invalid StakeHolder address");
-        wimx = IERC20(_wimx);
+        wimx = IWIMX(_wimx);
         stakeHolder = IStakeHolderERC20(_stakeHolder);
     }
 

@@ -568,6 +568,10 @@ contract ImmutableSignedZoneV2 is
         uint256 scalingFactorDenominator
     ) internal pure returns (bytes32) {
         uint256 numberOfItems = receivedItems.length;
+        // Slither has added an additional checker. Rather than update this in-production code,
+        // disable the check for this line. The receivedItemsHash variable will be assigned a 
+        // default value, so the code works.
+        // @slither-disable-next-line uninitialized-local
         bytes memory receivedItemsHash;
 
         for (uint256 i; i < numberOfItems; i++) {

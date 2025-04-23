@@ -74,9 +74,10 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+      - name: Uninstall Debian package that slither needs to uninstall
+        run: pip uninstall typing_extensions
       - name: Install Slither
-        run: sudo python3 -m pip install slither-analyzer
-        # Install command now failing: sudo pip3 install slither-analyzer
+        run: sudo pip3 install slither-analyzer
       - name: Show Slither Version
         run: slither --version
       - name: Install Foundry

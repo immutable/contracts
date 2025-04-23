@@ -54,6 +54,14 @@ contract StakeHolderOperationalNativeTest is StakeHolderOperationalBaseTest {
             abi.encodeWithSelector(IStakeHolder.MismatchMsgValueAmount.selector, 1 ether, 1.5 ether));
     }
 
+    function testAddStakeMismatch() public {
+        uint256 amount = 100 ether;
+        _deal(staker1, amount);
+        vm.prank(staker1);
+        vm.expectRevert(abi.encodeWithSelector(IStakeHolder.MismatchMsgValueAmount.selector, amount, amount+1));
+        stakeHolder.stake{value: amount}(amount + 1);
+    }
+
     function _deal(address _to, uint256 _amount) internal override {
         vm.deal(_to, _amount);
     }

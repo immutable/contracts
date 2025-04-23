@@ -29,6 +29,19 @@ contract StakeHolderOperationalERC20Test is StakeHolderOperationalBaseTest {
         stakeHolder = IStakeHolder(address(proxy));
     }
 
+
+    function testStakeWithValue() public {
+        uint256 amount = 100 ether;
+        vm.deal(staker1, amount);
+        _deal(staker1, amount);
+
+        vm.prank(staker1);
+        erc20.approve(address(stakeHolder), amount);
+        vm.expectRevert(abi.encodeWithSelector(IStakeHolder.NonPayable.selector));
+        vm.prank(staker1);
+        stakeHolder.stake{value: amount}(amount);
+    }
+
     function _deal(address _to, uint256 _amount) internal override {
         vm.prank(bank);
         erc20.transfer(_to, _amount);

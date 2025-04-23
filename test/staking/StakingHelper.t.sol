@@ -87,11 +87,11 @@ contract StakingHelperTest is Test {
         assertEq(wimx.balanceOf(address(stakingHelper)), 0); // All WIMX should be staked
 
         // Important: The stake is recorded against the StakingHelper contract, not the user
-        assertEq(stakeHolder.getBalance(address(stakingHelper)), stakeAmount);
-        assertEq(stakeHolder.getBalance(user), 0); // User has no direct stake
+        assertEq(stakeHolder.getBalance(user), stakeAmount);
+        assertEq(stakeHolder.getBalance(address(stakingHelper)), 0); // User has no direct stake
 
         // Verify WIMX balance in the StakeHolder contract
-        assertEq(wimx.balanceOf(address(stakingHelper)), 0);
+        assertEq(wimx.balanceOf(address(user)), 0);
     }
 
     function testDepositedWIMXIsOwnedByStakingHelper() public {

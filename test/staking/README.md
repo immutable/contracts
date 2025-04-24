@@ -4,7 +4,7 @@
 
 [StakeHolderNative.sol](../../contracts/staking/StakeHolderNative.sol) and [StakeHolderERC20.sol](../../contracts/staking/StakeHolderERC20.sol) use common base tests.
 
-Initialize testing (in [StakeHolderInitBase.t.sol](../../contracts/staking/StakeHolderInitBase.t.sol)):
+Initialize testing (in [StakeHolderInitBase.t.sol](./StakeHolderInitBase.t.sol)):
 
 | Test name                       | Description                                                | Happy Case | Implemented |
 |---------------------------------|------------------------------------------------------------|------------|-------------|
@@ -13,7 +13,7 @@ Initialize testing (in [StakeHolderInitBase.t.sol](../../contracts/staking/Stake
 | testAdmins                      | Check that role and upgrade admin have been set correctly. | Yes        | Yes         |
 
 
-Configuration tests (in [StakeHolderConfigBase.t.sol](../../contracts/staking/StakeHolderConfigBase.t.sol))::
+Configuration tests (in [StakeHolderConfigBase.t.sol](./StakeHolderConfigBase.t.sol)):
 
 | Test name                       | Description                                                | Happy Case | Implemented |
 |---------------------------------|------------------------------------------------------------|------------|-------------|
@@ -26,7 +26,7 @@ Configuration tests (in [StakeHolderConfigBase.t.sol](../../contracts/staking/St
 | testRoleAdminAuthFail           | Attempt to add an upgrade admin from a non-role admin.     | No         | Yes         |
 
 
-Operational tests (in [StakeHolderOperationalBase.t.sol](../../contracts/staking/StakeHolderOperationalBase.t.sol))::
+Operational tests (in [StakeHolderOperationalBase.t.sol](./StakeHolderOperationalBase.t.sol)):
 
 | Test name                      | Description                                                 | Happy Case | Implemented |
 |--------------------------------|-------------------------------------------------------------|------------|-------------|

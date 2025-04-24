@@ -2,7 +2,7 @@
 
 The Immutable zkEVM staking system allows any account (EOA or contract) to stake any amount of a token at any time. An account can remove all or some of their stake at any time. The contract has the facility to distribute rewards to stakers.
 
-The staking contracts are upgradeable and operate via a proxy contract. They use the [Universal Upgradeable Proxy Standard (UUPS)](https://eips.ethereum.org/EIPS/eip-1822) upgrade pattern, whether the authorisation and access control for upgrade resides within the application contract (the staking contract). 
+The staking contracts are upgradeable and operate via a proxy contract. They use the [Universal Upgradeable Proxy Standard (UUPS)](https://eips.ethereum.org/EIPS/eip-1822) upgrade pattern, where the access control for upgrade resides within the application contract (the staking contract). 
 
 The system consists of a set of contracts show in the diagram below.
 
@@ -18,7 +18,7 @@ The system consists of a set of contracts show in the diagram below.
 
 `ERC1967Proxy.sol` is a proxy contract. All calls to StakeHolder contracts go via the ERC1967Proxy contract.
 
-`TimelockController.sol` can be used with the staking contracts to provide a one week delay between upgrade or other admin changes are proposed and when they are executed. See below for information on how to configure the time lock controller.
+`TimelockController.sol` can be used with the staking contracts to provide a one week delay between when upgrade or other admin changes are proposed and when they are executed. See below for information on how to configure the time lock controller.
 
 `OwnableCreate3Deployer.sol` ensures contracts are deployed to the same addresses across chains. The use of this contract is optional. See [deployment scripts](../../script/staking/README.md) for more information.
 
@@ -38,6 +38,7 @@ Contract threat models and audits:
 | Description               | Date             |Version Audited  | Link to Report |
 |---------------------------|------------------|-----------------|----------------|
 | Threat model              | Oct 21, 2024     | [`fd982abc49884af41e05f18349b13edc9eefbc1e`](https://github.com/immutable/contracts/blob/fd982abc49884af41e05f18349b13edc9eefbc1e/contracts/staking/README.md) | [202410-threat-model-stake-holder.md](../../audits/staking/202410-threat-model-stake-holder.md)              |
+| Threat model              | April 24, 2025     | [`bf327c7abdadd48fd51ae632500510ac2b07b5f0`](https://github.com/immutable/contracts/blob/bf327c7abdadd48fd51ae632500510ac2b07b5f0/contracts/staking/README.md) | [202504-threat-model-stake-holder.md](../../audits/staking/202504-threat-model-stake-holder.md)              |
 
 
 

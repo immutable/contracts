@@ -20,7 +20,8 @@ contract StakeHolderERC20 is StakeHolderBase {
      * @notice Initialises the upgradeable contract, setting up admin accounts.
      * @param _roleAdmin the address to grant `DEFAULT_ADMIN_ROLE` to
      * @param _upgradeAdmin the address to grant `UPGRADE_ROLE` to
-     * @param _distributeAdmin the address to grant `DISTRIBUTE_ROLE` to
+     * @param _distributeAdmin the address to grant `DISTRIBUTE_ROLE` to.
+     * @param _token the token to use for staking.
      */
     function initialize(
         address _roleAdmin,
@@ -28,9 +29,19 @@ contract StakeHolderERC20 is StakeHolderBase {
         address _distributeAdmin,
         address _token
     ) public initializer {
+        __StakeHolderERC20_init(_roleAdmin, _upgradeAdmin, _distributeAdmin, _token);
+    }
+
+    function __StakeHolderERC20_init(
+        address _roleAdmin,
+        address _upgradeAdmin,
+        address _distributeAdmin,
+        address _token
+    ) internal onlyInitializing {
         __StakeHolderBase_init(_roleAdmin, _upgradeAdmin, _distributeAdmin);
         token = IERC20Upgradeable(_token);
     }
+
 
     /**
      * @inheritdoc IStakeHolder

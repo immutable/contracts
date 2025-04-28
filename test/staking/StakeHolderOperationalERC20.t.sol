@@ -66,8 +66,10 @@ contract StakeHolderOperationalERC20Test is StakeHolderOperationalBaseTest {
         vm.prank(_distributor);
         stakeHolder.distributeRewards(_accountAmounts);
     }
-    function _getBalance(address _staker) internal view override returns (uint256) {
+    function _getBalanceStaker(address _staker) internal view override returns (uint256) {
         return erc20.balanceOf(_staker);
     }
-
+    function _getBalanceStakeHolderContract() internal view override returns (uint256) {
+        return erc20.balanceOf(address(stakeHolder));
+    }
 }

@@ -11,8 +11,8 @@ abstract contract StakeHolderOperationalBaseTest is StakeHolderBaseTest {
     function testStake() public {
         _deal(staker1, 100 ether);
         _addStake(staker1, 10 ether);
-        assertEq(_getBalance(staker1), 90 ether, "Incorrect balance1");
-        assertEq(_getBalance(address(stakeHolder)), 10 ether, "Incorrect balance2");
+        assertEq(_getBalanceStaker(staker1), 90 ether, "Incorrect balance1");
+        assertEq(_getBalanceStakeHolderContract(), 10 ether, "Incorrect balance2");
 
         assertEq(stakeHolder.getBalance(staker1), 10 ether, "Incorrect balance3");
         assertTrue(stakeHolder.hasStaked(staker1), "Expect staker1 has staked");
@@ -68,7 +68,7 @@ abstract contract StakeHolderOperationalBaseTest is StakeHolderBaseTest {
         vm.prank(staker1);
         stakeHolder.unstake(10 ether);
 
-        assertEq(_getBalance(staker1), 100 ether, "Incorrect native balance");
+        assertEq(_getBalanceStaker(staker1), 100 ether, "Incorrect native balance");
         assertEq(stakeHolder.getBalance(staker1), 0 ether, "Incorrect balance");
         assertTrue(stakeHolder.hasStaked(staker1), "Expect staker1 has staked");
         assertEq(stakeHolder.getNumStakers(), 1, "Incorrect number of stakers");
@@ -93,7 +93,7 @@ abstract contract StakeHolderOperationalBaseTest is StakeHolderBaseTest {
         vm.prank(staker1);
         stakeHolder.unstake(3 ether);
 
-        assertEq(_getBalance(staker1), 93 ether, "Incorrect native balance");
+        assertEq(_getBalanceStaker(staker1), 93 ether, "Incorrect native balance");
         assertEq(stakeHolder.getBalance(staker1), 7 ether, "Incorrect balance");
     }
 
@@ -106,7 +106,7 @@ abstract contract StakeHolderOperationalBaseTest is StakeHolderBaseTest {
         vm.prank(staker1);
         stakeHolder.unstake(1 ether);
 
-        assertEq(_getBalance(staker1), 94 ether, "Incorrect native balance");
+        assertEq(_getBalanceStaker(staker1), 94 ether, "Incorrect native balance");
         assertEq(stakeHolder.getBalance(staker1), 6 ether, "Incorrect balance");
     }
 
@@ -264,7 +264,8 @@ abstract contract StakeHolderOperationalBaseTest is StakeHolderBaseTest {
 
 
     function _deal(address _to, uint256 _amount) internal virtual;
-    function _getBalance(address _staker) internal view virtual returns (uint256);
+    function _getBalanceStaker(address _staker) internal virtual view returns (uint256);
+    function _getBalanceStakeHolderContract() internal virtual view returns (uint256);
 
     function _addStake(address _staker, uint256 _amount) internal {
         _addStake(_staker, _amount, false, bytes(""));

@@ -5,9 +5,9 @@ pragma solidity >=0.8.19 <0.8.29;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /*
-* @notice Interface for the Wrapped IMX (wIMX) contract.
-* @dev Based on the interface for the standard [Wrapped ETH contract](../root/IWETH.sol)
-*/
+ * @notice Interface for the Wrapped IMX (wIMX) contract.
+ * @dev Based on the interface for the standard [Wrapped ETH contract](../root/IWETH.sol)
+ */
 interface IWIMX is IERC20 {
     /**
      * @notice Emitted when native ETH is deposited to the contract, and a corresponding amount of wETH are minted

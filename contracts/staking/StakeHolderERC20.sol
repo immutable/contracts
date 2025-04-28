@@ -42,7 +42,6 @@ contract StakeHolderERC20 is StakeHolderBase {
         token = IERC20Upgradeable(_token);
     }
 
-
     /**
      * @inheritdoc IStakeHolder
      */

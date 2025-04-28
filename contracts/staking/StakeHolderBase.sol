@@ -57,7 +57,11 @@ abstract contract StakeHolderBase is
      * @param _upgradeAdmin the address to grant `UPGRADE_ROLE` to
      * @param _distributeAdmin the address to grant `DISTRIBUTE_ROLE` to
      */
-    function __StakeHolderBase_init(address _roleAdmin, address _upgradeAdmin, address _distributeAdmin) internal onlyInitializing {
+    function __StakeHolderBase_init(
+        address _roleAdmin,
+        address _upgradeAdmin,
+        address _distributeAdmin
+    ) internal onlyInitializing {
         __UUPSUpgradeable_init();
         __AccessControl_init();
         __ReentrancyGuard_init();

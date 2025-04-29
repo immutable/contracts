@@ -25,14 +25,14 @@ contract StakeHolderNative is StakeHolderBase {
     /**
      * @inheritdoc IStakeHolder
      */
-    function getToken() external pure returns (address) {
+    function getToken() external virtual view returns (address) {
         return address(0);
     }
 
     /**
      * @inheritdoc StakeHolderBase
      */
-    function _sendValue(address _to, uint256 _amount) internal override {
+    function _sendValue(address _to, uint256 _amount) internal virtual override {
         // slither-disable-next-line low-level-calls,arbitrary-send-eth
         (bool success, bytes memory returndata) = payable(_to).call{value: _amount}("");
         if (!success) {
@@ -53,7 +53,7 @@ contract StakeHolderNative is StakeHolderBase {
     /**
      * @inheritdoc StakeHolderBase
      */
-    function _checksAndTransfer(uint256 _amount) internal override {
+    function _checksAndTransfer(uint256 _amount) internal virtual override {
         // Check that the amount matches the msg.value.
         if (_amount != msg.value) {
             revert MismatchMsgValueAmount(msg.value, _amount);

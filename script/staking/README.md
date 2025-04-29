@@ -22,7 +22,8 @@ The following variables must be specified via the environment or a `.env` file f
 * `ROLE_ADMIN`: Account that will be the initial role administrator. Accounts with the role administrator access can manage which accounts have `UPGRADE_ADMIN` and `DISTRIBUTED_ADMIN` access. Specify 0x0000000000000000000000000000000000000000 to have no account with role administrator access.
 * `UPGRADE_ADMIN`: Initial account that will be authorised to upgrade the StakeHolderERC20 contract. Specify 0x0000000000000000000000000000000000000000 to have no account with upgrade administrator access.
 * `DISTRIBUTE_ADMIN`: Initial account that will be authorised to upgrade the StakeHolderERC20 contract. Specify 0x0000000000000000000000000000000000000000 to have no account with distribute administrator access.
-* `ERC20_STAKING_TOKEN`: Address of ERC20 token to be used for staking.
+* `ERC20_STAKING_TOKEN`: Address of ERC20 token to be used for staking. For use by ERC20 deployment script.
+* `WIMX_TOKEN`: Address of WIMX token contract. For use by the WIMX deployment scirpt.
 
 ## Complex Deployment
 

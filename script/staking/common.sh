@@ -51,7 +51,7 @@ fi
 if [ "$STAKEHOLDER_TYPE" = "ERC20" ]; then
     script=script/staking/StakeHolderScriptERC20.t.sol:StakeHolderScriptERC20
 else
-    if [ "$STAKEHOLDER_TYPE" = "ERC20" ]; then
+    if [ "$STAKEHOLDER_TYPE" = "WIMX" ]; then
         script=script/staking/StakeHolderScriptWIMX.t.sol:StakeHolderScriptWIMX
     else 
         echo "Error: Unknown STAKEHOLDER_TYPE: " $STAKEHOLDER_TYPE

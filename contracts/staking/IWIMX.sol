@@ -6,7 +6,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /*
  * @notice Interface for the Wrapped IMX (wIMX) contract.
- * @dev Based on the interface for the standard [Wrapped ETH contract](../root/IWETH.sol)
+ * @dev Based on the interface for the [Wrapped ETH contract](https://etherscan.io/token/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2#code)
  */
 interface IWIMX is IERC20 {
     /**

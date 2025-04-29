@@ -5,11 +5,11 @@ pragma solidity ^0.8.20;
 import "forge-std/Test.sol";
 import {ERC1967Proxy} from "openzeppelin-contracts-4.9.3/proxy/ERC1967/ERC1967Proxy.sol";
 import {TimelockController} from "openzeppelin-contracts-4.9.3/governance/TimelockController.sol";
-import {ERC20PresetFixedSupply} from "openzeppelin-contracts-4.9.3/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 import {IERC20} from "openzeppelin-contracts-4.9.3/token/ERC20/IERC20.sol";
 
 import {IStakeHolder} from "../../contracts/staking/IStakeHolder.sol";
-import {StakeHolderERC20} from "../../contracts/staking/StakeHolderERC20.sol";
+import {StakeHolderWIMX} from "../../contracts/staking/StakeHolderWIMX.sol";
+import {WIMX} from "../../contracts/staking/WIMX.sol";
 import {OwnableCreate3Deployer} from "../../contracts/deployer/create3/OwnableCreate3Deployer.sol";
 
 /**
@@ -66,7 +66,7 @@ struct SimpleStakeHolderContractArgs {
  * @dev deploy() is the function the script should call.
  * For more details on deployment see ../../contracts/staking/README.md
  */
-contract StakeHolderScript is Test {
+contract StakeHolderScriptWIMX is Test {
 
     /**
      * Deploy the OwnableCreate3Deployer needed for the complex deployment.
@@ -77,13 +77,13 @@ contract StakeHolderScript is Test {
     }
 
     /**
-     * Deploy StakeHolderERC20 using Create3, with the TimelockController.
+     * Deploy StakeHolderWIMX using Create3, with the TimelockController.
      */
     function deployComplex() external {
         address signer = vm.envAddress("DEPLOYER_ADDRESS");
         address factory = vm.envAddress("OWNABLE_CREATE3_FACTORY_ADDRESS");
         address distributeAdmin = vm.envAddress("DISTRIBUTE_ADMIN");
-        address token = vm.envAddress("ERC20_STAKING_TOKEN");
+        address token = vm.envAddress("WIMX_TOKEN");
         uint256 timeDelayInSeconds = vm.envUint("TIMELOCK_DELAY_SECONDS");
         address proposerAdmin = vm.envAddress("TIMELOCK_PROPOSER_ADMIN");
         address executorAdmin = vm.envAddress("TIMELOCK_EXECUTOR_ADMIN");
@@ -100,14 +100,14 @@ contract StakeHolderScript is Test {
     }
 
     /**
-     * Deploy StakeHolderERC20 using an EOA.
+     * Deploy StakeHolderWIMX using an EOA.
      */
     function deploySimple() external {
         address deployer = vm.envAddress("DEPLOYER_ADDRESS");
         address roleAdmin = vm.envAddress("ROLE_ADMIN");
         address upgradeAdmin = vm.envAddress("UPGRADE_ADMIN");
         address distributeAdmin = vm.envAddress("DISTRIBUTE_ADMIN");
-        address token = vm.envAddress("ERC20_STAKING_TOKEN");
+        address token = vm.envAddress("WIMX_TOKEN");
 
         SimpleDeploymentArgs memory deploymentArgs = SimpleDeploymentArgs({deployer: deployer});
 
@@ -145,14 +145,14 @@ contract StakeHolderScript is Test {
     }
 
     /**
-     * Deploy StakeHolderERC20 using Create3, with the TimelockController.
+     * Deploy StakeHolderWIMX using Create3, with the TimelockController.
      */
     function _deployComplex(
         ComplexDeploymentArgs memory deploymentArgs, 
         ComplexStakeHolderContractArgs memory stakeHolderArgs,
         ComplexTimelockContractArgs memory timelockArgs)
         private
-        returns (StakeHolderERC20 stakeHolderContract, TimelockController timelockController)
+        returns (StakeHolderWIMX stakeHolderContract, TimelockController timelockController)
     {
         IDeployer ownableCreate3 = IDeployer(deploymentArgs.factory);
 
@@ -185,10 +185,10 @@ contract StakeHolderScript is Test {
         }
 
 
-        // Deploy StakeHolderERC20 via the Ownable Create3 factory.
+        // Deploy StakeHolderWIMX via the Ownable Create3 factory.
         // Create deployment bytecode and encode constructor args
         deploymentBytecode = abi.encodePacked(
-            type(StakeHolderERC20).creationCode
+            type(StakeHolderWIMX).creationCode
         );
         /// @dev Deploy the contract via the Ownable CREATE3 factory
         vm.startBroadcast(deploymentArgs.signer);
@@ -198,7 +198,7 @@ contract StakeHolderScript is Test {
         // Deploy ERC1967Proxy via the Ownable Create3 factory.
         // Create init data for the ERC1967 Proxy
         bytes memory initData = abi.encodeWithSelector(
-            StakeHolderERC20.initialize.selector, 
+            StakeHolderWIMX.initialize.selector, 
             timelockAddress, // roleAdmin
             timelockAddress, // upgradeAdmin
             stakeHolderArgs.distributeAdmin,
@@ -214,50 +214,46 @@ contract StakeHolderScript is Test {
         address stakeHolderContractAddress = ownableCreate3.deploy(deploymentBytecode, salt3);
         vm.stopBroadcast();
 
-        stakeHolderContract = StakeHolderERC20(stakeHolderContractAddress);
+        stakeHolderContract = StakeHolderWIMX(payable(stakeHolderContractAddress));
         timelockController = TimelockController(payable(timelockAddress));
     }
 
     /**
-     * Deploy StakeHolderERC20 using an EOA and no time lock.
+     * Deploy StakeHolderWIMX using an EOA and no time lock.
      */
     function _deploySimple(
         SimpleDeploymentArgs memory deploymentArgs, 
         SimpleStakeHolderContractArgs memory stakeHolderArgs)
         private
-        returns (StakeHolderERC20 stakeHolderContract) {
+        returns (StakeHolderWIMX stakeHolderContract) {
 
         bytes memory initData = abi.encodeWithSelector(
-            StakeHolderERC20.initialize.selector, 
+            StakeHolderWIMX.initialize.selector, 
             stakeHolderArgs.roleAdmin,
             stakeHolderArgs.upgradeAdmin,
             stakeHolderArgs.distributeAdmin,
             stakeHolderArgs.token);
 
         vm.startBroadcast(deploymentArgs.deployer);
-        StakeHolderERC20 impl = new StakeHolderERC20();
+        StakeHolderWIMX impl = new StakeHolderWIMX();
         vm.stopBroadcast();
         vm.startBroadcast(deploymentArgs.deployer);
         ERC1967Proxy proxy = new ERC1967Proxy(address(impl), initData);
         vm.stopBroadcast();
 
-        stakeHolderContract = StakeHolderERC20(address(proxy));
+        stakeHolderContract = StakeHolderWIMX(payable(address(proxy)));
     }
 
     function _stake(IStakeHolder _stakeHolder, address _staker, uint256 _amount) private {
-        address tokenAddress = _stakeHolder.getToken();
-        IERC20 erc20 = IERC20(tokenAddress);
-
-        uint256 bal = erc20.balanceOf(_staker);
+        uint256 bal = _staker.balance;
         console.log("Balance is: %x", bal);
-        console.log("Amount is: %x", bal);
+        console.log("Amount is: %x", _amount);
         if (bal < _amount) {
             revert("Insufficient balance");
         }
 
         vm.startBroadcast(_staker);
-        erc20.approve(address(_stakeHolder), _amount);
-        _stakeHolder.stake(_amount);
+        _stakeHolder.stake{value: _amount} (_amount);
         vm.stopBroadcast();
     }
 
@@ -273,11 +269,8 @@ contract StakeHolderScript is Test {
         string memory rpcURL = "https://rpc.testnet.immutable.com";
         vm.createSelectFork(rpcURL);
 
-        address bank = makeAddr("bank");
-        vm.startBroadcast(bank);
-        ERC20PresetFixedSupply erc20 = 
-            new ERC20PresetFixedSupply("Name", "SYM", 1000 ether, bank);
-        vm.stopBroadcast();
+        address payable wimxOnTestnet = payable(address(0x1CcCa691501174B4A623CeDA58cC8f1a76dc3439));
+        WIMX erc20 = WIMX(wimxOnTestnet);
 
         /// @dev These are Immutable zkEVM testnet values where necessary
         address immTestNetCreate3 = 0x37a59A845Bb6eD2034098af8738fbFFB9D589610;
@@ -306,13 +299,13 @@ contract StakeHolderScript is Test {
             });
 
         // Run deployment against forked testnet
-        StakeHolderERC20 stakeHolder;
+        StakeHolderWIMX stakeHolder;
         TimelockController timelockController;
         (stakeHolder, timelockController) = 
             _deployComplex(deploymentArgs, stakeHolderArgs, timelockArgs);
 
         _commonTest(true, IStakeHolder(stakeHolder), address(timelockController), 
-            bank, immTestNetCreate3, address(0), address(0), distributeAdmin);
+            immTestNetCreate3, address(0), address(0), distributeAdmin);
 
         assertTrue(timelockController.hasRole(timelockController.PROPOSER_ROLE(), proposer), "Proposer not set correcrly");
         assertTrue(timelockController.hasRole(timelockController.EXECUTOR_ROLE(), executor), "Executor not set correcrly");
@@ -325,12 +318,9 @@ contract StakeHolderScript is Test {
         vm.createSelectFork(rpcURL);
 
         address deployer = makeAddr("deployer");
-        address bank = makeAddr("bank");
 
-        vm.startBroadcast(deployer);
-        ERC20PresetFixedSupply erc20 = 
-            new ERC20PresetFixedSupply("Name", "SYM", 1000 ether, bank);
-        vm.stopBroadcast();
+        address payable wimxOnTestnet = payable(address(0x1CcCa691501174B4A623CeDA58cC8f1a76dc3439));
+        WIMX erc20 = WIMX(wimxOnTestnet);
 
         /// @dev These are Immutable zkEVM testnet values where necessary
         SimpleDeploymentArgs memory deploymentArgs = SimpleDeploymentArgs({
@@ -350,17 +340,16 @@ contract StakeHolderScript is Test {
             });
 
         // Run deployment against forked testnet
-        StakeHolderERC20 stakeHolder = _deploySimple(deploymentArgs, stakeHolderContractArgs);
+        StakeHolderWIMX stakeHolder = _deploySimple(deploymentArgs, stakeHolderContractArgs);
 
         _commonTest(false, IStakeHolder(stakeHolder), address(0), 
-           bank, deployer, roleAdmin, upgradeAdmin, distributeAdmin);
+           deployer, roleAdmin, upgradeAdmin, distributeAdmin);
     }
 
     function _commonTest(
             bool _isComplex, 
             IStakeHolder _stakeHolder, 
             address _timelockControl,
-            address _bank,
             address _deployer,
             address _roleAdmin,
             address _upgradeAdmin,
@@ -374,7 +363,7 @@ contract StakeHolderScript is Test {
 
         // Post deployment checks
         {
-            StakeHolderERC20 temp = new StakeHolderERC20();
+            StakeHolderWIMX temp = new StakeHolderWIMX();
             bytes32 defaultAdminRole = temp.DEFAULT_ADMIN_ROLE();
             assertTrue(_stakeHolder.hasRole(_stakeHolder.UPGRADE_ROLE(), upgradeAdmin), "Upgrade admin should have upgrade role");
             assertTrue(_stakeHolder.hasRole(defaultAdminRole, roleAdmin), "Role admin should have default admin role");
@@ -384,17 +373,15 @@ contract StakeHolderScript is Test {
         }
 
         address user1 = makeAddr("user1");
-        vm.startBroadcast(_bank);
-        erc20.transfer(user1, 100 ether);
-        vm.stopBroadcast();
+        vm.deal(user1, 100 ether);
 
         _stake(_stakeHolder, user1, 10 ether);
 
-        assertEq(erc20.balanceOf(user1), 90 ether, "User1 balance after stake");
+        assertEq(user1.balance, 90 ether, "User1 balance after stake");
         assertEq(erc20.balanceOf(address(_stakeHolder)), 10 ether, "StakeHolder balance after stake");
 
         _unstake(_stakeHolder, user1, 7 ether);
-        assertEq(erc20.balanceOf(user1), 97 ether, "User1 balance after unstake");
+        assertEq(user1.balance, 97 ether, "User1 balance after unstake");
         assertEq(erc20.balanceOf(address(_stakeHolder)), 3 ether, "StakeHolder balance after unstake");
     }
 }

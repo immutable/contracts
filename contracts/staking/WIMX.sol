@@ -8,6 +8,7 @@ import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 /**
  * @notice WIMX is a wrapped IMX contract that allows users to wrap their native IMX.
  * @dev This contract is adapted from the official Wrapped ETH contract.
+ * This contract is copied from https://github.com/immutable/zkevm-bridge-contracts/blob/main/src/child/WIMX.sol
  */
 contract WIMX is IWIMX {
     string public name = "Wrapped IMX";

@@ -44,6 +44,21 @@ if [ -z "${FUNCTION_TO_EXECUTE}" ]; then
     exit 1
 fi
 
+if [ -z "${STAKEHOLDER_TYPE}" ]; then
+    echo "Error: STAKEHOLDER_TYPE variable is not set. Should be ERC20 or WIMX"
+    exit 1
+fi
+if [ "$STAKEHOLDER_TYPE" = "ERC20" ]; then
+    script=script/staking/StakeHolderScriptERC20.t.sol:StakeHolderScriptERC20
+else
+    if [ "$STAKEHOLDER_TYPE" = "ERC20" ]; then
+        script=script/staking/StakeHolderScriptWIMX.t.sol:StakeHolderScriptWIMX
+    else 
+        echo "Error: Unknown STAKEHOLDER_TYPE: " $STAKEHOLDER_TYPE
+        exit 1
+    fi
+fi
+
 
 echo "Configuration"
 echo " IMMUTABLE_RPC: $IMMUTABLE_RPC"
@@ -55,8 +70,8 @@ if [ "${HARDWARE_WALLET}" = "ledger" ] || [ "${HARDWARE_WALLET}" = "trezor" ]; t
 else
     echo " PRIVATE_KEY: <not echoed for your security>" # $PRIVATE_KEY
 fi
-echo "Function to execute: $FUNCTION_TO_EXECUTE"
-
+echo " Function to execute: $FUNCTION_TO_EXECUTE"
+echo " Script to execute: $script"
 
 
 # NOTE WELL ---------------------------------------------
@@ -75,7 +90,7 @@ if [ "${HARDWARE_WALLET}" = "ledger" ] || [ "${HARDWARE_WALLET}" = "trezor" ]; t
         --sig "$FUNCTION_TO_EXECUTE" \
         --$HARDWARE_WALLET \
         --hd-paths "$HD_PATH" \
-        script/staking/StakeHolderScript.t.sol:StakeHolderScript 
+        $script
 else
     forge script --rpc-url $IMMUTABLE_RPC \
         --priority-gas-price 10000000000 \
@@ -87,5 +102,5 @@ else
         --verifier-url $BLOCKSCOUT_URI$BLOCKSCOUT_APIKEY \
         --sig "$FUNCTION_TO_EXECUTE" \
         --private-key $PRIVATE_KEY \
-        script/staking/StakeHolderScript.t.sol:StakeHolderScript 
+        $script
 fi

@@ -12,9 +12,11 @@ The system consists of a set of contracts show in the diagram below.
 
 `StakeHolderBase.sol` is the abstract base contract that all staking implementation use.
 
+`StakeHolderWIMX.sol` allows the native token, IMX, to be used as the staking currency. Stake is held as wrapped IMX, WIMX, an ERC20 token.
+
 `StakeHolderERC20.sol` allows an ERC20 token to be used as the staking currency.
 
-`StakeHolderNative.sol` uses the native token, IMX, to be used as the staking currency.
+`StakeHolderNative.sol` uses the native token, IMX, to be used as the staking currency. Stake is held as native IMX.
 
 `ERC1967Proxy.sol` is a proxy contract. All calls to StakeHolder contracts go via the ERC1967Proxy contract.
 
@@ -49,13 +51,13 @@ See [deployment scripts](../../script/staking/README.md).
 
 # Usage
 
-For StakeHolderERC20, the ERC20 staking token must be specified when the contract is being initialised. The token can not be changed.
+For StakeHolderERC20 and StakeHolderWIMX, the ERC20 staking token must be specified when the contract is being initialised. The token can not be changed.
 
-To stake, any account should call `stake(uint256 _amount)`. For the native IMX variant, the amount to be staked must be passed in as the msg.value.
+To stake, any account should call `stake(uint256 _amount)`. For the WIMX and the native IMX variants, the amount to be staked must be passed in as the msg.value.
 
 To unstake, the account that previously staked should call, `unstake(uint256 _amountToUnstake)`.
 
-Accounts that have DISTRIBUTE_ROLE that wish to distribute rewards should call, `distributeRewards(AccountAmount[] calldata _recipientsAndAmounts)`. The `AccountAmount` structure consists of recipient address and amount to distribute pairs. Distributions can only be made to accounts that have previously or are currently staking. For the native IMX variant, the amount to be distributed must be passed in as msg.value and must equal to the sum of the amounts specified in the `_recipientsAndAmounts` array.
+Accounts that have DISTRIBUTE_ROLE that wish to distribute rewards should call, `distributeRewards(AccountAmount[] calldata _recipientsAndAmounts)`. The `AccountAmount` structure consists of recipient address and amount to distribute pairs. Distributions can only be made to accounts that have previously or are currently staking. For the WIMX and the native IMX variants, the amount to be distributed must be passed in as msg.value and must equal to the sum of the amounts specified in the `_recipientsAndAmounts` array.
 
 The `stakers` array needs to be analysed to determine which accounts have staked and how much. The following functions provide access to this data structure:
 

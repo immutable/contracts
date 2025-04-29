@@ -34,10 +34,10 @@ interface IStakeHolder is IAccessControlEnumerableUpgradeable {
     error MismatchMsgValueAmount(uint256 _msgValue, uint256 _amount);
 
     /// @notice Event when an amount has been staked or when an amount is distributed to an account.
-    event StakeAdded(address _staker, uint256 _amountAdded, uint256 _newBalance, uint256 _timestamp);
+    event StakeAdded(address _staker, uint256 _amountAdded, uint256 _newBalance);
 
     /// @notice Event when an amount has been unstaked.
-    event StakeRemoved(address _staker, uint256 _amountRemoved, uint256 _newBalance, uint256 _timestamp);
+    event StakeRemoved(address _staker, uint256 _amountRemoved, uint256 _newBalance);
 
     /// @notice Event summarising a distribution. There will also be one StakeAdded event for each recipient.
     event Distributed(address _distributor, uint256 _totalDistribution, uint256 _numRecipients);

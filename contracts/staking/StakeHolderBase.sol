@@ -110,7 +110,7 @@ abstract contract StakeHolderBase is
         uint256 newBalance = currentStake - _amountToUnstake;
         stakeInfo.stake = newBalance;
 
-        emit StakeRemoved(msg.sender, _amountToUnstake, newBalance, block.timestamp);
+        emit StakeRemoved(msg.sender, _amountToUnstake, newBalance);
 
         _sendValue(msg.sender, _amountToUnstake);
     }
@@ -193,7 +193,7 @@ abstract contract StakeHolderBase is
         }
         uint256 newBalance = currentStake + _amount;
         stakeInfo.stake = newBalance;
-        emit StakeAdded(_account, _amount, newBalance, block.timestamp);
+        emit StakeAdded(_account, _amount, newBalance);
     }
 
     /**

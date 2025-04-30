@@ -25,7 +25,7 @@ contract StakeHolderNative is StakeHolderBase {
     /**
      * @inheritdoc IStakeHolder
      */
-    function getToken() external virtual view returns (address) {
+    function getToken() external view virtual returns (address) {
         return address(0);
     }
 

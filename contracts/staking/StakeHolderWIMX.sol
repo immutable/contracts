@@ -12,7 +12,6 @@ import {IWIMX} from "./IWIMX.sol";
  * The StakeHolderWIMX contract is designed to be upgradeable.
  */
 contract StakeHolderWIMX is StakeHolderNative {
-
     /// @notice The token used for staking.
     IWIMX internal wIMX;
 
@@ -40,7 +39,7 @@ contract StakeHolderWIMX is StakeHolderNative {
     /**
      * @inheritdoc IStakeHolder
      */
-    function getToken() external override view returns (address) {
+    function getToken() external view override returns (address) {
         return address(wIMX);
     }
 

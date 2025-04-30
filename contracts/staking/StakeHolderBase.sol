@@ -4,11 +4,8 @@ pragma solidity >=0.8.19 <0.8.29;
 
 import {UUPSUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/proxy/utils/UUPSUpgradeable.sol";
 import {AccessControlEnumerableUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/access/AccessControlEnumerableUpgradeable.sol";
-import {AccessControlUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/access/AccessControlUpgradeable.sol";
-import {IAccessControlUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/access/IAccessControlUpgradeable.sol";
 import {ReentrancyGuardUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/security/ReentrancyGuardUpgradeable.sol";
 import {IStakeHolder} from "./IStakeHolder.sol";
-import {StakeHolderBase} from "./StakeHolderBase.sol";
 
 /**
  * @title StakeHolderBase: allows anyone to stake any amount of an ERC20 token and to then remove all or part of that stake.

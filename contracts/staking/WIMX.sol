@@ -10,13 +10,16 @@ import {Address} from "@openzeppelin/contracts/utils/Address.sol";
  * @dev This contract is adapted from the official Wrapped ETH contract.
  * This contract is copied from https://github.com/immutable/zkevm-bridge-contracts/blob/main/src/child/WIMX.sol
  */
+// solhint-disable custom-errors, reason-string
 contract WIMX is IWIMX {
+    // slither-disable-start constable-states
     string public name = "Wrapped IMX";
     string public symbol = "WIMX";
     uint8 public decimals = 18;
+    // slither-disable-end constable-states
 
-    mapping(address => uint256) public balanceOf;
-    mapping(address => mapping(address => uint256)) public allowance;
+    mapping(address account => uint256 balance) public balanceOf;
+    mapping(address account => mapping(address spender => uint256 amount)) public allowance;
 
     /**
      * @notice Fallback function on receiving native IMX.
@@ -37,6 +40,7 @@ contract WIMX is IWIMX {
      * @notice Withdraw given amount of native IMX to msg.sender and burn the equal amount of wrapped IMX.
      * @param wad The amount to withdraw.
      */
+    // slither-disable-start reentrancy-events
     function withdraw(uint256 wad) public {
         require(balanceOf[msg.sender] >= wad, "Wrapped IMX: Insufficient balance");
         balanceOf[msg.sender] -= wad;
@@ -44,6 +48,7 @@ contract WIMX is IWIMX {
         Address.sendValue(payable(msg.sender), wad);
         emit Withdrawal(msg.sender, wad);
     }
+    // slither-disable-end reentrancy-events
 
     /**
      * @notice Obtain the current total supply of wrapped IMX.

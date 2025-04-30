@@ -2,8 +2,7 @@
 // SPDX-License-Identifier: Apache 2
 pragma solidity >=0.8.19 <0.8.29;
 
-import {IStakeHolder, StakeHolderBase} from "./StakeHolderBase.sol";
-import {StakeHolderNative} from "./StakeHolderNative.sol";
+import {IStakeHolder, StakeHolderBase, StakeHolderNative} from "./StakeHolderNative.sol";
 import {IWIMX} from "./IWIMX.sol";
 
 /**
@@ -60,6 +59,7 @@ contract StakeHolderWIMX is StakeHolderNative {
         super._checksAndTransfer(_amount);
 
         // Convert native IMX to WIMX.
+        // slither-disable-next-line arbitrary-send-eth
         wIMX.deposit{value: _amount}();
     }
 

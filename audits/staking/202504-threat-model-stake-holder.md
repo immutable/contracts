@@ -2,23 +2,24 @@
 
 ## Introduction
 
-This threat model document for the [StakeHolderERC20 and StakeHolderNative](../../contracts/staking/README.md) contracts has been created in preparation for an internal audit.
+This threat model document for the [StakeHolderWIMX, StakeHolderERC20 and StakeHolderNative](../../contracts/staking/README.md) contracts has been created in preparation for an internal audit.
 
 ## Rationale
 
-Immutable operates a system whereby people can place Wrapped IMX in a holding contract, do some actions (which are outside of the scope of this threat model), and then are paid a reward. The people, known as stakers, have full custody of their tokens they place in the holding contract; they can withdraw deposited IMX at any time. Administrators can choose to distribute rewards to stakers at any time.
+Immutable operates a system whereby people can place native IMX in a holding contract, do some actions (which are outside of the scope of this threat model), and then are paid a reward. The people, known as stakers, have full custody of their tokens they place in the holding contract; they can withdraw deposited IMX at any time. Administrators can choose to distribute rewards to stakers at any time.
 
-The StakeHolderERC20 contract can be used for any staking system that uses ERC20 tokens. The StakeHolderNative contract is an alternative implementation that allows native IMX, rather than ERC20 tokens, to be used for staking.
+The StakeHolderERC20 contract can be used for any staking system that uses ERC20 tokens. The StakeHolderNative contract is an alternative implementation that allows native IMX, rather than ERC20 tokens, to be used for staking. The difference between the StakeHolderNative and StakeHolderWIMX is that the StakeHolderWIMX holds the staked value as wrapped IMX (WIMX), an ERC20 contract.
 
 
 ## Threat Model Scope
 
-The threat model is limited to the stake holder Solidity files at GitHash [`bf327c7abdadd48fd51ae632500510ac2b07b5f0`](https://github.com/immutable/contracts/tree/bf327c7abdadd48fd51ae632500510ac2b07b5f0/contracts/staking):
+The threat model is limited to the stake holder Solidity files at GitHash [`bf327c7abdadd48fd51ae632500510ac2b07b5f0`](https://github.com/immutable/contracts/tree/aee3f35d76117a1a22dab96fd6dfd8e92444757b/contracts/staking):
 
 * [IStakeHolder.sol](https://github.com/immutable/contracts/blob/bf327c7abdadd48fd51ae632500510ac2b07b5f0/contracts/staking/IStakeHolder.sol) is the interface that all staking implementations comply with.
-* [StakeHolderBase.sol](https://github.com/immutable/contracts/blob/bf327c7abdadd48fd51ae632500510ac2b07b5f0/contracts/staking/StakeHolderBase.sol) is the abstract base contract that all staking implementation use.
-* [StakeHolderERC20.sol](https://github.com/immutable/contracts/blob/bf327c7abdadd48fd51ae632500510ac2b07b5f0/contracts/staking/StakeHolderERC20.sol) allows an ERC20 token to be used as the staking currency.
-* [StakeHolderNative.sol](https://github.com/immutable/contracts/blob/bf327c7abdadd48fd51ae632500510ac2b07b5f0/contracts/staking/StakeHolderNative.sol) uses the native token, IMX, to be used as the staking currency.
+* [StakeHolderBase.sol](https://github.com/immutable/contracts/tree/aee3f35d76117a1a22dab96fd6dfd8e92444757b/contracts/staking/StakeHolderBase.sol) is the abstract base contract that all staking implementation use.
+* [StakeHolderWIMX.sol](https://github.com/immutable/contracts/tree/aee3f35d76117a1a22dab96fd6dfd8e92444757b/contracts/staking/StakeHolderWIMX.sol) allows the native token, IMX, to be used as the staking currency.
+* [StakeHolderERC20.sol](https://github.com/immutable/contracts/tree/aee3f35d76117a1a22dab96fd6dfd8e92444757b/contracts/staking/StakeHolderERC20.sol) allows an ERC20 token to be used as the staking currency.
+* [StakeHolderNative.sol](https://github.com/immutable/contracts/tree/aee3f35d76117a1a22dab96fd6dfd8e92444757b/contracts/staking/StakeHolderNative.sol) uses the native token, IMX, to be used as the staking currency.
 
 Additionally, this threat model analyses whether the documentation for the time controller contract correctly advises operators how to achieve the required time delay upgrade functionality:
 
@@ -53,9 +54,10 @@ The following sections list attack surfaces evaluated as part of this threat mod
 
 An attacker could formulate an attack in which they send one or more transactions that execute one or more of the externally visible functions.
 
-The list of functions and their function selectors was determined by the following commands. The additional information was obtained by reviewing the code. `StakeHolderERC20` and `StakeHolderNative` have identical functions with the exception of the `initialize` function. `StakeHolderERC20` uses the `initialize` function that has four parameters and `StakeHolderNative` uses the `initialize` function with three parameters.
+The list of functions and their function selectors was determined by the following commands. The additional information was obtained by reviewing the code. `StakeHolderWIMX`, `StakeHolderERC20` and `StakeHolderNative` have identical functions with the exception of the `initialize` function. `StakeHolderWIMX` and `StakeHolderERC20` use the `initialize` function that has four parameters and `StakeHolderNative` uses the `initialize` function with three parameters.
 
 ```
+forge inspect StakeHolderWIMX methods
 forge inspect StakeHolderERC20 methods
 forge inspect StakeHolderNative methods
 ```
@@ -67,7 +69,7 @@ Functions that *change* state:
 | `distributeRewards((address,uint256)[])`| 00cfb539          | Permissionless      |
 | `grantRole(bytes32,address)`            | 2f2ff15d          | Role admin          |
 | `initialize(address,address,address)`   | c0c53b8b          | Can only be called once during deployment |
-| `initialize(address,address, address, address)` | f8c8765e  | Can only be called once during deployment |
+| `initialize(address,address,address,address)` | f8c8765e  | Can only be called once during deployment |
 | `renounceRole(bytes32,address)`         | 36568abe          | `msg.sender`        |
 | `revokeRole(bytes32,address)`           | d547741f          | Role admin          |
 | `stake(uint256)`                        | a694fc3a          | Operations based on msg.sender |
@@ -133,6 +135,37 @@ Exploiting this attack surface requires compromising an account with `DISTRIBUTE
 
 
 ### Upgrade and Storage Slots
+
+#### Upgrade and Storage Slots for StakeHolderWIMX
+
+The table was constructed by using the command described below, and analysing the source code.
+
+```
+forge inspect StakeHolderWIMX storage
+```
+
+| Name                              | Type                                                           | Slot | Offset | Bytes | Source File |
+| --------------------------------- | -------------------------------------------------------------- | ---- | ------ | ----- | ----------- |
+| \_initialized                     | uint8                                                          | 0    | 0      | 1     | OpenZeppelin Contracts v4.9.3: proxy/utils/Initializable.sol |
+| \_initializing                    | bool                                                           | 0    | 1      | 1     | OpenZeppelin Contracts v4.9.3: proxy/utils/Initializable.sol |
+| \_\_gap                           | uint256[50]                                                    | 1    | 0      | 1600  | OpenZeppelin Contracts v4.9.3: utils/Context.sol            |
+| \_\_gap                           | uint256[50]                                                    | 51   | 0      | 1600  | OpenZeppelin Contracts v4.9.3: utils/introspection/ERC165.sol |
+| \_roles                           | mapping(bytes32 => struct AccessControlUpgradeable.RoleData)   | 101  | 0      | 32    | OpenZeppelin Contracts v4.9.3: access/AccessControlUpgradeable.sol |
+| \_\_gap                           | uint256[49]                                                    | 102  | 0      | 1568  | OpenZeppelin Contracts v4.9.3: access/AccessControlUpgradeable.sol |
+| \_roleMembers                     | mapping(bytes32 => struct EnumerableSetUpgradeable.AddressSet) | 151  | 0      | 32    | OpenZeppelin Contracts v4.9.3: access/AccessControlEnumerableUpgradeable.sol |
+| \_\_gap                           | uint256[49]                                                    | 152  | 0      | 1568  | OpenZeppelin Contracts v4.9.3: access/AccessControlEnumerableUpgradeable.sol |
+| \_\_gap                           | uint256[50]                                                    | 201  | 0      | 1600  | OpenZeppelin Contracts v4.9.3: proxy/ERC1967/ERC1967Upgrade.sol |
+| \_\_gap                           | uint256[50]                                                    | 251  | 0      | 1600  | OpenZeppelin Contracts v4.9.3: proxy/utils/UUPSUpgradeable.sol  |
+| \_status                         | uint256                                                        | 301  | 0      | 32    | OpenZeppelin Contracts v4.9.3: security/ReentrancyGuardUpgradeable.sol  |
+| \_\_gap                           | uint256[49]                                                    | 302  | 0      | 1568  | OpenZeppelin Contracts v4.9.3: security/ReentrancyGuardUpgradeable.sol  |
+| balances                          | mapping(address => struct StakeHolder.StakeInfo)               | 351  | 0      | 32    | StakeHolderBase.sol |
+| stakers                           | address[]                                                      | 352  | 0      | 32    | StakeHolderBase.sol |
+| version                           | uint256                                                        | 353  | 0      | 32    | StakeHolderBase.sol |
+| \_\_StakeHolderBaseGap            | uint256[50]                                                    | 354  | 0      | 1600  | StakeHolderBase.sol |
+| \_\_StakeHolderNativeGap          | uint256[50]                                                    | 404  | 0      | 1600  | StakeHolderNative.sol |
+| wIMX                              | contract IWIMX                                                 | 454  | 0      | 20    | StakeHolderWIMX.sol |
+| \_\_StakeHolderWIMXGap            | uint256[50]                                                    | 455  | 0      | 1600  | StakeHolderWIMX.sol |
+
 
 #### Upgrade and Storage Slots for StakeHolderERC20
 

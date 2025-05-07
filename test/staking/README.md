@@ -1,8 +1,10 @@
 # Test Plan for Staking contracts
 
-## [StakeHolder.sol](../../contracts/staking/StakeHolder.sol)
+## [IStakeHolder.sol](../../contracts/staking/IStakeHolder.sol)
 
-Initialize testing (in [StakeHolderInit.t.sol](../../contracts/staking/StakeHolderInit.t.sol)):
+[StakeHolderNative.sol](../../contracts/staking/StakeHolderNative.sol) and [StakeHolderERC20.sol](../../contracts/staking/StakeHolderERC20.sol) use common base tests.
+
+Initialize testing (in [StakeHolderInitBase.t.sol](./StakeHolderInitBase.t.sol)):
 
 | Test name                       | Description                                                | Happy Case | Implemented |
 |---------------------------------|------------------------------------------------------------|------------|-------------|
@@ -11,7 +13,7 @@ Initialize testing (in [StakeHolderInit.t.sol](../../contracts/staking/StakeHold
 | testAdmins                      | Check that role and upgrade admin have been set correctly. | Yes        | Yes         |
 
 
-Configuration tests (in [StakeHolderConfig.t.sol](../../contracts/staking/StakeHolderConfig.t.sol))::
+Configuration tests (in [StakeHolderConfigBase.t.sol](./StakeHolderConfigBase.t.sol)):
 
 | Test name                       | Description                                                | Happy Case | Implemented |
 |---------------------------------|------------------------------------------------------------|------------|-------------|
@@ -21,12 +23,10 @@ Configuration tests (in [StakeHolderConfig.t.sol](../../contracts/staking/StakeH
 | testUpgradeAuthFail             | Try upgrade from account that doesn't have upgrade role.   | No         | Yes         |
 | testAddRevokeRenounceRoleAdmin  | Check adding, removing, and renouncing role admins.        | Yes        | Yes         |
 | testAddRevokeRenounceUpgradeAdmin | Check adding, removing, and renouncing upgrade admins.   | Yes        | Yes         |
-| testRenounceLastRoleAdmin       | Check that attempting to renounce last role admin fails.   | No         | Yes         |
-| testRevokeLastRoleAdmin         | Check that attempting to revoke last role admin fails.     | No         | Yes         |
 | testRoleAdminAuthFail           | Attempt to add an upgrade admin from a non-role admin.     | No         | Yes         |
 
 
-Operational tests (in [StakeHolderOperational.t.sol](../../contracts/staking/StakeHolderOperational.t.sol))::
+Operational tests (in [StakeHolderOperationalBase.t.sol](./StakeHolderOperationalBase.t.sol)):
 
 | Test name                      | Description                                                 | Happy Case | Implemented |
 |--------------------------------|-------------------------------------------------------------|------------|-------------|
@@ -49,4 +49,5 @@ Operational tests (in [StakeHolderOperational.t.sol](../../contracts/staking/Sta
 | testDistributeToEmptyAccount   | Stake, unstake, distribute rewards.                         | Yes        | Yes         |
 | testDistributeToUnusedAccount  | Attempt to distribute rewards to an account that has never staked. | No  | Yes         |
 | testDistributeBadAuth  | Attempt to distribute rewards using an unauthorised account.        | No  | Yes         |
+
 

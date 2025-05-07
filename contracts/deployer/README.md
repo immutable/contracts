@@ -1,7 +1,5 @@
 # Contract Deployers
 
-At present, use of the Contract Deployers described below is limited to Immutable. 
-
 This directory provides two types of contract deployers: CREATE2 and CREATE3. Both deployer types facilitate contract deployment to predictable addresses, independent of the deployer account’s nonce. The deployers offer a more reliable alternative to using a Nonce Reserver Key (a key that is only used for deploying contracts, and has specific nonces reserved for deploying specific contracts), particularly across different chains. These factories can also be utilized for contracts that don't necessarily need predictable addresses. The advantage of this method, compared to using a deployer key in conjunction with a deployment factory contract, is that it can enable better standardisation and simplification of deployment processes and enables the rotation of the deployer key without impacting the consistency of the perceived deployer address for contracts.
 
 Deployments via these factories can only be performed by the owner of the factory. 

@@ -568,7 +568,7 @@ contract ImmutableSignedZoneV2 is
         uint256 scalingFactorDenominator
     ) internal pure returns (bytes32) {
         uint256 numberOfItems = receivedItems.length;
-        bytes memory receivedItemsHash;
+        bytes memory receivedItemsHash = new bytes(0); // Explicitly initialize to empty bytes
 
         for (uint256 i; i < numberOfItems; i++) {
             receivedItemsHash = abi.encodePacked(

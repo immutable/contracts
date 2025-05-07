@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
-import {StakeHolder} from "../../contracts/staking/StakeHolder.sol";
+import {StakeHolderNative} from "../../contracts/staking/StakeHolderNative.sol";
 
 // Wallet designed to attempt reentrancy attacks
 contract StakeHolderAttackWallet {
-    StakeHolder public stakeHolder;
+    StakeHolderNative public stakeHolder;
     constructor(address _stakeHolder) {
-        stakeHolder = StakeHolder(_stakeHolder);
+        stakeHolder = StakeHolderNative(_stakeHolder);
     }
     receive() external payable {
         // Assumung the call to unstake is for a "whole" number, say 1 ether, then
@@ -20,7 +20,7 @@ contract StakeHolderAttackWallet {
         }
     }
     function stake(uint256 _amount) external {
-        stakeHolder.stake{value: _amount}();
+        stakeHolder.stake{value: _amount}(_amount);
     }
     function unstake(uint256 _amount) external {
         stakeHolder.unstake(_amount);

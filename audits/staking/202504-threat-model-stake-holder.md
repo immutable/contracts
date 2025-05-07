@@ -66,7 +66,7 @@ Functions that *change* state:
 
 | Name                                    | Function Selector | Access Control      |
 | --------------------------------------- | ----------------- | ------------------- |
-| `distributeRewards((address,uint256)[])`| 00cfb539          | Permissionless      |
+| `distributeRewards((address,uint256)[])`| 00cfb539          | Distribute role only      |
 | `grantRole(bytes32,address)`            | 2f2ff15d          | Role admin          |
 | `initialize(address,address,address)`   | c0c53b8b          | Can only be called once during deployment |
 | `initialize(address,address,address,address)` | f8c8765e  | Can only be called once during deployment |

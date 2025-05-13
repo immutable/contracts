@@ -11,8 +11,8 @@ The following variables must be specified for all scripts. They can be supplied 
 * `HARDWARE_WALLET`: Set to `ledger` for a Ledger hardware wallet, `trezor` for a Trezor hardware wallet, and not set when using a private key. See [Forge's documentation](https://book.getfoundry.sh/reference/forge/forge-script#wallet-options---hardware-wallet) for more information on hardware wallet configuration.
 * `HD_PATH`: Hierarchical Deterministic path. Must be set if using a Ledger or Trezor hardware wallet. Should be of the form: `HD_PATH="m/44'/60'/0'/0/0"`.
 * PRIVATE_KEY: A private key must be specified if HARDWARE_WALLET is not specified. The value should not be prefixed with `0x`. 
-* `DISTRIBUTE_ADMIN`: Initial account that will be authorised to upgrade the StakeHolderERC20 contract. Specify 0x0000000000000000000000000000000000000000 to have no account with distribute administrator access.
-* `STAKEHOLDER_TYPE`: The stake holder configuration can be an ERC20 token or native IMX which is stored as wrapped IMX. For the ERC20 token variant, `STAKEHOLDER_TYPE` must be `ERC20`. For native IMX, `STAKEHOLDER_TYPE` must be `WIMX`.
+* `DISTRIBUTE_ADMIN`: Initial account that will be authorised to distribute token to stakers. Specify 0x0000000000000000000000000000000000000000 to have no account with distribute administrator access.
+* `STAKEHOLDER_TYPE`: The stake holder configuration can allow for an ERC20 token or native IMX to be staked. For the ERC20 token variant, `STAKEHOLDER_TYPE` must be `ERC20`. For native IMX, `STAKEHOLDER_TYPE` must be `WIMX`.
 * `ERC20_STAKING_TOKEN`: Address of ERC20 token to be used for staking. For use by ERC20 deployment script, which is used when `STAKEHOLDER_TYPE`=`ERC20`.
 * `WIMX_TOKEN`: Address of WIMX token contract. For use by the WIMX deployment scirpt, which is used when `STAKEHOLDER_TYPE`=`WIMX`.
 

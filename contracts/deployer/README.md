@@ -14,7 +14,7 @@ Contract audits and threat models:
 
 | Description               | Date             |Version Audited  | Link to Report |
 |---------------------------|------------------|-----------------|----------------|
-| Internal audit            | Work in Progress |                 |                |
+| Internal audit            | May 2024 | [eab4acb8](https://github.com/immutable/contracts/pull/225/commits/eab4acb8e6469bbc98bbf94d1ed968f74085ffb3) | [202405-internal-audit-deployer.pdf](../../audits/deployer/202405-internal-audit-deployer.pdf) |
 
 
 # Architecture

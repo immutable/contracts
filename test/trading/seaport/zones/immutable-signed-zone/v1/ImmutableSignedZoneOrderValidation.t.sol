@@ -56,6 +56,63 @@ contract ImmutableSignedZoneOrderValidationTest is Test {
         vm.stopPrank();
     }
 
+    function testValidatesCorrectSignatureWithContext() public {
+        bytes32 orderHash = keccak256("0x1234");
+        bytes32[] memory orderHashes = new bytes32[](1);
+        orderHashes[0] = orderHash;
+        uint64 expiration = uint64(block.timestamp + 100);
+        ReceivedItem[] memory consideration = _createMockConsideration(10);
+        bytes32 considerationHash = this._deriveConsiderationHash(consideration);
+        bytes memory context = abi.encodePacked(considerationHash, _convertToBytesWithoutArrayLength(orderHashes));
+
+        bytes memory signature = _signOrder(signerPkey, orderHash, expiration, context);
+        bytes memory extraData = abi.encodePacked(
+            uint8(0), // SIP6 version
+            fulfiller,
+            expiration,
+            this._convertSignatureToEIP2098(signature),
+            context
+        );
+        //console.logAddress(signer);
+
+        ZoneParameters memory params = _createZoneParameters(extraData, orderHash, consideration);
+        bytes4 selector = zone.validateOrder(params);
+        assertEq(selector, bytes4(keccak256("validateOrder((bytes32,address,address,(uint8,address,uint256,uint256)[],(uint8,address,uint256,uint256,address)[],bytes,bytes32[],uint256,uint256,bytes32))")));
+    }
+
+    function testValidateOrderWithMultipleOrderHashes() public {
+        console.logAddress(signer);
+        bytes32 orderHash = keccak256("0x1234");
+        uint64 expiration = uint64(block.timestamp + 90);
+        ReceivedItem[] memory consideration = _createMockConsideration(10);
+        bytes32 considerationHash = this._deriveConsiderationHash(consideration);
+        
+        // Create array of order hashes
+        bytes32[] memory orderHashes = new bytes32[](10);
+        for (uint256 i = 0; i < 10; i++) {
+            orderHashes[i] = keccak256(abi.encodePacked("order", i));
+        }
+        
+        // Create context with consideration hash and order hashes
+        bytes memory context = abi.encodePacked(considerationHash, _convertToBytesWithoutArrayLength(orderHashes));
+
+        bytes memory signature = _signOrder(signerPkey, orderHash, expiration, context);
+        bytes memory extraData = abi.encodePacked(
+            uint8(0), // SIP6 version
+            fulfiller,
+            expiration,
+            this._convertSignatureToEIP2098(signature),
+            context
+        );
+
+        ZoneParameters memory params = _createZoneParameters(extraData, orderHash, orderHashes, consideration);
+        
+        bytes4 selector = zone.validateOrder(params);
+        assertEq(selector, bytes4(keccak256("validateOrder((bytes32,address,address,(uint8,address,uint256,uint256)[],(uint8,address,uint256,uint256,address)[],bytes,bytes32[],uint256,uint256,bytes32))")));
+    }
+
+
+
     function testValidateOrderWithoutExtraData() public {
         bytes memory extraData = "";
         ZoneParameters memory params = _createZoneParameters(extraData);
@@ -174,13 +231,12 @@ contract ImmutableSignedZoneOrderValidationTest is Test {
         zone.validateOrder(params);
     }
 
-
-    function testValidatesCorrectSignatureWithContext() public {
+    function testValidateOrderRevertsAfterExpiration() public {
         bytes32 orderHash = keccak256("0x1234");
-        uint64 expiration = uint64(block.timestamp + 100);
+        uint64 expiration = uint64(block.timestamp + 90);
         ReceivedItem[] memory consideration = _createMockConsideration(10);
         bytes32 considerationHash = this._deriveConsiderationHash(consideration);
-        bytes memory context = abi.encode(considerationHash, orderHash);
+        bytes memory context = abi.encodePacked(considerationHash, orderHash);
 
         bytes memory signature = _signOrder(signerPkey, orderHash, expiration, context);
         bytes memory extraData = abi.encodePacked(
@@ -190,12 +246,25 @@ contract ImmutableSignedZoneOrderValidationTest is Test {
             this._convertSignatureToEIP2098(signature),
             context
         );
-        console.logAddress(signer);
 
-        ZoneParameters memory params = _createZoneParameters(extraData, orderHash, consideration);
+        ZoneParameters memory params = _createZoneParameters(extraData);
+        
+        // First validate should succeed
         bytes4 selector = zone.validateOrder(params);
         assertEq(selector, bytes4(keccak256("validateOrder((bytes32,address,address,(uint8,address,uint256,uint256)[],(uint8,address,uint256,uint256,address)[],bytes,bytes32[],uint256,uint256,bytes32))")));
+
+        // Advance time past expiration
+        vm.warp(block.timestamp + 900);
+
+        // Second validate should fail
+        vm.expectRevert(abi.encodeWithSelector(SIP7EventsAndErrors.SignatureExpired.selector, uint64(block.timestamp), expiration, orderHash));
+        zone.validateOrder(params);
     }
+
+
+
+
+
 
     // Helper functions
     function _createZoneParameters(bytes memory _extraData) internal returns (ZoneParameters memory) {
@@ -210,6 +279,10 @@ contract ImmutableSignedZoneOrderValidationTest is Test {
     function _createZoneParameters(bytes memory _extraData, bytes32 _orderHash, ReceivedItem[] memory _consideration) internal view returns (ZoneParameters memory) {
         bytes32[] memory orderHashes = new bytes32[](1);
         orderHashes[0] = _orderHash;
+        return _createZoneParameters(_extraData, _orderHash, orderHashes, _consideration);
+    }
+
+    function _createZoneParameters(bytes memory _extraData, bytes32 _orderHash, bytes32[] memory _orderHashes, ReceivedItem[] memory _consideration) internal view returns (ZoneParameters memory) {
         return ZoneParameters({
             orderHash: _orderHash,
             fulfiller: fulfiller,
@@ -217,7 +290,7 @@ contract ImmutableSignedZoneOrderValidationTest is Test {
             offer: new SpentItem[](0),
             consideration: _consideration,
             extraData: _extraData,
-            orderHashes: orderHashes,
+            orderHashes: _orderHashes,
             startTime: 0,
             endTime: 0,
             zoneHash: bytes32(0)
@@ -274,7 +347,7 @@ contract ImmutableSignedZoneOrderValidationTest is Test {
                 address(zone)
             )
         );
-        console.logBytes32(domainSeparator);
+        //console.logBytes32(domainSeparator);
 
         bytes32 structHash = keccak256(
             abi.encode(
@@ -285,12 +358,12 @@ contract ImmutableSignedZoneOrderValidationTest is Test {
                 keccak256(context)
             )
         );
-        console.logBytes32(structHash);
+        //console.logBytes32(structHash);
 
         bytes32 digest = keccak256(
             abi.encodePacked("\x19\x01", domainSeparator, structHash)
         );
-        console.logBytes32(digest);
+        //console.logBytes32(digest);
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(_signerPkey, digest);
         return abi.encodePacked(r, s, v);
@@ -305,4 +378,13 @@ contract ImmutableSignedZoneOrderValidationTest is Test {
         }
         return abi.encodePacked(signature[0:64]);
     }
+
+    function _convertToBytesWithoutArrayLength(bytes32[] memory _orders) private view returns (bytes memory) {
+        bytes memory data = abi.encodePacked(_orders);
+        return this._stripArrayLength(data);
+    }
+    function _stripArrayLength(bytes calldata _data) external pure returns (bytes memory) {
+        return _data[32:_data.length];
+    }
+
 } 

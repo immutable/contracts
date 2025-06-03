@@ -86,6 +86,20 @@ abstract contract ImmutableSeaportTestHelper is Test {
         return consideration;
     }
 
+    function _convertConsiderationToReceivedItem(ConsiderationItem[] memory _items) internal pure returns (ReceivedItem[] memory) {
+        ReceivedItem[] memory consideration = new ReceivedItem[](_items.length);
+        for (uint256 i = 0; i < _items.length; i++) {
+            consideration[i] = ReceivedItem({
+                itemType: _items[i].itemType,
+                token: _items[i].token,
+                identifier: _items[i].identifierOrCriteria,
+                amount: _items[i].startAmount,
+                recipient: _items[i].recipient
+            });
+        }
+        return consideration;
+    }
+
     function _createConsiderationItems(address recipient, uint256 amount) internal pure returns (ConsiderationItem[] memory) {
         ConsiderationItem[] memory consideration = new ConsiderationItem[](1);
         consideration[0] = ConsiderationItem({
@@ -168,6 +182,37 @@ abstract contract ImmutableSeaportTestHelper is Test {
             revert("Invalid signature length");
         }
         return abi.encodePacked(signature[0:64]);
+    }
+
+    // Helper functions
+    function _createOfferItems(address token, uint256 tokenId) internal pure returns (OfferItem[] memory) {
+        OfferItem[] memory offer = new OfferItem[](1);
+        offer[0] = OfferItem({
+            itemType: ItemType.ERC721,
+            token: token,
+            identifierOrCriteria: tokenId,
+            startAmount: 1,
+            endAmount: 1
+        });
+        return offer;
+    }
+
+
+    function _generateSip7Signature(bytes32 orderHash, address fulfiller, uint256 signerPkey, uint64 _expiration, ConsiderationItem[] memory _consideration) internal view returns (bytes memory) {
+        bytes32[] memory orderHashes = new bytes32[](1);
+        orderHashes[0] = orderHash;
+        ReceivedItem[] memory consideration = _convertConsiderationToReceivedItem(_consideration);
+        bytes32 considerationHash = this._deriveConsiderationHash(consideration);
+        bytes memory context = abi.encodePacked(considerationHash, _convertToBytesWithoutArrayLength(orderHashes));
+
+        bytes memory signature = _signOrder(signerPkey, orderHash, _expiration, context);
+        return abi.encodePacked(
+            uint8(0), // SIP6 version
+            fulfiller,
+            _expiration,
+            this._convertSignatureToEIP2098(signature),
+            context
+        );
     }
 
     function _convertToBytesWithoutArrayLength(bytes32[] memory _orders) internal view returns (bytes memory) {

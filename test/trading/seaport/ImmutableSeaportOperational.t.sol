@@ -33,6 +33,8 @@ contract TestERC721 is ERC721("Test721", "TST721") {
     }
 }
 
+// A wallet rather than an EOA needs to be used for the seller because code in forge detects
+// the seller as a contract when created it is created with makeAddr.
 contract SellerWallet {
     bytes4 private constant SELECTOR_ERC1271_BYTES_BYTES = 0x20c13b0b;
     bytes4 private constant SELECTOR_ERC1271_BYTES32_BYTES = 0x1626ba7e;
@@ -62,19 +64,125 @@ contract SellerWallet {
 
 
 contract ImmutableSeaportOperationalTest is ImmutableSeaportBaseTest, ImmutableSeaportTestHelper {
+    SellerWallet public sellerWallet;
+    TestERC721 public erc721;
+    uint256 public nftId;
+
     function setUp() public override {
         super.setUp();
         _setFulfillerAndZone(buyer, address(immutableSignedZone));
+        sellerWallet = new SellerWallet();
+        nftId = 1;
+        vm.deal(buyer, 10 ether);
     }
 
 
     function testFulfillFullRestrictedOrder() public {
-        SellerWallet sellerWallet = new SellerWallet();
+        _checkFulfill(OrderType.FULL_RESTRICTED);
+    }
 
+    function testFulfillPartialRestrictedOrder() public {
+        _checkFulfill(OrderType.PARTIAL_RESTRICTED);
+    }
+
+ 
+    function testRejectUnsupportedZones() public {
+        // Create order with random zone
+        address randomZone = makeAddr("randomZone");
+        AdvancedOrder memory order = _prepareCheckFulfill(randomZone);
+
+        vm.prank(buyer);
+        vm.expectRevert(abi.encodeWithSelector(ImmutableSeaport.InvalidZone.selector, randomZone));
+        immutableSeaport.fulfillAdvancedOrder{value: 10 ether}(order, new CriteriaResolver[](0), conduitKey, buyer);
+    }
+
+    function testRejectFullOpenOrder() public {
+        AdvancedOrder memory order = _prepareCheckFulfill(OrderType.FULL_OPEN);
+
+        vm.prank(buyer);
+        vm.expectRevert(abi.encodeWithSelector(ImmutableSeaport.OrderNotRestricted.selector));
+        immutableSeaport.fulfillAdvancedOrder{value: 10 ether}(order, new CriteriaResolver[](0), conduitKey, buyer);
+    }
+
+    function testRejectDisabledZone() public {
+        AdvancedOrder memory order = _prepareCheckFulfill();
+
+        vm.prank(owner);
+        immutableSeaport.setAllowedZone(address(immutableSignedZone), false);
+
+        vm.prank(buyer);
+        vm.expectRevert(abi.encodeWithSelector(ImmutableSeaport.InvalidZone.selector, address(immutableSignedZone)));
+        immutableSeaport.fulfillAdvancedOrder{value: 10 ether}(order, new CriteriaResolver[](0), conduitKey, buyer);
+    }
+
+    function testRejectWrongSigner() public {
+        uint256 wrongSigner = 1;
+        AdvancedOrder memory order = _prepareCheckFulfill(wrongSigner);
+
+        // The algorithm inside fulfillAdvancedOrder uses ecRecover to determine the signer. If the 
+        // information going in is wrong, then the wrong signer will be derived.
+        address derivedBadSigner = 0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf;
+
+        vm.prank(buyer);
+        vm.expectRevert(abi.encodeWithSelector(SIP7EventsAndErrors.SignerNotActive.selector, derivedBadSigner));
+        immutableSeaport.fulfillAdvancedOrder{value: 10 ether}(order, new CriteriaResolver[](0), conduitKey, buyer);
+    }
+
+    function testRejectInvalidExtraData() public {
+        AdvancedOrder memory order = _prepareCheckFulfillWithBadExtraData();
+
+        // The algorithm inside fulfillAdvancedOrder uses ecRecover to determine the signer. If the 
+        // information going in is wrong, then the wrong signer will be derived.
+        address derivedBadSigner = 0xcE810B9B83082C93574784f403727369c3FE6955;
+
+        vm.prank(buyer);
+        vm.expectRevert(abi.encodeWithSelector(SIP7EventsAndErrors.SignerNotActive.selector, derivedBadSigner));
+        immutableSeaport.fulfillAdvancedOrder{value: 10 ether}(order, new CriteriaResolver[](0), conduitKey, buyer);
+    }
+
+
+    function _checkFulfill(OrderType _orderType) internal {
+        AdvancedOrder memory order = _prepareCheckFulfill(_orderType);
+
+        // Record balances before
+        uint256 sellerBalanceBefore = address(sellerWallet).balance;
+        uint256 buyerBalanceBefore = address(buyer).balance;
+
+        // Fulfill order
+        vm.prank(buyer);
+        immutableSeaport.fulfillAdvancedOrder{value: 10 ether}(order, new CriteriaResolver[](0), conduitKey, buyer);
+
+        // Verify results
+        assertEq(erc721.ownerOf(nftId), buyer, "Owner of NFT not buyer");
+        assertEq(address(sellerWallet).balance, sellerBalanceBefore + 10 ether, "Seller incorrect final balance");
+        assertEq(address(buyer).balance, buyerBalanceBefore - 10 ether, "Buyer incorrect final balance");
+    }
+
+    function _prepareCheckFulfill() internal returns (AdvancedOrder memory) {
+        return _prepareCheckFulfill(OrderType.PARTIAL_RESTRICTED, address(immutableSignedZone), immutableSignerPkey, false);
+    }
+
+    function _prepareCheckFulfill(OrderType _orderType) internal returns (AdvancedOrder memory) {
+        return _prepareCheckFulfill(_orderType, address(immutableSignedZone), immutableSignerPkey, false);
+    }
+
+
+    function _prepareCheckFulfill(address _zone) internal returns (AdvancedOrder memory) {
+        return _prepareCheckFulfill(OrderType.PARTIAL_RESTRICTED, _zone, immutableSignerPkey, false);
+    }
+
+    function _prepareCheckFulfill(uint256 _signer) internal returns (AdvancedOrder memory) {
+        return _prepareCheckFulfill(OrderType.PARTIAL_RESTRICTED, address(immutableSignedZone), _signer, false);
+    }
+
+    function _prepareCheckFulfillWithBadExtraData() internal returns (AdvancedOrder memory) {
+        return _prepareCheckFulfill(OrderType.PARTIAL_RESTRICTED, address(immutableSignedZone), immutableSignerPkey, true);
+    }
+
+
+    function _prepareCheckFulfill(OrderType _orderType, address _zone, uint256 _signer, bool _useBaseExtraData) internal returns (AdvancedOrder memory) {
         // Deploy test ERC721
-        TestERC721 erc721 = new TestERC721();
-        uint256 nftId = 1;
-        //erc721.mint(seller, nftId);
+        erc721 = new TestERC721();
         erc721.mint(address(sellerWallet), nftId);
         sellerWallet.setApprovalForAll(address(erc721), conduitAddress);
         uint64 expiration = uint64(block.timestamp + 90);
@@ -82,10 +190,10 @@ contract ImmutableSeaportOperationalTest is ImmutableSeaportBaseTest, ImmutableS
         // Create order
         OrderParameters memory orderParams = OrderParameters({
             offerer: address(sellerWallet),
-            zone: address(immutableSignedZone),
+            zone: _zone,
             offer: _createOfferItems(address(erc721), nftId),
             consideration: _createConsiderationItems(address(sellerWallet), 10 ether),
-            orderType: OrderType.FULL_RESTRICTED,
+            orderType: _orderType,
             startTime: 0,
             endTime: expiration,
             zoneHash: bytes32(0),
@@ -109,354 +217,14 @@ contract ImmutableSeaportOperationalTest is ImmutableSeaportBaseTest, ImmutableS
         });
 
         bytes32 orderHash = immutableSeaport.getOrderHash(orderComponents);
-        bytes memory extraData = _generateSip7Signature(orderHash, buyer, immutableSignerPkey, expiration, orderParams.consideration);
+        bytes memory extraData = _generateSip7Signature(orderHash, buyer, _signer, expiration, orderParams.consideration);
+        if (_useBaseExtraData) {
+            orderParams.consideration[0].recipient = payable(buyer);
+            extraData = _generateSip7Signature(orderHash, buyer, _signer, expiration, orderParams.consideration);
+        }
         bytes memory signature = _signOrder(sellerPkey, orderHash);
 
         AdvancedOrder memory order = AdvancedOrder(orderParams, 1, 1, signature, extraData);
-
-        // Record balances before
-        vm.deal(buyer, 10 ether);
-        uint256 sellerBalanceBefore = address(sellerWallet).balance;
-        uint256 buyerBalanceBefore = address(buyer).balance;
-
-        // Fulfill order
-        vm.prank(buyer);
-        immutableSeaport.fulfillAdvancedOrder{value: 10 ether}(order, new CriteriaResolver[](0), conduitKey, buyer);
-
-        // Verify results
-        assertEq(erc721.ownerOf(nftId), buyer, "Owner of NFT not buyer");
-        assertEq(address(sellerWallet).balance, sellerBalanceBefore + 10 ether, "Seller incorrect final balance");
-        assertEq(address(buyer).balance, buyerBalanceBefore - 10 ether, "Buyer incorrect final balance");
+        return order;
     }
-
-    // function testFulfillPartialRestrictedOrder() public {
-    //     // Deploy test ERC721
-    //     TestERC721 erc721 = new TestERC721();
-    //     uint256 nftId = 1;
-    //     erc721.mint(seller, nftId);
-    //     vm.prank(seller);
-    //     erc721.setApprovalForAll(address(immutableSeaport), true);
-
-    //     // Create order
-    //     OrderParameters memory orderParams = OrderParameters({
-    //         offerer: seller,
-    //         zone: address(immutableSignedZone),
-    //         offer: _createOfferItems(address(erc721), nftId),
-    //         consideration: _createConsiderationItems(seller, 10 ether),
-    //         orderType: OrderType.PARTIAL_RESTRICTED,
-    //         startTime: 0,
-    //         endTime: 0,
-    //         zoneHash: bytes32(0),
-    //         salt: 0,
-    //         conduitKey: conduitKey,
-    //         totalOriginalConsiderationItems: 1
-    //     });
-
-    //     OrderComponents memory orderComponents = OrderComponents({
-    //         offerer: orderParams.offerer,
-    //         zone: orderParams.zone,
-    //         offer: orderParams.offer,
-    //         consideration: orderParams.consideration,
-    //         orderType: orderParams.orderType,
-    //         startTime: orderParams.startTime,
-    //         endTime: orderParams.endTime,
-    //         zoneHash: orderParams.zoneHash,
-    //         salt: orderParams.salt,
-    //         conduitKey: orderParams.conduitKey,
-    //         counter: 0
-    //     });
-
-    //     bytes32 orderHash = immutableSeaport.getOrderHash(orderComponents);
-    //     bytes memory extraData = _generateSip7Signature(orderHash, buyer);
-    //     bytes memory signature = _signOrder(sellerPkey, orderHash);
-
-    //     AdvancedOrder memory order = AdvancedOrder(orderParams, 1, 1, signature, extraData);
-    //     // Order memory order = Order(orderParams, signature);
-    //     // order.extraData = extraData;
-
-    //     // Record balances before
-    //     uint256 sellerBalanceBefore = address(seller).balance;
-    //     uint256 buyerBalanceBefore = address(buyer).balance;
-
-    //     // Fulfill order
-    //     vm.deal(buyer, 10 ether);
-    //     vm.prank(buyer);
-    //     immutableSeaport.fulfillAdvancedOrder{value: 10 ether}(order, new CriteriaResolver[](0), conduitKey, buyer);
-
-    //     // Verify results
-    //     assertEq(erc721.ownerOf(nftId), buyer);
-    //     assertEq(address(seller).balance, sellerBalanceBefore + 10 ether);
-    //     assertLt(address(buyer).balance, buyerBalanceBefore - 10 ether);
-    // }
-
-    // function testRejectUnsupportedZones() public {
-    //     // Deploy test ERC721
-    //     TestERC721 erc721 = new TestERC721();
-    //     uint256 nftId = 1;
-    //     erc721.mint(seller, nftId);
-    //     vm.prank(seller);
-    //     erc721.setApprovalForAll(address(immutableSeaport), true);
-
-    //     // Create order with random zone
-    //     address randomZone = makeAddr("randomZone");
-    //     OrderParameters memory orderParams = OrderParameters({
-    //         offerer: seller,
-    //         zone: randomZone,
-    //         offer: _createOfferItems(address(erc721), nftId),
-    //         consideration: _createConsiderationItems(seller, 10 ether),
-    //         orderType: OrderType.FULL_RESTRICTED,
-    //         startTime: 0,
-    //         endTime: 0,
-    //         zoneHash: bytes32(0),
-    //         salt: 0,
-    //         conduitKey: conduitKey,
-    //         totalOriginalConsiderationItems: 1
-    //     });
-
-    //     OrderComponents memory orderComponents = OrderComponents({
-    //         offerer: orderParams.offerer,
-    //         zone: orderParams.zone,
-    //         offer: orderParams.offer,
-    //         consideration: orderParams.consideration,
-    //         orderType: orderParams.orderType,
-    //         startTime: orderParams.startTime,
-    //         endTime: orderParams.endTime,
-    //         zoneHash: orderParams.zoneHash,
-    //         salt: orderParams.salt,
-    //         conduitKey: orderParams.conduitKey,
-    //         counter: 0
-    //     });
-
-    //     bytes32 orderHash = immutableSeaport.getOrderHash(orderComponents);
-    //     bytes memory extraData = _generateSip7Signature(orderHash, buyer);
-    //     bytes memory signature = _signOrder(sellerPkey, orderHash);
-
-    //     AdvancedOrder memory order = AdvancedOrder(orderParams, 1, 1, signature, extraData);
-    //     // Order memory order = Order(orderParams, signature);
-    //     // order.extraData = extraData;
-
-    //     // Try to fulfill order
-    //     vm.deal(buyer, 10 ether);
-    //     vm.prank(buyer);
-    //     vm.expectRevert("InvalidZone");
-    //     immutableSeaport.fulfillAdvancedOrder{value: 10 ether}(order, new CriteriaResolver[](0), conduitKey, buyer);
-    // }
-
-    // function testRejectFullOpenOrder() public {
-    //     // Deploy test ERC721
-    //     TestERC721 erc721 = new TestERC721();
-    //     uint256 nftId = 1;
-    //     erc721.mint(seller, nftId);
-    //     vm.prank(seller);
-    //     erc721.setApprovalForAll(address(immutableSeaport), true);
-
-    //     // Create order
-    //     OrderParameters memory orderParams = OrderParameters({
-    //         offerer: seller,
-    //         zone: address(immutableSignedZone),
-    //         offer: _createOfferItems(address(erc721), nftId),
-    //         consideration: _createConsiderationItems(seller, 10 ether),
-    //         orderType: OrderType.FULL_OPEN,
-    //         startTime: 0,
-    //         endTime: 0,
-    //         zoneHash: bytes32(0),
-    //         salt: 0,
-    //         conduitKey: conduitKey,
-    //         totalOriginalConsiderationItems: 1
-    //     });
-
-    //     OrderComponents memory orderComponents = OrderComponents({
-    //         offerer: orderParams.offerer,
-    //         zone: orderParams.zone,
-    //         offer: orderParams.offer,
-    //         consideration: orderParams.consideration,
-    //         orderType: orderParams.orderType,
-    //         startTime: orderParams.startTime,
-    //         endTime: orderParams.endTime,
-    //         zoneHash: orderParams.zoneHash,
-    //         salt: orderParams.salt,
-    //         conduitKey: orderParams.conduitKey,
-    //         counter: 0
-    //     });
-
-    //     bytes32 orderHash = immutableSeaport.getOrderHash(orderComponents);
-    //     bytes memory extraData = _generateSip7Signature(orderHash, buyer);
-    //     bytes memory signature = _signOrder(sellerPkey, orderHash);
-
-    //     AdvancedOrder memory order = AdvancedOrder(orderParams, 1, 1, signature, extraData);
-    //     // Order memory order = Order(orderParams, signature);
-    //     // order.extraData = extraData;
-
-    //     // Try to fulfill order
-    //     vm.deal(buyer, 10 ether);
-    //     vm.prank(buyer);
-    //     vm.expectRevert("OrderNotRestricted");
-    //     immutableSeaport.fulfillAdvancedOrder{value: 10 ether}(order, new CriteriaResolver[](0), conduitKey, buyer);
-    // }
-
-    // function testRejectDisabledZone() public {
-    //     // Deploy test ERC721
-    //     TestERC721 erc721 = new TestERC721();
-    //     uint256 nftId = 1;
-    //     erc721.mint(seller, nftId);
-    //     vm.prank(seller);
-    //     erc721.setApprovalForAll(address(immutableSeaport), true);
-
-    //     // Disable the zone
-    //     vm.prank(owner);
-    //     immutableSeaport.setAllowedZone(address(immutableSignedZone), false);
-
-    //     // Create order
-    //     OrderParameters memory orderParams = OrderParameters({
-    //         offerer: seller,
-    //         zone: address(immutableSignedZone),
-    //         offer: _createOfferItems(address(erc721), nftId),
-    //         consideration: _createConsiderationItems(seller, 10 ether),
-    //         orderType: OrderType.PARTIAL_RESTRICTED,
-    //         startTime: 0,
-    //         endTime: 0,
-    //         zoneHash: bytes32(0),
-    //         salt: 0,
-    //         conduitKey: conduitKey,
-    //         totalOriginalConsiderationItems: 1
-    //     });
-
-    //     OrderComponents memory orderComponents = OrderComponents({
-    //         offerer: orderParams.offerer,
-    //         zone: orderParams.zone,
-    //         offer: orderParams.offer,
-    //         consideration: orderParams.consideration,
-    //         orderType: orderParams.orderType,
-    //         startTime: orderParams.startTime,
-    //         endTime: orderParams.endTime,
-    //         zoneHash: orderParams.zoneHash,
-    //         salt: orderParams.salt,
-    //         conduitKey: orderParams.conduitKey,
-    //         counter: 0
-    //     });
-
-    //     bytes32 orderHash = immutableSeaport.getOrderHash(orderComponents);
-    //     bytes memory extraData = _generateSip7Signature(orderHash, buyer);
-    //     bytes memory signature = _signOrder(sellerPkey, orderHash);
-
-    //     AdvancedOrder memory order = AdvancedOrder(orderParams, 1, 1, signature, extraData);
-    //     // Order memory order = Order(orderParams, signature);
-    //     // order.extraData = extraData;
-
-    //     // Try to fulfill order
-    //     vm.deal(buyer, 10 ether);
-    //     vm.prank(buyer);
-    //     vm.expectRevert("InvalidZone");
-    //     immutableSeaport.fulfillAdvancedOrder{value: 10 ether}(order, new CriteriaResolver[](0), conduitKey, buyer);
-    // }
-
-    // function testRejectWrongSigner() public {
-    //     // Deploy test ERC721
-    //     TestERC721 erc721 = new TestERC721();
-    //     uint256 nftId = 1;
-    //     erc721.mint(seller, nftId);
-    //     vm.prank(seller);
-    //     erc721.setApprovalForAll(address(immutableSeaport), true);
-
-    //     // Create order
-    //     OrderParameters memory orderParams = OrderParameters({
-    //         offerer: seller,
-    //         zone: address(immutableSignedZone),
-    //         offer: _createOfferItems(address(erc721), nftId),
-    //         consideration: _createConsiderationItems(seller, 10 ether),
-    //         orderType: OrderType.PARTIAL_RESTRICTED,
-    //         startTime: 0,
-    //         endTime: 0,
-    //         zoneHash: bytes32(0),
-    //         salt: 0,
-    //         conduitKey: conduitKey,
-    //         totalOriginalConsiderationItems: 1
-    //     });
-
-    //     OrderComponents memory orderComponents = OrderComponents({
-    //         offerer: orderParams.offerer,
-    //         zone: orderParams.zone,
-    //         offer: orderParams.offer,
-    //         consideration: orderParams.consideration,
-    //         orderType: orderParams.orderType,
-    //         startTime: orderParams.startTime,
-    //         endTime: orderParams.endTime,
-    //         zoneHash: orderParams.zoneHash,
-    //         salt: orderParams.salt,
-    //         conduitKey: orderParams.conduitKey,
-    //         counter: 0
-    //     });
-
-    //     bytes32 orderHash = immutableSeaport.getOrderHash(orderComponents);
-        
-    //     // Sign with wrong signer
-    //     (address wrongSigner, uint256 wrongSignerPkey) = makeAddrAndKey("wrongSigner");
-    //     bytes memory extraData = _generateSip7SignatureWithSigner(orderHash, buyer, wrongSignerPkey);
-    //     bytes memory signature = _signOrder(sellerPkey, orderHash);
-
-    //     AdvancedOrder memory order = AdvancedOrder(orderParams, 1, 1, signature, extraData);
-    //     // Order memory order = Order(orderParams, signature);
-    //     // order.extraData = extraData;
-
-    //     // Try to fulfill order
-    //     vm.deal(buyer, 10 ether);
-    //     vm.prank(buyer);
-    //     vm.expectRevert(abi.encodeWithSelector(SIP7EventsAndErrors.SignerNotActive.selector, wrongSigner));
-    //     immutableSeaport.fulfillAdvancedOrder{value: 10 ether}(order, new CriteriaResolver[](0), conduitKey, buyer);
-    // }
-
-    // function testRejectInvalidExtraData() public {
-    //     // Deploy test ERC721
-    //     TestERC721 erc721 = new TestERC721();
-    //     uint256 nftId = 1;
-    //     erc721.mint(seller, nftId);
-    //     vm.prank(seller);
-    //     erc721.setApprovalForAll(address(immutableSeaport), true);
-
-    //     // Create order
-    //     OrderParameters memory orderParams = OrderParameters({
-    //         offerer: seller,
-    //         zone: address(immutableSignedZone),
-    //         offer: _createOfferItems(address(erc721), nftId),
-    //         consideration: _createConsiderationItems(seller, 10 ether),
-    //         orderType: OrderType.PARTIAL_RESTRICTED,
-    //         startTime: 0,
-    //         endTime: 0,
-    //         zoneHash: bytes32(0),
-    //         salt: 0,
-    //         conduitKey: conduitKey,
-    //         totalOriginalConsiderationItems: 1
-    //     });
-
-    //     OrderComponents memory orderComponents = OrderComponents({
-    //         offerer: orderParams.offerer,
-    //         zone: orderParams.zone,
-    //         offer: orderParams.offer,
-    //         consideration: orderParams.consideration,
-    //         orderType: orderParams.orderType,
-    //         startTime: orderParams.startTime,
-    //         endTime: orderParams.endTime,
-    //         zoneHash: orderParams.zoneHash,
-    //         salt: orderParams.salt,
-    //         conduitKey: orderParams.conduitKey,
-    //         counter: 0
-    //     });
-
-    //     bytes32 orderHash = immutableSeaport.getOrderHash(orderComponents);
-        
-    //     // Generate signature with bad order hash
-    //     bytes memory extraData = _generateSip7Signature(bytes32(0), buyer);
-    //     bytes memory signature = _signOrder(sellerPkey, orderHash);
-
-    //     AdvancedOrder memory order = AdvancedOrder(orderParams, 1, 1, signature, extraData);
-    //     // Order memory order = Order(orderParams, signature);
-    //     // order.extraData = extraData;
-
-    //     // Try to fulfill order
-    //     vm.deal(buyer, 10 ether);
-    //     vm.prank(buyer);
-    //     vm.expectRevert(abi.encodeWithSelector(SIP7EventsAndErrors.SubstandardViolation.selector, 
-    //         3, "invalid consideration hash", orderHash));
-    //     immutableSeaport.fulfillAdvancedOrder{value: 10 ether}(order, new CriteriaResolver[](0), conduitKey, buyer);
-    // }
 } 

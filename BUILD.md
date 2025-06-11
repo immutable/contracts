@@ -15,7 +15,6 @@ To build and test the contracts:
 
 ```
 forge test -vvv
-yarn test
 ```
 
 ## Solidity Linter

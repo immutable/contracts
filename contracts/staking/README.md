@@ -26,11 +26,27 @@ The system consists of a set of contracts show in the diagram below.
 
 ## Immutable Contract Addresses
 
-StakeHolderERC20.sol configured with IMX as the staking token:
+TimelockController.sol:
 
 | Environment/Network      | Deployment Address | Commit Hash |
 |--------------------------|--------------------|-------------|
-| Immutable zkEVM Testnet  | Not deployed yet   |   -|
+| Immutable zkEVM Testnet  | [0x994a66607f947A47F33C2fA80e0470C03C30e289](https://explorer.testnet.immutable.com/address/0x994a66607f947A47F33C2fA80e0470C03C30e289)   | [3c458637](https://github.com/immutable/contracts/blob/3c45863765a2621c8122c2742416a897dd77ca2a/contracts/staking/README.md) |
+| Immutable zkEVM Mainnet  | Not deployed yet   |   -|
+
+
+ERC1967Proxy.sol for the staking implmentation (StakeHolderWIMX.sol):
+
+| Environment/Network      | Deployment Address | Commit Hash |
+|--------------------------|--------------------|-------------|
+| Immutable zkEVM Testnet  | [0xb6c2aa8690c8ab6ac380a0bb798ab0debe5c4c38](https://explorer.testnet.immutable.com/address/0xb6c2aa8690c8ab6ac380a0bb798ab0debe5c4c38)   | [3c458637](https://github.com/immutable/contracts/blob/3c45863765a2621c8122c2742416a897dd77ca2a/contracts/staking/README.md) |
+| Immutable zkEVM Mainnet  | Not deployed yet   |   -|
+
+
+StakeHolderWIMX.sol:
+
+| Environment/Network      | Deployment Address | Commit Hash |
+|--------------------------|--------------------|-------------|
+| Immutable zkEVM Testnet  | [0xfEb60c9309E28D8CfDD00b8796cA87eDa75e1943](https://explorer.testnet.immutable.com/address/0xfEb60c9309E28D8CfDD00b8796cA87eDa75e1943)   | [3c458637](https://github.com/immutable/contracts/blob/3c45863765a2621c8122c2742416a897dd77ca2a/contracts/staking/README.md)|
 | Immutable zkEVM Mainnet  | Not deployed yet   |   -|
 
 # Status
@@ -40,8 +56,9 @@ Contract threat models and audits:
 | Description               | Date             |Version Audited  | Link to Report |
 |---------------------------|------------------|-----------------|----------------|
 | Threat model              | Oct 21, 2024     | [`fd982abc49884af41e05f18349b13edc9eefbc1e`](https://github.com/immutable/contracts/blob/fd982abc49884af41e05f18349b13edc9eefbc1e/contracts/staking/README.md) | [202410-threat-model-stake-holder.md](../../audits/staking/202410-threat-model-stake-holder.md)              |
+| Internal audit            | Feb, 2025        | [`fd982abc49884af41e05f18349b13edc9eefbc1e`](https://github.com/immutable/contracts/blob/fd982abc49884af41e05f18349b13edc9eefbc1e/contracts/staking/README.md) | Not released |
 | Threat model              | April 24, 2025     | [`bf327c7abdadd48fd51ae632500510ac2b07b5f0`](https://github.com/immutable/contracts/blob/bf327c7abdadd48fd51ae632500510ac2b07b5f0/contracts/staking/README.md) | [202504-threat-model-stake-holder.md](../../audits/staking/202504-threat-model-stake-holder.md)              |
-
+| Internal audit            | April, 2025     | [`bf327c7abdadd48fd51ae632500510ac2b07b5f0`](https://github.com/immutable/contracts/blob/bf327c7abdadd48fd51ae632500510ac2b07b5f0/contracts/staking/README.md) | Not released |
 
 
 # Deployment

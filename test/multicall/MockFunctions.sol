@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: Unlicense
-// This file is part of the test code for GuardedMulticaller
+// Copyright Immutable Pty Ltd 2018 - 2024
+// SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
 contract MockFunctions {
@@ -16,7 +16,7 @@ contract MockFunctions {
     }
 
     // solhint-disable-next-line no-empty-blocks
-    function nonPermitted() public pure {
+    function notPermitted() public pure {
         // This function is intentionally left empty to simulate a non-permitted action
     }
 
@@ -28,4 +28,4 @@ contract MockFunctions {
         // solhint-disable-next-line custom-errors,reason-string
         revert RevertWithData(value);
     }
-}
+} 

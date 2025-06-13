@@ -1,13 +1,5 @@
-.github @immutable/assets @immutable/traders @immutable/prodsec
+# Global owner
+@immutable/rollups
 
-/clients @immutable/assets
-/abi @immutable/assets
-
-/contracts/allowlist @immutable/assets
-/contracts/token @immutable/assets
-/contracts/trading @immutable/traders
-
-/test/allowlist @immutable/assets
-/test/royalty-enforcement @immutable/assets
-/test/token @immutable/assets
-/test/seaport @immutable/traders
+# Github actions
+.github @immutable/rollups  @immutable/security

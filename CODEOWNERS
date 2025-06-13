@@ -2,4 +2,4 @@
 @immutable/rollups
 
 # Github actions
-.github @immutable/rollups  @immutable/prodsec
+.github @immutable/rollups  @immutable/security

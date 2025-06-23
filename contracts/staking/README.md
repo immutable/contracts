@@ -1,6 +1,6 @@
 # Staking
 
-The Immutable zkEVM staking system allows any account (EOA or contract) to stake any amount of a token at any time. An account can remove all or some of their stake at any time. The contract has the facility to distribute rewards to stakers.
+The Immutable zkEVM staking system allows any account (EOA or contract) to stake any amount of a token at any time. An account can remove all or some of their stake at any time. The contracts have the facility to distribute rewards to stakers and to stake on behalf of accounts
 
 The staking contracts are upgradeable and operate via a proxy contract. They use the [Universal Upgradeable Proxy Standard (UUPS)](https://eips.ethereum.org/EIPS/eip-1822) upgrade pattern, where the access control for upgrade resides within the application contract (the staking contract). 
 
@@ -23,6 +23,10 @@ The system consists of a set of contracts show in the diagram below.
 `TimelockController.sol` can be used with the staking contracts to provide a one week delay between when upgrade or other admin changes are proposed and when they are executed. See below for information on how to configure the time lock controller.
 
 `OwnableCreate3Deployer.sol` ensures contracts are deployed to the same addresses across chains. The use of this contract is optional. See [deployment scripts](../../script/staking/README.md) for more information.
+
+## Staking System V2
+
+Files, contracts, and interfaced suffixed with `V2` form a part of the version two staking system. Version two introduces the ability for an admin account to stake on behalf of other accounts using the `stakeFor` function.
 
 ## Immutable Contract Addresses
 

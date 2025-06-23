@@ -5,8 +5,7 @@ pragma solidity >=0.8.19 <0.8.29;
 import {IAccessControlEnumerableUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/access/IAccessControlEnumerableUpgradeable.sol";
 
 /**
- * @title StakeHolderBase: allows anyone to stake any amount of an ERC20 token and to then remove all or part of that stake.
- * @dev The StakeHolderERC20 contract is designed to be upgradeable.
+ * @title IStakeHolder: Interface for staking system.
  */
 interface IStakeHolder is IAccessControlEnumerableUpgradeable {
     /// @notice implementation does not accept native tokens.
@@ -39,7 +38,8 @@ interface IStakeHolder is IAccessControlEnumerableUpgradeable {
     /// @notice Event when an amount has been unstaked.
     event StakeRemoved(address _staker, uint256 _amountRemoved, uint256 _newBalance);
 
-    /// @notice Event summarising a distribution. There will also be one StakeAdded event for each recipient.
+    /// @notice Event summarising a distribution. 
+    /// @dev There will also be one StakeAdded event for each recipient.
     event Distributed(address _distributor, uint256 _totalDistribution, uint256 _numRecipients);
 
     /// @notice Struct to combine an account and an amount.
@@ -61,7 +61,9 @@ interface IStakeHolder is IAccessControlEnumerableUpgradeable {
     function unstake(uint256 _amountToUnstake) external;
 
     /**
-     * @notice Accounts with DISTRIBUTE_ROLE can distribute tokens to any set of accounts.
+     * @notice Distribute rewards to stakers.
+     * @dev Only callable by accounts with DISTRIBUTE_ROLE.
+     * @dev Receipients must have staked value prior to this function call.
      * @param _recipientsAndAmounts An array of recipients to distribute value to and
      *          amounts to be distributed to each recipient.
      */

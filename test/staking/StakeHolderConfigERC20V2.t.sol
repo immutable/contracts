@@ -22,22 +22,9 @@ contract StakeHolderConfigERC20TestV2 is StakeHolderConfigBaseTestV2 {
 
     function setUp() public override {
         super.setUp();
-
-        // Deploy V1
-        StakeHolderERC20 impl = new StakeHolderERC20();
-        bytes memory initData = abi.encodeWithSelector(
-            StakeHolderERC20.initialize.selector, roleAdmin, upgradeAdmin, distributeAdmin, address(0)
-        );
-        ERC1967Proxy proxy = new ERC1967Proxy(address(impl), initData);
-        stakeHolder = IStakeHolder(address(proxy));
-
-        // Upgrade to V2
-        StakeHolderERC20V2 implV2 = new StakeHolderERC20V2();
-        bytes memory upgradeData = abi.encodeWithSelector(StakeHolderBaseV2.upgradeStorage.selector, bytes("NotUsed"));
-        vm.prank(upgradeAdmin);
-        StakeHolderERC20V2(address(stakeHolder)).upgradeToAndCall(address(implV2), upgradeData);
-
-        assertEq(stakeHolder.version(), 2, "Wrong version");
+        deployERC20();
+        deployStakeHolderERC20V1();
+        upgradeToStakeHolderERC20V2();
     }
 
     function _deployV1() internal override returns(IStakeHolder) {

@@ -7,7 +7,7 @@ import "forge-std/Test.sol";
 import {StakeHolderBaseTest} from "./StakeHolderBase.t.sol";
 
 abstract contract StakeHolderInitBaseTest is StakeHolderBaseTest {
-    function testGetVersion() public {
+    function testGetVersion() public virtual {
         uint256 ver = stakeHolder.version();
         assertEq(ver, 0, "Expect initial version of storage layout to be V0");
     }

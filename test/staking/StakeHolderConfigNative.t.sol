@@ -21,15 +21,7 @@ contract StakeHolderConfigNativeTest is StakeHolderConfigBaseTest {
 
     function setUp() public override {
         super.setUp();
-
-        StakeHolderNative impl = new StakeHolderNative();
-
-        bytes memory initData = abi.encodeWithSelector(
-            StakeHolderNative.initialize.selector, roleAdmin, upgradeAdmin, distributeAdmin
-        );
-
-        ERC1967Proxy proxy = new ERC1967Proxy(address(impl), initData);
-        stakeHolder = IStakeHolder(address(proxy));
+        deployStakeHolderNativeV1();
     }
 
     function _deployV1() internal override returns(IStakeHolder) {

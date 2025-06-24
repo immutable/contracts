@@ -1,4 +1,4 @@
-// Copyright Immutable Pty Ltd 2018 - 2024
+// Copyright Immutable Pty Ltd 2018 - 2025
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
@@ -12,17 +12,9 @@ import {StakeHolderAttackWallet} from "./StakeHolderAttackWallet.sol";
 
 contract StakeHolderOperationalNativeTest is StakeHolderOperationalBaseTest {
 
-    function setUp() public override {
+    function setUp() public virtual override {
         super.setUp();
-
-        StakeHolderNative impl = new StakeHolderNative();
-
-        bytes memory initData = abi.encodeWithSelector(
-            StakeHolderNative.initialize.selector, roleAdmin, upgradeAdmin, distributeAdmin
-        );
-
-        ERC1967Proxy proxy = new ERC1967Proxy(address(impl), initData);
-        stakeHolder = IStakeHolder(address(proxy));
+        deployStakeHolderNativeV1();
     }
 
     function testUnstakeReentrantAttack() public {

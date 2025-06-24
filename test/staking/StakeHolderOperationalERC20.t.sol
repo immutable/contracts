@@ -1,4 +1,4 @@
-// Copyright Immutable Pty Ltd 2018 - 2024
+// Copyright Immutable Pty Ltd 2018 - 2025
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
@@ -8,25 +8,12 @@ import {StakeHolderERC20} from "../../contracts/staking/StakeHolderERC20.sol";
 import {IStakeHolder} from "../../contracts/staking/IStakeHolder.sol";
 import {StakeHolderOperationalBaseTest} from "./StakeHolderOperationalBase.t.sol";
 import {ERC1967Proxy} from "openzeppelin-contracts-4.9.3/proxy/ERC1967/ERC1967Proxy.sol";
-import {ERC20PresetFixedSupply} from "openzeppelin-contracts-4.9.3/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 
 contract StakeHolderOperationalERC20Test is StakeHolderOperationalBaseTest {
-    ERC20PresetFixedSupply erc20;
-
-
-    function setUp() public override {
+    function setUp() public virtual override {
         super.setUp();
-
-        erc20 = new ERC20PresetFixedSupply("Name", "SYM", 1000 ether, bank);
-
-        StakeHolderERC20 impl = new StakeHolderERC20();
-
-        bytes memory initData = abi.encodeWithSelector(
-            StakeHolderERC20.initialize.selector, roleAdmin, upgradeAdmin, distributeAdmin, address(erc20)
-        );
-
-        ERC1967Proxy proxy = new ERC1967Proxy(address(impl), initData);
-        stakeHolder = IStakeHolder(address(proxy));
+        deployERC20();
+        deployStakeHolderERC20V1();
     }
 
 

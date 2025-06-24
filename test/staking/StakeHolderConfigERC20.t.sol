@@ -8,7 +8,6 @@ import {StakeHolderERC20} from "../../contracts/staking/StakeHolderERC20.sol";
 import {IStakeHolder} from "../../contracts/staking/IStakeHolder.sol";
 import {StakeHolderBase} from "../../contracts/staking/StakeHolderBase.sol";
 import {StakeHolderConfigBaseTest} from "./StakeHolderConfigBase.t.sol";
-import {ERC1967Proxy} from "openzeppelin-contracts-4.9.3/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract StakeHolderERC20V2a is StakeHolderERC20 {
     function upgradeStorage(bytes memory /* _data */) external override(StakeHolderBase) {
@@ -20,15 +19,8 @@ contract StakeHolderConfigERC20Test is StakeHolderConfigBaseTest {
 
     function setUp() public override {
         super.setUp();
-
-        StakeHolderERC20 impl = new StakeHolderERC20();
-
-        bytes memory initData = abi.encodeWithSelector(
-            StakeHolderERC20.initialize.selector, roleAdmin, upgradeAdmin, distributeAdmin, address(0)
-        );
-
-        ERC1967Proxy proxy = new ERC1967Proxy(address(impl), initData);
-        stakeHolder = IStakeHolder(address(proxy));
+        deployERC20();
+        deployStakeHolderERC20V1();
     }
 
     function _deployV1() internal override returns(IStakeHolder) {

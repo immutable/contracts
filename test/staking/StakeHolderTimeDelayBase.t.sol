@@ -38,12 +38,12 @@ abstract contract StakeHolderTimeDelayBaseTest is StakeHolderBaseTest {
         assertEq(stakeHolderTimeDelay.getMinDelay(), delay, "Incorrect time delay");
     }
 
-    function testUpgrade() public {
+    function testUpgradeToV2() public {
         IStakeHolder v2Impl = _deployV2();
 
-        bytes memory initData = abi.encodeWithSelector(StakeHolderBase.upgradeStorage.selector, bytes(""));
+        bytes memory callData = abi.encodeWithSelector(StakeHolderBase.upgradeStorage.selector, bytes(""));
         bytes memory upgradeCall = abi.encodeWithSelector(
-            UUPSUpgradeable.upgradeToAndCall.selector, address(v2Impl), initData);
+            UUPSUpgradeable.upgradeToAndCall.selector, address(v2Impl), callData);
 
         address target = address(stakeHolder);
         uint256 value = 0;
@@ -64,8 +64,40 @@ abstract contract StakeHolderTimeDelayBaseTest is StakeHolderBaseTest {
         stakeHolderTimeDelay.execute(target, value, data, predecessor, salt);
 
         uint256 ver = stakeHolder.version();
-        assertEq(ver, 1, "Upgrade did not upgrade version");
+        assertEq(ver, 2, "Upgrade did not upgrade version 2");
     }
+
+    function testUpgradeToV3() public {
+        testUpgradeToV2();
+
+        IStakeHolder v3Impl = _deployV3();
+
+        bytes memory callData = abi.encodeWithSelector(StakeHolderBase.upgradeStorage.selector, bytes(""));
+        bytes memory upgradeCall = abi.encodeWithSelector(
+            UUPSUpgradeable.upgradeToAndCall.selector, address(v3Impl), callData);
+
+        address target = address(stakeHolder);
+        uint256 value = 0;
+        bytes memory data = upgradeCall;
+        bytes32 predecessor = bytes32(0);
+        bytes32 salt = bytes32(uint256(2));
+        uint256 theDelay = delay;
+
+        uint256 timeNow = block.timestamp;
+
+        vm.prank(adminProposer);
+        stakeHolderTimeDelay.schedule(
+            target, value, data, predecessor, salt, theDelay);
+
+        vm.warp(timeNow + delay);
+
+        vm.prank(adminExecutor);
+        stakeHolderTimeDelay.execute(target, value, data, predecessor, salt);
+
+        uint256 ver = stakeHolder.version();
+        assertEq(ver, 3, "Upgrade did not upgrade version 3");
+    }
+
 
     function testTooShortDelay() public {
         IStakeHolder v2Impl = _deployV2();
@@ -114,8 +146,6 @@ abstract contract StakeHolderTimeDelayBaseTest is StakeHolderBaseTest {
         stakeHolderTimeDelay.execute(target, value, data, predecessor, salt);
     }
 
-
-
-
     function _deployV2() internal virtual returns(IStakeHolder);
+    function _deployV3() internal virtual returns(IStakeHolder);
 }

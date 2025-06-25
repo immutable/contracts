@@ -70,7 +70,7 @@ abstract contract StakeHolderBaseV2 is IStakeHolderV2, StakeHolderBase {
     function stakeFor(
         AccountAmount[] calldata _recipientsAndAmounts
     ) external payable nonReentrant onlyRole(DISTRIBUTE_ROLE) {
-        uint256 total = _distributeRewards(_recipientsAndAmounts, true);
+        uint256 total = _distributeRewards(_recipientsAndAmounts, false);
         uint256 len = _recipientsAndAmounts.length;
         emit StakedFor(msg.sender, total, len);
     }

@@ -27,6 +27,18 @@ contract StakeHolderConfigWIMXTestV2 is StakeHolderConfigBaseTestV2 {
         upgradeToStakeHolderWIMXV2();
     }
 
+    function testDeployStakeHolderWIMXV2() public {
+        // Check that V2 can be installed from scratch: that is, without upgrading form V1.
+        StakeHolderWIMXV2 impl = new StakeHolderWIMXV2();
+        bytes memory initData = abi.encodeWithSelector(
+            StakeHolderWIMXV2.initialize.selector, roleAdmin, upgradeAdmin, distributeAdmin, wimxErc20
+        );
+        ERC1967Proxy proxy = new ERC1967Proxy(address(impl), initData);
+        IStakeHolder stakeHolderV2 = IStakeHolder(address(proxy));
+
+        assertEq(stakeHolderV2.version(), 2, "Incorrect version");
+    }
+
     function _deployV1() internal override returns(IStakeHolder) {
         return IStakeHolder(address(new StakeHolderWIMX()));
     }

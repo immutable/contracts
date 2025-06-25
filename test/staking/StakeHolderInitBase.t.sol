@@ -16,6 +16,10 @@ abstract contract StakeHolderInitBaseTest is StakeHolderBaseTest {
         assertEq(stakeHolder.getNumStakers(), 0, "Expect no stakers at deployment time");
     }
 
+    function testGetToken() public {
+        assertEq(stakeHolder.getToken(), address(erc20), "Incorrect token address returned");
+    }
+
     function testAdmins() public {
         assertEq(stakeHolder.getRoleMemberCount(defaultAdminRole), 1, "Expect one role admin");
         assertEq(stakeHolder.getRoleMemberCount(upgradeRole), 1, "Expect one upgrade admin");

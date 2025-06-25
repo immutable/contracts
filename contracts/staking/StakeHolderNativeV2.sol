@@ -10,9 +10,6 @@ import {IStakeHolder, StakeHolderBase, StakeHolderBaseV2} from "./StakeHolderBas
  * @dev This contract is the same as StakeHolderNative, with the exception that it derives from StakeHolderBaseV2.
 */
 contract StakeHolderNativeV2 is StakeHolderBaseV2 {
-    /// @notice Error: Unstake transfer failed.
-    error UnstakeTransferFailed();
-
     /**
      * @notice Initialises the upgradeable contract, setting up admin accounts.
      * @param _roleAdmin the address to grant `DEFAULT_ADMIN_ROLE` to

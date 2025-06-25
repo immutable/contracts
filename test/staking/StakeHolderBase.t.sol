@@ -61,6 +61,7 @@ abstract contract StakeHolderBaseTest is Test {
 
     function deployWIMX() internal {
         wimxErc20 = new WIMX();
+        erc20 = ERC20PresetFixedSupply(address(wimxErc20));
     }
 
     function deployStakeHolderNativeV1() internal {

@@ -42,6 +42,10 @@ interface IStakeHolder is IAccessControlEnumerableUpgradeable {
     /// @dev There will also be one StakeAdded event for each recipient.
     event Distributed(address _distributor, uint256 _totalDistribution, uint256 _numRecipients);
 
+    /// @notice Error: Unstake native value transfer failed with revert with no revert informaiton.
+    /// @dev An error was detected by the EVM. For example a function call to an address with no contract associated with it.
+    error UnstakeTransferFailed();
+
     /// @notice Struct to combine an account and an amount.
     struct AccountAmount {
         address account;

@@ -9,6 +9,7 @@ import {IStakeHolder} from "../../contracts/staking/IStakeHolder.sol";
 import {StakeHolderOperationalBaseTest} from "./StakeHolderOperationalBase.t.sol";
 import {ERC1967Proxy} from "openzeppelin-contracts-4.9.3/proxy/ERC1967/ERC1967Proxy.sol";
 import {StakeHolderAttackWallet} from "./StakeHolderAttackWallet.sol";
+import {StakeHolderAttackWallet2} from "./StakeHolderAttackWallet2.sol";
 
 contract StakeHolderOperationalNativeTest is StakeHolderOperationalBaseTest {
 
@@ -25,6 +26,16 @@ contract StakeHolderOperationalNativeTest is StakeHolderOperationalBaseTest {
         // Attacker's reentracy attack will double the amount being unstaked.
         // The attack fails due to attempting to withdraw more than balance (that is, 2 x 6 eth = 12)
         vm.expectRevert(abi.encodePacked("ReentrancyGuard: reentrant call"));
+        attacker.unstake{gas: 10000000}(6 ether);
+    }
+
+    function testWillFailToAcceptTransferDuringUnstake() public {
+        StakeHolderAttackWallet2 attacker = new StakeHolderAttackWallet2(address(stakeHolder));
+        _deal(address(attacker), 100 ether);
+
+        attacker.stake(10 ether);
+
+        vm.expectRevert(abi.encodeWithSelector(IStakeHolder.UnstakeTransferFailed.selector));
         attacker.unstake{gas: 10000000}(6 ether);
     }
 

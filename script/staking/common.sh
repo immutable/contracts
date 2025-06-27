@@ -77,6 +77,7 @@ echo " Script to execute: $script"
 # NOTE WELL ---------------------------------------------
 # Add resume option if the script fails part way through:
 #     --resume \
+# To record the transactions but not execute them, remove the --broadcast line.
 # NOTE WELL ---------------------------------------------
 if [ "${HARDWARE_WALLET}" = "ledger" ] || [ "${HARDWARE_WALLET}" = "trezor" ]; then
     forge script --rpc-url $IMMUTABLE_RPC \

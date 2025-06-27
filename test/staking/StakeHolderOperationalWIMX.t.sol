@@ -1,4 +1,4 @@
-// Copyright Immutable Pty Ltd 2018 - 2024
+// Copyright Immutable Pty Ltd 2018 - 2025
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
@@ -9,25 +9,12 @@ import {IStakeHolder} from "../../contracts/staking/IStakeHolder.sol";
 import {WIMX} from "../../contracts/staking/WIMX.sol";
 import {StakeHolderOperationalBaseTest} from "./StakeHolderOperationalBase.t.sol";
 import {ERC1967Proxy} from "openzeppelin-contracts-4.9.3/proxy/ERC1967/ERC1967Proxy.sol";
-import {ERC20PresetFixedSupply} from "openzeppelin-contracts-4.9.3/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 
 contract StakeHolderOperationalWIMXTest is StakeHolderOperationalBaseTest {
-    WIMX erc20;
-
-
-    function setUp() public override {
+    function setUp() public virtual override {
         super.setUp();
-
-        erc20 = new WIMX();
-
-        StakeHolderWIMX impl = new StakeHolderWIMX();
-
-        bytes memory initData = abi.encodeWithSelector(
-            StakeHolderWIMX.initialize.selector, roleAdmin, upgradeAdmin, distributeAdmin, address(erc20)
-        );
-
-        ERC1967Proxy proxy = new ERC1967Proxy(address(impl), initData);
-        stakeHolder = IStakeHolder(address(proxy));
+        deployWIMX();
+        deployStakeHolderWIMXV1();
     }
 
 
@@ -94,6 +81,6 @@ contract StakeHolderOperationalWIMXTest is StakeHolderOperationalBaseTest {
         return _staker.balance;
     }
     function _getBalanceStakeHolderContract() internal view override returns (uint256) {
-        return erc20.balanceOf(address(stakeHolder));
+        return wimxErc20.balanceOf(address(stakeHolder));
     }
 }

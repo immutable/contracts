@@ -1,4 +1,4 @@
-// Copyright Immutable Pty Ltd 2018 - 2024
+// Copyright Immutable Pty Ltd 2018 - 2025
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
@@ -10,17 +10,17 @@ import {StakeHolderBaseTest} from "./StakeHolderBase.t.sol";
 
 
 abstract contract StakeHolderConfigBaseTest is StakeHolderBaseTest {
-    function testUpgradeToV1() public {
+    function testUpgradeToV2() public virtual {
         IStakeHolder v2Impl = _deployV2();
         bytes memory initData = abi.encodeWithSelector(StakeHolderBase.upgradeStorage.selector, bytes(""));
         vm.prank(upgradeAdmin);
         StakeHolderBase(address(stakeHolder)).upgradeToAndCall(address(v2Impl), initData);
 
         uint256 ver = stakeHolder.version();
-        assertEq(ver, 1, "Upgrade did not upgrade version");
+        assertEq(ver, 2, "Upgrade did not upgrade version");
     }
 
-    function testUpgradeToV0() public {
+    function testUpgradeToV1() public virtual {
         IStakeHolder v1Impl = _deployV1();
         bytes memory initData = abi.encodeWithSelector(StakeHolderBase.upgradeStorage.selector, bytes(""));
         vm.expectRevert(abi.encodeWithSelector(IStakeHolder.CanNotUpgradeToLowerOrSameVersion.selector, 0));
@@ -28,8 +28,8 @@ abstract contract StakeHolderConfigBaseTest is StakeHolderBaseTest {
         StakeHolderBase(address(stakeHolder)).upgradeToAndCall(address(v1Impl), initData);
     }
 
-    function testDowngradeV1ToV0() public {
-        // Upgrade from V0 to V1
+    function testDowngradeV2ToV1() public virtual {
+        // Upgrade from V0 to V2
         IStakeHolder v2Impl = _deployV2();
         bytes memory initData = abi.encodeWithSelector(StakeHolderBase.upgradeStorage.selector, bytes(""));
         vm.prank(upgradeAdmin);
@@ -37,7 +37,7 @@ abstract contract StakeHolderConfigBaseTest is StakeHolderBaseTest {
 
         // Attempt to downgrade from V1 to V0.
         IStakeHolder v1Impl = _deployV1();
-        vm.expectRevert(abi.encodeWithSelector(IStakeHolder.CanNotUpgradeToLowerOrSameVersion.selector, 1));
+        vm.expectRevert(abi.encodeWithSelector(IStakeHolder.CanNotUpgradeToLowerOrSameVersion.selector, 2));
         vm.prank(upgradeAdmin);
         StakeHolderBase(address(stakeHolder)).upgradeToAndCall(address(v1Impl), initData);
     }

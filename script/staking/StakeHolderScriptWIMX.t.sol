@@ -6,9 +6,11 @@ import "forge-std/Test.sol";
 import {ERC1967Proxy} from "openzeppelin-contracts-4.9.3/proxy/ERC1967/ERC1967Proxy.sol";
 import {TimelockController} from "openzeppelin-contracts-4.9.3/governance/TimelockController.sol";
 import {IERC20} from "openzeppelin-contracts-4.9.3/token/ERC20/IERC20.sol";
+import {UUPSUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/proxy/utils/UUPSUpgradeable.sol";
 
 import {IStakeHolder} from "../../contracts/staking/IStakeHolder.sol";
-import {StakeHolderWIMX} from "../../contracts/staking/StakeHolderWIMX.sol";
+import {StakeHolderBase} from "../../contracts/staking/StakeHolderBase.sol";
+import {StakeHolderWIMXV2} from "../../contracts/staking/StakeHolderWIMXV2.sol";
 import {WIMX} from "../../contracts/staking/WIMX.sol";
 import {OwnableCreate3Deployer} from "../../contracts/deployer/create3/OwnableCreate3Deployer.sol";
 
@@ -77,7 +79,7 @@ contract StakeHolderScriptWIMX is Test {
     }
 
     /**
-     * Deploy StakeHolderWIMX using Create3, with the TimelockController.
+     * Deploy StakeHolderWIMXV2 using Create3, with the TimelockController.
      */
     function deployComplex() external {
         address signer = vm.envAddress("DEPLOYER_ADDRESS");
@@ -100,7 +102,7 @@ contract StakeHolderScriptWIMX is Test {
     }
 
     /**
-     * Deploy StakeHolderWIMX using an EOA.
+     * Deploy StakeHolderWIMXV2 using an EOA.
      */
     function deploySimple() external {
         address deployer = vm.envAddress("DEPLOYER_ADDRESS");
@@ -132,8 +134,6 @@ contract StakeHolderScriptWIMX is Test {
         _unstake(IStakeHolder(stakeHolder), staker, amount);
     }
 
-
-
     /**
      * Deploy the OwnableCreate3Deployer contract. Set the owner to the
      * contract deployer.
@@ -145,14 +145,14 @@ contract StakeHolderScriptWIMX is Test {
     }
 
     /**
-     * Deploy StakeHolderWIMX using Create3, with the TimelockController.
+     * Deploy StakeHolderWIMXV2 using Create3, with the TimelockController.
      */
     function _deployComplex(
         ComplexDeploymentArgs memory deploymentArgs, 
         ComplexStakeHolderContractArgs memory stakeHolderArgs,
         ComplexTimelockContractArgs memory timelockArgs)
         private
-        returns (StakeHolderWIMX stakeHolderContract, TimelockController timelockController)
+        returns (StakeHolderWIMXV2 stakeHolderContract, TimelockController timelockController)
     {
         IDeployer ownableCreate3 = IDeployer(deploymentArgs.factory);
 
@@ -185,10 +185,10 @@ contract StakeHolderScriptWIMX is Test {
         }
 
 
-        // Deploy StakeHolderWIMX via the Ownable Create3 factory.
+        // Deploy StakeHolderWIMXV2 via the Ownable Create3 factory.
         // Create deployment bytecode and encode constructor args
         deploymentBytecode = abi.encodePacked(
-            type(StakeHolderWIMX).creationCode
+            type(StakeHolderWIMXV2).creationCode
         );
         /// @dev Deploy the contract via the Ownable CREATE3 factory
         vm.startBroadcast(deploymentArgs.signer);
@@ -198,7 +198,7 @@ contract StakeHolderScriptWIMX is Test {
         // Deploy ERC1967Proxy via the Ownable Create3 factory.
         // Create init data for the ERC1967 Proxy
         bytes memory initData = abi.encodeWithSelector(
-            StakeHolderWIMX.initialize.selector, 
+            StakeHolderWIMXV2.initialize.selector, 
             timelockAddress, // roleAdmin
             timelockAddress, // upgradeAdmin
             stakeHolderArgs.distributeAdmin,
@@ -214,34 +214,34 @@ contract StakeHolderScriptWIMX is Test {
         address stakeHolderContractAddress = ownableCreate3.deploy(deploymentBytecode, salt3);
         vm.stopBroadcast();
 
-        stakeHolderContract = StakeHolderWIMX(payable(stakeHolderContractAddress));
+        stakeHolderContract = StakeHolderWIMXV2(payable(stakeHolderContractAddress));
         timelockController = TimelockController(payable(timelockAddress));
     }
 
     /**
-     * Deploy StakeHolderWIMX using an EOA and no time lock.
+     * Deploy StakeHolderWIMXV2 using an EOA and no time lock.
      */
     function _deploySimple(
         SimpleDeploymentArgs memory deploymentArgs, 
         SimpleStakeHolderContractArgs memory stakeHolderArgs)
         private
-        returns (StakeHolderWIMX stakeHolderContract) {
+        returns (StakeHolderWIMXV2 stakeHolderContract) {
 
         bytes memory initData = abi.encodeWithSelector(
-            StakeHolderWIMX.initialize.selector, 
+            StakeHolderWIMXV2.initialize.selector, 
             stakeHolderArgs.roleAdmin,
             stakeHolderArgs.upgradeAdmin,
             stakeHolderArgs.distributeAdmin,
             stakeHolderArgs.token);
 
         vm.startBroadcast(deploymentArgs.deployer);
-        StakeHolderWIMX impl = new StakeHolderWIMX();
+        StakeHolderWIMXV2 impl = new StakeHolderWIMXV2();
         vm.stopBroadcast();
         vm.startBroadcast(deploymentArgs.deployer);
         ERC1967Proxy proxy = new ERC1967Proxy(address(impl), initData);
         vm.stopBroadcast();
 
-        stakeHolderContract = StakeHolderWIMX(payable(address(proxy)));
+        stakeHolderContract = StakeHolderWIMXV2(payable(address(proxy)));
     }
 
     function _stake(IStakeHolder _stakeHolder, address _staker, uint256 _amount) private {
@@ -262,7 +262,6 @@ contract StakeHolderScriptWIMX is Test {
         _stakeHolder.unstake(_amount);
         vm.stopBroadcast();
     }
-
 
     function testComplex() external {
         /// @dev Fork the Immutable zkEVM testnet for this test
@@ -299,7 +298,7 @@ contract StakeHolderScriptWIMX is Test {
             });
 
         // Run deployment against forked testnet
-        StakeHolderWIMX stakeHolder;
+        StakeHolderWIMXV2 stakeHolder;
         TimelockController timelockController;
         (stakeHolder, timelockController) = 
             _deployComplex(deploymentArgs, stakeHolderArgs, timelockArgs);
@@ -340,7 +339,7 @@ contract StakeHolderScriptWIMX is Test {
             });
 
         // Run deployment against forked testnet
-        StakeHolderWIMX stakeHolder = _deploySimple(deploymentArgs, stakeHolderContractArgs);
+        StakeHolderWIMXV2 stakeHolder = _deploySimple(deploymentArgs, stakeHolderContractArgs);
 
         _commonTest(false, IStakeHolder(stakeHolder), address(0), 
            deployer, roleAdmin, upgradeAdmin, distributeAdmin);
@@ -363,7 +362,7 @@ contract StakeHolderScriptWIMX is Test {
 
         // Post deployment checks
         {
-            StakeHolderWIMX temp = new StakeHolderWIMX();
+            StakeHolderWIMXV2 temp = new StakeHolderWIMXV2();
             bytes32 defaultAdminRole = temp.DEFAULT_ADMIN_ROLE();
             assertTrue(_stakeHolder.hasRole(_stakeHolder.UPGRADE_ROLE(), upgradeAdmin), "Upgrade admin should have upgrade role");
             assertTrue(_stakeHolder.hasRole(defaultAdminRole, roleAdmin), "Role admin should have default admin role");
@@ -383,5 +382,143 @@ contract StakeHolderScriptWIMX is Test {
         _unstake(_stakeHolder, user1, 7 ether);
         assertEq(user1.balance, 97 ether, "User1 balance after unstake");
         assertEq(erc20.balanceOf(address(_stakeHolder)), 3 ether, "StakeHolder balance after unstake");
+    }
+
+
+    // *********************** UPGRADE TO V2 ***************************
+
+    string constant MAINNET_RPC_URL = "https://rpc.immutable.com/";
+    address constant STAKE_HOLDER_PROXY = 0xb6c2aA8690C8Ab6AC380a0bb798Ab0debe5C4C38;
+    address constant TIMELOCK_CONTROLLER = 0x994a66607f947A47F33C2fA80e0470C03C30e289;
+    bytes32 constant PROPOSER_ROLE = 0xb09aa5aeb3702cfd50b6b62bc4532604938f21248a27a1d5ca736082b6819cc1;
+    bytes32 constant EXECUTOR_ROLE = 0xd8aa0f3194971a2a116679f7c2090f6939c8d4e01a2a8d7e41d55e5351469e63;
+    
+    // On mainnet Proposer and Execute are a GnosisSafeProxy.
+    address constant PROPOSER = 0xaA53161A1fD22b258c89bA76B4bA11019034612D;
+    address constant EXECUTOR = 0xaA53161A1fD22b258c89bA76B4bA11019034612D;
+    uint256 constant TIMELOCK_DELAY = 604800;
+
+    address constant DEPLOYER_ADDRESS = 0xdDA0d9448Ebe3eA43aFecE5Fa6401F5795c19333;
+    address constant OWNABLE_CREATE3_FACTORY = 0x37a59A845Bb6eD2034098af8738fbFFB9D589610;
+
+    address constant STAKE_HOLDER_V2 = address(0x123);
+
+    TimelockController stakeHolderTimeDelay = TimelockController(payable(TIMELOCK_CONTROLLER));
+
+
+    function deployV2() external {
+        address stakeHolderV2 = _deployV2();
+        console.log("Deployed StakeHolderWIMXV2 to: %s", stakeHolderV2);
+    }
+
+    function proposeUpgradeToV2() external {
+        _proposeUpgradeToV2(STAKE_HOLDER_V2);
+    }
+
+    function executeUpgradeToV2() external {
+        _executeUpgradeToV2(STAKE_HOLDER_V2);
+    }
+
+    function _deployV2() internal returns (address) {
+        bytes32 salt = bytes32(uint256(17));
+
+        IDeployer ownableCreate3 = IDeployer(OWNABLE_CREATE3_FACTORY);
+
+        // Deploy StakeHolderWIMXV2 via the Ownable Create3 factory.
+        // Create deployment bytecode and encode constructor args
+        bytes memory deploymentBytecode = abi.encodePacked(
+            type(StakeHolderWIMXV2).creationCode
+        );
+        /// @dev Deploy the contract via the Ownable CREATE3 factory
+        vm.startBroadcast(DEPLOYER_ADDRESS);
+        address stakeHolderImplAddress = ownableCreate3.deploy(deploymentBytecode, salt);
+        vm.stopBroadcast();
+        return stakeHolderImplAddress;
+    }
+
+    function _proposeUpgradeToV2(address _v2Impl) internal {
+        assertTrue(stakeHolderTimeDelay.hasRole(PROPOSER_ROLE, PROPOSER), "Proposer does not have proposer role");
+        assertTrue(stakeHolderTimeDelay.hasRole(EXECUTOR_ROLE, EXECUTOR), "Executor does not have executor role");
+
+        (address target, uint256 value, bytes memory data, bytes32 predecessor, bytes32 salt) = 
+            _getProposalParams(_v2Impl);
+
+        vm.startBroadcast(PROPOSER);
+        stakeHolderTimeDelay.schedule(target, value, data, predecessor, salt, TIMELOCK_DELAY);
+        vm.stopBroadcast();
+    }
+
+    function _executeUpgradeToV2(address _v2Impl) internal {
+        stakeHolderTimeDelay = TimelockController(payable(TIMELOCK_CONTROLLER));
+        assertTrue(stakeHolderTimeDelay.hasRole(EXECUTOR_ROLE, EXECUTOR), "Executor does not have executor role");
+
+        (address target, uint256 value, bytes memory data, bytes32 predecessor, bytes32 salt) = 
+            _getProposalParams(_v2Impl);
+
+        bytes32 id = stakeHolderTimeDelay.hashOperation(target, value, data, predecessor, salt);
+        assertTrue(stakeHolderTimeDelay.isOperationReady(id), "Operation is not yet ready");
+
+        vm.startBroadcast(EXECUTOR);
+        stakeHolderTimeDelay.execute(target, value, data, predecessor, salt);
+        vm.stopBroadcast();
+
+        IStakeHolder stakeHolder = IStakeHolder(STAKE_HOLDER_PROXY);
+        assertEq(stakeHolder.version(), 2, "Upgrade did not upgrade to version 2");
+    }
+
+    function _getProposalParams(address _v2Impl) private returns (
+        address target, uint256 value, bytes memory data, bytes32 predecessor, bytes32 salt) {
+
+        stakeHolderTimeDelay = TimelockController(payable(TIMELOCK_CONTROLLER));
+        assertNotEq(_v2Impl, address(0), "StakeHolderV2 can not be address(0)");
+
+        bytes memory callData = abi.encodeWithSelector(StakeHolderBase.upgradeStorage.selector, bytes(""));
+        bytes memory upgradeCall = abi.encodeWithSelector(
+            UUPSUpgradeable.upgradeToAndCall.selector, _v2Impl, callData);
+
+        target = STAKE_HOLDER_PROXY;
+        value = 0;
+        data = upgradeCall;
+        predecessor = bytes32(0);
+        salt = bytes32(uint256(1));
+    }
+
+
+    // Test the remainder of the upgrade process.
+    function testRemainderOfUpgradeProcessToV2() public {
+        uint256 mainnetFork = vm.createFork(MAINNET_RPC_URL);
+        vm.selectFork(mainnetFork);
+
+        IStakeHolder stakeHolder = IStakeHolder(STAKE_HOLDER_PROXY);
+        if (stakeHolder.version() != 0) {
+            // Upgrade has occurred. Nothing to test.
+            return;
+        }
+
+        address stakeHolderV2 = STAKE_HOLDER_V2;
+        if (stakeHolderV2 == address(0)) {
+            // StakeHolderWIMXV2 has not been deployed yet.
+            stakeHolderV2 = _deployV2();
+        }
+
+        (address target, uint256 value, bytes memory data, bytes32 predecessor, bytes32 salt) = 
+            _getProposalParams(stakeHolderV2);
+        bytes32 id = stakeHolderTimeDelay.hashOperation(target, value, data, predecessor, salt);
+        if (!stakeHolderTimeDelay.isOperation(id)) {
+            // The upgrade hasn't been proposed yet.
+            _proposeUpgradeToV2(stakeHolderV2);
+        }
+
+        uint256 earliestExecuteTime = stakeHolderTimeDelay.getTimestamp(id);
+        uint256 time = earliestExecuteTime;
+        if (time < block.timestamp) {
+            time = block.timestamp;
+        }
+        vm.warp(time);
+
+        uint256 numStakersBefore = stakeHolder.getNumStakers();
+        _executeUpgradeToV2(stakeHolderV2);
+        uint256 numStakersAfter = stakeHolder.getNumStakers();
+        assertEq(numStakersBefore, numStakersAfter, "Number of stakers before and after upgrade do not match");
     }
 }

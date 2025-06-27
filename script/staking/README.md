@@ -20,17 +20,17 @@ The following variables must be specified for all scripts. They can be supplied 
 
 ## Simple Deployment
 
-To deploy the `StakeHolderERC20.sol` or the `StakeHolderWIMX.sol` contract with a `ERC1967Proxy.sol`, use the `deploySimple.sh` script.
+To deploy the `StakeHolderERC20V2.sol` or the `StakeHolderWIMXV2.sol` contract with a `ERC1967Proxy.sol`, use the `deploySimple.sh` script.
 
 In addition to the common variables described above, the following variables must be specified via the environment or a `.env` file for the `deploySimple.sh` script:
 
-* `DEPLOYER_ADDRESS`: Address that corresponds to the hardware wallet or private key. This account is used to deploy the `StakeHolderERC20` or `StakeHolderWIMX` and the `ERC1967Proxy` contracts.
+* `DEPLOYER_ADDRESS`: Address that corresponds to the hardware wallet or private key. This account is used to deploy the `StakeHolderERC20V2` or `StakeHolderWIMXV2` and the `ERC1967Proxy` contracts.
 * `ROLE_ADMIN`: Account that will be the initial role administrator. Accounts with the role administrator access can manage which accounts have `UPGRADE_ADMIN` and `DISTRIBUTED_ADMIN` access. Specify 0x0000000000000000000000000000000000000000 to have no account with role administrator access.
-* `UPGRADE_ADMIN`: Initial account that will be authorised to upgrade the StakeHolderERC20 contract. Specify 0x0000000000000000000000000000000000000000 to have no account with upgrade administrator access.
+* `UPGRADE_ADMIN`: Initial account that will be authorised to upgrade the StakeHolderERC20V2 contract. Specify 0x0000000000000000000000000000000000000000 to have no account with upgrade administrator access.
 
 ## Complex Deployment
 
-To deploy the `StakeHolderERC20.sol` or the `StakeHolderWIMX.sol` contract with a `ERC1967Proxy.sol` and a `TimelockController` using an `OwnableCreate3Deployer`, use the `deployComplex.sh` script. If you do not have access to an `OwnableCreate3Deployer` contract, use the `deployDeployer.sh` script to deploy this contract first.
+To deploy the `StakeHolderERC20V2.sol` or the `StakeHolderWIMXV2.sol` contract with a `ERC1967Proxy.sol` and a `TimelockController` using an `OwnableCreate3Deployer`, use the `deployComplex.sh` script. If you do not have access to an `OwnableCreate3Deployer` contract, use the `deployDeployer.sh` script to deploy this contract first.
 
 In addition to the common variables described above, the following variables must be specified via the environment or a `.env` file for the `deployDeployer.sh` script:
 
@@ -52,3 +52,12 @@ The `stake.sh` script can be called to stake tokens and the `unstake.sh` script 
 * `STAKE_HOLDER_CONTRACT`: The address of the deployed stake holder contract.
 * `STAKER_ADDRESS`: The address of the staker. The address corresponds to the hardware wallet or the private key. 
 * `STAKER_AMOUNT`: The number of tokens. Note that the number of decimal places must be taken into account. For example, 1 IMX would be 1000000000000000000.
+
+## Upgrading StakeHolderWIMX to StakeHolderWIMXV2 on MainNet
+
+The following scripts are used as part of the process for upgrading the staking contract used on Immutable zkEVM Mainnet.
+
+* `upgradeToWIMXV2_Deploy.sh`: Deploys `StakeHolderWIMXV2` using the `OwnableCreate3Deployer`. No additional environment variables need to be set to run this script.
+* `upgradeToWIMXV2_Propose.sh`: Proposes the upgrade to the TimelockController contract. Once the `StakeHolderWIMXV2` contract has been deployed, update the value of the `STAKE_HOLDER_V2` constant in `StakeHolderScriptWIMX.t.sol` to reflect the deployed address. Temporarily
+update `common.sh`, removing the `--broadcast` line. This will log the calldata, but not execute the transaction. Submit the calldata to Safe wallet. 
+* `upgradeToWIMXV2_Execute.sh`: Executes the upgrade using the TimelockController contract. Once one week has elapsed, the upgrade can be executed. Temporarily update `common.sh`, removing the `--broadcast` line. This will log the calldata, but not execute the transaction. Submit the calldata to Safe wallet. 

@@ -34,6 +34,10 @@ contract StakeHolderWIMXV2 is StakeHolderNativeV2 {
 
     receive() external payable {
         // Receive IMX sent by the WIMX contract when wIMX.withdraw() is called.
+        // Revert if any other account sends IMX to prevent the tokens being stuck in this contract.
+        if (msg.sender != address(wIMX)) {
+            revert ImxNotFromWimxContract(msg.sender);
+        }
     }
 
     /**

@@ -32,6 +32,10 @@ interface IStakeHolder is IAccessControlEnumerableUpgradeable {
     /// @notice Error: Call to stake for implementations that accept value require value and parameter to match.
     error MismatchMsgValueAmount(uint256 _msgValue, uint256 _amount);
 
+    /// @notice Error: Unstake native value transfer failed with revert with no revert information.
+    /// @dev An error was detected by the EVM. For example a function call to an address with no contract associated with it.
+    error UnstakeTransferFailed();
+
     /// @notice Event when an amount has been staked or when an amount is distributed to an account.
     event StakeAdded(address _staker, uint256 _amountAdded, uint256 _newBalance);
 
@@ -41,10 +45,6 @@ interface IStakeHolder is IAccessControlEnumerableUpgradeable {
     /// @notice Event summarising a distribution. 
     /// @dev There will also be one StakeAdded event for each recipient.
     event Distributed(address _distributor, uint256 _totalDistribution, uint256 _numRecipients);
-
-    /// @notice Error: Unstake native value transfer failed with revert with no revert information.
-    /// @dev An error was detected by the EVM. For example a function call to an address with no contract associated with it.
-    error UnstakeTransferFailed();
 
     /// @notice Struct to combine an account and an amount.
     struct AccountAmount {

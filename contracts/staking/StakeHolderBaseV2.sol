@@ -92,8 +92,6 @@ abstract contract StakeHolderBaseV2 is IStakeHolderV2, StakeHolderBase {
         for (uint256 i = 0; i < len; i++) {
             AccountAmount calldata accountAmount = _recipientsAndAmounts[i];
             uint256 amount = accountAmount.amount;
-            // Add stake, but require the account to either currently be staking or have
-            // previously staked.
             _addStake(accountAmount.account, amount, _existingAccountsOnly);
             _total += amount;
         }

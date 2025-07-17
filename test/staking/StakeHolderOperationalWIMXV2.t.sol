@@ -10,12 +10,23 @@ import {IStakeHolderV2} from "../../contracts/staking/IStakeHolderV2.sol";
 import {StakeHolderBaseTest} from "./StakeHolderBase.t.sol";
 import {StakeHolderOperationalBaseTestV2} from "./StakeHolderOperationalBaseV2.t.sol";
 import {StakeHolderOperationalWIMXTest} from "./StakeHolderOperationalWIMX.t.sol";
+import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
 contract StakeHolderOperationalWIMXTestV2 is StakeHolderOperationalWIMXTest, StakeHolderOperationalBaseTestV2 {
     function setUp() public override (StakeHolderOperationalWIMXTest, StakeHolderBaseTest) {
         StakeHolderOperationalWIMXTest.setUp();
         upgradeToStakeHolderWIMXV2();
     }
+
+    function testSendImxNotFromWimxContract() public {
+        uint256 amount = 1 ether;
+        _deal(staker1, amount);
+
+        vm.prank(staker1);
+        vm.expectRevert(abi.encodeWithSelector(IStakeHolderV2.ImxNotFromWimxContract.selector, staker1));
+        Address.sendValue(payable(address(stakeHolder)), amount);
+    }
+
 
     function _stakeFor(address _distributor, uint256 _total, IStakeHolder.AccountAmount[] memory _accountAmounts, 
         bool _hasError, bytes memory _error) internal override {

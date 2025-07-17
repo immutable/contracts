@@ -9,7 +9,6 @@ import {IStakeHolder, StakeHolderBase} from "./StakeHolderBase.sol";
  * @dev The StakeHolder contract is designed to be upgradeable.
  */
 contract StakeHolderNative is StakeHolderBase {
-
     /**
      * @notice Initialises the upgradeable contract, setting up admin accounts.
      * @param _roleAdmin the address to grant `DEFAULT_ADMIN_ROLE` to

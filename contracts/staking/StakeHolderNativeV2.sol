@@ -8,7 +8,7 @@ import {IStakeHolder, StakeHolderBase, StakeHolderBaseV2} from "./StakeHolderBas
  * @title StakeHolderNativeV2: allows anyone to stake any amount of native IMX and to then remove all or part of that stake.
  * @dev The StakeHolder contract is designed to be upgradeable.
  * @dev This contract is the same as StakeHolderNative, with the exception that it derives from StakeHolderBaseV2.
-*/
+ */
 contract StakeHolderNativeV2 is StakeHolderBaseV2 {
     /**
      * @notice Initialises the upgradeable contract, setting up admin accounts.

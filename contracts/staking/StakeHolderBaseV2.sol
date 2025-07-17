@@ -13,7 +13,6 @@ abstract contract StakeHolderBaseV2 is IStakeHolderV2, StakeHolderBase {
     /// @notice Version 2 version number
     uint256 internal constant _VERSION2 = 2;
 
-
     /**
      * @notice Initialises the upgradeable contract, setting up admin accounts.
      * @param _roleAdmin the address to grant `DEFAULT_ADMIN_ROLE` to
@@ -43,11 +42,10 @@ abstract contract StakeHolderBaseV2 is IStakeHolderV2, StakeHolderBase {
      */
     function upgradeStorage(bytes memory /* _data */) external virtual override {
         if (version == _VERSION0) {
-            // Upgrading from version 0 to 2 involves only code changes and 
+            // Upgrading from version 0 to 2 involves only code changes and
             // changing the storage version number.
             version = _VERSION2;
-        }
-        else {
+        } else {
             // Don't allow downgrade or re-initialising.
             revert CanNotUpgradeToLowerOrSameVersion(version);
         }

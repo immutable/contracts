@@ -42,7 +42,7 @@ interface IStakeHolder is IAccessControlEnumerableUpgradeable {
     /// @notice Event when an amount has been unstaked.
     event StakeRemoved(address _staker, uint256 _amountRemoved, uint256 _newBalance);
 
-    /// @notice Event summarising a distribution. 
+    /// @notice Event summarising a distribution.
     /// @dev There will also be one StakeAdded event for each recipient.
     event Distributed(address _distributor, uint256 _totalDistribution, uint256 _numRecipients);
 

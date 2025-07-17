@@ -11,8 +11,7 @@ interface IStakeHolderV2 is IStakeHolder {
     /// @notice Native IMX was received from an account other than the WIMX contract.
     error ImxNotFromWimxContract(address _from);
 
-
-    /// @notice Event summarising a distribution via the stakeFor function. 
+    /// @notice Event summarising a distribution via the stakeFor function.
     /// @dev There will be one StakeAdded event for each recipient.
     event StakedFor(address _distributor, uint256 _totalDistribution, uint256 _numRecipients);
 

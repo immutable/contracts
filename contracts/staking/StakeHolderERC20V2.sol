@@ -10,7 +10,7 @@ import {IStakeHolder, StakeHolderBase, StakeHolderBaseV2} from "./StakeHolderBas
  * @title StakeHolderERC20V2: allows anyone to stake any amount of an ERC20 token and to then remove all or part of that stake.
  * @dev The StakeHolderERC20 contract is designed to be upgradeable.
  * @dev This contract is the same as StakeHolderERC20, with the exception that it derives from StakeHolderBaseV2.
-*/
+ */
 contract StakeHolderERC20V2 is StakeHolderBaseV2 {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 

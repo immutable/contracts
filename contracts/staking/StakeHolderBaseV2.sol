@@ -80,7 +80,7 @@ abstract contract StakeHolderBaseV2 is IStakeHolderV2, StakeHolderBase {
      * @param _recipientsAndAmounts An array of recipients to distribute value to and
      *          amounts to be distributed to each recipient.
      * @param _existingAccountsOnly If true, revert if the account has never been used.
-     * @return _total Value distirbuted.
+     * @return _total Value distributed.
      */
     function _distributeRewards(
         AccountAmount[] calldata _recipientsAndAmounts,

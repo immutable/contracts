@@ -42,7 +42,7 @@ interface IStakeHolder is IAccessControlEnumerableUpgradeable {
     /// @dev There will also be one StakeAdded event for each recipient.
     event Distributed(address _distributor, uint256 _totalDistribution, uint256 _numRecipients);
 
-    /// @notice Error: Unstake native value transfer failed with revert with no revert informaiton.
+    /// @notice Error: Unstake native value transfer failed with revert with no revert information.
     /// @dev An error was detected by the EVM. For example a function call to an address with no contract associated with it.
     error UnstakeTransferFailed();
 
@@ -67,7 +67,7 @@ interface IStakeHolder is IAccessControlEnumerableUpgradeable {
     /**
      * @notice Distribute rewards to stakers.
      * @dev Only callable by accounts with DISTRIBUTE_ROLE.
-     * @dev Receipients must have staked value prior to this function call.
+     * @dev Recipients must have staked value prior to this function call.
      * @param _recipientsAndAmounts An array of recipients to distribute value to and
      *          amounts to be distributed to each recipient.
      */

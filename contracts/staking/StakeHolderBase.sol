@@ -8,8 +8,8 @@ import {ReentrancyGuardUpgradeable} from "openzeppelin-contracts-upgradeable-4.9
 import {IStakeHolder} from "./IStakeHolder.sol";
 
 /**
- * @title StakeHolderBase: allows anyone to stake any amount of an ERC20 token and to then remove all or part of that stake.
- * @dev The StakeHolderERC20 contract is designed to be upgradeable.
+ * @title StakeHolderBase: allows anyone to stake and unstake value.
+ * @dev This contract is designed to be upgradeable.
  */
 abstract contract StakeHolderBase is
     IStakeHolder,
@@ -58,7 +58,7 @@ abstract contract StakeHolderBase is
         address _roleAdmin,
         address _upgradeAdmin,
         address _distributeAdmin
-    ) internal onlyInitializing {
+    ) internal virtual onlyInitializing {
         __UUPSUpgradeable_init();
         __AccessControl_init();
         __ReentrancyGuard_init();
@@ -117,7 +117,7 @@ abstract contract StakeHolderBase is
      */
     function distributeRewards(
         AccountAmount[] calldata _recipientsAndAmounts
-    ) external payable nonReentrant onlyRole(DISTRIBUTE_ROLE) {
+    ) external payable virtual nonReentrant onlyRole(DISTRIBUTE_ROLE) {
         // Distribute the value.
         uint256 total = 0;
         uint256 len = _recipientsAndAmounts.length;

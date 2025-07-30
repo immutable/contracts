@@ -1,4 +1,4 @@
-// Copyright Immutable Pty Ltd 2018 - 2024
+// Copyright Immutable Pty Ltd 2018 - 2025
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
@@ -10,9 +10,9 @@ import {StakeHolderBase} from "../../contracts/staking/StakeHolderBase.sol";
 import {StakeHolderConfigBaseTest} from "./StakeHolderConfigBase.t.sol";
 import {ERC1967Proxy} from "openzeppelin-contracts-4.9.3/proxy/ERC1967/ERC1967Proxy.sol";
 
-contract StakeHolderNativeV2 is StakeHolderNative {
+contract StakeHolderNativeV2a is StakeHolderNative {
     function upgradeStorage(bytes memory /* _data */) external override(StakeHolderBase) {
-        version = 1;
+        version = 2;
     }
 }
 
@@ -21,15 +21,7 @@ contract StakeHolderConfigNativeTest is StakeHolderConfigBaseTest {
 
     function setUp() public override {
         super.setUp();
-
-        StakeHolderNative impl = new StakeHolderNative();
-
-        bytes memory initData = abi.encodeWithSelector(
-            StakeHolderNative.initialize.selector, roleAdmin, upgradeAdmin, distributeAdmin
-        );
-
-        ERC1967Proxy proxy = new ERC1967Proxy(address(impl), initData);
-        stakeHolder = IStakeHolder(address(proxy));
+        deployStakeHolderNativeV1();
     }
 
     function _deployV1() internal override returns(IStakeHolder) {
@@ -37,7 +29,7 @@ contract StakeHolderConfigNativeTest is StakeHolderConfigBaseTest {
     }
 
     function _deployV2() internal override returns(IStakeHolder) {
-        return IStakeHolder(address(new StakeHolderNativeV2()));
+        return IStakeHolder(address(new StakeHolderNativeV2a()));
     }
 
 }

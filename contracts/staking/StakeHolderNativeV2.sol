@@ -2,13 +2,14 @@
 // SPDX-License-Identifier: Apache 2
 pragma solidity >=0.8.19 <0.8.29;
 
-import {IStakeHolder, StakeHolderBase} from "./StakeHolderBase.sol";
+import {IStakeHolder, StakeHolderBase, StakeHolderBaseV2} from "./StakeHolderBaseV2.sol";
 
 /**
- * @title StakeHolder: allows anyone to stake any amount of native IMX and to then remove all or part of that stake.
+ * @title StakeHolderNativeV2: allows anyone to stake any amount of native IMX and to then remove all or part of that stake.
  * @dev The StakeHolder contract is designed to be upgradeable.
+ * @dev This contract is the same as StakeHolderNative, with the exception that it derives from StakeHolderBaseV2.
  */
-contract StakeHolderNative is StakeHolderBase {
+contract StakeHolderNativeV2 is StakeHolderBaseV2 {
     /**
      * @notice Initialises the upgradeable contract, setting up admin accounts.
      * @param _roleAdmin the address to grant `DEFAULT_ADMIN_ROLE` to

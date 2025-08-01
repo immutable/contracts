@@ -8,8 +8,8 @@ seaport/contracts/=lib/immutable-seaport-1.5.0+im1.3/contracts/
 seaport-core/=lib/immutable-seaport-core-1.5.0+im1/
 seaport-types/=lib/immutable-seaport-1.5.0+im1.3/lib/seaport-types/
 @axelar-network/axelar-gmp-sdk-solidity=lib/axelar-gmp-sdk-solidity
-seaport-16/contracts/=lib/immutable-seaport-1.6.0+im3/contracts/
+seaport-16/contracts/=lib/immutable-seaport-1.6.0+im4/contracts/
 seaport-core-16/=lib/immutable-seaport-core-1.6.0+im2/
-seaport-sol-16/=lib/immutable-seaport-1.6.0+im3/lib/seaport-sol/
-seaport-types-16/=lib/immutable-seaport-1.6.0+im3/lib/seaport-types/
+seaport-sol-16/=lib/immutable-seaport-1.6.0+im4/lib/seaport-sol/
+seaport-types-16/=lib/immutable-seaport-1.6.0+im4/lib/seaport-types/
 

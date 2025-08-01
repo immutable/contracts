@@ -29,6 +29,7 @@
 [submodule "lib/immutable-seaport-core-1.6.0+im2"]
 	path = lib/immutable-seaport-core-1.6.0+im2
 	url = https://github.com/immutable/seaport-core
-[submodule "lib/immutable-seaport-1.6.0+im3"]
-	path = lib/immutable-seaport-1.6.0+im3
+
+[submodule "lib/immutable-seaport-1.6.0+im4"]
+	path = lib/immutable-seaport-1.6.0+im4
 	url = https://github.com/immutable/seaport

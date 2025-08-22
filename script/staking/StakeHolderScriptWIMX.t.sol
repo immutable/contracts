@@ -402,7 +402,7 @@ contract StakeHolderScriptWIMX is Test {
     address constant DEPLOYER_ADDRESS = 0xdDA0d9448Ebe3eA43aFecE5Fa6401F5795c19333;
     address constant OWNABLE_CREATE3_FACTORY = 0x37a59A845Bb6eD2034098af8738fbFFB9D589610;
 
-    address constant STAKE_HOLDER_V2 = address(0x0);
+    address constant STAKE_HOLDER_V2 = address(0x2de15ab8337a86787bec585cd9159dfb75aff97f);
 
     TimelockController stakeHolderTimeDelay = TimelockController(payable(TIMELOCK_CONTROLLER));
 

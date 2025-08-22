@@ -7,6 +7,7 @@ import {ERC1967Proxy} from "openzeppelin-contracts-4.9.3/proxy/ERC1967/ERC1967Pr
 import {TimelockController} from "openzeppelin-contracts-4.9.3/governance/TimelockController.sol";
 import {IERC20} from "openzeppelin-contracts-4.9.3/token/ERC20/IERC20.sol";
 import {UUPSUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/proxy/utils/UUPSUpgradeable.sol";
+import {IAccessControlUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/access/IAccessControlUpgradeable.sol";
 
 import {IStakeHolder} from "../../contracts/staking/IStakeHolder.sol";
 import {StakeHolderBase} from "../../contracts/staking/StakeHolderBase.sol";
@@ -521,4 +522,120 @@ contract StakeHolderScriptWIMX is Test {
         uint256 numStakersAfter = stakeHolder.getNumStakers();
         assertEq(numStakersBefore, numStakersAfter, "Number of stakers before and after upgrade do not match");
     }
+
+
+    // *********************** Change Distributor Account ***************************
+    bytes32 private constant DISTRIBUTOR_ROLE = 0x444953545249425554455f524f4c450000000000000000000000000000000000;
+    address private constant OLD_DISTRIBUTOR = 0xdDA0d9448Ebe3eA43aFecE5Fa6401F5795c19333;
+
+    function proposeChangeDistributor() external {
+        address distributeAdmin = vm.envAddress("DISTRIBUTE_ADMIN");
+        _proposeChangeDistributor(distributeAdmin);
+    }
+
+    function executeChangeDistribturo() external {
+        address distributeAdmin = vm.envAddress("DISTRIBUTE_ADMIN");
+        _executeChangeDistributor(distributeAdmin);
+    }
+
+    function _proposeChangeDistributor(address newDistributor) internal {
+        assertTrue(stakeHolderTimeDelay.hasRole(PROPOSER_ROLE, PROPOSER), "Proposer does not have proposer role");
+        assertTrue(stakeHolderTimeDelay.hasRole(EXECUTOR_ROLE, EXECUTOR), "Executor does not have executor role");
+
+        address oldDistributor = OLD_DISTRIBUTOR;
+
+        (address[] memory targets, uint256[] memory values, bytes[] memory data, 
+            bytes32 predecessor, bytes32 salt) = 
+            _getChangeDistributorProposalParams(oldDistributor, newDistributor);
+
+        vm.startBroadcast(PROPOSER);
+        stakeHolderTimeDelay.scheduleBatch(targets, values, data, predecessor, salt, TIMELOCK_DELAY);
+        vm.stopBroadcast();
+    }
+
+    function _executeChangeDistributor(address newDistributor) internal {
+        stakeHolderTimeDelay = TimelockController(payable(TIMELOCK_CONTROLLER));
+        assertTrue(stakeHolderTimeDelay.hasRole(EXECUTOR_ROLE, EXECUTOR), "Executor does not have executor role");
+
+        address oldDistributor = OLD_DISTRIBUTOR;
+
+        (address[] memory targets, uint256[] memory values, bytes[] memory data, 
+            bytes32 predecessor, bytes32 salt) = 
+            _getChangeDistributorProposalParams(oldDistributor, newDistributor);
+
+        bytes32 id = stakeHolderTimeDelay.hashOperationBatch(targets, values, data, predecessor, salt);
+        assertTrue(stakeHolderTimeDelay.isOperationReady(id), "Operation is not yet ready");
+
+        vm.startBroadcast(EXECUTOR);
+        stakeHolderTimeDelay.executeBatch(targets, values, data, predecessor, salt);
+        vm.stopBroadcast();
+    }
+
+    function _getChangeDistributorProposalParams(address _oldAccount, address _newAccount) private returns (
+        address[] memory targets, uint256[] memory values, bytes[] memory data, bytes32 predecessor, bytes32 salt) {
+
+        stakeHolderTimeDelay = TimelockController(payable(TIMELOCK_CONTROLLER));
+
+        bytes memory callData0 = abi.encodeWithSelector(
+            IAccessControlUpgradeable.revokeRole.selector, 
+            DISTRIBUTOR_ROLE,
+            _oldAccount);
+        bytes memory callData1 = abi.encodeWithSelector(
+            IAccessControlUpgradeable.grantRole.selector, 
+            DISTRIBUTOR_ROLE,
+            _newAccount);
+
+        targets = new address[](2);
+        values = new uint256[](2);
+        data = new bytes[](2);
+        targets[0] = STAKE_HOLDER_PROXY;
+        values[0] = 0;
+        data[0] = callData0;
+        targets[1] = STAKE_HOLDER_PROXY;
+        values[1] = 0;
+        data[1] = callData1;
+
+        predecessor = bytes32(0);
+        salt = bytes32(uint256(1));
+    }
+
+
+
+
+    // Test the remainder of the upgrade process.
+    function testRemainderChangeDistributor() public {
+        uint256 mainnetFork = vm.createFork(MAINNET_RPC_URL);
+        vm.selectFork(mainnetFork);
+
+        address oldDistributor = OLD_DISTRIBUTOR;
+        IStakeHolder stakeHolder = IStakeHolder(STAKE_HOLDER_PROXY);
+        if (!stakeHolder.hasRole(DISTRIBUTOR_ROLE, oldDistributor)) {
+            // Change distributor has occurred.
+            return;
+        }
+
+        address newDistributor = 0x8BA97cE2C64E2d1b9826bb6aB5e288524873f63D;
+
+        (address[] memory targets, uint256[] memory values, bytes[] memory data, 
+            bytes32 predecessor, bytes32 salt) = 
+            _getChangeDistributorProposalParams(oldDistributor, newDistributor);
+        bytes32 id = stakeHolderTimeDelay.hashOperationBatch(targets, values, data, predecessor, salt);
+
+        if (!stakeHolderTimeDelay.isOperation(id)) {
+            _proposeChangeDistributor(newDistributor);
+        }
+
+        uint256 earliestExecuteTime = stakeHolderTimeDelay.getTimestamp(id);
+        uint256 time = earliestExecuteTime;
+        if (time < block.timestamp) {
+            time = block.timestamp;
+        }
+        vm.warp(time);
+
+        _executeChangeDistributor(newDistributor);
+
+        require(!stakeHolder.hasRole(DISTRIBUTOR_ROLE, oldDistributor), "Old distributor still has role");
+        require(stakeHolder.hasRole(DISTRIBUTOR_ROLE, newDistributor), "New distributor does not have role");
+    }
+
 }

@@ -33,40 +33,12 @@ interface IDeployer {
         returns (address deployedAddress_);
 }
 
-// Args needed for compex deployment using CREATE3 and a TimelockController
-struct ComplexDeploymentArgs {
-    address signer;
-    address factory;
-    string salt;
-}
-struct ComplexStakeHolderContractArgs {
-    address distributeAdmin;
-    address token;
-}
-struct ComplexTimelockContractArgs {
-    uint256 timeDelayInSeconds;
-    address proposerAdmin;
-    address executorAdmin;
-}
-
-
-// Args needed for simple deployment
-struct SimpleDeploymentArgs {
-    address deployer;
-}
-struct SimpleStakeHolderContractArgs {
-    address roleAdmin;
-    address upgradeAdmin;
-    address distributeAdmin;
-    address token;
-}
-
-
-
 /**
  * @notice Deployment script and test code for the deployment script.
- * @dev testDeploy is the test.
- * @dev deploy() is the function the script should call.
+ * @dev testRemainderOfUpgradeProcessToV2 Tests the upgrade
+ * @dev deployV2() to deploy the V2 contract.
+ * @dev proposeUpgradeToV2() to propose the upgrade.
+ * @dev executeUpgradeToV2deploy() to execute the upgrade.
  * For more details on deployment see ../../contracts/staking/README.md
  */
 contract UpgradeToWIMXV2 is Test {

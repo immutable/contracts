@@ -61,20 +61,21 @@ jobs:
         run: |
           rm -rf dist && yarn build
 
-      # ! Do NOT remove - this will cause a Sev 0 incident !
-      - name: Generate SDK attestation
+      # ! Do NOT remove - this will cause a Sev 0 incident !        
+      - name: Pack NPM package
+        run: |
+          npm pack
+
+      - name: Generate attestation
         uses: actions/attest-build-provenance@v1
         with:
-          subject-path: |
-            dist
-            contracts
-            README.md
-            LICENSE.md
-            package.json
-  
+          subject-path: ./*.tgz
+      # ! ------------------------------------------------- !
+
       - name: Publish package
-        uses: JS-DevTools/npm-publish@v1
+        uses: JS-DevTools/npm-publish@19c28f1ef146469e409470805ea4279d47c3d35c # v3.1.1
         with:
           token: ${{ secrets.CONTRACTS_NPM_TOKEN }}
           access: public
           tag: "latest"
+          provenance: true

@@ -12,10 +12,11 @@ contract StakeHolderAttackWallet2 {
         stakeHolder = StakeHolderNative(_stakeHolder);
     }
     receive() external payable {
-        // Cause a revert that has zero call data length. The easiest way to do this is to 
-        // call a function on an address that doesn't have a contract associated with it.
-        StakeHolderAttackWallet2 notARealContract = StakeHolderAttackWallet2(payable(address(0x12345)));
-        notARealContract.stake(0);
+        // Cause a revert that has zero call data length. 
+        assembly {
+            revert(0, 0)
+        }
+
     }
     function stake(uint256 _amount) external {
         stakeHolder.stake{value: _amount}(_amount);

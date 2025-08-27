@@ -50,7 +50,6 @@ if [ -z "${STAKEHOLDER_TYPE}" ]; then
 fi
 if [ "$STAKEHOLDER_TYPE" = "ANY" ]; then
     # "script" must be specified by the outer script.
-    
 else
     if [ "$STAKEHOLDER_TYPE" = "ERC20" ]; then
         script=script/staking/StakeHolderScriptERC20.t.sol:StakeHolderScriptERC20

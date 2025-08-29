@@ -48,14 +48,19 @@ if [ -z "${STAKEHOLDER_TYPE}" ]; then
     echo "Error: STAKEHOLDER_TYPE variable is not set. Should be ERC20 or WIMX"
     exit 1
 fi
-if [ "$STAKEHOLDER_TYPE" = "ERC20" ]; then
-    script=script/staking/StakeHolderScriptERC20.t.sol:StakeHolderScriptERC20
+if [ "$STAKEHOLDER_TYPE" = "ANY" ]; then
+    # "script" must be specified by the outer script.
+    echo .
 else
-    if [ "$STAKEHOLDER_TYPE" = "WIMX" ]; then
-        script=script/staking/StakeHolderScriptWIMX.t.sol:StakeHolderScriptWIMX
-    else 
-        echo "Error: Unknown STAKEHOLDER_TYPE: " $STAKEHOLDER_TYPE
-        exit 1
+    if [ "$STAKEHOLDER_TYPE" = "ERC20" ]; then
+        script=script/staking/StakeHolderScriptERC20.t.sol:StakeHolderScriptERC20
+    else
+        if [ "$STAKEHOLDER_TYPE" = "WIMX" ]; then
+            script=script/staking/StakeHolderScriptWIMX.t.sol:StakeHolderScriptWIMX
+        else 
+            echo "Error: Unknown STAKEHOLDER_TYPE: " $STAKEHOLDER_TYPE
+            exit 1
+        fi
     fi
 fi
 

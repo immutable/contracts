@@ -8,11 +8,20 @@ import {MockFunctions} from "./MockFunctions.sol";
 import {SigUtils} from "./SigUtils.t.sol";
 
 contract GuardedMulticallerTest is Test {
-    
     GuardedMulticaller public gmc;
     MockFunctions public mock;
     SigUtils public sigUtils;
-    
+
+    event Multicalled(
+        address indexed _multicallSigner,
+        bytes32 indexed _reference,
+        address[] _targets,
+        bytes[] _data,
+        uint256 _deadline
+    );
+
+    event FunctionPermitted(address indexed _target, bytes4 _functionSelector, bool _permitted);
+
     address public deployer;
     address public signer;
     uint256 public signerPk;
@@ -21,22 +30,21 @@ contract GuardedMulticallerTest is Test {
 
     string public constant MULTICALLER_NAME = "Multicaller";
     string public constant MULTICALLER_VERSION = "v1";
-    
+
     bytes32 public ref;
     uint256 public deadline;
-    
+
     function setUp() public {
         deployer = makeAddr("deployer");
         (signer, signerPk) = makeAddrAndKey("signer");
         (user, userPk) = makeAddrAndKey("user");
-        
+
         vm.prank(deployer);
         gmc = new GuardedMulticaller(deployer, MULTICALLER_NAME, MULTICALLER_VERSION);
         vm.prank(deployer);
         gmc.grantMulticallSignerRole(signer);
-        
-        sigUtils = new SigUtils(MULTICALLER_NAME, MULTICALLER_VERSION, address(gmc));
 
+        sigUtils = new SigUtils(MULTICALLER_NAME, MULTICALLER_VERSION, address(gmc));
 
         vm.prank(deployer);
         mock = new MockFunctions();
@@ -55,161 +63,163 @@ contract GuardedMulticallerTest is Test {
         vm.prank(deployer);
         gmc.setFunctionPermits(functionPermits);
 
-        
         deadline = block.timestamp + 30 minutes;
         ref = keccak256(abi.encodePacked("test_ref"));
     }
-    
+
     function test_SuccessfulExecution() public {
         address[] memory targets = new address[](1);
         targets[0] = address(mock);
 
         bytes[] memory data = new bytes[](1);
         data[0] = abi.encodeWithSelector(MockFunctions.succeed.selector);
-        
+
         bytes memory signature = signTypedData(signerPk, ref, targets, data, deadline);
-        
+
         vm.prank(user);
         vm.expectEmit(true, true, true, true);
-        emit GuardedMulticaller.Multicalled(signer, ref, targets, data, deadline);
+        emit Multicalled(signer, ref, targets, data, deadline);
         gmc.execute(signer, ref, targets, data, deadline, signature);
     }
-    
+
     function test_RevertWithCustomError() public {
         address[] memory targets = new address[](1);
         targets[0] = address(mock);
-        
+
         bytes[] memory data = new bytes[](1);
         data[0] = abi.encodeWithSignature("revertWithNoReason()");
-        
+
         bytes memory signature = signTypedData(signerPk, ref, targets, data, deadline);
-        
+
         vm.prank(user);
         vm.expectRevert(abi.encodeWithSelector(GuardedMulticaller.FailedCall.selector, targets[0], data[0]));
         gmc.execute(signer, ref, targets, data, deadline, signature);
     }
-    
+
     function test_RevertIfDeadlinePassed() public {
         address[] memory targets = new address[](1);
         targets[0] = address(mock);
-        
+
         bytes[] memory data = new bytes[](1);
         data[0] = abi.encodeWithSignature("succeed()");
-        
 
         uint256 expiredDeadline = block.timestamp;
         vm.warp(expiredDeadline + 30 minutes);
         bytes memory signature = signTypedData(signerPk, ref, targets, data, expiredDeadline);
-        
+
         vm.prank(user);
         vm.expectRevert(abi.encodeWithSelector(GuardedMulticaller.Expired.selector, expiredDeadline));
         gmc.execute(signer, ref, targets, data, expiredDeadline, signature);
     }
-    
+
     function test_RevertIfReferenceReused() public {
         address[] memory targets = new address[](1);
         targets[0] = address(mock);
-        
+
         bytes[] memory data = new bytes[](1);
         data[0] = abi.encodeWithSignature("succeed()");
-        
+
         bytes memory signature = signTypedData(signerPk, ref, targets, data, deadline);
-        
+
         vm.prank(user);
         gmc.execute(signer, ref, targets, data, deadline, signature);
-        
+
         vm.prank(user);
         vm.expectRevert(abi.encodePacked(GuardedMulticaller.ReusedReference.selector, ref));
         gmc.execute(signer, ref, targets, data, deadline, signature);
     }
-    
+
     function test_RevertIfInvalidReference() public {
         address[] memory targets = new address[](1);
         targets[0] = address(mock);
-        
+
         bytes[] memory data = new bytes[](1);
         data[0] = abi.encodeWithSignature("succeed()");
-        
+
         bytes32 invalidRef = bytes32(0);
         bytes memory signature = signTypedData(signerPk, ref, targets, data, deadline);
-        
+
         vm.prank(user);
         vm.expectRevert(abi.encodeWithSelector(GuardedMulticaller.InvalidReference.selector, invalidRef));
         gmc.execute(signer, invalidRef, targets, data, deadline, signature);
     }
-    
+
     function test_RevertIfUnauthorizedSigner() public {
         address[] memory targets = new address[](1);
         targets[0] = address(mock);
-        
+
         bytes[] memory data = new bytes[](1);
         data[0] = abi.encodeWithSignature("succeed()");
-        
+
         bytes memory signature = signTypedData(signerPk, ref, targets, data, deadline);
-        
+
         vm.prank(user);
         vm.expectRevert(abi.encodeWithSelector(GuardedMulticaller.UnauthorizedSigner.selector, user));
-        // Note: execute called with user as signer. 
+        // Note: execute called with user as signer.
         gmc.execute(user, ref, targets, data, deadline, signature);
     }
-    
+
     function test_RevertIfSignatureMismatch() public {
         address[] memory targets = new address[](1);
         targets[0] = address(mock);
-        
+
         bytes[] memory data = new bytes[](1);
         data[0] = abi.encodeWithSignature("succeed()");
-        
+
         bytes memory signature = signTypedData(userPk, ref, targets, data, deadline);
-        
+
         vm.prank(user);
         vm.expectRevert(abi.encodeWithSelector(GuardedMulticaller.UnauthorizedSignature.selector, signature));
         gmc.execute(signer, ref, targets, data, deadline, signature);
     }
-    
+
     function test_RevertIfEmptyTargets() public {
         address[] memory targets = new address[](0);
         bytes[] memory data = new bytes[](1);
         data[0] = abi.encodeWithSignature("succeed()");
-        
+
         bytes memory signature = signTypedData(signerPk, ref, targets, data, deadline);
-        
+
         vm.prank(user);
         vm.expectRevert(abi.encodeWithSelector(GuardedMulticaller.EmptyAddressArray.selector));
         gmc.execute(signer, ref, targets, data, deadline, signature);
     }
-    
+
     function test_RevertIfTargetsDataMismatch() public {
         address[] memory targets = new address[](2);
         targets[0] = address(mock);
         targets[1] = address(mock);
-        
+
         bytes[] memory data = new bytes[](1);
         data[0] = abi.encodeWithSignature("succeed()");
-        
+
         bytes memory signature = signTypedData(signerPk, ref, targets, data, deadline);
-        
+
         vm.prank(user);
-        vm.expectRevert(abi.encodeWithSelector(
-            GuardedMulticaller.AddressDataArrayLengthsMismatch.selector, 
-            targets.length, data.length));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                GuardedMulticaller.AddressDataArrayLengthsMismatch.selector,
+                targets.length,
+                data.length
+            )
+        );
         gmc.execute(signer, ref, targets, data, deadline, signature);
     }
 
     function test_RevertIfFunctionNotPermitted() public {
         address[] memory targets = new address[](1);
         targets[0] = address(mock);
-        
+
         bytes[] memory data = new bytes[](1);
         data[0] = abi.encodeWithSignature("notPermitted()");
-        
+
         bytes memory signature = signTypedData(signerPk, ref, targets, data, deadline);
-        
+
         vm.prank(user);
         vm.expectRevert(abi.encodeWithSelector(GuardedMulticaller.UnauthorizedFunction.selector, targets[0], data[0]));
         gmc.execute(signer, ref, targets, data, deadline, signature);
     }
-    
+
     function test_RevertIfFunctionDisallowed() public {
         GuardedMulticaller.FunctionPermit[] memory functionPermits = new GuardedMulticaller.FunctionPermit[](1);
         functionPermits[0] = GuardedMulticaller.FunctionPermit({
@@ -219,35 +229,35 @@ contract GuardedMulticallerTest is Test {
         });
         vm.prank(deployer);
         gmc.setFunctionPermits(functionPermits);
-        
+
         address[] memory targets = new address[](1);
         targets[0] = address(mock);
-        
+
         bytes[] memory data = new bytes[](1);
         data[0] = abi.encodeWithSignature("succeed()");
-        
+
         bytes memory signature = signTypedData(signerPk, ref, targets, data, deadline);
-        
+
         vm.prank(user);
         vm.expectRevert(abi.encodeWithSelector(GuardedMulticaller.UnauthorizedFunction.selector, targets[0], data[0]));
         gmc.execute(signer, ref, targets, data, deadline, signature);
     }
-    
+
     function test_RevertIfInvalidSignature() public {
         address[] memory targets = new address[](1);
         targets[0] = address(mock);
-        
+
         bytes[] memory data = new bytes[](1);
         data[0] = abi.encodeWithSignature("succeed()");
-        
+
         bytes32 maliciousRef = keccak256(abi.encodePacked("malicious_ref"));
         bytes memory signature = signTypedData(signerPk, maliciousRef, targets, data, deadline);
-        
+
         vm.prank(user);
         vm.expectRevert(abi.encodeWithSelector(GuardedMulticaller.UnauthorizedSignature.selector, signature));
         gmc.execute(signer, ref, targets, data, deadline, signature);
     }
-    
+
     function test_EmitFunctionPermittedEvent() public {
         vm.startPrank(deployer);
         GuardedMulticaller.FunctionPermit[] memory functionPermits = new GuardedMulticaller.FunctionPermit[](1);
@@ -257,26 +267,18 @@ contract GuardedMulticallerTest is Test {
             permitted: true
         });
         vm.expectEmit(true, true, true, true);
-        emit GuardedMulticaller.FunctionPermitted(
-            address(mock),
-            MockFunctions.succeed.selector,
-            true
-        );
+        emit FunctionPermitted(address(mock), MockFunctions.succeed.selector, true);
         gmc.setFunctionPermits(functionPermits);
-        
+
         functionPermits[0] = GuardedMulticaller.FunctionPermit({
             target: address(mock),
             functionSelector: MockFunctions.succeed.selector,
             permitted: false
         });
         vm.expectEmit(true, true, true, true);
-        emit GuardedMulticaller.FunctionPermitted(
-            address(mock),
-            MockFunctions.succeed.selector,
-            false
-        );
+        emit FunctionPermitted(address(mock), MockFunctions.succeed.selector, false);
         gmc.setFunctionPermits(functionPermits);
-        
+
         vm.stopPrank();
     }
 
@@ -299,7 +301,6 @@ contract GuardedMulticallerTest is Test {
         gmc.setFunctionPermits(functionPermits);
     }
 
-
     function test_RevertIfSetFunctionPermitsNonContract() public {
         GuardedMulticaller.FunctionPermit[] memory functionPermits = new GuardedMulticaller.FunctionPermit[](1);
         functionPermits[0] = GuardedMulticaller.FunctionPermit({
@@ -311,33 +312,33 @@ contract GuardedMulticallerTest is Test {
         vm.expectRevert(abi.encodeWithSelector(GuardedMulticaller.NonContractAddress.selector, deployer));
         gmc.setFunctionPermits(functionPermits);
     }
-    
+
     function test_RevertIfGrantRevokeSignerRoleWithInvalidRole() public {
         vm.startPrank(user);
-        
+
         vm.expectRevert();
         gmc.grantMulticallSignerRole(user);
-        
+
         vm.expectRevert();
         gmc.revokeMulticallSignerRole(user);
-        
+
         vm.stopPrank();
     }
-    
+
     function test_HasBeenExecuted() public {
         address[] memory targets = new address[](1);
         targets[0] = address(mock);
-        
+
         bytes[] memory data = new bytes[](1);
         data[0] = abi.encodeWithSignature("succeed()");
-        
+
         bytes memory signature = signTypedData(signerPk, ref, targets, data, deadline);
-        
+
         vm.prank(user);
         gmc.execute(signer, ref, targets, data, deadline, signature);
-        
+
         assertTrue(gmc.hasBeenExecuted(ref));
-        
+
         bytes32 invalidRef = keccak256(abi.encodePacked("invalid_ref"));
         assertFalse(gmc.hasBeenExecuted(invalidRef));
     }
@@ -366,5 +367,4 @@ contract GuardedMulticallerTest is Test {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(_signerPk, digest);
         return abi.encodePacked(r, s, v);
     }
-
-} 
+}

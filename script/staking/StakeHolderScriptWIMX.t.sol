@@ -97,7 +97,7 @@ contract StakeHolderScriptWIMX is Test {
         ComplexStakeHolderContractArgs memory stakeHolderArgs =
             ComplexStakeHolderContractArgs({distributeAdmin: distributeAdmin, token: token});
 
-        ComplexTimelockContractArgs memory timelockArgs = 
+        ComplexTimelockContractArgs memory timelockArgs =
             ComplexTimelockContractArgs({timeDelayInSeconds: timeDelayInSeconds, proposerAdmin: proposerAdmin, executorAdmin: executorAdmin});
         _deployComplex(deploymentArgs, stakeHolderArgs, timelockArgs);
     }
@@ -116,7 +116,7 @@ contract StakeHolderScriptWIMX is Test {
 
         SimpleStakeHolderContractArgs memory stakeHolderArgs =
             SimpleStakeHolderContractArgs({
-                roleAdmin: roleAdmin, upgradeAdmin: upgradeAdmin, 
+                roleAdmin: roleAdmin, upgradeAdmin: upgradeAdmin,
                 distributeAdmin: distributeAdmin, token: token});
         _deploySimple(deploymentArgs, stakeHolderArgs);
     }
@@ -149,7 +149,7 @@ contract StakeHolderScriptWIMX is Test {
      * Deploy StakeHolderWIMXV2 using Create3, with the TimelockController.
      */
     function _deployComplex(
-        ComplexDeploymentArgs memory deploymentArgs, 
+        ComplexDeploymentArgs memory deploymentArgs,
         ComplexStakeHolderContractArgs memory stakeHolderArgs,
         ComplexTimelockContractArgs memory timelockArgs)
         private
@@ -171,7 +171,7 @@ contract StakeHolderScriptWIMX is Test {
             executors[0] = timelockArgs.executorAdmin;
             // Create deployment bytecode and encode constructor args
             deploymentBytecode = abi.encodePacked(
-                type(TimelockController).creationCode, 
+                type(TimelockController).creationCode,
                 abi.encode(
                     timelockArgs.timeDelayInSeconds,
                     proposers,
@@ -199,7 +199,7 @@ contract StakeHolderScriptWIMX is Test {
         // Deploy ERC1967Proxy via the Ownable Create3 factory.
         // Create init data for the ERC1967 Proxy
         bytes memory initData = abi.encodeWithSelector(
-            StakeHolderWIMXV2.initialize.selector, 
+            StakeHolderWIMXV2.initialize.selector,
             timelockAddress, // roleAdmin
             timelockAddress, // upgradeAdmin
             stakeHolderArgs.distributeAdmin,
@@ -223,13 +223,13 @@ contract StakeHolderScriptWIMX is Test {
      * Deploy StakeHolderWIMXV2 using an EOA and no time lock.
      */
     function _deploySimple(
-        SimpleDeploymentArgs memory deploymentArgs, 
+        SimpleDeploymentArgs memory deploymentArgs,
         SimpleStakeHolderContractArgs memory stakeHolderArgs)
         private
         returns (StakeHolderWIMXV2 stakeHolderContract) {
 
         bytes memory initData = abi.encodeWithSelector(
-            StakeHolderWIMXV2.initialize.selector, 
+            StakeHolderWIMXV2.initialize.selector,
             stakeHolderArgs.roleAdmin,
             stakeHolderArgs.upgradeAdmin,
             stakeHolderArgs.distributeAdmin,
@@ -281,7 +281,7 @@ contract StakeHolderScriptWIMX is Test {
         });
 
         address distributeAdmin = makeAddr("distribute");
-        ComplexStakeHolderContractArgs memory stakeHolderArgs = 
+        ComplexStakeHolderContractArgs memory stakeHolderArgs =
             ComplexStakeHolderContractArgs({
                 distributeAdmin: distributeAdmin,
                 token: address(erc20)
@@ -291,7 +291,7 @@ contract StakeHolderScriptWIMX is Test {
         address proposer = makeAddr("proposer");
         address executor = makeAddr("executor");
 
-        ComplexTimelockContractArgs memory timelockArgs = 
+        ComplexTimelockContractArgs memory timelockArgs =
             ComplexTimelockContractArgs({
                 timeDelayInSeconds: delay,
                 proposerAdmin: proposer,
@@ -301,10 +301,10 @@ contract StakeHolderScriptWIMX is Test {
         // Run deployment against forked testnet
         StakeHolderWIMXV2 stakeHolder;
         TimelockController timelockController;
-        (stakeHolder, timelockController) = 
+        (stakeHolder, timelockController) =
             _deployComplex(deploymentArgs, stakeHolderArgs, timelockArgs);
 
-        _commonTest(true, IStakeHolder(stakeHolder), address(timelockController), 
+        _commonTest(true, IStakeHolder(stakeHolder), address(timelockController),
             immTestNetCreate3, address(0), address(0), distributeAdmin);
 
         assertTrue(timelockController.hasRole(timelockController.PROPOSER_ROLE(), proposer), "Proposer not set correcrly");
@@ -331,7 +331,7 @@ contract StakeHolderScriptWIMX is Test {
         address upgradeAdmin = makeAddr("upgrade");
         address distributeAdmin = makeAddr("distribute");
 
-        SimpleStakeHolderContractArgs memory stakeHolderContractArgs = 
+        SimpleStakeHolderContractArgs memory stakeHolderContractArgs =
             SimpleStakeHolderContractArgs({
                 roleAdmin: roleAdmin,
                 upgradeAdmin: upgradeAdmin,
@@ -342,13 +342,13 @@ contract StakeHolderScriptWIMX is Test {
         // Run deployment against forked testnet
         StakeHolderWIMXV2 stakeHolder = _deploySimple(deploymentArgs, stakeHolderContractArgs);
 
-        _commonTest(false, IStakeHolder(stakeHolder), address(0), 
+        _commonTest(false, IStakeHolder(stakeHolder), address(0),
            deployer, roleAdmin, upgradeAdmin, distributeAdmin);
     }
 
     function _commonTest(
-            bool _isComplex, 
-            IStakeHolder _stakeHolder, 
+            bool _isComplex,
+            IStakeHolder _stakeHolder,
             address _timelockControl,
             address _deployer,
             address _roleAdmin,

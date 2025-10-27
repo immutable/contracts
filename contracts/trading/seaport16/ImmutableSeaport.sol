@@ -19,7 +19,7 @@ import {ImmutableSeaportEvents} from "./interfaces/ImmutableSeaportEvents.sol";
  *         spent (the "offer") along with an arbitrary number of items that must
  *         be received back by the indicated recipients (the "consideration").
  */
-contract ImmutableSeaport16 is Consideration, Ownable, ImmutableSeaportEvents {
+contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
     // Mapping to store valid ImmutableZones - this allows for multiple Zones
     // to be active at the same time, and can be expired or added on demand.
     // solhint-disable-next-line named-parameters-mapping

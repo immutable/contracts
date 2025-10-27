@@ -2,14 +2,14 @@
 // SPDX-License-Identifier: Apache-2
 
 // solhint-disable-next-line compiler-version
-pragma solidity 0.8.20;
+pragma solidity ^0.8.20;
 
 import {AccessControlEnumerable} from "openzeppelin-contracts-5.0.2/access/extensions/AccessControlEnumerable.sol";
 import {ECDSA} from "openzeppelin-contracts-5.0.2/utils/cryptography/ECDSA.sol";
 import {MessageHashUtils} from "openzeppelin-contracts-5.0.2/utils/cryptography/MessageHashUtils.sol";
 import {ERC165} from "openzeppelin-contracts-5.0.2/utils/introspection/ERC165.sol";
 import {Math} from "openzeppelin-contracts-5.0.2/utils/math/Math.sol";
-import {ZoneInterface} from "seaport-16/contracts/interfaces/ZoneInterface.sol";
+import {ZoneInterface} from "seaport-types-16/src/interfaces/ZoneInterface.sol";
 import {ZoneParameters, Schema, ReceivedItem} from "seaport-types-16/src/lib/ConsiderationStructs.sol";
 import {ZoneAccessControl} from "./ZoneAccessControl.sol";
 import {SIP5Interface} from "./interfaces/SIP5Interface.sol";
@@ -49,7 +49,7 @@ contract ImmutableSignedZoneV3 is
         );
 
     /// @dev The EIP-712 domain version value.
-    bytes32 private constant _VERSION_HASH = keccak256(bytes("2.0"));
+    bytes32 private constant _VERSION_HASH = keccak256(bytes("3.0"));
 
     /// @dev The EIP-712 signed order type hash.
     bytes32 private constant _SIGNED_ORDER_TYPEHASH =
@@ -244,19 +244,19 @@ contract ImmutableSignedZoneV3 is
     }
 
     /**
-     * @notice Validates a fulfilment execution.
+     * @notice Check if a given order including extraData is currently valid.
      *
      * @dev This function is called by Seaport whenever any extraData is
      *      provided by the caller.
      *
      * @param zoneParameters        The zone parameters containing data related to
      *                                 the fulfilment execution.
-     * @return validOrderMagicValue A magic value indicating if the order is
-     *                              currently valid.
+     * @return authorizedOrderMagicValue A magic value indicating if the order
+     *                                   is currently valid.
      */
-    function validateOrder(
+    function authorizeOrder(
         ZoneParameters calldata zoneParameters
-    ) external view override returns (bytes4 validOrderMagicValue) {
+    ) external override /* TODO view */ returns (bytes4 authorizedOrderMagicValue) {
         // Put the extraData and orderHash on the stack for cheaper access.
         bytes calldata extraData = zoneParameters.extraData;
         bytes32 orderHash = zoneParameters.orderHash;
@@ -332,6 +332,24 @@ contract ImmutableSignedZoneV3 is
         }
 
         // All validation completes and passes with no reverts, return valid.
+        authorizedOrderMagicValue = ZoneInterface.authorizeOrder.selector;
+    }
+
+    /**
+     * @notice Validates a fulfilment execution.
+     *
+     * @dev This function is called by Seaport whenever any extraData is
+     *      provided by the caller.
+     *
+     * @ param zoneParameters        The zone parameters containing data related to
+     *                                 the fulfilment execution.
+     * @return validOrderMagicValue A magic value indicating if the order is
+     *                              currently valid.
+     */
+    function validateOrder(
+        ZoneParameters calldata /* zoneParameters */
+    ) external pure override returns (bytes4 validOrderMagicValue) {
+        // All validation done in authoriseOrder.
         validOrderMagicValue = ZoneInterface.validateOrder.selector;
     }
 
@@ -411,30 +429,36 @@ contract ImmutableSignedZoneV3 is
      * @param context        Bytes payload of context.
      * @param zoneParameters The zone parameters.
      */
-    function _validateSubstandards(bytes calldata context, ZoneParameters calldata zoneParameters) internal pure {
+    function _validateSubstandards(bytes calldata context, ZoneParameters calldata zoneParameters) internal /* TODO pure */ {
         uint256 startIndex = 0;
         uint256 contextLength = context.length;
 
-        // The ImmutableSignedZoneV2 contract enforces at least
+        // The ImmutableSignedZoneV3 contract enforces at least
         // one of the supported substandards is present in the context.
         if (contextLength == 0) {
             revert InvalidExtraData("invalid context, no substandards present", zoneParameters.orderHash);
         }
+        emit Dump(uint8(context[0]), startIndex, contextLength);
 
         // Each _validateSubstandard* function returns the length of the substandard
         // segment (0 if the substandard was not matched).
         startIndex = _validateSubstandard3(context[startIndex:], zoneParameters) + startIndex;
+        emit Dump(uint8(context[0]), startIndex, contextLength);
 
         if (startIndex == contextLength) return;
         startIndex = _validateSubstandard4(context[startIndex:], zoneParameters) + startIndex;
+        emit Dump(uint8(context[0]), startIndex, contextLength);
 
         if (startIndex == contextLength) return;
         startIndex = _validateSubstandard6(context[startIndex:], zoneParameters) + startIndex;
+        emit Dump(uint8(context[0]), startIndex, contextLength);
 
         if (startIndex != contextLength) {
             revert InvalidExtraData("invalid context, unexpected context length", zoneParameters.orderHash);
         }
     }
+
+    event Dump(uint8, uint256, uint256);
 
     /**
      * @dev Validates substandard 3. This substandard is used to validate that the server's
@@ -451,7 +475,7 @@ contract ImmutableSignedZoneV3 is
     function _validateSubstandard3(
         bytes calldata context,
         ZoneParameters calldata zoneParameters
-    ) internal pure returns (uint256) {
+    ) internal /* TODO pure */ returns (uint256) {
         if (uint8(context[0]) != 3) {
             return 0;
         }
@@ -461,11 +485,15 @@ contract ImmutableSignedZoneV3 is
         }
 
         if (_deriveReceivedItemsHash(zoneParameters.consideration, 1, 1) != bytes32(context[1:33])) {
+            emit Dump3(_deriveReceivedItemsHash(zoneParameters.consideration, 1, 1), bytes32(context[1:33]));
             revert Substandard3Violation(zoneParameters.orderHash);
         }
 
         return 33;
     }
+
+event Dump2(uint256, uint256, uint256);
+event Dump3(bytes32, bytes32);
 
     /**
      * @dev Validates substandard 4. This substandard is used to validate that the server's
@@ -480,7 +508,7 @@ contract ImmutableSignedZoneV3 is
     function _validateSubstandard4(
         bytes calldata context,
         ZoneParameters calldata zoneParameters
-    ) internal pure returns (uint256) {
+    ) internal /*TODO pure */ returns (uint256) {
         if (uint8(context[0]) != 4) {
             return 0;
         }
@@ -491,8 +519,11 @@ contract ImmutableSignedZoneV3 is
         }
 
         uint256 expectedOrderHashesSize = uint256(bytes32(context[33:65]));
-        uint256 substandardIndexEnd = 64 + (expectedOrderHashesSize * 32);
-        bytes32[] memory expectedOrderHashes = abi.decode(context[1:substandardIndexEnd + 1], (bytes32[]));
+        uint256 substandardIndexEnd = 65 + (expectedOrderHashesSize * 32);
+
+        emit Dump2(expectedOrderHashesSize, substandardIndexEnd, 0);
+        bytes32[] memory expectedOrderHashes = abi.decode(context[1:substandardIndexEnd], (bytes32[]));
+        emit Dump2(expectedOrderHashes.length, zoneParameters.orderHashes.length, 0);
 
         // revert if any order hashes in substandard data are not present in zoneParameters.orderHashes.
         if (!_bytes32ArrayIncludes(zoneParameters.orderHashes, expectedOrderHashes)) {

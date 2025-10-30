@@ -683,30 +683,39 @@ contract ImmutableSignedZoneV3Test is
     /* _domainSeparator */
 
     function test_domainSeparator_returnsCachedDomainSeparatorWhenChainIDMatchesValueSetOnDeployment() public {
+        address deployer = makeAddr("deployer");
+        vm.startPrank(deployer);
         ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
+        vm.stopPrank();
 
         bytes32 domainSeparator = zone.exposed_domainSeparator();
-        assertEq(domainSeparator, bytes32(0xafb48e1c246f21ba06352cb2c0ebe99b8adc2590dfc48fa547732df870835b42));
+        assertEq(domainSeparator, bytes32(0x7946de4e45fec74bd718eeaf23c0d6e9ee4a66d31dcaa416695b27a794624c58));
     }
 
     function test_domainSeparator_returnsUpdatedDomainSeparatorIfChainIDIsDifferentFromValueSetOnDeployment() public {
+        address deployer = makeAddr("deployer");
+        vm.startPrank(deployer);
         ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
+        vm.stopPrank();
 
         bytes32 domainSeparatorCached = zone.exposed_domainSeparator();
         vm.chainId(31338);
         bytes32 domainSeparatorDerived = zone.exposed_domainSeparator();
 
         assertNotEq(domainSeparatorCached, domainSeparatorDerived);
-        assertEq(domainSeparatorDerived, bytes32(0x835aabb0d2af048df195a75a990b42533471d4a4e82842cd54a892eaac463d74));
+        assertEq(domainSeparatorDerived, bytes32(0xf0f125b29a5274c4bcd4a916a5363c1c79472ac09bca6f09dbb97a23a3e6bc8f));
     }
 
     /* _deriveDomainSeparator */
 
     function test_deriveDomainSeparator_returnsDomainSeparatorForChainID() public {
+        address deployer = makeAddr("deployer");
+        vm.startPrank(deployer);
         ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
+        vm.stopPrank();
 
         bytes32 domainSeparator = zone.exposed_deriveDomainSeparator();
-        assertEq(domainSeparator, bytes32(0xafb48e1c246f21ba06352cb2c0ebe99b8adc2590dfc48fa547732df870835b42));
+        assertEq(domainSeparator, bytes32(0x7946de4e45fec74bd718eeaf23c0d6e9ee4a66d31dcaa416695b27a794624c58));
     }
 
     /* _getSupportedSubstandards */

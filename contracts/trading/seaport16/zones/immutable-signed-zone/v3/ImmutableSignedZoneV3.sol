@@ -19,7 +19,7 @@ import {SIP7Interface} from "./interfaces/SIP7Interface.sol";
 /**
  * @title  ImmutableSignedZoneV3
  * @author Immutable
- * @notice ImmutableSignedZone3 is a zone implementation based on the
+ * @notice ImmutableSignedZoneV3 is a zone implementation based on the
  *         SIP-7 standard https://github.com/ProjectOpenSea/SIPs/blob/main/SIPS/sip-7.md
  *         implementing substandards 3, 4 and 6.
  *

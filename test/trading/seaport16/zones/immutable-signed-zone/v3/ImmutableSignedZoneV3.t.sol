@@ -677,7 +677,7 @@ contract ImmutableSignedZoneV3Test is
         assertTrue(zone.supportsInterface(0x01ffc9a7)); // ERC165 interface
         assertFalse(zone.supportsInterface(0xffffffff)); // ERC165 compliance
         assertTrue(zone.supportsInterface(0x2e778efc)); // SIP-5 interface
-        assertTrue(zone.supportsInterface(0x3839be19)); // SIP-5 compliance - ZoneInterface
+        assertTrue(zone.supportsInterface(0x39dd6933)); // SIP-5 compliance - ZoneInterface
     }
 
     /* _domainSeparator */

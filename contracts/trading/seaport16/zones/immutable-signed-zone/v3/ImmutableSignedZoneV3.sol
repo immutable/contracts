@@ -19,7 +19,7 @@ import {SIP7Interface} from "./interfaces/SIP7Interface.sol";
 /**
  * @title  ImmutableSignedZoneV3
  * @author Immutable
- * @notice ImmutableSignedZone32 is a zone implementation based on the
+ * @notice ImmutableSignedZone3 is a zone implementation based on the
  *         SIP-7 standard https://github.com/ProjectOpenSea/SIPs/blob/main/SIPS/sip-7.md
  *         implementing substandards 3, 4 and 6.
  *
@@ -256,7 +256,7 @@ contract ImmutableSignedZoneV3 is
      */
     function authorizeOrder(
         ZoneParameters calldata zoneParameters
-    ) external override /* TODO view */ returns (bytes4 authorizedOrderMagicValue) {
+    ) external override returns (bytes4 authorizedOrderMagicValue) {
         // Put the extraData and orderHash on the stack for cheaper access.
         bytes calldata extraData = zoneParameters.extraData;
         bytes32 orderHash = zoneParameters.orderHash;
@@ -341,8 +341,8 @@ contract ImmutableSignedZoneV3 is
      * @dev This function is called by Seaport whenever any extraData is
      *      provided by the caller.
      *
-     * @ param zoneParameters        The zone parameters containing data related to
-     *                                 the fulfilment execution.
+     * @param zoneParameters        The zone parameters containing data related to
+     *                              the fulfilment execution.
      * @return validOrderMagicValue A magic value indicating if the order is
      *                              currently valid.
      */
@@ -429,7 +429,7 @@ contract ImmutableSignedZoneV3 is
      * @param context        Bytes payload of context.
      * @param zoneParameters The zone parameters.
      */
-    function _validateSubstandards(bytes calldata context, ZoneParameters calldata zoneParameters) internal /* TODO pure */ {
+    function _validateSubstandards(bytes calldata context, ZoneParameters calldata zoneParameters) internal pure {
         uint256 startIndex = 0;
         uint256 contextLength = context.length;
 
@@ -438,27 +438,21 @@ contract ImmutableSignedZoneV3 is
         if (contextLength == 0) {
             revert InvalidExtraData("invalid context, no substandards present", zoneParameters.orderHash);
         }
-        emit Dump(uint8(context[0]), startIndex, contextLength);
 
         // Each _validateSubstandard* function returns the length of the substandard
         // segment (0 if the substandard was not matched).
         startIndex = _validateSubstandard3(context[startIndex:], zoneParameters) + startIndex;
-        emit Dump(uint8(context[0]), startIndex, contextLength);
 
         if (startIndex == contextLength) return;
         startIndex = _validateSubstandard4(context[startIndex:], zoneParameters) + startIndex;
-        emit Dump(uint8(context[0]), startIndex, contextLength);
 
         if (startIndex == contextLength) return;
         startIndex = _validateSubstandard6(context[startIndex:], zoneParameters) + startIndex;
-        emit Dump(uint8(context[0]), startIndex, contextLength);
 
         if (startIndex != contextLength) {
             revert InvalidExtraData("invalid context, unexpected context length", zoneParameters.orderHash);
         }
     }
-
-    event Dump(uint8, uint256, uint256);
 
     /**
      * @dev Validates substandard 3. This substandard is used to validate that the server's
@@ -475,7 +469,7 @@ contract ImmutableSignedZoneV3 is
     function _validateSubstandard3(
         bytes calldata context,
         ZoneParameters calldata zoneParameters
-    ) internal /* TODO pure */ returns (uint256) {
+    ) internal pure returns (uint256) {
         if (uint8(context[0]) != 3) {
             return 0;
         }
@@ -485,15 +479,11 @@ contract ImmutableSignedZoneV3 is
         }
 
         if (_deriveReceivedItemsHash(zoneParameters.consideration, 1, 1) != bytes32(context[1:33])) {
-            emit Dump3(_deriveReceivedItemsHash(zoneParameters.consideration, 1, 1), bytes32(context[1:33]));
             revert Substandard3Violation(zoneParameters.orderHash);
         }
 
         return 33;
     }
-
-event Dump2(uint256, uint256, uint256);
-event Dump3(bytes32, bytes32);
 
     /**
      * @dev Validates substandard 4. This substandard is used to validate that the server's
@@ -508,7 +498,7 @@ event Dump3(bytes32, bytes32);
     function _validateSubstandard4(
         bytes calldata context,
         ZoneParameters calldata zoneParameters
-    ) internal /*TODO pure */ returns (uint256) {
+    ) internal pure returns (uint256) {
         if (uint8(context[0]) != 4) {
             return 0;
         }
@@ -520,10 +510,7 @@ event Dump3(bytes32, bytes32);
 
         uint256 expectedOrderHashesSize = uint256(bytes32(context[33:65]));
         uint256 substandardIndexEnd = 65 + (expectedOrderHashesSize * 32);
-
-        emit Dump2(expectedOrderHashesSize, substandardIndexEnd, 0);
         bytes32[] memory expectedOrderHashes = abi.decode(context[1:substandardIndexEnd], (bytes32[]));
-        emit Dump2(expectedOrderHashes.length, zoneParameters.orderHashes.length, 0);
 
         // revert if any order hashes in substandard data are not present in zoneParameters.orderHashes.
         if (!_bytes32ArrayIncludes(zoneParameters.orderHashes, expectedOrderHashes)) {

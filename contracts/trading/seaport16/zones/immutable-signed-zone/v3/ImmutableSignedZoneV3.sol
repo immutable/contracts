@@ -247,10 +247,12 @@ contract ImmutableSignedZoneV3 is
      * @notice Check if a given order including extraData is currently valid.
      *
      * @dev This function is called by Seaport whenever any extraData is
-     *      provided by the caller.
+     *      provided by the caller, before tokens have been transferred. Note
+     *      that this function does not validate the SIP-7 substandards. Validation
+     *      of the SIP-7 substandards is performed in the validateOrder function.
      *
-     * @param zoneParameters        The zone parameters containing data related to
-     *                                 the fulfilment execution.
+     * @param zoneParameters             The zone parameters containing data related to
+     *                                   the fulfilment execution.
      * @return authorizedOrderMagicValue A magic value indicating if the order
      *                                   is currently valid.
      */
@@ -311,9 +313,6 @@ contract ImmutableSignedZoneV3 is
             revert InvalidFulfiller(expectedFulfiller, actualFulfiller, orderHash);
         }
 
-        // Validate supported substandards.
-        _validateSubstandards(context, zoneParameters);
-
         // Derive the signedOrder hash.
         bytes32 signedOrderHash = _deriveSignedOrderHash(expectedFulfiller, expiration, orderHash, context);
 
@@ -331,7 +330,7 @@ contract ImmutableSignedZoneV3 is
             revert SignerNotActive(recoveredSigner);
         }
 
-        // All validation completes and passes with no reverts, return valid.
+        // Pre hook validation completes and passes with no reverts, return valid.
         authorizedOrderMagicValue = ZoneInterface.authorizeOrder.selector;
     }
 
@@ -339,7 +338,10 @@ contract ImmutableSignedZoneV3 is
      * @notice Validates a fulfilment execution.
      *
      * @dev This function is called by Seaport whenever any extraData is
-     *      provided by the caller.
+     *      provided by the caller, after tokens have been transferred.
+     *      Note that this function only validates the SIP-7 substandards as
+     *      the final value of ZoneParameters.orderHashes is not known in the
+     *      authorizeOrder function.
      *
      * @param zoneParameters        The zone parameters containing data related to
      *                              the fulfilment execution.
@@ -347,9 +349,18 @@ contract ImmutableSignedZoneV3 is
      *                              currently valid.
      */
     function validateOrder(
-        ZoneParameters calldata /* zoneParameters */
+        ZoneParameters calldata zoneParameters
     ) external pure override returns (bytes4 validOrderMagicValue) {
-        // All validation done in authoriseOrder.
+        // Put the extraData and orderHash on the stack for cheaper access.
+        bytes calldata extraData = zoneParameters.extraData;
+
+        // extraData bytes 93-end: context (optional, variable length).
+        bytes calldata context = extraData[93:];
+
+        // Validate supported substandards.
+        _validateSubstandards(context, zoneParameters);
+
+        // Pre hook validation completes and passes with no reverts, return valid.
         validOrderMagicValue = ZoneInterface.validateOrder.selector;
     }
 
@@ -509,8 +520,8 @@ contract ImmutableSignedZoneV3 is
         }
 
         uint256 expectedOrderHashesSize = uint256(bytes32(context[33:65]));
-        uint256 substandardIndexEnd = 65 + (expectedOrderHashesSize * 32);
-        bytes32[] memory expectedOrderHashes = abi.decode(context[1:substandardIndexEnd], (bytes32[]));
+        uint256 substandardIndexEnd = 64 + (expectedOrderHashesSize * 32);
+        bytes32[] memory expectedOrderHashes = abi.decode(context[1:substandardIndexEnd + 1], (bytes32[]));
 
         // revert if any order hashes in substandard data are not present in zoneParameters.orderHashes.
         if (!_bytes32ArrayIncludes(zoneParameters.orderHashes, expectedOrderHashes)) {

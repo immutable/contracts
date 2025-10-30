@@ -389,7 +389,7 @@ contract ImmutableSignedZoneV3Test is
 
     /* validateOrder */
 
-    function test_validateOrder_revertsIfEmptyExtraData() public {
+    function test_authorizeOrder_revertsIfEmptyExtraData() public {
         ImmutableSignedZoneV3 zone = _newZone(OWNER);
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
@@ -409,7 +409,7 @@ contract ImmutableSignedZoneV3Test is
         zone.authorizeOrder(zoneParameters);
     }
 
-    function test_validateOrder_revertsIfExtraDataLengthIsLessThan93() public {
+    function test_authorizeOrder_revertsIfExtraDataLengthIsLessThan93() public {
         ImmutableSignedZoneV3 zone = _newZone(OWNER);
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
@@ -431,7 +431,7 @@ contract ImmutableSignedZoneV3Test is
         zone.authorizeOrder(zoneParameters);
     }
 
-    function test_validateOrder_revertsIfExtraDataVersionIsNotSupported() public {
+    function test_authorizeOrder_revertsIfExtraDataVersionIsNotSupported() public {
         ImmutableSignedZoneV3 zone = _newZone(OWNER);
         ZoneParameters memory zoneParameters = ZoneParameters({
             orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
@@ -451,7 +451,7 @@ contract ImmutableSignedZoneV3Test is
         zone.authorizeOrder(zoneParameters);
     }
 
-    function test_validateOrder_revertsIfSignatureHasExpired() public {
+    function test_authorizeOrder_revertsIfSignatureHasExpired() public {
         ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
         bytes32 orderHash = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
         uint64 expiration = 100;
@@ -484,7 +484,7 @@ contract ImmutableSignedZoneV3Test is
         zone.authorizeOrder(zoneParameters);
     }
 
-    function test_validateOrder_revertsIfActualFulfillerDoesNotMatchExpectedFulfiller() public {
+    function test_authorizeOrder_revertsIfActualFulfillerDoesNotMatchExpectedFulfiller() public {
         ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
         address randomFulfiller = makeAddr("random");
         bytes32 orderHash = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
@@ -513,10 +513,10 @@ contract ImmutableSignedZoneV3Test is
                 bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9)
             )
         );
-        zone.validateOrder(zoneParameters);
+        zone.authorizeOrder(zoneParameters);
     }
 
-    function test_validateOrder_revertsIfSignerIsNotActive() public {
+    function test_authorizeOrder_revertsIfSignerIsNotActive() public {
         ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
         // no signer added
 
@@ -567,6 +567,60 @@ contract ImmutableSignedZoneV3Test is
         zone.authorizeOrder(zoneParameters);
     }
 
+    function test_authorizeOrder_returnsMagicValueOnSuccessfulValidation() public {
+        ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
+        bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
+        vm.prank(OWNER);
+        zone.grantRole(managerRole, OWNER);
+        vm.prank(OWNER);
+        zone.addSigner(SIGNER);
+
+        bytes32 orderHash = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
+        uint64 expiration = 100;
+
+        SpentItem[] memory spentItems = new SpentItem[](1);
+        spentItems[0] = SpentItem({itemType: ItemType.ERC1155, token: address(0x5), identifier: 222, amount: 10});
+
+        ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
+        ReceivedItem memory receivedItem = ReceivedItem({
+            itemType: ItemType.ERC20,
+            token: address(0x4),
+            identifier: 0,
+            amount: 20,
+            recipient: payable(address(0x3))
+        });
+        receivedItems[0] = receivedItem;
+
+        bytes32[] memory orderHashes = new bytes32[](1);
+        orderHashes[0] = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
+
+        // console.logBytes32(zone.exposed_deriveReceivedItemsHash(receivedItems, 1, 1));
+        bytes32 substandard3Data = bytes32(0xec07a42041c18889c5c5dcd348923ea9f3d0979735bd8b3b687ebda38d9b6a31);
+        bytes memory substandard4Data = abi.encode(orderHashes);
+        bytes memory substandard6Data = abi.encodePacked(uint256(10), substandard3Data);
+        bytes memory context = abi.encodePacked(
+            bytes1(0x03), substandard3Data, bytes1(0x04), substandard4Data, bytes1(0x06), substandard6Data
+        );
+
+        bytes memory extraData = _buildExtraData(zone, SIGNER_PRIVATE_KEY, FULFILLER, expiration, orderHash, context);
+
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9),
+            fulfiller: FULFILLER,
+            offerer: OFFERER,
+            offer: spentItems,
+            consideration: receivedItems,
+            extraData: extraData,
+            orderHashes: orderHashes,
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+        assertEq(zone.authorizeOrder(zoneParameters), bytes4(0x01e4d72a));
+    }
+
+    /* validateOrder */
+
     function test_validateOrder_revertsIfContextIsEmpty() public {
         ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
         bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
@@ -615,7 +669,7 @@ contract ImmutableSignedZoneV3Test is
                 InvalidExtraData.selector, "invalid context, no substandards present", zoneParameters.orderHash
             )
         );
-        zone.authorizeOrder(zoneParameters);
+        zone.validateOrder(zoneParameters);
     }
 
     function test_validateOrder_returnsMagicValueOnSuccessfulValidation() public {
@@ -667,7 +721,7 @@ contract ImmutableSignedZoneV3Test is
             endTime: 0,
             zoneHash: bytes32(0)
         });
-        assertEq(zone.authorizeOrder(zoneParameters), bytes4(0x17b1f942));
+        assertEq(zone.validateOrder(zoneParameters), bytes4(0x17b1f942));
     }
 
     /* supportsInterface */
@@ -742,6 +796,7 @@ contract ImmutableSignedZoneV3Test is
     }
 
     /* _validateSubstandards */
+
     function test_validateSubstandards_revertsIfEmptyContext() public {
         ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
 

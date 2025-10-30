@@ -14,4 +14,4 @@ contract ImmutableSeaportConfigTest is ImmutableSeaportBaseTest {
         emit AllowedZoneSet(zone, allowed);
         immutableSeaport.setAllowedZone(zone, allowed);
     }
-} 
+}

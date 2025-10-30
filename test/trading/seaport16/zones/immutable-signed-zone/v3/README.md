@@ -1,6 +1,6 @@
-# Test Plan for Immutable Signed Zone (v2)
+# Test Plan for Immutable Signed Zone (v3)
 
-## ImmutableSignedZoneV2.sol
+## ImmutableSignedZoneV3.sol
 
 Constructor tests:
 
@@ -38,20 +38,20 @@ Control function tests:
 
 Operational function tests:
 
-| Test name                                                                  | Description                                        | Happy Case | Implemented |
-| -------------------------------------------------------------------------- | -------------------------------------------------- | ---------- | ----------- |
-| `test_getSeaportMetadata`                                                  | Retrieve metadata describing the Zone.             | Yes        | Yes         |
-| `test_sip7Information`                                                     | Retrieve SIP-7 specific information.               | Yes        | Yes         |
-| `test_supportsInterface`                                                   | ERC165 support.                                    | Yes        | Yes         |
-| `test_validateOrder_revertsIfEmptyExtraData`                               | Validate order with empty `extraData`.             | No         | Yes         |
-| `test_validateOrder_revertsIfExtraDataLengthIsLessThan93`                  | Validate order with unexpected `extraData` length. | No         | Yes         |
-| `test_validateOrder_revertsIfExtraDataVersionIsNotSupported`               | Validate order with unexpected SIP-6 version byte. | No         | Yes         |
-| `test_validateOrder_revertsIfSignatureHasExpired`                          | Validate order with an expired signature.          | No         | Yes         |
-| `test_validateOrder_revertsIfActualFulfillerDoesNotMatchExpectedFulfiller` | Validate order with unexpected fufiller.           | No         | Yes         |
-| `test_validateOrder_revertsIfActualFulfillerDoesNotMatchExpectedFulfiller` | Validate order with expected *any* fufiller.       | Yes        | No          |
-| `test_validateOrder_revertsIfSignerIsNotActive`                            | Validate order with inactive signer.               | No         | Yes         |
-| `test_validateOrder_revertsIfContextIsEmpty`                               | Validate order with an empty context.              | No         | Yes         |
-| `test_validateOrder_returnsMagicValueOnSuccessfulValidation`               | Validate order successfully.                       | Yes        | Yes         |
+| Test name                                                                   | Description                                         | Happy Case | Implemented |
+| --------------------------------------------------------------------------- | --------------------------------------------------- | ---------- | ----------- |
+| `test_getSeaportMetadata`                                                   | Retrieve metadata describing the Zone.              | Yes        | Yes         |
+| `test_sip7Information`                                                      | Retrieve SIP-7 specific information.                | Yes        | Yes         |
+| `test_supportsInterface`                                                    | ERC165 support.                                     | Yes        | Yes         |
+| `test_authorizeOrder_revertsIfEmptyExtraData`                               | Authorize order with empty `extraData`.             | No         | Yes         |
+| `test_authorizeOrder_revertsIfExtraDataLengthIsLessThan93`                  | Authorize order with unexpected `extraData` length. | No         | Yes         |
+| `test_authorizeOrder_revertsIfExtraDataVersionIsNotSupported`               | Authorize order with unexpected SIP-6 version byte. | No         | Yes         |
+| `test_authorizeOrder_revertsIfSignatureHasExpired`                          | Authorize order with an expired signature.          | No         | Yes         |
+| `test_authorizeOrder_revertsIfActualFulfillerDoesNotMatchExpectedFulfiller` | Authorize order with unexpected fufiller.           | No         | Yes         |
+| `test_authorizeOrder_revertsIfSignerIsNotActive`                            | Authorize order with inactive signer.               | No         | Yes         |
+| `test_authorizeOrder_returnsMagicValueOnSuccessfulValidation`               | Authorize order successfully.                       | Yes        | Yes         |
+| `test_validateOrder_revertsIfContextIsEmpty`                                | Validate order with an empty context.               | No         | Yes         |
+| `test_validateOrder_returnsMagicValueOnSuccessfulValidation`                | Validate order successfully.                        | Yes        | Yes         |
 
 Internal operational function tests:
 
@@ -92,7 +92,7 @@ Internal operational function tests:
 
 Integration tests:
 
-All of these tests are in [test/trading/seaport/ImmutableSeaportSignedZoneV2Integration.t.sol](../../../ImmutableSeaportSignedZoneV2Integration.t.sol).
+All of these tests are in [test/trading/seaport16/ImmutableSeaportSignedZoneV3Integration.t.sol](../../../ImmutableSeaportSignedZoneV3Integration.t.sol).
 
 | Test name                                            | Description                     | Happy Case | Implemented |
 | ---------------------------------------------------- | ------------------------------- | ---------- | ----------- |

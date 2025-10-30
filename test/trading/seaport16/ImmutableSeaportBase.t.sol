@@ -42,9 +42,10 @@ abstract contract ImmutableSeaportBaseTest is Test {
     function setUp() public virtual {
         // Set up chain ID
         //uint256 chainId = block.chainid;
-        
+
         // Create test addresses
         owner = makeAddr("owner");
+        zoneManager = makeAddr("zoneManager");
         (immutableSigner, immutableSignerPkey) = makeAddrAndKey("immutableSigner");
         (buyer, buyerPkey) = makeAddrAndKey("buyer");
         (seller, sellerPkey) = makeAddrAndKey("seller");

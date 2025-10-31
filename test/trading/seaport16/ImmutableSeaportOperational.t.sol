@@ -85,7 +85,6 @@ contract ImmutableSeaportOperationalTest is ImmutableSeaportBaseTest, ImmutableS
         _checkFulfill(OrderType.PARTIAL_RESTRICTED);
     }
 
- 
     function testRejectUnsupportedZones() public {
         // Create order with random zone
         address randomZone = makeAddr("randomZone");
@@ -119,7 +118,7 @@ contract ImmutableSeaportOperationalTest is ImmutableSeaportBaseTest, ImmutableS
         uint256 wrongSigner = 1;
         AdvancedOrder memory order = _prepareCheckFulfill(wrongSigner);
 
-        // The algorithm inside fulfillAdvancedOrder uses ecRecover to determine the signer. If the 
+        // The algorithm inside fulfillAdvancedOrder uses ecRecover to determine the signer. If the
         // information going in is wrong, then the wrong signer will be derived.
         address derivedBadSigner = 0x7E5F4552091A69125d5DfCb7b8C2659029395Bdf;
 
@@ -131,9 +130,9 @@ contract ImmutableSeaportOperationalTest is ImmutableSeaportBaseTest, ImmutableS
     function testRejectInvalidExtraData() public {
         AdvancedOrder memory order = _prepareCheckFulfillWithBadExtraData();
 
-        // The algorithm inside fulfillAdvancedOrder uses ecRecover to determine the signer. If the 
+        // The algorithm inside fulfillAdvancedOrder uses ecRecover to determine the signer. If the
         // information going in is wrong, then the wrong signer will be derived.
-        address derivedBadSigner = 0xcE810B9B83082C93574784f403727369c3FE6955;
+        address derivedBadSigner = 0x7D86d2b5A73f1620093012C73B3a99781B11B2F5;
 
         vm.prank(buyer);
         vm.expectRevert(abi.encodeWithSelector(SIP7EventsAndErrors.SignerNotActive.selector, derivedBadSigner));
@@ -213,7 +212,7 @@ contract ImmutableSeaportOperationalTest is ImmutableSeaportBaseTest, ImmutableS
             zoneHash: orderParams.zoneHash,
             salt: orderParams.salt,
             conduitKey: orderParams.conduitKey,
-            counter: 0
+            counter: immutableSeaport.getCounter(orderParams.offerer)
         });
 
         bytes32 orderHash = immutableSeaport.getOrderHash(orderComponents);
@@ -227,4 +226,4 @@ contract ImmutableSeaportOperationalTest is ImmutableSeaportBaseTest, ImmutableS
         AdvancedOrder memory order = AdvancedOrder(orderParams, 1, 1, signature, extraData);
         return order;
     }
-} 
+}

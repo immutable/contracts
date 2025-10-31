@@ -2,31 +2,15 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {SigningTestHelper} from "./utils/SigningTestHelper.t.sol";
 import {ItemType} from "seaport-types-16/src/lib/ConsiderationEnums.sol";
 import {ZoneParameters, ConsiderationItem, OfferItem, ReceivedItem, SpentItem} from "seaport-types-16/src/lib/ConsiderationStructs.sol";
 import {Math} from "openzeppelin-contracts-5.0.2/utils/math/Math.sol";
 
 
-abstract contract ImmutableSeaportTestHelper is Test {
-    bytes internal constant CONSIDERATION_BYTES =
-        abi.encodePacked("Consideration(", "ReceivedItem[] consideration", ")");
 
-    bytes internal constant RECEIVED_ITEM_BYTES =
-        abi.encodePacked(
-            "ReceivedItem(",
-            "uint8 itemType,",
-            "address token,",
-            "uint256 identifier,",
-            "uint256 amount,",
-            "address recipient",
-            ")"
-        );
-
-    bytes32 internal constant RECEIVED_ITEM_TYPEHASH = keccak256(RECEIVED_ITEM_BYTES);
-
-    bytes32 internal constant CONSIDERATION_TYPEHASH =
-        keccak256(abi.encodePacked(CONSIDERATION_BYTES, RECEIVED_ITEM_BYTES));
-
+abstract contract ImmutableSeaportTestHelper is Test, SigningTestHelper {
     string public constant ZONE_NAME = "ImmutableSignedZone";
     string public constant VERSION = "3.0";
 
@@ -38,7 +22,6 @@ abstract contract ImmutableSeaportTestHelper is Test {
         theFulfiller = _fulfiller;
         theZone = _zone;
     }
-
 
     // Helper functions
     function _createZoneParameters(bytes memory _extraData) internal returns (ZoneParameters memory) {
@@ -87,10 +70,10 @@ abstract contract ImmutableSeaportTestHelper is Test {
         return consideration;
     }
 
-    function _convertConsiderationToReceivedItem(ConsiderationItem[] memory _items) internal pure returns (ReceivedItem[] memory) {
-        ReceivedItem[] memory consideration = new ReceivedItem[](_items.length);
+    function _convertConsiderationToReceivedItems(ConsiderationItem[] memory _items) internal pure returns (ReceivedItem[] memory) {
+        ReceivedItem[] memory receivedItems = new ReceivedItem[](_items.length);
         for (uint256 i = 0; i < _items.length; i++) {
-            consideration[i] = ReceivedItem({
+            receivedItems[i] = ReceivedItem({
                 itemType: _items[i].itemType,
                 token: _items[i].token,
                 identifier: _items[i].identifierOrCriteria,
@@ -98,7 +81,7 @@ abstract contract ImmutableSeaportTestHelper is Test {
                 recipient: _items[i].recipient
             });
         }
-        return consideration;
+        return receivedItems;
     }
 
     function _createConsiderationItems(address recipient, uint256 amount) internal pure returns (ConsiderationItem[] memory) {
@@ -114,30 +97,11 @@ abstract contract ImmutableSeaportTestHelper is Test {
         return consideration;
     }
 
-    function _deriveConsiderationHash(ReceivedItem[] calldata consideration) external pure returns (bytes32) {
-        uint256 numberOfItems = consideration.length;
-        bytes32[] memory considerationHashes = new bytes32[](numberOfItems);
-        for (uint256 i; i < numberOfItems; i++) {
-            considerationHashes[i] = keccak256(
-                abi.encode(
-                    RECEIVED_ITEM_TYPEHASH,
-                    consideration[i].itemType,
-                    consideration[i].token,
-                    consideration[i].identifier,
-                    consideration[i].amount,
-                    consideration[i].recipient
-                )
-            );
-        }
-        return keccak256(abi.encode(CONSIDERATION_TYPEHASH, keccak256(abi.encodePacked(considerationHashes))));
-    }
-
     function _deriveReceivedItemsHash(
         ReceivedItem[] calldata receivedItems
     ) public pure returns (bytes32) {
         return _deriveReceivedItemsHash(receivedItems, 1, 1);
     }
-
 
     function _deriveReceivedItemsHash(
         ReceivedItem[] calldata receivedItems,
@@ -161,12 +125,12 @@ abstract contract ImmutableSeaportTestHelper is Test {
         return keccak256(receivedItemsHash);
     }
 
-
-    function _signOrder(uint256 signerPkey, bytes32 orderHash) internal view returns (bytes memory) {
-        return _signOrder(signerPkey, orderHash, 0, "");
+    function _signOrder(uint256 _signerPkey, bytes32 _orderHash) internal view returns (bytes memory) {
+        // For the purposes of testing, the offerer wallet will always return valid for signature checks
+        return abi.encodePacked("Hello!");
     }
 
-    function _signOrder(
+    function _signSIP7Order(
         uint256 _signerPkey,
         bytes32 orderHash,
         uint64 expiration,
@@ -182,7 +146,6 @@ abstract contract ImmutableSeaportTestHelper is Test {
                 theZone
             )
         );
-        //console.logBytes32(domainSeparator);
 
         bytes32 structHash = keccak256(
             abi.encode(
@@ -193,25 +156,10 @@ abstract contract ImmutableSeaportTestHelper is Test {
                 keccak256(context)
             )
         );
-        //console.logBytes32(structHash);
 
-        bytes32 digest = keccak256(
-            abi.encodePacked("\x19\x01", domainSeparator, structHash)
-        );
-        //console.logBytes32(digest);
+        bytes32 digest = ECDSA.toTypedDataHash(domainSeparator, structHash);
 
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(_signerPkey, digest);
-        return abi.encodePacked(r, s, v);
-    }
-
-    function _convertSignatureToEIP2098(bytes calldata signature) external pure returns (bytes memory) {
-        if (signature.length == 64) {
-            return signature;
-        }
-        if (signature.length != 65) {
-            revert("Invalid signature length");
-        }
-        return abi.encodePacked(signature[0:64]);
+        return _signCompact(_signerPkey, digest);
     }
 
     // Helper functions
@@ -227,36 +175,21 @@ abstract contract ImmutableSeaportTestHelper is Test {
         return offer;
     }
 
-
     function _generateSip7Signature(bytes32 orderHash, address fulfiller, uint256 signerPkey, uint64 _expiration, ConsiderationItem[] memory _consideration) internal view returns (bytes memory) {
-        ReceivedItem[] memory consideration = _convertConsiderationToReceivedItem(_consideration);
-        bytes32 considerationHash = this._deriveReceivedItemsHash(consideration);
-        //bytes32 considerationHash = this._deriveConsiderationHash(consideration);
-        // TODO Use sub-standard 4 DOES NOT WORK
-        //bytes32[] memory orderHashes = new bytes32[](1);
-        //orderHashes[0] = orderHash;
-        // bytes memory substandard4Data = abi.encode(orderHashes);
-        // bytes memory context = abi.encodePacked(bytes1(0x04), substandard4Data);
+        ReceivedItem[] memory receivedItems = _convertConsiderationToReceivedItems(_consideration);
+        bytes32 substandard3Data = this._deriveReceivedItemsHash(receivedItems);
+        bytes32[] memory orderHashes = new bytes32[](1);
+        orderHashes[0] = orderHash;
+        bytes memory substandard4Data = abi.encode(orderHashes);
+        bytes memory context = abi.encodePacked(bytes1(0x03), substandard3Data, bytes1(0x04), substandard4Data);
 
-        // Use sub-standard 3
-        bytes memory context = abi.encodePacked(bytes1(0x03), considerationHash);
-
-
-        bytes memory signature = _signOrder(signerPkey, orderHash, _expiration, context);
+        bytes memory signature = _signSIP7Order(signerPkey, orderHash, _expiration, context);
         return abi.encodePacked(
-            uint8(0), // SIP6 version
+            bytes1(0),
             fulfiller,
             _expiration,
-            this._convertSignatureToEIP2098(signature),
+            signature,
             context
         );
     }
-
-    function _convertToBytesWithoutArrayLength(bytes32[] memory _orders) internal view returns (bytes memory) {
-        bytes memory data = abi.encodePacked(_orders);
-        return this._stripArrayLength(data);
-    }
-    function _stripArrayLength(bytes calldata _data) external pure returns (bytes memory) {
-        return _data[32:_data.length];
-    }
-} 
+}

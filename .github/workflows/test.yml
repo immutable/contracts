@@ -39,6 +39,8 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
       - name: Show Forge Version
         run: forge --version
+      - name: Install Forge dependancies
+        run: forge install
       - name: Run Tests
         run: yarn test
   eslint:

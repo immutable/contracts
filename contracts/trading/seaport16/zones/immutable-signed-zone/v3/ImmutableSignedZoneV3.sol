@@ -247,9 +247,7 @@ contract ImmutableSignedZoneV3 is
      * @notice Check if a given order including extraData is currently valid.
      *
      * @dev This function is called by Seaport whenever any extraData is
-     *      provided by the caller, before tokens have been transferred. Note
-     *      that this function does not validate the SIP-7 substandards. Validation
-     *      of the SIP-7 substandards is performed in the validateOrder function.
+     *      provided by the caller, before tokens have been transferred.
      *
      * @param zoneParameters             The zone parameters containing data related to
      *                                   the fulfilment execution.
@@ -313,6 +311,9 @@ contract ImmutableSignedZoneV3 is
             revert InvalidFulfiller(expectedFulfiller, actualFulfiller, orderHash);
         }
 
+        // Validate supported substandards - before hook validation.
+        _validateSubstandards(context, zoneParameters, true);
+
         // Derive the signedOrder hash.
         bytes32 signedOrderHash = _deriveSignedOrderHash(expectedFulfiller, expiration, orderHash, context);
 
@@ -339,9 +340,6 @@ contract ImmutableSignedZoneV3 is
      *
      * @dev This function is called by Seaport whenever any extraData is
      *      provided by the caller, after tokens have been transferred.
-     *      Note that this function only validates the SIP-7 substandards as
-     *      the final value of ZoneParameters.orderHashes is not known in the
-     *      authorizeOrder function.
      *
      * @param zoneParameters        The zone parameters containing data related to
      *                              the fulfilment execution.
@@ -357,8 +355,8 @@ contract ImmutableSignedZoneV3 is
         // extraData bytes 93-end: context (optional, variable length).
         bytes calldata context = extraData[93:];
 
-        // Validate supported substandards.
-        _validateSubstandards(context, zoneParameters);
+        // Validate supported substandards - after hook validation.
+        _validateSubstandards(context, zoneParameters, false);
 
         // Pre hook validation completes and passes with no reverts, return valid.
         validOrderMagicValue = ZoneInterface.validateOrder.selector;
@@ -441,7 +439,7 @@ contract ImmutableSignedZoneV3 is
      * @param context        Bytes payload of context.
      * @param zoneParameters The zone parameters.
      */
-    function _validateSubstandards(bytes calldata context, ZoneParameters calldata zoneParameters) internal pure {
+    function _validateSubstandards(bytes calldata context, ZoneParameters calldata zoneParameters, bool before) internal pure {
         uint256 startIndex = 0;
         uint256 contextLength = context.length;
 
@@ -453,16 +451,16 @@ contract ImmutableSignedZoneV3 is
 
         // Each _validateSubstandard* function returns the length of the substandard
         // segment (0 if the substandard was not matched).
-        startIndex = _validateSubstandard1(context[startIndex:], zoneParameters) + startIndex;
+        startIndex = _validateSubstandard1(context[startIndex:], zoneParameters, before) + startIndex;
 
         if (startIndex == contextLength) return;
-        startIndex = _validateSubstandard3(context[startIndex:], zoneParameters) + startIndex;
+        startIndex = _validateSubstandard3(context[startIndex:], zoneParameters, before) + startIndex;
 
         if (startIndex == contextLength) return;
-        startIndex = _validateSubstandard4(context[startIndex:], zoneParameters) + startIndex;
+        startIndex = _validateSubstandard4(context[startIndex:], zoneParameters, before) + startIndex;
 
         if (startIndex == contextLength) return;
-        startIndex = _validateSubstandard6(context[startIndex:], zoneParameters) + startIndex;
+        startIndex = _validateSubstandard6(context[startIndex:], zoneParameters, before) + startIndex;
 
         if (startIndex != contextLength) {
             revert InvalidExtraData("invalid context, unexpected context length", zoneParameters.orderHash);
@@ -478,7 +476,8 @@ contract ImmutableSignedZoneV3 is
      */
     function _validateSubstandard1(
         bytes calldata context,
-        ZoneParameters calldata zoneParameters
+        ZoneParameters calldata zoneParameters,
+        bool before
     ) internal pure returns (uint256) {
         if (uint8(context[0]) != 1) {
             return 0;
@@ -488,8 +487,11 @@ contract ImmutableSignedZoneV3 is
             revert InvalidExtraData("invalid substandard 1 data length", zoneParameters.orderHash);
         }
 
-        if (uint256(bytes32(context[1:33])) != zoneParameters.consideration[0].identifier) {
-            revert Substandard1Violation(zoneParameters.orderHash, zoneParameters.consideration[0].identifier, uint256(bytes32(context[1:33])));
+        // Only perform validation in before hook.
+        if (before) {
+            if (uint256(bytes32(context[1:33])) != zoneParameters.consideration[0].identifier) {
+                revert Substandard1Violation(zoneParameters.orderHash, zoneParameters.consideration[0].identifier, uint256(bytes32(context[1:33])));
+            }
         }
 
         return 33;
@@ -509,7 +511,8 @@ contract ImmutableSignedZoneV3 is
      */
     function _validateSubstandard3(
         bytes calldata context,
-        ZoneParameters calldata zoneParameters
+        ZoneParameters calldata zoneParameters,
+        bool before
     ) internal pure returns (uint256) {
         if (uint8(context[0]) != 3) {
             return 0;
@@ -519,8 +522,11 @@ contract ImmutableSignedZoneV3 is
             revert InvalidExtraData("invalid substandard 3 data length", zoneParameters.orderHash);
         }
 
-        if (_deriveReceivedItemsHash(zoneParameters.consideration, 1, 1) != bytes32(context[1:33])) {
-            revert Substandard3Violation(zoneParameters.orderHash);
+        // Only perform validation in before hook.
+        if (before) {
+            if (_deriveReceivedItemsHash(zoneParameters.consideration, 1, 1) != bytes32(context[1:33])) {
+                revert Substandard3Violation(zoneParameters.orderHash);
+            }
         }
 
         return 33;
@@ -538,7 +544,8 @@ contract ImmutableSignedZoneV3 is
      */
     function _validateSubstandard4(
         bytes calldata context,
-        ZoneParameters calldata zoneParameters
+        ZoneParameters calldata zoneParameters,
+        bool before
     ) internal pure returns (uint256) {
         if (uint8(context[0]) != 4) {
             return 0;
@@ -551,11 +558,16 @@ contract ImmutableSignedZoneV3 is
 
         uint256 expectedOrderHashesSize = uint256(bytes32(context[33:65]));
         uint256 substandardIndexEnd = 64 + (expectedOrderHashesSize * 32);
-        bytes32[] memory expectedOrderHashes = abi.decode(context[1:substandardIndexEnd + 1], (bytes32[]));
 
-        // revert if any order hashes in substandard data are not present in zoneParameters.orderHashes.
-        if (!_bytes32ArrayIncludes(zoneParameters.orderHashes, expectedOrderHashes)) {
-            revert Substandard4Violation(zoneParameters.orderHashes, expectedOrderHashes, zoneParameters.orderHash);
+        // Only perform validation in after hook. Note that zoneParameters.orderHashes is only fully
+        // populated in the after hook (validateOrder call).
+        if (!before) {
+            bytes32[] memory expectedOrderHashes = abi.decode(context[1:substandardIndexEnd + 1], (bytes32[]));
+
+            // revert if any order hashes in substandard data are not present in zoneParameters.orderHashes.
+            if (!_bytes32ArrayIncludes(zoneParameters.orderHashes, expectedOrderHashes)) {
+                revert Substandard4Violation(zoneParameters.orderHashes, expectedOrderHashes, zoneParameters.orderHash);
+            }
         }
 
         return substandardIndexEnd + 1;
@@ -572,7 +584,8 @@ contract ImmutableSignedZoneV3 is
      */
     function _validateSubstandard6(
         bytes calldata context,
-        ZoneParameters calldata zoneParameters
+        ZoneParameters calldata zoneParameters,
+        bool before
     ) internal pure returns (uint256) {
         if (uint8(context[0]) != 6) {
             return 0;
@@ -582,32 +595,35 @@ contract ImmutableSignedZoneV3 is
             revert InvalidExtraData("invalid substandard 6 data length", zoneParameters.orderHash);
         }
 
-        // The first 32 bytes are the original first offer item amount.
-        uint256 originalFirstOfferItemAmount = uint256(bytes32(context[1:33]));
-        // The next 32 bytes are the hash of the received items that were expected
-        // derived based on an assumption of full fulfilment (i.e. numerator = denominator = 1).
-        bytes32 expectedReceivedItemsHash = bytes32(context[33:65]);
+        // Only perform validation in before hook.
+        if (before) {
+            // The first 32 bytes are the original first offer item amount.
+            uint256 originalFirstOfferItemAmount = uint256(bytes32(context[1:33]));
+            // The next 32 bytes are the hash of the received items that were expected
+            // derived based on an assumption of full fulfilment (i.e. numerator = denominator = 1).
+            bytes32 expectedReceivedItemsHash = bytes32(context[33:65]);
 
-        // To support partial fulfilment scenarios, we must scale the actual received item amounts
-        // to match the expected received items hash based on full fulfilment (i.e. numerator = denominator = 1).
-        //
-        // actualAmount = originalAmount * numerator / denominator
-        // originalAmount = actualAmount * denominator / numerator
-        //
-        // The numerator and denominator values are inferred from the actual and original (extracted
-        // from context) amounts of the first offer item.
-        if (
-            _deriveReceivedItemsHash(
-                zoneParameters.consideration,
-                originalFirstOfferItemAmount,
-                zoneParameters.offer[0].amount
-            ) != expectedReceivedItemsHash
-        ) {
-            revert Substandard6Violation(
-                zoneParameters.offer[0].amount,
-                originalFirstOfferItemAmount,
-                zoneParameters.orderHash
-            );
+            // To support partial fulfilment scenarios, we must scale the actual received item amounts
+            // to match the expected received items hash based on full fulfilment (i.e. numerator = denominator = 1).
+            //
+            // actualAmount = originalAmount * numerator / denominator
+            // originalAmount = actualAmount * denominator / numerator
+            //
+            // The numerator and denominator values are inferred from the actual and original (extracted
+            // from context) amounts of the first offer item.
+            if (
+                _deriveReceivedItemsHash(
+                    zoneParameters.consideration,
+                    originalFirstOfferItemAmount,
+                    zoneParameters.offer[0].amount
+                ) != expectedReceivedItemsHash
+            ) {
+                revert Substandard6Violation(
+                    zoneParameters.offer[0].amount,
+                    originalFirstOfferItemAmount,
+                    zoneParameters.orderHash
+                );
+            }
         }
 
         return 65;

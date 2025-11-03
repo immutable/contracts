@@ -36,43 +36,43 @@ contract ImmutableSignedZoneV3Harness is ImmutableSignedZoneV3 {
         return _deriveSignedOrderHash(fulfiller, expiration, orderHash, context);
     }
 
-    function exposed_validateSubstandards(bytes calldata context, ZoneParameters calldata zoneParameters)
+    function exposed_validateSubstandards(bytes calldata context, ZoneParameters calldata zoneParameters, bool before)
         external
         pure
     {
-        return _validateSubstandards(context, zoneParameters);
+        return _validateSubstandards(context, zoneParameters, before);
     }
 
-    function exposed_validateSubstandard1(bytes calldata context, ZoneParameters calldata zoneParameters)
+    function exposed_validateSubstandard1(bytes calldata context, ZoneParameters calldata zoneParameters, bool before)
         external
         pure
         returns (uint256)
     {
-        return _validateSubstandard1(context, zoneParameters);
+        return _validateSubstandard1(context, zoneParameters, before);
     }
 
-    function exposed_validateSubstandard3(bytes calldata context, ZoneParameters calldata zoneParameters)
+    function exposed_validateSubstandard3(bytes calldata context, ZoneParameters calldata zoneParameters, bool before)
         external
         pure
         returns (uint256)
     {
-        return _validateSubstandard3(context, zoneParameters);
+        return _validateSubstandard3(context, zoneParameters, before);
     }
 
-    function exposed_validateSubstandard4(bytes calldata context, ZoneParameters calldata zoneParameters)
+    function exposed_validateSubstandard4(bytes calldata context, ZoneParameters calldata zoneParameters, bool before)
         external
         pure
         returns (uint256)
     {
-        return _validateSubstandard4(context, zoneParameters);
+        return _validateSubstandard4(context, zoneParameters, before);
     }
 
-    function exposed_validateSubstandard6(bytes calldata context, ZoneParameters calldata zoneParameters)
+    function exposed_validateSubstandard6(bytes calldata context, ZoneParameters calldata zoneParameters, bool before)
         external
         pure
         returns (uint256)
     {
-        return _validateSubstandard6(context, zoneParameters);
+        return _validateSubstandard6(context, zoneParameters, before);
     }
 
     function exposed_deriveReceivedItemsHash(

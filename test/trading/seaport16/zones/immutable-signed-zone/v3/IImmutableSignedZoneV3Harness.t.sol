@@ -30,21 +30,21 @@ interface IImmutableSignedZoneV3Harness is ZoneInterface, SIP7Interface {
         bytes calldata context
     ) external view returns (bytes32 signedOrderHash);
 
-    function exposed_validateSubstandards(bytes calldata context, ZoneParameters calldata zoneParameters)
+    function exposed_validateSubstandards(bytes calldata context, ZoneParameters calldata zoneParameters, bool before)
         external
         pure;
 
-    function exposed_validateSubstandard3(bytes calldata context, ZoneParameters calldata zoneParameters)
+    function exposed_validateSubstandard3(bytes calldata context, ZoneParameters calldata zoneParameters, bool before)
         external
         pure
         returns (uint256);
 
-    function exposed_validateSubstandard4(bytes calldata context, ZoneParameters calldata zoneParameters)
+    function exposed_validateSubstandard4(bytes calldata context, ZoneParameters calldata zoneParameters, bool before)
         external
         pure
         returns (uint256);
 
-    function exposed_validateSubstandard6(bytes calldata context, ZoneParameters calldata zoneParameters)
+    function exposed_validateSubstandard6(bytes calldata context, ZoneParameters calldata zoneParameters, bool before)
         external
         pure
         returns (uint256);

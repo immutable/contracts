@@ -33,3 +33,6 @@
 [submodule "lib/immutable-seaport-1.6.0+im4"]
 	path = lib/immutable-seaport-1.6.0+im4
 	url = https://github.com/immutable/seaport
+[submodule "lib/creator-token-standards"]
+	path = lib/creator-token-standards
+	url = https://github.com/limitbreakinc/creator-token-standards

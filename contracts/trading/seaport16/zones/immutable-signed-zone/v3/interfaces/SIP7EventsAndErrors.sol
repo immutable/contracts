@@ -67,6 +67,12 @@ interface SIP7EventsAndErrors {
     error SubstandardViolation(uint256 substandardId, string reason, bytes32 orderHash);
 
     /**
+     * @dev Revert with an error if substandard 1 validation fails.
+     *      This is a custom error that is not part of the SIP-7 spec.
+     */
+    error Substandard1Violation(bytes32 orderHash, uint256 actualIdentifier, uint256 expectedIdentifier);
+
+    /**
      * @dev Revert with an error if substandard 3 validation fails.
      *      This is a custom error that is not part of the SIP-7 spec.
      */

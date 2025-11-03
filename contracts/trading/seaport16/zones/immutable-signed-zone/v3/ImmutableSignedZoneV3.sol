@@ -21,7 +21,7 @@ import {SIP7Interface} from "./interfaces/SIP7Interface.sol";
  * @author Immutable
  * @notice ImmutableSignedZoneV3 is a zone implementation based on the
  *         SIP-7 standard https://github.com/ProjectOpenSea/SIPs/blob/main/SIPS/sip-7.md
- *         implementing substandards 3, 4 and 6.
+ *         implementing substandards 1, 3, 4 and 6.
  *
  *         The contract is not upgradable. If the contract needs to be changed a new version
  *         should be deployed, and the old version should be removed from the Seaport contract
@@ -406,11 +406,12 @@ contract ImmutableSignedZoneV3 is
      * @return substandards Array of substandards supported.
      */
     function _getSupportedSubstandards() internal pure returns (uint256[] memory substandards) {
-        // support substandards 3, 4 and 6
-        substandards = new uint256[](3);
-        substandards[0] = 3;
-        substandards[1] = 4;
-        substandards[2] = 6;
+        // support substandards 1, 3, 4 and 6
+        substandards = new uint256[](4);
+        substandards[0] = 1;
+        substandards[1] = 3;
+        substandards[2] = 4;
+        substandards[3] = 6;
     }
 
     /**
@@ -452,6 +453,9 @@ contract ImmutableSignedZoneV3 is
 
         // Each _validateSubstandard* function returns the length of the substandard
         // segment (0 if the substandard was not matched).
+        startIndex = _validateSubstandard1(context[startIndex:], zoneParameters) + startIndex;
+
+        if (startIndex == contextLength) return;
         startIndex = _validateSubstandard3(context[startIndex:], zoneParameters) + startIndex;
 
         if (startIndex == contextLength) return;
@@ -463,6 +467,32 @@ contract ImmutableSignedZoneV3 is
         if (startIndex != contextLength) {
             revert InvalidExtraData("invalid context, unexpected context length", zoneParameters.orderHash);
         }
+    }
+
+    /**
+     * @dev Validates substandard 1.
+     *
+     * @param context        Bytes payload of context, 0 indexed to start of substandard segment.
+     * @param zoneParameters The zone parameters.
+     * @return               Length of substandard segment.
+     */
+    function _validateSubstandard1(
+        bytes calldata context,
+        ZoneParameters calldata zoneParameters
+    ) internal pure returns (uint256) {
+        if (uint8(context[0]) != 1) {
+            return 0;
+        }
+
+        if (context.length < 33) {
+            revert InvalidExtraData("invalid substandard 1 data length", zoneParameters.orderHash);
+        }
+
+        if (uint256(bytes32(context[1:33])) != zoneParameters.consideration[0].identifier) {
+            revert Substandard1Violation(zoneParameters.orderHash, zoneParameters.consideration[0].identifier, uint256(bytes32(context[1:33])));
+        }
+
+        return 33;
     }
 
     /**

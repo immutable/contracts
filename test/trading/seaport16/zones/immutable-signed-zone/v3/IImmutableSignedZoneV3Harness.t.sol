@@ -52,6 +52,10 @@ interface IImmutableSignedZoneV3Harness is ZoneInterface, SIP7Interface {
         external
         returns (uint256);
 
+    function exposed_validateSubstandard8(bytes calldata context, ZoneParameters calldata zoneParameters, bool before)
+        external
+        returns (uint256);
+
     function exposed_deriveReceivedItemsHash(
         ReceivedItem[] calldata receivedItems,
         uint256 scalingFactorNumerator,

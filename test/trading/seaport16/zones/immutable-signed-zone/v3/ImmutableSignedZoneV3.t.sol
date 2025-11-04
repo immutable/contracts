@@ -778,12 +778,13 @@ contract ImmutableSignedZoneV3Test is
     function test_getSupportedSubstandards() public {
         ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
         uint256[] memory supportedSubstandards = zone.exposed_getSupportedSubstandards();
-        assertEq(supportedSubstandards.length, 5);
+        assertEq(supportedSubstandards.length, 6);
         assertEq(supportedSubstandards[0], 1);
         assertEq(supportedSubstandards[1], 3);
         assertEq(supportedSubstandards[2], 4);
         assertEq(supportedSubstandards[3], 6);
         assertEq(supportedSubstandards[4], 7);
+        assertEq(supportedSubstandards[5], 8);
     }
 
     /* _deriveSignedOrderHash  */
@@ -1028,6 +1029,55 @@ contract ImmutableSignedZoneV3Test is
         });
 
         bytes memory context = abi.encodePacked(bytes1(0x07), uint256(222), address(transferValidator), address(0x7));
+
+        zone.exposed_validateSubstandards(context, zoneParameters, before);
+    }
+
+    function test_validateSubstandards_beforeHookSubstandard8() public {
+        _test_validateSubstandards_substandard8(true);
+    }
+
+    function test_validateSubstandards_afterHookSubstandard8() public {
+        _test_validateSubstandards_substandard8(false);
+    }
+
+    function _test_validateSubstandards_substandard8(bool before) private {
+        ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
+        MockTransferValidator transferValidator = new MockTransferValidator();
+
+        SpentItem[] memory spentItems = new SpentItem[](1);
+        SpentItem memory spentItem = SpentItem({
+            itemType: ItemType.ERC20,
+            token: address(0x9),
+            identifier: 0,
+            amount: 100
+        });
+        spentItems[0] = spentItem;
+
+        ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
+        ReceivedItem memory receivedItem = ReceivedItem({
+            itemType: ItemType.ERC721,
+            token: address(0x8),
+            identifier: 222,
+            amount: 1,
+            recipient: payable(address(0x3))
+        });
+        receivedItems[0] = receivedItem;
+
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0),
+            fulfiller: address(0x2),
+            offerer: address(0x3),
+            offer: spentItems,
+            consideration: receivedItems,
+            extraData: new bytes(0),
+            orderHashes: new bytes32[](0),
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+
+        bytes memory context = abi.encodePacked(bytes1(0x08), uint256(222), address(transferValidator));
 
         zone.exposed_validateSubstandards(context, zoneParameters, before);
     }
@@ -1863,7 +1913,7 @@ contract ImmutableSignedZoneV3Test is
 
         bytes memory context = abi.encodePacked(bytes1(0x07), uint256(0), address(transferValidator), address(0x7));
 
-        transferValidator.revertBeforeAuthorizedTransferWithOperator();
+        transferValidator.revertBeforeAuthorizedTransferWithOperator(address(0x7), address(0x8));
         vm.expectRevert(abi.encodeWithSelector(MockTransferValidatorRevert.selector, "beforeAuthorizedTransfer(address operator, address token)"));
         zone.exposed_validateSubstandard7(context, zoneParameters, true);
     }
@@ -1906,7 +1956,7 @@ contract ImmutableSignedZoneV3Test is
 
         bytes memory context = abi.encodePacked(bytes1(0x07), uint256(0), address(transferValidator), address(0x7));
 
-        transferValidator.revertAfterAuthorizedTransfer();
+        transferValidator.revertAfterAuthorizedTransfer(address(0x8));
         vm.expectRevert(abi.encodeWithSelector(MockTransferValidatorRevert.selector, "afterAuthorizedTransfer(address token)"));
         zone.exposed_validateSubstandard7(context, zoneParameters, false);
     }
@@ -1959,6 +2009,263 @@ contract ImmutableSignedZoneV3Test is
 
         uint256 substandardLengthResult = zone.exposed_validateSubstandard7(context, zoneParameters, before);
         assertEq(substandardLengthResult, 73);
+    }
+
+    /* _validateSubstandard8 */
+
+    function test_validateSubstandard8_returnsZeroLengthIfNotSubstandard8() public {
+        ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
+
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0),
+            fulfiller: address(0x2),
+            offerer: address(0x3),
+            offer: new SpentItem[](0),
+            consideration: new ReceivedItem[](0),
+            extraData: new bytes(0),
+            orderHashes: new bytes32[](0),
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+
+        uint256 substandardLengthResult = zone.exposed_validateSubstandard8(hex"04", zoneParameters, true);
+        assertEq(substandardLengthResult, 0);
+    }
+
+    function test_validateSubstandard8_revertsIfContextLengthIsInvalid() public {
+        ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
+
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0),
+            fulfiller: address(0x2),
+            offerer: address(0x3),
+            offer: new SpentItem[](0),
+            consideration: new ReceivedItem[](0),
+            extraData: new bytes(0),
+            orderHashes: new bytes32[](0),
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+
+        bytes memory context = abi.encodePacked(bytes1(0x08), bytes10(0));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                InvalidExtraData.selector, "invalid substandard 8 data length", zoneParameters.orderHash
+            )
+        );
+        zone.exposed_validateSubstandard8(context, zoneParameters, true);
+    }
+
+    function test_validateSubstandard8_revertsIfFirstReceivedItemIdentifierNotEqualToIdentifierInContext() public {
+        ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
+
+        ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
+        ReceivedItem memory receivedItem = ReceivedItem({
+            itemType: ItemType.ERC721,
+            token: address(0x2),
+            identifier: 45,
+            amount: 1,
+            recipient: payable(address(0x3))
+        });
+        receivedItems[0] = receivedItem;
+
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0),
+            fulfiller: address(0x2),
+            offerer: address(0x3),
+            offer: new SpentItem[](0),
+            consideration: receivedItems,
+            extraData: new bytes(0),
+            orderHashes: new bytes32[](0),
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+
+        bytes memory context = abi.encodePacked(bytes1(0x08), uint256(46), address(0x6));
+
+        vm.expectRevert(abi.encodeWithSelector(Substandard8IdentifierViolation.selector, zoneParameters.orderHash, 45, 46));
+        zone.exposed_validateSubstandard8(context, zoneParameters, true);
+    }
+
+    function test_validateSubstandard8_revertsIfItemTypeRequirementsAreNotMet() public {
+        ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
+
+        SpentItem[] memory spentItems = new SpentItem[](1);
+        SpentItem memory spentItem = SpentItem({
+            itemType: ItemType.ERC20,
+            token: address(0x2),
+            identifier: 0,
+            amount: 50
+        });
+        spentItems[0] = spentItem;
+
+        ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
+        ReceivedItem memory receivedItem = ReceivedItem({
+            itemType: ItemType.ERC20,
+            token: address(0x9),
+            identifier: 0,
+            amount: 100,
+            recipient: payable(address(0x3))
+        });
+        receivedItems[0] = receivedItem;
+
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0),
+            fulfiller: address(0x2),
+            offerer: address(0x3),
+            offer: spentItems,
+            consideration: receivedItems,
+            extraData: new bytes(0),
+            orderHashes: new bytes32[](0),
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+
+        bytes memory context = abi.encodePacked(bytes1(0x08), uint256(0), address(0x6));
+
+        vm.expectRevert(abi.encodeWithSelector(Substandard8UnexpectedItemTypeViolation.selector, zoneParameters.orderHash));
+        zone.exposed_validateSubstandard8(context, zoneParameters, true);
+    }
+
+    function test_validateSubstandard8_revertsIfTransferValidatorBeforeAuthorizedTransferReverts() public {
+        ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
+        MockTransferValidator transferValidator = new MockTransferValidator();
+
+        SpentItem[] memory spentItems = new SpentItem[](1);
+        SpentItem memory spentItem = SpentItem({
+            itemType: ItemType.ERC721,
+            token: address(0x8),
+            identifier: 222,
+            amount: 1
+        });
+        spentItems[0] = spentItem;
+
+        ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
+        ReceivedItem memory receivedItem = ReceivedItem({
+            itemType: ItemType.ERC20,
+            token: address(0x9),
+            identifier: 0,
+            amount: 100,
+            recipient: payable(address(0x3))
+        });
+        receivedItems[0] = receivedItem;
+
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0),
+            fulfiller: address(0x2),
+            offerer: address(0x3),
+            offer: spentItems,
+            consideration: receivedItems,
+            extraData: new bytes(0),
+            orderHashes: new bytes32[](0),
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+
+        bytes memory context = abi.encodePacked(bytes1(0x08), uint256(0), address(transferValidator));
+
+        transferValidator.revertBeforeAuthorizedTransferWithTokenId(address(0x8), 222);
+        vm.expectRevert(abi.encodeWithSelector(MockTransferValidatorRevert.selector, "beforeAuthorizedTransfer(address token, uint256 tokenId)"));
+        zone.exposed_validateSubstandard8(context, zoneParameters, true);
+    }
+
+    function test_validateSubstandard8_revertsIfTransferValidatorAfterAuthorizedTransferReverts() public {
+        ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
+        MockTransferValidator transferValidator = new MockTransferValidator();
+
+        SpentItem[] memory spentItems = new SpentItem[](1);
+        SpentItem memory spentItem = SpentItem({
+            itemType: ItemType.ERC721,
+            token: address(0x8),
+            identifier: 222,
+            amount: 1
+        });
+        spentItems[0] = spentItem;
+
+        ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
+        ReceivedItem memory receivedItem = ReceivedItem({
+            itemType: ItemType.ERC20,
+            token: address(0x9),
+            identifier: 0,
+            amount: 100,
+            recipient: payable(address(0x3))
+        });
+        receivedItems[0] = receivedItem;
+
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0),
+            fulfiller: address(0x2),
+            offerer: address(0x3),
+            offer: spentItems,
+            consideration: receivedItems,
+            extraData: new bytes(0),
+            orderHashes: new bytes32[](0),
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+
+        bytes memory context = abi.encodePacked(bytes1(0x08), uint256(0), address(transferValidator));
+
+        transferValidator.revertAfterAuthorizedTransferWithTokenId(address(0x8), 222);
+        vm.expectRevert(abi.encodeWithSelector(MockTransferValidatorRevert.selector, "afterAuthorizedTransfer(address token, uint256 tokenId)"));
+        zone.exposed_validateSubstandard8(context, zoneParameters, false);
+    }
+
+    function test_validateSubstandard8_beforeHookReturns53OnSuccess() public {
+        _test_validateSubstandard8_returns53OnSuccess(true);
+    }
+
+    function test_validateSubstandard8_afterHookReturns53OnSuccess() public {
+        _test_validateSubstandard8_returns53OnSuccess(false);
+    }
+
+    function _test_validateSubstandard8_returns53OnSuccess(bool before) private {
+        ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
+        MockTransferValidator transferValidator = new MockTransferValidator();
+
+        SpentItem[] memory spentItems = new SpentItem[](1);
+        SpentItem memory spentItem = SpentItem({
+            itemType: ItemType.ERC721,
+            token: address(0x8),
+            identifier: 222,
+            amount: 1
+        });
+        spentItems[0] = spentItem;
+
+        ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
+        ReceivedItem memory receivedItem = ReceivedItem({
+            itemType: ItemType.ERC20,
+            token: address(0x9),
+            identifier: 0,
+            amount: 100,
+            recipient: payable(address(0x3))
+        });
+        receivedItems[0] = receivedItem;
+
+        ZoneParameters memory zoneParameters = ZoneParameters({
+            orderHash: bytes32(0),
+            fulfiller: address(0x2),
+            offerer: address(0x3),
+            offer: spentItems,
+            consideration: receivedItems,
+            extraData: new bytes(0),
+            orderHashes: new bytes32[](0),
+            startTime: 0,
+            endTime: 0,
+            zoneHash: bytes32(0)
+        });
+
+        bytes memory context = abi.encodePacked(bytes1(0x08), uint256(0), address(transferValidator));
+
+        uint256 substandardLengthResult = zone.exposed_validateSubstandard8(context, zoneParameters, before);
+        assertEq(substandardLengthResult, 53);
     }
 
     /* _deriveReceivedItemsHash */

@@ -81,6 +81,13 @@ contract ImmutableSignedZoneV3Harness is ImmutableSignedZoneV3 {
         return _validateSubstandard7(context, zoneParameters, before);
     }
 
+    function exposed_validateSubstandard8(bytes calldata context, ZoneParameters calldata zoneParameters, bool before)
+        external
+        returns (uint256)
+    {
+        return _validateSubstandard8(context, zoneParameters, before);
+    }
+
     function exposed_deriveReceivedItemsHash(
         ReceivedItem[] calldata receivedItems,
         uint256 scalingFactorNumerator,

@@ -1,6 +1,6 @@
 # Immutable Signed Zone (v3)
 
-The Immutable Signed Zone contract is a [Seaport Zone](https://docs.opensea.io/docs/seaport-hooks#zone-hooks) that implements [SIP-7 (Interface for Server-Signed Orders)](https://github.com/ProjectOpenSea/SIPs/blob/main/SIPS/sip-7.md) with support for [substandards](https://github.com/ProjectOpenSea/SIPs/blob/main/SIPS/sip-7.md#substandards) 1, 3, 4 and 6.
+The Immutable Signed Zone contract is a [Seaport Zone](https://docs.opensea.io/docs/seaport-hooks#zone-hooks) that implements [SIP-7 (Interface for Server-Signed Orders)](https://github.com/ProjectOpenSea/SIPs/blob/main/SIPS/sip-7.md) with support for [substandards](https://github.com/ProjectOpenSea/SIPs/blob/main/SIPS/sip-7.md#substandards) 1, 3, 4, 6 and 7.
 
 This zone is used by Immutable to enable:
 
@@ -56,3 +56,5 @@ The sequence of events is as follows:
 
 The contract was developed based on ImmutableSignedZoneV2, with the addition of:
  - Support for the Seaport 1.6 Zone interface `authorizeOrder` function
+ - SIP-7 Substandard 1
+ - SIP-7 Substandard 7

@@ -89,4 +89,16 @@ interface SIP7EventsAndErrors {
      *      This is a custom error that is not part of the SIP-7 spec.
      */
     error Substandard6Violation(uint256 actualSpentItemAmount, uint256 originalSpentItemAmount, bytes32 orderHash);
+
+    /**
+     * @dev Revert with an error if substandard 7 identifier validation fails.
+     *      This is a custom error that is not part of the SIP-7 spec.
+     */
+    error Substandard7IdentifierViolation(bytes32 orderHash, uint256 actualIdentifier, uint256 expectedIdentifier);
+
+    /**
+     * @dev Revert with an error if substandard 7 item type expectations are not met.
+     *      This is a custom error that is not part of the SIP-7 spec.
+     */
+    error Substandard7UnexpectedItemTypeViolation(bytes32 orderHash);
 }

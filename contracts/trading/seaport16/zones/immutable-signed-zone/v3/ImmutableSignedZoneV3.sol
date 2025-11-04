@@ -4,6 +4,7 @@
 // solhint-disable-next-line compiler-version
 pragma solidity ^0.8.20;
 
+import {ITransferValidator} from "creator-token-standards/interfaces/ITransferValidator.sol";
 import {AccessControlEnumerable} from "openzeppelin-contracts-5.0.2/access/extensions/AccessControlEnumerable.sol";
 import {ECDSA} from "openzeppelin-contracts-5.0.2/utils/cryptography/ECDSA.sol";
 import {MessageHashUtils} from "openzeppelin-contracts-5.0.2/utils/cryptography/MessageHashUtils.sol";
@@ -21,7 +22,7 @@ import {SIP7Interface} from "./interfaces/SIP7Interface.sol";
  * @author Immutable
  * @notice ImmutableSignedZoneV3 is a zone implementation based on the
  *         SIP-7 standard https://github.com/ProjectOpenSea/SIPs/blob/main/SIPS/sip-7.md
- *         implementing substandards 1, 3, 4 and 6.
+ *         implementing substandards 1, 3, 4, 6 and 7.
  *
  *         The contract is not upgradable. If the contract needs to be changed a new version
  *         should be deployed, and the old version should be removed from the Seaport contract
@@ -348,7 +349,7 @@ contract ImmutableSignedZoneV3 is
      */
     function validateOrder(
         ZoneParameters calldata zoneParameters
-    ) external pure override returns (bytes4 validOrderMagicValue) {
+    ) external override returns (bytes4 validOrderMagicValue) {
         // Put the extraData and orderHash on the stack for cheaper access.
         bytes calldata extraData = zoneParameters.extraData;
 
@@ -404,12 +405,13 @@ contract ImmutableSignedZoneV3 is
      * @return substandards Array of substandards supported.
      */
     function _getSupportedSubstandards() internal pure returns (uint256[] memory substandards) {
-        // support substandards 1, 3, 4 and 6
-        substandards = new uint256[](4);
+        // support substandards 1, 3, 4, 6 and 7
+        substandards = new uint256[](5);
         substandards[0] = 1;
         substandards[1] = 3;
         substandards[2] = 4;
         substandards[3] = 6;
+        substandards[4] = 7;
     }
 
     /**
@@ -439,7 +441,7 @@ contract ImmutableSignedZoneV3 is
      * @param context        Bytes payload of context.
      * @param zoneParameters The zone parameters.
      */
-    function _validateSubstandards(bytes calldata context, ZoneParameters calldata zoneParameters, bool before) internal pure {
+    function _validateSubstandards(bytes calldata context, ZoneParameters calldata zoneParameters, bool before) internal {
         uint256 startIndex = 0;
         uint256 contextLength = context.length;
 
@@ -461,6 +463,9 @@ contract ImmutableSignedZoneV3 is
 
         if (startIndex == contextLength) return;
         startIndex = _validateSubstandard6(context[startIndex:], zoneParameters, before) + startIndex;
+
+        if (startIndex == contextLength) return;
+        startIndex = _validateSubstandard7(context[startIndex:], zoneParameters, before) + startIndex;
 
         if (startIndex != contextLength) {
             revert InvalidExtraData("invalid context, unexpected context length", zoneParameters.orderHash);
@@ -627,6 +632,47 @@ contract ImmutableSignedZoneV3 is
         }
 
         return 65;
+    }
+
+    function _validateSubstandard7(
+        bytes calldata context,
+        ZoneParameters calldata zoneParameters,
+        bool before
+    ) internal returns (uint256) {
+        if (uint8(context[0]) != 7) {
+            return 0;
+        }
+
+        if (context.length < 73) {
+            revert InvalidExtraData("invalid substandard 7 data length", zoneParameters.orderHash);
+        }
+
+        // Only perform identifier validation in before hook.
+        if (before) {
+            if (uint256(bytes32(context[1:33])) != zoneParameters.consideration[0].identifier) {
+                revert Substandard7IdentifierViolation(zoneParameters.orderHash, zoneParameters.consideration[0].identifier, uint256(bytes32(context[1:33])));
+            }
+        }
+
+        // This zone assumes that either the first consideration item or the first offer item is an ERC721 or ERC1155 token.
+        address token;
+        if (uint(zoneParameters.consideration[0].itemType) > 1) {
+            token = zoneParameters.consideration[0].token;
+        } else if (uint(zoneParameters.offer[0].itemType) > 1) {
+            token = zoneParameters.offer[0].token;
+        } else {
+            revert Substandard7UnexpectedItemTypeViolation(zoneParameters.orderHash);
+        }
+
+        address registry = address(bytes20(context[33:53]));
+
+        if (before) {
+            ITransferValidator(registry).beforeAuthorizedTransfer(address(bytes20(context[53:73])), token);
+        } else {
+            ITransferValidator(registry).afterAuthorizedTransfer(token);
+        }
+
+        return 73;
     }
 
     /**

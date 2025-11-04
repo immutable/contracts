@@ -38,7 +38,6 @@ contract ImmutableSignedZoneV3Harness is ImmutableSignedZoneV3 {
 
     function exposed_validateSubstandards(bytes calldata context, ZoneParameters calldata zoneParameters, bool before)
         external
-        pure
     {
         return _validateSubstandards(context, zoneParameters, before);
     }
@@ -73,6 +72,13 @@ contract ImmutableSignedZoneV3Harness is ImmutableSignedZoneV3 {
         returns (uint256)
     {
         return _validateSubstandard6(context, zoneParameters, before);
+    }
+
+    function exposed_validateSubstandard7(bytes calldata context, ZoneParameters calldata zoneParameters, bool before)
+        external
+        returns (uint256)
+    {
+        return _validateSubstandard7(context, zoneParameters, before);
     }
 
     function exposed_deriveReceivedItemsHash(

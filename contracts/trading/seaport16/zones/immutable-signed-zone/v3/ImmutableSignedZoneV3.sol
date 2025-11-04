@@ -437,7 +437,7 @@ contract ImmutableSignedZoneV3 is
     }
 
     /**
-     * @dev Validate substandards 3, 4 and 6 based on context.
+     * @dev Validate substandards 1, 3, 4, 6, 7 and 8 based on context.
      *
      * @param context        Bytes payload of context.
      * @param zoneParameters The zone parameters.

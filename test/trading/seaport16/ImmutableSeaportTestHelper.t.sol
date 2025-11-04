@@ -125,7 +125,7 @@ abstract contract ImmutableSeaportTestHelper is Test, SigningTestHelper {
         return keccak256(receivedItemsHash);
     }
 
-    function _signOrder(uint256 _signerPkey, bytes32 _orderHash) internal view returns (bytes memory) {
+    function _signOrder(uint256 /* _signerPkey */, bytes32 /* _orderHash */) internal pure returns (bytes memory) {
         // For the purposes of testing, the offerer wallet will always return valid for signature checks
         return abi.encodePacked("Hello!");
     }

@@ -441,6 +441,7 @@ contract ImmutableSignedZoneV3 is
      *
      * @param context        Bytes payload of context.
      * @param zoneParameters The zone parameters.
+     * @param before         Whether validation is occurring in before or after hook.
      */
     function _validateSubstandards(bytes calldata context, ZoneParameters calldata zoneParameters, bool before) internal {
         uint256 startIndex = 0;
@@ -477,10 +478,13 @@ contract ImmutableSignedZoneV3 is
     }
 
     /**
-     * @dev Validates substandard 1.
+     * @dev Validates substandard 1. This substandard is used to validate that the server's
+     *      specified first received item identifier matches the actual first received
+     *      item identifier.
      *
      * @param context        Bytes payload of context, 0 indexed to start of substandard segment.
      * @param zoneParameters The zone parameters.
+     * @param before         Whether validation is occurring in before or after hook.
      * @return               Length of substandard segment.
      */
     function _validateSubstandard1(
@@ -516,6 +520,7 @@ contract ImmutableSignedZoneV3 is
      *
      * @param context        Bytes payload of context, 0 indexed to start of substandard segment.
      * @param zoneParameters The zone parameters.
+     * @param before         Whether validation is occurring in before or after hook.
      * @return               Length of substandard segment.
      */
     function _validateSubstandard3(
@@ -549,6 +554,7 @@ contract ImmutableSignedZoneV3 is
      *
      * @param context        Bytes payload of context, 0 indexed to start of substandard segment.
      * @param zoneParameters The zone parameters.
+     * @param before         Whether validation is occurring in before or after hook.
      * @return               Length of substandard segment.
      */
     function _validateSubstandard4(
@@ -589,6 +595,7 @@ contract ImmutableSignedZoneV3 is
      *
      * @param context        Bytes payload of context, 0 indexed to start of substandard segment.
      * @param zoneParameters The zone parameters.
+     * @param before         Whether validation is occurring in before or after hook.
      * @return               Length of substandard segment.
      */
     function _validateSubstandard6(
@@ -638,6 +645,16 @@ contract ImmutableSignedZoneV3 is
         return 65;
     }
 
+    /**
+     * @dev Validates substandard 7. This substandard is a superset of substandard 1. It
+     *      additionally calls the creator token standard transfer validator before and
+     *      after token transfer hooks for a specified operator.
+     *
+     * @param context        Bytes payload of context, 0 indexed to start of substandard segment.
+     * @param zoneParameters The zone parameters.
+     * @param before         Whether validation is occurring in before or after hook.
+     * @return               Length of substandard segment.
+     */
     function _validateSubstandard7(
         bytes calldata context,
         ZoneParameters calldata zoneParameters,
@@ -679,6 +696,16 @@ contract ImmutableSignedZoneV3 is
         return 73;
     }
 
+    /**
+     * @dev Validates substandard 8. This substandard is a superset of substandard 1. It
+     *      additionally calls the creator token standard transfer validator before and
+     *      after token transfer hooks.
+     *
+     * @param context        Bytes payload of context, 0 indexed to start of substandard segment.
+     * @param zoneParameters The zone parameters.
+     * @param before         Whether validation is occurring in before or after hook.
+     * @return               Length of substandard segment.
+     */
     function _validateSubstandard8(
         bytes calldata context,
         ZoneParameters calldata zoneParameters,

@@ -676,6 +676,7 @@ contract ImmutableSignedZoneV3 is
         }
 
         // This zone assumes that either the first consideration item or the first offer item is an ERC721 or ERC1155 token.
+        // slither-disable-next-line uninitialized-local
         address token;
         if (uint(zoneParameters.consideration[0].itemType) > 1) {
             token = zoneParameters.consideration[0].token;
@@ -727,7 +728,9 @@ contract ImmutableSignedZoneV3 is
         }
 
         // This zone assumes that either the first consideration item or the first offer item is an ERC721 or ERC1155 token.
+        // slither-disable-next-line uninitialized-local
         address token;
+        // slither-disable-next-line uninitialized-local
         uint256 tokenId;
         if (uint(zoneParameters.consideration[0].itemType) > 1) {
             token = zoneParameters.consideration[0].token;

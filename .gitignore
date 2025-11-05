@@ -12,6 +12,7 @@ package-lock.json
 # Hardhat files
 cache
 artifacts
+cache_hardhat
 
 # Build files
 dist/

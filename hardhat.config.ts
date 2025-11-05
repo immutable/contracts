@@ -34,6 +34,7 @@ const config: HardhatUserConfig = {
             enabled: true,
             runs: 200,
           },
+          evmVersion: "cancun",
         },
       },
       {
@@ -99,6 +100,17 @@ const config: HardhatUserConfig = {
             enabled: true,
             runs: 1000000,
           },
+        },
+      },
+      "contracts/trading/seaport16/ImmutableSeaport.sol": {
+        version: "0.8.24",
+        settings: {
+          viaIR: true,
+          optimizer: {
+            enabled: true,
+            runs: 10,
+          },
+          evmVersion: "cancun",
         },
       },
     },

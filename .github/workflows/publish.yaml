@@ -53,6 +53,15 @@ jobs:
         run: |
           yarn install --frozen-lockfile --network-concurrency 1
 
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Show Forge Version
+        run: forge --version
+
+      - name: Install Forge dependancies
+        run: forge install
+
       - name: Compile contracts
         run: |
           yarn compile
@@ -61,7 +70,7 @@ jobs:
         run: |
           rm -rf dist && yarn build
 
-      # ! Do NOT remove - this will cause a Sev 0 incident !        
+      # ! Do NOT remove - this will cause a Sev 0 incident !
       - name: Pack NPM package
         run: |
           npm pack

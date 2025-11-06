@@ -12,4 +12,4 @@ seaport-16/contracts/=lib/immutable-seaport-1.6.0+im4/contracts/
 seaport-core-16/=lib/immutable-seaport-core-1.6.0+im2/
 seaport-sol-16/=lib/immutable-seaport-1.6.0+im4/lib/seaport-sol/
 seaport-types-16/=lib/immutable-seaport-1.6.0+im4/lib/seaport-types/
-creator-token-standards/=lib/creator-token-standards/src/
+@limitbreak/creator-token-standards/=lib/creator-token-standards/

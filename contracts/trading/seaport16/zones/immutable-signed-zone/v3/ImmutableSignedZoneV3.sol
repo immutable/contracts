@@ -4,7 +4,7 @@
 // solhint-disable-next-line compiler-version
 pragma solidity ^0.8.20;
 
-import {ITransferValidator} from "creator-token-standards/interfaces/ITransferValidator.sol";
+import {ITransferValidator} from "@limitbreak/creator-token-standards/src/interfaces/ITransferValidator.sol";
 import {AccessControlEnumerable} from "openzeppelin-contracts-5.0.2/access/extensions/AccessControlEnumerable.sol";
 import {ECDSA} from "openzeppelin-contracts-5.0.2/utils/cryptography/ECDSA.sol";
 import {MessageHashUtils} from "openzeppelin-contracts-5.0.2/utils/cryptography/MessageHashUtils.sol";

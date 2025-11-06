@@ -907,6 +907,22 @@
     "@jridgewell/resolve-uri" "^3.0.3"
     "@jridgewell/sourcemap-codec" "^1.4.10"
 
+"@limitbreak/creator-token-standards@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@limitbreak/creator-token-standards/-/creator-token-standards-5.0.0.tgz#35f6c8929351e765d1f4d85974e61e5516ed9db8"
+  integrity sha512-BhrD3SMCq8YrGbJildBbu4BpHia7uby60XpGYVyFnb4xEvFey7bRbnOeVQ2mrTx07y02KvTWS5gESIPj5O4Mtg==
+  dependencies:
+    "@limitbreak/permit-c" "1.0.0"
+    "@openzeppelin/contracts" "4.8.3"
+    erc721a "4.2.3"
+
+"@limitbreak/permit-c@1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@limitbreak/permit-c/-/permit-c-1.0.0.tgz#96df6527ef2562ac1e8bd363d040419df465abca"
+  integrity sha512-7BooxTklXlCPzfdccfKL7Tt2Cm4MntOHR51dHqjKePn7AynMKsUtaKH75ZXHzWRPZSmyixFNzQ7tIJDdPxF2MA==
+  dependencies:
+    "@openzeppelin/contracts" "4.8.3"
+
 "@metamask/eth-sig-util@^4.0.0":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@metamask/eth-sig-util/-/eth-sig-util-4.0.1.tgz#3ad61f6ea9ad73ba5b19db780d40d9aae5157088"
@@ -1305,10 +1321,20 @@
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts-upgradeable/-/contracts-upgradeable-4.9.5.tgz#572b5da102fc9be1d73f34968e0ca56765969812"
   integrity sha512-f7L1//4sLlflAN7fVzJLoRedrf5Na3Oal5PZfIq55NFcVZ90EpV1q5xOvL4lFvg3MNICSDr2hH0JUBxwlxcoPg==
 
+"@openzeppelin/contracts@4.8.3":
+  version "4.8.3"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.8.3.tgz#cbef3146bfc570849405f59cba18235da95a252a"
+  integrity sha512-bQHV8R9Me8IaJoJ2vPG4rXcL7seB7YVuskr4f+f5RyOStSZetwzkWtoqDMl5erkBJy0lDRUnIR2WIkPiC0GJlg==
+
 "@openzeppelin/contracts@^4.9.2", "@openzeppelin/contracts@^4.9.3":
   version "4.9.5"
   resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.9.5.tgz#1eed23d4844c861a1835b5d33507c1017fa98de8"
   integrity sha512-ZK+W5mVhRppff9BE6YdR8CC52C8zAvsVAiWhEtQ5+oNxFE6h1WdeWo+FJSF8KKvtxxVYZ7MTP/5KoVpAU3aSWg==
+
+"@openzeppelin/contracts@^4.9.6":
+  version "4.9.6"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.9.6.tgz#2a880a24eb19b4f8b25adc2a5095f2aa27f39677"
+  integrity sha512-xSmezSupL+y9VkHZJGDoCBpmnB2ogM13ccaYDWqJTfS3dbuHkgjuwDFUmaFauBCboQMGB/S5UqUl2y54X99BmA==
 
 "@openzeppelin/test-helpers@^0.5.16":
   version "0.5.16"
@@ -3873,6 +3899,11 @@ env-paths@^2.2.0:
   resolved "https://registry.yarnpkg.com/env-paths/-/env-paths-2.2.1.tgz#420399d416ce1fbe9bc0a07c62fa68d67fd0f8f2"
   integrity sha512-+h1lkLKhZMTYjog1VEpJNG7NZJWcuc2DDk/qsqSTRRCOXiLjeQ1d1/udrUGhqMxUgAlwKNZ0cf2uqan5GLuS2A==
 
+erc721a@4.2.3:
+  version "4.2.3"
+  resolved "https://registry.yarnpkg.com/erc721a/-/erc721a-4.2.3.tgz#ca6469b0e54afb0f614272c2147dc4cb49ff223f"
+  integrity sha512-0deF0hOOK1XI1Vxv3NKDh2E9sgzRlENuOoexjXRJIRfYCsLlqi9ejl2RF6Wcd9HfH0ldqC03wleQ2WDjxoOUvA==
+
 errno@~0.1.1:
   version "0.1.8"
   resolved "https://registry.yarnpkg.com/errno/-/errno-0.1.8.tgz#8bb3e9c7d463be4976ff888f76b4809ebc2e811f"
@@ -5395,7 +5426,7 @@ hardhat@^2.17.3:
     uuid "^8.3.2"
     ws "^7.4.6"
 
-hardhat@^2.26.5:
+hardhat@^2.21.0, hardhat@^2.26.5:
   version "2.26.5"
   resolved "https://registry.yarnpkg.com/hardhat/-/hardhat-2.26.5.tgz#831073e3bc9d034fbb997078aa819f38538d2d7f"
   integrity sha512-TvFKUPGRaoemeVpnKsXt5I+kVCNrzP2cLwyNUveu0JKf2Q0lzh6LTgVBsWyYPlXAwBzyUQ6fsL98UgyF/QdOfA==
@@ -6601,7 +6632,7 @@ merkle-patricia-tree@^4.2.2, merkle-patricia-tree@^4.2.4:
     readable-stream "^3.6.0"
     semaphore-async-await "^1.5.1"
 
-merkletreejs@^0.3.11:
+merkletreejs@^0.3.11, merkletreejs@^0.3.9:
   version "0.3.11"
   resolved "https://registry.yarnpkg.com/merkletreejs/-/merkletreejs-0.3.11.tgz#e0de05c3ca1fd368de05a12cb8efb954ef6fc04f"
   integrity sha512-LJKTl4iVNTndhL+3Uz/tfkjD0klIWsHlUzgtuNnNrsf7bAlXR30m+xYB7lHr5Z/l6e/yAIsr26Dabx6Buo4VGQ==
@@ -8122,6 +8153,34 @@ scrypt-js@3.0.1, scrypt-js@^3.0.0, scrypt-js@^3.0.1:
   resolved "https://registry.yarnpkg.com/scrypt-js/-/scrypt-js-3.0.1.tgz#d314a57c2aef69d1ad98a138a21fe9eafa9ee312"
   integrity sha512-cdwTTnqPu0Hyvf5in5asVdZocVDTNRmR7XEcJuIzMjJeSHybHl7vpB66AzwTaIg6CLSbtjcxc8fqcySfnTkccA==
 
+"seaport-16@https://github.com/immutable/seaport.git#1.6.0+im4":
+  version "1.6.0"
+  resolved "https://github.com/immutable/seaport.git#e058101dbe69b403352598ed989c3afd845e9793"
+  dependencies:
+    "@nomicfoundation/hardhat-network-helpers" "^1.0.7"
+    "@openzeppelin/contracts" "^4.9.6"
+    ethers "^5.5.3"
+    ethers-eip712 "^0.2.0"
+    hardhat "^2.21.0"
+    merkletreejs "^0.3.9"
+    seaport-core "1.6.5"
+    seaport-sol "1.6.0"
+    seaport-types "1.6.3"
+    solady "^0.0.84"
+
+"seaport-core-16@https://github.com/immutable/seaport-core.git#1.6.0+im2":
+  version "1.6.6"
+  resolved "https://github.com/immutable/seaport-core.git#9ad91d82609e937a9ba3ef330df396b05f384e44"
+  dependencies:
+    seaport-types "1.6.3"
+
+seaport-core@1.6.5:
+  version "1.6.5"
+  resolved "https://registry.yarnpkg.com/seaport-core/-/seaport-core-1.6.5.tgz#97c85dd5161e57ec28df6c43c93ee3eb9943ec66"
+  integrity sha512-jpGOpaKpH1B49oOYqAYAAVXN8eGlI/NjE6fYHPYlQaDVx325NS5dpiDDgGLtQZNgQ3EbqrfhfB5KyIbg7owyFg==
+  dependencies:
+    seaport-types "1.6.3"
+
 seaport-core@^0.0.1:
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/seaport-core/-/seaport-core-0.0.1.tgz#99db0b605d0fbbfd43ca7a4724e64374ce47f6d4"
@@ -8135,6 +8194,14 @@ seaport-core@immutable/seaport-core#1.5.0+im.1:
   dependencies:
     seaport-types "^0.0.1"
 
+seaport-sol@1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/seaport-sol/-/seaport-sol-1.6.0.tgz#2a71ae8da5af9aecffee21767632ef37aaaaee13"
+  integrity sha512-a1FBK1jIeEQXZ9CmQvtmfG0w7CE8nIad89btGg7qrrrtF4j1S0Ilmzpe2Hderap05Uvf3EWS9P/aghDQCNAwkA==
+  dependencies:
+    seaport-core "^0.0.1"
+    seaport-types "^0.0.1"
+
 seaport-sol@^1.5.0:
   version "1.5.3"
   resolved "https://registry.yarnpkg.com/seaport-sol/-/seaport-sol-1.5.3.tgz#ccb0047bcefb7d29bcd379faddf3a5a9902d0c3a"
@@ -8142,6 +8209,16 @@ seaport-sol@^1.5.0:
   dependencies:
     seaport-core "^0.0.1"
     seaport-types "^0.0.1"
+
+"seaport-types-16@npm:seaport-types@1.6.3":
+  version "1.6.3"
+  resolved "https://registry.yarnpkg.com/seaport-types/-/seaport-types-1.6.3.tgz#b9993864517d4f9ecccc6b6daf6ef3f52a114e58"
+  integrity sha512-Rm9dTTEUKmXqMgc5TiRtfX/sFOX6SjKkT9l/spTdRknplYh5tmJ0fMJzbE60pCzV1/Izq0cCua6uvWszo6zOAQ==
+
+seaport-types@1.6.3:
+  version "1.6.3"
+  resolved "https://registry.yarnpkg.com/seaport-types/-/seaport-types-1.6.3.tgz#b9993864517d4f9ecccc6b6daf6ef3f52a114e58"
+  integrity sha512-Rm9dTTEUKmXqMgc5TiRtfX/sFOX6SjKkT9l/spTdRknplYh5tmJ0fMJzbE60pCzV1/Izq0cCua6uvWszo6zOAQ==
 
 seaport-types@^0.0.1:
   version "0.0.1"

@@ -312,6 +312,16 @@ contract ImmutableSignedZoneV3 is
             revert InvalidFulfiller(expectedFulfiller, actualFulfiller, orderHash);
         }
 
+        // Revert if no spent items are provided.
+        if (zoneParameters.offer.length == 0) {
+            revert NoSpentItems(orderHash);
+        }
+
+        // Revert if no received items are provided.
+        if (zoneParameters.consideration.length == 0) {
+            revert NoReceivedItems(orderHash);
+        }
+
         // Validate supported substandards - before hook validation.
         _validateSubstandards(context, zoneParameters, true);
 
@@ -340,7 +350,10 @@ contract ImmutableSignedZoneV3 is
      * @notice Validates a fulfilment execution.
      *
      * @dev This function is called by Seaport whenever any extraData is
-     *      provided by the caller, after tokens have been transferred.
+     *      provided by the caller, after tokens have been transferred. Note
+     *      that this function omits redundant validation that is already performed
+     *      in the authorizeOrder function which is called by Seaport before
+     *      tokens are transferred.
      *
      * @param zoneParameters        The zone parameters containing data related to
      *                              the fulfilment execution.
@@ -354,6 +367,7 @@ contract ImmutableSignedZoneV3 is
         bytes calldata extraData = zoneParameters.extraData;
 
         // extraData bytes 93-end: context (optional, variable length).
+        // extraData length is guaranteed by the authorizeOrder function.
         bytes calldata context = extraData[93:];
 
         // Validate supported substandards - after hook validation.
@@ -502,6 +516,7 @@ contract ImmutableSignedZoneV3 is
 
         // Only perform validation in before hook.
         if (before) {
+            // zoneParameters.consideration.length >= 1 is guaranteed by the authorizeOrder function.
             if (uint256(bytes32(context[1:33])) != zoneParameters.consideration[0].identifier) {
                 revert Substandard1Violation(zoneParameters.orderHash, zoneParameters.consideration[0].identifier, uint256(bytes32(context[1:33])));
             }
@@ -670,6 +685,7 @@ contract ImmutableSignedZoneV3 is
 
         // Only perform identifier validation in before hook.
         if (before) {
+            // zoneParameters.consideration.length >= 1 is guaranteed by the authorizeOrder function.
             if (uint256(bytes32(context[1:33])) != zoneParameters.consideration[0].identifier) {
                 revert Substandard7IdentifierViolation(zoneParameters.orderHash, zoneParameters.consideration[0].identifier, uint256(bytes32(context[1:33])));
             }
@@ -678,8 +694,10 @@ contract ImmutableSignedZoneV3 is
         // This zone assumes that either the first consideration item or the first offer item is an ERC721 or ERC1155 token.
         // slither-disable-next-line uninitialized-local
         address token;
+        // zoneParameters.consideration.length >= 1 is guaranteed by the authorizeOrder function.
         if (uint(zoneParameters.consideration[0].itemType) > 1) {
             token = zoneParameters.consideration[0].token;
+        // zoneParameters.offer.length >= 1 is guaranteed by the authorizeOrder function.
         } else if (uint(zoneParameters.offer[0].itemType) > 1) {
             token = zoneParameters.offer[0].token;
         } else {
@@ -732,9 +750,11 @@ contract ImmutableSignedZoneV3 is
         address token;
         // slither-disable-next-line uninitialized-local
         uint256 tokenId;
+        // zoneParameters.consideration.length >= 1 is guaranteed by the authorizeOrder function.
         if (uint(zoneParameters.consideration[0].itemType) > 1) {
             token = zoneParameters.consideration[0].token;
             tokenId = zoneParameters.consideration[0].identifier;
+        // zoneParameters.offer.length >= 1 is guaranteed by the authorizeOrder function.
         } else if (uint(zoneParameters.offer[0].itemType) > 1) {
             token = zoneParameters.offer[0].token;
             tokenId = zoneParameters.offer[0].identifier;

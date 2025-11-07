@@ -48,6 +48,8 @@ Operational function tests:
 | `test_authorizeOrder_revertsIfExtraDataVersionIsNotSupported`               | Authorize order with unexpected SIP-6 version byte. | No         | Yes         |
 | `test_authorizeOrder_revertsIfSignatureHasExpired`                          | Authorize order with an expired signature.          | No         | Yes         |
 | `test_authorizeOrder_revertsIfActualFulfillerDoesNotMatchExpectedFulfiller` | Authorize order with unexpected fufiller.           | No         | Yes         |
+| `test_authorizeOrder_revertsIfNoSpentItems`                                 | Authorize order with no spent items.                | No         | Yes         |
+| `test_authorizeOrder_revertsIfNoReceivedItems`                              | Authorize order with no received items.             | No         | Yes         |
 | `test_authorizeOrder_revertsIfSignerIsNotActive`                            | Authorize order with inactive signer.               | No         | Yes         |
 | `test_authorizeOrder_returnsMagicValueOnSuccessfulValidation`               | Authorize order successfully.                       | Yes        | Yes         |
 | `test_validateOrder_revertsIfContextIsEmpty`                                | Validate order with an empty context.               | No         | Yes         |

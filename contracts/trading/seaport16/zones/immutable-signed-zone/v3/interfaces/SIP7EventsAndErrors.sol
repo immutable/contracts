@@ -61,13 +61,13 @@ interface SIP7EventsAndErrors {
     error InvalidExtraData(string reason, bytes32 orderHash);
 
     /**
-     * @dev Revert with an error if a no spent items are provided.
+     * @dev Revert with an error if no spent items are provided.
      *      This is a custom error that is not part of the SIP-7 spec.
      */
     error NoSpentItems(bytes32 orderHash);
 
     /**
-     * @dev Revert with an error if a no received items are provided.
+     * @dev Revert with an error if no received items are provided.
      *      This is a custom error that is not part of the SIP-7 spec.
      */
     error NoReceivedItems(bytes32 orderHash);

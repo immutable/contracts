@@ -281,14 +281,14 @@ contract ImmutableSignedZoneV3 is
             revert UnsupportedExtraDataVersion(uint8(extraData[0]));
         }
 
-        // extraData bytes 1-21: expected fulfiller.
+        // extraData bytes 1-20: expected fulfiller.
         // (zero address means not restricted).
         address expectedFulfiller = address(bytes20(extraData[1:21]));
 
-        // extraData bytes 21-29: expiration timestamp.
+        // extraData bytes 21-28: expiration timestamp.
         uint64 expiration = uint64(bytes8(extraData[21:29]));
 
-        // extraData bytes 29-93: signature.
+        // extraData bytes 29-92: signature.
         // (strictly requires 64 byte compact sig, ERC2098).
         bytes calldata signature = extraData[29:93];
 

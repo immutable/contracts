@@ -35,10 +35,6 @@ Control function tests:
 | `test_updateAPIEndpoint_updatesAPIEndpointIfCalledByZoneManagerRole`           | Update API endpoint with authorization.         | Yes        | Yes         |
 | `test_updateDocumentationURI_revertsIfCalledByNonZoneManagerRole`              | Update documentation URI without authorization. | No         | Yes         |
 | `test_updateDocumentationURI_updatesDocumentationURIIfCalledByZoneManagerRole` | Update documentation URI with authorization.    | Yes        | Yes         |
-| `test_authorizeOrder_revertsIfSeaportNotCaller`                                | `authorizeOrder` caller not Seaport.            | No         | Yes         |
-| `test_authorizeOrder_allowedIfSeaportIsCaller`                                 | `authorizeOrder` caller is Seaport.             | Yes        | Yes         |
-| `test_validateOrder_revertsIfSeaportNotCaller`                                 | `validateOrder` caller not Seaport.             | No         | Yes         |
-| `test_validateOrder_allowedIfSeaportIsCaller`                                  | `validateOrder` caller is Seaport.              | Yes        | Yes         |
 
 Operational function tests:
 
@@ -47,6 +43,8 @@ Operational function tests:
 | `test_getSeaportMetadata`                                                   | Retrieve metadata describing the Zone.              | Yes        | Yes         |
 | `test_sip7Information`                                                      | Retrieve SIP-7 specific information.                | Yes        | Yes         |
 | `test_supportsInterface`                                                    | ERC165 support.                                     | Yes        | Yes         |
+| `test_authorizeOrder_revertsIfSeaportNotCaller`                             | `authorizeOrder` caller not Seaport.                | No         | Yes         |
+| `test_authorizeOrder_allowedIfSeaportIsCaller`                              | `authorizeOrder` caller is Seaport.                 | Yes        | Yes         |
 | `test_authorizeOrder_revertsIfEmptyExtraData`                               | Authorize order with empty `extraData`.             | No         | Yes         |
 | `test_authorizeOrder_revertsIfExtraDataLengthIsLessThan93`                  | Authorize order with unexpected `extraData` length. | No         | Yes         |
 | `test_authorizeOrder_revertsIfExtraDataVersionIsNotSupported`               | Authorize order with unexpected SIP-6 version byte. | No         | Yes         |
@@ -56,6 +54,8 @@ Operational function tests:
 | `test_authorizeOrder_revertsIfNoReceivedItems`                              | Authorize order with no received items.             | No         | Yes         |
 | `test_authorizeOrder_revertsIfSignerIsNotActive`                            | Authorize order with inactive signer.               | No         | Yes         |
 | `test_authorizeOrder_returnsMagicValueOnSuccessfulValidation`               | Authorize order successfully.                       | Yes        | Yes         |
+| `test_validateOrder_revertsIfSeaportNotCaller`                              | `validateOrder` caller not Seaport.                 | No         | Yes         |
+| `test_validateOrder_allowedIfSeaportIsCaller`                               | `validateOrder` caller is Seaport.                  | Yes        | Yes         |
 | `test_validateOrder_revertsIfContextIsEmpty`                                | Validate order with an empty context.               | No         | Yes         |
 | `test_validateOrder_returnsMagicValueOnSuccessfulValidation`                | Validate order successfully.                        | Yes        | Yes         |
 

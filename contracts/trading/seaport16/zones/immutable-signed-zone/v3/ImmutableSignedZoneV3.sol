@@ -80,6 +80,9 @@ contract ImmutableSignedZoneV3 is
 
     bytes32 private immutable _NAME_HASH;
 
+    /// @dev The Seaport contract address.
+    address private immutable _SEAPORT;
+
     /// @dev The allowed signers.
     // solhint-disable-next-line named-parameters-mapping
     mapping(address => SignerInfo) private _signers;
@@ -94,6 +97,7 @@ contract ImmutableSignedZoneV3 is
      * @notice Constructor to deploy the contract.
      *
      * @param zoneName         The name for the zone returned in getSeaportMetadata().
+     * @param seaport          The Seaport contract address.
      * @param apiEndpoint      The API endpoint where orders for this zone can be signed.
      *                         Request and response payloads are defined in SIP-7.
      * @param documentationURI The documentation URI.
@@ -102,6 +106,7 @@ contract ImmutableSignedZoneV3 is
      */
     constructor(
         string memory zoneName,
+        address seaport,
         string memory apiEndpoint,
         string memory documentationURI,
         address owner
@@ -111,6 +116,9 @@ contract ImmutableSignedZoneV3 is
 
         // Set name hash.
         _NAME_HASH = keccak256(bytes(zoneName));
+
+        // Set the Seaport contract address.
+        _SEAPORT = seaport;
 
         // Set the API endpoint.
         _apiEndpoint = apiEndpoint;
@@ -258,6 +266,11 @@ contract ImmutableSignedZoneV3 is
     function authorizeOrder(
         ZoneParameters calldata zoneParameters
     ) external override returns (bytes4 authorizedOrderMagicValue) {
+        // Revert if the caller is not the Seaport contract.
+        if (msg.sender != _SEAPORT) {
+            revert CallerNotSeaport();
+        }
+
         // Put the extraData and orderHash on the stack for cheaper access.
         bytes calldata extraData = zoneParameters.extraData;
         bytes32 orderHash = zoneParameters.orderHash;
@@ -363,6 +376,11 @@ contract ImmutableSignedZoneV3 is
     function validateOrder(
         ZoneParameters calldata zoneParameters
     ) external override returns (bytes4 validOrderMagicValue) {
+        // Revert if the caller is not the Seaport contract.
+        if (msg.sender != _SEAPORT) {
+            revert CallerNotSeaport();
+        }
+
         // Put the extraData and orderHash on the stack for cheaper access.
         bytes calldata extraData = zoneParameters.extraData;
 

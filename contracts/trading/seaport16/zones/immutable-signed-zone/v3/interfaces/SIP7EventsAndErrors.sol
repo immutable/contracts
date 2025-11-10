@@ -61,6 +61,12 @@ interface SIP7EventsAndErrors {
     error InvalidExtraData(string reason, bytes32 orderHash);
 
     /**
+     * @dev Revert with an error if the caller is not the Seaport contract.
+     *      This is a custom error that is not part of the SIP-7 spec.
+     */
+    error CallerNotSeaport();
+
+    /**
      * @dev Revert with an error if no spent items are provided.
      *      This is a custom error that is not part of the SIP-7 spec.
      */

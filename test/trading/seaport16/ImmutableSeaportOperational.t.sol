@@ -132,7 +132,7 @@ contract ImmutableSeaportOperationalTest is ImmutableSeaportBaseTest, ImmutableS
 
         // The algorithm inside fulfillAdvancedOrder uses ecRecover to determine the signer. If the
         // information going in is wrong, then the wrong signer will be derived.
-        address derivedBadSigner = 0x7D86d2b5A73f1620093012C73B3a99781B11B2F5;
+        address derivedBadSigner = 0xbB5E3df75ae272CcEb6CEB0F4A4BCfd3AfE3f27D;
 
         vm.prank(buyer);
         vm.expectRevert(abi.encodeWithSelector(SIP7EventsAndErrors.SignerNotActive.selector, derivedBadSigner));

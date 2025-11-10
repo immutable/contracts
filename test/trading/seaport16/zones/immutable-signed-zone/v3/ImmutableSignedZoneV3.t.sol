@@ -40,6 +40,7 @@ contract ImmutableSignedZoneV3Test is
     address private immutable OFFERER = makeAddr("offerer");
     address private immutable SIGNER;
     uint256 private immutable SIGNER_PRIVATE_KEY;
+    address private immutable SEAPORT = makeAddr("seaport");
     // solhint-enable private-vars-leading-underscore
 
     // OpenZeppelin v5 access/IAccessControl.sol
@@ -55,7 +56,7 @@ contract ImmutableSignedZoneV3Test is
     function test_contructor_grantsAdminRoleToOwner() public {
         address owner = makeAddr("owner");
         ImmutableSignedZoneV3 zone = new ImmutableSignedZoneV3(
-            "MyZoneName", "https://www.immutable.com", "https://www.immutable.com/docs", owner
+            "MyZoneName", SEAPORT, "https://www.immutable.com", "https://www.immutable.com/docs", owner
         );
         bool ownerHasAdminRole = zone.hasRole(zone.DEFAULT_ADMIN_ROLE(), owner);
         assertTrue(ownerHasAdminRole);
@@ -65,7 +66,7 @@ contract ImmutableSignedZoneV3Test is
         vm.expectEmit();
         emit SeaportCompatibleContractDeployed();
         new ImmutableSignedZoneV3(
-            "MyZoneName", "https://www.immutable.com", "https://www.immutable.com/docs", makeAddr("owner")
+            "MyZoneName", SEAPORT, "https://www.immutable.com", "https://www.immutable.com/docs", makeAddr("owner")
         );
     }
 
@@ -342,7 +343,7 @@ contract ImmutableSignedZoneV3Test is
         string memory expectedDocumentationURI = "https://www.immutable.com/docs";
 
         ImmutableSignedZoneV3Harness zone =
-            new ImmutableSignedZoneV3Harness(expectedZoneName, expectedApiEndpoint, expectedDocumentationURI, OWNER);
+            new ImmutableSignedZoneV3Harness(expectedZoneName, SEAPORT, expectedApiEndpoint, expectedDocumentationURI, OWNER);
 
         bytes32 expectedDomainSeparator = zone.exposed_deriveDomainSeparator();
         uint256[] memory expectedSubstandards = zone.exposed_getSupportedSubstandards();
@@ -371,7 +372,7 @@ contract ImmutableSignedZoneV3Test is
         string memory expectedDocumentationURI = "https://www.immutable.com/docs";
 
         ImmutableSignedZoneV3Harness zone =
-            new ImmutableSignedZoneV3Harness("MyZoneName", expectedApiEndpoint, expectedDocumentationURI, OWNER);
+            new ImmutableSignedZoneV3Harness("MyZoneName", SEAPORT, expectedApiEndpoint, expectedDocumentationURI, OWNER);
 
         bytes32 expectedDomainSeparator = zone.exposed_deriveDomainSeparator();
         uint256[] memory expectedSubstandards = zone.exposed_getSupportedSubstandards();
@@ -391,6 +392,51 @@ contract ImmutableSignedZoneV3Test is
 
     /* authorizeOrder */
 
+    function test_authorizeOrder_revertsIfSeaportNotCaller() public {
+        ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
+        bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
+        vm.prank(OWNER);
+        zone.grantRole(managerRole, OWNER);
+        vm.prank(OWNER);
+        zone.addSigner(SIGNER);
+
+        ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
+        zoneParameters.extraData = _buildExtraData(
+            zone,
+            SIGNER_PRIVATE_KEY,
+            zoneParameters.fulfiller,
+            DEFAULT_EXPIRATION,
+            zoneParameters.orderHash,
+            abi.encodePacked(bytes1(0x01), zoneParameters.consideration[0].identifier)
+        );
+
+        vm.expectRevert(abi.encodeWithSelector(CallerNotSeaport.selector));
+        vm.prank(makeAddr("not_seaport"));
+        zone.authorizeOrder(zoneParameters);
+    }
+
+    function test_authorizeOrder_allowedIfSeaportIsCaller() public {
+        ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
+        bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
+        vm.prank(OWNER);
+        zone.grantRole(managerRole, OWNER);
+        vm.prank(OWNER);
+        zone.addSigner(SIGNER);
+
+        ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
+        zoneParameters.extraData = _buildExtraData(
+            zone,
+            SIGNER_PRIVATE_KEY,
+            zoneParameters.fulfiller,
+            DEFAULT_EXPIRATION,
+            zoneParameters.orderHash,
+            abi.encodePacked(bytes1(0x01), zoneParameters.consideration[0].identifier)
+        );
+
+        vm.prank(SEAPORT);
+        zone.authorizeOrder(zoneParameters);
+    }
+
     function test_authorizeOrder_revertsIfEmptyExtraData() public {
         ImmutableSignedZoneV3 zone = _newZone(OWNER);
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
@@ -398,6 +444,7 @@ contract ImmutableSignedZoneV3Test is
         vm.expectRevert(
             abi.encodeWithSelector(InvalidExtraData.selector, "extraData is empty", zoneParameters.orderHash)
         );
+        vm.prank(SEAPORT);
         zone.authorizeOrder(zoneParameters);
     }
 
@@ -410,6 +457,7 @@ contract ImmutableSignedZoneV3Test is
                 InvalidExtraData.selector, "extraData length must be at least 93 bytes", zoneParameters.orderHash
             )
         );
+        vm.prank(SEAPORT);
         zone.authorizeOrder(zoneParameters);
     }
 
@@ -420,6 +468,7 @@ contract ImmutableSignedZoneV3Test is
             hex"01f39fd6e51aad88f6f4ce6ab8827279cfffb9226600000000660f3027d9ef9e6e50a74cc24433373b9cdd97693a02adcc94e562bb59a5af68190ecaea4414dcbe74618f6c77d11cbcf4a8345bbdf46e665249904925c95929ba6606638b779c6b502204fca6bb0539cdc3dc258fe3ce7b53be0c4ad620899167fedaa8"
         );
         vm.expectRevert(abi.encodeWithSelector(UnsupportedExtraDataVersion.selector, uint8(1)));
+        vm.prank(SEAPORT);
         zone.authorizeOrder(zoneParameters);
     }
 
@@ -446,6 +495,7 @@ contract ImmutableSignedZoneV3Test is
         );
         // set current block.timestamp to be 1000
         vm.warp(1000);
+        vm.prank(SEAPORT);
         zone.authorizeOrder(zoneParameters);
     }
 
@@ -471,6 +521,7 @@ contract ImmutableSignedZoneV3Test is
                 zoneParameters.orderHash
             )
         );
+        vm.prank(SEAPORT);
         zone.authorizeOrder(zoneParameters);
     }
 
@@ -494,6 +545,7 @@ contract ImmutableSignedZoneV3Test is
                 zoneParameters.orderHash
             )
         );
+        vm.prank(SEAPORT);
         zone.authorizeOrder(zoneParameters);
     }
 
@@ -517,6 +569,7 @@ contract ImmutableSignedZoneV3Test is
                 zoneParameters.orderHash
             )
         );
+        vm.prank(SEAPORT);
         zone.authorizeOrder(zoneParameters);
     }
 
@@ -537,6 +590,7 @@ contract ImmutableSignedZoneV3Test is
         vm.expectRevert(
             abi.encodeWithSelector(SignerNotActive.selector, address(0x6E12D8C87503D4287c294f2Fdef96ACd9DFf6bd2))
         );
+        vm.prank(SEAPORT);
         zone.authorizeOrder(zoneParameters);
     }
 
@@ -558,10 +612,56 @@ contract ImmutableSignedZoneV3Test is
             abi.encodePacked(bytes1(0x01), zoneParameters.consideration[0].identifier)
         );
 
+        vm.prank(SEAPORT);
         assertEq(zone.authorizeOrder(zoneParameters), bytes4(0x01e4d72a));
     }
 
     /* validateOrder */
+
+    function test_validateOrder_revertsIfSeaportNotCaller() public {
+        ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
+        bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
+        vm.prank(OWNER);
+        zone.grantRole(managerRole, OWNER);
+        vm.prank(OWNER);
+        zone.addSigner(SIGNER);
+
+        ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
+        zoneParameters.extraData = _buildExtraData(
+            zone,
+            SIGNER_PRIVATE_KEY,
+            zoneParameters.fulfiller,
+            DEFAULT_EXPIRATION,
+            zoneParameters.orderHash,
+            abi.encodePacked(bytes1(0x01), zoneParameters.consideration[0].identifier)
+        );
+
+        vm.expectRevert(abi.encodeWithSelector(CallerNotSeaport.selector));
+        vm.prank(makeAddr("not_seaport"));
+        zone.validateOrder(zoneParameters);
+    }
+
+    function test_validateOrder_allowedIfSeaportIsCaller() public {
+        ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
+        bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
+        vm.prank(OWNER);
+        zone.grantRole(managerRole, OWNER);
+        vm.prank(OWNER);
+        zone.addSigner(SIGNER);
+
+        ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
+        zoneParameters.extraData = _buildExtraData(
+            zone,
+            SIGNER_PRIVATE_KEY,
+            zoneParameters.fulfiller,
+            DEFAULT_EXPIRATION,
+            zoneParameters.orderHash,
+            abi.encodePacked(bytes1(0x01), zoneParameters.consideration[0].identifier)
+        );
+
+        vm.prank(SEAPORT);
+        zone.validateOrder(zoneParameters);
+    }
 
     function test_validateOrder_revertsIfContextIsEmpty() public {
         ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
@@ -586,6 +686,7 @@ contract ImmutableSignedZoneV3Test is
                 InvalidExtraData.selector, "invalid context, no substandards present", zoneParameters.orderHash
             )
         );
+        vm.prank(SEAPORT);
         zone.validateOrder(zoneParameters);
     }
 
@@ -607,6 +708,7 @@ contract ImmutableSignedZoneV3Test is
             abi.encodePacked(bytes1(0x01), zoneParameters.consideration[0].identifier)
         );
 
+        vm.prank(SEAPORT);
         assertEq(zone.validateOrder(zoneParameters), bytes4(0x17b1f942));
     }
 
@@ -2093,13 +2195,13 @@ contract ImmutableSignedZoneV3Test is
 
     function _newZone(address owner) private returns (ImmutableSignedZoneV3) {
         return new ImmutableSignedZoneV3(
-            "MyZoneName", "https://www.immutable.com", "https://www.immutable.com/docs", owner
+            "MyZoneName", SEAPORT, "https://www.immutable.com", "https://www.immutable.com/docs", owner
         );
     }
 
     function _newZoneHarness(address owner) private returns (ImmutableSignedZoneV3Harness) {
         return new ImmutableSignedZoneV3Harness(
-            "MyZoneName", "https://www.immutable.com", "https://www.immutable.com/docs", owner
+            "MyZoneName", SEAPORT, "https://www.immutable.com", "https://www.immutable.com/docs", owner
         );
     }
 

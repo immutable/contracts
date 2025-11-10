@@ -35,6 +35,10 @@ Control function tests:
 | `test_updateAPIEndpoint_updatesAPIEndpointIfCalledByZoneManagerRole`           | Update API endpoint with authorization.         | Yes        | Yes         |
 | `test_updateDocumentationURI_revertsIfCalledByNonZoneManagerRole`              | Update documentation URI without authorization. | No         | Yes         |
 | `test_updateDocumentationURI_updatesDocumentationURIIfCalledByZoneManagerRole` | Update documentation URI with authorization.    | Yes        | Yes         |
+| `test_authorizeOrder_revertsIfSeaportNotCaller`                                | `authorizeOrder` caller not Seaport.            | No         | Yes         |
+| `test_authorizeOrder_allowedIfSeaportIsCaller`                                 | `authorizeOrder` caller is Seaport.             | Yes        | Yes         |
+| `test_validateOrder_revertsIfSeaportNotCaller`                                 | `validateOrder` caller not Seaport.             | No         | Yes         |
+| `test_validateOrder_allowedIfSeaportIsCaller`                                  | `validateOrder` caller is Seaport.              | Yes        | Yes         |
 
 Operational function tests:
 

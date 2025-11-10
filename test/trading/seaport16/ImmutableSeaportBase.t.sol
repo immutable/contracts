@@ -51,12 +51,6 @@ abstract contract ImmutableSeaportBaseTest is Test {
         (seller, sellerPkey) = makeAddrAndKey("seller");
 
         // Deploy contracts
-        immutableSignedZone = new ImmutableSignedZoneV3("ImmutableSignedZone", "", "", owner);
-        bytes32 zoneManagerRole = immutableSignedZone.ZONE_MANAGER_ROLE();
-        vm.prank(owner);
-        immutableSignedZone.grantRole(zoneManagerRole, zoneManager);
-        vm.prank(zoneManager);
-        immutableSignedZone.addSigner(immutableSigner);
 
         // The conduit key used to deploy the conduit. Note that the first twenty bytes of the conduit key must match the caller of this contract.
         conduitKey = bytes32(uint256(uint160(owner)) << (256-160));
@@ -69,6 +63,13 @@ abstract contract ImmutableSeaportBaseTest is Test {
         conduit = Conduit(conduitAddress);
 
         immutableSeaport = new ImmutableSeaport(address(conduitController), owner);
+
+        immutableSignedZone = new ImmutableSignedZoneV3("ImmutableSignedZone", address(immutableSeaport), "", "", owner);
+        bytes32 zoneManagerRole = immutableSignedZone.ZONE_MANAGER_ROLE();
+        vm.prank(owner);
+        immutableSignedZone.grantRole(zoneManagerRole, zoneManager);
+        vm.prank(zoneManager);
+        immutableSignedZone.addSigner(immutableSigner);
 
         vm.prank(owner);
         immutableSeaport.setAllowedZone(address(immutableSignedZone), true);

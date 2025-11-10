@@ -91,11 +91,15 @@ contract ImmutableSeaportSignedZoneV3IntegrationTest is Test, SigningTestHelper 
         vm.prank(OWNER);
         erc1155Token.grantMinterRole(OWNER);
 
+        // seaport
+        ConduitController conduitController = new ConduitController();
+        seaport = new ImmutableSeaportHarness(address(conduitController), OWNER);
+
         // zone
         zone = IImmutableSignedZoneV3Harness(
             deployCode(
                 ZONE_ARTIFACT,
-                abi.encode("MyZoneName", "https://www.immutable.com", "https://www.immutable.com/docs", OWNER)
+                abi.encode("MyZoneName", address(seaport), "https://www.immutable.com", "https://www.immutable.com/docs", OWNER)
             )
         );
         vm.prank(OWNER);
@@ -105,9 +109,7 @@ contract ImmutableSeaportSignedZoneV3IntegrationTest is Test, SigningTestHelper 
         vm.prank(ZONE_MANAGER);
         zone.addSigner(SIGNER);
 
-        // seaport
-        ConduitController conduitController = new ConduitController();
-        seaport = new ImmutableSeaportHarness(address(conduitController), OWNER);
+        // set allowed zone
         vm.prank(OWNER);
         seaport.setAllowedZone(address(zone), true);
 

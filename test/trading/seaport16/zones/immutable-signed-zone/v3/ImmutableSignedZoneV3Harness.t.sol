@@ -11,8 +11,14 @@ import {ImmutableSignedZoneV3} from
 // solhint-disable func-name-mixedcase
 
 contract ImmutableSignedZoneV3Harness is ImmutableSignedZoneV3 {
-    constructor(string memory zoneName, string memory apiEndpoint, string memory documentationURI, address owner)
-        ImmutableSignedZoneV3(zoneName, apiEndpoint, documentationURI, owner)
+    constructor(
+        string memory zoneName,
+        address seaport,
+        string memory apiEndpoint,
+        string memory documentationURI,
+        address owner
+    )
+        ImmutableSignedZoneV3(zoneName, seaport, apiEndpoint, documentationURI, owner)
     {}
 
     function exposed_domainSeparator() external view returns (bytes32) {

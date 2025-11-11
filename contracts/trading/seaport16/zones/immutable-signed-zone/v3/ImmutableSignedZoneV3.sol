@@ -118,6 +118,9 @@ contract ImmutableSignedZoneV3 is
         _NAME_HASH = keccak256(bytes(zoneName));
 
         // Set the Seaport contract address.
+        if (seaport == address(0)) {
+            revert SeaportCannotBeZeroAddress();
+        }
         _SEAPORT = seaport;
 
         // Set the API endpoint.

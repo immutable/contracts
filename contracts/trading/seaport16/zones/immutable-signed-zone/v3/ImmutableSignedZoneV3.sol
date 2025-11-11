@@ -610,6 +610,11 @@ contract ImmutableSignedZoneV3 is
         uint256 expectedOrderHashesSize = uint256(bytes32(context[33:65]));
         uint256 substandardIndexEnd = 64 + (expectedOrderHashesSize * 32);
 
+        // substandard ID + array offset + array length + array data.
+        if (context.length < substandardIndexEnd + 1) {
+            revert InvalidExtraData("invalid substandard 4 data length", zoneParameters.orderHash);
+        }
+
         // Only perform validation in after hook. Note that zoneParameters.orderHashes is only fully
         // populated in the after hook (validateOrder call).
         if (!before) {

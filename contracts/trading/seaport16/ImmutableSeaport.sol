@@ -25,7 +25,7 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
     // solhint-disable-next-line named-parameters-mapping
     mapping(address => bool) public allowedZones;
 
-    error OrderNotRestricted();
+    error OrderNotRestricted(uint8 orderType);
     error InvalidZone(address zone);
 
     /**
@@ -83,7 +83,7 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
     function _rejectBasicOrderIfZoneInvalid(BasicOrderParameters calldata parameters) internal view {
         // Basic order types (modulo 4): 0 = FULL_OPEN, 1 = PARTIAL_OPEN, 2 = FULL_RESTRICTED, 3 = PARTIAL_RESTRICTED. Only restricted orders (types 2 and 3) are allowed
         if (uint256(parameters.basicOrderType) % 4 != 2 && uint256(parameters.basicOrderType) % 4 != 3) {
-            revert OrderNotRestricted();
+            revert OrderNotRestricted(uint8(uint256(parameters.basicOrderType) % 4));
         }
         _rejectIfZoneInvalid(parameters.zone);
     }
@@ -98,7 +98,7 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
             order.parameters.orderType != OrderType.FULL_RESTRICTED &&
             order.parameters.orderType != OrderType.PARTIAL_RESTRICTED
         ) {
-            revert OrderNotRestricted();
+            revert OrderNotRestricted(uint8(order.parameters.orderType));
         }
         _rejectIfZoneInvalid(order.parameters.zone);
     }
@@ -113,7 +113,7 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
             advancedOrder.parameters.orderType != OrderType.FULL_RESTRICTED &&
             advancedOrder.parameters.orderType != OrderType.PARTIAL_RESTRICTED
         ) {
-            revert OrderNotRestricted();
+            revert OrderNotRestricted(uint8(advancedOrder.parameters.orderType));
         }
         _rejectIfZoneInvalid(advancedOrder.parameters.zone);
     }

@@ -100,7 +100,7 @@ contract ImmutableSeaportOperationalTest is ImmutableSeaportBaseTest, ImmutableS
         AdvancedOrder memory order = _prepareCheckFulfill(OrderType.FULL_OPEN);
 
         vm.prank(buyer);
-        vm.expectRevert(abi.encodeWithSelector(ImmutableSeaport.OrderNotRestricted.selector));
+        vm.expectRevert(abi.encodeWithSelector(ImmutableSeaport.OrderNotRestricted.selector, uint8(OrderType.FULL_OPEN)));
         immutableSeaport.fulfillAdvancedOrder{value: 10 ether}(order, new CriteriaResolver[](0), conduitKey, buyer);
     }
 

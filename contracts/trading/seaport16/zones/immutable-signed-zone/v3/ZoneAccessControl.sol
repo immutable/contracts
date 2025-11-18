@@ -22,6 +22,7 @@ abstract contract ZoneAccessControl is AccessControlEnumerable, ZoneAccessContro
      * @param owner The address to assign the DEFAULT_ADMIN_ROLE.
      */
     constructor(address owner) {
+        require(owner != address(0), "ZoneAccessControl: owner is the zero address");
         // Grant admin role to the specified owner.
         _grantRole(DEFAULT_ADMIN_ROLE, owner);
     }

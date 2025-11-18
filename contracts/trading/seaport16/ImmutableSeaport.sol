@@ -26,7 +26,7 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
     mapping(address => bool) public allowedZones;
 
     error OrderNotRestricted(uint8 orderType);
-    error AllowedZoneAlreadySet(address zone);
+    error AllowedZoneAlreadySet(address zone, bool allowed);
     error InvalidZone(address zone);
 
     /**
@@ -52,7 +52,7 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
         require(zone != address(0), "ImmutableSeaport: zone is the zero address");
 
         if (allowedZones[zone] == allowed) {
-            revert AllowedZoneAlreadySet(zone);
+            revert AllowedZoneAlreadySet(zone, allowed);
         }
 
         allowedZones[zone] = allowed;

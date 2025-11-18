@@ -21,14 +21,22 @@ contract ImmutableSeaportConfigTest is ImmutableSeaportBaseTest {
         immutableSeaport.setAllowedZone(address(0), true);
     }
 
-    function testRejectAllowedZoneAlreadySet() public {
+    function testRejectAllowedZoneAlreadySetToTrue() public {
         address zone = makeAddr("zone");
 
         vm.prank(owner);
         immutableSeaport.setAllowedZone(zone, true);
 
         vm.prank(owner);
-        vm.expectRevert(abi.encodeWithSelector(ImmutableSeaport.AllowedZoneAlreadySet.selector, zone));
+        vm.expectRevert(abi.encodeWithSelector(ImmutableSeaport.AllowedZoneAlreadySet.selector, zone, true));
         immutableSeaport.setAllowedZone(zone, true);
+    }
+
+    function testRejectAllowedZoneAlreadySetToFalse() public {
+        address zone = makeAddr("zone");
+
+        vm.prank(owner);
+        vm.expectRevert(abi.encodeWithSelector(ImmutableSeaport.AllowedZoneAlreadySet.selector, zone, false));
+        immutableSeaport.setAllowedZone(zone, false);
     }
 }

@@ -39,6 +39,7 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
      *                          constructor to be CREATE2 / CREATE3 compatible.
      */
     constructor(address conduitController, address owner) Consideration(conduitController) Ownable() {
+        require(owner != address(0), "ImmutableSeaport: owner is the zero address");
         // Transfer ownership to the address specified in the constructor
         _transferOwnership(owner);
     }

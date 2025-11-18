@@ -76,7 +76,52 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
     }
 
     /**
-     * @dev Helper function to revert any fulfillment that has an invalid zone
+     * @dev Helper function to revert any basic order that has an invalid zone.
+     *
+     * @param parameters The basic order parameters.
+     */
+    function _rejectBasicOrderIfZoneInvalid(BasicOrderParameters calldata parameters) internal view {
+        // Basic order types (modulo 4): 0 = FULL_OPEN, 1 = PARTIAL_OPEN, 2 = FULL_RESTRICTED, 3 = PARTIAL_RESTRICTED. Only restricted orders (types 2 and 3) are allowed
+        if (uint256(parameters.basicOrderType) % 4 != 2 && uint256(parameters.basicOrderType) % 4 != 3) {
+            revert OrderNotRestricted();
+        }
+        _rejectIfZoneInvalid(parameters.zone);
+    }
+
+    /**
+     * @dev Helper function to revert any order that has an invalid zone.
+     *
+     * @param order The order.
+     */
+    function _rejectOrderIfZoneInvalid(Order memory order) internal view {
+        if (
+            order.parameters.orderType != OrderType.FULL_RESTRICTED &&
+            order.parameters.orderType != OrderType.PARTIAL_RESTRICTED
+        ) {
+            revert OrderNotRestricted();
+        }
+        _rejectIfZoneInvalid(order.parameters.zone);
+    }
+
+    /**
+     * @dev Helper function to revert any advanced order that has an invalid zone.
+     *
+     * @param advancedOrder The advanced order.
+     */
+    function _rejectAdvancedOrderIfZoneInvalid(AdvancedOrder memory advancedOrder) internal view {
+        if (
+            advancedOrder.parameters.orderType != OrderType.FULL_RESTRICTED &&
+            advancedOrder.parameters.orderType != OrderType.PARTIAL_RESTRICTED
+        ) {
+            revert OrderNotRestricted();
+        }
+        _rejectIfZoneInvalid(advancedOrder.parameters.zone);
+    }
+
+    /**
+     * @dev Helper function to revert if the zone is not allowed.
+     *
+     * @param zone The zone to check.
      */
     function _rejectIfZoneInvalid(address zone) internal view {
         if (!allowedZones[zone]) {
@@ -112,12 +157,7 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
     function fulfillBasicOrder(
         BasicOrderParameters calldata parameters
     ) public payable virtual override returns (bool fulfilled) {
-        // All restricted orders are captured using this method
-        if (uint256(parameters.basicOrderType) % 4 != 2 && uint256(parameters.basicOrderType) % 4 != 3) {
-            revert OrderNotRestricted();
-        }
-
-        _rejectIfZoneInvalid(parameters.zone);
+        _rejectBasicOrderIfZoneInvalid(parameters);
 
         return super.fulfillBasicOrder(parameters);
     }
@@ -154,12 +194,7 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
     function fulfillBasicOrder_efficient_6GL6yc(
         BasicOrderParameters calldata parameters
     ) public payable virtual override returns (bool fulfilled) {
-        // All restricted orders are captured using this method
-        if (uint256(parameters.basicOrderType) % 4 != 2 && uint256(parameters.basicOrderType) % 4 != 3) {
-            revert OrderNotRestricted();
-        }
-
-        _rejectIfZoneInvalid(parameters.zone);
+        _rejectBasicOrderIfZoneInvalid(parameters);
 
         return super.fulfillBasicOrder_efficient_6GL6yc(parameters);
     }
@@ -193,14 +228,7 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
         Order calldata order,
         bytes32 fulfillerConduitKey
     ) public payable virtual override returns (bool fulfilled) {
-        if (
-            order.parameters.orderType != OrderType.FULL_RESTRICTED &&
-            order.parameters.orderType != OrderType.PARTIAL_RESTRICTED
-        ) {
-            revert OrderNotRestricted();
-        }
-
-        _rejectIfZoneInvalid(order.parameters.zone);
+        _rejectOrderIfZoneInvalid(order);
 
         return super.fulfillOrder(order, fulfillerConduitKey);
     }
@@ -260,14 +288,7 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
         bytes32 fulfillerConduitKey,
         address recipient
     ) public payable virtual override returns (bool fulfilled) {
-        if (
-            advancedOrder.parameters.orderType != OrderType.FULL_RESTRICTED &&
-            advancedOrder.parameters.orderType != OrderType.PARTIAL_RESTRICTED
-        ) {
-            revert OrderNotRestricted();
-        }
-
-        _rejectIfZoneInvalid(advancedOrder.parameters.zone);
+        _rejectAdvancedOrderIfZoneInvalid(advancedOrder);
 
         return super.fulfillAdvancedOrder(advancedOrder, criteriaResolvers, fulfillerConduitKey, recipient);
     }
@@ -347,15 +368,10 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
         override
         returns (bool[] memory, /* availableOrders */ Execution[] memory /* executions */)
     {
-        for (uint256 i = 0; i < orders.length; i++) {
+        uint256 numberOfOrders = orders.length;
+        for (uint256 i = 0; i < numberOfOrders; i++) {
             Order memory order = orders[i];
-            if (
-                order.parameters.orderType != OrderType.FULL_RESTRICTED &&
-                order.parameters.orderType != OrderType.PARTIAL_RESTRICTED
-            ) {
-                revert OrderNotRestricted();
-            }
-            _rejectIfZoneInvalid(order.parameters.zone);
+            _rejectOrderIfZoneInvalid(order);
         }
 
         return
@@ -473,16 +489,10 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
         override
         returns (bool[] memory, /* availableOrders */ Execution[] memory /* executions */)
     {
-        for (uint256 i = 0; i < advancedOrders.length; i++) {
+        uint256 numberOfAdvancedOrders = advancedOrders.length;
+        for (uint256 i = 0; i < numberOfAdvancedOrders; i++) {
             AdvancedOrder memory advancedOrder = advancedOrders[i];
-            if (
-                advancedOrder.parameters.orderType != OrderType.FULL_RESTRICTED &&
-                advancedOrder.parameters.orderType != OrderType.PARTIAL_RESTRICTED
-            ) {
-                revert OrderNotRestricted();
-            }
-
-            _rejectIfZoneInvalid(advancedOrder.parameters.zone);
+            _rejectAdvancedOrderIfZoneInvalid(advancedOrder);
         }
 
         return
@@ -536,15 +546,10 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
          */
         Fulfillment[] calldata fulfillments
     ) public payable virtual override returns (Execution[] memory /* executions */) {
-        for (uint256 i = 0; i < orders.length; i++) {
+        uint256 numberOfOrders = orders.length;
+        for (uint256 i = 0; i < numberOfOrders; i++) {
             Order memory order = orders[i];
-            if (
-                order.parameters.orderType != OrderType.FULL_RESTRICTED &&
-                order.parameters.orderType != OrderType.PARTIAL_RESTRICTED
-            ) {
-                revert OrderNotRestricted();
-            }
-            _rejectIfZoneInvalid(order.parameters.zone);
+            _rejectOrderIfZoneInvalid(order);
         }
 
         return super.matchOrders(orders, fulfillments);
@@ -617,16 +622,10 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
         Fulfillment[] calldata fulfillments,
         address recipient
     ) public payable virtual override returns (Execution[] memory /* executions */) {
-        for (uint256 i = 0; i < advancedOrders.length; i++) {
+        uint256 numberOfAdvancedOrders = advancedOrders.length;
+        for (uint256 i = 0; i < numberOfAdvancedOrders; i++) {
             AdvancedOrder memory advancedOrder = advancedOrders[i];
-            if (
-                advancedOrder.parameters.orderType != OrderType.FULL_RESTRICTED &&
-                advancedOrder.parameters.orderType != OrderType.PARTIAL_RESTRICTED
-            ) {
-                revert OrderNotRestricted();
-            }
-
-            _rejectIfZoneInvalid(advancedOrder.parameters.zone);
+            _rejectAdvancedOrderIfZoneInvalid(advancedOrder);
         }
 
         return super.matchAdvancedOrders(advancedOrders, criteriaResolvers, fulfillments, recipient);

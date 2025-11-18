@@ -2,9 +2,9 @@
 pragma solidity ^0.8.13;
 
 import {ImmutableSeaportBaseTest} from "./ImmutableSeaportBase.t.sol";
+import {ImmutableSeaport} from "../../../contracts/trading/seaport16/ImmutableSeaport.sol";
 
 contract ImmutableSeaportConfigTest is ImmutableSeaportBaseTest {
-
     function testEmitsAllowedZoneSetEvent() public {
         address zone = makeAddr("zone");
         bool allowed = true;
@@ -13,5 +13,22 @@ contract ImmutableSeaportConfigTest is ImmutableSeaportBaseTest {
         vm.expectEmit(true, true, true, true);
         emit AllowedZoneSet(zone, allowed);
         immutableSeaport.setAllowedZone(zone, allowed);
+    }
+
+    function testRejectZeroAddressZone() public {
+        vm.prank(owner);
+        vm.expectRevert("ImmutableSeaport: zone is the zero address");
+        immutableSeaport.setAllowedZone(address(0), true);
+    }
+
+    function testRejectAllowedZoneAlreadySet() public {
+        address zone = makeAddr("zone");
+
+        vm.prank(owner);
+        immutableSeaport.setAllowedZone(zone, true);
+
+        vm.prank(owner);
+        vm.expectRevert(abi.encodeWithSelector(ImmutableSeaport.AllowedZoneAlreadySet.selector, zone));
+        immutableSeaport.setAllowedZone(zone, true);
     }
 }

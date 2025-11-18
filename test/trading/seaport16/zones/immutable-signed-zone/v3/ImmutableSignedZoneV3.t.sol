@@ -62,6 +62,13 @@ contract ImmutableSignedZoneV3Test is
         assertTrue(ownerHasAdminRole);
     }
 
+    function test_contructor_revertsIfOwnerIsTheZeroAddress() public {
+        vm.expectRevert("ZoneAccessControl: owner is the zero address");
+        new ImmutableSignedZoneV3(
+            "MyZoneName", SEAPORT, "https://www.immutable.com", "https://www.immutable.com/docs", address(0)
+        );
+    }
+
     function test_contructor_emitsSeaportCompatibleContractDeployedEvent() public {
         vm.expectEmit();
         emit SeaportCompatibleContractDeployed();

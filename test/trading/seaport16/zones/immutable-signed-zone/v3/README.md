@@ -7,6 +7,7 @@ Constructor tests:
 | Test name                                                     | Description                                                   | Happy Case | Implemented |
 | ------------------------------------------------------------- | ------------------------------------------------------------- | ---------- | ----------- |
 | `test_contructor_grantsAdminRoleToOwner`                      | Check `DEFAULT_ADMIN_ROLE` is granted to the specified owner. | Yes        | Yes         |
+| `test_contructor_revertsIfOwnerIsTheZeroAddress`              | Check specified owner is not the zero address.                | No         | Yes         |
 | `test_contructor_emitsSeaportCompatibleContractDeployedEvent` | Emits `SeaportCompatibleContractDeployed` event.              | Yes        | Yes         |
 
 Control function tests:

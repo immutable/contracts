@@ -137,6 +137,16 @@ contract ImmutableSignedZoneV3 is
     }
 
     /**
+     * @notice Check if a given signer is active.
+     *
+     * @param signer The signer address to check.
+     * @return True if the signer is active, false otherwise.
+     */
+    function isActiveSigner(address signer) external view returns (bool) {
+        return _signers[signer].active;
+    }
+
+    /**
      * @notice Add a new signer to the zone.
      *
      * @param signer The new signer address to add.

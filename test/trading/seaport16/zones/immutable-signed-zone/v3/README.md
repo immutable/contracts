@@ -24,6 +24,8 @@ Control function tests:
 | `test_renounceRole_revertsIfRenouncingLastDefaultAdminRole`                    | Renounce last `DEFAULT_ADMIN_ROLE`.             | No         | Yes         |
 | `test_renounceRole_revokesIfRenouncingNonLastDefaultAdminRole`                 | Renounce non-last `DEFAULT_ADMIN_ROLE`.         | Yes        | Yes         |
 | `test_renounceRole_revokesIfRenouncingLastNonDefaultAdminRole`                 | Renounce last non-`DEFAULT_ADMIN_ROLE`.         | Yes        | Yes         |
+| `test_isActiveSigner_returnsTrueIfSignerIsActive`                              | Check active signer.                            | Yes        | Yes         |
+| `test_isActiveSigner_returnsFalseIfSignerIsNotActive`                          | Check inactive signer.                          | Yes        | Yes         |
 | `test_addSigner_revertsIfCalledByNonZoneManagerRole`                           | Add signer without authorization.               | No         | Yes         |
 | `test_addSigner_revertsIfSignerIsTheZeroAddress`                               | Add zero address as signer.                     | No         | Yes         |
 | `test_addSigner_emitsSignerAddedEvent`                                         | Emits `SignerAdded` event.                      | Yes        | Yes         |

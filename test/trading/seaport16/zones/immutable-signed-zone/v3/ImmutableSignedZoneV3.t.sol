@@ -197,6 +197,26 @@ contract ImmutableSignedZoneV3Test is
         assertEq(managerCount, 0);
     }
 
+    /* isActiveSigner */
+
+    function test_isActiveSigner_returnsTrueIfSignerIsActive() public {
+        address signer = makeAddr("signer");
+        ImmutableSignedZoneV3 zone = _newZone(OWNER);
+        bytes32 managerRole = zone.ZONE_MANAGER_ROLE();
+        vm.prank(OWNER);
+        zone.grantRole(managerRole, OWNER);
+        vm.prank(OWNER);
+        zone.addSigner(signer);
+        bool isActive = zone.isActiveSigner(signer);
+        assertTrue(isActive);
+    }
+
+    function test_isActiveSigner_returnsFalseIfSignerIsNotActive() public {
+        ImmutableSignedZoneV3 zone = _newZone(OWNER);
+        bool isActive = zone.isActiveSigner(makeAddr("signer"));
+        assertFalse(isActive);
+    }
+
     /* addSigner */
 
     function test_addSigner_revertsIfCalledByNonZoneManagerRole() public {

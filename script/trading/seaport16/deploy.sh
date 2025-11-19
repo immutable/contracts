@@ -57,11 +57,11 @@ fi
 
 contract_to_deploy="$1"
 if [[ "$contract_to_deploy" == "ConduitController" ]]; then
-    script=script/trading/seaport16/deployConduitController.s.sol
+    script=script/trading/seaport16/DeployConduitController.s.sol
 elif [[ "$contract_to_deploy" == "ImmutableSeaport" ]]; then
-    script=script/trading/seaport16/deployImmutableSeaport.s.sol
+    script=script/trading/seaport16/DeployImmutableSeaport.s.sol
 elif [[ "$contract_to_deploy" == "ImmutableSignedZoneV3" ]]; then
-    script=script/trading/seaport16/deployImmutableSignedZoneV3.s.sol
+    script=script/trading/seaport16/DeployImmutableSignedZoneV3.s.sol
 else
     echo "Error: contract to deploy must be either ConduitController, ImmutableSeaport or ImmutableSignedZoneV3"
     exit 1

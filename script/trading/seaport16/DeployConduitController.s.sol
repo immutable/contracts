@@ -38,11 +38,10 @@ contract DeployConduitController is Script {
         }
 
         bool success;
-        bytes memory returnData;
 
         if (inefficientImmutableCreate2FactoryAddress.code.length == 0) {
             console.log("Deploying INEFFICIENT_IMMUTABLE_CREATE2_FACTORY");
-            (success, returnData) = keylessCreate2Address.call(createInefficientImmutableCreate2FactoryRawTx);
+            (success,) = keylessCreate2Address.call(createInefficientImmutableCreate2FactoryRawTx);
             require(success, "Failed to create INEFFICIENT_IMMUTABLE_CREATE2_FACTORY");
         } else {
             console.log("Skipping INEFFICIENT_IMMUTABLE_CREATE2_FACTORY, already exists");
@@ -50,7 +49,7 @@ contract DeployConduitController is Script {
 
         if (immutableCreate2FactoryAddress.code.length == 0) {
             console.log("Deploying IMMUTABLE_CREATE2_FACTORY");
-            (success, returnData) = inefficientImmutableCreate2FactoryAddress.call(createImmutableCreate2FactoryRawTx);
+            (success,) = inefficientImmutableCreate2FactoryAddress.call(createImmutableCreate2FactoryRawTx);
             require(success, "Failed to create IMMUTABLE_CREATE2_FACTORY");
         } else {
             console.log("Skipping IMMUTABLE_CREATE2_FACTORY, already exists");
@@ -58,7 +57,7 @@ contract DeployConduitController is Script {
 
         if (conduitControllerAddress.code.length == 0) {
             console.log("Deploying ConduitController");
-            (success, returnData) = immutableCreate2FactoryAddress.call(createConduitControllerRawTx);
+            (success,) = immutableCreate2FactoryAddress.call(createConduitControllerRawTx);
             require(success, "Failed to create ConduitController");
         } else {
             console.log("Skipping ConduitController, already exists");

@@ -37,33 +37,21 @@ contract DeployConduitController is Script {
             console.log("Skipping KEYLESS_CREATE2, already exists");
         }
 
-        bool success;
-
-        if (inefficientImmutableCreate2FactoryAddress.code.length == 0) {
-            console.log("Deploying INEFFICIENT_IMMUTABLE_CREATE2_FACTORY");
-            (success,) = keylessCreate2Address.call(createInefficientImmutableCreate2FactoryRawTx);
-            require(success, "Failed to create INEFFICIENT_IMMUTABLE_CREATE2_FACTORY");
-        } else {
-            console.log("Skipping INEFFICIENT_IMMUTABLE_CREATE2_FACTORY, already exists");
-        }
-
-        if (immutableCreate2FactoryAddress.code.length == 0) {
-            console.log("Deploying IMMUTABLE_CREATE2_FACTORY");
-            (success,) = inefficientImmutableCreate2FactoryAddress.call(createImmutableCreate2FactoryRawTx);
-            require(success, "Failed to create IMMUTABLE_CREATE2_FACTORY");
-        } else {
-            console.log("Skipping IMMUTABLE_CREATE2_FACTORY, already exists");
-        }
-
-        if (conduitControllerAddress.code.length == 0) {
-            console.log("Deploying ConduitController");
-            (success,) = immutableCreate2FactoryAddress.call(createConduitControllerRawTx);
-            require(success, "Failed to create ConduitController");
-        } else {
-            console.log("Skipping ConduitController, already exists");
-        }
+        _createIfNotExist("INEFFICIENT_IMMUTABLE_CREATE2_FACTORY", inefficientImmutableCreate2FactoryAddress, keylessCreate2Address, createInefficientImmutableCreate2FactoryRawTx);
+        _createIfNotExist("IMMUTABLE_CREATE2_FACTORY", immutableCreate2FactoryAddress, inefficientImmutableCreate2FactoryAddress, createImmutableCreate2FactoryRawTx);
+        _createIfNotExist("ConduitController", conduitControllerAddress, immutableCreate2FactoryAddress, createConduitControllerRawTx);
 
         vm.stopBroadcast();
+    }
+
+    function _createIfNotExist(string memory targetName, address targetAddress, address deployer, bytes memory creationTx) private {
+        if (targetAddress.code.length == 0) {
+            console.log("Deploying", targetName);
+            (bool success,) = deployer.call(creationTx);
+            require(success, string.concat("Failed to create ", targetName));
+        } else {
+            console.log(string.concat("Skipping ", targetName, ", already exists"));
+        }
     }
 }
 

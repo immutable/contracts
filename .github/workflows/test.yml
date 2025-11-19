@@ -35,6 +35,12 @@ jobs:
           cache: 'yarn'
       - name: Install dependencies
         run: yarn install --frozen-lockfile --network-concurrency 1
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Show Forge Version
+        run: forge --version
+      - name: Install Forge dependancies
+        run: forge install
       - name: Run Tests
         run: yarn test
   eslint:
@@ -122,6 +128,12 @@ jobs:
           cache: 'yarn'
       - name: Install dependencies
         run: yarn install --frozen-lockfile --network-concurrency 1
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+      - name: Show Forge Version
+        run: forge --version
+      - name: Install Forge dependancies
+        run: forge install
       - name: Compile contracts
         run: yarn compile
       - name: Build dist files

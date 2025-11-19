@@ -1,0 +1,74 @@
+{
+  "lib/axelar-gmp-sdk-solidity": {
+    "tag": {
+      "name": "v5.8.0",
+      "rev": "3f6ae1a1d22590e1c9b6af66781adc72148ee447"
+    }
+  },
+  "lib/creator-token-standards": {
+    "tag": {
+      "name": "v5.0.0",
+      "rev": "980a63b33591d568b6e04b45f37deba05a55f787"
+    }
+  },
+  "lib/forge-std": {
+    "tag": {
+      "name": "v1.11.0",
+      "rev": "8e40513d678f392f398620b3ef2b418648b33e89"
+    }
+  },
+  "lib/immutable-seaport-1.5.0+im1.3": {
+    "tag": {
+      "name": "1.5.0+im.1.3",
+      "rev": "ae061dc008105dd8d05937df9ad9a676f878cbf9"
+    }
+  },
+  "lib/immutable-seaport-1.6.0+im4": {
+    "tag": {
+      "name": "1.6.0+im4",
+      "rev": "e058101dbe69b403352598ed989c3afd845e9793"
+    }
+  },
+  "lib/immutable-seaport-core-1.5.0+im1": {
+    "tag": {
+      "name": "1.5.0+im.1",
+      "rev": "33e9030f308500b422926a1be12d7a1e4d6adc06"
+    }
+  },
+  "lib/immutable-seaport-core-1.6.0+im2": {
+    "tag": {
+      "name": "1.6.0+im2",
+      "rev": "9ad91d82609e937a9ba3ef330df396b05f384e44"
+    }
+  },
+  "lib/openzeppelin-contracts-4.9.3": {
+    "tag": {
+      "name": "v4.9.3",
+      "rev": "fd81a96f01cc42ef1c9a5399364968d0e07e9e90"
+    }
+  },
+  "lib/openzeppelin-contracts-5.0.2": {
+    "tag": {
+      "name": "v5.0.2",
+      "rev": "dbb6104ce834628e473d2173bbc9d47f81a9eec3"
+    }
+  },
+  "lib/openzeppelin-contracts-upgradeable-4.9.3": {
+    "tag": {
+      "name": "v4.9.3",
+      "rev": "3d4c0d5741b131c231e558d7a6213392ab3672a5"
+    }
+  },
+  "lib/solidity-bits": {
+    "tag": {
+      "name": "v0.4.0",
+      "rev": "c243a888782b61542da380ac92e218c676427b50"
+    }
+  },
+  "lib/solidity-bytes-utils": {
+    "tag": {
+      "name": "v0.8.0",
+      "rev": "6458fb2780a3092bc756e737f246be1de6d3d362"
+    }
+  }
+}

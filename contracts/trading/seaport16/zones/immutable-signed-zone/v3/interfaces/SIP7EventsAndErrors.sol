@@ -1,0 +1,134 @@
+// Copyright (c) Immutable Pty Ltd 2018 - 2024
+// SPDX-License-Identifier: Apache-2
+
+// solhint-disable compiler-version
+pragma solidity ^0.8.17;
+
+/**
+ * @notice SIP7EventsAndErrors contains errors and events
+ *         related to zone interaction as specified in the SIP-7.
+ */
+// This contract name re-use is OK because the SIP7EventsAndErrors is an interface and not a deployable contract.
+// slither-disable-next-line name-reused
+interface SIP7EventsAndErrors {
+    /**
+     * @dev Emit an event when a new signer is added.
+     */
+    event SignerAdded(address signer);
+
+    /**
+     * @dev Emit an event when a signer is removed.
+     */
+    event SignerRemoved(address signer);
+
+    /**
+     * @dev Revert with an error if trying to add a signer that is
+     *      already active.
+     */
+    error SignerAlreadyActive(address signer);
+
+    /**
+     * @dev Revert with an error if trying to remove a signer that is
+     *      not active.
+     */
+    error SignerNotActive(address signer);
+
+    /**
+     * @dev Revert with an error if a new signer is the zero address.
+     */
+    error SignerCannotBeZeroAddress();
+
+    /**
+     * @dev Revert with an error if a removed signer is trying to be
+     *      reauthorized.
+     */
+    error SignerCannotBeReauthorized(address signer);
+
+    /**
+     * @dev Revert with an error when the signature has expired.
+     */
+    error SignatureExpired(uint256 currentTimestamp, uint256 expiration, bytes32 orderHash);
+
+    /**
+     * @dev Revert with an error if the fulfiller does not match.
+     */
+    error InvalidFulfiller(address expectedFulfiller, address actualFulfiller, bytes32 orderHash);
+
+    /**
+     * @dev Revert with an error if supplied order extraData is invalid
+     *      or improperly formatted.
+     */
+    error InvalidExtraData(string reason, bytes32 orderHash);
+
+    /**
+     * @dev Revert with an error if the Seaport address is the zero address.
+     *      This is a custom error that is not part of the SIP-7 spec.
+     */
+    error SeaportCannotBeZeroAddress();
+
+    /**
+     * @dev Revert with an error if the caller is not the Seaport contract.
+     *      This is a custom error that is not part of the SIP-7 spec.
+     */
+    error CallerNotSeaport();
+
+    /**
+     * @dev Revert with an error if no spent items are provided.
+     *      This is a custom error that is not part of the SIP-7 spec.
+     */
+    error NoSpentItems(bytes32 orderHash);
+
+    /**
+     * @dev Revert with an error if no received items are provided.
+     *      This is a custom error that is not part of the SIP-7 spec.
+     */
+    error NoReceivedItems(bytes32 orderHash);
+
+    /**
+     * @dev Revert with an error if substandard 1 validation fails.
+     *      This is a custom error that is not part of the SIP-7 spec.
+     */
+    error Substandard1Violation(bytes32 orderHash, uint256 actualIdentifier, uint256 expectedIdentifier);
+
+    /**
+     * @dev Revert with an error if substandard 3 validation fails.
+     *      This is a custom error that is not part of the SIP-7 spec.
+     */
+    error Substandard3Violation(bytes32 orderHash);
+
+    /**
+     * @dev Revert with an error if substandard 4 validation fails.
+     *      This is a custom error that is not part of the SIP-7 spec.
+     */
+    error Substandard4Violation(bytes32[] actualOrderHashes, bytes32[] expectedOrderHashes, bytes32 orderHash);
+
+    /**
+     * @dev Revert with an error if substandard 6 validation fails.
+     *      This is a custom error that is not part of the SIP-7 spec.
+     */
+    error Substandard6Violation(uint256 actualSpentItemAmount, uint256 originalSpentItemAmount, bytes32 orderHash);
+
+    /**
+     * @dev Revert with an error if substandard 7 identifier validation fails.
+     *      This is a custom error that is not part of the SIP-7 spec.
+     */
+    error Substandard7IdentifierViolation(bytes32 orderHash, uint256 actualIdentifier, uint256 expectedIdentifier);
+
+    /**
+     * @dev Revert with an error if substandard 7 item type expectations are not met.
+     *      This is a custom error that is not part of the SIP-7 spec.
+     */
+    error Substandard7UnexpectedItemTypeViolation(bytes32 orderHash);
+
+    /**
+     * @dev Revert with an error if substandard 8 identifier validation fails.
+     *      This is a custom error that is not part of the SIP-7 spec.
+     */
+    error Substandard8IdentifierViolation(bytes32 orderHash, uint256 actualIdentifier, uint256 expectedIdentifier);
+
+    /**
+     * @dev Revert with an error if substandard 8 item type expectations are not met.
+     *      This is a custom error that is not part of the SIP-7 spec.
+     */
+    error Substandard8UnexpectedItemTypeViolation(bytes32 orderHash);
+}

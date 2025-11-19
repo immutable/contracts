@@ -6,16 +6,16 @@ import {ImmutableSeaportBaseTest} from "./ImmutableSeaportBase.t.sol";
 
 import "forge-std/Test.sol";
 import {ImmutableSeaportTestHelper} from "./ImmutableSeaportTestHelper.t.sol";
-import {ImmutableSeaport} from "../../../contracts/trading/seaport/ImmutableSeaport.sol";
-import {ImmutableSignedZone} from "../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/ImmutableSignedZone.sol";
-import {SIP7EventsAndErrors} from "../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/interfaces/SIP7EventsAndErrors.sol";
+import {ImmutableSeaport} from "../../../contracts/trading/seaport16/ImmutableSeaport.sol";
+import {SIP7EventsAndErrors} from "../../../contracts/trading/seaport16/zones/immutable-signed-zone/v3/interfaces/SIP7EventsAndErrors.sol";
 
-import {ConduitController} from "seaport-core/src/conduit/ConduitController.sol";
-import {Conduit} from "seaport-core/src/conduit/Conduit.sol";
-import {Consideration} from "seaport-core/src/lib/Consideration.sol";
-import {OrderParameters, OrderComponents, Order, AdvancedOrder, FulfillmentComponent, FulfillmentComponent, CriteriaResolver} from "seaport-types/src/lib/ConsiderationStructs.sol";
-import {ItemType, OrderType} from "seaport-types/src/lib/ConsiderationEnums.sol";
-import {ConsiderationItem, OfferItem, ReceivedItem, SpentItem} from "seaport-types/src/lib/ConsiderationStructs.sol";
+
+import {ConduitController} from "seaport-core-16/src/conduit/ConduitController.sol";
+import {Conduit} from "seaport-core-16/src/conduit/Conduit.sol";
+import {Consideration} from "seaport-core-16/src/lib/Consideration.sol";
+import {OrderParameters, OrderComponents, Order, AdvancedOrder, FulfillmentComponent, FulfillmentComponent, CriteriaResolver} from "seaport-types-16/src/lib/ConsiderationStructs.sol";
+import {ItemType, OrderType} from "seaport-types-16/src/lib/ConsiderationEnums.sol";
+import {ConsiderationItem, OfferItem, ReceivedItem, SpentItem} from "seaport-types-16/src/lib/ConsiderationStructs.sol";
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
@@ -85,7 +85,6 @@ contract ImmutableSeaportOperationalTest is ImmutableSeaportBaseTest, ImmutableS
         _checkFulfill(OrderType.PARTIAL_RESTRICTED);
     }
 
-
     function testRejectUnsupportedZones() public {
         // Create order with random zone
         address randomZone = makeAddr("randomZone");
@@ -133,7 +132,7 @@ contract ImmutableSeaportOperationalTest is ImmutableSeaportBaseTest, ImmutableS
 
         // The algorithm inside fulfillAdvancedOrder uses ecRecover to determine the signer. If the
         // information going in is wrong, then the wrong signer will be derived.
-        address derivedBadSigner = 0xcE810B9B83082C93574784f403727369c3FE6955;
+        address derivedBadSigner = 0xbB5E3df75ae272CcEb6CEB0F4A4BCfd3AfE3f27D;
 
         vm.prank(buyer);
         vm.expectRevert(abi.encodeWithSelector(SIP7EventsAndErrors.SignerNotActive.selector, derivedBadSigner));
@@ -213,7 +212,7 @@ contract ImmutableSeaportOperationalTest is ImmutableSeaportBaseTest, ImmutableS
             zoneHash: orderParams.zoneHash,
             salt: orderParams.salt,
             conduitKey: orderParams.conduitKey,
-            counter: 0
+            counter: immutableSeaport.getCounter(orderParams.offerer)
         });
 
         bytes32 orderHash = immutableSeaport.getOrderHash(orderComponents);

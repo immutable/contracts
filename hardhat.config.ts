@@ -1,5 +1,6 @@
 import * as dotenv from "dotenv";
 
+import "@nomicfoundation/hardhat-foundry";
 import { HardhatUserConfig, task } from "hardhat/config";
 import "@nomiclabs/hardhat-ethers";
 import "@nomiclabs/hardhat-etherscan";
@@ -26,6 +27,16 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 const config: HardhatUserConfig = {
   solidity: {
     compilers: [
+      {
+        version: "0.8.24",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+          evmVersion: "cancun",
+        },
+      },
       {
         version: "0.8.19",
         settings: {
@@ -91,12 +102,26 @@ const config: HardhatUserConfig = {
           },
         },
       },
+      "contracts/trading/seaport16/ImmutableSeaport.sol": {
+        version: "0.8.24",
+        settings: {
+          viaIR: true,
+          optimizer: {
+            enabled: true,
+            runs: 10,
+          },
+          evmVersion: "cancun",
+        },
+      },
     },
   },
   paths: {
     tests: "./test",
   },
   networks: {
+    hardhat: {
+      hardfork: "cancun",
+    },
     sepolia: {
       url: process.env.SEPOLIA_URL || "",
       accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],

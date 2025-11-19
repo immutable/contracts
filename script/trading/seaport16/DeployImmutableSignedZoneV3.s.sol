@@ -15,15 +15,15 @@ import {IDeployer} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/inter
  * @dev This script assumes that the ImmutableSeaport contract has already been deployed.
  */
 contract DeployImmutableSignedZoneV3 is Script {
-    address accessControlledDeployerAddress = 0x0B5B1d92259b13D516cCd5a6E63d7D94Ea2A4836;
-    address create2DeployerAddress = 0x9df760a54b3B00cC8B3d70A37d45fa97cCfdb4Db;
-    address conduitControllerAddress = 0x00000000F9490004C11Cef243f5400493c00Ad63;
-    address payable immutableSeaportAddress = payable(0xbE737Cf2C122F83d1610C1224f7B99ca9d0E09f6);
-    bytes32 immutableSeaportDeploymentSalt = keccak256(abi.encodePacked("immutable-seaport16"));
-    address zoneAddress = 0x18C12fb9c4f6165196c895aDF84230828A85B247;
-    bytes32 zoneDeploymentSalt = keccak256(abi.encodePacked("immutable-signed-zone-v3"));
-    address seaportInitialOwner = 0xdDA0d9448Ebe3eA43aFecE5Fa6401F5795c19333; // Immutable Deployer
-    address zoneInitialOwner = 0xdDA0d9448Ebe3eA43aFecE5Fa6401F5795c19333; // Immutable Deployer
+    address private constant accessControlledDeployerAddress = 0x0B5B1d92259b13D516cCd5a6E63d7D94Ea2A4836;
+    address private constant create2DeployerAddress = 0x9df760a54b3B00cC8B3d70A37d45fa97cCfdb4Db;
+    address private constant conduitControllerAddress = 0x00000000F9490004C11Cef243f5400493c00Ad63;
+    address private constant immutableSeaportAddress = 0xbE737Cf2C122F83d1610C1224f7B99ca9d0E09f6;
+    bytes32 private constant immutableSeaportDeploymentSalt = keccak256(abi.encodePacked("immutable-seaport16"));
+    address private constant zoneAddress = 0x18C12fb9c4f6165196c895aDF84230828A85B247;
+    bytes32 private constant zoneDeploymentSalt = keccak256(abi.encodePacked("immutable-signed-zone-v3"));
+    address private constant seaportInitialOwner = 0xdDA0d9448Ebe3eA43aFecE5Fa6401F5795c19333; // Immutable Deployer
+    address private constant zoneInitialOwner = 0xdDA0d9448Ebe3eA43aFecE5Fa6401F5795c19333; // Immutable Deployer
 
     function run() external {
         AccessControlledDeployer deployer = AccessControlledDeployer(accessControlledDeployerAddress);

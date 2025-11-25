@@ -1,9 +1,25 @@
 {
   "name": "@imtbl/contracts",
   "description": "Immutable Smart Contracts",
-  "version": "0.0.0",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./contracts/*": "./contracts/*"
+  },
+  "sideEffects": false,
   "files": [
     "contracts/**/*.sol",
     "!contracts/mocks",
@@ -12,16 +28,14 @@
   "scripts": {
     "postinstall": "npx rimraf ./node_modules/seaport/foundry.toml",
     "compile": "hardhat compile",
-    "build": "tsc",
+    "build": "tsup",
     "test": "hardhat test",
-    "prettier:solidity": "./node_modules/.bin/prettier --write --plugin=prettier-plugin-solidity contracts/**/*.sol",
-    "lint": "eslint . --ext .ts,.tsx --fix && solhint --config ./.solhint.json  contracts/**/*.sol",
-    "eslint": "eslint clients --ext .ts,.tsx",
-    "solhint": "solhint --config ./.solhint.json",
-    "clean": "hardhat clean",
-    "coverage": "hardhat coverage"
+    "test:coverage": "hardhat test --coverage",
+    "format": "forge fmt",
+    "format:check": "forge fmt --check",
+    "lint": "solhint 'contracts/**/*.sol'",
+    "clean": "hardhat clean && rimraf dist"
   },
-  "type": "commonjs",
   "repository": {
     "type": "git",
     "url": "https://github.com/immutable/contracts"
@@ -29,61 +43,41 @@
   "homepage": "https://github.com/immutable/contracts/blob/main/README.md",
   "author": "Immutable",
   "license": "Apache-2.0",
-  "devDependencies": {
-    "@nomicfoundation/hardhat-foundry": "^1.2.0",
-    "@nomiclabs/hardhat-ethers": "^2.2.2",
-    "@nomiclabs/hardhat-etherscan": "^3.1.6",
-    "@nomiclabs/hardhat-waffle": "^2.0.5",
-    "@nomiclabs/hardhat-web3": "^2.0.0",
-    "@openzeppelin/test-helpers": "^0.5.16",
-    "@typechain/ethers-v5": "^10.2.0",
-    "@typechain/hardhat": "^6.1.4",
-    "@types/chai": "^4.3.4",
-    "@types/mocha": "^9.1.1",
-    "@types/node": "^18.17.14",
-    "@typescript-eslint/eslint-plugin": "^5.60.0",
-    "@typescript-eslint/parser": "^5.60.0",
-    "@wagmi/cli": "^2.1.4",
-    "abitype": "^1.0.2",
-    "chai": "^4.3.7",
-    "dotenv": "^16.0.3",
-    "eslint": "^8.43.0",
-    "eslint-config-prettier": "^8.8.0",
-    "eslint-config-standard": "^17.1.0",
-    "eslint-plugin-import": "^2.28.1",
-    "eslint-plugin-n": "^16.1.0",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-prettier": "5.1.3",
-    "eslint-plugin-promise": "^6.1.1",
-    "ethereum-waffle": "^4.0.10",
-    "ethers": "^5.7.2",
-    "hardhat": "^2.26.5",
-    "hardhat-gas-reporter": "^1.0.9",
-    "prettier": "^3.2.4",
-    "prettier-plugin-solidity": "^1.3.1",
-    "rimraf": "^5.0.5",
-    "solhint": "^5.0.1",
-    "solhint-community": "^4.0.0",
-    "solhint-plugin-prettier": "^0.1.0",
-    "solidity-coverage": "^0.8.4",
-    "eslint-plugin-mocha": "^10.2.0",
-    "ts-node": "^10.9.1",
-    "typechain": "^8.1.1",
-    "typescript": "^4.9.5"
+  "peerDependencies": {
+    "@openzeppelin/contracts": "^4.9.3 || ^5.0.0"
   },
-  "dependencies": {
-    "@axelar-network/axelar-gmp-sdk-solidity": "^5.8.0",
+  "peerDependenciesMeta": {
+    "@openzeppelin/contracts": {
+      "optional": false
+    },
+    "@axelar-network/axelar-gmp-sdk-solidity": {
+      "optional": true
+    },
+    "@limitbreak/creator-token-standards": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@axelar-network/axelar-gmp-sdk-solidity": "^5.10.0",
     "@limitbreak/creator-token-standards": "^5.0.0",
-    "@openzeppelin/contracts": "^4.9.3",
-    "@openzeppelin/contracts-upgradeable": "^4.9.3",
-    "openzeppelin-contracts-5.0.2": "npm:@openzeppelin/contracts@^5.0.2",
-    "openzeppelin-contracts-upgradeable-4.9.3": "npm:@openzeppelin/contracts-upgradeable@^4.9.3",
+    "@nomicfoundation/hardhat-verify": "^3.0.7",
+    "@nomicfoundation/hardhat-viem": "^3.0.1",
+    "@openzeppelin/contracts": "^4.9.6",
+    "dotenv": "^16.5.0",
+    "hardhat": "^3.0.15",
+    "openzeppelin-contracts-5.0.2": "npm:@openzeppelin/contracts@^5.5.0",
+    "openzeppelin-contracts-upgradeable-4.9.3": "npm:@openzeppelin/contracts-upgradeable@^4.9.6",
+    "rimraf": "^6.0.1",
     "seaport": "https://github.com/immutable/seaport.git#1.5.0+im.1.3",
     "seaport-16": "https://github.com/immutable/seaport.git#1.6.0+im4",
     "seaport-core-16": "https://github.com/immutable/seaport-core.git#1.6.0+im2",
     "seaport-types-16": "npm:seaport-types@1.6.3",
+    "solhint": "^6.0.1",
     "solidity-bits": "^0.4.0",
-    "solidity-bytes-utils": "^0.8.0"
+    "solidity-bytes-utils": "^0.8.2",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
+    "viem": "^2.40.2"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

@@ -1,14 +1,15 @@
 {
   "compilerOptions": {
-    "target": "es2018",
-    "module": "commonjs",
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "strict": true,
     "esModuleInterop": true,
-    "outDir": "dist",
+    "skipLibCheck": true,
     "declaration": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true
+    "outDir": "dist",
+    "resolveJsonModule": true
   },
-  "include": ["./index.ts", "./test/**/*.ts"],
-  "files": ["hardhat.config.ts"]
+  "include": ["src/**/*.ts", "index.ts"],
+  "exclude": ["node_modules", "dist", "test"]
 }

@@ -1,6 +1,4 @@
 {
-  "plugins": ["prettier"],
-
   "rules": {
     "code-complexity": ["warn", 7],
     "custom-errors": "error",
@@ -48,9 +46,6 @@
     "not-rely-on-block-hash": "warn",
     "not-rely-on-time": "warn",
     "reentrancy": "warn",
-    "state-visibility": "warn",
-
-    "prettier/prettier": "error"
+    "state-visibility": "warn"
   }
 }
-

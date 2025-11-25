@@ -1,14 +1,23 @@
+# Build and config files
 hardhat.config.ts
+tsconfig.json
+tsup.config.ts
+wagmi.config.ts
+foundry.toml
+foundry.lock
+remappings.txt
+slither.config.json
+
+# Development directories
 scripts
 test
+perfTest
+lib
+audits
+deploy
+abi
 
-# Exclude test/mock contracts
-contracts/mocks
-
-# Exclude binary assets
-**/*.png
-**/*.jpg
-**/*.jpeg
-
-# Exclude diagram source files
-**/MermaidDiagramSource.md
+# Documentation (available on GitHub)
+*.md
+!README.md
+!LICENSE.md

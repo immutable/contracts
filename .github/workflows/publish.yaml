@@ -14,7 +14,7 @@ jobs:
       attestations: write # ! Required for GitHub Attestations, removing will create a Sev 0 incident !
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -39,7 +39,7 @@ jobs:
         run: echo "package.json version - ${{ steps.clean-tag.outputs.TAG }}"
 
       - name: Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
           registry-url: https://registry.npmjs.org/

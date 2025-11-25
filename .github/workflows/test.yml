@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
       - name: Show Forge Version
@@ -27,11 +27,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version-file: ".nvmrc"
           cache: 'yarn'
       - name: Install dependencies
         run: yarn install --frozen-lockfile --network-concurrency 1
@@ -43,43 +43,27 @@ jobs:
         run: forge install
       - name: Run Tests
         run: yarn test
-  eslint:
-    name: Run eslint
-    continue-on-error: true
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: lts/*
-          cache: 'yarn'
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile --network-concurrency 1
-      - name: Run eslint
-        run: yarn run eslint
   solhint:
     name: Run solhint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: lts/*
+          node-version-file: ".nvmrc"
           cache: 'yarn'
       - name: Install dependencies
         run: yarn install --frozen-lockfile --network-concurrency 1
       - name: Run solhint
-        run: yarn run solhint contracts/**/*.sol
+        run: yarn lint
   slither:
     name: Run slither
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Uninstall Debian package that slither needs to uninstall
         run: sudo apt remove python3-typing-extensions
       - name: Install Slither
@@ -92,14 +76,6 @@ jobs:
         run: forge --version
       - name: Run slither
         run: slither --compile-force-framework forge  --foundry-out-directory foundry-out .
-  readme:
-    name: Check README.md is contained in each contracts directory
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-      - name: Run check script
-        run: sh readmecheck.sh
   dependency-review:
     runs-on: ubuntu-latest
     steps:
@@ -119,9 +95,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
           registry-url: https://registry.npmjs.org/

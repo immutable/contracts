@@ -2,6 +2,9 @@
   "name": "@imtbl/contracts",
   "description": "Immutable Smart Contracts",
   "version": "1.0.0",
+  "engines": {
+    "node": ">=22.10.0"
+  },
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

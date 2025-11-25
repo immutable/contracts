@@ -7,8 +7,8 @@ import {ImmutableSeaportBaseTest} from "./ImmutableSeaportBase.t.sol";
 import "forge-std/Test.sol";
 import {ImmutableSeaportTestHelper} from "./ImmutableSeaportTestHelper.t.sol";
 import {ImmutableSeaport} from "../../../contracts/trading/seaport/ImmutableSeaport.sol";
-import {ImmutableSignedZone} from "../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/ImmutableSignedZone.sol";
-import {SIP7EventsAndErrors} from "../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/interfaces/SIP7EventsAndErrors.sol";
+import {ImmutableSignedZoneV2} from "../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/ImmutableSignedZoneV2.sol";
+import {SIP7EventsAndErrors} from "../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/SIP7EventsAndErrors.sol";
 
 import {ConduitController} from "seaport-core/src/conduit/ConduitController.sol";
 import {Conduit} from "seaport-core/src/conduit/Conduit.sol";

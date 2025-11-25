@@ -49,9 +49,6 @@
   "peerDependenciesMeta": {
     "@openzeppelin/contracts": {
       "optional": false
-    },
-    "@axelar-network/axelar-gmp-sdk-solidity": {
-      "optional": true
     }
   },
   "devDependencies": {

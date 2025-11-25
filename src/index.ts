@@ -6,7 +6,6 @@
 
 // ABIs - for contracts you deploy
 export {
-  guardedMulticallerAbi,
   guardedMulticaller2Abi,
   immutableErc721Abi,
   immutableErc721MintByIdAbi,

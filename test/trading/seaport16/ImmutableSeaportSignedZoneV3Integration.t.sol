@@ -18,7 +18,7 @@ import {
     OrderParameters,
     ReceivedItem
 } from "seaport-types-16/src/lib/ConsiderationStructs.sol";
-import {ConduitController} from "../../../contracts/trading/seaport16/conduit/ConduitController.sol";
+import {ConduitController} from "seaport-core-16/src/conduit/ConduitController.sol";
 import {ImmutableSeaportHarness} from "./ImmutableSeaportHarness.t.sol";
 import {IImmutableERC1155} from "../seaport/utils/IImmutableERC1155.t.sol";
 import {IImmutableERC721} from "../seaport/utils/IImmutableERC721.t.sol";

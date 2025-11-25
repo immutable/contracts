@@ -3,8 +3,8 @@ pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
 import {ImmutableSeaport} from "../../../contracts/trading/seaport/ImmutableSeaport.sol";
-import {ImmutableSignedZone} from "../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/ImmutableSignedZone.sol";
-import {SIP7EventsAndErrors} from "../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/interfaces/SIP7EventsAndErrors.sol";
+import {ImmutableSignedZoneV2} from "../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/ImmutableSignedZoneV2.sol";
+import {SIP7EventsAndErrors} from "../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/SIP7EventsAndErrors.sol";
 
 import {ConduitController} from "seaport-core/src/conduit/ConduitController.sol";
 import {Conduit} from "seaport-core/src/conduit/Conduit.sol";
@@ -24,7 +24,7 @@ abstract contract ImmutableSeaportBaseTest is Test {
     event AllowedZoneSet(address zoneAddress, bool allowed);
 
     ImmutableSeaport public immutableSeaport;
-    ImmutableSignedZone public immutableSignedZone;
+    ImmutableSignedZoneV2 public immutableSignedZone;
     ConduitController public conduitController;
     Conduit public conduit;
     bytes32 public conduitKey;
@@ -48,9 +48,12 @@ abstract contract ImmutableSeaportBaseTest is Test {
         (seller, sellerPkey) = makeAddrAndKey("seller");
 
         // Deploy contracts
-        immutableSignedZone = new ImmutableSignedZone("ImmutableSignedZone", "", "", owner);
-        vm.prank(owner);
+        immutableSignedZone = new ImmutableSignedZoneV2("ImmutableSignedZone", "", "", owner);
+        // Grant ZONE_MANAGER_ROLE and add signer
+        vm.startPrank(owner);
+        immutableSignedZone.grantRole(immutableSignedZone.ZONE_MANAGER_ROLE(), owner);
         immutableSignedZone.addSigner(immutableSigner);
+        vm.stopPrank();
 
         // The conduit key used to deploy the conduit. Note that the first twenty bytes of the conduit key must match the caller of this contract.
         conduitKey = bytes32(uint256(uint160(owner)) << (256-160));

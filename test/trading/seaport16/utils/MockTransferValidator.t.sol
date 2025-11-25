@@ -4,7 +4,7 @@
 // solhint-disable-next-line compiler-version
 pragma solidity ^0.8.17;
 
-import {ITransferValidator} from "@limitbreak/creator-token-standards/src/interfaces/ITransferValidator.sol";
+import {ITransferValidator} from "../../../../contracts/trading/seaport16/zones/immutable-signed-zone/v3/interfaces/ITransferValidator.sol";
 
 contract MockTransferValidator is ITransferValidator {
     bool private _shouldRevertApplyCollectionTransferPolicy = false;

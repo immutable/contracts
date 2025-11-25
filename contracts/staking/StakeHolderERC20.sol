@@ -72,3 +72,4 @@ contract StakeHolderERC20 is StakeHolderBase {
     uint256[50] private __StakeHolderERC20Gap;
     // slither-disable-end unused-state
 }
+

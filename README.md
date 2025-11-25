@@ -18,8 +18,6 @@ Immutable Contracts is a library of smart contracts targeted at developers who w
 
 - Smart Contract Wallets
 
-- Random Number Generation
-
 These contracts are feature-rich and are the recommended standard on Immutable zkEVM intended for all users and partners within the ecosystem.
 
 ## Setup

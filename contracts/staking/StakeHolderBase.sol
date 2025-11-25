@@ -26,6 +26,9 @@ abstract contract StakeHolderBase is
     /// @notice Version 0 version number
     uint256 internal constant _VERSION0 = 0;
 
+    /// @notice Version 2 version number
+    uint256 internal constant _VERSION2 = 2;
+
     /// @notice Holds staking information for a single staker.
     struct StakeInfo {
         /// @notice Amount of stake.
@@ -65,14 +68,12 @@ abstract contract StakeHolderBase is
         _grantRole(DEFAULT_ADMIN_ROLE, _roleAdmin);
         _grantRole(UPGRADE_ROLE, _upgradeAdmin);
         _grantRole(DISTRIBUTE_ROLE, _distributeAdmin);
-        version = _VERSION0;
+        version = _VERSION2;
     }
 
     /**
      * @notice Function to be called when upgrading this contract.
      * @dev Call this function as part of upgradeToAndCall().
-     *      This initial version of this function reverts. There is no situation
-     *      in which it makes sense to upgrade to the V0 storage layout.
      *      Note that this function is permissionless. Future versions must
      *      compare the code version and the storage version and upgrade
      *      appropriately. As such, the code will revert if an attacker calls
@@ -80,7 +81,14 @@ abstract contract StakeHolderBase is
      * @ param _data ABI encoded data to be used as part of the contract storage upgrade.
      */
     function upgradeStorage(bytes memory /* _data */) external virtual {
-        revert CanNotUpgradeToLowerOrSameVersion(version);
+        if (version == _VERSION0) {
+            // Upgrading from version 0 to 2 involves only code changes and
+            // changing the storage version number.
+            version = _VERSION2;
+        } else {
+            // Don't allow downgrade or re-initialising.
+            revert CanNotUpgradeToLowerOrSameVersion(version);
+        }
     }
 
     /**
@@ -118,22 +126,20 @@ abstract contract StakeHolderBase is
     function distributeRewards(
         AccountAmount[] calldata _recipientsAndAmounts
     ) external payable virtual nonReentrant onlyRole(DISTRIBUTE_ROLE) {
-        // Distribute the value.
-        uint256 total = 0;
+        uint256 total = _distributeRewards(_recipientsAndAmounts, true);
         uint256 len = _recipientsAndAmounts.length;
-        for (uint256 i = 0; i < len; i++) {
-            AccountAmount calldata accountAmount = _recipientsAndAmounts[i];
-            uint256 amount = accountAmount.amount;
-            // Add stake, but require the account to either currently be staking or have
-            // previously staked.
-            _addStake(accountAmount.account, amount, true);
-            total += amount;
-        }
-        if (total == 0) {
-            revert MustDistributeMoreThanZero();
-        }
-        _checksAndTransfer(total);
         emit Distributed(msg.sender, total, len);
+    }
+
+    /**
+     * @inheritdoc IStakeHolder
+     */
+    function stakeFor(
+        AccountAmount[] calldata _recipientsAndAmounts
+    ) external payable nonReentrant onlyRole(DISTRIBUTE_ROLE) {
+        uint256 total = _distributeRewards(_recipientsAndAmounts, false);
+        uint256 len = _recipientsAndAmounts.length;
+        emit StakedFor(msg.sender, total, len);
     }
 
     /**
@@ -169,6 +175,32 @@ abstract contract StakeHolderBase is
             stakerPartialArray[i] = stakers[_startOffset + i];
         }
         return stakerPartialArray;
+    }
+
+    /**
+     * @notice Distribute tokens to a set of accounts.
+     * @param _recipientsAndAmounts An array of recipients to distribute value to and
+     *          amounts to be distributed to each recipient.
+     * @param _existingAccountsOnly If true, revert if the account has never been used.
+     * @return _total Value distributed.
+     */
+    function _distributeRewards(
+        AccountAmount[] calldata _recipientsAndAmounts,
+        bool _existingAccountsOnly
+    ) private returns (uint256 _total) {
+        // Distribute the value.
+        _total = 0;
+        uint256 len = _recipientsAndAmounts.length;
+        for (uint256 i = 0; i < len; i++) {
+            AccountAmount calldata accountAmount = _recipientsAndAmounts[i];
+            uint256 amount = accountAmount.amount;
+            _addStake(accountAmount.account, amount, _existingAccountsOnly);
+            _total += amount;
+        }
+        if (_total == 0) {
+            revert MustDistributeMoreThanZero();
+        }
+        _checksAndTransfer(_total);
     }
 
     /**
@@ -216,3 +248,4 @@ abstract contract StakeHolderBase is
     uint256[50] private __StakeHolderBaseGap;
     // slither-disable-end unused-state
 }
+

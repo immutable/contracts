@@ -5,7 +5,7 @@ pragma solidity >=0.8.19 <0.8.29;
 import {IStakeHolder, StakeHolderBase} from "./StakeHolderBase.sol";
 
 /**
- * @title StakeHolder: allows anyone to stake any amount of native IMX and to then remove all or part of that stake.
+ * @title StakeHolderNative: allows anyone to stake any amount of native IMX and to then remove all or part of that stake.
  * @dev The StakeHolder contract is designed to be upgradeable.
  */
 contract StakeHolderNative is StakeHolderBase {
@@ -63,3 +63,4 @@ contract StakeHolderNative is StakeHolderBase {
     uint256[50] private __StakeHolderNativeGap;
     // slither-disable-end unused-state
 }
+

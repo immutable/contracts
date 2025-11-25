@@ -6,9 +6,8 @@ all the contracts is contained at the end of this document.
 
 | Contract                               | Description                                   |
 |--------------------------------------- |-----------------------------------------------|
-| preset/ImmutableERC721                 | ERC721 contract that provides mint by id and mint by quantity. | 
-| preset/ImmutableERC721V2               | ImmutableERC721 with improved overall performance. | 
-| preset/ImmutableERC721MintByID         | ERC721 that allow mint by id across the entire token range. | 
+| preset/ImmutableERC721                 | ERC721 contract that provides mint by id and mint by quantity with optimized gas. | 
+| preset/ImmutableERC721MintByID         | ERC721 that allows mint by id across the entire token range. | 
 
 ## Security
 
@@ -32,13 +31,14 @@ Contract threat models and audits:
 
 Presets are contracts that game studios could choose to deploy.
 
-### ImmutableERC721 and ImmutableERC721V2
+### ImmutableERC721
 
-These contracts have the following features:
+This contract has the following features:
 
 * Mint by ID for token IDs less than `2^128`.
 * Mint by quantity for token IDs greater than `2^128`.
 * Permits.
+* Optimized gas usage with deterministic owner lookups.
 
 Note: The threshold between mint by ID and mint by quantity can be changed by extending the contracts and 
 implementing `mintBatchByQuantityThreshold`.
@@ -52,12 +52,9 @@ The contract has the following features:
 
 ## Interfaces
 
-The original presets, ImmutableERC721 and ImmutableERC721MintByID did not implement interfaces. To reduce
-the number of code differences between ImmutableERC721 and ImmutableERC721V2, ImmutableERC721V2 also does not 
-implement interfaces. However, the preset contracts implement the following interfaces:
+The preset contracts implement the following interfaces:
 
 * ImmutableERC721: IImmutableERC721ByQuantity.sol
-* ImmutableERC721V2: IImmutableERC721ByQuantityV2.sol
 * ImmutableERC721MintByID: IImmutableERC721.sol
 
 ## Abstract and PSI
@@ -73,16 +70,6 @@ ImmutableERC721
       |- ERC721Hybrid
          |- ERC721PsiBurnable 
          |  |- ERC721Psi
-         |- Open Zeppelin's ERC721
-
-ImmutableERC721V2
-|- ImmutableERC721HybridBaseV2
-   |- OperatorAllowlistEnforced
-   |- MintingAccessControl
-   |- ERC721HybridPermitV2
-      |- ERC721HybridV2
-         |- ERC721PsiBurnableV2
-         |  |- ERC721PsiV2
          |- Open Zeppelin's ERC721
 
 ImmutableERC721MintByID

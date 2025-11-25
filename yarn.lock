@@ -938,22 +938,6 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@limitbreak/creator-token-standards@^5.0.0":
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/@limitbreak/creator-token-standards/-/creator-token-standards-5.0.0.tgz#35f6c8929351e765d1f4d85974e61e5516ed9db8"
-  integrity sha512-BhrD3SMCq8YrGbJildBbu4BpHia7uby60XpGYVyFnb4xEvFey7bRbnOeVQ2mrTx07y02KvTWS5gESIPj5O4Mtg==
-  dependencies:
-    "@limitbreak/permit-c" "1.0.0"
-    "@openzeppelin/contracts" "4.8.3"
-    erc721a "4.2.3"
-
-"@limitbreak/permit-c@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@limitbreak/permit-c/-/permit-c-1.0.0.tgz#96df6527ef2562ac1e8bd363d040419df465abca"
-  integrity sha512-7BooxTklXlCPzfdccfKL7Tt2Cm4MntOHR51dHqjKePn7AynMKsUtaKH75ZXHzWRPZSmyixFNzQ7tIJDdPxF2MA==
-  dependencies:
-    "@openzeppelin/contracts" "4.8.3"
-
 "@metamask/eth-sig-util@^4.0.0":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@metamask/eth-sig-util/-/eth-sig-util-4.0.1.tgz#3ad61f6ea9ad73ba5b19db780d40d9aae5157088"
@@ -1437,11 +1421,6 @@
     "@nomicfoundation/solidity-analyzer-linux-x64-gnu" "0.1.2"
     "@nomicfoundation/solidity-analyzer-linux-x64-musl" "0.1.2"
     "@nomicfoundation/solidity-analyzer-win32-x64-msvc" "0.1.2"
-
-"@openzeppelin/contracts@4.8.3":
-  version "4.8.3"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.8.3.tgz#cbef3146bfc570849405f59cba18235da95a252a"
-  integrity sha512-bQHV8R9Me8IaJoJ2vPG4rXcL7seB7YVuskr4f+f5RyOStSZetwzkWtoqDMl5erkBJy0lDRUnIR2WIkPiC0GJlg==
 
 "@openzeppelin/contracts@^4.9.2":
   version "4.9.5"
@@ -2517,11 +2496,6 @@ env-paths@^2.2.0:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/env-paths/-/env-paths-2.2.1.tgz#420399d416ce1fbe9bc0a07c62fa68d67fd0f8f2"
   integrity sha512-+h1lkLKhZMTYjog1VEpJNG7NZJWcuc2DDk/qsqSTRRCOXiLjeQ1d1/udrUGhqMxUgAlwKNZ0cf2uqan5GLuS2A==
-
-erc721a@4.2.3:
-  version "4.2.3"
-  resolved "https://registry.yarnpkg.com/erc721a/-/erc721a-4.2.3.tgz#ca6469b0e54afb0f614272c2147dc4cb49ff223f"
-  integrity sha512-0deF0hOOK1XI1Vxv3NKDh2E9sgzRlENuOoexjXRJIRfYCsLlqi9ejl2RF6Wcd9HfH0ldqC03wleQ2WDjxoOUvA==
 
 error-ex@^1.3.1:
   version "1.3.2"
@@ -4396,16 +4370,6 @@ solhint@^6.0.1:
     text-table "^0.2.0"
   optionalDependencies:
     prettier "^2.8.3"
-
-solidity-bits@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/solidity-bits/-/solidity-bits-0.4.0.tgz#164ef2184d446b37fe1e08e63c55ae200b36697a"
-  integrity sha512-bAU3OwfZ3DrZz0LqxyCjaxXQL5fcbUXygaz7Wjd+4Th5zUbkw6h1SWBdi2E4yGOv1VSGyvcmHI8gAdgLDCXaDQ==
-
-solidity-bytes-utils@^0.8.2:
-  version "0.8.4"
-  resolved "https://registry.yarnpkg.com/solidity-bytes-utils/-/solidity-bytes-utils-0.8.4.tgz#646588b7031153770350f982665b8c9033f7dc26"
-  integrity sha512-/bjac5YR12i0plOKvGlhE51F5IWGP6rI8DJetCQlXcnwKWz/Hgf/vr+Qlk1BWz56xVcwVhmhCaDkTMnx5xvt0g==
 
 source-map-support@^0.5.13:
   version "0.5.21"

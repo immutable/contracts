@@ -44,4 +44,10 @@ interface IImmutableERC721ByQuantity is IImmutableERC721 {
      *  minted by quantity
      */
     function mintBatchByQuantityThreshold() external pure returns (uint256);
+
+    /**
+     * @notice returns the next token id that will be minted for the first
+     *  NFT in a call to mintByQuantity or safeMintByQuantity.
+     */
+    function mintBatchByQuantityNextTokenId() external view returns (uint256);
 }

@@ -1,4 +1,4 @@
-// Copyright Immutable Pty Ltd 2018 - 2023
+// Copyright Immutable Pty Ltd 2018 - 2025
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
@@ -6,7 +6,6 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 import {IERC4494} from "./IERC4494.sol";
 import {ERC721Hybrid} from "./ERC721Hybrid.sol";
 
@@ -72,7 +71,9 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
      * @param interfaceId The interface identifier, which is a 4-byte selector.
      * @return True if the contract implements `interfaceId` and the call doesn't revert, otherwise false.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165, ERC721Hybrid) returns (bool) {
+    function supportsInterface(
+        bytes4 interfaceId
+    ) public view virtual override(IERC165, ERC721Hybrid) returns (bool) {
         return
             interfaceId == type(IERC4494).interfaceId || // 0x5604e225
             super.supportsInterface(interfaceId);
@@ -107,12 +108,15 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
 
         // EOA signature validation
         if (sig.length == 64) {
-            // ERC2098 Sig
-            recoveredSigner = ECDSA.recover(
-                digest,
-                bytes32(BytesLib.slice(sig, 0, 32)),
-                bytes32(BytesLib.slice(sig, 32, 64))
-            );
+            // ERC2098 compact signature - extract r and vs directly
+            bytes32 r;
+            bytes32 vs;
+            // solhint-disable-next-line no-inline-assembly
+            assembly {
+                r := mload(add(sig, 32))
+                vs := mload(add(sig, 64))
+            }
+            recoveredSigner = ECDSA.recover(digest, r, vs);
         } else if (sig.length == 65) {
             // typical EDCSA Sig
             recoveredSigner = ECDSA.recover(digest, sig);
@@ -171,3 +175,4 @@ abstract contract ERC721HybridPermit is ERC721Hybrid, IERC4494, EIP712 {
         return false;
     }
 }
+

@@ -1,6 +1,6 @@
 # Staking
 
-The Immutable zkEVM staking system allows any account (EOA or contract) to stake any amount of a token at any time. An account can remove all or some of their stake at any time. The contracts have the facility to distribute rewards to stakers and to stake on behalf of accounts
+The Immutable zkEVM staking system allows any account (EOA or contract) to stake any amount of a token at any time. An account can remove all or some of their stake at any time. The contracts have the facility to distribute rewards to stakers and to stake on behalf of accounts.
 
 The staking contracts are upgradeable and operate via a proxy contract. They use the [Universal Upgradeable Proxy Standard (UUPS)](https://eips.ethereum.org/EIPS/eip-1822) upgrade pattern, where the access control for upgrade resides within the application contract (the staking contract). 
 
@@ -24,9 +24,13 @@ The system consists of a set of contracts show in the diagram below.
 
 `OwnableCreate3Deployer.sol` ensures contracts are deployed to the same addresses across chains. The use of this contract is optional. See [deployment scripts](../../script/staking/README.md) for more information.
 
-## Staking System V2
+## Features
 
-Files, contracts, and interfaced suffixed with `V2` form a part of the version two staking system. Version two introduces the ability for an admin account to stake on behalf of other accounts using the `stakeFor` function.
+The staking system includes:
+- `stake(uint256 _amount)` - Allow any account to stake value
+- `unstake(uint256 _amountToUnstake)` - Allow accounts to remove stake
+- `distributeRewards(AccountAmount[] calldata _recipientsAndAmounts)` - Distribute rewards to existing stakers
+- `stakeFor(AccountAmount[] calldata _recipientsAndAmounts)` - Stake on behalf of other accounts (no requirement that recipients are existing stakers)
 
 ## Immutable Contract Addresses
 
@@ -38,7 +42,7 @@ TimelockController.sol:
 | Immutable zkEVM Mainnet  | Not deployed yet   |   -|
 
 
-ERC1967Proxy.sol for the staking implmentation (StakeHolderWIMX.sol):
+ERC1967Proxy.sol for the staking implementation (StakeHolderWIMX.sol):
 
 | Environment/Network      | Deployment Address | Commit Hash |
 |--------------------------|--------------------|-------------|
@@ -79,6 +83,8 @@ To stake, any account should call `stake(uint256 _amount)`. For the WIMX and the
 To unstake, the account that previously staked should call, `unstake(uint256 _amountToUnstake)`.
 
 Accounts that have DISTRIBUTE_ROLE that wish to distribute rewards should call, `distributeRewards(AccountAmount[] calldata _recipientsAndAmounts)`. The `AccountAmount` structure consists of recipient address and amount to distribute pairs. Distributions can only be made to accounts that have previously or are currently staking. For the WIMX and the native IMX variants, the amount to be distributed must be passed in as msg.value and must equal to the sum of the amounts specified in the `_recipientsAndAmounts` array.
+
+Accounts that have DISTRIBUTE_ROLE can also call `stakeFor(AccountAmount[] calldata _recipientsAndAmounts)` to stake on behalf of other accounts. Unlike `distributeRewards`, there is no requirement that recipients are existing stakers.
 
 The `stakers` array needs to be analysed to determine which accounts have staked and how much. The following functions provide access to this data structure:
 

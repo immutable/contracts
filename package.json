@@ -52,14 +52,10 @@
     },
     "@axelar-network/axelar-gmp-sdk-solidity": {
       "optional": true
-    },
-    "@limitbreak/creator-token-standards": {
-      "optional": true
     }
   },
   "devDependencies": {
     "@axelar-network/axelar-gmp-sdk-solidity": "^5.10.0",
-    "@limitbreak/creator-token-standards": "^5.0.0",
     "@nomicfoundation/hardhat-verify": "^3.0.7",
     "@nomicfoundation/hardhat-viem": "^3.0.1",
     "@openzeppelin/contracts": "^4.9.6",
@@ -73,8 +69,6 @@
     "seaport-core-16": "https://github.com/immutable/seaport-core.git#1.6.0+im2",
     "seaport-types-16": "npm:seaport-types@1.6.3",
     "solhint": "^6.0.1",
-    "solidity-bits": "^0.4.0",
-    "solidity-bytes-utils": "^0.8.2",
     "tsup": "^8.5.0",
     "typescript": "^5.8.3",
     "viem": "^2.40.2"

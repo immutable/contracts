@@ -1,22 +1,13 @@
-// SPDX-License-Identifier: MIT
+// Copyright Immutable Pty Ltd 2018 - 2025
+// SPDX-License-Identifier: Apache 2.0
 /**
- * ______ _____   _____ ______ ___  __ _  _  _
- *  |  ____|  __ \ / ____|____  |__ \/_ | || || |
- *  | |__  | |__) | |        / /   ) || | \| |/ |
- *  |  __| |  _  /| |       / /   / / | |\_   _/
- *  | |____| | \ \| |____  / /   / /_ | |  | |
- *  |______|_|  \_\\_____|/_/   |____||_|  |_|
+ * Inspired by ERC721Psi: https://github.com/estarriolvetch/ERC721Psi
  */
 pragma solidity >=0.8.19 <0.8.29;
 
-import {BitMaps} from "solidity-bits/contracts/BitMaps.sol";
 import {ERC721Psi} from "./ERC721Psi.sol";
 
 abstract contract ERC721PsiBurnable is ERC721Psi {
-    using BitMaps for BitMaps.BitMap;
-
-    BitMaps.BitMap private _burnedToken;
-
     /**
      * @dev Destroys `tokenId`.
      * The approval is cleared when the token is burned.
@@ -27,59 +18,29 @@ abstract contract ERC721PsiBurnable is ERC721Psi {
      *
      * Emits a {Transfer} event.
      */
-    function _burn(uint256 tokenId) internal virtual {
-        address from = ownerOf(tokenId);
-        _beforeTokenTransfers(from, address(0), tokenId, 1);
-        _burnedToken.set(tokenId);
+    function _burn(uint256 _tokenId) internal virtual {
+        // Note: To get here, exists must be true. Hence, it is OK to ignore exists.
+        uint256 groupNumber;
+        uint256 groupOffset;
+        address owner;
+        (groupNumber, groupOffset, , owner) = _tokenInfo(_tokenId);
 
-        emit Transfer(from, address(0), tokenId);
+        _beforeTokenTransfers(owner, address(0), _tokenId, 1);
 
-        _afterTokenTransfers(from, address(0), tokenId, 1);
-    }
+        TokenGroup storage group = tokenOwners[groupNumber];
+        group.burned = _setBit(group.burned, groupOffset);
 
-    /**
-     * @dev Returns whether `tokenId` exists.
-     *
-     * Tokens can be managed by their owner or approved accounts via {approve} or {setApprovalForAll}.
-     *
-     * Tokens start existing when they are minted (`_mint`),
-     * and stop existing when they are burned (`_burn`).
-     */
-    function _exists(uint256 tokenId) internal view virtual override returns (bool) {
-        if (_burnedToken.get(tokenId)) {
-            return false;
-        }
-        return super._exists(tokenId);
-    }
+        // Update balances
+        balances[owner]--;
+        // _burn is called in a loop in burn batch, and hence a more efficient batch
+        // burning process would be to have this update to supply happen outside the loop.
+        // However, this would mean changing code across the codebase.
+        // slither-disable-next-line costly-loop
+        supply--;
 
-    /**
-     * @dev See {IERC721Enumerable-totalSupply}.
-     */
-    function totalSupply() public view virtual override returns (uint256) {
-        return _totalMinted() - _burned();
-    }
+        emit Transfer(owner, address(0), _tokenId);
 
-    /**
-     * @dev Returns number of token burned.
-     */
-    function _burned() internal view returns (uint256 burned) {
-        uint256 startBucket = _startTokenId() >> 8;
-        uint256 lastBucket = (_nextTokenId() >> 8) + 1;
-
-        for (uint256 i = startBucket; i < lastBucket; i++) {
-            uint256 bucket = _burnedToken.getBucket(i);
-            burned += _popcount(bucket);
-        }
-    }
-
-    /**
-     * @dev Returns number of set bits.
-     */
-    function _popcount(uint256 x) private pure returns (uint256 count) {
-        unchecked {
-            for (count = 0; x != 0; count++) {
-                x &= x - 1;
-            }
-        }
+        _afterTokenTransfers(owner, address(0), _tokenId, 1);
     }
 }
+

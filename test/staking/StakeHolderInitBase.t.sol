@@ -12,15 +12,15 @@ abstract contract StakeHolderInitBaseTest is StakeHolderBaseTest {
         assertEq(ver, 0, "Expect initial version of storage layout to be V0");
     }
 
-    function testStakersInit() public {
+    function testStakersInit() public view {
         assertEq(stakeHolder.getNumStakers(), 0, "Expect no stakers at deployment time");
     }
 
-    function testGetToken() public {
+    function testGetToken() public view {
         assertEq(stakeHolder.getToken(), address(erc20), "Incorrect token address returned");
     }
 
-    function testAdmins() public {
+    function testAdmins() public view {
         assertEq(stakeHolder.getRoleMemberCount(defaultAdminRole), 1, "Expect one role admin");
         assertEq(stakeHolder.getRoleMemberCount(upgradeRole), 1, "Expect one upgrade admin");
         assertEq(stakeHolder.getRoleMemberCount(distributeRole), 1, "Expect one distribute admin");

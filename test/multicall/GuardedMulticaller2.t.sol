@@ -37,7 +37,7 @@ contract GuardedMulticaller2Test is Test {
         sigUtils = new SigUtils("name", "1", address(gmc));
     }
 
-    function test_Roles() public {
+    function test_Roles() public view {
         assertTrue(gmc.hasRole(gmc.DEFAULT_ADMIN_ROLE(), defaultAdmin));
         assertTrue(gmc.hasRole(gmc.MULTICALL_SIGNER_ROLE(), signer));
     }

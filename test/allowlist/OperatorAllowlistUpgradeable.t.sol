@@ -44,7 +44,7 @@ contract OperatorAllowlistTest is Test, OperatorAllowlistUpgradeable {
         deploySCWScript = new DeploySCWallet();
     }
 
-    function testDeployment() public {
+    function testDeployment() public view {
         assertTrue(allowlist.hasRole(allowlist.DEFAULT_ADMIN_ROLE(), admin));
         assertTrue(allowlist.hasRole(allowlist.REGISTRAR_ROLE(), registrar));
         assertTrue(allowlist.hasRole(allowlist.UPGRADE_ROLE(), upgrader));
@@ -74,7 +74,7 @@ contract OperatorAllowlistTest is Test, OperatorAllowlistUpgradeable {
         allowlist.upgradeTo(address(oalImplV2));
     }
 
-    function testShouldSupportIOperatorAllowlistInterface() public {
+    function testShouldSupportIOperatorAllowlistInterface() public view {
         assertTrue(allowlist.supportsInterface(0x05a3b809));
     }
 

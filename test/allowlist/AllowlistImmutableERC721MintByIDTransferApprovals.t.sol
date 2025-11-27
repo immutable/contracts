@@ -61,7 +61,7 @@ contract AllowlistERC721TransferApprovals is Test {
         _giveMinterRole();
     }
 
-    function testDeployment() public {
+    function testDeployment() public view {
         assertEq(address(immutableERC721MintByID.operatorAllowlist()), proxyAddr);
     }
 

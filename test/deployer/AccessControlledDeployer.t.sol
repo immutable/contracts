@@ -60,7 +60,7 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
         new AccessControlledDeployer(roleAdmin, ownershipManager, pauser, address(0));
     }
 
-    function test_Constructor_AssignsRoles() public {
+    function test_Constructor_AssignsRoles() public view {
         assertTrue(rbacDeployer.hasRole(rbacDeployer.DEFAULT_ADMIN_ROLE(), roleAdmin));
         assertTrue(rbacDeployer.hasRole(rbacDeployer.OWNERSHIP_MANAGER_ROLE(), ownershipManager));
         assertTrue(rbacDeployer.hasRole(rbacDeployer.PAUSER_ROLE(), pauser));

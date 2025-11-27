@@ -4,21 +4,15 @@
 
 Immutable Contracts is a library of smart contracts targeted at developers who wish to quickly build and deploy their smart contracts on Immutable chain, a general-purpose permissionless EVM compatible chain. The library allows developers to build on contracts curated by Immutable, including (but not limited to):
 
-- Token presets, e.g. ERC721
+- Token presets:
 
-  - [ImmutableERC721](./contracts/token/erc721/preset/ImmutableERC721.sol)
-  - [ImmutableERC721MintByID](./contracts/token/erc721/preset/ImmutableERC721MintByID.sol)
-  - [ImmutableERC1155](./contracts/token/erc1155/preset/ImmutableERC1155.sol)
-  - [ImmutableERC20MinterBurnerPermit](./contracts/token/erc20/preset/ImmutableERC20MinterBurnerPermit.sol)
-  - [ImmutableERC20FixedSupplyNoBurn](./contracts/token/erc20/preset/ImmutableERC20FixedSupplyNoBurn.sol)
+  - [ERC 721](./contracts/token/erc721/README.md)
+  - [ERC 1155](./contracts/token/erc1155/README.md)
+  - [ERC 20](./contracts/token/erc20/README.md)
 
-- Bridging contracts
+- Utility:
 
-- Marketplace and AMM contracts
-
-- Smart Contract Wallets
-
-- Random Number Generation
+  - [Guarded Multicall](./contracts/multicall/README.md)
 
 These contracts are feature-rich and are the recommended standard on Immutable zkEVM intended for all users and partners within the ecosystem.
 

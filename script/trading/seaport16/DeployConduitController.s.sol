@@ -3,7 +3,7 @@
 pragma solidity 0.8.24;
 
 import {console} from "forge-std/Console.sol";
-import {Script, Vm} from "forge-std/Script.sol";
+import {Script} from "forge-std/Script.sol";
 
 /**
  * @title DeployConduitController

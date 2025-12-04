@@ -209,7 +209,7 @@ contract OwnableCreate3DeployerTest is Test, Create3Utils {
      */
 
     /// @dev Same contracts initialised with different constructor parameters, should be deployed to the same address if using the same sender and salt
-    function test_deployedAddress_SameContractSameSaltDifferentConstructorParams() public {
+    function test_deployedAddress_SameContractSameSaltDifferentConstructorParams() public view {
         bytes memory bytecode1 =
             abi.encodePacked(type(ERC20MintableBurnable).creationCode, abi.encode("Token 1", "T1", 18));
         bytes memory bytecode2 =
@@ -223,7 +223,7 @@ contract OwnableCreate3DeployerTest is Test, Create3Utils {
     }
 
     /// @dev Different contracts should be deployed to the same address if using the same sender and salt
-    function test_deployedAddress_DifferentContractsSameSalt() public {
+    function test_deployedAddress_DifferentContractsSameSalt() public view {
         bytes32 salt = _createSaltFromKey("test-salt");
         bytes memory bytecode1 = type(ERC20Mock).creationCode;
         bytes memory bytecode2 = type(ERC20MintableBurnable).creationCode;
@@ -257,7 +257,7 @@ contract OwnableCreate3DeployerTest is Test, Create3Utils {
      */
     function _create2Address(bytes memory bytecode, bytes32 salt, address deployer, address sender)
         internal
-        view
+        pure
         returns (address)
     {
         bytes32 deploySalt = keccak256(abi.encode(sender, salt));

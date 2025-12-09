@@ -4,6 +4,8 @@ pragma solidity >=0.8.19 <0.8.29;
 import {ERC721PsiBurnableV2} from "../../../../contracts/token/erc721/erc721psi/ERC721PsiBurnableV2.sol";
 import {IERC721Receiver} from "openzeppelin-contracts-4.9.3/token/ERC721/IERC721Receiver.sol";
 
+// solhint-disable mixed-case-function
+
 // Test receiver contract for safe transfer testing
 contract TestReceiver is IERC721Receiver {
     bool public received;

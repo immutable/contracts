@@ -1,6 +1,6 @@
 pragma solidity >=0.8.19 <0.8.29;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 
 import {MockWallet} from "../../contracts/mocks/MockWallet.sol";
 import {MockWalletFactory} from "../../contracts/mocks/MockWalletFactory.sol";
@@ -61,7 +61,7 @@ contract AllowlistERC721TransferApprovals is Test {
         _giveMinterRole();
     }
 
-    function testDeployment() public {
+    function testDeployment() public view {
         assertEq(address(immutableERC721.operatorAllowlist()), proxyAddr);
     }
 

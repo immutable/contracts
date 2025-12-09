@@ -3,7 +3,7 @@
 
 pragma solidity >=0.8.19 <0.8.29;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {ERC721BaseTest} from "../../../test/token/erc721/ERC721Base.t.sol";
 import {IImmutableERC721} from "../../../contracts/token/erc721/interfaces/IImmutableERC721.sol";
 import {IImmutableERC721Structs} from "../../../contracts/token/erc721/interfaces/IImmutableERC721Structs.sol";

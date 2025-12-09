@@ -3,7 +3,7 @@
 pragma solidity >=0.8.19 <0.8.29;
 
 // solhint-disable-next-line no-global-import
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {StakeHolderWIMX} from "../../contracts/staking/StakeHolderWIMX.sol";
 import {StakeHolderWIMXV2} from "../../contracts/staking/StakeHolderWIMXV2.sol";
 import {WIMX} from "../../contracts/staking/WIMX.sol";

@@ -3,7 +3,7 @@
 pragma solidity >=0.8.19 <0.8.29;
 
 // solhint-disable-next-line no-global-import
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {StakeHolderWIMX} from "../../contracts/staking/StakeHolderWIMX.sol";
 import {StakeHolderWIMXV2} from "../../contracts/staking/StakeHolderWIMXV2.sol";
 import {ERC1967Proxy} from "openzeppelin-contracts-4.9.3/proxy/ERC1967/ERC1967Proxy.sol";
@@ -51,7 +51,7 @@ contract StakeHolderUpgradeForkTest is Test {
             // It would fail if we were to run the test.
             return;
         }
-        console.log("Executing Staking Contract Upgrade Fork Test");
+        //console.log("Executing Staking Contract Upgrade Fork Test");
 
         stakingTokenAddress = stakeHolder.getToken();
         assertEq(WIMX, stakingTokenAddress, "WIMX address incorrect prior to upgrade");

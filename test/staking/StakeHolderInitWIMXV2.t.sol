@@ -3,7 +3,7 @@
 pragma solidity >=0.8.19 <0.8.29;
 
 // solhint-disable-next-line no-global-import
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {StakeHolderInitBaseTestV2} from "./StakeHolderInitBaseV2.t.sol";
 
 contract StakeHolderInitWIMXTestV2 is StakeHolderInitBaseTestV2 {

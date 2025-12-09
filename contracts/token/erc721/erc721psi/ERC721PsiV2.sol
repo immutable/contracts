@@ -13,7 +13,7 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IERC165, ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
-// solhint-disable custom-errors, reason-string
+// f orge-lint: disable-start custom-errors, reason-string
 abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     using Address for address;
     using Strings for uint256;
@@ -127,7 +127,6 @@ abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
      * @dev See {IERC721-transferFrom}.
      */
     function transferFrom(address _from, address _to, uint256 _tokenId) public virtual override {
-        //solhint-disable-next-line max-line-length
         require(_isApprovedOrOwner(_msgSender(), _tokenId), "ERC721Psi: transfer caller is not owner nor approved");
         _transfer(_from, _to, _tokenId);
     }
@@ -281,7 +280,6 @@ abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
         // The duplicated `log4` removes an extra check and reduces stack juggling.
         // The assembly, together with the surrounding Solidity code, have been
         // delicately arranged to nudge the compiler into producing optimized opcodes.
-        // solhint-disable-next-line no-inline-assembly
         assembly {
             // Mask `to` to the lower 160 bits, in case the upper bits somehow aren't clean.
             toMasked := and(_to, _BITMASK_ADDRESS)
@@ -388,6 +386,7 @@ abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
      * @param _data bytes optional data to send along with the call
      * @return r bool whether the call correctly returned the expected magic value
      */
+    // forge-lint: disable-next-line(mixed-case-function)
     function _checkOnERC721Received(
         address _from,
         address _to,
@@ -459,11 +458,13 @@ abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     }
 
     function _bitIsSet(uint256 _bitMask, uint256 _offset) internal pure returns (bool) {
+        /// forge-lint: disable-next-line(incorrect-shift)
         uint256 bitSet = 1 << _offset;
         return (bitSet & _bitMask != 0);
     }
 
     function _setBit(uint256 _bitMask, uint256 _offset) internal pure returns (uint256) {
+        /// forge-lint: disable-next-line(incorrect-shift)
         uint256 bitSet = 1 << _offset;
         uint256 updatedBitMask = bitSet | _bitMask;
         return updatedBitMask;
@@ -474,6 +475,7 @@ abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
         // If offset = 1, mask should be 0xffff...ffe
         // If offset = 2, mask should be 0xffff...ffc
         // If offset = 3, mask should be 0xffff...ff8
+        /// forge-lint: disable-next-line(incorrect-shift)
         uint256 inverseBitMask = (1 << _offset) - 1;
         return ~inverseBitMask;
     }
@@ -490,7 +492,6 @@ abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
      * transferred to `to`.
      * - When `from` is zero, `tokenId` will be minted for `to`.
      */
-    // solhint-disable-next-line no-empty-blocks
     function _beforeTokenTransfers(address from, address to, uint256 startTokenId, uint256 quantity) internal virtual {}
 
     /**
@@ -505,6 +506,5 @@ abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
      * - when `from` and `to` are both non-zero.
      * - `from` and `to` are never both zero.
      */
-    // solhint-disable-next-line no-empty-blocks
     function _afterTokenTransfers(address from, address to, uint256 startTokenId, uint256 quantity) internal virtual {}
 }

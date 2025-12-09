@@ -19,6 +19,7 @@ import {IImmutableERC20Errors} from "./Errors.sol";
  */
 contract ImmutableERC20MinterBurnerPermit is ERC20Capped, ERC20Burnable, ERC20Permit, MintingAccessControl {
     /// @notice Role to mint tokens
+    // forge-lint: disable-next-line(unsafe-typecast)
     bytes32 public constant HUB_OWNER_ROLE = bytes32("HUB_OWNER_ROLE");
 
     /**

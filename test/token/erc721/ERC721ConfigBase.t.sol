@@ -157,7 +157,7 @@ abstract contract ERC721ConfigBaseTest is ERC721BaseTest {
         erc721.setContractURI("New Contract URI");
     }
 
-    function testSupportedInterfaces() public {
+    function testSupportedInterfaces() public view {
         // ERC165
         assertTrue(erc721.supportsInterface(0x01ffc9a7));
         // ERC721

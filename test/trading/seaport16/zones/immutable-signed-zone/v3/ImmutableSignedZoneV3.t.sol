@@ -1,11 +1,10 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2025
 // SPDX-License-Identifier: Apache-2
 
-// solhint-disable-next-line compiler-version
+// @solhint-disable-next-line compiler-version
 pragma solidity ^0.8.17;
 
-// solhint-disable-next-line no-global-import
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {ItemType} from "seaport-types-16/src/lib/ConsiderationEnums.sol";
 import {ReceivedItem, Schema, SpentItem, ZoneParameters} from "seaport-types-16/src/lib/ConsiderationStructs.sol";
@@ -23,7 +22,7 @@ import {SigningTestHelper} from "../../../../seaport/utils/SigningTestHelper.t.s
 import {ImmutableSignedZoneV3Harness} from "./ImmutableSignedZoneV3Harness.t.sol";
 import {MockTransferValidator, MockTransferValidatorRevert} from "../../../utils/MockTransferValidator.t.sol";
 
-// solhint-disable func-name-mixedcase
+// @solhint-disable func-name-mixedcase
 
 contract ImmutableSignedZoneV3Test is
     Test,
@@ -33,7 +32,7 @@ contract ImmutableSignedZoneV3Test is
     SIP6EventsAndErrors,
     SIP7EventsAndErrors
 {
-    // solhint-disable private-vars-leading-underscore
+    // @solhint-disable private-vars-leading-underscore
     uint64 private constant DEFAULT_EXPIRATION = 100;
     address private immutable OWNER = makeAddr("owner");
     address private immutable FULFILLER = makeAddr("fulfiller");
@@ -2279,4 +2278,4 @@ contract ImmutableSignedZoneV3Test is
     }
 }
 
-// solhint-enable func-name-mixedcase
+// @solhint-enable func-name-mixedcase

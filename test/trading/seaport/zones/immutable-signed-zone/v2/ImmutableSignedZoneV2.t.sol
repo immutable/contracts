@@ -5,7 +5,7 @@
 pragma solidity ^0.8.17;
 
 // solhint-disable-next-line no-global-import
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {ItemType} from "seaport-types/src/lib/ConsiderationEnums.sol";
 import {ReceivedItem, Schema, SpentItem, ZoneParameters} from "seaport-types/src/lib/ConsiderationStructs.sol";

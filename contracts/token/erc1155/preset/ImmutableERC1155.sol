@@ -8,6 +8,7 @@ import {ImmutableERC1155Base} from "../abstract/ImmutableERC1155Base.sol";
  * @title ImmutableERC1155
  * @author @jasonzwli, Immutable
  */
+// forge-lint: disable-start(mixed-case-function,mixed-case-variable)
 contract ImmutableERC1155 is ImmutableERC1155Base {
     ///     =====   Constructor  =====
 

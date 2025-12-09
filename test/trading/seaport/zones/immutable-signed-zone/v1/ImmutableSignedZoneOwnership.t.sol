@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {ImmutableSignedZone} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/ImmutableSignedZone.sol";
 import {SIP7EventsAndErrors} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/interfaces/SIP7EventsAndErrors.sol";
 
@@ -23,7 +23,7 @@ contract ImmutableSignedZoneOwnershipTest is Test {
         vm.stopPrank();
     }
 
-    function testDeployerBecomesOwner() public {
+    function testDeployerBecomesOwner() public view {
         assertEq(zone.owner(), owner);
     }
 

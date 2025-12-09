@@ -4,6 +4,8 @@ pragma solidity >=0.8.19 <0.8.29;
 
 import {ImmutableERC721HybridBase} from "../abstract/ImmutableERC721HybridBase.sol";
 
+// forge-lint: disable-start(mixed-case-function,mixed-case-variable)
+
 contract ImmutableERC721 is ImmutableERC721HybridBase {
     ///     =====   Constructor  =====
 
@@ -19,6 +21,7 @@ contract ImmutableERC721 is ImmutableERC721HybridBase {
      * @param feeNumerator_ The royalty fee numerator
      * @dev the royalty receiver and amount (this can not be changed once set)
      */
+    // @solhint-disable-next-line variable-name-mixedcase
     constructor(
         address owner_,
         string memory name_,

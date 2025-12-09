@@ -11,6 +11,8 @@ import {IMintingAccessControl} from "../../../access/IMintingAccessControl.sol";
 import {IImmutableERC721Structs} from "./IImmutableERC721Structs.sol";
 import {IImmutableERC721Errors} from "./IImmutableERC721Errors.sol";
 
+// forge-lint: disable-start(mixed-case-function,mixed-case-variable)
+
 interface IImmutableERC721 is
     IMintingAccessControl,
     IERC2981,

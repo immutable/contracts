@@ -3,7 +3,7 @@
 
 pragma solidity ^0.8.20;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {GemGame} from "../../../contracts/games/gems/GemGame.sol";
 
 /**
@@ -41,6 +41,7 @@ contract DeployGemGame is Test {
 
     function testDeploy() external {
         /// @dev Fork the Immutable zkEVM testnet for this test
+        // @solhint-disable-next-line variable-name-mixedcase
         string memory rpcURL = "https://rpc.testnet.immutable.com";
         vm.createSelectFork(rpcURL);
 

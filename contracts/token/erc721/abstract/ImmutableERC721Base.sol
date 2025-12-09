@@ -13,6 +13,9 @@ import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnf
 import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import {AccessControlEnumerable, MintingAccessControl} from "../../../access/MintingAccessControl.sol";
 
+
+// forge-lint: disable-start(mixed-case-function,mixed-case-variable,pascal-case-struct)
+
 /*
     ImmutableERC721Base is an abstract contract that offers minimum preset functionality without
     an opinionated form of minting. This contract is intended to be inherited and implement its

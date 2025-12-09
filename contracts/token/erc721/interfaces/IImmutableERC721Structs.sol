@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
+// forge-lint: disable-start(pascal-case-struct)
+
 interface IImmutableERC721Structs {
     /**
      * @notice A singular batch transfer request. The length of the tos and tokenIds must be matching

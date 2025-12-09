@@ -3,7 +3,7 @@
 pragma solidity >=0.8.19 <0.8.29;
 
 // solhint-disable-next-line no-global-import
-import "forge-std/Test.sol";
+import {stdError} from "forge-std/StdError.sol";
 import {IStakeHolder} from "../../contracts/staking/IStakeHolder.sol";
 import {StakeHolderBaseTest} from "./StakeHolderBase.t.sol";
 

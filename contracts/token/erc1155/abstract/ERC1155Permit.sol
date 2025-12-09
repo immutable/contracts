@@ -9,6 +9,8 @@ import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 import {IERC1155Permit} from "./IERC1155Permit.sol";
 import {IImmutableERC1155Errors} from "../../../errors/Errors.sol";
 
+// forge-lint: disable-start(mixed-case-function,mixed-case-variable)
+
 abstract contract ERC1155Permit is ERC1155Burnable, EIP712, IERC1155Permit, IImmutableERC1155Errors {
     bytes32 private immutable _PERMIT_TYPEHASH =
         keccak256("Permit(address owner,address spender,bool approved,uint256 nonce,uint256 deadline)");

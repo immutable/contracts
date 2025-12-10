@@ -8,8 +8,6 @@ import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnf
 import {ERC721HybridPermit} from "./ERC721HybridPermit.sol";
 import {ERC721Hybrid} from "./ERC721Hybrid.sol";
 
-// forge-lint: disable-start(mixed-case-function,mixed-case-variable)
-
 abstract contract ImmutableERC721HybridBase is
     OperatorAllowlistEnforced,
     MintingAccessControl,

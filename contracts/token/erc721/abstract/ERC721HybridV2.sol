@@ -8,8 +8,6 @@ import {ERC721PsiV2, ERC721PsiBurnableV2} from "../erc721psi/ERC721PsiBurnableV2
 import {IImmutableERC721Errors} from "../interfaces/IImmutableERC721Errors.sol";
 import {IImmutableERC721Structs} from "../interfaces/IImmutableERC721Structs.sol";
 
-// forge-lint: disable-start(mixed-case-function,mixed-case-variable)
-
 /*
 This contract allows for minting with one of two strategies:
 - ERC721: minting with specified tokenIDs (inefficient)

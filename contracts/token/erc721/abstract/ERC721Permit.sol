@@ -11,8 +11,6 @@ import {ERC721, ERC721Burnable, IERC165} from "@openzeppelin/contracts/token/ERC
 // Errors
 import {IImmutableERC721Errors} from "../../../errors/Errors.sol";
 
-// forge-lint: disable-start(mixed-case-function,mixed-case-variable)
-
 /**
  * @title ERC721Permit: An extension of the ERC721Burnable NFT standard that supports off-chain approval via permits.
  * @dev This contract implements ERC-4494 as well, allowing tokens to be approved via off-chain signed messages.

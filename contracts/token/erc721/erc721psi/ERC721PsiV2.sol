@@ -13,7 +13,6 @@ import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IERC165, ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
-// f orge-lint: disable-start custom-errors, reason-string
 abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     using Address for address;
     using Strings for uint256;
@@ -386,7 +385,6 @@ abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
      * @param _data bytes optional data to send along with the call
      * @return r bool whether the call correctly returned the expected magic value
      */
-    // forge-lint: disable-next-line(mixed-case-function)
     function _checkOnERC721Received(
         address _from,
         address _to,

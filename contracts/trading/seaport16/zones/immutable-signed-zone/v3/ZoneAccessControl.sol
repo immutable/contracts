@@ -14,6 +14,7 @@ import {ZoneAccessControlEventsAndErrors} from "./interfaces/ZoneAccessControlEv
  */
 abstract contract ZoneAccessControl is AccessControlEnumerable, ZoneAccessControlEventsAndErrors {
     /// @dev Zone manager manages the zone.
+    // forge-lint: disable-next-line(unsafe-typecast)
     bytes32 public constant ZONE_MANAGER_ROLE = bytes32("ZONE_MANAGER");
 
     /**

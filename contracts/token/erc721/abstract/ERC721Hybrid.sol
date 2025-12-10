@@ -8,7 +8,7 @@ import {ERC721Psi, ERC721PsiBurnable} from "../erc721psi/ERC721PsiBurnable.sol";
 // Errors
 import {IImmutableERC721Errors} from "../../../errors/Errors.sol";
 
-// forge-lint: disable-start(mixed-case-function,mixed-case-variable,pascal-case-struct)
+// forge-lint: disable-start(pascal-case-struct)
 
 /*
 This contract allows for minting with one of two strategies:

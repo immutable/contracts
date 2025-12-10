@@ -4,8 +4,6 @@ pragma solidity >=0.8.19 <0.8.29;
 
 import {ImmutableERC721HybridBase} from "../abstract/ImmutableERC721HybridBase.sol";
 
-// forge-lint: disable-start(mixed-case-function,mixed-case-variable)
-
 contract ImmutableERC721 is ImmutableERC721HybridBase {
     ///     =====   Constructor  =====
 

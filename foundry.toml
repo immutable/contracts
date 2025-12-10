@@ -7,3 +7,5 @@ fs_permissions = [{ access = "read", path = "./foundry-out" }]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 
+[lint]
+exclude_lints = ["mixed-case-function","mixed-case-variable","asm-keccak256"]

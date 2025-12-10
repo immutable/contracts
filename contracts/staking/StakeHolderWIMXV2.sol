@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache 2
 pragma solidity >=0.8.19 <0.8.29;
 
-import {IStakeHolder, StakeHolderBase, StakeHolderBaseV2, StakeHolderNativeV2} from "./StakeHolderNativeV2.sol";
+import {IStakeHolder, StakeHolderBase, StakeHolderNativeV2} from "./StakeHolderNativeV2.sol";
 import {IWIMX} from "./IWIMX.sol";
 
 /**

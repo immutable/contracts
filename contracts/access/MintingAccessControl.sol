@@ -6,6 +6,7 @@ import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessCont
 
 abstract contract MintingAccessControl is AccessControlEnumerable {
     /// @notice Role to mint tokens
+    // forge-lint: disable-next-line(unsafe-typecast)
     bytes32 public constant MINTER_ROLE = bytes32("MINTER_ROLE");
 
     /**

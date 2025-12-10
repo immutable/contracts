@@ -14,7 +14,7 @@ import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import {AccessControlEnumerable, MintingAccessControl} from "../../../access/MintingAccessControl.sol";
 
 
-// forge-lint: disable-start(mixed-case-function,mixed-case-variable,pascal-case-struct)
+// forge-lint: disable-start(pascal-case-struct)
 
 /*
     ImmutableERC721Base is an abstract contract that offers minimum preset functionality without

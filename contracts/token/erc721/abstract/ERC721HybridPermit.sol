@@ -10,8 +10,6 @@ import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 import {IERC4494} from "./IERC4494.sol";
 import {ERC721Hybrid} from "./ERC721Hybrid.sol";
 
-// forge-lint: disable-start(mixed-case-function,mixed-case-variable)
-
 /**
  * @title ERC721HybridPermit: An extension of the ERC721Hybrid NFT standard that supports off-chain approval via permits.
  * @dev This contract implements ERC-4494 as well, allowing tokens to be approved via off-chain signed messages.

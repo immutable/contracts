@@ -148,7 +148,7 @@ contract ImmutableSignedZoneV2 is
         }
 
         // Set the signer info.
-        _signers[signer] = SignerInfo(true, true);
+        _signers[signer] = SignerInfo({ active: true, previouslyActive: true });
 
         // Emit an event that the signer was added.
         emit SignerAdded(signer);

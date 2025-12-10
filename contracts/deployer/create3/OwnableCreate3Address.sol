@@ -12,13 +12,13 @@ import {OwnableCreateDeploy} from "../create/OwnableCreateDeploy.sol";
  */
 abstract contract OwnableCreate3Address {
     /// @dev bytecode hash of the CreateDeploy helper contract
-    bytes32 internal immutable createDeployBytecodeHash;
+    bytes32 internal immutable CREATE_DEPLOY_BYTECODE_HASH;
 
     constructor() {
         // Slither is mistakenly seeing the expansion of type(OwnableCreateDeploy).creationCode
         // as a very large number.
         // slither-disable-next-line too-many-digits
-        createDeployBytecodeHash = keccak256(type(OwnableCreateDeploy).creationCode);
+        CREATE_DEPLOY_BYTECODE_HASH = keccak256(type(OwnableCreateDeploy).creationCode);
     }
 
     /**
@@ -28,7 +28,7 @@ abstract contract OwnableCreate3Address {
      */
     function _create3Address(bytes32 deploySalt) internal view returns (address deployed) {
         address deployer = address(
-            uint160(uint256(keccak256(abi.encodePacked(hex"ff", address(this), deploySalt, createDeployBytecodeHash))))
+            uint160(uint256(keccak256(abi.encodePacked(hex"ff", address(this), deploySalt, CREATE_DEPLOY_BYTECODE_HASH))))
         );
 
         deployed = address(uint160(uint256(keccak256(abi.encodePacked(hex"d694", deployer, hex"01")))));

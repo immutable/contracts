@@ -3,7 +3,6 @@
 pragma solidity >=0.8.19 <0.8.29;
 
 import {Test} from "forge-std/Test.sol";
-import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 import {OperatorAllowlistUpgradeable} from "../../contracts/allowlist/OperatorAllowlistUpgradeable.sol";
 import {MockOperatorAllowlistUpgradeable} from "./MockOAL.sol";
 import {ImmutableERC721} from "../../contracts/token/erc721/preset/ImmutableERC721.sol";

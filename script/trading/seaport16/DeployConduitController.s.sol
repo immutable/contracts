@@ -11,11 +11,11 @@ import {Script} from "forge-std/Script.sol";
  *         outlined here: https://github.com/ProjectOpenSea/seaport/blob/main/docs/Deployment.md.
  */
 contract DeployConduitController is Script {
-    address private constant keylessCreate2DeployerAddress = 0x4c8D290a1B368ac4728d83a9e8321fC3af2b39b1;
-    address private constant keylessCreate2Address = 0x7A0D94F55792C434d74a40883C6ed8545E406D12;
-    address private constant inefficientImmutableCreate2FactoryAddress = 0xcfA3A7637547094fF06246817a35B8333C315196;
-    address private constant immutableCreate2FactoryAddress = 0x0000000000FFe8B47B3e2130213B802212439497;
-    address private constant conduitControllerAddress = 0x00000000F9490004C11Cef243f5400493c00Ad63;
+    address private constant KEYLESS_CREATE2_DEPLOYER_ADDRESS = 0x4c8D290a1B368ac4728d83a9e8321fC3af2b39b1;
+    address private constant KEYLESS_CREATE2_ADDRESS = 0x7A0D94F55792C434d74a40883C6ed8545E406D12;
+    address private constant INEFFICIENT_IMMUTABLE_CREATE2_FACTORY_ADDRESS = 0xcfA3A7637547094fF06246817a35B8333C315196;
+    address private constant IMMUTABLE_CREATE2_FACTORY_ADDRESS = 0x0000000000FFe8B47B3e2130213B802212439497;
+    address private constant CONDUIT_CONTROLLER_ADDRESS = 0x00000000F9490004C11Cef243f5400493c00Ad63;
 
     bytes private constant createKeylessCreate2RawSignedTx = hex"f87e8085174876e800830186a08080ad601f80600e600039806000f350fe60003681823780368234f58015156014578182fd5b80825250506014600cf31ba02222222222222222222222222222222222222222222222222222222222222222a02222222222222222222222222222222222222222222222222222222222222222";
 
@@ -28,18 +28,18 @@ contract DeployConduitController is Script {
     function run() external {
         vm.startBroadcast();
 
-        if (keylessCreate2Address.code.length == 0) {
+        if (KEYLESS_CREATE2_ADDRESS.code.length == 0) {
             console.log("Deploying KEYLESS_CREATE2");
             // Creates KEYLESS_CREATE2 contract using 0x4c8D290a1B368ac4728d83a9e8321fC3af2b39b1 as the deployer. This account must be funded with at least 0.01 ether.
-            require(keylessCreate2DeployerAddress.balance >= 0.01 ether, string.concat("keylessCreate2Deployer balance must be at least ", vm.toString(uint256(0.01 ether)), " but is only ", vm.toString(keylessCreate2DeployerAddress.balance)));
+            require(KEYLESS_CREATE2_DEPLOYER_ADDRESS.balance >= 0.01 ether, string.concat("keylessCreate2Deployer balance must be at least ", vm.toString(uint256(0.01 ether)), " but is only ", vm.toString(KEYLESS_CREATE2_DEPLOYER_ADDRESS.balance)));
             vm.broadcastRawTransaction(createKeylessCreate2RawSignedTx);
         } else {
             console.log("Skipping KEYLESS_CREATE2, already exists");
         }
 
-        _createIfNotExist("INEFFICIENT_IMMUTABLE_CREATE2_FACTORY", inefficientImmutableCreate2FactoryAddress, keylessCreate2Address, createInefficientImmutableCreate2FactoryRawTx);
-        _createIfNotExist("IMMUTABLE_CREATE2_FACTORY", immutableCreate2FactoryAddress, inefficientImmutableCreate2FactoryAddress, createImmutableCreate2FactoryRawTx);
-        _createIfNotExist("ConduitController", conduitControllerAddress, immutableCreate2FactoryAddress, createConduitControllerRawTx);
+        _createIfNotExist("INEFFICIENT_IMMUTABLE_CREATE2_FACTORY", INEFFICIENT_IMMUTABLE_CREATE2_FACTORY_ADDRESS, KEYLESS_CREATE2_ADDRESS, createInefficientImmutableCreate2FactoryRawTx);
+        _createIfNotExist("IMMUTABLE_CREATE2_FACTORY", IMMUTABLE_CREATE2_FACTORY_ADDRESS, INEFFICIENT_IMMUTABLE_CREATE2_FACTORY_ADDRESS, createImmutableCreate2FactoryRawTx);
+        _createIfNotExist("ConduitController", CONDUIT_CONTROLLER_ADDRESS, IMMUTABLE_CREATE2_FACTORY_ADDRESS, createConduitControllerRawTx);
 
         vm.stopBroadcast();
     }

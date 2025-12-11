@@ -386,8 +386,9 @@ contract StakeHolderScriptERC20 is Test {
 
         address user1 = makeAddr("user1");
         vm.startBroadcast(_bank);
-        erc20.transfer(user1, 100 ether);
+        bool success = erc20.transfer(user1, 100 ether);
         vm.stopBroadcast();
+        require(success, "ERC20 transfer unexpectedly failed");
 
         _stake(_stakeHolder, user1, 10 ether);
 

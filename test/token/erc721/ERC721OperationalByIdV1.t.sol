@@ -4,7 +4,7 @@ pragma solidity >=0.8.19 <0.8.29;
 
 import {ERC721OperationalBaseTest} from "./ERC721OperationalBase.t.sol";
 import {ImmutableERC721MintByID} from "../../../contracts/token/erc721/preset/ImmutableERC721MintByID.sol";
-import {IImmutableERC721, IImmutableERC721Errors} from "../../../contracts/token/erc721/interfaces/IImmutableERC721.sol";
+import {IImmutableERC721} from "../../../contracts/token/erc721/interfaces/IImmutableERC721.sol";
 
 
 // Test the original ImmutableERC721 contract: Operational tests

@@ -78,6 +78,7 @@ abstract contract ERC721BaseTest is Test {
     function notOwnedRevertError(uint256 _tokenIdToBeBurned) public pure virtual returns (bytes memory);
 
     function calcFee(uint256 _salePrice) public view returns(uint96) {
+        // forge-lint: disable-next-line(unsafe-typecast)
         return uint96(feeNumerator * _salePrice / 10000);
     }
 

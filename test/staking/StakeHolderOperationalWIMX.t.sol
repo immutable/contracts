@@ -2,11 +2,7 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
-// solhint-disable-next-line no-global-import
-import {Test} from "forge-std/Test.sol";
-import {StakeHolderWIMX} from "../../contracts/staking/StakeHolderWIMX.sol";
 import {IStakeHolder} from "../../contracts/staking/IStakeHolder.sol";
-import {WIMX} from "../../contracts/staking/WIMX.sol";
 import {StakeHolderOperationalBaseTest} from "./StakeHolderOperationalBase.t.sol";
 
 contract StakeHolderOperationalWIMXTest is StakeHolderOperationalBaseTest {

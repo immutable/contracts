@@ -2,12 +2,9 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
-// solhint-disable-next-line no-global-import
-import {Test} from "forge-std/Test.sol";
 import {StakeHolderERC20} from "../../contracts/staking/StakeHolderERC20.sol";
 import {StakeHolderERC20V2} from "../../contracts/staking/StakeHolderERC20V2.sol";
 import {IStakeHolder} from "../../contracts/staking/IStakeHolder.sol";
-import {StakeHolderBase} from "../../contracts/staking/StakeHolderBase.sol";
 import {StakeHolderBaseV2} from "../../contracts/staking/StakeHolderBaseV2.sol";
 import {StakeHolderConfigBaseTestV2} from "./StakeHolderConfigBaseV2.t.sol";
 import {ERC1967Proxy} from "openzeppelin-contracts-4.9.3/proxy/ERC1967/ERC1967Proxy.sol";

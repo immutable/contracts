@@ -3,17 +3,10 @@
 pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
-import {ERC1967Proxy} from "openzeppelin-contracts-4.9.3/proxy/ERC1967/ERC1967Proxy.sol";
 import {TimelockController} from "openzeppelin-contracts-4.9.3/governance/TimelockController.sol";
-import {IERC20} from "openzeppelin-contracts-4.9.3/token/ERC20/IERC20.sol";
-import {UUPSUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/proxy/utils/UUPSUpgradeable.sol";
 import {IAccessControlUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/access/IAccessControlUpgradeable.sol";
 
 import {IStakeHolder} from "../../contracts/staking/IStakeHolder.sol";
-import {StakeHolderBase} from "../../contracts/staking/StakeHolderBase.sol";
-import {StakeHolderWIMXV2} from "../../contracts/staking/StakeHolderWIMXV2.sol";
-import {WIMX} from "../../contracts/staking/WIMX.sol";
-import {OwnableCreate3Deployer} from "../../contracts/deployer/create3/OwnableCreate3Deployer.sol";
 
 
 /**

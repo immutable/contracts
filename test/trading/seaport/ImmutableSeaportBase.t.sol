@@ -9,14 +9,7 @@ import {SIP7EventsAndErrors} from "../../../contracts/trading/seaport/zones/immu
 import {ConduitController} from "seaport-core/src/conduit/ConduitController.sol";
 import {Conduit} from "seaport-core/src/conduit/Conduit.sol";
 import {Consideration} from "seaport-core/src/lib/Consideration.sol";
-import {OrderParameters, OrderComponents, Order, AdvancedOrder, FulfillmentComponent, FulfillmentComponent, CriteriaResolver} from "seaport-types/src/lib/ConsiderationStructs.sol";
-import {ReceivedItem, SpentItem} from "seaport-types/src/lib/ConsiderationStructs.sol";
-
-import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-
-
-
-
+import {OrderParameters} from "seaport-types/src/lib/ConsiderationStructs.sol";
 
 
 abstract contract ImmutableSeaportBaseTest is Test {

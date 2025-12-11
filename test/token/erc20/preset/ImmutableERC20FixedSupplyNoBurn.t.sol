@@ -25,7 +25,7 @@ contract ImmutableERC20FixedSupplyNoBurnTest is Test {
         erc20 = new ImmutableERC20FixedSupplyNoBurn(name, symbol, supply, treasurer, hubOwner);
     }
 
-    function testInit() public {
+    function testInit() public view {
         assertEq(erc20.name(), name, "name");
         assertEq(erc20.symbol(), symbol, "symbol");
         assertEq(erc20.totalSupply(), supply, "supply");

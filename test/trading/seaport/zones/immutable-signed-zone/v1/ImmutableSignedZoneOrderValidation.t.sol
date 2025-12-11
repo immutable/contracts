@@ -6,8 +6,7 @@ import {ImmutableSeaportTestHelper} from "../../../ImmutableSeaportTestHelper.t.
 import {ImmutableSignedZone} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/ImmutableSignedZone.sol";
 import {SIP7EventsAndErrors} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/interfaces/SIP7EventsAndErrors.sol";
 import {SIP6EventsAndErrors} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/interfaces/SIP6EventsAndErrors.sol";
-import {ZoneParameters, ReceivedItem, SpentItem} from "seaport-types/src/lib/ConsiderationStructs.sol";
-import {ItemType} from "seaport-types/src/lib/ConsiderationEnums.sol";
+import {ZoneParameters, ReceivedItem} from "seaport-types/src/lib/ConsiderationStructs.sol";
 
 
 contract ImmutableSignedZoneOrderValidationTest is Test, ImmutableSeaportTestHelper {

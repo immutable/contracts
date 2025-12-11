@@ -29,7 +29,7 @@ contract ImmutableERC20MinterBurnerPermitTest is Test {
         erc20 = new ImmutableERC20MinterBurnerPermit(admin, minter, hubOwner, name, symbol, maxSupply);
     }
 
-    function testInit() public {
+    function testInit() public view {
         assertEq(erc20.name(), name, "name");
         assertEq(erc20.symbol(), symbol, "symbol");
         bytes32 minterRole = erc20.MINTER_ROLE();

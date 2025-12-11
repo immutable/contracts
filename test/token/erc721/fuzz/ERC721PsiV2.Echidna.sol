@@ -242,6 +242,7 @@ contract ERC721PsiV2Echidna is ERC721PsiBurnableV2 {
 
     function echidna_cross_group_operations() public returns (bool) {
         uint256 groupSize = GROUP_SIZE;
+        // forge-lint: disable-next-line(divide-before-multiply)
         uint256 tokenId = (currentTokenId / groupSize) * groupSize; // Align to group boundary
         
         try this.mint(address(this), groupSize + 1) {
@@ -354,6 +355,7 @@ contract ERC721PsiV2Echidna is ERC721PsiBurnableV2 {
         if (totalMinted == 0) return true;
         uint256 tokenId = currentTokenId % totalMinted;
         address originalOwner = tokenOwnersMap[tokenId];
+        // forge-lint: disable-next-line(unsafe-typecast)
         address newOwner = address(uint160(currentTokenId % 100));
         
         try this.transferFrom(originalOwner, newOwner, tokenId) {

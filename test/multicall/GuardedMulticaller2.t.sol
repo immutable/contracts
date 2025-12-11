@@ -5,7 +5,6 @@ pragma solidity >=0.8.19 <0.8.29;
 import {Test} from "forge-std/Test.sol";
 import {GuardedMulticaller2} from "../../contracts/multicall/GuardedMulticaller2.sol";
 import {MockFunctions} from "./MockFunctions.sol";
-import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {SigUtils} from "./SigUtils.t.sol";
 
 contract GuardedMulticaller2Test is Test {

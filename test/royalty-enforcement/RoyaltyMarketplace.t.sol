@@ -22,9 +22,9 @@ contract RoyaltyMarketplaceTest is Test {
     address public seller;
     
     string public constant BASE_URI = "https://baseURI.com/";
-    string public constant contractURI = "https://contractURI.com";
-    string public constant name = "ERC721Preset";
-    string public constant symbol = "EP";
+    string public constant CONTRACT_URI = "https://contractURI.com";
+    string public constant NAME = "ERC721Preset";
+    string public constant SYMBOL = "EP";
     uint96 public constant ROYALTY = 2000; // 20%
     
     function setUp() public {
@@ -45,10 +45,10 @@ contract RoyaltyMarketplaceTest is Test {
         vm.prank(owner);
         erc721 = new ImmutableERC721MintByID(
             owner,
-            name,
-            symbol,
+            NAME,
+            SYMBOL,
             BASE_URI,
-            contractURI,
+            CONTRACT_URI,
             address(operatorAllowlist),
             royaltyRecipient,
             ROYALTY

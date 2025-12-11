@@ -270,13 +270,14 @@ contract ImmutableSeaportSignedZoneV3IntegrationTest is Test, SigningTestHelper 
 
         // mints
         vm.prank(OWNER);
-        erc20Token.transfer(
+        bool success = erc20Token.transfer(
             FULFILLER,
             (
                 considerationItems[0].startAmount + considerationItems[1].startAmount
                     + considerationItems[2].startAmount + considerationItems[3].startAmount
             )
         );
+        require(success, "Unexpectedly, ERC20 transfer failed");
         vm.prank(OWNER);
         erc721Token.safeMint(OFFERER, offerItems[0].identifierOrCriteria);
 
@@ -450,13 +451,14 @@ contract ImmutableSeaportSignedZoneV3IntegrationTest is Test, SigningTestHelper 
 
         // mints
         vm.prank(OWNER);
-        erc20Token.transfer(
+        bool success = erc20Token.transfer(
             FULFILLER,
             (
                 considerationItems[0].startAmount + considerationItems[1].startAmount
                     + considerationItems[2].startAmount + considerationItems[3].startAmount
             ) / 100
         );
+        require(success, "Unexpectedly, ERC20 transfer failed");
         vm.prank(OWNER);
         erc1155Token.safeMint(OFFERER, offerItems[0].identifierOrCriteria, offerItems[0].startAmount, new bytes(0));
 
@@ -634,13 +636,14 @@ contract ImmutableSeaportSignedZoneV3IntegrationTest is Test, SigningTestHelper 
 
         // mints
         vm.prank(OWNER);
-        erc20Token.transfer(
+        bool success = erc20Token.transfer(
             FULFILLER,
             (
                 considerationItems[0].startAmount + considerationItems[1].startAmount
                     + considerationItems[2].startAmount + considerationItems[3].startAmount
             ) * 2 / 100
         );
+        require(success, "Unexpectedly, ERC20 transfer failed");
         vm.prank(OWNER);
         erc1155Token.safeMint(OFFERER, offerItems[0].identifierOrCriteria, offerItems[0].startAmount, new bytes(0));
 
@@ -846,22 +849,28 @@ contract ImmutableSeaportSignedZoneV3IntegrationTest is Test, SigningTestHelper 
         });
 
         // mints
-        vm.prank(OWNER);
-        erc20Token.transfer(
-            FULFILLER,
-            (
-                considerationItems[0].startAmount + considerationItems[1].startAmount
-                    + considerationItems[2].startAmount + considerationItems[3].startAmount
-            ) / 2
-        );
-        vm.prank(OWNER);
-        erc20Token.transfer(
-            FULFILLER_TWO,
-            (
-                considerationItems[0].startAmount + considerationItems[1].startAmount
-                    + considerationItems[2].startAmount + considerationItems[3].startAmount
-            )
-        );
+        {
+            vm.prank(OWNER);
+            erc20Token.transfer(
+                FULFILLER,
+                (
+                    considerationItems[0].startAmount + considerationItems[1].startAmount
+                        + considerationItems[2].startAmount + considerationItems[3].startAmount
+                ) / 2
+            );
+            //require(success, "Unexpectedly, ERC20 transfer failed");
+        }
+        {
+            vm.prank(OWNER);
+            bool success = erc20Token.transfer(
+                FULFILLER_TWO,
+                (
+                    considerationItems[0].startAmount + considerationItems[1].startAmount
+                        + considerationItems[2].startAmount + considerationItems[3].startAmount
+                )
+            );
+            require(success, "Unexpectedly, ERC20 transfer failed");
+        }
         vm.prank(OWNER);
         erc1155Token.safeMint(OFFERER, offerItems[0].identifierOrCriteria, offerItems[0].startAmount, new bytes(0));
 

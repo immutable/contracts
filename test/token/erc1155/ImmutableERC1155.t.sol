@@ -2,10 +2,9 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {ImmutableERC1155} from "../../../contracts/token/erc1155/preset/ImmutableERC1155.sol";
 import {IImmutableERC1155Errors} from "../../../contracts/errors/Errors.sol";
-import {OperatorAllowlistEnforcementErrors} from "../../../contracts/errors/Errors.sol";
 import {OperatorAllowlistUpgradeable} from "../../../contracts/allowlist/OperatorAllowlistUpgradeable.sol";
 import {Sign} from "../../utils/Sign.sol";
 import {DeployOperatorAllowlist} from "../../utils/DeployAllowlistProxy.sol";
@@ -144,29 +143,29 @@ contract ImmutableERC1155Test is Test {
         assertEq(500, royaltyAmount);
     }
 
-    function test_DeploymentShouldSetAdminRoleToOwner() public {
+    function test_DeploymentShouldSetAdminRoleToOwner() public view {
         bytes32 adminRole = immutableERC1155.DEFAULT_ADMIN_ROLE();
         assertTrue(immutableERC1155.hasRole(adminRole, owner));
     }
 
-    function test_DeploymentShouldSetContractURI() public {
+    function test_DeploymentShouldSetContractURI() public view {
         assertEq(immutableERC1155.contractURI(), "test-contract-uri");
     }
 
-    function test_DeploymentShouldSetBaseURI() public {
+    function test_DeploymentShouldSetBaseURI() public view {
         assertEq(immutableERC1155.baseURI(), "test-base-uri");
     }
 
-    function test_DeploymentShouldSetUri() public {
+    function test_DeploymentShouldSetUri() public view {
         assertEq(immutableERC1155.uri(0), immutableERC1155.baseURI());
     }
 
-    function test_DeploymentAllowlistShouldGiveAdminToOwner() public {
+    function test_DeploymentAllowlistShouldGiveAdminToOwner() public view {
         bytes32 adminRole = operatorAllowlist.DEFAULT_ADMIN_ROLE();
         assertTrue(operatorAllowlist.hasRole(adminRole, owner));
     }
 
-    function test_DeploymentShouldSetAllowlistToProxy() public {
+    function test_DeploymentShouldSetAllowlistToProxy() public view {
         assertEq(address(immutableERC1155.operatorAllowlist()), proxyAddr);
     }
 
@@ -429,11 +428,11 @@ contract ImmutableERC1155Test is Test {
     /*
     * SupportsInterface
     */
-    function test_SupportsInterface() public {
+    function test_SupportsInterface() public view {
         assertTrue(immutableERC1155.supportsInterface(0x9e3ae8e4));
     }
 
-    function test_SupportsInterface_delegatesToSuper() public {
+    function test_SupportsInterface_delegatesToSuper() public view {
         assertTrue(immutableERC1155.supportsInterface(0x01ffc9a7)); //IERC165
     }
 

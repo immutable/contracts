@@ -4,6 +4,8 @@ pragma solidity >=0.8.19 <0.8.29;
 import {ERC721PsiBurnableV2} from "../../../../contracts/token/erc721/erc721psi/ERC721PsiBurnableV2.sol";
 import {IERC721Receiver} from "openzeppelin-contracts-4.9.3/token/ERC721/IERC721Receiver.sol";
 
+// solhint-disable mixed-case-function
+
 // Test receiver contract for safe transfer testing
 contract TestReceiver is IERC721Receiver {
     bool public received;
@@ -240,6 +242,7 @@ contract ERC721PsiV2Echidna is ERC721PsiBurnableV2 {
 
     function echidna_cross_group_operations() public returns (bool) {
         uint256 groupSize = GROUP_SIZE;
+        // forge-lint: disable-next-line(divide-before-multiply)
         uint256 tokenId = (currentTokenId / groupSize) * groupSize; // Align to group boundary
         
         try this.mint(address(this), groupSize + 1) {
@@ -352,6 +355,7 @@ contract ERC721PsiV2Echidna is ERC721PsiBurnableV2 {
         if (totalMinted == 0) return true;
         uint256 tokenId = currentTokenId % totalMinted;
         address originalOwner = tokenOwnersMap[tokenId];
+        // forge-lint: disable-next-line(unsafe-typecast)
         address newOwner = address(uint160(currentTokenId % 100));
         
         try this.transferFrom(originalOwner, newOwner, tokenId) {

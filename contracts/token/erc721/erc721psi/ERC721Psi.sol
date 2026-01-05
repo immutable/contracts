@@ -10,7 +10,7 @@
  *  - github: https://github.com/estarriolvetch/ERC721Psi
  *  - npm: https://www.npmjs.com/package/erc721psi
  */
-// solhint-disable
+// forge-lint: disable-start(all)
 pragma solidity >=0.8.19 <0.8.29;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
@@ -199,7 +199,6 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
      * @dev See {IERC721-transferFrom}.
      */
     function transferFrom(address from, address to, uint256 tokenId) public virtual override {
-        //solhint-disable-next-line max-line-length
         require(_isApprovedOrOwner(_msgSender(), tokenId), "ERC721Psi: transfer caller is not owner nor approved");
 
         _transfer(from, to, tokenId);
@@ -452,7 +451,6 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
      * transferred to `to`.
      * - When `from` is zero, `tokenId` will be minted for `to`.
      */
-    // solhint-disable-next-line no-empty-blocks
     function _beforeTokenTransfers(address from, address to, uint256 startTokenId, uint256 quantity) internal virtual {}
 
     /**
@@ -467,6 +465,5 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
      * - when `from` and `to` are both non-zero.
      * - `from` and `to` are never both zero.
      */
-    // solhint-disable-next-line no-empty-blocks
     function _afterTokenTransfers(address from, address to, uint256 startTokenId, uint256 quantity) internal virtual {}
 }

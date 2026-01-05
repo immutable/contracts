@@ -2,12 +2,8 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
-// solhint-disable-next-line no-global-import
-import "forge-std/Test.sol";
-import {StakeHolderERC20} from "../../contracts/staking/StakeHolderERC20.sol";
 import {IStakeHolder} from "../../contracts/staking/IStakeHolder.sol";
 import {StakeHolderOperationalBaseTest} from "./StakeHolderOperationalBase.t.sol";
-import {ERC1967Proxy} from "openzeppelin-contracts-4.9.3/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract StakeHolderOperationalERC20Test is StakeHolderOperationalBaseTest {
     function setUp() public virtual override {
@@ -31,7 +27,8 @@ contract StakeHolderOperationalERC20Test is StakeHolderOperationalBaseTest {
 
     function _deal(address _to, uint256 _amount) internal override {
         vm.prank(bank);
-        erc20.transfer(_to, _amount);
+        bool success = erc20.transfer(_to, _amount);
+        require(success, "Unexpected ERC 20 transfer failure");
     }
 
     function _addStake(address _staker, uint256 _amount, bool _hasError, bytes memory _error) internal override {

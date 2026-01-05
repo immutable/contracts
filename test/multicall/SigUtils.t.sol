@@ -21,10 +21,10 @@ contract SigUtils {
         );
 
 
-    bytes32 private immutable cachedDomainSeparator;
+    bytes32 private immutable CACHED_DOMAIN_SEPARATOR;
 
     constructor(string memory _name, string memory _version, address _verifyingContract) {
-        cachedDomainSeparator = keccak256(abi.encode(_TYPE_HASH, keccak256(bytes(_name)), keccak256(bytes(_version)), block.chainid, _verifyingContract));
+        CACHED_DOMAIN_SEPARATOR = keccak256(abi.encode(_TYPE_HASH, keccak256(bytes(_name)), keccak256(bytes(_version)), block.chainid, _verifyingContract));
     }
 
     function _hashCallArray(GuardedMulticaller2.Call[] calldata _calls) internal pure returns (bytes32) {
@@ -43,7 +43,7 @@ contract SigUtils {
         uint256 _deadline
     ) public view returns (bytes32) {
         bytes32 digest = keccak256(abi.encode(MULTICALL_TYPEHASHV2, _reference, _hashCallArray(_calls), _deadline));
-        return keccak256(abi.encodePacked("\x19\x01", cachedDomainSeparator, digest));
+        return keccak256(abi.encodePacked("\x19\x01", CACHED_DOMAIN_SEPARATOR, digest));
     }
 
 
@@ -59,7 +59,7 @@ contract SigUtils {
             keccak256(abi.encodePacked(_targets)), 
             hashBytesArray(_data), 
             _deadline));
-        return keccak256(abi.encodePacked("\x19\x01", cachedDomainSeparator, digest));
+        return keccak256(abi.encodePacked("\x19\x01", CACHED_DOMAIN_SEPARATOR, digest));
     }
 
     function hashBytesArray(bytes[] memory _data) public pure returns (bytes32) {

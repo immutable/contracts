@@ -1,42 +1,68 @@
-// Copyright Immutable Pty Ltd 2018 - 2023
+// Copyright Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache 2.0
 // slither-disable-start calls-loop
 pragma solidity >=0.8.19 <0.8.29;
 
-// Allowlist Registry
 import {IOperatorAllowlist} from "./IOperatorAllowlist.sol";
-
-// Interface
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-
-// Errors
 import {OperatorAllowlistEnforcementErrors} from "../errors/Errors.sol";
 
-/*
-    OperatorAllowlistEnforced is an abstract contract that token contracts can inherit in order to set the
-    address of the OperatorAllowlist registry that it will interface with, so that the token contract may
-    enable the restriction of approvals and transfers to allowlisted users.
-    OperatorAllowlistEnforced is not designed to be upgradeable or extended.
-*/
-
+/**
+ * @notice OperatorAllowlistEnforced is an abstract contract that token contracts can inherit in order to set the
+ * address of the OperatorAllowlist registry that it will interface with, so that the token contract may
+ * enable the restriction of approvals and transfers to allowlisted users.
+ *
+ * OperatorAllowlistEnforced is not designed to be upgradeable or extended.
+ */
 abstract contract OperatorAllowlistEnforced is OperatorAllowlistEnforcementErrors {
-    ///     =====   State Variables  =====
+    /// @notice Emitted whenever the transfer Allowlist registry is updated
+    event OperatorAllowlistRegistryUpdated(address oldRegistry, address newRegistry);
 
     /// @notice Interface that implements the `IOperatorAllowlist` interface
     IOperatorAllowlist public operatorAllowlist;
 
-    ///     =====     Events         =====
-
-    /// @notice Emitted whenever the transfer Allowlist registry is updated
-    event OperatorAllowlistRegistryUpdated(address oldRegistry, address newRegistry);
-
-    ///     =====     Modifiers      =====
-
     /**
-     * @notice Internal function to validate an approval, according to whether the target is an EOA or Allowlisted
+     * @notice Validate an approval, according to whether the target is an EOA or Allowlisted
      * @param targetApproval the address of the approval target to be validated
      */
     modifier validateApproval(address targetApproval) {
+        // Note: the validity checks are in a separate function so that if the modifier is 
+        // used for multiple functions, the check code isn't copied for each function.
+        _validateApproval(targetApproval);
+        _;
+    }
+
+    /**
+     * @notice Validate a transfer, according to whether the calling address,
+     * from address and to address is an EOA or Allowlisted
+     * @param from the address of the from target to be validated
+     * @param to the address of the to target to be validated
+     */
+    modifier validateTransfer(address from, address to) {
+        // Note: the validity checks are in a separate function so that if the modifier is 
+        // used for multiple functions, the check code isn't copied for each function.
+        _validateTransfer(from, to);
+        _;
+    }
+
+    /**
+     * @notice Internal function to set the operator allowlist the calling contract will interface with
+     * @param _operatorAllowlist the address of the Allowlist registry
+     */
+    function _setOperatorAllowlistRegistry(address _operatorAllowlist) internal {
+        if (!IERC165(_operatorAllowlist).supportsInterface(type(IOperatorAllowlist).interfaceId)) {
+            revert AllowlistDoesNotImplementIOperatorAllowlist();
+        }
+
+        emit OperatorAllowlistRegistryUpdated(address(operatorAllowlist), _operatorAllowlist);
+        operatorAllowlist = IOperatorAllowlist(_operatorAllowlist);
+    }
+
+    /**
+     * @notice Validate an approval, according to whether the target is an EOA or Allowlisted
+     * @param targetApproval the address of the approval target to be validated
+     */
+    function _validateApproval(address targetApproval) private view {
         // Check for:
         // 1. approver is an EOA. Contract constructor is handled as transfers 'from' are blocked
         // 2. approver is address or bytecode is allowlisted
@@ -50,16 +76,15 @@ abstract contract OperatorAllowlistEnforced is OperatorAllowlistEnforcementError
         if (targetApproval.code.length != 0 && !operatorAllowlist.isAllowlisted(targetApproval)) {
             revert ApproveTargetNotInAllowlist(targetApproval);
         }
-        _;
     }
 
     /**
-     * @notice Internal function to validate a transfer, according to whether the calling address,
-     * from address and to address is an EOA or Allowlisted
+     * @notice Validate a transfer, according to whether the calling address,
+     * from address and to address is an EOA or Allowlisted.
      * @param from the address of the from target to be validated
      * @param to the address of the to target to be validated
      */
-    modifier validateTransfer(address from, address to) {
+    function _validateTransfer(address from, address to) private view {
         // Check for:
         // 1. caller is an EOA
         // 2. caller is Allowlisted or is the calling address bytecode is Allowlisted
@@ -83,22 +108,6 @@ abstract contract OperatorAllowlistEnforced is OperatorAllowlistEnforcementError
         if (to.code.length != 0 && !operatorAllowlist.isAllowlisted(to)) {
             revert TransferToNotInAllowlist(to);
         }
-        _;
-    }
-
-    ///     =====  External functions  =====
-
-    /**
-     * @notice Internal function to set the operator allowlist the calling contract will interface with
-     * @param _operatorAllowlist the address of the Allowlist registry
-     */
-    function _setOperatorAllowlistRegistry(address _operatorAllowlist) internal {
-        if (!IERC165(_operatorAllowlist).supportsInterface(type(IOperatorAllowlist).interfaceId)) {
-            revert AllowlistDoesNotImplementIOperatorAllowlist();
-        }
-
-        emit OperatorAllowlistRegistryUpdated(address(operatorAllowlist), _operatorAllowlist);
-        operatorAllowlist = IOperatorAllowlist(_operatorAllowlist);
     }
 }
 // slither-disable-end calls-loop

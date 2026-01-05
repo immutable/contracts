@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {ImmutableERC721MintByID} from "../../contracts/token/erc721/preset/ImmutableERC721MintByID.sol";
 import {MockMarketplace} from "./MockMarketplace.sol";
 import {OperatorAllowlistUpgradeable} from "../../contracts/allowlist/OperatorAllowlistUpgradeable.sol";
@@ -21,11 +21,11 @@ contract RoyaltyMarketplaceTest is Test {
     address public buyer;
     address public seller;
     
-    string public constant baseURI = "https://baseURI.com/";
-    string public constant contractURI = "https://contractURI.com";
-    string public constant name = "ERC721Preset";
-    string public constant symbol = "EP";
-    uint96 public constant royalty = 2000; // 20%
+    string public constant BASE_URI = "https://baseURI.com/";
+    string public constant CONTRACT_URI = "https://contractURI.com";
+    string public constant NAME = "ERC721Preset";
+    string public constant SYMBOL = "EP";
+    uint96 public constant ROYALTY = 2000; // 20%
     
     function setUp() public {
         // Set up accounts
@@ -45,13 +45,13 @@ contract RoyaltyMarketplaceTest is Test {
         vm.prank(owner);
         erc721 = new ImmutableERC721MintByID(
             owner,
-            name,
-            symbol,
-            baseURI,
-            contractURI,
+            NAME,
+            SYMBOL,
+            BASE_URI,
+            CONTRACT_URI,
             address(operatorAllowlist),
             royaltyRecipient,
-            royalty
+            ROYALTY
         );
 
         // Deploy mock marketplace

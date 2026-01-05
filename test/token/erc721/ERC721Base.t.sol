@@ -3,7 +3,7 @@
 pragma solidity >=0.8.19 <0.8.29;
 
 // solhint-disable-next-line no-global-import
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {IImmutableERC721} from "../../../contracts/token/erc721/interfaces/IImmutableERC721.sol";
 import {OperatorAllowlistUpgradeable} from "../../../contracts/allowlist/OperatorAllowlistUpgradeable.sol";
 import {DeployOperatorAllowlist} from "../../utils/DeployAllowlistProxy.sol";
@@ -78,6 +78,7 @@ abstract contract ERC721BaseTest is Test {
     function notOwnedRevertError(uint256 _tokenIdToBeBurned) public pure virtual returns (bytes memory);
 
     function calcFee(uint256 _salePrice) public view returns(uint96) {
+        // forge-lint: disable-next-line(unsafe-typecast)
         return uint96(feeNumerator * _salePrice / 10000);
     }
 

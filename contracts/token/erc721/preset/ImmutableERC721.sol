@@ -19,6 +19,7 @@ contract ImmutableERC721 is ImmutableERC721HybridBase {
      * @param feeNumerator_ The royalty fee numerator
      * @dev the royalty receiver and amount (this can not be changed once set)
      */
+    // @solhint-disable-next-line variable-name-mixedcase
     constructor(
         address owner_,
         string memory name_,

@@ -2,8 +2,6 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
-// solhint-disable-next-line no-global-import
-import "forge-std/Test.sol";
 import {IStakeHolder} from "../../contracts/staking/IStakeHolder.sol";
 import {StakeHolderBaseTest} from "./StakeHolderBase.t.sol";
 import {TimelockController} from "openzeppelin-contracts-4.9.3/governance/TimelockController.sol";
@@ -34,7 +32,7 @@ abstract contract StakeHolderTimeDelayBaseTest is StakeHolderBaseTest {
     }
 
 
-    function testTimeLockControllerDeployment() public {
+    function testTimeLockControllerDeployment() public view {
         assertEq(stakeHolderTimeDelay.getMinDelay(), delay, "Incorrect time delay");
     }
 

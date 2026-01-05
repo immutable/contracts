@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 
 contract Create2Utils is Test {
     function predictCreate2Address(bytes memory _bytecode, address _deployer, address _sender, bytes32 _salt)

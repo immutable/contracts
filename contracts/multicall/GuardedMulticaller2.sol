@@ -35,6 +35,7 @@ contract GuardedMulticaller2 is AccessControl, ReentrancyGuard, EIP712 {
     mapping(bytes32 ref => bool executed) private replayProtection;
 
     /// @dev Only those with MULTICALL_SIGNER_ROLE can generate valid signatures for execute function.
+    // forge-lint: disable-next-line(unsafe-typecast)
     bytes32 public constant MULTICALL_SIGNER_ROLE = bytes32("MULTICALL_SIGNER_ROLE");
 
     /// @dev EIP712 typehash for call

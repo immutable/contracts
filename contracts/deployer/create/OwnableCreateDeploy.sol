@@ -12,10 +12,10 @@ pragma solidity >=0.8.19 <0.8.29;
  */
 contract OwnableCreateDeploy {
     // Address that is authorised to call the deploy function.
-    address private immutable owner;
+    address private immutable OWNER;
 
     constructor() {
-        owner = msg.sender;
+        OWNER = msg.sender;
     }
     /**
      * @dev Deploys a new contract with the specified bytecode using the `CREATE` opcode.
@@ -24,7 +24,7 @@ contract OwnableCreateDeploy {
     // slither-disable-next-line locked-ether
     function deploy(bytes memory bytecode) external payable {
         // solhint-disable-next-line custom-errors, reason-string
-        require(msg.sender == owner, "CreateDeploy: caller is not the owner");
+        require(msg.sender == OWNER, "CreateDeploy: caller is not the owner");
         // solhint-disable no-inline-assembly
         assembly {
             if iszero(create(callvalue(), add(bytecode, 32), mload(bytecode))) {

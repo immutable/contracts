@@ -12,7 +12,7 @@ import {MockEIP1271Wallet} from "../../../contracts/mocks/MockEIP1271Wallet.sol"
 abstract contract ERC721OperationalByQuantityBaseTest is ERC721OperationalBaseTest {
     IImmutableERC721ByQuantity public erc721BQ;
 
-    function testThreshold() public {
+    function testThreshold() public view {
         uint256 first = erc721BQ.mintBatchByQuantityThreshold();
         assertTrue(first >= 2**128);
     }

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19 <0.8.29;
 
-import "forge-std/Test.sol";
 
 contract Sign {
     bytes32 private _DOMAIN_SEPARATOR;

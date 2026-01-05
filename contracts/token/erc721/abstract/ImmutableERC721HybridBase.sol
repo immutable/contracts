@@ -73,6 +73,7 @@ abstract contract ImmutableERC721HybridBase is
      * @notice sets the contract uri for the collection. Permissioned to only the admin role
      * @param _contractURI the new baseURI to set
      */
+    // solhint-disable-next-line mixed-case-function
     function setContractURI(string memory _contractURI) public onlyRole(DEFAULT_ADMIN_ROLE) {
         contractURI = _contractURI;
     }

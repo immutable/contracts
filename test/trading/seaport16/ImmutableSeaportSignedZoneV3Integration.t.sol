@@ -1,11 +1,12 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: Apache-2
 
+// forge-lint: disable-start(erc20-unchecked-transfer)
 // solhint-disable-next-line compiler-version
 pragma solidity ^0.8.17;
 
 // solhint-disable-next-line no-global-import
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {ItemType, OrderType} from "seaport-types-16/src/lib/ConsiderationEnums.sol";
@@ -270,13 +271,14 @@ contract ImmutableSeaportSignedZoneV3IntegrationTest is Test, SigningTestHelper 
 
         // mints
         vm.prank(OWNER);
-        erc20Token.transfer(
+        bool success = erc20Token.transfer(
             FULFILLER,
             (
                 considerationItems[0].startAmount + considerationItems[1].startAmount
                     + considerationItems[2].startAmount + considerationItems[3].startAmount
             )
         );
+        require(success, "Unexpectedly, ERC20 transfer failed");
         vm.prank(OWNER);
         erc721Token.safeMint(OFFERER, offerItems[0].identifierOrCriteria);
 
@@ -450,13 +452,14 @@ contract ImmutableSeaportSignedZoneV3IntegrationTest is Test, SigningTestHelper 
 
         // mints
         vm.prank(OWNER);
-        erc20Token.transfer(
+        bool success = erc20Token.transfer(
             FULFILLER,
             (
                 considerationItems[0].startAmount + considerationItems[1].startAmount
                     + considerationItems[2].startAmount + considerationItems[3].startAmount
             ) / 100
         );
+        require(success, "Unexpectedly, ERC20 transfer failed");
         vm.prank(OWNER);
         erc1155Token.safeMint(OFFERER, offerItems[0].identifierOrCriteria, offerItems[0].startAmount, new bytes(0));
 
@@ -634,13 +637,14 @@ contract ImmutableSeaportSignedZoneV3IntegrationTest is Test, SigningTestHelper 
 
         // mints
         vm.prank(OWNER);
-        erc20Token.transfer(
+        bool success = erc20Token.transfer(
             FULFILLER,
             (
                 considerationItems[0].startAmount + considerationItems[1].startAmount
                     + considerationItems[2].startAmount + considerationItems[3].startAmount
             ) * 2 / 100
         );
+        require(success, "Unexpectedly, ERC20 transfer failed");
         vm.prank(OWNER);
         erc1155Token.safeMint(OFFERER, offerItems[0].identifierOrCriteria, offerItems[0].startAmount, new bytes(0));
 
@@ -846,22 +850,28 @@ contract ImmutableSeaportSignedZoneV3IntegrationTest is Test, SigningTestHelper 
         });
 
         // mints
-        vm.prank(OWNER);
-        erc20Token.transfer(
-            FULFILLER,
-            (
-                considerationItems[0].startAmount + considerationItems[1].startAmount
-                    + considerationItems[2].startAmount + considerationItems[3].startAmount
-            ) / 2
-        );
-        vm.prank(OWNER);
-        erc20Token.transfer(
-            FULFILLER_TWO,
-            (
-                considerationItems[0].startAmount + considerationItems[1].startAmount
-                    + considerationItems[2].startAmount + considerationItems[3].startAmount
-            )
-        );
+        {
+            vm.prank(OWNER);
+            erc20Token.transfer(
+                FULFILLER,
+                (
+                    considerationItems[0].startAmount + considerationItems[1].startAmount
+                        + considerationItems[2].startAmount + considerationItems[3].startAmount
+                ) / 2
+            );
+            //require(success, "Unexpectedly, ERC20 transfer failed");
+        }
+        {
+            vm.prank(OWNER);
+            bool success = erc20Token.transfer(
+                FULFILLER_TWO,
+                (
+                    considerationItems[0].startAmount + considerationItems[1].startAmount
+                        + considerationItems[2].startAmount + considerationItems[3].startAmount
+                )
+            );
+            require(success, "Unexpectedly, ERC20 transfer failed");
+        }
         vm.prank(OWNER);
         erc1155Token.safeMint(OFFERER, offerItems[0].identifierOrCriteria, offerItems[0].startAmount, new bytes(0));
 
@@ -901,3 +911,4 @@ contract ImmutableSeaportSignedZoneV3IntegrationTest is Test, SigningTestHelper 
 }
 
 // solhint-enable func-name-mixedcase, private-vars-leading-underscore
+// forge-lint: disable-end(erc20-unchecked-transfer)

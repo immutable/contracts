@@ -4,12 +4,9 @@ pragma solidity ^0.8.13;
 import {Test} from "forge-std/Test.sol";
 import {ImmutableSeaport} from "../../../contracts/trading/seaport/ImmutableSeaport.sol";
 import {ImmutableSignedZone} from "../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/ImmutableSignedZone.sol";
-import {SIP7EventsAndErrors} from "../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/interfaces/SIP7EventsAndErrors.sol";
 
 import {ConduitController} from "seaport-core/src/conduit/ConduitController.sol";
 import {Conduit} from "seaport-core/src/conduit/Conduit.sol";
-import {Consideration} from "seaport-core/src/lib/Consideration.sol";
-import {OrderParameters} from "seaport-types/src/lib/ConsiderationStructs.sol";
 
 
 abstract contract ImmutableSeaportBaseTest is Test {

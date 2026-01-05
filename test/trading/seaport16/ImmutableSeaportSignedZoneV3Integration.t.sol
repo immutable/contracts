@@ -1,6 +1,7 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: Apache-2
 
+// forge-lint: disable-start(erc20-unchecked-transfer)
 // solhint-disable-next-line compiler-version
 pragma solidity ^0.8.17;
 
@@ -910,3 +911,4 @@ contract ImmutableSeaportSignedZoneV3IntegrationTest is Test, SigningTestHelper 
 }
 
 // solhint-enable func-name-mixedcase, private-vars-leading-underscore
+// forge-lint: disable-end(erc20-unchecked-transfer)

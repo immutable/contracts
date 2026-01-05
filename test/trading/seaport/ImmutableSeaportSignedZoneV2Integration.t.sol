@@ -1,10 +1,10 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: Apache-2
 
+// forge-lint: disable-start(erc20-unchecked-transfer)
 // solhint-disable-next-line compiler-version
 pragma solidity ^0.8.17;
 
-// solhint-disable-next-line no-global-import
 import {Test} from "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -897,5 +897,6 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test, SigningTestHelper 
         assertEq(erc20Token.balanceOf(ECOSYSTEM_FEE_RECEIVER), considerationItems[3].startAmount);
     }
 }
+// forge-lint: disable-end(erc20-unchecked-transfer)
 
 // solhint-enable func-name-mixedcase, private-vars-leading-underscore

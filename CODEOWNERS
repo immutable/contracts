@@ -1,5 +1,5 @@
 # Global owner
-@immutable/rollups
+* @immutable/rollups
 
 # Github actions
-.github @immutable/rollups  @immutable/security
+/.github/ @immutable/rollups  @immutable/security

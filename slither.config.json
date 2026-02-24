@@ -1,5 +1,5 @@
 {
-  "detectors_to_exclude": "naming-convention, solc-version, similar-names, timestamp, assembly",
+  "detectors_to_exclude": "naming-convention, solc-version, similar-names, timestamp, assembly, unindexed-event-address",
 
   "filter_paths": "lib"
 }

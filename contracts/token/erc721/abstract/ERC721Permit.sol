@@ -100,6 +100,7 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
 
         // smart contract signature validation
         if (_isValidERC1271Signature(ownerOf(tokenId), digest, sig)) {
+            _nonces[tokenId]++;
             _approve(spender, tokenId);
             return;
         }
@@ -122,6 +123,7 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
         }
 
         if (_isValidEOASignature(recoveredSigner, tokenId)) {
+            _nonces[tokenId]++;
             _approve(spender, tokenId);
         } else {
             revert InvalidSignature();

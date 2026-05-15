@@ -484,4 +484,37 @@ abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
         erc721.permit(user2, tokenId, deadline, signature);
         assertEq(erc721.getApproved(tokenId), user2);
     }
+
+    /**
+     * @notice A permit must consume the token nonce (ERC-4494). A successful
+     *  permit therefore cannot be replayed, and an owner's `approve(address(0))`
+     *  durably revokes the approval (the prior signature is no longer valid).
+     */
+    function testPermitConsumesNonceAndCannotBeReplayed() public {
+        uint256 tokenId = 1;
+        vm.prank(minter);
+        erc721.mint(user1, tokenId);
+
+        uint256 deadline = block.timestamp + 1 days;
+        uint256 nonce = erc721.nonces(tokenId);
+        bytes memory signature = getSignature(user1Pkey, user2, tokenId, nonce, deadline);
+
+        vm.prank(user2);
+        erc721.permit(user2, tokenId, deadline, signature);
+        assertEq(erc721.getApproved(tokenId), user2);
+
+        // The nonce must advance on a successful permit.
+        assertEq(erc721.nonces(tokenId), nonce + 1);
+
+        // Owner revokes the approval.
+        vm.prank(user1);
+        erc721.approve(address(0), tokenId);
+        assertEq(erc721.getApproved(tokenId), address(0));
+
+        // Replaying the original signature must now fail: revocation is durable.
+        vm.prank(user2);
+        vm.expectRevert(abi.encodeWithSelector(IImmutableERC721Errors.InvalidSignature.selector));
+        erc721.permit(user2, tokenId, deadline, signature);
+        assertEq(erc721.getApproved(tokenId), address(0));
+    }
 }

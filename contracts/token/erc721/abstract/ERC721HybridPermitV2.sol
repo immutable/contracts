@@ -101,6 +101,7 @@ abstract contract ERC721HybridPermitV2 is ERC721HybridV2, IERC4494, EIP712 {
 
         // smart contract wallet signature validation
         if (_isValidERC1271Signature(ownerOf(tokenId), digest, sig)) {
+            _nonces[tokenId]++;
             _approve(spender, tokenId);
             return;
         }
@@ -123,6 +124,7 @@ abstract contract ERC721HybridPermitV2 is ERC721HybridV2, IERC4494, EIP712 {
         }
 
         if (_isValidEOASignature(recoveredSigner, tokenId)) {
+            _nonces[tokenId]++;
             _approve(spender, tokenId);
         } else {
             revert InvalidSignature();

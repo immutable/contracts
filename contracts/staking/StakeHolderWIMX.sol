@@ -8,7 +8,7 @@ import {IWIMX} from "./IWIMX.sol";
 /**
  * @title StakeHolderWIMX: allows anyone to stake any amount of IMX and to then remove all or part of that stake.
  * @dev Stake can be added and withdrawn either as native IMX only.
- * @dev The StakeHolderWIMX contract is designed to be upgradeable.
+ * The StakeHolderWIMX contract is designed to be upgradeable.
  */
 contract StakeHolderWIMX is StakeHolderNative {
     /// @notice The token used for staking.
@@ -33,10 +33,6 @@ contract StakeHolderWIMX is StakeHolderNative {
 
     receive() external payable {
         // Receive IMX sent by the WIMX contract when wIMX.withdraw() is called.
-        // Revert if any other account sends IMX to prevent the tokens being stuck in this contract.
-        if (msg.sender != address(wIMX)) {
-            revert ImxNotFromWimxContract(msg.sender);
-        }
     }
 
     /**
@@ -73,4 +69,3 @@ contract StakeHolderWIMX is StakeHolderNative {
     uint256[50] private __StakeHolderWIMXGap;
     // slither-disable-end unused-state
 }
-

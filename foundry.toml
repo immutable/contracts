@@ -1,20 +1,9 @@
 [profile.default]
-src = "contracts"
-out = "foundry-out"
+src = 'contracts'
+out = 'foundry-out'
+# libs = ["lib", "node_modules"]
 libs = ["lib"]
-test = "test"
-cache_path = "cache"
-optimizer = true
-optimizer_runs = 200
-evm_version = "cancun"
+fs_permissions = [{ access = "read", path = "./foundry-out" }]
 
-# Seaport stack (matches former Hardhat per-file overrides: viaIR + runs=10)
-additional_compiler_profiles = [
-  { name = "seaport-via-ir", via_ir = true, optimizer = true, optimizer_runs = 10 },
-]
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 
-compilation_restrictions = [
-  { paths = "lib/seaport/**", via_ir = true, optimizer_runs = 10 },
-  { paths = "contracts/trading/seaport/**", via_ir = true, optimizer_runs = 10 },
-  { paths = "contracts/trading/seaport16/**", via_ir = true, optimizer_runs = 10 },
-]

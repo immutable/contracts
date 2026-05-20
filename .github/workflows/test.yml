@@ -21,6 +21,14 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
 
+      - name: Cache Foundry build output
+        uses: actions/cache@v4
+        with:
+          path: |
+            foundry-out
+            cache
+          key: ${{ runner.os }}-foundry-${{ hashFiles('foundry.lock', 'foundry.toml') }}
+
       - name: Install Forge dependencies
         run: forge install
 
@@ -40,12 +48,21 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
+          cache: yarn
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile --network-concurrency 1
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Cache Foundry build output
+        uses: actions/cache@v4
+        with:
+          path: |
+            foundry-out
+            cache
+          key: ${{ runner.os }}-foundry-${{ hashFiles('foundry.lock', 'foundry.toml') }}
 
       - name: Install Forge dependencies
         run: forge install

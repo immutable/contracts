@@ -1,19 +1,18 @@
 /**
  * @imtbl/contracts
  *
- * Contract ABIs and deployed addresses for Immutable zkEVM
+ * Contract ABIs and deployed addresses for Immutable zkEVM.
+ * Use with viem, wagmi, or ethers v6 — no runtime npm dependencies.
  */
 
-// ABIs - for contracts you deploy
 export {
-  guardedMulticaller2Abi,
-  immutableErc721Abi,
-  immutableErc721MintByIdAbi,
-  immutableErc1155Abi,
-  paymentSplitterAbi,
-} from "./generated";
+  GuardedMulticaller2Abi,
+  ImmutableERC721Abi,
+  ImmutableERC721MintByIdAbi,
+  ImmutableERC1155Abi,
+  PaymentSplitterAbi,
+} from "./abis";
 
-// Chain IDs and deployed addresses
 export {
   CHAIN_ID,
   IMMUTABLE_SIGNER,

@@ -28,11 +28,24 @@ These contracts are feature-rich and are the recommended standard on Immutable z
 $ yarn add @imtbl/contracts
 ```
 
+Installing this package pulls **runtime dependencies from npm** — the published tarball intentionally does **not** bundle Seaport, OpenZeppelin, Axelar, or other Solidity libraries as production `dependencies`. TypeScript ABI consumers need only this package plus their own tooling (e.g. `viem`).
+
+### Consuming Solidity sources
+
+Solidity imports use paths such as `@imtbl/contracts/contracts/...` (see [package.json](./package.json) `exports`). Sources under `contracts/` depend on libraries that **you must supply** via your toolchain — for example:
+
+- **`@openzeppelin/contracts`** — listed as a **peer dependency** (`^4.9.3 || ^5.0.0`); align with presets that mix v4 and v5 remappings used in this repo.
+- **`@openzeppelin/contracts-upgradeable`** — for upgradeable presets (typically v4.9.x path `openzeppelin-contracts-upgradeable-4.9.3`).
+- **`@axelar-network/axelar-gmp-sdk-solidity`** — for deploy / GMP-related contracts (e.g. `OwnableCreate3Deployer`).
+- **Immutable Seaport forks** — Seaport-related files expect remappings compatible with Immutable’s Seaport branches (see [remappings.txt](./remappings.txt) and [`.gitmodules`](./.gitmodules) for the git URLs and aliases used in this repo: `seaport`, `seaport-core`, `seaport-types`, `seaport-16`, `seaport-core-16`, `seaport-types-16`).
+
+**Forge:** run `forge install` after clone (see [`.gitmodules`](./.gitmodules)) and use the remappings in [remappings.txt](./remappings.txt). This package does **not** install Seaport or full OpenZeppelin transitively.
+
 ### Usage
 
 #### Contracts
 
-Once the `contracts` package is installed, use the contracts from the library by importing them:
+Once `@imtbl/contracts` is installed, use the Solidity files from the package by importing them:
 
 ```solidity
 pragma solidity >=0.8.19 <0.8.29;
@@ -68,13 +81,13 @@ contract MyERC721 is ImmutableERC721 {
 `contracts` comes with importable Typescript ABIs that can be used to generate a contract client in conjunction with libraries such as `viem` or `wagmi`, so that you can
 interact with deployed preset contracts.
 
-The following Typescript ABIs are available:
+The following are exported from the package root:
 
-- `ImmutableERC721Abi`
-- `ImmutableERC721MintByIdAbi`
-- `ImmutableERC1155Abi`
+- `ImmutableERC721Abi`, `ImmutableERC721MintByIdAbi`, `ImmutableERC1155Abi`
+- `GuardedMulticaller2Abi`, `PaymentSplitterAbi`
+- Deployed address constants (e.g. `IMMUTABLE_SEAPORT`, `CHAIN_ID`)
 
-An example of how to create and use a contract client in order to interact with a deployed `ImmutableERC721`:
+An example of how to create and use a contract client in order to interact with a deployed `ImmutableERC721` preset:
 
 ```typescript
 import { getContract, http, createWalletClient, defineChain } from "viem";
@@ -110,9 +123,28 @@ const contract = getContract({
   client: walletClient,
 });
 
+const recipient = RECIPIENT as `0x${string}`;
+const tokenId = TOKEN_ID;
+
 const txHash = await contract.write.mint([recipient, tokenId]);
 console.log(`txHash: ${txHash}`);
 ```
+
+## Upgrading from npm `2.x`
+
+**3.0.0** is a breaking release: new ABI names, a smaller package layout, no bundled ethers clients or typechain, and no runtime npm dependencies. See **[MIGRATION.md](./MIGRATION.md)**. To keep the old surface, stay on **`@imtbl/contracts@2.2.18`**.
+
+## Development
+
+```bash
+yarn install
+forge install
+forge build
+forge test
+yarn build   # TypeScript dist
+```
+
+See [BUILD.md](./BUILD.md) for coverage, linting, Slither, and deployment notes.
 
 ## Build, Test and Deploy
 

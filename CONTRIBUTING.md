@@ -58,11 +58,11 @@ git pull upstream main
 git checkout -b <your-branch-name>
 ```
 
-6. Be sure to run the tests and set up the relevant linters to ensure all GitHub checks pass (see GitHub issues: https://docs.github.com/en/issues/tracking-your-work-with-issues/about-issues, and [build information](BUILD.md) for more information). New test code should use Foundry tests and not Hardhat.
+6. Be sure to run the tests and set up the relevant linters to ensure all GitHub checks pass (see GitHub issues: https://docs.github.com/en/issues/tracking-your-work-with-issues/about-issues, and [build information](BUILD.md) for more information). New test code should use Foundry tests.
 
 ```
+forge install
 forge test -vvv
-yarn test
 ```
 
 Test coverage for all new code must be 100%. To check your test coverage:

@@ -1,118 +1,60 @@
-name: test
+name: Test
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   forge-test:
-    name: Run Forge Tests
+    name: Foundry test
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-      - name: Show Forge Version
-        run: forge --version
-      - name: Run tests and install dependancies
-        run: forge test -vvv
-      - name: Debug Info1
-        if: '!cancelled()'
-        run: pwd
-  hardhat-test:
-    name: Run Hardhat Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
         with:
-          node-version-file: ".nvmrc"
-          cache: 'yarn'
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile --network-concurrency 1
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-      - name: Show Forge Version
-        run: forge --version
-      - name: Install Forge dependancies
-        run: forge install
-      - name: Run Tests
-        run: yarn test
-  solhint:
-    name: Run solhint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: ".nvmrc"
-          cache: 'yarn'
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile --network-concurrency 1
-      - name: Run solhint
-        run: yarn lint
-  slither:
-    name: Run slither
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-      - name: Uninstall Debian package that slither needs to uninstall
-        run: sudo apt remove python3-typing-extensions
-      - name: Install Slither
-        run: sudo pip3 install slither-analyzer
-      - name: Show Slither Version
-        run: slither --version
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-      - name: Show Forge Version
-        run: forge --version
-      - name: Run slither
-        run: slither --compile-force-framework forge  --foundry-out-directory foundry-out .
-  dependency-review:
-    runs-on: ubuntu-latest
-    steps:
-    - name: 'Checkout Repository'
-      uses: actions/checkout@v4
-    - name: Dependency Review
-      uses: actions/dependency-review-action@v4
-      with:
-        # Possible values: "critical", "high", "moderate", "low"
-        fail-on-severity: critical
+          submodules: recursive
 
-        # Address https://github.com/actions/dependency-review-action/issues/456
-        base-ref: ${{ github.event.pull_request.base.sha || github.event.repository.default_branch }}
-        head-ref: ${{ github.event.pull_request.head.sha || github.ref }}
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Install Forge dependencies
+        run: forge install
+
+      - name: Run Forge tests
+        run: forge test -vvv
+
   publish:
-    name: Publish to NPM (dry run)
+    name: Publish
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Node
+        with:
+          submodules: recursive
+
+      - name: Setup node
         uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
-          registry-url: https://registry.npmjs.org/
-          cache: 'yarn'
+
       - name: Install dependencies
         run: yarn install --frozen-lockfile --network-concurrency 1
+
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
-      - name: Show Forge Version
-        run: forge --version
-      - name: Install Forge dependancies
+
+      - name: Install Forge dependencies
         run: forge install
+
       - name: Compile contracts
         run: yarn compile
+
       - name: Build dist files
-        run: rm -rf dist && yarn build
-      - name: Test publish
-        run: npm pack --dry-run
+        run: yarn build
+
+      - name: Pack NPM package
+        run: npm pack

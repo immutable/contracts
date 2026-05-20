@@ -6,6 +6,7 @@ Install dependencies:
 
 ```
 yarn install
+forge install
 sudo pip3 install slither-analyzer
 ```
 

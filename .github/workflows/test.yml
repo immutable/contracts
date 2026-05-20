@@ -8,15 +8,22 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   forge-test:
     name: Foundry test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: recursive
+          fetch-depth: 0
+
+      - name: Initialize submodules
+        run: git submodule update --init --recursive
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -29,23 +36,18 @@ jobs:
             cache
           key: ${{ runner.os }}-foundry-${{ hashFiles('foundry.lock', 'foundry.toml') }}
 
-      - name: Install Forge dependencies
-        run: forge install
-
       - name: Run Forge tests
         run: forge test -vvv
 
-  publish:
-    name: Publish
+  package-check:
+    name: Package build (v3)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
+        uses: actions/checkout@v6
 
       - name: Setup node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version-file: ".nvmrc"
           cache: yarn
@@ -53,25 +55,8 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile --network-concurrency 1
 
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-
-      - name: Cache Foundry build output
-        uses: actions/cache@v4
-        with:
-          path: |
-            foundry-out
-            cache
-          key: ${{ runner.os }}-foundry-${{ hashFiles('foundry.lock', 'foundry.toml') }}
-
-      - name: Install Forge dependencies
-        run: forge install
-
-      - name: Compile contracts
-        run: yarn compile
-
       - name: Build dist files
         run: yarn build
 
       - name: Pack NPM package
-        run: npm pack
+        run: npm pack --dry-run

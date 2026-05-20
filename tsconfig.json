@@ -8,9 +8,10 @@
     "skipLibCheck": true,
     "declaration": true,
     "declarationMap": false,
+    "rootDir": "src",
     "outDir": "dist",
     "resolveJsonModule": true
   },
-  "include": ["src/**/*.ts", "index.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "test"]
 }

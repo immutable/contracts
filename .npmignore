@@ -20,3 +20,14 @@ abi
 *.md
 !README.md
 !LICENSE.md
+
+# Exclude test/mock contracts
+contracts/mocks
+
+# Exclude binary assets
+**/*.png
+**/*.jpg
+**/*.jpeg
+
+# Exclude diagram source files
+**/MermaidDiagramSource.md

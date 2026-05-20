@@ -109,6 +109,8 @@ jobs:
         with:
           submodules: recursive
       - run: sudo apt-get update && sudo apt-get install -y python3-pip
+      - name: Uninstall Debian package that blocks Slither pip install
+        run: sudo apt remove -y python3-typing-extensions
       - run: sudo pip3 install slither-analyzer
       - uses: foundry-rs/foundry-toolchain@v1
       - run: slither --compile-force-framework forge --foundry-out-directory foundry-out .

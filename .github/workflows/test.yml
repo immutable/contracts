@@ -12,6 +12,22 @@ permissions:
   contents: read
 
 jobs:
+  solhint:
+    name: Run solhint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile --network-concurrency 1
+      - name: Run solhint
+        run: yarn run solhint
+
   forge-test:
     name: Foundry test
     runs-on: ubuntu-latest

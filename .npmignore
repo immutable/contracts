@@ -1,6 +1,5 @@
 # Build and config files
 tsconfig.json
-tsup.config.ts
 foundry.toml
 foundry.lock
 remappings.txt
@@ -21,8 +20,8 @@ abi
 !README.md
 !LICENSE.md
 
-# Exclude test/mock contracts
-contracts/mocks
+# Exclude test/mock contracts (also negated in package.json "files")
+contracts/mocks/**
 
 # Exclude binary assets
 **/*.png

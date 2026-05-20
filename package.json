@@ -12,9 +12,11 @@
   "bugs": {
     "url": "https://github.com/immutable/contracts/issues"
   },
+  "type": "module",
   "files": [
     "dist",
-    "contracts"
+    "contracts/**/*.sol",
+    "!contracts/mocks/**"
   ],
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -22,13 +24,22 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./abis": {
+      "types": "./dist/abis.d.ts",
+      "import": "./dist/abis.js",
+      "default": "./dist/abis.js"
+    },
+    "./addresses": {
+      "types": "./dist/addresses.d.ts",
+      "import": "./dist/addresses.js",
+      "default": "./dist/addresses.js"
     },
     "./contracts/*": "./contracts/*"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsc",
     "compile": "forge build",
     "test": "forge test",
     "test:coverage": "forge coverage",
@@ -45,7 +56,6 @@
     "prettier": "^3.3.2",
     "rimraf": "^5.0.7",
     "solhint": "^5.0.1",
-    "tsup": "^8.1.0",
     "typescript": "^5.4.5"
   },
   "keywords": [

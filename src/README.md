@@ -1,6 +1,6 @@
 # @imtbl/contracts — TypeScript surface
 
-Published entry: [`index.ts`](./index.ts) → `dist/` via `tsup` (see root [`package.json`](../package.json) `exports`).
+Published entry: [`index.ts`](./index.ts) → `dist/` via `tsc` (see root [`package.json`](../package.json) `exports`).
 
 ## Layout
 

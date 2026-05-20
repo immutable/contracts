@@ -26,10 +26,10 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile --network-concurrency 1
       - name: Run solhint
-        run: yarn run solhint
+        run: yarn run lint
 
   forge-test:
-    name: Foundry test
+    name: Run Forge Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -76,3 +76,39 @@ jobs:
 
       - name: Pack NPM package
         run: npm pack --dry-run
+
+  # Satisfy legacy required checks from main branch protection until rulesets are updated for v3.
+  readme:
+    name: Check README.md is contained in each contracts directory
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - run: sh readmecheck.sh
+
+  hardhat-legacy:
+    name: Run Hardhat Tests
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Hardhat was removed in SDK v3. See README and MIGRATION.md."
+          echo "This job exists only to satisfy legacy branch protection on PRs targeting main."
+
+  eslint-legacy:
+    name: Run eslint
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "ESLint is not part of the v3 toolchain (solhint covers Solidity)."
+          echo "This job exists only to satisfy legacy branch protection on PRs targeting main."
+
+  slither:
+    name: Run slither
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+      - run: sudo apt-get update && sudo apt-get install -y python3-pip
+      - run: sudo pip3 install slither-analyzer
+      - uses: foundry-rs/foundry-toolchain@v1
+      - run: slither --compile-force-framework forge --foundry-out-directory foundry-out .

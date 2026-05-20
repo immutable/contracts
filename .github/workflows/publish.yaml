@@ -27,6 +27,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version-file: ".nvmrc"
+          registry-url: https://registry.npmjs.org/
           cache: yarn
 
       - name: Install dependencies
@@ -52,23 +53,17 @@ jobs:
       - name: Pack NPM package
         run: npm pack
 
-      - name: Get release tag
-        id: release
-        run: echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
-
       - name: Publish to NPM
-        uses: JS-DevTools/npm-publish@v4
+        uses: JS-DevTools/npm-publish@0fd2f4369c5d6bcfcde6091a7c527d810b9b5c3f # v4.1.5
         with:
           token: ${{ secrets.CONTRACTS_NPM_TOKEN }}
           registry: https://registry.npmjs.org/
           package: package.json
-          tag: ${{ steps.release.outputs.tag }}
+          tag: latest
           provenance: true
           strategy: all
 
       - name: Attest build provenance
         uses: actions/attest-build-provenance@v3
         with:
-          subject-name: ${{ github.repository }}
-          subject-path: ${{ github.workspace }}
-          push-to-registry: true
+          subject-path: ./*.tgz

@@ -1,9 +1,27 @@
-hardhat.config.ts
+# Build and config files
+tsconfig.json
+foundry.toml
+foundry.lock
+remappings.txt
+slither.config.json
+
+# Development directories
+node_modules
 scripts
 test
+perfTest
+lib
+audits
+deploy
+abi
 
-# Exclude test/mock contracts
-contracts/mocks
+# Documentation (available on GitHub)
+*.md
+!README.md
+!LICENSE.md
+
+# Exclude test/mock contracts (also negated in package.json "files")
+contracts/mocks/**
 
 # Exclude binary assets
 **/*.png

@@ -9,10 +9,9 @@ node.json
 .vscode/
 package-lock.json
 
-# Hardhat files
+# Build artifacts
 cache
 artifacts
-cache_hardhat
 
 # Build files
 dist/

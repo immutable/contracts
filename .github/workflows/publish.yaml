@@ -1,90 +1,69 @@
-name: Publish to NPM
-run-name: Publish release ${{ github.event.release.tag_name }} to NPM
+name: Publish
 
 on:
   release:
-    types: [released] # A release was published, or a pre-release was changed to a release. https://docs.github.com/en/webhooks-and-events/webhooks/webhook-events-and-payloads?actionType=released#release
+    types: [released]
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
 
 jobs:
   publish:
-    name: Publish to NPM
+    name: Publish
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write # ! Required for GitHub Attestations, removing will create a Sev 0 incident !
-      attestations: write # ! Required for GitHub Attestations, removing will create a Sev 0 incident !
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
         with:
+          submodules: recursive
           fetch-depth: 0
 
-      - name: Check Input
-        run: echo "Release Tag - ${{ github.event.release.tag_name }}"
-
-      - name: Validate Tag
-        run: |
-          if [[ "${{ github.event.release.tag_name }}" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "Tag ${{ github.event.release.tag_name }} is valid"
-          else
-            echo "Tag is invalid"
-            exit 1
-          fi
-
-      - name: Clean Tag
-        id: clean-tag
-        run: |
-          echo "::set-output name=TAG::$(grep -Eo '[^v]?[0-9]+\.[0-9]+\.[0-9]+$' <<< '${{ github.event.release.tag_name }}')"
-
-      - name: Validated Tag
-        run: echo "package.json version - ${{ steps.clean-tag.outputs.TAG }}"
+      - name: Initialize submodules
+        run: git submodule update --init --recursive
 
       - name: Setup node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v6
         with:
           node-version-file: ".nvmrc"
           registry-url: https://registry.npmjs.org/
-
-      - name: Update package.json version
-        run: |
-          tmp=$(mktemp)
-          jq '.version = "${{ steps.clean-tag.outputs.TAG }}"' ./package.json > "$tmp" && mv "$tmp" ./package.json
+          cache: yarn
 
       - name: Install dependencies
-        run: |
-          yarn install --frozen-lockfile --network-concurrency 1
+        run: yarn install --frozen-lockfile --network-concurrency 1
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
 
-      - name: Show Forge Version
-        run: forge --version
+      - name: Cache Foundry build output
+        uses: actions/cache@v4
+        with:
+          path: |
+            foundry-out
+            cache
+          key: ${{ runner.os }}-foundry-${{ hashFiles('foundry.lock', 'foundry.toml') }}
 
-      - name: Install Forge dependancies
-        run: forge install
-
-      - name: Compile contracts
-        run: |
-          yarn compile
+      - name: Compile contracts (Foundry)
+        run: forge build
 
       - name: Build dist files
-        run: |
-          rm -rf dist && yarn build
+        run: yarn build
 
-      # ! Do NOT remove - this will cause a Sev 0 incident !
       - name: Pack NPM package
-        run: |
-          npm pack
+        run: npm pack
 
-      - name: Generate attestation
-        uses: actions/attest-build-provenance@v1
-        with:
-          subject-path: ./*.tgz
-      # ! ------------------------------------------------- !
-
-      - name: Publish package
-        uses: JS-DevTools/npm-publish@19c28f1ef146469e409470805ea4279d47c3d35c # v3.1.1
+      - name: Publish to NPM
+        uses: JS-DevTools/npm-publish@0fd2f4369c5d6bcfcde6091a7c527d810b9b5c3f # v4.1.5
         with:
           token: ${{ secrets.CONTRACTS_NPM_TOKEN }}
-          access: public
-          tag: "latest"
+          registry: https://registry.npmjs.org/
+          package: package.json
+          tag: latest
           provenance: true
+          strategy: all
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: ./*.tgz

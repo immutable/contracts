@@ -6,6 +6,7 @@ Install dependencies:
 
 ```
 yarn install
+forge install
 sudo pip3 install slither-analyzer
 ```
 
@@ -25,10 +26,10 @@ To execute solhint:
 yarn run solhint contracts/**/*.sol
 ```
 
-To resolve formatting issues:
+To format Solidity (same as CI):
 
 ```
-npx prettier --write --plugin=prettier-plugin-solidity 'contracts/**/*.sol'
+forge fmt
 ```
 
 

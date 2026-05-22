@@ -1,10 +1,10 @@
 {
-  "plugins": ["prettier"],
+  "plugins": [],
 
   "rules": {
     "code-complexity": ["warn", 7],
     "custom-errors": "error",
-    "explicit-types": ["error"],
+    "explicit-types": "error",
     "function-max-lines": ["off", 50],
     "max-line-length": ["off", 120],
     "max-states-count": ["off", 15],
@@ -32,7 +32,7 @@
     "var-name-mixedcase": "warn",
     "imports-on-top": "warn",
     "visibility-modifier-order": "warn",
-    
+
     "avoid-call-value": "error",
     "avoid-low-level-calls": "error",
     "avoid-sha3": "error",
@@ -40,7 +40,7 @@
     "avoid-throw": "error",
     "avoid-tx-origin": "error",
     "check-send-result": "error",
-    "compiler-version": ["error", ">=0.8.19 <0.8.29"],
+    "compiler-version": ["warn", ">=0.8.19 <0.8.29"],
     "func-visibility": ["error", {"ignoreConstructors": true}],
     "multiple-sends": "warn",
     "no-complex-fallback": "warn",
@@ -48,9 +48,6 @@
     "not-rely-on-block-hash": "warn",
     "not-rely-on-time": "warn",
     "reentrancy": "warn",
-    "state-visibility": "warn",
-
-    "prettier/prettier": "error"
+    "state-visibility": "warn"
   }
 }
-

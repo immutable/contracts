@@ -58,7 +58,7 @@ Potential Attacks:
 
 ## Tests
 
-`npx hardhat test` will run all the related tests for the above mentioned repos. The test plan and cases are written in the test files describing the scenario is it testing for.
+`forge test` will run all the related tests for the above mentioned repos. The test plan and cases are written in the test files describing the scenario is it testing for.
 
 ## Diagram
 

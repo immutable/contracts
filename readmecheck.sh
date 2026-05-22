@@ -4,7 +4,7 @@ parent_dir=contracts
 fail=0
 
 find "$parent_dir" -type d |
-{ 
+{
   while IFS= read -r subdir; do
     if [ ! -f "$subdir/$file_to_find" ]; then
       echo README.md not found in "$subdir"
@@ -15,7 +15,6 @@ find "$parent_dir" -type d |
   if [ $fail -eq 1 ]; then
     echo Found at least one directory missing a README.md.
     echo NOT FAILING BUILD
-    # exit 1
     exit 0
   else
     echo All directories have a README.md file.

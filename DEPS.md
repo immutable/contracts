@@ -5,9 +5,7 @@ This repo uses the Foundry tool chain to build and test Solidity code.
 The instructions below were used to install the dependencies.
 
 ```
-forge install https://github.com/estarriolvetch/solidity-bits --no-commit
-forge install https://github.com/GNSPS/solidity-bytes-utils --co-commit
-forge install https://github.com/axelarnetwork/axelar-gmp-sdk-solidity --co-commit
+forge install https://github.com/axelarnetwork/axelar-gmp-sdk-solidity --no-commit
 
 forge install openzeppelin-contracts-4.9.3=OpenZeppelin/openzeppelin-contracts@4.9.3 --no-commit
 forge install openzeppelin-contracts-upgradeable-4.9.3=OpenZeppelin/openzeppelin-contracts-upgradeable@4.9.3 --no-commit

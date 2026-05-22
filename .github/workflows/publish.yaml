@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # pin@v6.0.1
         with:
           submodules: recursive
           fetch-depth: 0
@@ -24,7 +24,7 @@ jobs:
         run: git submodule update --init --recursive
 
       - name: Setup node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # pin@v6.3.0
         with:
           node-version-file: ".nvmrc"
           registry-url: https://registry.npmjs.org/
@@ -34,10 +34,10 @@ jobs:
         run: yarn install --frozen-lockfile --network-concurrency 1
 
       - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
+        uses: foundry-rs/foundry-toolchain@c7450ba673e133f5ee30098b3b54f444d3a2ca2d # pin @v1.8.0
 
       - name: Cache Foundry build output
-        uses: actions/cache@v4
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # pin@v5.0.3
         with:
           path: |
             foundry-out
@@ -64,6 +64,6 @@ jobs:
           strategy: all
 
       - name: Attest build provenance
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # pin @ v4.1.0
         with:
           subject-path: ./*.tgz

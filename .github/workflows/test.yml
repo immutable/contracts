@@ -17,9 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # pin@v6.0.1
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # pin@v6.3.0
         with:
           node-version-file: ".nvmrc"
           cache: yarn
@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # pin@v6.0.1
         with:
           submodules: recursive
           fetch-depth: 0
@@ -42,10 +42,10 @@ jobs:
         run: git submodule update --init --recursive
 
       - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
+        uses: foundry-rs/foundry-toolchain@c7450ba673e133f5ee30098b3b54f444d3a2ca2d # pin @v1.8.0
 
       - name: Cache Foundry build output
-        uses: actions/cache@v4
+        uses: actions/cache@cdf6c1fa76f9f475f3d7449005a359c84ca0f306 # pin@v5.0.3
         with:
           path: |
             foundry-out
@@ -60,10 +60,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # pin@v6.0.1
 
       - name: Setup node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # pin@v6.3.0
         with:
           node-version-file: ".nvmrc"
           cache: yarn
@@ -82,7 +82,7 @@ jobs:
     name: Check README.md is contained in each contracts directory
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # pin@v6.0.1
       - run: sh readmecheck.sh
 
   hardhat-legacy:
@@ -105,12 +105,12 @@ jobs:
     name: Run slither
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # pin@v6.0.1
         with:
           submodules: recursive
       - run: sudo apt-get update && sudo apt-get install -y python3-pip
       - name: Uninstall Debian package that blocks Slither pip install
         run: sudo apt remove -y python3-typing-extensions
       - run: sudo pip3 install slither-analyzer
-      - uses: foundry-rs/foundry-toolchain@v1
+      - uses: foundry-rs/foundry-toolchain@c7450ba673e133f5ee30098b3b54f444d3a2ca2d # pin @v1.8.0
       - run: slither --compile-force-framework forge --foundry-out-directory foundry-out .

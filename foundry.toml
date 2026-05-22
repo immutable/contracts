@@ -5,7 +5,19 @@ out = 'foundry-out'
 libs = ["lib"]
 fs_permissions = [{ access = "read", path = "./foundry-out" }]
 
+# Error 2424: This suppresses the "Natspec memory-safe-assembly special comment for inline assembly"
+# warning. At present, there appears to be not other to suppress this warning.
+# The warning is being generated because libraries used by this repo are not compliant.
+# Error 3860: The is related to the size of init code fragments, and was being applied to 
+# test code as well as production code. There is, unfortunatley, no was to disable this
+# just for test code.
+# Error 5574: Code size too large
+# Error 2394: Transient storage used in Seaport.
+ignored_error_codes = [2424, 3860, 5574, 2394]
+
+
 [lint]
+# For list of linting rules see https://www.getfoundry.sh/forge/linting
 exclude_lints = ["mixed-case-function","mixed-case-variable","asm-keccak256"]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

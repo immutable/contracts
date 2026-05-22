@@ -5,7 +5,7 @@ pragma solidity >=0.8.19 <0.8.29;
 import {StakeHolderInitBaseTest} from "./StakeHolderInitBase.t.sol";
 
 abstract contract StakeHolderInitBaseTestV2 is StakeHolderInitBaseTest {
-    function testGetVersion() public override {
+    function testGetVersion() public override view {
         uint256 ver = stakeHolder.version();
         assertEq(ver, 2, "Incorrect version");
     }

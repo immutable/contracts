@@ -53,23 +53,23 @@ contract PaymentSplitterTest is Test {
         paymentSplitter.overridePayees(payees, shares);
     }
 
-    function testDeployRoles() public {
+    function testDeployRoles() public view {
         assertTrue(paymentSplitter.hasRole(paymentSplitter.DEFAULT_ADMIN_ROLE(), defaultAdmin));
         assertTrue(paymentSplitter.hasRole(paymentSplitter.TOKEN_REGISTRAR_ROLE(), registrarAdmin));
         assertTrue(paymentSplitter.hasRole(paymentSplitter.RELEASE_FUNDS_ROLE(), fundsAdmin));
     }
 
-    function testTokensAdded() public {
+    function testTokensAdded() public view {
         assertEq(address(paymentSplitter.erc20Allowlist()[1]), address(erc20s[1]));
         assertEq(address(paymentSplitter.erc20Allowlist()[0]), address(erc20s[0]));
     }
 
-    function testPayeeAdded() public {
+    function testPayeeAdded() public view {
         assertEq(paymentSplitter.payee(0), payees[0]);
         assertEq(paymentSplitter.payee(1), payees[1]);
     }
 
-    function testSharesAdded() public {
+    function testSharesAdded() public view {
         assertEq(paymentSplitter.shares(payees[0]), shares[0]);
         assertEq(paymentSplitter.shares(payees[1]), shares[1]);
     }

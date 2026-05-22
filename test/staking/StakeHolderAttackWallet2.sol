@@ -13,7 +13,7 @@ contract StakeHolderAttackWallet2 {
     }
     receive() external payable {
         // Cause a revert that has zero call data length. 
-        assembly {
+        assembly ("memory-safe") {
             revert(0, 0)
         }
 

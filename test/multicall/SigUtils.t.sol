@@ -59,7 +59,7 @@ contract SigUtils {
             keccak256(abi.encodePacked(_targets)), 
             hashBytesArray(_data), 
             _deadline));
-        return keccak256(abi.encodePacked("\x19\x01", cachedDomainSeparator, digest));
+        return keccak256(abi.encodePacked("\x19\x01", CACHED_DOMAIN_SEPARATOR, digest));
     }
 
     function hashBytesArray(bytes[] memory _data) public pure returns (bytes32) {

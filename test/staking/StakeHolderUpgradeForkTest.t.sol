@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
+import {Test} from "forge-std/Test.sol";
 import {StakeHolderWIMX} from "../../contracts/staking/StakeHolderWIMX.sol";
 import {StakeHolderWIMXV2} from "../../contracts/staking/StakeHolderWIMXV2.sol";
 import {TimelockController} from "openzeppelin-contracts-4.9.3/governance/TimelockController.sol";

@@ -279,7 +279,7 @@ abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
         // The duplicated `log4` removes an extra check and reduces stack juggling.
         // The assembly, together with the surrounding Solidity code, have been
         // delicately arranged to nudge the compiler into producing optimized opcodes.
-        assembly {
+        assembly ("memory-safe") {
             // Mask `to` to the lower 160 bits, in case the upper bits somehow aren't clean.
             toMasked := and(_to, _BITMASK_ADDRESS)
             // Emit the `Transfer` event.
@@ -402,7 +402,7 @@ abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
                     if (reason.length == 0) {
                         revert("ERC721Psi: transfer to non ERC721Receiver implementer");
                     } else {
-                        assembly {
+                        assembly ("memory-safe") {
                             revert(add(32, reason), mload(reason))
                         }
                     }

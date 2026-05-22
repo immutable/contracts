@@ -102,7 +102,7 @@ contract OperatorAllowlistUpgradeable is
         // get bytecode of wallet
         bytes32 codeHash;
         // solhint-disable-next-line no-inline-assembly
-        assembly {
+        assembly ("memory-safe") {
             codeHash := extcodehash(walletAddr)
         }
         bytecodeAllowlist[codeHash] = true;
@@ -122,7 +122,7 @@ contract OperatorAllowlistUpgradeable is
         // get bytecode of wallet
         bytes32 codeHash;
         // solhint-disable-next-line no-inline-assembly
-        assembly {
+        assembly ("memory-safe") {
             codeHash := extcodehash(walletAddr)
         }
         delete bytecodeAllowlist[codeHash];
@@ -147,7 +147,7 @@ contract OperatorAllowlistUpgradeable is
         // Check if caller is a Allowlisted smart contract wallet
         bytes32 codeHash;
         // solhint-disable-next-line no-inline-assembly
-        assembly {
+        assembly ("memory-safe") {
             codeHash := extcodehash(target)
         }
         if (bytecodeAllowlist[codeHash]) {

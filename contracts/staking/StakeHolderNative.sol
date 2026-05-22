@@ -37,7 +37,7 @@ contract StakeHolderNative is StakeHolderBase {
             // Revert reasons should contain an error selector, which is four bytes long.
             if (returndata.length >= 4) {
                 // solhint-disable-next-line no-inline-assembly
-                assembly {
+                assembly ("memory-safe") {
                     let returndata_size := mload(returndata)
                     revert(add(32, returndata), returndata_size)
                 }

@@ -166,7 +166,7 @@ contract GuardedMulticaller2 is AccessControl, ReentrancyGuard, EIP712 {
                     revert FailedCall(_calls[i], returnData);
                 }
                 // solhint-disable-next-line no-inline-assembly
-                assembly {
+                assembly ("memory-safe") {
                     // The easiest way to bubble the revert reason is using memory via assembly
                     revert(add(returnData, 32), mload(returnData))
                 }

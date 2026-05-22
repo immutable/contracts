@@ -26,7 +26,7 @@ contract OwnableCreateDeploy {
         // solhint-disable-next-line custom-errors, reason-string
         require(msg.sender == OWNER, "CreateDeploy: caller is not the owner");
         // solhint-disable no-inline-assembly
-        assembly {
+        assembly ("memory-safe") {
             if iszero(create(callvalue(), add(bytecode, 32), mload(bytecode))) {
                 revert(0, 0)
             }

@@ -10,7 +10,7 @@
  *
  * // Use with viem
  * const contract = getContract({
- *   address: IMMUTABLE_SEAPORT[CHAIN_ID.MAINNET],
+ *   address: IMMUTABLE_SEAPORT[CHAIN_ID.IMMUTABLE_MAINNET],
  *   abi: seaportAbi,
  *   client,
  * });

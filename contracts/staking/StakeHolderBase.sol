@@ -3,8 +3,12 @@
 pragma solidity >=0.8.19 <0.8.29;
 
 import {UUPSUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/proxy/utils/UUPSUpgradeable.sol";
-import {AccessControlEnumerableUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/access/AccessControlEnumerableUpgradeable.sol";
-import {ReentrancyGuardUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/security/ReentrancyGuardUpgradeable.sol";
+import {
+    AccessControlEnumerableUpgradeable
+} from "openzeppelin-contracts-upgradeable-4.9.3/access/AccessControlEnumerableUpgradeable.sol";
+import {
+    ReentrancyGuardUpgradeable
+} from "openzeppelin-contracts-upgradeable-4.9.3/security/ReentrancyGuardUpgradeable.sol";
 import {IStakeHolder} from "./IStakeHolder.sol";
 
 /**
@@ -18,7 +22,7 @@ abstract contract StakeHolderBase is
     ReentrancyGuardUpgradeable
 {
     /// @notice Only UPGRADE_ROLE can upgrade the contract
-    // forge-lint: disable-next-line(unsafe-typecast)    
+    // forge-lint: disable-next-line(unsafe-typecast)
     bytes32 public constant UPGRADE_ROLE = bytes32("UPGRADE_ROLE");
 
     /// @notice Only DISTRIBUTE_ROLE can call the distribute function
@@ -37,14 +41,12 @@ abstract contract StakeHolderBase is
     }
 
     /// @notice The amount of value owned by each staker
-    // solhint-disable-next-line private-vars-leading-underscore
     mapping(address staker => StakeInfo stakeInfo) internal balances;
 
     /// @notice A list of all stakers who have ever staked.
     /// @dev The list make contain stakers who have completely unstaked (that is, have
     ///    a balance of 0). This array is never re-ordered. As such, off-chain services
     ///    could cache the results of getStakers().
-    // solhint-disable-next-line private-vars-leading-underscore
     address[] internal stakers;
 
     /// @notice version number of the storage variable layout.
@@ -56,11 +58,11 @@ abstract contract StakeHolderBase is
      * @param _upgradeAdmin the address to grant `UPGRADE_ROLE` to
      * @param _distributeAdmin the address to grant `DISTRIBUTE_ROLE` to
      */
-    function __StakeHolderBase_init(
-        address _roleAdmin,
-        address _upgradeAdmin,
-        address _distributeAdmin
-    ) internal virtual onlyInitializing {
+    function __StakeHolderBase_init(address _roleAdmin, address _upgradeAdmin, address _distributeAdmin)
+        internal
+        virtual
+        onlyInitializing
+    {
         __UUPSUpgradeable_init();
         __AccessControl_init();
         __ReentrancyGuard_init();
@@ -81,7 +83,12 @@ abstract contract StakeHolderBase is
      *      this function attempting a malicious upgrade.
      * @ param _data ABI encoded data to be used as part of the contract storage upgrade.
      */
-    function upgradeStorage(bytes memory /* _data */) external virtual {
+    function upgradeStorage(
+        bytes memory /* _data */
+    )
+        external
+        virtual
+    {
         revert CanNotUpgradeToLowerOrSameVersion(version);
     }
 
@@ -117,9 +124,13 @@ abstract contract StakeHolderBase is
     /**
      * @inheritdoc IStakeHolder
      */
-    function distributeRewards(
-        AccountAmount[] calldata _recipientsAndAmounts
-    ) external payable virtual nonReentrant onlyRole(DISTRIBUTE_ROLE) {
+    function distributeRewards(AccountAmount[] calldata _recipientsAndAmounts)
+        external
+        payable
+        virtual
+        nonReentrant
+        onlyRole(DISTRIBUTE_ROLE)
+    {
         // Distribute the value.
         uint256 total = 0;
         uint256 len = _recipientsAndAmounts.length;
@@ -162,10 +173,12 @@ abstract contract StakeHolderBase is
     /**
      * @inheritdoc IStakeHolder
      */
-    function getStakers(
-        uint256 _startOffset,
-        uint256 _numberToReturn
-    ) external view override(IStakeHolder) returns (address[] memory _stakers) {
+    function getStakers(uint256 _startOffset, uint256 _numberToReturn)
+        external
+        view
+        override(IStakeHolder)
+        returns (address[] memory _stakers)
+    {
         address[] memory stakerPartialArray = new address[](_numberToReturn);
         for (uint256 i = 0; i < _numberToReturn; i++) {
             stakerPartialArray[i] = stakers[_startOffset + i];
@@ -209,12 +222,10 @@ abstract contract StakeHolderBase is
     function _checksAndTransfer(uint256 _amount) internal virtual;
 
     // Override the _authorizeUpgrade function
-    // solhint-disable-next-line no-empty-blocks
     function _authorizeUpgrade(address newImplementation) internal override onlyRole(UPGRADE_ROLE) {}
 
     /// @notice storage gap for additional variables for upgrades
     // slither-disable-start unused-state
-    // solhint-disable-next-line var-name-mixedcase
     uint256[50] private __StakeHolderBaseGap;
     // slither-disable-end unused-state
 }

@@ -69,10 +69,8 @@ abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
      * @dev See {IERC165-supportsInterface}.
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
-        return
-            interfaceId == type(IERC721).interfaceId ||
-            interfaceId == type(IERC721Metadata).interfaceId ||
-            super.supportsInterface(interfaceId);
+        return interfaceId == type(IERC721).interfaceId || interfaceId == type(IERC721Metadata).interfaceId
+            || super.supportsInterface(interfaceId);
     }
 
     /**
@@ -88,7 +86,7 @@ abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     function ownerOf(uint256 _tokenId) public view virtual override returns (address) {
         bool exists;
         address owner;
-        (, , exists, owner) = _tokenInfo(_tokenId);
+        (,, exists, owner) = _tokenInfo(_tokenId);
         require(exists, "ERC721Psi: owner query for nonexistent token");
         return owner;
     }
@@ -174,8 +172,7 @@ abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     function _safeTransfer(address from, address to, uint256 tokenId, bytes memory _data) internal virtual {
         _transfer(from, to, tokenId);
         require(
-            _checkOnERC721Received(from, to, tokenId, 1, _data),
-            "ERC721Psi: transfer to non ERC721Receiver implementer"
+            _checkOnERC721Received(from, to, tokenId, 1, _data), "ERC721Psi: transfer to non ERC721Receiver implementer"
         );
     }
 
@@ -188,7 +185,7 @@ abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
      */
     function _exists(uint256 _tokenId) internal view virtual returns (bool) {
         bool exists;
-        (, , exists, ) = _tokenInfo(_tokenId);
+        (,, exists,) = _tokenInfo(_tokenId);
         return exists;
     }
 
@@ -202,7 +199,7 @@ abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     function _isApprovedOrOwner(address _spender, uint256 _tokenId) internal view virtual returns (bool) {
         bool exists;
         address owner;
-        (, , exists, owner) = _tokenInfo(_tokenId);
+        (,, exists, owner) = _tokenInfo(_tokenId);
         require(exists, "ERC721Psi: operator query for nonexistent token");
 
         return ((_spender == owner) || (_spender == tokenApprovals[_tokenId]) || isApprovedForAll(owner, _spender));
@@ -359,7 +356,7 @@ abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
      * Emits a {Approval} event.
      */
     function _approve(address _to, uint256 _tokenId) internal virtual {
-        (, , , address owner) = _tokenInfo(_tokenId);
+        (,,, address owner) = _tokenInfo(_tokenId);
         // Clear approvals from the previous owner
         _approve(owner, _to, _tokenId);
     }
@@ -456,7 +453,7 @@ abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     }
 
     function _bitIsSet(uint256 _bitMask, uint256 _offset) internal pure returns (bool) {
-        /// forge-lint: disable-next-line(incorrect-shift)        
+        /// forge-lint: disable-next-line(incorrect-shift)
         uint256 bitSet = 1 << _offset;
         return (bitSet & _bitMask != 0);
     }
@@ -473,7 +470,7 @@ abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
         // If offset = 1, mask should be 0xffff...ffe
         // If offset = 2, mask should be 0xffff...ffc
         // If offset = 3, mask should be 0xffff...ff8
-        /// forge-lint: disable-next-line(incorrect-shift)        
+        /// forge-lint: disable-next-line(incorrect-shift)
         uint256 inverseBitMask = (1 << _offset) - 1;
         return ~inverseBitMask;
     }

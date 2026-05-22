@@ -75,11 +75,13 @@ contract AccessControlledDeployer is AccessControlEnumerable, Pausable {
      * @dev The function emits `Deployed` event after the contract is deployed
      * @return The address of the deployed contract
      */
-    function deploy(
-        IDeployer deployer,
-        bytes memory bytecode,
-        bytes32 salt
-    ) external payable whenNotPaused onlyRole(DEPLOYER_ROLE) returns (address) {
+    function deploy(IDeployer deployer, bytes memory bytecode, bytes32 salt)
+        external
+        payable
+        whenNotPaused
+        onlyRole(DEPLOYER_ROLE)
+        returns (address)
+    {
         if (address(deployer) == address(0)) {
             revert ZeroAddress();
         }
@@ -98,12 +100,13 @@ contract AccessControlledDeployer is AccessControlEnumerable, Pausable {
      * @dev The function emits `Deployed` event after the contract is deployed
      * @return The address of the deployed contract
      */
-    function deployAndInit(
-        IDeployer deployer,
-        bytes memory bytecode,
-        bytes32 salt,
-        bytes calldata init
-    ) external payable whenNotPaused onlyRole(DEPLOYER_ROLE) returns (address) {
+    function deployAndInit(IDeployer deployer, bytes memory bytecode, bytes32 salt, bytes calldata init)
+        external
+        payable
+        whenNotPaused
+        onlyRole(DEPLOYER_ROLE)
+        returns (address)
+    {
         if (address(deployer) == address(0)) {
             revert ZeroAddress();
         }
@@ -156,10 +159,10 @@ contract AccessControlledDeployer is AccessControlEnumerable, Pausable {
      * @dev This function requires that the current owner of `ownableDeployer` is this contract
      * @dev The function emits `OwnershipTransferred` event if the ownership is successfully transferred
      */
-    function transferOwnershipOfDeployer(
-        Ownable ownableDeployer,
-        address newOwner
-    ) external onlyRole(OWNERSHIP_MANAGER_ROLE) {
+    function transferOwnershipOfDeployer(Ownable ownableDeployer, address newOwner)
+        external
+        onlyRole(OWNERSHIP_MANAGER_ROLE)
+    {
         if (address(ownableDeployer) == address(0) || newOwner == address(0)) {
             revert ZeroAddress();
         }

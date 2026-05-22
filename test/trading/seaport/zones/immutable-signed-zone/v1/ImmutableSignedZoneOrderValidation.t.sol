@@ -3,11 +3,16 @@ pragma solidity ^0.8.13;
 
 import {Test} from "forge-std/Test.sol";
 import {ImmutableSeaportTestHelper} from "../../../ImmutableSeaportTestHelper.t.sol";
-import {ImmutableSignedZone} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/ImmutableSignedZone.sol";
-import {SIP7EventsAndErrors} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/interfaces/SIP7EventsAndErrors.sol";
-import {SIP6EventsAndErrors} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/interfaces/SIP6EventsAndErrors.sol";
+import {
+    ImmutableSignedZone
+} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/ImmutableSignedZone.sol";
+import {
+    SIP7EventsAndErrors
+} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/interfaces/SIP7EventsAndErrors.sol";
+import {
+    SIP6EventsAndErrors
+} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/interfaces/SIP6EventsAndErrors.sol";
 import {ZoneParameters, ReceivedItem} from "seaport-types/src/lib/ConsiderationStructs.sol";
-
 
 contract ImmutableSignedZoneOrderValidationTest is Test, ImmutableSeaportTestHelper {
     ImmutableSignedZone public zone;
@@ -52,7 +57,14 @@ contract ImmutableSignedZoneOrderValidationTest is Test, ImmutableSeaportTestHel
 
         ZoneParameters memory params = _createZoneParameters(extraData, orderHash, consideration);
         bytes4 selector = zone.validateOrder(params);
-        assertEq(selector, bytes4(keccak256("validateOrder((bytes32,address,address,(uint8,address,uint256,uint256)[],(uint8,address,uint256,uint256,address)[],bytes,bytes32[],uint256,uint256,bytes32))")));
+        assertEq(
+            selector,
+            bytes4(
+                keccak256(
+                    "validateOrder((bytes32,address,address,(uint8,address,uint256,uint256)[],(uint8,address,uint256,uint256,address)[],bytes,bytes32[],uint256,uint256,bytes32))"
+                )
+            )
+        );
     }
 
     function testValidateOrderWithMultipleOrderHashes() public {
@@ -60,13 +72,13 @@ contract ImmutableSignedZoneOrderValidationTest is Test, ImmutableSeaportTestHel
         uint64 expiration = uint64(block.timestamp + 90);
         ReceivedItem[] memory consideration = _createMockConsideration(10);
         bytes32 considerationHash = this._deriveConsiderationHash(consideration);
-        
+
         // Create array of order hashes
         bytes32[] memory orderHashes = new bytes32[](10);
         for (uint256 i = 0; i < 10; i++) {
             orderHashes[i] = keccak256(abi.encodePacked("order", i));
         }
-        
+
         // Create context with consideration hash and order hashes
         bytes memory context = abi.encodePacked(considerationHash, _convertToBytesWithoutArrayLength(orderHashes));
 
@@ -80,23 +92,39 @@ contract ImmutableSignedZoneOrderValidationTest is Test, ImmutableSeaportTestHel
         );
 
         ZoneParameters memory params = _createZoneParameters(extraData, orderHash, orderHashes, consideration);
-        
+
         bytes4 selector = zone.validateOrder(params);
-        assertEq(selector, bytes4(keccak256("validateOrder((bytes32,address,address,(uint8,address,uint256,uint256)[],(uint8,address,uint256,uint256,address)[],bytes,bytes32[],uint256,uint256,bytes32))")));
+        assertEq(
+            selector,
+            bytes4(
+                keccak256(
+                    "validateOrder((bytes32,address,address,(uint8,address,uint256,uint256)[],(uint8,address,uint256,uint256,address)[],bytes,bytes32[],uint256,uint256,bytes32))"
+                )
+            )
+        );
     }
 
     function testValidateOrderWithoutExtraData() public {
         bytes memory extraData = "";
         ZoneParameters memory params = _createZoneParameters(extraData);
-        vm.expectRevert(abi.encodeWithSelector(SIP7EventsAndErrors.InvalidExtraData.selector, 
-            "extraData is empty", params.orderHash));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SIP7EventsAndErrors.InvalidExtraData.selector, "extraData is empty", params.orderHash
+            )
+        );
         zone.validateOrder(params);
     }
 
     function testValidateOrderWithInvalidExtraData() public {
         bytes memory extraData = abi.encodePacked(uint8(1), uint8(2), uint8(3));
         ZoneParameters memory params = _createZoneParameters(extraData);
-        vm.expectRevert(abi.encodeWithSelector(SIP7EventsAndErrors.InvalidExtraData.selector, "extraData length must be at least 93 bytes", params.orderHash));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SIP7EventsAndErrors.InvalidExtraData.selector,
+                "extraData length must be at least 93 bytes",
+                params.orderHash
+            )
+        );
         zone.validateOrder(params);
     }
 
@@ -119,7 +147,9 @@ contract ImmutableSignedZoneOrderValidationTest is Test, ImmutableSeaportTestHel
         vm.warp(uint256(timeNow));
 
         ZoneParameters memory params = _createZoneParameters(extraData, orderHash);
-        vm.expectRevert(abi.encodeWithSelector(SIP7EventsAndErrors.SignatureExpired.selector, timeNow, expiration, orderHash));
+        vm.expectRevert(
+            abi.encodeWithSelector(SIP7EventsAndErrors.SignatureExpired.selector, timeNow, expiration, orderHash)
+        );
         zone.validateOrder(params);
     }
 
@@ -139,7 +169,11 @@ contract ImmutableSignedZoneOrderValidationTest is Test, ImmutableSeaportTestHel
         );
 
         ZoneParameters memory params = _createZoneParameters(extraData, orderHash);
-        vm.expectRevert(abi.encodeWithSelector(SIP7EventsAndErrors.InvalidFulfiller.selector, invalidFulfiller, fulfiller, orderHash));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SIP7EventsAndErrors.InvalidFulfiller.selector, invalidFulfiller, fulfiller, orderHash
+            )
+        );
         zone.validateOrder(params);
     }
 
@@ -177,8 +211,13 @@ contract ImmutableSignedZoneOrderValidationTest is Test, ImmutableSeaportTestHel
         );
 
         ZoneParameters memory params = _createZoneParameters(extraData, orderHash);
-        vm.expectRevert(abi.encodeWithSelector(SIP7EventsAndErrors.InvalidExtraData.selector, 
-            "invalid context, expecting consideration hash followed by order hashes", params.orderHash));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SIP7EventsAndErrors.InvalidExtraData.selector,
+                "invalid context, expecting consideration hash followed by order hashes",
+                params.orderHash
+            )
+        );
         zone.validateOrder(params);
     }
 
@@ -198,8 +237,11 @@ contract ImmutableSignedZoneOrderValidationTest is Test, ImmutableSeaportTestHel
 
         ZoneParameters memory params = _createZoneParameters(extraData, orderHash);
         params.consideration = _createMockConsideration(10);
-        vm.expectRevert(abi.encodeWithSelector(SIP7EventsAndErrors.SubstandardViolation.selector, 
-            3, "invalid consideration hash", orderHash));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SIP7EventsAndErrors.SubstandardViolation.selector, 3, "invalid consideration hash", orderHash
+            )
+        );
         zone.validateOrder(params);
     }
 
@@ -220,16 +262,27 @@ contract ImmutableSignedZoneOrderValidationTest is Test, ImmutableSeaportTestHel
         );
 
         ZoneParameters memory params = _createZoneParameters(extraData);
-        
+
         // First validate should succeed
         bytes4 selector = zone.validateOrder(params);
-        assertEq(selector, bytes4(keccak256("validateOrder((bytes32,address,address,(uint8,address,uint256,uint256)[],(uint8,address,uint256,uint256,address)[],bytes,bytes32[],uint256,uint256,bytes32))")));
+        assertEq(
+            selector,
+            bytes4(
+                keccak256(
+                    "validateOrder((bytes32,address,address,(uint8,address,uint256,uint256)[],(uint8,address,uint256,uint256,address)[],bytes,bytes32[],uint256,uint256,bytes32))"
+                )
+            )
+        );
 
         // Advance time past expiration
         vm.warp(block.timestamp + 900);
 
         // Second validate should fail
-        vm.expectRevert(abi.encodeWithSelector(SIP7EventsAndErrors.SignatureExpired.selector, uint64(block.timestamp), expiration, orderHash));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SIP7EventsAndErrors.SignatureExpired.selector, uint64(block.timestamp), expiration, orderHash
+            )
+        );
         zone.validateOrder(params);
     }
 
@@ -238,20 +291,21 @@ contract ImmutableSignedZoneOrderValidationTest is Test, ImmutableSeaportTestHel
         uint64 expiration = uint64(block.timestamp + 90);
         ReceivedItem[] memory consideration = _createMockConsideration(10);
         bytes32 considerationHash = this._deriveConsiderationHash(consideration);
-        
+
         // Create array of order hashes
         bytes32[] memory orderHashes = new bytes32[](10);
         for (uint256 i = 0; i < 10; i++) {
             orderHashes[i] = keccak256(abi.encodePacked("order", i));
         }
-        
+
         // Create partial array of order hashes (first 2)
         bytes32[] memory partialOrderHashes = new bytes32[](2);
         partialOrderHashes[0] = orderHashes[0];
         partialOrderHashes[1] = orderHashes[1];
-        
+
         // Create context with consideration hash and partial order hashes
-        bytes memory context = abi.encodePacked(considerationHash, _convertToBytesWithoutArrayLength(partialOrderHashes));
+        bytes memory context =
+            abi.encodePacked(considerationHash, _convertToBytesWithoutArrayLength(partialOrderHashes));
 
         bytes memory signature = _signOrder(signerPkey, orderHash, expiration, context);
         bytes memory extraData = abi.encodePacked(
@@ -263,9 +317,16 @@ contract ImmutableSignedZoneOrderValidationTest is Test, ImmutableSeaportTestHel
         );
 
         ZoneParameters memory params = _createZoneParameters(extraData, orderHash, orderHashes, consideration);
-        
+
         bytes4 selector = zone.validateOrder(params);
-        assertEq(selector, bytes4(keccak256("validateOrder((bytes32,address,address,(uint8,address,uint256,uint256)[],(uint8,address,uint256,uint256,address)[],bytes,bytes32[],uint256,uint256,bytes32))")));
+        assertEq(
+            selector,
+            bytes4(
+                keccak256(
+                    "validateOrder((bytes32,address,address,(uint8,address,uint256,uint256)[],(uint8,address,uint256,uint256,address)[],bytes,bytes32[],uint256,uint256,bytes32))"
+                )
+            )
+        );
     }
 
     function testValidateOrderWhenNotAllExpectedOrdersAreZoneParameters() public {
@@ -273,13 +334,13 @@ contract ImmutableSignedZoneOrderValidationTest is Test, ImmutableSeaportTestHel
         uint64 expiration = uint64(block.timestamp + 90);
         ReceivedItem[] memory consideration = _createMockConsideration(10);
         bytes32 considerationHash = this._deriveConsiderationHash(consideration);
-        
+
         // Create array of order hashes
         bytes32[] memory orderHashes = new bytes32[](10);
         for (uint256 i = 0; i < 10; i++) {
             orderHashes[i] = keccak256(abi.encodePacked("order", i));
         }
-        
+
         // Create context with consideration hash and full order hashes
         bytes memory context = abi.encodePacked(considerationHash, _convertToBytesWithoutArrayLength(orderHashes));
 
@@ -298,9 +359,12 @@ contract ImmutableSignedZoneOrderValidationTest is Test, ImmutableSeaportTestHel
         partialOrderHashes[1] = orderHashes[1];
 
         ZoneParameters memory params = _createZoneParameters(extraData, orderHash, partialOrderHashes, consideration);
-        
-        vm.expectRevert(abi.encodeWithSelector(SIP7EventsAndErrors.SubstandardViolation.selector, 
-            4, "invalid order hashes", orderHash));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SIP7EventsAndErrors.SubstandardViolation.selector, 4, "invalid order hashes", orderHash
+            )
+        );
         zone.validateOrder(params);
     }
 
@@ -309,13 +373,13 @@ contract ImmutableSignedZoneOrderValidationTest is Test, ImmutableSeaportTestHel
         uint64 expiration = uint64(block.timestamp + 90);
         ReceivedItem[] memory consideration = _createMockConsideration(10);
         bytes32 considerationHash = this._deriveConsiderationHash(consideration);
-        
+
         // Create array of order hashes
         bytes32[] memory orderHashes = new bytes32[](10);
         for (uint256 i = 0; i < 10; i++) {
             orderHashes[i] = keccak256(abi.encodePacked("order", i));
         }
-        
+
         // Create context with consideration hash and full order hashes
         bytes memory context = abi.encodePacked(considerationHash, _convertToBytesWithoutArrayLength(orderHashes));
 
@@ -336,9 +400,12 @@ contract ImmutableSignedZoneOrderValidationTest is Test, ImmutableSeaportTestHel
         mixedOrderHashes[3] = keccak256("0x66");
 
         ZoneParameters memory params = _createZoneParameters(extraData, orderHash, mixedOrderHashes, consideration);
-        
-        vm.expectRevert(abi.encodeWithSelector(SIP7EventsAndErrors.SubstandardViolation.selector, 
-            4, "invalid order hashes", orderHash));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                SIP7EventsAndErrors.SubstandardViolation.selector, 4, "invalid order hashes", orderHash
+            )
+        );
         zone.validateOrder(params);
     }
 
@@ -347,20 +414,20 @@ contract ImmutableSignedZoneOrderValidationTest is Test, ImmutableSeaportTestHel
         uint64 expiration = uint64(block.timestamp + 90);
         ReceivedItem[] memory consideration = _createMockConsideration(10);
         bytes32 considerationHash = this._deriveConsiderationHash(consideration);
-        
+
         // Create array of order hashes
         bytes32[] memory orderHashes = new bytes32[](10);
         for (uint256 i = 0; i < 10; i++) {
             orderHashes[i] = keccak256(abi.encodePacked("order", i));
         }
-        
+
         // Create context with consideration hash and order hashes
         bytes memory context = abi.encodePacked(considerationHash, _convertToBytesWithoutArrayLength(orderHashes));
 
         // Sign with wrong signer
         (address wrongSigner, uint256 wrongSignerPkey) = makeAddrAndKey("wrongSigner");
         bytes memory signature = _signOrder(wrongSignerPkey, orderHash, expiration, context);
-        
+
         bytes memory extraData = abi.encodePacked(
             uint8(0), // SIP6 version
             fulfiller,
@@ -370,8 +437,8 @@ contract ImmutableSignedZoneOrderValidationTest is Test, ImmutableSeaportTestHel
         );
 
         ZoneParameters memory params = _createZoneParameters(extraData, orderHash, orderHashes, consideration);
-        
+
         vm.expectRevert(abi.encodeWithSelector(SIP7EventsAndErrors.SignerNotActive.selector, wrongSigner));
         zone.validateOrder(params);
     }
-} 
+}

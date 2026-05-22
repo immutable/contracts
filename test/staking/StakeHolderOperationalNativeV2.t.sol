@@ -9,13 +9,18 @@ import {StakeHolderOperationalBaseTestV2} from "./StakeHolderOperationalBaseV2.t
 import {StakeHolderOperationalNativeTest} from "./StakeHolderOperationalNative.t.sol";
 
 contract StakeHolderOperationalNativeTestV2 is StakeHolderOperationalNativeTest, StakeHolderOperationalBaseTestV2 {
-    function setUp() public override (StakeHolderOperationalNativeTest, StakeHolderBaseTest) {
+    function setUp() public override(StakeHolderOperationalNativeTest, StakeHolderBaseTest) {
         StakeHolderOperationalNativeTest.setUp();
         upgradeToStakeHolderNativeV2();
     }
 
-    function _stakeFor(address _distributor, uint256 _total, IStakeHolder.AccountAmount[] memory _accountAmounts, 
-        bool _hasError, bytes memory _error) internal override {
+    function _stakeFor(
+        address _distributor,
+        uint256 _total,
+        IStakeHolder.AccountAmount[] memory _accountAmounts,
+        bool _hasError,
+        bytes memory _error
+    ) internal override {
         if (_hasError) {
             vm.expectRevert(_error);
         }

@@ -21,12 +21,10 @@ contract StakeHolderWIMX is StakeHolderNative {
      * @param _distributeAdmin the address to grant `DISTRIBUTE_ROLE` to
      * @param _wIMXToken The address of the WIMX contract.
      */
-    function initialize(
-        address _roleAdmin,
-        address _upgradeAdmin,
-        address _distributeAdmin,
-        address _wIMXToken
-    ) public initializer {
+    function initialize(address _roleAdmin, address _upgradeAdmin, address _distributeAdmin, address _wIMXToken)
+        public
+        initializer
+    {
         __StakeHolderBase_init(_roleAdmin, _upgradeAdmin, _distributeAdmin);
         wIMX = IWIMX(_wIMXToken);
     }
@@ -65,7 +63,6 @@ contract StakeHolderWIMX is StakeHolderNative {
 
     /// @notice storage gap for additional variables for upgrades
     // slither-disable-start unused-state
-    // solhint-disable-next-line var-name-mixedcase
     uint256[50] private __StakeHolderWIMXGap;
     // slither-disable-end unused-state
 }

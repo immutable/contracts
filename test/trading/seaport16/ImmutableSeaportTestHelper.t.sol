@@ -5,10 +5,14 @@ import {Test} from "forge-std/Test.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {SigningTestHelper} from "./utils/SigningTestHelper.t.sol";
 import {ItemType} from "seaport-types-16/src/lib/ConsiderationEnums.sol";
-import {ZoneParameters, ConsiderationItem, OfferItem, ReceivedItem, SpentItem} from "seaport-types-16/src/lib/ConsiderationStructs.sol";
+import {
+    ZoneParameters,
+    ConsiderationItem,
+    OfferItem,
+    ReceivedItem,
+    SpentItem
+} from "seaport-types-16/src/lib/ConsiderationStructs.sol";
 import {Math} from "openzeppelin-contracts-5.0.2/utils/math/Math.sol";
-
-
 
 abstract contract ImmutableSeaportTestHelper is Test, SigningTestHelper {
     string public constant ZONE_NAME = "ImmutableSignedZone";
@@ -29,17 +33,29 @@ abstract contract ImmutableSeaportTestHelper is Test, SigningTestHelper {
         return _createZoneParameters(_extraData, orderHash, _createMockConsideration(10));
     }
 
-    function _createZoneParameters(bytes memory _extraData, bytes32 _orderHash) internal returns (ZoneParameters memory) {
+    function _createZoneParameters(bytes memory _extraData, bytes32 _orderHash)
+        internal
+        returns (ZoneParameters memory)
+    {
         return _createZoneParameters(_extraData, _orderHash, _createMockConsideration(10));
     }
 
-    function _createZoneParameters(bytes memory _extraData, bytes32 _orderHash, ReceivedItem[] memory _consideration) internal view returns (ZoneParameters memory) {
+    function _createZoneParameters(bytes memory _extraData, bytes32 _orderHash, ReceivedItem[] memory _consideration)
+        internal
+        view
+        returns (ZoneParameters memory)
+    {
         bytes32[] memory orderHashes = new bytes32[](1);
         orderHashes[0] = _orderHash;
         return _createZoneParameters(_extraData, _orderHash, orderHashes, _consideration);
     }
 
-    function _createZoneParameters(bytes memory _extraData, bytes32 _orderHash, bytes32[] memory _orderHashes, ReceivedItem[] memory _consideration) internal view returns (ZoneParameters memory) {
+    function _createZoneParameters(
+        bytes memory _extraData,
+        bytes32 _orderHash,
+        bytes32[] memory _orderHashes,
+        ReceivedItem[] memory _consideration
+    ) internal view returns (ZoneParameters memory) {
         return ZoneParameters({
             orderHash: _orderHash,
             fulfiller: theFulfiller,
@@ -60,17 +76,17 @@ abstract contract ImmutableSeaportTestHelper is Test, SigningTestHelper {
             address payable recipient = payable(makeAddr(string(abi.encodePacked("recipient", vm.toString(i)))));
             address payable token = payable(makeAddr(string(abi.encodePacked("token", vm.toString(i)))));
             consideration[i] = ReceivedItem({
-                itemType: ItemType.NATIVE,
-                token: token,
-                identifier: 123,
-                amount: 12,
-                recipient: recipient
+                itemType: ItemType.NATIVE, token: token, identifier: 123, amount: 12, recipient: recipient
             });
         }
         return consideration;
     }
 
-    function _convertConsiderationToReceivedItems(ConsiderationItem[] memory _items) internal pure returns (ReceivedItem[] memory) {
+    function _convertConsiderationToReceivedItems(ConsiderationItem[] memory _items)
+        internal
+        pure
+        returns (ReceivedItem[] memory)
+    {
         ReceivedItem[] memory receivedItems = new ReceivedItem[](_items.length);
         for (uint256 i = 0; i < _items.length; i++) {
             receivedItems[i] = ReceivedItem({
@@ -84,7 +100,11 @@ abstract contract ImmutableSeaportTestHelper is Test, SigningTestHelper {
         return receivedItems;
     }
 
-    function _createConsiderationItems(address recipient, uint256 amount) internal pure returns (ConsiderationItem[] memory) {
+    function _createConsiderationItems(address recipient, uint256 amount)
+        internal
+        pure
+        returns (ConsiderationItem[] memory)
+    {
         ConsiderationItem[] memory consideration = new ConsiderationItem[](1);
         consideration[0] = ConsiderationItem({
             itemType: ItemType.NATIVE,
@@ -97,9 +117,7 @@ abstract contract ImmutableSeaportTestHelper is Test, SigningTestHelper {
         return consideration;
     }
 
-    function _deriveReceivedItemsHash(
-        ReceivedItem[] calldata receivedItems
-    ) public pure returns (bytes32) {
+    function _deriveReceivedItemsHash(ReceivedItem[] calldata receivedItems) public pure returns (bytes32) {
         return _deriveReceivedItemsHash(receivedItems, 1, 1);
     }
 
@@ -125,17 +143,24 @@ abstract contract ImmutableSeaportTestHelper is Test, SigningTestHelper {
         return keccak256(receivedItemsHash);
     }
 
-    function _signOrder(uint256 /* _signerPkey */, bytes32 /* _orderHash */) internal pure returns (bytes memory) {
+    function _signOrder(
+        uint256,
+        /* _signerPkey */
+        bytes32 /* _orderHash */
+    )
+        internal
+        pure
+        returns (bytes memory)
+    {
         // For the purposes of testing, the offerer wallet will always return valid for signature checks
         return abi.encodePacked("Hello!");
     }
 
-    function _signSIP7Order(
-        uint256 _signerPkey,
-        bytes32 orderHash,
-        uint64 expiration,
-        bytes memory context
-    ) internal view returns (bytes memory) {
+    function _signSIP7Order(uint256 _signerPkey, bytes32 orderHash, uint64 expiration, bytes memory context)
+        internal
+        view
+        returns (bytes memory)
+    {
         uint256 chainId = block.chainid;
         bytes32 domainSeparator = keccak256(
             abi.encode(
@@ -166,16 +191,18 @@ abstract contract ImmutableSeaportTestHelper is Test, SigningTestHelper {
     function _createOfferItems(address token, uint256 tokenId) internal pure returns (OfferItem[] memory) {
         OfferItem[] memory offer = new OfferItem[](1);
         offer[0] = OfferItem({
-            itemType: ItemType.ERC721,
-            token: token,
-            identifierOrCriteria: tokenId,
-            startAmount: 1,
-            endAmount: 1
+            itemType: ItemType.ERC721, token: token, identifierOrCriteria: tokenId, startAmount: 1, endAmount: 1
         });
         return offer;
     }
 
-    function _generateSip7Signature(bytes32 orderHash, address fulfiller, uint256 signerPkey, uint64 _expiration, ConsiderationItem[] memory _consideration) internal view returns (bytes memory) {
+    function _generateSip7Signature(
+        bytes32 orderHash,
+        address fulfiller,
+        uint256 signerPkey,
+        uint64 _expiration,
+        ConsiderationItem[] memory _consideration
+    ) internal view returns (bytes memory) {
         ReceivedItem[] memory receivedItems = _convertConsiderationToReceivedItems(_consideration);
         bytes32 substandard3Data = this._deriveReceivedItemsHash(receivedItems);
         bytes32[] memory orderHashes = new bytes32[](1);
@@ -184,12 +211,6 @@ abstract contract ImmutableSeaportTestHelper is Test, SigningTestHelper {
         bytes memory context = abi.encodePacked(bytes1(0x03), substandard3Data, bytes1(0x04), substandard4Data);
 
         bytes memory signature = _signSIP7Order(signerPkey, orderHash, _expiration, context);
-        return abi.encodePacked(
-            bytes1(0),
-            fulfiller,
-            _expiration,
-            signature,
-            context
-        );
+        return abi.encodePacked(bytes1(0), fulfiller, _expiration, signature, context);
     }
 }

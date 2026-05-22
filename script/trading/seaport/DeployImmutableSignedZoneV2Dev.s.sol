@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2
 
 import {Script} from "forge-std/Script.sol";
-import {ImmutableSignedZoneV2} from
-    "../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/ImmutableSignedZoneV2.sol";
+import {
+    ImmutableSignedZoneV2
+} from "../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/ImmutableSignedZoneV2.sol";
 
-// solhint-disable-next-line compiler-version
 pragma solidity 0.8.20;
 
 // Deploy ImmutableSignedZoneV2 to dev environment (without create3)

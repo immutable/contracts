@@ -50,9 +50,13 @@ abstract contract ImmutableERC721HybridBase is
     }
 
     /// @dev Returns the supported interfaces
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view virtual override(ERC721HybridPermit, ERC2981, AccessControlEnumerable) returns (bool) {
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ERC721HybridPermit, ERC2981, AccessControlEnumerable)
+        returns (bool)
+    {
         return super.supportsInterface(interfaceId);
     }
 
@@ -81,10 +85,12 @@ abstract contract ImmutableERC721HybridBase is
      * @inheritdoc ERC721Hybrid
      * @dev Note it will validate the operator in the allowlist
      */
-    function setApprovalForAll(
-        address operator,
-        bool approved
-    ) public virtual override(ERC721Hybrid) validateApproval(operator) {
+    function setApprovalForAll(address operator, bool approved)
+        public
+        virtual
+        override(ERC721Hybrid)
+        validateApproval(operator)
+    {
         super.setApprovalForAll(operator, approved);
     }
 
@@ -100,11 +106,12 @@ abstract contract ImmutableERC721HybridBase is
      * @inheritdoc ERC721HybridPermit
      * @dev Note it will validate the from and to address in the allowlist
      */
-    function _transfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal virtual override(ERC721HybridPermit) validateTransfer(from, to) {
+    function _transfer(address from, address to, uint256 tokenId)
+        internal
+        virtual
+        override(ERC721HybridPermit)
+        validateTransfer(from, to)
+    {
         super._transfer(from, to, tokenId);
     }
 
@@ -125,11 +132,10 @@ abstract contract ImmutableERC721HybridBase is
      *  @param feeNumerator the royalty fee numerator
      *  @dev This can only be called by the a minter. See ERC2981 for more details on _setTokenRoyalty
      */
-    function setNFTRoyaltyReceiver(
-        uint256 tokenId,
-        address receiver,
-        uint96 feeNumerator
-    ) public onlyRole(MINTER_ROLE) {
+    function setNFTRoyaltyReceiver(uint256 tokenId, address receiver, uint96 feeNumerator)
+        public
+        onlyRole(MINTER_ROLE)
+    {
         _setTokenRoyalty(tokenId, receiver, feeNumerator);
     }
 
@@ -140,11 +146,10 @@ abstract contract ImmutableERC721HybridBase is
      *  @param feeNumerator the royalty fee numerator
      *  @dev This can only be called by the a minter. See ERC2981 for more details on _setTokenRoyalty
      */
-    function setNFTRoyaltyReceiverBatch(
-        uint256[] calldata tokenIds,
-        address receiver,
-        uint96 feeNumerator
-    ) public onlyRole(MINTER_ROLE) {
+    function setNFTRoyaltyReceiverBatch(uint256[] calldata tokenIds, address receiver, uint96 feeNumerator)
+        public
+        onlyRole(MINTER_ROLE)
+    {
         for (uint256 i = 0; i < tokenIds.length; i++) {
             _setTokenRoyalty(tokenIds[i], receiver, feeNumerator);
         }

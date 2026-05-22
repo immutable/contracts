@@ -19,11 +19,11 @@ abstract contract StakeHolderBaseV2 is IStakeHolderV2, StakeHolderBase {
      * @param _upgradeAdmin the address to grant `UPGRADE_ROLE` to
      * @param _distributeAdmin the address to grant `DISTRIBUTE_ROLE` to
      */
-    function __StakeHolderBase_init(
-        address _roleAdmin,
-        address _upgradeAdmin,
-        address _distributeAdmin
-    ) internal virtual override {
+    function __StakeHolderBase_init(address _roleAdmin, address _upgradeAdmin, address _distributeAdmin)
+        internal
+        virtual
+        override
+    {
         // NOTE: onlyInitializing is called in super.
         super.__StakeHolderBase_init(_roleAdmin, _upgradeAdmin, _distributeAdmin);
         version = _VERSION2;
@@ -40,7 +40,13 @@ abstract contract StakeHolderBaseV2 is IStakeHolderV2, StakeHolderBase {
      *      this function attempting a malicious upgrade.
      * @ param _data ABI encoded data to be used as part of the contract storage upgrade.
      */
-    function upgradeStorage(bytes memory /* _data */) external virtual override {
+    function upgradeStorage(
+        bytes memory /* _data */
+    )
+        external
+        virtual
+        override
+    {
         if (version == _VERSION0) {
             // Upgrading from version 0 to 2 involves only code changes and
             // changing the storage version number.
@@ -54,9 +60,13 @@ abstract contract StakeHolderBaseV2 is IStakeHolderV2, StakeHolderBase {
     /**
      * @inheritdoc IStakeHolder
      */
-    function distributeRewards(
-        AccountAmount[] calldata _recipientsAndAmounts
-    ) external payable override(IStakeHolder, StakeHolderBase) nonReentrant onlyRole(DISTRIBUTE_ROLE) {
+    function distributeRewards(AccountAmount[] calldata _recipientsAndAmounts)
+        external
+        payable
+        override(IStakeHolder, StakeHolderBase)
+        nonReentrant
+        onlyRole(DISTRIBUTE_ROLE)
+    {
         uint256 total = _distributeRewards(_recipientsAndAmounts, true);
         uint256 len = _recipientsAndAmounts.length;
         emit Distributed(msg.sender, total, len);
@@ -65,9 +75,12 @@ abstract contract StakeHolderBaseV2 is IStakeHolderV2, StakeHolderBase {
     /**
      * @inheritdoc IStakeHolderV2
      */
-    function stakeFor(
-        AccountAmount[] calldata _recipientsAndAmounts
-    ) external payable nonReentrant onlyRole(DISTRIBUTE_ROLE) {
+    function stakeFor(AccountAmount[] calldata _recipientsAndAmounts)
+        external
+        payable
+        nonReentrant
+        onlyRole(DISTRIBUTE_ROLE)
+    {
         uint256 total = _distributeRewards(_recipientsAndAmounts, false);
         uint256 len = _recipientsAndAmounts.length;
         emit StakedFor(msg.sender, total, len);
@@ -80,10 +93,10 @@ abstract contract StakeHolderBaseV2 is IStakeHolderV2, StakeHolderBase {
      * @param _existingAccountsOnly If true, revert if the account has never been used.
      * @return _total Value distributed.
      */
-    function _distributeRewards(
-        AccountAmount[] calldata _recipientsAndAmounts,
-        bool _existingAccountsOnly
-    ) private returns (uint256 _total) {
+    function _distributeRewards(AccountAmount[] calldata _recipientsAndAmounts, bool _existingAccountsOnly)
+        private
+        returns (uint256 _total)
+    {
         // Distribute the value.
         _total = 0;
         uint256 len = _recipientsAndAmounts.length;

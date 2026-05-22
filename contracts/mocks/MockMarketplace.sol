@@ -38,7 +38,6 @@ contract MockMarketplace {
         if (from == address(0)) {
             revert ZeroAddress();
         }
-        // solhint-disable-next-line custom-errors
         require(msg.value == price, "insufficient msg.value");
         (address receiver, uint256 royaltyAmount) = ROYALTY_ADDRESS.royaltyInfo(_tokenId, price);
         if (receiver == address(0)) {

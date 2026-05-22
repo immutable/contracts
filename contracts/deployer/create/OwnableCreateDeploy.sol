@@ -17,15 +17,14 @@ contract OwnableCreateDeploy {
     constructor() {
         OWNER = msg.sender;
     }
+
     /**
      * @dev Deploys a new contract with the specified bytecode using the `CREATE` opcode.
      * @param bytecode The bytecode of the contract to be deployed
      */
     // slither-disable-next-line locked-ether
     function deploy(bytes memory bytecode) external payable {
-        // solhint-disable-next-line custom-errors, reason-string
         require(msg.sender == OWNER, "CreateDeploy: caller is not the owner");
-        // solhint-disable no-inline-assembly
         assembly ("memory-safe") {
             if iszero(create(callvalue(), add(bytecode, 32), mload(bytecode))) {
                 revert(0, 0)

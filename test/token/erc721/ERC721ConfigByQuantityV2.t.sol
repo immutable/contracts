@@ -8,7 +8,6 @@ import {IImmutableERC721ByQuantity} from "../../../contracts/token/erc721/interf
 import {IImmutableERC721} from "../../../contracts/token/erc721/interfaces/IImmutableERC721.sol";
 
 contract ERC721ConfigByQuantityV2Test is ERC721ConfigByQuantityBaseTest {
-
     function setUp() public virtual override {
         super.setUp();
 
@@ -16,16 +15,16 @@ contract ERC721ConfigByQuantityV2Test is ERC721ConfigByQuantityBaseTest {
             owner, name, symbol, baseURI, contractURI, address(allowlist), feeReceiver, feeNumerator
         );
 
-        // ImmutableERC721 does not implement the interface, and hence must be cast to the 
+        // ImmutableERC721 does not implement the interface, and hence must be cast to the
         // interface type.
         erc721 = IImmutableERC721(address(immutableERC721));
         erc721BQ = IImmutableERC721ByQuantity(address(immutableERC721));
 
         vm.prank(owner);
         erc721.grantMinterRole(minter);
-   }
+    }
 
-    function getFirst() internal override view returns (uint256) {
+    function getFirst() internal view override returns (uint256) {
         uint256 nominalFirst = erc721BQ.mintBatchByQuantityThreshold();
         return ((nominalFirst / 256) + 1) * 256;
     }

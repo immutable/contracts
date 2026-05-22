@@ -10,21 +10,15 @@ forge install
 sudo pip3 install slither-analyzer
 ```
 
-## Build and Test
+## Build, Test, and Lint
 
-To build and test the contracts:
+To build, test, and lint the contracts:
 
 ```
 forge test -vvv
 ```
 
-## Solidity Linter
-
-To execute solhint:
-
-```
-yarn run solhint contracts/**/*.sol
-```
+## Solidity Formatter
 
 To format Solidity (same as CI):
 

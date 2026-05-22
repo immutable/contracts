@@ -56,8 +56,12 @@ abstract contract StakeHolderOperationalBaseTestV2 is StakeHolderOperationalBase
         // Stake for of 0 to staker1.
         IStakeHolder.AccountAmount[] memory accountsAmounts = new IStakeHolder.AccountAmount[](1);
         accountsAmounts[0] = IStakeHolder.AccountAmount(staker1, 0 ether);
-        _stakeFor(distributeAdmin, 0 ether, accountsAmounts, 
-            abi.encodeWithSelector(IStakeHolder.MustDistributeMoreThanZero.selector));
+        _stakeFor(
+            distributeAdmin,
+            0 ether,
+            accountsAmounts,
+            abi.encodeWithSelector(IStakeHolder.MustDistributeMoreThanZero.selector)
+        );
     }
 
     function testStakeForToEmptyAccount() public {
@@ -101,16 +105,35 @@ abstract contract StakeHolderOperationalBaseTestV2 is StakeHolderOperationalBase
         // Distribute rewards to staker1 only, but not from distributeAdmin
         IStakeHolder.AccountAmount[] memory accountsAmounts = new IStakeHolder.AccountAmount[](1);
         accountsAmounts[0] = IStakeHolder.AccountAmount(staker1, 0.5 ether);
-        _stakeFor(bank, 0.5 ether, accountsAmounts, 
-            abi.encodePacked("AccessControl: account 0x3448fc79c22032be61bee8d832ebc59744f5cc40 is missing role 0x444953545249425554455f524f4c450000000000000000000000000000000000"));
+        _stakeFor(
+            bank,
+            0.5 ether,
+            accountsAmounts,
+            abi.encodePacked(
+                "AccessControl: account 0x3448fc79c22032be61bee8d832ebc59744f5cc40 is missing role 0x444953545249425554455f524f4c450000000000000000000000000000000000"
+            )
+        );
     }
 
-    function _stakeFor(address _distributor, uint256 _total, IStakeHolder.AccountAmount[] memory _accountAmounts) internal {
+    function _stakeFor(address _distributor, uint256 _total, IStakeHolder.AccountAmount[] memory _accountAmounts)
+        internal
+    {
         _stakeFor(_distributor, _total, _accountAmounts, false, bytes(""));
     }
-    function _stakeFor(address _distributor, uint256 _total, IStakeHolder.AccountAmount[] memory _accountAmounts, bytes memory _error) internal {
+
+    function _stakeFor(
+        address _distributor,
+        uint256 _total,
+        IStakeHolder.AccountAmount[] memory _accountAmounts,
+        bytes memory _error
+    ) internal {
         _stakeFor(_distributor, _total, _accountAmounts, true, _error);
     }
-    function _stakeFor(address _distributor, uint256 _total, IStakeHolder.AccountAmount[] memory _accountAmounts, 
-        bool _hasError, bytes memory _error) internal virtual;
+    function _stakeFor(
+        address _distributor,
+        uint256 _total,
+        IStakeHolder.AccountAmount[] memory _accountAmounts,
+        bool _hasError,
+        bytes memory _error
+    ) internal virtual;
 }

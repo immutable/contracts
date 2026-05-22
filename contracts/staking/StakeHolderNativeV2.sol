@@ -37,7 +37,6 @@ contract StakeHolderNativeV2 is StakeHolderBaseV2 {
             // Look for revert reason and bubble it up if present.
             // Revert reasons should contain an error selector, which is four bytes long.
             if (returndata.length >= 4) {
-                // solhint-disable-next-line no-inline-assembly
                 assembly ("memory-safe") {
                     let returndata_size := mload(returndata)
                     revert(add(32, returndata), returndata_size)
@@ -60,7 +59,6 @@ contract StakeHolderNativeV2 is StakeHolderBaseV2 {
 
     /// @notice storage gap for additional variables for upgrades
     // slither-disable-start unused-state
-    // solhint-disable-next-line var-name-mixedcase
     uint256[50] private __StakeHolderNativeGap;
     // slither-disable-end unused-state
 }

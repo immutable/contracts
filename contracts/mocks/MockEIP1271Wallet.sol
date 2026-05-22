@@ -23,11 +23,18 @@ contract MockEIP1271Wallet is IERC1271 {
     }
 
     function onERC721Received(
-        address /* operator */,
-        address /* from */,
-        uint256 /* tokenId */,
+        address,
+        /* operator */
+        address,
+        /* from */
+        uint256,
+        /* tokenId */
         bytes calldata /* data */
-    ) external pure returns (bytes4) {
+    )
+        external
+        pure
+        returns (bytes4)
+    {
         return IERC721Receiver.onERC721Received.selector;
     }
 }

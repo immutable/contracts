@@ -1,14 +1,11 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache-2
-
-// solhint-disable-next-line compiler-version
 pragma solidity ^0.8.17;
 
 import {ReceivedItem, ZoneParameters} from "seaport-types/src/lib/ConsiderationStructs.sol";
-import {ImmutableSignedZoneV2} from
-    "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/ImmutableSignedZoneV2.sol";
-
-// solhint-disable func-name-mixedcase
+import {
+    ImmutableSignedZoneV2
+} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/ImmutableSignedZoneV2.sol";
 
 contract ImmutableSignedZoneV2Harness is ImmutableSignedZoneV2 {
     constructor(string memory zoneName, string memory apiEndpoint, string memory documentationURI, address owner)
@@ -84,4 +81,3 @@ contract ImmutableSignedZoneV2Harness is ImmutableSignedZoneV2 {
     }
 }
 
-// solhint-enable func-name-mixedcase

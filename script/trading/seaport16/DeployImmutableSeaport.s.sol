@@ -27,20 +27,27 @@ contract DeployImmutableSeaport is Script {
 
         // Check supplied immutableSeaportAddress matches the expected address based on current creationCode
         bytes memory immutableSeaportDeploymentBytecode = abi.encodePacked(
-            type(ImmutableSeaport).creationCode,
-            abi.encode(CONDUIT_CONTROLLER_ADDRESS, SEAPORT_INITIAL_OWNER)
+            type(ImmutableSeaport).creationCode, abi.encode(CONDUIT_CONTROLLER_ADDRESS, SEAPORT_INITIAL_OWNER)
         );
-        address expectedImmutableSeaportAddress = create2Deployer.deployedAddress(immutableSeaportDeploymentBytecode, ACCESS_CONTROLLED_DEPLOYER_ADDRESS, IMMUTABLE_SEAPORT_DEPLOYMENT_SALT);
+        address expectedImmutableSeaportAddress = create2Deployer.deployedAddress(
+            immutableSeaportDeploymentBytecode, ACCESS_CONTROLLED_DEPLOYER_ADDRESS, IMMUTABLE_SEAPORT_DEPLOYMENT_SALT
+        );
         console.log("Expected ImmutableSeaport address: %s", expectedImmutableSeaportAddress);
-        require(expectedImmutableSeaportAddress == IMMUTABLE_SEAPORT_ADDRESS, "Expected ImmutableSeaport address mismatch");
+        require(
+            expectedImmutableSeaportAddress == IMMUTABLE_SEAPORT_ADDRESS, "Expected ImmutableSeaport address mismatch"
+        );
 
         vm.startBroadcast();
 
         // Deploy ImmutableSeaport if it doesn't already exist
         if (IMMUTABLE_SEAPORT_ADDRESS.code.length == 0) {
             console.log("Deploying ImmutableSeaport");
-            address deployedImmutableSeaportAddress = deployer.deploy(create2Deployer, immutableSeaportDeploymentBytecode, IMMUTABLE_SEAPORT_DEPLOYMENT_SALT);
-            require(deployedImmutableSeaportAddress == IMMUTABLE_SEAPORT_ADDRESS, "Deployed ImmutableSeaport address mismatch");
+            address deployedImmutableSeaportAddress =
+                deployer.deploy(create2Deployer, immutableSeaportDeploymentBytecode, IMMUTABLE_SEAPORT_DEPLOYMENT_SALT);
+            require(
+                deployedImmutableSeaportAddress == IMMUTABLE_SEAPORT_ADDRESS,
+                "Deployed ImmutableSeaport address mismatch"
+            );
         } else {
             console.log("Skipping ImmutableSeaport, already exists");
         }

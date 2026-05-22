@@ -35,17 +35,16 @@ contract GuardedMulticaller2 is AccessControl, ReentrancyGuard, EIP712 {
     mapping(bytes32 ref => bool executed) private replayProtection;
 
     /// @dev Only those with MULTICALL_SIGNER_ROLE can generate valid signatures for execute function.
-    // forge-lint: disable-next-line(unsafe-typecast)    
+    // forge-lint: disable-next-line(unsafe-typecast)
     bytes32 public constant MULTICALL_SIGNER_ROLE = bytes32("MULTICALL_SIGNER_ROLE");
 
     /// @dev EIP712 typehash for call
     bytes32 internal constant CALL_TYPEHASH = keccak256("Call(address target,string functionSignature,bytes data)");
 
     /// @dev EIP712 typehash for execute function
-    bytes32 internal constant MULTICALL_TYPEHASH =
-        keccak256(
-            "Multicall(bytes32 ref,Call[] calls,uint256 deadline)Call(address target,string functionSignature,bytes data)"
-        );
+    bytes32 internal constant MULTICALL_TYPEHASH = keccak256(
+        "Multicall(bytes32 ref,Call[] calls,uint256 deadline)Call(address target,string functionSignature,bytes data)"
+    );
 
     /// @dev Event emitted when execute function is called
     event Multicalled(address indexed _multicallSigner, bytes32 indexed _reference, Call[] _calls, uint256 _deadline);
@@ -84,7 +83,6 @@ contract GuardedMulticaller2 is AccessControl, ReentrancyGuard, EIP712 {
      * @param _name Name of the contract
      * @param _version Version of the contract
      */
-    // solhint-disable-next-line no-unused-vars
     constructor(address _owner, string memory _name, string memory _version) EIP712(_name, _version) {
         _grantRole(DEFAULT_ADMIN_ROLE, _owner);
     }
@@ -107,7 +105,6 @@ contract GuardedMulticaller2 is AccessControl, ReentrancyGuard, EIP712 {
      * @param _signature Signature of the multicall signer
      */
     // slither-disable-start low-level-calls,cyclomatic-complexity
-    // solhint-disable-next-line code-complexity
     function execute(
         address _multicallSigner,
         bytes32 _reference,
@@ -115,7 +112,6 @@ contract GuardedMulticaller2 is AccessControl, ReentrancyGuard, EIP712 {
         uint256 _deadline,
         bytes calldata _signature
     ) external nonReentrant {
-        // solhint-disable-next-line not-rely-on-time
         if (_deadline < block.timestamp) {
             revert Expired(_deadline);
         }
@@ -141,13 +137,9 @@ contract GuardedMulticaller2 is AccessControl, ReentrancyGuard, EIP712 {
         }
 
         // Signature validation
-        if (
-            !SignatureChecker.isValidSignatureNow(
-                _multicallSigner,
-                _hashTypedData(_reference, _calls, _deadline),
-                _signature
-            )
-        ) {
+        if (!SignatureChecker.isValidSignatureNow(
+                _multicallSigner, _hashTypedData(_reference, _calls, _deadline), _signature
+            )) {
             revert UnauthorizedSignature(_signature);
         }
 
@@ -157,7 +149,6 @@ contract GuardedMulticaller2 is AccessControl, ReentrancyGuard, EIP712 {
         for (uint256 i = 0; i < _calls.length; i++) {
             bytes4 functionSelector = bytes4(keccak256(bytes(_calls[i].functionSignature)));
             bytes memory callData = abi.encodePacked(functionSelector, _calls[i].data);
-            // solhint-disable avoid-low-level-calls
             // slither-disable-next-line calls-loop
             (bool success, bytes memory returnData) = _calls[i].target.call(callData);
             if (!success) {
@@ -165,7 +156,6 @@ contract GuardedMulticaller2 is AccessControl, ReentrancyGuard, EIP712 {
                 if (returnData.length < 4) {
                     revert FailedCall(_calls[i], returnData);
                 }
-                // solhint-disable-next-line no-inline-assembly
                 assembly ("memory-safe") {
                     // The easiest way to bubble the revert reason is using memory via assembly
                     revert(add(returnData, 32), mload(returnData))
@@ -214,9 +204,8 @@ contract GuardedMulticaller2 is AccessControl, ReentrancyGuard, EIP712 {
     function _hashCallArray(Call[] calldata _calls) internal pure returns (bytes32) {
         bytes32[] memory hashedCallArr = new bytes32[](_calls.length);
         for (uint256 i = 0; i < _calls.length; i++) {
-            hashedCallArr[i] = keccak256(
-                abi.encode(CALL_TYPEHASH, _calls[i].target, _calls[i].functionSignature, _calls[i].data)
-            );
+            hashedCallArr[i] =
+                keccak256(abi.encode(CALL_TYPEHASH, _calls[i].target, _calls[i].functionSignature, _calls[i].data));
         }
         return keccak256(abi.encode(hashedCallArr));
     }
@@ -229,11 +218,11 @@ contract GuardedMulticaller2 is AccessControl, ReentrancyGuard, EIP712 {
      * @param _calls List of calls
      * @param _deadline Expiration timestamp
      */
-    function _hashTypedData(
-        bytes32 _reference,
-        Call[] calldata _calls,
-        uint256 _deadline
-    ) internal view returns (bytes32) {
+    function _hashTypedData(bytes32 _reference, Call[] calldata _calls, uint256 _deadline)
+        internal
+        view
+        returns (bytes32)
+    {
         return
             _hashTypedDataV4(keccak256(abi.encode(MULTICALL_TYPEHASH, _reference, _hashCallArray(_calls), _deadline)));
     }

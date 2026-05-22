@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache 2
 pragma solidity >=0.8.19 <0.8.29;
 
-import {IAccessControlEnumerableUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/access/IAccessControlEnumerableUpgradeable.sol";
+import {
+    IAccessControlEnumerableUpgradeable
+} from "openzeppelin-contracts-upgradeable-4.9.3/access/IAccessControlEnumerableUpgradeable.sol";
 
 /**
  * @title IStakeHolder: Interface for staking system.
@@ -108,10 +110,7 @@ interface IStakeHolder is IAccessControlEnumerableUpgradeable {
      * @param _numberToReturn The number of accounts to return.
      * @return _stakers A subset of the stakers array.
      */
-    function getStakers(
-        uint256 _startOffset,
-        uint256 _numberToReturn
-    ) external view returns (address[] memory _stakers);
+    function getStakers(uint256 _startOffset, uint256 _numberToReturn) external view returns (address[] memory _stakers);
 
     /**
      * @return The address of the staking token.

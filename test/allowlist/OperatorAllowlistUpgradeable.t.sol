@@ -43,7 +43,7 @@ contract OperatorAllowlistTest is Test, OperatorAllowlistUpgradeable {
         deploySCWScript = new DeploySCWallet();
     }
 
-    function testDeployment() public {
+    function testDeployment() public view {
         assertTrue(allowlist.hasRole(allowlist.DEFAULT_ADMIN_ROLE(), admin));
         assertTrue(allowlist.hasRole(allowlist.REGISTRAR_ROLE(), registrar));
         assertTrue(allowlist.hasRole(allowlist.UPGRADE_ROLE(), upgrader));
@@ -65,15 +65,17 @@ contract OperatorAllowlistTest is Test, OperatorAllowlistUpgradeable {
     function testUpgradeNoPerms() public {
         MockOperatorAllowlistUpgradeable oalImplV2 = new MockOperatorAllowlistUpgradeable();
         vm.prank(nonAuthorizedWallet);
-        vm.expectRevert(abi.encodePacked(
-            "AccessControl: account ",
-            vm.toString(nonAuthorizedWallet),
-            " is missing role 0x555047524144455f524f4c450000000000000000000000000000000000000000"
-        ));
+        vm.expectRevert(
+            abi.encodePacked(
+                "AccessControl: account ",
+                vm.toString(nonAuthorizedWallet),
+                " is missing role 0x555047524144455f524f4c450000000000000000000000000000000000000000"
+            )
+        );
         allowlist.upgradeTo(address(oalImplV2));
     }
 
-    function testShouldSupportIOperatorAllowlistInterface() public {
+    function testShouldSupportIOperatorAllowlistInterface() public view {
         assertTrue(allowlist.supportsInterface(0x05a3b809));
     }
 

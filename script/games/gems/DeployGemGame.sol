@@ -41,7 +41,6 @@ contract DeployGemGame is Test {
 
     function testDeploy() external {
         /// @dev Fork the Immutable zkEVM testnet for this test
-        // @solhint-disable-next-line variable-name-mixedcase
         string memory rpcURL = "https://rpc.testnet.immutable.com";
         vm.createSelectFork(rpcURL);
 
@@ -53,9 +52,7 @@ contract DeployGemGame is Test {
         });
 
         GemGameContractArgs memory gemGameContractArgs = GemGameContractArgs({
-            pauser: makeAddr("pause"),
-            unpauser: makeAddr("unpause"),
-            defaultAdmin: makeAddr("admin")
+            pauser: makeAddr("pause"), unpauser: makeAddr("unpause"), defaultAdmin: makeAddr("admin")
         });
 
         // Run deployment against forked testnet

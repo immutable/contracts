@@ -8,19 +8,22 @@ import {StakeHolderNative} from "../../contracts/staking/StakeHolderNative.sol";
 // Not really an attack as such.
 contract StakeHolderAttackWallet2 {
     StakeHolderNative public stakeHolder;
+
     constructor(address _stakeHolder) {
         stakeHolder = StakeHolderNative(_stakeHolder);
     }
+
     receive() external payable {
-        // Cause a revert that has zero call data length. 
+        // Cause a revert that has zero call data length.
         assembly ("memory-safe") {
             revert(0, 0)
         }
-
     }
+
     function stake(uint256 _amount) external {
         stakeHolder.stake{value: _amount}(_amount);
     }
+
     function unstake(uint256 _amount) external {
         stakeHolder.unstake(_amount);
     }

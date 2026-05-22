@@ -1,10 +1,8 @@
 // Copyright Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache 2.0
-// solhint-disable not-rely-on-time
 
 pragma solidity >=0.8.19 <0.8.29;
 
-// solhint-disable-next-line no-global-import
 import {Test} from "forge-std/Test.sol";
 import {IStakeHolder} from "../../contracts/staking/IStakeHolder.sol";
 import {StakeHolderBaseV2} from "../../contracts/staking/StakeHolderBaseV2.sol";
@@ -19,7 +17,6 @@ import {ERC20PresetFixedSupply} from "openzeppelin-contracts-4.9.3/token/ERC20/p
 import {ERC1967Proxy} from "openzeppelin-contracts-4.9.3/proxy/ERC1967/ERC1967Proxy.sol";
 
 abstract contract StakeHolderBaseTest is Test {
-
     bytes32 public defaultAdminRole;
     bytes32 public upgradeRole;
     bytes32 public distributeRole;
@@ -37,7 +34,6 @@ abstract contract StakeHolderBaseTest is Test {
 
     ERC20PresetFixedSupply erc20;
     WIMX wimxErc20;
-
 
     function setUp() public virtual {
         roleAdmin = makeAddr("RoleAdmin");
@@ -66,9 +62,8 @@ abstract contract StakeHolderBaseTest is Test {
 
     function deployStakeHolderNativeV1() internal {
         StakeHolderNative impl = new StakeHolderNative();
-        bytes memory initData = abi.encodeWithSelector(
-            StakeHolderNative.initialize.selector, roleAdmin, upgradeAdmin, distributeAdmin
-        );
+        bytes memory initData =
+            abi.encodeWithSelector(StakeHolderNative.initialize.selector, roleAdmin, upgradeAdmin, distributeAdmin);
         ERC1967Proxy proxy = new ERC1967Proxy(address(impl), initData);
         stakeHolder = IStakeHolder(address(proxy));
     }

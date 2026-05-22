@@ -12,22 +12,6 @@ permissions:
   contents: read
 
 jobs:
-  solhint:
-    name: Run solhint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: ".nvmrc"
-          cache: yarn
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile --network-concurrency 1
-      - name: Run solhint
-        run: yarn run lint
-
   forge-test:
     name: Run Forge Tests
     runs-on: ubuntu-latest
@@ -84,22 +68,6 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - run: sh readmecheck.sh
-
-  hardhat-legacy:
-    name: Run Hardhat Tests
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          echo "Hardhat was removed in SDK v3. See README and MIGRATION.md."
-          echo "This job exists only to satisfy legacy branch protection on PRs targeting main."
-
-  eslint-legacy:
-    name: Run eslint
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          echo "ESLint is not part of the v3 toolchain (solhint covers Solidity)."
-          echo "This job exists only to satisfy legacy branch protection on PRs targeting main."
 
   slither:
     name: Run slither

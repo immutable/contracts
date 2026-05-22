@@ -51,9 +51,13 @@ abstract contract ImmutableERC721HybridBaseV2 is
     }
 
     /// @dev Returns the supported interfaces
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view virtual override(ERC721HybridPermitV2, ERC2981, AccessControlEnumerable) returns (bool) {
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ERC721HybridPermitV2, ERC2981, AccessControlEnumerable)
+        returns (bool)
+    {
         return super.supportsInterface(interfaceId);
     }
 
@@ -74,7 +78,6 @@ abstract contract ImmutableERC721HybridBaseV2 is
      * @notice sets the contract uri for the collection. Permissioned to only the admin role
      * @param _contractURI the new baseURI to set
      */
-    // solhint-disable-next-line mixed-case-function     
     function setContractURI(string memory _contractURI) public onlyRole(DEFAULT_ADMIN_ROLE) {
         contractURI = _contractURI;
     }
@@ -83,10 +86,12 @@ abstract contract ImmutableERC721HybridBaseV2 is
      * @inheritdoc ERC721
      * @dev Note it will validate the operator in the allowlist
      */
-    function setApprovalForAll(
-        address operator,
-        bool approved
-    ) public virtual override(ERC721, IERC721) validateApproval(operator) {
+    function setApprovalForAll(address operator, bool approved)
+        public
+        virtual
+        override(ERC721, IERC721)
+        validateApproval(operator)
+    {
         super.setApprovalForAll(operator, approved);
     }
 
@@ -102,11 +107,12 @@ abstract contract ImmutableERC721HybridBaseV2 is
      * @inheritdoc ERC721HybridPermitV2
      * @dev Note it will validate the from and to address in the allowlist
      */
-    function _transfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal virtual override(ERC721HybridPermitV2) validateTransfer(from, to) {
+    function _transfer(address from, address to, uint256 tokenId)
+        internal
+        virtual
+        override(ERC721HybridPermitV2)
+        validateTransfer(from, to)
+    {
         super._transfer(from, to, tokenId);
     }
 
@@ -127,11 +133,10 @@ abstract contract ImmutableERC721HybridBaseV2 is
      *  @param feeNumerator the royalty fee numerator
      *  @dev This can only be called by the a minter. See ERC2981 for more details on _setTokenRoyalty
      */
-    function setNFTRoyaltyReceiver(
-        uint256 tokenId,
-        address receiver,
-        uint96 feeNumerator
-    ) public onlyRole(MINTER_ROLE) {
+    function setNFTRoyaltyReceiver(uint256 tokenId, address receiver, uint96 feeNumerator)
+        public
+        onlyRole(MINTER_ROLE)
+    {
         _setTokenRoyalty(tokenId, receiver, feeNumerator);
     }
 
@@ -142,11 +147,10 @@ abstract contract ImmutableERC721HybridBaseV2 is
      *  @param feeNumerator the royalty fee numerator
      *  @dev This can only be called by the a minter. See ERC2981 for more details on _setTokenRoyalty
      */
-    function setNFTRoyaltyReceiverBatch(
-        uint256[] calldata tokenIds,
-        address receiver,
-        uint96 feeNumerator
-    ) public onlyRole(MINTER_ROLE) {
+    function setNFTRoyaltyReceiverBatch(uint256[] calldata tokenIds, address receiver, uint96 feeNumerator)
+        public
+        onlyRole(MINTER_ROLE)
+    {
         for (uint256 i = 0; i < tokenIds.length; i++) {
             _setTokenRoyalty(tokenIds[i], receiver, feeNumerator);
         }

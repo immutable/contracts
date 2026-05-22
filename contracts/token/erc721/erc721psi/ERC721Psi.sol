@@ -83,10 +83,8 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
      * @dev See {IERC165-supportsInterface}.
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
-        return
-            interfaceId == type(IERC721).interfaceId ||
-            interfaceId == type(IERC721Metadata).interfaceId ||
-            super.supportsInterface(interfaceId);
+        return interfaceId == type(IERC721).interfaceId || interfaceId == type(IERC721Metadata).interfaceId
+            || super.supportsInterface(interfaceId);
     }
 
     /**
@@ -110,7 +108,7 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
      * @dev See {IERC721-ownerOf}.
      */
     function ownerOf(uint256 tokenId) public view virtual override returns (address) {
-        (address owner, ) = _ownerAndBatchHeadOf(tokenId);
+        (address owner,) = _ownerAndBatchHeadOf(tokenId);
         return owner;
     }
 
@@ -240,8 +238,7 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
     function _safeTransfer(address from, address to, uint256 tokenId, bytes memory _data) internal virtual {
         _transfer(from, to, tokenId);
         require(
-            _checkOnERC721Received(from, to, tokenId, 1, _data),
-            "ERC721Psi: transfer to non ERC721Receiver implementer"
+            _checkOnERC721Received(from, to, tokenId, 1, _data), "ERC721Psi: transfer to non ERC721Receiver implementer"
         );
     }
 

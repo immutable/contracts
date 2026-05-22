@@ -29,11 +29,11 @@ contract PaymentSplitter is AccessControlEnumerable, IPaymentSplitterErrors, Ree
     event PaymentReceived(address from, uint256 amount);
 
     /// @notice Role responsible for releasing funds
-    // forge-lint: disable-next-line(unsafe-typecast)    
+    // forge-lint: disable-next-line(unsafe-typecast)
     bytes32 public constant RELEASE_FUNDS_ROLE = bytes32("RELEASE_FUNDS_ROLE");
 
     /// @notice Role responsible for registering tokens
-    // forge-lint: disable-next-line(unsafe-typecast)    
+    // forge-lint: disable-next-line(unsafe-typecast)
     bytes32 public constant TOKEN_REGISTRAR_ROLE = bytes32("TOKEN_REGISTRAR_ROLE");
 
     /// @notice the totalshares held by payees
@@ -195,10 +195,10 @@ contract PaymentSplitter is AccessControlEnumerable, IPaymentSplitterErrors, Ree
      * @param payees the address of new payees
      * @param shares_ the shares of new payees
      */
-    function overridePayees(
-        address payable[] memory payees,
-        uint256[] memory shares_
-    ) public onlyRole(DEFAULT_ADMIN_ROLE) {
+    function overridePayees(address payable[] memory payees, uint256[] memory shares_)
+        public
+        onlyRole(DEFAULT_ADMIN_ROLE)
+    {
         if (payees.length != shares_.length) {
             revert PaymentSplitterLengthMismatchSharesPayees();
         }

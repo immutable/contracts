@@ -10,13 +10,17 @@ import {StakeHolderConfigBaseTestV2} from "./StakeHolderConfigBaseV2.t.sol";
 import {ERC1967Proxy} from "openzeppelin-contracts-4.9.3/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract StakeHolderWIMXV3a is StakeHolderWIMXV2 {
-    function upgradeStorage(bytes memory /* _data */) external override(StakeHolderBaseV2) {
+    function upgradeStorage(
+        bytes memory /* _data */
+    )
+        external
+        override(StakeHolderBaseV2)
+    {
         version = 3;
     }
 }
 
 contract StakeHolderConfigWIMXTestV2 is StakeHolderConfigBaseTestV2 {
-
     function setUp() public override {
         super.setUp();
         deployWIMX();
@@ -36,15 +40,15 @@ contract StakeHolderConfigWIMXTestV2 is StakeHolderConfigBaseTestV2 {
         assertEq(stakeHolderV2.version(), 2, "Incorrect version");
     }
 
-    function _deployV1() internal override returns(IStakeHolder) {
+    function _deployV1() internal override returns (IStakeHolder) {
         return IStakeHolder(address(new StakeHolderWIMX()));
     }
 
-    function _deployV2() internal override returns(IStakeHolder) {
+    function _deployV2() internal override returns (IStakeHolder) {
         return IStakeHolder(address(new StakeHolderWIMXV2()));
     }
 
-    function _deployV3() internal override returns(IStakeHolder) {
+    function _deployV3() internal override returns (IStakeHolder) {
         return IStakeHolder(address(new StakeHolderWIMXV3a()));
     }
 }

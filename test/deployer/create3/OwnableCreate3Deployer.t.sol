@@ -6,10 +6,12 @@ import {Test} from "forge-std/Test.sol";
 import {console} from "forge-std/console.sol";
 import {IDeploy} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/interfaces/IDeploy.sol";
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/ERC20Mock.sol";
-import {ERC20MintableBurnable} from
-    "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnable.sol";
-import {ERC20MintableBurnableInit} from
-    "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnableInit.sol";
+import {
+    ERC20MintableBurnable
+} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnable.sol";
+import {
+    ERC20MintableBurnableInit
+} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnableInit.sol";
 import {ContractAddress} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/libs/ContractAddress.sol";
 
 import {OwnableCreate3Deployer} from "../../../contracts/deployer/create3/OwnableCreate3Deployer.sol";
@@ -205,12 +207,13 @@ contract OwnableCreate3DeployerTest is Test, Create3Utils {
         vm.startPrank(address(factory));
         singleUseDeployer.deploy(erc20MockBytecode);
     }
+
     /**
      * deployedAddress
      */
 
     /// @dev Same contracts initialised with different constructor parameters, should be deployed to the same address if using the same sender and salt
-    function test_deployedAddress_SameContractSameSaltDifferentConstructorParams() public {
+    function test_deployedAddress_SameContractSameSaltDifferentConstructorParams() public view {
         bytes memory bytecode1 =
             abi.encodePacked(type(ERC20MintableBurnable).creationCode, abi.encode("Token 1", "T1", 18));
         bytes memory bytecode2 =
@@ -224,7 +227,7 @@ contract OwnableCreate3DeployerTest is Test, Create3Utils {
     }
 
     /// @dev Different contracts should be deployed to the same address if using the same sender and salt
-    function test_deployedAddress_DifferentContractsSameSalt() public {
+    function test_deployedAddress_DifferentContractsSameSalt() public view {
         bytes32 salt = _createSaltFromKey("test-salt");
         bytes memory bytecode1 = type(ERC20Mock).creationCode;
         bytes memory bytecode2 = type(ERC20MintableBurnable).creationCode;
@@ -258,7 +261,7 @@ contract OwnableCreate3DeployerTest is Test, Create3Utils {
      */
     function _create2Address(bytes memory bytecode, bytes32 salt, address deployer, address sender)
         internal
-        view
+        pure
         returns (address)
     {
         bytes32 deploySalt = keccak256(abi.encode(sender, salt));

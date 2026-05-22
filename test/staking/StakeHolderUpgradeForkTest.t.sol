@@ -28,7 +28,7 @@ contract StakeHolderUpgradeForkTest is Test {
     StakeHolderWIMX stakeHolder;
     TimelockController stakeHolderTimeDelay;
 
-    // Put the variables below into storage so we don't need to worry about 
+    // Put the variables below into storage so we don't need to worry about
     // stack depth issues.
     address stakingTokenAddress;
     uint256 numStakers;
@@ -74,8 +74,8 @@ contract StakeHolderUpgradeForkTest is Test {
         StakeHolderWIMXV2 v2Impl = new StakeHolderWIMXV2();
 
         bytes memory callData = abi.encodeWithSelector(StakeHolderBase.upgradeStorage.selector, bytes(""));
-        bytes memory upgradeCall = abi.encodeWithSelector(
-            UUPSUpgradeable.upgradeToAndCall.selector, address(v2Impl), callData);
+        bytes memory upgradeCall =
+            abi.encodeWithSelector(UUPSUpgradeable.upgradeToAndCall.selector, address(v2Impl), callData);
 
         address target = address(stakeHolder);
         uint256 value = 0;
@@ -87,8 +87,7 @@ contract StakeHolderUpgradeForkTest is Test {
         uint256 timeNow = block.timestamp;
 
         vm.prank(PROPOSER);
-        stakeHolderTimeDelay.schedule(
-            target, value, data, predecessor, salt, theDelay);
+        stakeHolderTimeDelay.schedule(target, value, data, predecessor, salt, theDelay);
 
         vm.warp(timeNow + delay);
 

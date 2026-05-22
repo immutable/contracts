@@ -39,7 +39,6 @@ contract MockMarketplace {
         if (from == address(0)) {
             revert ZeroAddress();
         }
-        // solhint-disable-next-line custom-errors
         require(msg.value == price, "insufficient msg.value");
         (address receiver, uint256 royaltyAmount) = ROYALTY_ADDRESS.royaltyInfo(_tokenId, price);
         if (receiver == address(0)) {
@@ -53,7 +52,6 @@ contract MockMarketplace {
     }
 }
 
-
 //     function executeTransferRoyalties(
 //         address seller,
 //         address buyer,
@@ -62,16 +60,16 @@ contract MockMarketplace {
 //     ) external payable {
 //         // Get royalty info
 //         (address recipient, uint256 royaltyAmount) = IERC2981(address(nft)).royaltyInfo(tokenId, price);
-        
+
 //         // Transfer NFT
 //         nft.transferFrom(seller, buyer, tokenId);
-        
+
 //         // Transfer royalty to recipient
 //         if (royaltyAmount > 0) {
 //             (bool success, ) = recipient.call{value: royaltyAmount}("");
 //             require(success, "Royalty transfer failed");
 //         }
-        
+
 //         // Transfer remaining amount to seller
 //         uint256 sellerAmount = price - royaltyAmount;
 //         if (sellerAmount > 0) {
@@ -79,4 +77,4 @@ contract MockMarketplace {
 //             require(success, "Seller transfer failed");
 //         }
 //     }
-// } 
+// }

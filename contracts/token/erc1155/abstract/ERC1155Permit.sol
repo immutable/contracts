@@ -18,7 +18,6 @@ abstract contract ERC1155Permit is ERC1155Burnable, EIP712, IERC1155Permit, IImm
     constructor(string memory name, string memory uri) ERC1155(uri) EIP712(name, "1") {}
 
     function permit(address owner, address spender, bool approved, uint256 deadline, bytes memory sig) external {
-        // solhint-disable-next-line not-rely-on-time
         if (deadline < block.timestamp) {
             revert PermitExpired();
         }
@@ -36,11 +35,8 @@ abstract contract ERC1155Permit is ERC1155Burnable, EIP712, IERC1155Permit, IImm
         // EOA signature validation
         if (sig.length == 64) {
             // ERC2098 Sig
-            recoveredSigner = ECDSA.recover(
-                digest,
-                bytes32(BytesLib.slice(sig, 0, 32)),
-                bytes32(BytesLib.slice(sig, 32, 64))
-            );
+            recoveredSigner =
+                ECDSA.recover(digest, bytes32(BytesLib.slice(sig, 0, 32)), bytes32(BytesLib.slice(sig, 32, 64)));
         } else if (sig.length == 65) {
             // typical EDCSA Sig
             recoveredSigner = ECDSA.recover(digest, sig);
@@ -68,7 +64,6 @@ abstract contract ERC1155Permit is ERC1155Burnable, EIP712, IERC1155Permit, IImm
      * @notice Returns the domain separator used in the encoding of the signature for permits, as defined by EIP-712
      * @return the bytes32 domain separator
      */
-    // solhint-disable-next-line func-name-mixedcase
     function DOMAIN_SEPARATOR() external view override returns (bytes32) {
         return _domainSeparatorV4();
     }
@@ -79,9 +74,8 @@ abstract contract ERC1155Permit is ERC1155Burnable, EIP712, IERC1155Permit, IImm
      * @return True if the contract implements `interfaceId` and the call doesn't revert, otherwise false.
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155) returns (bool) {
-        return
-            interfaceId == type(IERC1155Permit).interfaceId || // 0x9e3ae8e4
-            super.supportsInterface(interfaceId);
+        return interfaceId == type(IERC1155Permit).interfaceId // 0x9e3ae8e4
+            || super.supportsInterface(interfaceId);
     }
 
     /**
@@ -91,16 +85,13 @@ abstract contract ERC1155Permit is ERC1155Burnable, EIP712, IERC1155Permit, IImm
      * @param deadline The deadline until which the permit is valid.
      * @return A bytes32 digest, EIP-712 compliant, that serves as a unique identifier for the permit.
      */
-    function _buildPermitDigest(
-        address spender,
-        address owner,
-        bool approved,
-        uint256 deadline
-    ) internal returns (bytes32) {
-        return
-            _hashTypedDataV4(
-                keccak256(abi.encode(_PERMIT_TYPEHASH, owner, spender, approved, _nonces[owner]++, deadline))
-            );
+    function _buildPermitDigest(address spender, address owner, bool approved, uint256 deadline)
+        internal
+        returns (bytes32)
+    {
+        return _hashTypedDataV4(
+            keccak256(abi.encode(_PERMIT_TYPEHASH, owner, spender, approved, _nonces[owner]++, deadline))
+        );
     }
 
     /**
@@ -112,9 +103,8 @@ abstract contract ERC1155Permit is ERC1155Burnable, EIP712, IERC1155Permit, IImm
      */
     function _isValidERC1271Signature(address spender, bytes32 digest, bytes memory sig) private view returns (bool) {
         // slither-disable-next-line low-level-calls
-        (bool success, bytes memory res) = spender.staticcall(
-            abi.encodeWithSelector(IERC1271.isValidSignature.selector, digest, sig)
-        );
+        (bool success, bytes memory res) =
+            spender.staticcall(abi.encodeWithSelector(IERC1271.isValidSignature.selector, digest, sig));
 
         if (success && res.length == 32) {
             bytes4 decodedRes = abi.decode(res, (bytes4));

@@ -119,7 +119,7 @@ abstract contract StakeHolderOperationalBaseTest is StakeHolderBaseTest {
         assertEq(stakeHolder.getBalance(staker1), 0 ether, "Incorrect balance2");
         _addStake(staker1, 9 ether);
         assertEq(stakeHolder.getBalance(staker1), 9 ether, "Incorrect balance3");
-        _addStake(staker1,2 ether);
+        _addStake(staker1, 2 ether);
         assertEq(stakeHolder.getBalance(staker1), 11 ether, "Incorrect balance4");
         assertEq(stakeHolder.getNumStakers(), 1, "Incorrect number of stakers");
         vm.stopPrank();
@@ -163,7 +163,7 @@ abstract contract StakeHolderOperationalBaseTest is StakeHolderBaseTest {
 
         vm.expectRevert(stdError.indexOOBError);
         stakeHolder.getStakers(1, 3);
-    }    
+    }
 
     function testDistributeRewardsOne() public {
         _deal(staker1, 100 ether);
@@ -215,8 +215,12 @@ abstract contract StakeHolderOperationalBaseTest is StakeHolderBaseTest {
         // Distribute rewards of 0 to staker1.
         IStakeHolder.AccountAmount[] memory accountsAmounts = new IStakeHolder.AccountAmount[](1);
         accountsAmounts[0] = IStakeHolder.AccountAmount(staker1, 0 ether);
-        _distributeRewards(distributeAdmin, 0 ether, accountsAmounts, 
-            abi.encodeWithSelector(IStakeHolder.MustDistributeMoreThanZero.selector));
+        _distributeRewards(
+            distributeAdmin,
+            0 ether,
+            accountsAmounts,
+            abi.encodeWithSelector(IStakeHolder.MustDistributeMoreThanZero.selector)
+        );
     }
 
     function testDistributeToEmptyAccount() public {
@@ -244,8 +248,12 @@ abstract contract StakeHolderOperationalBaseTest is StakeHolderBaseTest {
         // Distribute rewards to staker2 only.
         IStakeHolder.AccountAmount[] memory accountsAmounts = new IStakeHolder.AccountAmount[](1);
         accountsAmounts[0] = IStakeHolder.AccountAmount(staker1, 0.5 ether);
-        _distributeRewards(distributeAdmin, 0.5 ether, accountsAmounts,
-            abi.encodeWithSelector(IStakeHolder.AttemptToDistributeToNewAccount.selector, staker1, 0.5 ether));
+        _distributeRewards(
+            distributeAdmin,
+            0.5 ether,
+            accountsAmounts,
+            abi.encodeWithSelector(IStakeHolder.AttemptToDistributeToNewAccount.selector, staker1, 0.5 ether)
+        );
     }
 
     function testDistributeBadAuth() public {
@@ -257,31 +265,50 @@ abstract contract StakeHolderOperationalBaseTest is StakeHolderBaseTest {
         // Distribute rewards to staker1 only, but not from distributeAdmin
         IStakeHolder.AccountAmount[] memory accountsAmounts = new IStakeHolder.AccountAmount[](1);
         accountsAmounts[0] = IStakeHolder.AccountAmount(staker1, 0.5 ether);
-        _distributeRewards(bank, 0.5 ether, accountsAmounts, 
-            abi.encodePacked("AccessControl: account 0x3448fc79c22032be61bee8d832ebc59744f5cc40 is missing role 0x444953545249425554455f524f4c450000000000000000000000000000000000"));
+        _distributeRewards(
+            bank,
+            0.5 ether,
+            accountsAmounts,
+            abi.encodePacked(
+                "AccessControl: account 0x3448fc79c22032be61bee8d832ebc59744f5cc40 is missing role 0x444953545249425554455f524f4c450000000000000000000000000000000000"
+            )
+        );
     }
 
-
     function _deal(address _to, uint256 _amount) internal virtual;
-    function _getBalanceStaker(address _staker) internal virtual view returns (uint256);
-    function _getBalanceStakeHolderContract() internal virtual view returns (uint256);
+    function _getBalanceStaker(address _staker) internal view virtual returns (uint256);
+    function _getBalanceStakeHolderContract() internal view virtual returns (uint256);
 
     function _addStake(address _staker, uint256 _amount) internal {
         _addStake(_staker, _amount, false, bytes(""));
     }
+
     function _addStake(address _staker, uint256 _amount, bytes memory _error) internal {
         _addStake(_staker, _amount, true, _error);
-
     }
     function _addStake(address _staker, uint256 _amount, bool _hasError, bytes memory _error) internal virtual;
 
-
-    function _distributeRewards(address _distributor, uint256 _total, IStakeHolder.AccountAmount[] memory _accountAmounts) internal {
+    function _distributeRewards(
+        address _distributor,
+        uint256 _total,
+        IStakeHolder.AccountAmount[] memory _accountAmounts
+    ) internal {
         _distributeRewards(_distributor, _total, _accountAmounts, false, bytes(""));
     }
-    function _distributeRewards(address _distributor, uint256 _total, IStakeHolder.AccountAmount[] memory _accountAmounts, bytes memory _error) internal {
+
+    function _distributeRewards(
+        address _distributor,
+        uint256 _total,
+        IStakeHolder.AccountAmount[] memory _accountAmounts,
+        bytes memory _error
+    ) internal {
         _distributeRewards(_distributor, _total, _accountAmounts, true, _error);
     }
-    function _distributeRewards(address _distributor, uint256 _total, IStakeHolder.AccountAmount[] memory _accountAmounts, 
-        bool _hasError, bytes memory _error) internal virtual;
+    function _distributeRewards(
+        address _distributor,
+        uint256 _total,
+        IStakeHolder.AccountAmount[] memory _accountAmounts,
+        bool _hasError,
+        bytes memory _error
+    ) internal virtual;
 }

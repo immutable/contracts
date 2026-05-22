@@ -1,29 +1,29 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache-2
-
-// solhint-disable-next-line compiler-version
 pragma solidity ^0.8.17;
 
-// solhint-disable-next-line no-global-import
 import {Test} from "forge-std/Test.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {ItemType} from "seaport-types-16/src/lib/ConsiderationEnums.sol";
 import {ReceivedItem, Schema, SpentItem, ZoneParameters} from "seaport-types-16/src/lib/ConsiderationStructs.sol";
-import {ImmutableSignedZoneV3} from
-    "../../../../../../contracts/trading/seaport16/zones/immutable-signed-zone/v3/ImmutableSignedZoneV3.sol";
-import {SIP5EventsAndErrors} from
-    "../../../../../../contracts/trading/seaport16/zones/immutable-signed-zone/v3/interfaces/SIP5EventsAndErrors.sol";
-import {SIP6EventsAndErrors} from
-    "../../../../../../contracts/trading/seaport16/zones/immutable-signed-zone/v3/interfaces/SIP6EventsAndErrors.sol";
-import {SIP7EventsAndErrors} from
-    "../../../../../../contracts/trading/seaport16/zones/immutable-signed-zone/v3/interfaces/SIP7EventsAndErrors.sol";
-import {ZoneAccessControlEventsAndErrors} from
-    "../../../../../../contracts/trading/seaport16/zones/immutable-signed-zone/v3/interfaces/ZoneAccessControlEventsAndErrors.sol";
+import {
+    ImmutableSignedZoneV3
+} from "../../../../../../contracts/trading/seaport16/zones/immutable-signed-zone/v3/ImmutableSignedZoneV3.sol";
+import {
+    SIP5EventsAndErrors
+} from "../../../../../../contracts/trading/seaport16/zones/immutable-signed-zone/v3/interfaces/SIP5EventsAndErrors.sol";
+import {
+    SIP6EventsAndErrors
+} from "../../../../../../contracts/trading/seaport16/zones/immutable-signed-zone/v3/interfaces/SIP6EventsAndErrors.sol";
+import {
+    SIP7EventsAndErrors
+} from "../../../../../../contracts/trading/seaport16/zones/immutable-signed-zone/v3/interfaces/SIP7EventsAndErrors.sol";
+import {
+    ZoneAccessControlEventsAndErrors
+} from "../../../../../../contracts/trading/seaport16/zones/immutable-signed-zone/v3/interfaces/ZoneAccessControlEventsAndErrors.sol";
 import {SigningTestHelper} from "../../../../seaport/utils/SigningTestHelper.t.sol";
 import {ImmutableSignedZoneV3Harness} from "./ImmutableSignedZoneV3Harness.t.sol";
 import {MockTransferValidator, MockTransferValidatorRevert} from "../../../utils/MockTransferValidator.t.sol";
-
-// solhint-disable func-name-mixedcase
 
 contract ImmutableSignedZoneV3Test is
     Test,
@@ -33,7 +33,6 @@ contract ImmutableSignedZoneV3Test is
     SIP6EventsAndErrors,
     SIP7EventsAndErrors
 {
-    // solhint-disable private-vars-leading-underscore
     uint64 private constant DEFAULT_EXPIRATION = 100;
     address private immutable OWNER = makeAddr("owner");
     address private immutable FULFILLER = makeAddr("fulfiller");
@@ -41,7 +40,6 @@ contract ImmutableSignedZoneV3Test is
     address private immutable SIGNER;
     uint256 private immutable SIGNER_PRIVATE_KEY;
     address private immutable SEAPORT = makeAddr("seaport");
-    // solhint-enable private-vars-leading-underscore
 
     // OpenZeppelin v5 access/IAccessControl.sol
     error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
@@ -369,8 +367,9 @@ contract ImmutableSignedZoneV3Test is
         string memory expectedApiEndpoint = "https://www.immutable.com";
         string memory expectedDocumentationURI = "https://www.immutable.com/docs";
 
-        ImmutableSignedZoneV3Harness zone =
-            new ImmutableSignedZoneV3Harness(expectedZoneName, SEAPORT, expectedApiEndpoint, expectedDocumentationURI, OWNER);
+        ImmutableSignedZoneV3Harness zone = new ImmutableSignedZoneV3Harness(
+            expectedZoneName, SEAPORT, expectedApiEndpoint, expectedDocumentationURI, OWNER
+        );
 
         bytes32 expectedDomainSeparator = zone.exposed_deriveDomainSeparator();
         uint256[] memory expectedSubstandards = zone.exposed_getSupportedSubstandards();
@@ -398,8 +397,9 @@ contract ImmutableSignedZoneV3Test is
         string memory expectedApiEndpoint = "https://www.immutable.com";
         string memory expectedDocumentationURI = "https://www.immutable.com/docs";
 
-        ImmutableSignedZoneV3Harness zone =
-            new ImmutableSignedZoneV3Harness("MyZoneName", SEAPORT, expectedApiEndpoint, expectedDocumentationURI, OWNER);
+        ImmutableSignedZoneV3Harness zone = new ImmutableSignedZoneV3Harness(
+            "MyZoneName", SEAPORT, expectedApiEndpoint, expectedDocumentationURI, OWNER
+        );
 
         bytes32 expectedDomainSeparator = zone.exposed_deriveDomainSeparator();
         uint256[] memory expectedSubstandards = zone.exposed_getSupportedSubstandards();
@@ -512,14 +512,7 @@ contract ImmutableSignedZoneV3Test is
             new bytes(0)
         );
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                SignatureExpired.selector,
-                1000,
-                100,
-                zoneParameters.orderHash
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(SignatureExpired.selector, 1000, 100, zoneParameters.orderHash));
         // set current block.timestamp to be 1000
         vm.warp(1000);
         vm.prank(SEAPORT);
@@ -532,20 +525,12 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
         zoneParameters.fulfiller = makeAddr("random");
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            FULFILLER,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            new bytes(0)
+            zone, SIGNER_PRIVATE_KEY, FULFILLER, DEFAULT_EXPIRATION, zoneParameters.orderHash, new bytes(0)
         );
 
         vm.expectRevert(
             abi.encodeWithSelector(
-                InvalidFulfiller.selector,
-                FULFILLER,
-                zoneParameters.fulfiller,
-                zoneParameters.orderHash
+                InvalidFulfiller.selector, FULFILLER, zoneParameters.fulfiller, zoneParameters.orderHash
             )
         );
         vm.prank(SEAPORT);
@@ -566,12 +551,7 @@ contract ImmutableSignedZoneV3Test is
             new bytes(0)
         );
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                NoSpentItems.selector,
-                zoneParameters.orderHash
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(NoSpentItems.selector, zoneParameters.orderHash));
         vm.prank(SEAPORT);
         zone.authorizeOrder(zoneParameters);
     }
@@ -590,12 +570,7 @@ contract ImmutableSignedZoneV3Test is
             new bytes(0)
         );
 
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                NoReceivedItems.selector,
-                zoneParameters.orderHash
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(NoReceivedItems.selector, zoneParameters.orderHash));
         vm.prank(SEAPORT);
         zone.authorizeOrder(zoneParameters);
     }
@@ -821,12 +796,7 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
         bytes memory context = new bytes(0);
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         vm.expectRevert(
@@ -852,12 +822,7 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
         bytes memory context = abi.encodePacked(bytes1(0x01), zoneParameters.consideration[0].identifier);
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         zone.exposed_validateSubstandards(context, zoneParameters, before);
@@ -878,12 +843,7 @@ contract ImmutableSignedZoneV3Test is
         bytes32 substandard3Data = zone.exposed_deriveReceivedItemsHash(zoneParameters.consideration, 1, 1);
         bytes memory context = abi.encodePacked(bytes1(0x03), substandard3Data);
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         zone.exposed_validateSubstandards(context, zoneParameters, before);
@@ -904,12 +864,7 @@ contract ImmutableSignedZoneV3Test is
         bytes memory substandard4Data = abi.encode(zoneParameters.orderHashes);
         bytes memory context = abi.encodePacked(bytes1(0x04), substandard4Data);
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         zone.exposed_validateSubstandards(context, zoneParameters, before);
@@ -934,23 +889,14 @@ contract ImmutableSignedZoneV3Test is
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         receivedItems[0] = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x2),
-            identifier: 222,
-            amount: 10,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x2), identifier: 222, amount: 10, recipient: payable(address(0x3))
         });
         zoneParameters.consideration = receivedItems;
 
         bytes32 substandard6Data = zone.exposed_deriveReceivedItemsHash(zoneParameters.consideration, 100, 10);
         bytes memory context = abi.encodePacked(bytes1(0x06), uint256(100), substandard6Data);
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         zone.exposed_validateSubstandards(context, zoneParameters, before);
@@ -971,34 +917,23 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
 
         SpentItem[] memory spentItems = new SpentItem[](1);
-        SpentItem memory spentItem = SpentItem({
-            itemType: ItemType.ERC20,
-            token: address(0x9),
-            identifier: 0,
-            amount: 100
-        });
+        SpentItem memory spentItem =
+            SpentItem({itemType: ItemType.ERC20, token: address(0x9), identifier: 0, amount: 100});
         spentItems[0] = spentItem;
         zoneParameters.offer = spentItems;
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
-            itemType: ItemType.ERC721,
-            token: address(0x8),
-            identifier: 222,
-            amount: 1,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC721, token: address(0x8), identifier: 222, amount: 1, recipient: payable(address(0x3))
         });
         receivedItems[0] = receivedItem;
         zoneParameters.consideration = receivedItems;
 
-        bytes memory context = abi.encodePacked(bytes1(0x07), zoneParameters.consideration[0].identifier, address(transferValidator), address(0x7));
+        bytes memory context = abi.encodePacked(
+            bytes1(0x07), zoneParameters.consideration[0].identifier, address(transferValidator), address(0x7)
+        );
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         zone.exposed_validateSubstandards(context, zoneParameters, before);
@@ -1019,34 +954,22 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
 
         SpentItem[] memory spentItems = new SpentItem[](1);
-        SpentItem memory spentItem = SpentItem({
-            itemType: ItemType.ERC20,
-            token: address(0x9),
-            identifier: 0,
-            amount: 100
-        });
+        SpentItem memory spentItem =
+            SpentItem({itemType: ItemType.ERC20, token: address(0x9), identifier: 0, amount: 100});
         spentItems[0] = spentItem;
         zoneParameters.offer = spentItems;
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
-            itemType: ItemType.ERC721,
-            token: address(0x8),
-            identifier: 222,
-            amount: 1,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC721, token: address(0x8), identifier: 222, amount: 1, recipient: payable(address(0x3))
         });
         receivedItems[0] = receivedItem;
         zoneParameters.consideration = receivedItems;
 
-        bytes memory context = abi.encodePacked(bytes1(0x08), zoneParameters.consideration[0].identifier, address(transferValidator));
+        bytes memory context =
+            abi.encodePacked(bytes1(0x08), zoneParameters.consideration[0].identifier, address(transferValidator));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         zone.exposed_validateSubstandards(context, zoneParameters, before);
@@ -1069,12 +992,7 @@ contract ImmutableSignedZoneV3Test is
         bytes memory substandard4Data = abi.encode(zoneParameters.orderHashes);
         bytes memory context = abi.encodePacked(bytes1(0x03), substandard3Data, bytes1(0x04), substandard4Data);
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         zone.exposed_validateSubstandards(context, zoneParameters, before);
@@ -1099,11 +1017,7 @@ contract ImmutableSignedZoneV3Test is
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x4),
-            identifier: 0,
-            amount: 20,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x4), identifier: 0, amount: 20, recipient: payable(address(0x3))
         });
         receivedItems[0] = receivedItem;
         zoneParameters.consideration = receivedItems;
@@ -1112,12 +1026,7 @@ contract ImmutableSignedZoneV3Test is
         bytes memory substandard6Data = abi.encodePacked(uint256(10), substandard3Data);
         bytes memory context = abi.encodePacked(bytes1(0x03), substandard3Data, bytes1(0x06), substandard6Data);
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         zone.exposed_validateSubstandards(context, zoneParameters, before);
@@ -1142,11 +1051,7 @@ contract ImmutableSignedZoneV3Test is
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x4),
-            identifier: 0,
-            amount: 20,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x4), identifier: 0, amount: 20, recipient: payable(address(0x3))
         });
         receivedItems[0] = receivedItem;
         zoneParameters.consideration = receivedItems;
@@ -1156,15 +1061,17 @@ contract ImmutableSignedZoneV3Test is
         bytes memory substandard4Data = abi.encode(zoneParameters.orderHashes);
         bytes memory substandard6Data = abi.encodePacked(uint256(10), substandard3Data);
         bytes memory context = abi.encodePacked(
-            bytes1(0x01), substandard1Data, bytes1(0x03), substandard3Data, bytes1(0x04), substandard4Data, bytes1(0x06), substandard6Data
+            bytes1(0x01),
+            substandard1Data,
+            bytes1(0x03),
+            substandard3Data,
+            bytes1(0x04),
+            substandard4Data,
+            bytes1(0x06),
+            substandard6Data
         );
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         zone.exposed_validateSubstandards(context, zoneParameters, before);
@@ -1177,11 +1084,7 @@ contract ImmutableSignedZoneV3Test is
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x2),
-            identifier: 222,
-            amount: 10,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x2), identifier: 222, amount: 10, recipient: payable(address(0x3))
         });
         receivedItems[0] = receivedItem;
         zoneParameters.consideration = receivedItems;
@@ -1190,12 +1093,7 @@ contract ImmutableSignedZoneV3Test is
         bytes memory substandard4Data = abi.encode(zoneParameters.orderHashes);
         bytes memory context = abi.encodePacked(bytes1(0x04), substandard4Data, bytes1(0x03), substandard3Data);
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         vm.expectRevert(
@@ -1214,12 +1112,7 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
         bytes memory context = abi.encodePacked(bytes1(0x03));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         uint256 substandardLengthResult = zone.exposed_validateSubstandard1(context, zoneParameters, true);
@@ -1232,12 +1125,7 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
         bytes memory context = abi.encodePacked(bytes1(0x01), bytes10(0));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         vm.expectRevert(
@@ -1259,23 +1147,14 @@ contract ImmutableSignedZoneV3Test is
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
-            itemType: ItemType.ERC721,
-            token: address(0x2),
-            identifier: 45,
-            amount: 1,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC721, token: address(0x2), identifier: 45, amount: 1, recipient: payable(address(0x3))
         });
         receivedItems[0] = receivedItem;
         zoneParameters.consideration = receivedItems;
 
         bytes memory context = abi.encodePacked(bytes1(0x01), uint256(46));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         vm.expectRevert(abi.encodeWithSelector(Substandard1Violation.selector, zoneParameters.orderHash, 45, 46));
@@ -1301,23 +1180,14 @@ contract ImmutableSignedZoneV3Test is
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
-            itemType: ItemType.ERC721,
-            token: address(0x2),
-            identifier: 45,
-            amount: 1,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC721, token: address(0x2), identifier: 45, amount: 1, recipient: payable(address(0x3))
         });
         receivedItems[0] = receivedItem;
         zoneParameters.consideration = receivedItems;
 
         bytes memory context = abi.encodePacked(bytes1(0x01), uint256(45));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         uint256 substandardLengthResult = zone.exposed_validateSubstandard1(context, zoneParameters, before);
@@ -1332,12 +1202,7 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
         bytes memory context = abi.encodePacked(bytes1(0x04));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         uint256 substandardLengthResult = zone.exposed_validateSubstandard3(context, zoneParameters, true);
@@ -1350,12 +1215,7 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
         bytes memory context = abi.encodePacked(bytes1(0x03), bytes10(0));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         vm.expectRevert(
@@ -1372,12 +1232,7 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
         bytes memory context = abi.encodePacked(bytes1(0x03), bytes32(0));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         vm.expectRevert(abi.encodeWithSelector(Substandard3Violation.selector, zoneParameters.orderHash));
@@ -1400,12 +1255,7 @@ contract ImmutableSignedZoneV3Test is
         bytes32 substandard3Data = zone.exposed_deriveReceivedItemsHash(zoneParameters.consideration, 1, 1);
         bytes memory context = abi.encodePacked(bytes1(0x03), substandard3Data);
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         uint256 substandardLengthResult = zone.exposed_validateSubstandard3(context, zoneParameters, before);
@@ -1420,12 +1270,7 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
         bytes memory context = abi.encodePacked(bytes1(0x02));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         uint256 substandardLengthResult = zone.exposed_validateSubstandard4(context, zoneParameters, true);
@@ -1439,12 +1284,7 @@ contract ImmutableSignedZoneV3Test is
 
         bytes memory context = abi.encodePacked(bytes1(0x04), bytes10(0));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         vm.expectRevert(
@@ -1469,12 +1309,7 @@ contract ImmutableSignedZoneV3Test is
 
         bytes memory context = abi.encodePacked(bytes1(0x04), abi.encode(expectedOrderHashes));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         vm.expectRevert(
@@ -1502,12 +1337,7 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
         bytes memory context = abi.encodePacked(bytes1(0x04), abi.encode(zoneParameters.orderHashes));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         uint256 substandardLengthResult = zone.exposed_validateSubstandard4(context, zoneParameters, before);
@@ -1523,12 +1353,7 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
         bytes memory context = abi.encodePacked(bytes1(0x04));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         uint256 substandardLengthResult = zone.exposed_validateSubstandard6(context, zoneParameters, true);
@@ -1541,12 +1366,7 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
         bytes memory context = abi.encodePacked(bytes1(0x06), bytes10(0));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         vm.expectRevert(
@@ -1563,16 +1383,13 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
         bytes memory context = abi.encodePacked(bytes1(0x06), uint256(100), bytes32(uint256(0x123456)));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         vm.expectRevert(
-            abi.encodeWithSelector(Substandard6Violation.selector, zoneParameters.offer[0].amount, 100, zoneParameters.orderHash)
+            abi.encodeWithSelector(
+                Substandard6Violation.selector, zoneParameters.offer[0].amount, 100, zoneParameters.orderHash
+            )
         );
         zone.exposed_validateSubstandard6(context, zoneParameters, true);
     }
@@ -1596,23 +1413,14 @@ contract ImmutableSignedZoneV3Test is
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         receivedItems[0] = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x2),
-            identifier: 222,
-            amount: 10,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x2), identifier: 222, amount: 10, recipient: payable(address(0x3))
         });
         zoneParameters.consideration = receivedItems;
 
         bytes32 substandard6Data = zone.exposed_deriveReceivedItemsHash(zoneParameters.consideration, 100, 10);
         bytes memory context = abi.encodePacked(bytes1(0x06), uint256(100), substandard6Data);
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         uint256 substandardLengthResult = zone.exposed_validateSubstandard6(context, zoneParameters, before);
@@ -1628,12 +1436,7 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
         bytes memory context = abi.encodePacked(bytes1(0x04));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         uint256 substandardLengthResult = zone.exposed_validateSubstandard7(context, zoneParameters, true);
@@ -1647,12 +1450,7 @@ contract ImmutableSignedZoneV3Test is
 
         bytes memory context = abi.encodePacked(bytes1(0x07), bytes10(0));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         vm.expectRevert(
@@ -1674,25 +1472,18 @@ contract ImmutableSignedZoneV3Test is
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         receivedItems[0] = ReceivedItem({
-            itemType: ItemType.ERC721,
-            token: address(0x2),
-            identifier: 45,
-            amount: 1,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC721, token: address(0x2), identifier: 45, amount: 1, recipient: payable(address(0x3))
         });
         zoneParameters.consideration = receivedItems;
 
         bytes memory context = abi.encodePacked(bytes1(0x07), uint256(46), address(0x6), address(0x7));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
-        vm.expectRevert(abi.encodeWithSelector(Substandard7IdentifierViolation.selector, zoneParameters.orderHash, 45, 46));
+        vm.expectRevert(
+            abi.encodeWithSelector(Substandard7IdentifierViolation.selector, zoneParameters.orderHash, 45, 46)
+        );
         zone.exposed_validateSubstandard7(context, zoneParameters, true);
     }
 
@@ -1702,35 +1493,23 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
 
         SpentItem[] memory spentItems = new SpentItem[](1);
-        spentItems[0] = SpentItem({
-            itemType: ItemType.ERC20,
-            token: address(0x2),
-            identifier: 0,
-            amount: 50
-        });
+        spentItems[0] = SpentItem({itemType: ItemType.ERC20, token: address(0x2), identifier: 0, amount: 50});
         zoneParameters.offer = spentItems;
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         receivedItems[0] = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x9),
-            identifier: 0,
-            amount: 100,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x9), identifier: 0, amount: 100, recipient: payable(address(0x3))
         });
         zoneParameters.consideration = receivedItems;
 
         bytes memory context = abi.encodePacked(bytes1(0x07), uint256(0), address(0x6), address(0x7));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
-        vm.expectRevert(abi.encodeWithSelector(Substandard7UnexpectedItemTypeViolation.selector, zoneParameters.orderHash));
+        vm.expectRevert(
+            abi.encodeWithSelector(Substandard7UnexpectedItemTypeViolation.selector, zoneParameters.orderHash)
+        );
         zone.exposed_validateSubstandard7(context, zoneParameters, true);
     }
 
@@ -1742,36 +1521,28 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
 
         SpentItem[] memory spentItems = new SpentItem[](1);
-        spentItems[0] = SpentItem({
-            itemType: ItemType.ERC721,
-            token: address(0x8),
-            identifier: 222,
-            amount: 1
-        });
+        spentItems[0] = SpentItem({itemType: ItemType.ERC721, token: address(0x8), identifier: 222, amount: 1});
         zoneParameters.offer = spentItems;
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         receivedItems[0] = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x9),
-            identifier: 0,
-            amount: 100,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x9), identifier: 0, amount: 100, recipient: payable(address(0x3))
         });
         zoneParameters.consideration = receivedItems;
 
-        bytes memory context = abi.encodePacked(bytes1(0x07), zoneParameters.consideration[0].identifier, address(transferValidator), operator);
+        bytes memory context = abi.encodePacked(
+            bytes1(0x07), zoneParameters.consideration[0].identifier, address(transferValidator), operator
+        );
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         transferValidator.revertBeforeAuthorizedTransferWithOperator(operator, zoneParameters.offer[0].token);
-        vm.expectRevert(abi.encodeWithSelector(MockTransferValidatorRevert.selector, "beforeAuthorizedTransfer(address operator, address token)"));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                MockTransferValidatorRevert.selector, "beforeAuthorizedTransfer(address operator, address token)"
+            )
+        );
         zone.exposed_validateSubstandard7(context, zoneParameters, true);
     }
 
@@ -1783,36 +1554,26 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
 
         SpentItem[] memory spentItems = new SpentItem[](1);
-        spentItems[0] = SpentItem({
-            itemType: ItemType.ERC721,
-            token: address(0x8),
-            identifier: 222,
-            amount: 1
-        });
+        spentItems[0] = SpentItem({itemType: ItemType.ERC721, token: address(0x8), identifier: 222, amount: 1});
         zoneParameters.offer = spentItems;
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         receivedItems[0] = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x9),
-            identifier: 0,
-            amount: 100,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x9), identifier: 0, amount: 100, recipient: payable(address(0x3))
         });
         zoneParameters.consideration = receivedItems;
 
-        bytes memory context = abi.encodePacked(bytes1(0x07), zoneParameters.consideration[0].identifier, address(transferValidator), operator);
+        bytes memory context = abi.encodePacked(
+            bytes1(0x07), zoneParameters.consideration[0].identifier, address(transferValidator), operator
+        );
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         transferValidator.revertAfterAuthorizedTransfer(zoneParameters.offer[0].token);
-        vm.expectRevert(abi.encodeWithSelector(MockTransferValidatorRevert.selector, "afterAuthorizedTransfer(address token)"));
+        vm.expectRevert(
+            abi.encodeWithSelector(MockTransferValidatorRevert.selector, "afterAuthorizedTransfer(address token)")
+        );
         zone.exposed_validateSubstandard7(context, zoneParameters, false);
     }
 
@@ -1832,32 +1593,20 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
 
         SpentItem[] memory spentItems = new SpentItem[](1);
-        spentItems[0] = SpentItem({
-            itemType: ItemType.ERC721,
-            token: address(0x8),
-            identifier: 222,
-            amount: 1
-        });
+        spentItems[0] = SpentItem({itemType: ItemType.ERC721, token: address(0x8), identifier: 222, amount: 1});
         zoneParameters.offer = spentItems;
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         receivedItems[0] = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x9),
-            identifier: 0,
-            amount: 100,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x9), identifier: 0, amount: 100, recipient: payable(address(0x3))
         });
         zoneParameters.consideration = receivedItems;
 
-        bytes memory context = abi.encodePacked(bytes1(0x07), zoneParameters.consideration[0].identifier, address(transferValidator), operator);
+        bytes memory context = abi.encodePacked(
+            bytes1(0x07), zoneParameters.consideration[0].identifier, address(transferValidator), operator
+        );
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         uint256 substandardLengthResult = zone.exposed_validateSubstandard7(context, zoneParameters, before);
@@ -1873,12 +1622,7 @@ contract ImmutableSignedZoneV3Test is
 
         bytes memory context = abi.encodePacked(bytes1(0x04));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         uint256 substandardLengthResult = zone.exposed_validateSubstandard8(context, zoneParameters, true);
@@ -1892,12 +1636,7 @@ contract ImmutableSignedZoneV3Test is
 
         bytes memory context = abi.encodePacked(bytes1(0x08), bytes10(0));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         vm.expectRevert(
@@ -1914,35 +1653,23 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
 
         SpentItem[] memory spentItems = new SpentItem[](1);
-        spentItems[0] = SpentItem({
-            itemType: ItemType.ERC20,
-            token: address(0x2),
-            identifier: 0,
-            amount: 50
-        });
+        spentItems[0] = SpentItem({itemType: ItemType.ERC20, token: address(0x2), identifier: 0, amount: 50});
         zoneParameters.offer = spentItems;
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         receivedItems[0] = ReceivedItem({
-            itemType: ItemType.ERC721,
-            token: address(0x5),
-            identifier: 45,
-            amount: 1,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC721, token: address(0x5), identifier: 45, amount: 1, recipient: payable(address(0x3))
         });
         zoneParameters.consideration = receivedItems;
 
         bytes memory context = abi.encodePacked(bytes1(0x08), uint256(46), address(0x6));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
-        vm.expectRevert(abi.encodeWithSelector(Substandard8IdentifierViolation.selector, zoneParameters.orderHash, 45, 46));
+        vm.expectRevert(
+            abi.encodeWithSelector(Substandard8IdentifierViolation.selector, zoneParameters.orderHash, 45, 46)
+        );
         zone.exposed_validateSubstandard8(context, zoneParameters, true);
     }
 
@@ -1952,35 +1679,23 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
 
         SpentItem[] memory spentItems = new SpentItem[](1);
-        spentItems[0] = SpentItem({
-            itemType: ItemType.ERC20,
-            token: address(0x2),
-            identifier: 0,
-            amount: 50
-        });
+        spentItems[0] = SpentItem({itemType: ItemType.ERC20, token: address(0x2), identifier: 0, amount: 50});
         zoneParameters.offer = spentItems;
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         receivedItems[0] = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x9),
-            identifier: 0,
-            amount: 100,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x9), identifier: 0, amount: 100, recipient: payable(address(0x3))
         });
         zoneParameters.consideration = receivedItems;
 
         bytes memory context = abi.encodePacked(bytes1(0x08), uint256(0), address(0x6));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
-        vm.expectRevert(abi.encodeWithSelector(Substandard8UnexpectedItemTypeViolation.selector, zoneParameters.orderHash));
+        vm.expectRevert(
+            abi.encodeWithSelector(Substandard8UnexpectedItemTypeViolation.selector, zoneParameters.orderHash)
+        );
         zone.exposed_validateSubstandard8(context, zoneParameters, true);
     }
 
@@ -1991,36 +1706,27 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
 
         SpentItem[] memory spentItems = new SpentItem[](1);
-        spentItems[0] = SpentItem({
-            itemType: ItemType.ERC721,
-            token: address(0x8),
-            identifier: 222,
-            amount: 1
-        });
+        spentItems[0] = SpentItem({itemType: ItemType.ERC721, token: address(0x8), identifier: 222, amount: 1});
         zoneParameters.offer = spentItems;
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         receivedItems[0] = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x9),
-            identifier: 0,
-            amount: 100,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x9), identifier: 0, amount: 100, recipient: payable(address(0x3))
         });
         zoneParameters.consideration = receivedItems;
 
-        bytes memory context = abi.encodePacked(bytes1(0x08), zoneParameters.consideration[0].identifier, address(transferValidator));
+        bytes memory context =
+            abi.encodePacked(bytes1(0x08), zoneParameters.consideration[0].identifier, address(transferValidator));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         transferValidator.revertBeforeAuthorizedTransferWithTokenId(address(0x8), zoneParameters.offer[0].identifier);
-        vm.expectRevert(abi.encodeWithSelector(MockTransferValidatorRevert.selector, "beforeAuthorizedTransfer(address token, uint256 tokenId)"));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                MockTransferValidatorRevert.selector, "beforeAuthorizedTransfer(address token, uint256 tokenId)"
+            )
+        );
         zone.exposed_validateSubstandard8(context, zoneParameters, true);
     }
 
@@ -2031,36 +1737,27 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
 
         SpentItem[] memory spentItems = new SpentItem[](1);
-        spentItems[0] = SpentItem({
-            itemType: ItemType.ERC721,
-            token: address(0x8),
-            identifier: 222,
-            amount: 1
-        });
+        spentItems[0] = SpentItem({itemType: ItemType.ERC721, token: address(0x8), identifier: 222, amount: 1});
         zoneParameters.offer = spentItems;
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         receivedItems[0] = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x9),
-            identifier: 0,
-            amount: 100,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x9), identifier: 0, amount: 100, recipient: payable(address(0x3))
         });
         zoneParameters.consideration = receivedItems;
 
-        bytes memory context = abi.encodePacked(bytes1(0x08), zoneParameters.consideration[0].identifier, address(transferValidator));
+        bytes memory context =
+            abi.encodePacked(bytes1(0x08), zoneParameters.consideration[0].identifier, address(transferValidator));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         transferValidator.revertAfterAuthorizedTransferWithTokenId(address(0x8), zoneParameters.offer[0].identifier);
-        vm.expectRevert(abi.encodeWithSelector(MockTransferValidatorRevert.selector, "afterAuthorizedTransfer(address token, uint256 tokenId)"));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                MockTransferValidatorRevert.selector, "afterAuthorizedTransfer(address token, uint256 tokenId)"
+            )
+        );
         zone.exposed_validateSubstandard8(context, zoneParameters, false);
     }
 
@@ -2079,32 +1776,19 @@ contract ImmutableSignedZoneV3Test is
         ZoneParameters memory zoneParameters = _defaultBaseZoneParameters();
 
         SpentItem[] memory spentItems = new SpentItem[](1);
-        spentItems[0] = SpentItem({
-            itemType: ItemType.ERC721,
-            token: address(0x8),
-            identifier: 222,
-            amount: 1
-        });
+        spentItems[0] = SpentItem({itemType: ItemType.ERC721, token: address(0x8), identifier: 222, amount: 1});
         zoneParameters.offer = spentItems;
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         receivedItems[0] = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x9),
-            identifier: 0,
-            amount: 100,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x9), identifier: 0, amount: 100, recipient: payable(address(0x3))
         });
         zoneParameters.consideration = receivedItems;
 
-        bytes memory context = abi.encodePacked(bytes1(0x08), zoneParameters.consideration[0].identifier, address(transferValidator));
+        bytes memory context =
+            abi.encodePacked(bytes1(0x08), zoneParameters.consideration[0].identifier, address(transferValidator));
         zoneParameters.extraData = _buildExtraData(
-            zone,
-            SIGNER_PRIVATE_KEY,
-            zoneParameters.fulfiller,
-            DEFAULT_EXPIRATION,
-            zoneParameters.orderHash,
-            context
+            zone, SIGNER_PRIVATE_KEY, zoneParameters.fulfiller, DEFAULT_EXPIRATION, zoneParameters.orderHash, context
         );
 
         uint256 substandardLengthResult = zone.exposed_validateSubstandard8(context, zoneParameters, before);
@@ -2127,18 +1811,10 @@ contract ImmutableSignedZoneV3Test is
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](2);
         receivedItems[0] = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x2),
-            identifier: 222,
-            amount: 10,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x2), identifier: 222, amount: 10, recipient: payable(address(0x3))
         });
         receivedItems[1] = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x2),
-            identifier: 199,
-            amount: 10,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x2), identifier: 199, amount: 10, recipient: payable(address(0x3))
         });
 
         // console.logBytes32(zone.exposed_deriveReceivedItemsHash(receivedItems, 100, 10));
@@ -2150,11 +1826,7 @@ contract ImmutableSignedZoneV3Test is
         ImmutableSignedZoneV3Harness zone = _newZoneHarness(OWNER);
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         receivedItems[0] = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x2),
-            identifier: 222,
-            amount: 10,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x2), identifier: 222, amount: 10, recipient: payable(address(0x3))
         });
 
         // console.logBytes32(zone.exposed_deriveReceivedItemsHash(receivedItems, type(uint256).max, 100));
@@ -2237,7 +1909,9 @@ contract ImmutableSignedZoneV3Test is
         spentItems[0] = SpentItem({itemType: ItemType.ERC721, token: address(0x66), identifier: 111, amount: 1});
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
-        receivedItems[0] = ReceivedItem({itemType: ItemType.ERC20, token: address(0x77), identifier: 0, amount: 10, recipient: payable(address(0x3))});
+        receivedItems[0] = ReceivedItem({
+            itemType: ItemType.ERC20, token: address(0x77), identifier: 0, amount: 10, recipient: payable(address(0x3))
+        });
 
         bytes32 orderHash = bytes32(0x43592598d0419e49d268e9b553427fd7ba1dd091eaa3f6127161e44afb7b40f9);
         bytes32[] memory orderHashes = new bytes32[](1);
@@ -2272,11 +1946,11 @@ contract ImmutableSignedZoneV3Test is
             bytes1(0),
             fulfiller,
             expiration,
-            _signCompact(signerPrivateKey, ECDSA.toTypedDataHash(zone.exposed_domainSeparator(), eip712SignedOrderHash)),
+            _signCompact(
+                signerPrivateKey, ECDSA.toTypedDataHash(zone.exposed_domainSeparator(), eip712SignedOrderHash)
+            ),
             context
         );
         return extraData;
     }
 }
-
-// solhint-enable func-name-mixedcase

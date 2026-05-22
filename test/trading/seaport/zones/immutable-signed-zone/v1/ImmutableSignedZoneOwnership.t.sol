@@ -2,9 +2,9 @@
 pragma solidity ^0.8.13;
 
 import {Test} from "forge-std/Test.sol";
-import {ImmutableSignedZone} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/ImmutableSignedZone.sol";
-
-
+import {
+    ImmutableSignedZone
+} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/ImmutableSignedZone.sol";
 
 contract ImmutableSignedZoneOwnershipTest is Test {
     ImmutableSignedZone public zone;
@@ -28,7 +28,7 @@ contract ImmutableSignedZoneOwnershipTest is Test {
 
     function testTransferOwnership() public {
         address newOwner = makeAddr("newOwner");
-        
+
         vm.startPrank(owner);
         zone.transferOwnership(newOwner);
         vm.stopPrank();
@@ -38,7 +38,7 @@ contract ImmutableSignedZoneOwnershipTest is Test {
 
     function testNonOwnerCannotTransferOwnership() public {
         address newOwner = makeAddr("newOwner");
-        
+
         vm.startPrank(user);
         vm.expectRevert("Ownable: caller is not the owner");
         zone.transferOwnership(newOwner);
@@ -58,4 +58,4 @@ contract ImmutableSignedZoneOwnershipTest is Test {
         zone.removeSigner(user);
         vm.stopPrank();
     }
-} 
+}

@@ -1,7 +1,5 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache-2
-
-// solhint-disable-next-line compiler-version
 pragma solidity ^0.8.20;
 
 import {ITransferValidator} from "@limitbreak/creator-token-standards/src/interfaces/ITransferValidator.sol";
@@ -37,33 +35,21 @@ contract ImmutableSignedZoneV3 is
     SIP7Interface
 {
     /// @dev The EIP-712 domain type hash.
-    bytes32 private constant _EIP_712_DOMAIN_TYPEHASH =
-        keccak256(
-            abi.encodePacked(
-                "EIP712Domain(",
-                "string name,",
-                "string version,",
-                "uint256 chainId,",
-                "address verifyingContract",
-                ")"
-            )
-        );
+    bytes32 private constant _EIP_712_DOMAIN_TYPEHASH = keccak256(
+        abi.encodePacked(
+            "EIP712Domain(", "string name,", "string version,", "uint256 chainId,", "address verifyingContract", ")"
+        )
+    );
 
     /// @dev The EIP-712 domain version value.
     bytes32 private constant _VERSION_HASH = keccak256(bytes("3.0"));
 
     /// @dev The EIP-712 signed order type hash.
-    bytes32 private constant _SIGNED_ORDER_TYPEHASH =
-        keccak256(
-            abi.encodePacked(
-                "SignedOrder(",
-                "address fulfiller,",
-                "uint64 expiration,",
-                "bytes32 orderHash,",
-                "bytes context",
-                ")"
-            )
-        );
+    bytes32 private constant _SIGNED_ORDER_TYPEHASH = keccak256(
+        abi.encodePacked(
+            "SignedOrder(", "address fulfiller,", "uint64 expiration,", "bytes32 orderHash,", "bytes context", ")"
+        )
+    );
 
     /// @dev The chain ID on which the contract was deployed.
     uint256 private immutable _CHAIN_ID = block.chainid;
@@ -75,7 +61,6 @@ contract ImmutableSignedZoneV3 is
     uint8 private constant _ACCEPTED_SIP6_VERSION = 0;
 
     /// @dev The name for this zone returned in getSeaportMetadata().
-    // solhint-disable-next-line var-name-mixedcase
     string private _ZONE_NAME;
 
     bytes32 private immutable _NAME_HASH;
@@ -84,7 +69,6 @@ contract ImmutableSignedZoneV3 is
     address private immutable _SEAPORT;
 
     /// @dev The allowed signers.
-    // solhint-disable-next-line named-parameters-mapping
     mapping(address => SignerInfo) private _signers;
 
     /// @dev The API endpoint where orders for this zone can be signed.
@@ -170,7 +154,7 @@ contract ImmutableSignedZoneV3 is
         }
 
         // Set the signer info.
-        _signers[signer] = SignerInfo(true, true);
+        _signers[signer] = SignerInfo({active: true, previouslyActive: true});
 
         // Emit an event that the signer was added.
         emit SignerAdded(signer);
@@ -230,12 +214,8 @@ contract ImmutableSignedZoneV3 is
         // supported SIP (7)
         schemas = new Schema[](1);
         schemas[0].id = 7;
-        schemas[0].metadata = abi.encode(
-            _domainSeparator(),
-            _apiEndpoint,
-            _getSupportedSubstandards(),
-            _documentationURI
-        );
+        schemas[0].metadata =
+            abi.encode(_domainSeparator(), _apiEndpoint, _getSupportedSubstandards(), _documentationURI);
     }
 
     /**
@@ -276,9 +256,11 @@ contract ImmutableSignedZoneV3 is
      * @return authorizedOrderMagicValue A magic value indicating if the order
      *                                   is currently valid.
      */
-    function authorizeOrder(
-        ZoneParameters calldata zoneParameters
-    ) external override returns (bytes4 authorizedOrderMagicValue) {
+    function authorizeOrder(ZoneParameters calldata zoneParameters)
+        external
+        override
+        returns (bytes4 authorizedOrderMagicValue)
+    {
         // Revert if the caller is not the Seaport contract.
         if (msg.sender != _SEAPORT) {
             revert CallerNotSeaport();
@@ -322,9 +304,7 @@ contract ImmutableSignedZoneV3 is
         bytes calldata context = extraData[93:];
 
         // Revert if expired.
-        // solhint-disable-next-line not-rely-on-time
         if (block.timestamp > expiration) {
-            // solhint-disable-next-line not-rely-on-time
             revert SignatureExpired(block.timestamp, expiration, orderHash);
         }
 
@@ -386,9 +366,11 @@ contract ImmutableSignedZoneV3 is
      * @return validOrderMagicValue A magic value indicating if the order is
      *                              currently valid.
      */
-    function validateOrder(
-        ZoneParameters calldata zoneParameters
-    ) external override returns (bytes4 validOrderMagicValue) {
+    function validateOrder(ZoneParameters calldata zoneParameters)
+        external
+        override
+        returns (bytes4 validOrderMagicValue)
+    {
         // Revert if the caller is not the Seaport contract.
         if (msg.sender != _SEAPORT) {
             revert CallerNotSeaport();
@@ -413,14 +395,14 @@ contract ImmutableSignedZoneV3 is
      *
      * @param interfaceId The interface ID to check for support.
      */
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view override(ERC165, ZoneInterface, AccessControlEnumerable) returns (bool) {
-        return
-            interfaceId == type(ZoneInterface).interfaceId ||
-            interfaceId == type(SIP5Interface).interfaceId ||
-            interfaceId == type(SIP7Interface).interfaceId ||
-            super.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC165, ZoneInterface, AccessControlEnumerable)
+        returns (bool)
+    {
+        return interfaceId == type(ZoneInterface).interfaceId || interfaceId == type(SIP5Interface).interfaceId
+            || interfaceId == type(SIP7Interface).interfaceId || super.supportsInterface(interfaceId);
     }
 
     /**
@@ -469,16 +451,14 @@ contract ImmutableSignedZoneV3 is
      * @param context          The optional variable-length context.
      * @return signedOrderHash The signedOrder hash.
      */
-    function _deriveSignedOrderHash(
-        address fulfiller,
-        uint64 expiration,
-        bytes32 orderHash,
-        bytes calldata context
-    ) internal pure returns (bytes32 signedOrderHash) {
+    function _deriveSignedOrderHash(address fulfiller, uint64 expiration, bytes32 orderHash, bytes calldata context)
+        internal
+        pure
+        returns (bytes32 signedOrderHash)
+    {
         // Derive the signed order hash.
-        signedOrderHash = keccak256(
-            abi.encode(_SIGNED_ORDER_TYPEHASH, fulfiller, expiration, orderHash, keccak256(context))
-        );
+        signedOrderHash =
+            keccak256(abi.encode(_SIGNED_ORDER_TYPEHASH, fulfiller, expiration, orderHash, keccak256(context)));
     }
 
     /**
@@ -488,7 +468,9 @@ contract ImmutableSignedZoneV3 is
      * @param zoneParameters The zone parameters.
      * @param before         Whether validation is occurring in before or after hook.
      */
-    function _validateSubstandards(bytes calldata context, ZoneParameters calldata zoneParameters, bool before) internal {
+    function _validateSubstandards(bytes calldata context, ZoneParameters calldata zoneParameters, bool before)
+        internal
+    {
         uint256 startIndex = 0;
         uint256 contextLength = context.length;
 
@@ -532,11 +514,11 @@ contract ImmutableSignedZoneV3 is
      * @param before         Whether validation is occurring in before or after hook.
      * @return               Length of substandard segment.
      */
-    function _validateSubstandard1(
-        bytes calldata context,
-        ZoneParameters calldata zoneParameters,
-        bool before
-    ) internal pure returns (uint256) {
+    function _validateSubstandard1(bytes calldata context, ZoneParameters calldata zoneParameters, bool before)
+        internal
+        pure
+        returns (uint256)
+    {
         if (uint8(context[0]) != 1) {
             return 0;
         }
@@ -549,7 +531,11 @@ contract ImmutableSignedZoneV3 is
         if (before) {
             // zoneParameters.consideration.length >= 1 is guaranteed by the authorizeOrder function.
             if (uint256(bytes32(context[1:33])) != zoneParameters.consideration[0].identifier) {
-                revert Substandard1Violation(zoneParameters.orderHash, zoneParameters.consideration[0].identifier, uint256(bytes32(context[1:33])));
+                revert Substandard1Violation(
+                    zoneParameters.orderHash,
+                    zoneParameters.consideration[0].identifier,
+                    uint256(bytes32(context[1:33]))
+                );
             }
         }
 
@@ -569,11 +555,11 @@ contract ImmutableSignedZoneV3 is
      * @param before         Whether validation is occurring in before or after hook.
      * @return               Length of substandard segment.
      */
-    function _validateSubstandard3(
-        bytes calldata context,
-        ZoneParameters calldata zoneParameters,
-        bool before
-    ) internal pure returns (uint256) {
+    function _validateSubstandard3(bytes calldata context, ZoneParameters calldata zoneParameters, bool before)
+        internal
+        pure
+        returns (uint256)
+    {
         if (uint8(context[0]) != 3) {
             return 0;
         }
@@ -603,11 +589,11 @@ contract ImmutableSignedZoneV3 is
      * @param before         Whether validation is occurring in before or after hook.
      * @return               Length of substandard segment.
      */
-    function _validateSubstandard4(
-        bytes calldata context,
-        ZoneParameters calldata zoneParameters,
-        bool before
-    ) internal pure returns (uint256) {
+    function _validateSubstandard4(bytes calldata context, ZoneParameters calldata zoneParameters, bool before)
+        internal
+        pure
+        returns (uint256)
+    {
         if (uint8(context[0]) != 4) {
             return 0;
         }
@@ -649,11 +635,11 @@ contract ImmutableSignedZoneV3 is
      * @param before         Whether validation is occurring in before or after hook.
      * @return               Length of substandard segment.
      */
-    function _validateSubstandard6(
-        bytes calldata context,
-        ZoneParameters calldata zoneParameters,
-        bool before
-    ) internal pure returns (uint256) {
+    function _validateSubstandard6(bytes calldata context, ZoneParameters calldata zoneParameters, bool before)
+        internal
+        pure
+        returns (uint256)
+    {
         if (uint8(context[0]) != 6) {
             return 0;
         }
@@ -680,15 +666,11 @@ contract ImmutableSignedZoneV3 is
             // from context) amounts of the first offer item.
             if (
                 _deriveReceivedItemsHash(
-                    zoneParameters.consideration,
-                    originalFirstOfferItemAmount,
-                    zoneParameters.offer[0].amount
-                ) != expectedReceivedItemsHash
+                        zoneParameters.consideration, originalFirstOfferItemAmount, zoneParameters.offer[0].amount
+                    ) != expectedReceivedItemsHash
             ) {
                 revert Substandard6Violation(
-                    zoneParameters.offer[0].amount,
-                    originalFirstOfferItemAmount,
-                    zoneParameters.orderHash
+                    zoneParameters.offer[0].amount, originalFirstOfferItemAmount, zoneParameters.orderHash
                 );
             }
         }
@@ -706,11 +688,10 @@ contract ImmutableSignedZoneV3 is
      * @param before         Whether validation is occurring in before or after hook.
      * @return               Length of substandard segment.
      */
-    function _validateSubstandard7(
-        bytes calldata context,
-        ZoneParameters calldata zoneParameters,
-        bool before
-    ) internal returns (uint256) {
+    function _validateSubstandard7(bytes calldata context, ZoneParameters calldata zoneParameters, bool before)
+        internal
+        returns (uint256)
+    {
         if (uint8(context[0]) != 7) {
             return 0;
         }
@@ -723,7 +704,11 @@ contract ImmutableSignedZoneV3 is
         if (before) {
             // zoneParameters.consideration.length >= 1 is guaranteed by the authorizeOrder function.
             if (uint256(bytes32(context[1:33])) != zoneParameters.consideration[0].identifier) {
-                revert Substandard7IdentifierViolation(zoneParameters.orderHash, zoneParameters.consideration[0].identifier, uint256(bytes32(context[1:33])));
+                revert Substandard7IdentifierViolation(
+                    zoneParameters.orderHash,
+                    zoneParameters.consideration[0].identifier,
+                    uint256(bytes32(context[1:33]))
+                );
             }
         }
 
@@ -731,10 +716,10 @@ contract ImmutableSignedZoneV3 is
         // slither-disable-next-line uninitialized-local
         address token;
         // zoneParameters.consideration.length >= 1 is guaranteed by the authorizeOrder function.
-        if (uint(zoneParameters.consideration[0].itemType) > 1) {
+        if (uint256(zoneParameters.consideration[0].itemType) > 1) {
             token = zoneParameters.consideration[0].token;
-        // zoneParameters.offer.length >= 1 is guaranteed by the authorizeOrder function.
-        } else if (uint(zoneParameters.offer[0].itemType) > 1) {
+            // zoneParameters.offer.length >= 1 is guaranteed by the authorizeOrder function.
+        } else if (uint256(zoneParameters.offer[0].itemType) > 1) {
             token = zoneParameters.offer[0].token;
         } else {
             revert Substandard7UnexpectedItemTypeViolation(zoneParameters.orderHash);
@@ -761,11 +746,10 @@ contract ImmutableSignedZoneV3 is
      * @param before         Whether validation is occurring in before or after hook.
      * @return               Length of substandard segment.
      */
-    function _validateSubstandard8(
-        bytes calldata context,
-        ZoneParameters calldata zoneParameters,
-        bool before
-    ) internal returns (uint256) {
+    function _validateSubstandard8(bytes calldata context, ZoneParameters calldata zoneParameters, bool before)
+        internal
+        returns (uint256)
+    {
         if (uint8(context[0]) != 8) {
             return 0;
         }
@@ -777,7 +761,11 @@ contract ImmutableSignedZoneV3 is
         // Only perform identifier validation in before hook.
         if (before) {
             if (uint256(bytes32(context[1:33])) != zoneParameters.consideration[0].identifier) {
-                revert Substandard8IdentifierViolation(zoneParameters.orderHash, zoneParameters.consideration[0].identifier, uint256(bytes32(context[1:33])));
+                revert Substandard8IdentifierViolation(
+                    zoneParameters.orderHash,
+                    zoneParameters.consideration[0].identifier,
+                    uint256(bytes32(context[1:33]))
+                );
             }
         }
 
@@ -787,11 +775,11 @@ contract ImmutableSignedZoneV3 is
         // slither-disable-next-line uninitialized-local
         uint256 tokenId;
         // zoneParameters.consideration.length >= 1 is guaranteed by the authorizeOrder function.
-        if (uint(zoneParameters.consideration[0].itemType) > 1) {
+        if (uint256(zoneParameters.consideration[0].itemType) > 1) {
             token = zoneParameters.consideration[0].token;
             tokenId = zoneParameters.consideration[0].identifier;
-        // zoneParameters.offer.length >= 1 is guaranteed by the authorizeOrder function.
-        } else if (uint(zoneParameters.offer[0].itemType) > 1) {
+            // zoneParameters.offer.length >= 1 is guaranteed by the authorizeOrder function.
+        } else if (uint256(zoneParameters.offer[0].itemType) > 1) {
             token = zoneParameters.offer[0].token;
             tokenId = zoneParameters.offer[0].identifier;
         } else {
@@ -847,10 +835,11 @@ contract ImmutableSignedZoneV3 is
      * @param values      Values array.
      * @return            True if all elements in values exist in sourceArray.
      */
-    function _bytes32ArrayIncludes(
-        bytes32[] calldata sourceArray,
-        bytes32[] memory values
-    ) internal pure returns (bool) {
+    function _bytes32ArrayIncludes(bytes32[] calldata sourceArray, bytes32[] memory values)
+        internal
+        pure
+        returns (bool)
+    {
         // cache the length in memory for loop optimisation
         uint256 sourceArraySize = sourceArray.length;
         uint256 valuesSize = values.length;
@@ -862,10 +851,10 @@ contract ImmutableSignedZoneV3 is
         }
 
         // Iterate through each element and compare them
-        for (uint256 i = 0; i < valuesSize; ) {
+        for (uint256 i = 0; i < valuesSize;) {
             bool found = false;
             bytes32 item = values[i];
-            for (uint256 j = 0; j < sourceArraySize; ) {
+            for (uint256 j = 0; j < sourceArraySize;) {
                 if (item == sourceArray[j]) {
                     // if item from values is in sourceArray, break
                     found = true;

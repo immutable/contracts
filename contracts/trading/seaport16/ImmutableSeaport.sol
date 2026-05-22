@@ -1,10 +1,17 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache-2
-// solhint-disable compiler-version
 pragma solidity ^0.8.24;
 
 import {Consideration} from "seaport-core-16/src/lib/Consideration.sol";
-import {AdvancedOrder, BasicOrderParameters, CriteriaResolver, Execution, Fulfillment, FulfillmentComponent, Order} from "seaport-types-16/src/lib/ConsiderationStructs.sol";
+import {
+    AdvancedOrder,
+    BasicOrderParameters,
+    CriteriaResolver,
+    Execution,
+    Fulfillment,
+    FulfillmentComponent,
+    Order
+} from "seaport-types-16/src/lib/ConsiderationStructs.sol";
 import {OrderType} from "seaport-types-16/src/lib/ConsiderationEnums.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ImmutableSeaportEvents} from "./interfaces/ImmutableSeaportEvents.sol";
@@ -22,7 +29,6 @@ import {ImmutableSeaportEvents} from "./interfaces/ImmutableSeaportEvents.sol";
 contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
     // Mapping to store valid ImmutableZones - this allows for multiple Zones
     // to be active at the same time, and can be expired or added on demand.
-    // solhint-disable-next-line named-parameters-mapping
     mapping(address => bool) public allowedZones;
 
     error OrderNotRestricted(uint8 orderType);
@@ -102,8 +108,8 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
      */
     function _rejectOrderIfZoneInvalid(Order memory order) internal view {
         if (
-            order.parameters.orderType != OrderType.FULL_RESTRICTED &&
-            order.parameters.orderType != OrderType.PARTIAL_RESTRICTED
+            order.parameters.orderType != OrderType.FULL_RESTRICTED
+                && order.parameters.orderType != OrderType.PARTIAL_RESTRICTED
         ) {
             revert OrderNotRestricted(uint8(order.parameters.orderType));
         }
@@ -117,8 +123,8 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
      */
     function _rejectAdvancedOrderIfZoneInvalid(AdvancedOrder memory advancedOrder) internal view {
         if (
-            advancedOrder.parameters.orderType != OrderType.FULL_RESTRICTED &&
-            advancedOrder.parameters.orderType != OrderType.PARTIAL_RESTRICTED
+            advancedOrder.parameters.orderType != OrderType.FULL_RESTRICTED
+                && advancedOrder.parameters.orderType != OrderType.PARTIAL_RESTRICTED
         ) {
             revert OrderNotRestricted(uint8(advancedOrder.parameters.orderType));
         }
@@ -161,9 +167,13 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
      * @return fulfilled A boolean indicating whether the order has been
      *                   successfully fulfilled.
      */
-    function fulfillBasicOrder(
-        BasicOrderParameters calldata parameters
-    ) public payable virtual override returns (bool fulfilled) {
+    function fulfillBasicOrder(BasicOrderParameters calldata parameters)
+        public
+        payable
+        virtual
+        override
+        returns (bool fulfilled)
+    {
         _rejectBasicOrderIfZoneInvalid(parameters);
 
         return super.fulfillBasicOrder(parameters);
@@ -197,10 +207,13 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
      * @return fulfilled A boolean indicating whether the order has been
      *                   successfully fulfilled.
      */
-    // solhint-disable-next-line func-name-mixedcase
-    function fulfillBasicOrder_efficient_6GL6yc(
-        BasicOrderParameters calldata parameters
-    ) public payable virtual override returns (bool fulfilled) {
+    function fulfillBasicOrder_efficient_6GL6yc(BasicOrderParameters calldata parameters)
+        public
+        payable
+        virtual
+        override
+        returns (bool fulfilled)
+    {
         _rejectBasicOrderIfZoneInvalid(parameters);
 
         return super.fulfillBasicOrder_efficient_6GL6yc(parameters);
@@ -234,7 +247,13 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
          */
         Order calldata order,
         bytes32 fulfillerConduitKey
-    ) public payable virtual override returns (bool fulfilled) {
+    )
+        public
+        payable
+        virtual
+        override
+        returns (bool fulfilled)
+    {
         _rejectOrderIfZoneInvalid(order);
 
         return super.fulfillOrder(order, fulfillerConduitKey);
@@ -373,7 +392,10 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
         payable
         virtual
         override
-        returns (bool[] memory, /* availableOrders */ Execution[] memory /* executions */)
+        returns (
+            bool[] memory, /* availableOrders */
+            Execution[] memory /* executions */
+        )
     {
         uint256 numberOfOrders = orders.length;
         for (uint256 i = 0; i < numberOfOrders; i++) {
@@ -381,14 +403,9 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
             _rejectOrderIfZoneInvalid(order);
         }
 
-        return
-            super.fulfillAvailableOrders(
-                orders,
-                offerFulfillments,
-                considerationFulfillments,
-                fulfillerConduitKey,
-                maximumFulfilled
-            );
+        return super.fulfillAvailableOrders(
+            orders, offerFulfillments, considerationFulfillments, fulfillerConduitKey, maximumFulfilled
+        );
     }
 
     /**
@@ -494,7 +511,10 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
         payable
         virtual
         override
-        returns (bool[] memory, /* availableOrders */ Execution[] memory /* executions */)
+        returns (
+            bool[] memory, /* availableOrders */
+            Execution[] memory /* executions */
+        )
     {
         uint256 numberOfAdvancedOrders = advancedOrders.length;
         for (uint256 i = 0; i < numberOfAdvancedOrders; i++) {
@@ -502,16 +522,15 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
             _rejectAdvancedOrderIfZoneInvalid(advancedOrder);
         }
 
-        return
-            super.fulfillAvailableAdvancedOrders(
-                advancedOrders,
-                criteriaResolvers,
-                offerFulfillments,
-                considerationFulfillments,
-                fulfillerConduitKey,
-                recipient,
-                maximumFulfilled
-            );
+        return super.fulfillAvailableAdvancedOrders(
+            advancedOrders,
+            criteriaResolvers,
+            offerFulfillments,
+            considerationFulfillments,
+            fulfillerConduitKey,
+            recipient,
+            maximumFulfilled
+        );
     }
 
     /**
@@ -552,7 +571,15 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
          * @custom:name fulfillments
          */
         Fulfillment[] calldata fulfillments
-    ) public payable virtual override returns (Execution[] memory /* executions */) {
+    )
+        public
+        payable
+        virtual
+        override
+        returns (
+            Execution[] memory /* executions */
+        )
+    {
         uint256 numberOfOrders = orders.length;
         for (uint256 i = 0; i < numberOfOrders; i++) {
             Order memory order = orders[i];
@@ -628,7 +655,15 @@ contract ImmutableSeaport is Consideration, Ownable, ImmutableSeaportEvents {
          */
         Fulfillment[] calldata fulfillments,
         address recipient
-    ) public payable virtual override returns (Execution[] memory /* executions */) {
+    )
+        public
+        payable
+        virtual
+        override
+        returns (
+            Execution[] memory /* executions */
+        )
+    {
         uint256 numberOfAdvancedOrders = advancedOrders.length;
         for (uint256 i = 0; i < numberOfAdvancedOrders; i++) {
             AdvancedOrder memory advancedOrder = advancedOrders[i];

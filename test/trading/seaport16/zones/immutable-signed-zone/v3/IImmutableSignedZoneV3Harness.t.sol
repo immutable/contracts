@@ -1,14 +1,12 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache-2
-
-// solhint-disable-next-line compiler-version
 pragma solidity ^0.8.17;
 
 import {ZoneInterface} from "seaport-16/contracts/interfaces/ZoneInterface.sol";
 import {ReceivedItem, ZoneParameters} from "seaport-types-16/src/lib/ConsiderationStructs.sol";
-import {SIP7Interface} from "../../../../../../contracts/trading/seaport16/zones/immutable-signed-zone/v3/interfaces/SIP7Interface.sol";
-
-// solhint-disable func-name-mixedcase
+import {
+    SIP7Interface
+} from "../../../../../../contracts/trading/seaport16/zones/immutable-signed-zone/v3/interfaces/SIP7Interface.sol";
 
 interface IImmutableSignedZoneV3Harness is ZoneInterface, SIP7Interface {
     function grantRole(bytes32 role, address account) external;
@@ -67,5 +65,3 @@ interface IImmutableSignedZoneV3Harness is ZoneInterface, SIP7Interface {
         pure
         returns (bool);
 }
-
-// solhint-enable func-name-mixedcase

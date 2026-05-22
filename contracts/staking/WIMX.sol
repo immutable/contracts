@@ -10,7 +10,6 @@ import {Address} from "@openzeppelin/contracts/utils/Address.sol";
  * @dev This contract is adapted from the official Wrapped ETH contract.
  * This contract is copied from https://github.com/immutable/zkevm-bridge-contracts/blob/main/src/child/WIMX.sol
  */
-// solhint-disable custom-errors, reason-string
 contract WIMX is IWIMX {
     // slither-disable-start constable-states
     string public name = "Wrapped IMX";
@@ -48,6 +47,7 @@ contract WIMX is IWIMX {
         Address.sendValue(payable(msg.sender), wad);
         emit Withdrawal(msg.sender, wad);
     }
+
     // slither-disable-end reentrancy-events
 
     /**

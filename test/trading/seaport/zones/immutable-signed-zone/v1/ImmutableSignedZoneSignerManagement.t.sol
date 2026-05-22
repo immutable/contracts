@@ -2,8 +2,12 @@
 pragma solidity ^0.8.13;
 
 import {Test} from "forge-std/Test.sol";
-import {ImmutableSignedZone} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/ImmutableSignedZone.sol";
-import {SIP7EventsAndErrors} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/interfaces/SIP7EventsAndErrors.sol";
+import {
+    ImmutableSignedZone
+} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/ImmutableSignedZone.sol";
+import {
+    SIP7EventsAndErrors
+} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v1/interfaces/SIP7EventsAndErrors.sol";
 
 contract ImmutableSignedZoneSignerManagementTest is Test {
     ImmutableSignedZone public zone;
@@ -32,7 +36,7 @@ contract ImmutableSignedZoneSignerManagementTest is Test {
     function testOwnerCanAddAndRemoveActiveSigner() public {
         vm.startPrank(owner);
         zone.addSigner(signer);
-        
+
         vm.expectEmit(true, true, true, true);
         emit SIP7EventsAndErrors.SignerRemoved(signer);
         zone.removeSigner(signer);
@@ -43,7 +47,7 @@ contract ImmutableSignedZoneSignerManagementTest is Test {
         vm.startPrank(owner);
         zone.addSigner(signer);
         zone.removeSigner(signer);
-        
+
         // Try to add deactivated signer
         vm.expectRevert(abi.encodeWithSelector(SIP7EventsAndErrors.SignerCannotBeReauthorized.selector, signer));
         zone.addSigner(signer);
@@ -53,10 +57,10 @@ contract ImmutableSignedZoneSignerManagementTest is Test {
     function testAlreadyActiveSignerCannotBeAdded() public {
         vm.startPrank(owner);
         zone.addSigner(signer);
-        
+
         // Try to add same signer again
         vm.expectRevert(abi.encodeWithSelector(SIP7EventsAndErrors.SignerAlreadyActive.selector, signer));
         zone.addSigner(signer);
         vm.stopPrank();
     }
-} 
+}

@@ -7,6 +7,9 @@ import {IOperatorAllowlist} from "./IOperatorAllowlist.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {OperatorAllowlistEnforcementErrors} from "../errors/Errors.sol";
 
+// Disable this code size warning as there is no plan to change this logic.
+// forge-lint: disable-start(unwrapped-modifier-logic)
+
 /**
  * @notice OperatorAllowlistEnforced is an abstract contract that token contracts can inherit in order to set the
  * address of the OperatorAllowlist registry that it will interface with, so that the token contract may
@@ -50,8 +53,8 @@ abstract contract OperatorAllowlistEnforced is OperatorAllowlistEnforcementError
         // 1. caller is an EOA
         // 2. caller is Allowlisted or is the calling address bytecode is Allowlisted
         if (
-            msg.sender != tx.origin && // solhint-disable-line avoid-tx-origin
-            !operatorAllowlist.isAllowlisted(msg.sender)
+            msg.sender != tx.origin 
+                && !operatorAllowlist.isAllowlisted(msg.sender)
         ) {
             revert CallerNotInAllowlist(msg.sender);
         }
@@ -88,4 +91,4 @@ abstract contract OperatorAllowlistEnforced is OperatorAllowlistEnforcementError
         operatorAllowlist = IOperatorAllowlist(_operatorAllowlist);
     }
 }
-// slither-disable-end calls-loop
+// forge-lint: disable-end(unwrapped-modifier-logic)

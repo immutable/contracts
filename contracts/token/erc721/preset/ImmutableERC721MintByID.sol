@@ -6,7 +6,6 @@ import {ImmutableERC721Base} from "../abstract/ImmutableERC721Base.sol";
 
 contract ImmutableERC721MintByID is ImmutableERC721Base {
     ///     =====   Constructor  =====
-
     /**
      * @notice Grants `DEFAULT_ADMIN_ROLE` to the supplied `owner` address
      * @param owner_ The address to grant the `DEFAULT_ADMIN_ROLE` to
@@ -30,14 +29,7 @@ contract ImmutableERC721MintByID is ImmutableERC721Base {
         uint96 feeNumerator_
     )
         ImmutableERC721Base(
-            owner_,
-            name_,
-            symbol_,
-            baseURI_,
-            contractURI_,
-            operatorAllowlist_,
-            royaltyReceiver_,
-            feeNumerator_
+            owner_, name_, symbol_, baseURI_, contractURI_, operatorAllowlist_, royaltyReceiver_, feeNumerator_
         )
     {}
 

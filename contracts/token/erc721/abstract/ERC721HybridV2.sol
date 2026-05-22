@@ -117,12 +117,11 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnableV2, ERC721, IImmutableERC72
     /**
      * @notice refer to erc721 or erc721psi
      */
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes memory _data
-    ) public virtual override(ERC721, ERC721PsiV2) {
+    function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory _data)
+        public
+        virtual
+        override(ERC721, ERC721PsiV2)
+    {
         if (tokenId < mintBatchByQuantityThreshold()) {
             return ERC721.safeTransferFrom(from, to, tokenId, _data);
         }
@@ -132,10 +131,13 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnableV2, ERC721, IImmutableERC72
     /**
      * @notice refer to erc721 or erc721psi
      */
-    function isApprovedForAll(
-        address owner,
-        address operator
-    ) public view virtual override(ERC721, ERC721PsiV2) returns (bool) {
+    function isApprovedForAll(address owner, address operator)
+        public
+        view
+        virtual
+        override(ERC721, ERC721PsiV2)
+        returns (bool)
+    {
         return ERC721.isApprovedForAll(owner, operator);
     }
 
@@ -343,12 +345,11 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnableV2, ERC721, IImmutableERC72
     /**
      * @notice refer to erc721 or erc721psi
      */
-    function _safeTransfer(
-        address from,
-        address to,
-        uint256 tokenId,
-        bytes memory _data
-    ) internal virtual override(ERC721, ERC721PsiV2) {
+    function _safeTransfer(address from, address to, uint256 tokenId, bytes memory _data)
+        internal
+        virtual
+        override(ERC721, ERC721PsiV2)
+    {
         if (tokenId < mintBatchByQuantityThreshold()) {
             return ERC721._safeTransfer(from, to, tokenId, _data);
         }
@@ -389,10 +390,13 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnableV2, ERC721, IImmutableERC72
     /**
      * @notice refer to erc721 or erc721psi
      */
-    function _isApprovedOrOwner(
-        address spender,
-        uint256 tokenId
-    ) internal view virtual override(ERC721, ERC721PsiV2) returns (bool) {
+    function _isApprovedOrOwner(address spender, uint256 tokenId)
+        internal
+        view
+        virtual
+        override(ERC721, ERC721PsiV2)
+        returns (bool)
+    {
         if (tokenId < mintBatchByQuantityThreshold()) {
             return ERC721._isApprovedOrOwner(spender, tokenId);
         }

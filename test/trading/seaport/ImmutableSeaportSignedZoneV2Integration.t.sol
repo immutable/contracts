@@ -1,10 +1,8 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache-2
 
-// solhint-disable-next-line compiler-version
 pragma solidity ^0.8.17;
 
-// solhint-disable-next-line no-global-import
 import {Test} from "forge-std/Test.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -26,7 +24,7 @@ import {IOperatorAllowlistUpgradeable} from "./utils/IOperatorAllowlistUpgradeab
 import {SigningTestHelper} from "./utils/SigningTestHelper.t.sol";
 import {IImmutableSignedZoneV2Harness} from "./zones/immutable-signed-zone/v2/IImmutableSignedZoneV2Harness.t.sol";
 
-// solhint-disable func-name-mixedcase, private-vars-leading-underscore
+// forge-lint: disable-start(erc20-unchecked-transfer)
 
 contract ImmutableSeaportSignedZoneV2IntegrationTest is Test, SigningTestHelper {
     // Foundry artifacts allow the test to deploy contracts separately that aren't compatible with
@@ -268,13 +266,12 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test, SigningTestHelper 
 
         // mints
         vm.prank(OWNER);
-        erc20Token.transfer(
+        bool success = erc20Token.transfer(
             FULFILLER,
-            (
-                considerationItems[0].startAmount + considerationItems[1].startAmount
-                    + considerationItems[2].startAmount + considerationItems[3].startAmount
-            )
+            (considerationItems[0].startAmount + considerationItems[1].startAmount + considerationItems[2].startAmount
+                    + considerationItems[3].startAmount)
         );
+        require(success, "ERC20 transfer failed");
         vm.prank(OWNER);
         erc721Token.safeMint(OFFERER, offerItems[0].identifierOrCriteria);
 
@@ -448,13 +445,14 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test, SigningTestHelper 
 
         // mints
         vm.prank(OWNER);
-        erc20Token.transfer(
+        bool success = erc20Token.transfer(
             FULFILLER,
-            (
-                considerationItems[0].startAmount + considerationItems[1].startAmount
-                    + considerationItems[2].startAmount + considerationItems[3].startAmount
-            ) / 100
+            (considerationItems[0].startAmount
+                    + considerationItems[1].startAmount
+                    + considerationItems[2].startAmount
+                    + considerationItems[3].startAmount) / 100
         );
+        require(success, "ERC20 transfer failed");
         vm.prank(OWNER);
         erc1155Token.safeMint(OFFERER, offerItems[0].identifierOrCriteria, offerItems[0].startAmount, new bytes(0));
 
@@ -632,13 +630,14 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test, SigningTestHelper 
 
         // mints
         vm.prank(OWNER);
-        erc20Token.transfer(
+        bool success = erc20Token.transfer(
             FULFILLER,
-            (
-                considerationItems[0].startAmount + considerationItems[1].startAmount
-                    + considerationItems[2].startAmount + considerationItems[3].startAmount
-            ) * 2 / 100
+            (considerationItems[0].startAmount
+                    + considerationItems[1].startAmount
+                    + considerationItems[2].startAmount
+                    + considerationItems[3].startAmount) * 2 / 100
         );
+        require(success, "ERC20 transfer failed");
         vm.prank(OWNER);
         erc1155Token.safeMint(OFFERER, offerItems[0].identifierOrCriteria, offerItems[0].startAmount, new bytes(0));
 
@@ -847,18 +846,16 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test, SigningTestHelper 
         vm.prank(OWNER);
         erc20Token.transfer(
             FULFILLER,
-            (
-                considerationItems[0].startAmount + considerationItems[1].startAmount
-                    + considerationItems[2].startAmount + considerationItems[3].startAmount
-            ) / 2
+            (considerationItems[0].startAmount
+                    + considerationItems[1].startAmount
+                    + considerationItems[2].startAmount
+                    + considerationItems[3].startAmount) / 2
         );
         vm.prank(OWNER);
         erc20Token.transfer(
             FULFILLER_TWO,
-            (
-                considerationItems[0].startAmount + considerationItems[1].startAmount
-                    + considerationItems[2].startAmount + considerationItems[3].startAmount
-            )
+            (considerationItems[0].startAmount + considerationItems[1].startAmount + considerationItems[2].startAmount
+                    + considerationItems[3].startAmount)
         );
         vm.prank(OWNER);
         erc1155Token.safeMint(OFFERER, offerItems[0].identifierOrCriteria, offerItems[0].startAmount, new bytes(0));
@@ -887,10 +884,10 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test, SigningTestHelper 
         assertEq(erc20Token.balanceOf(FULFILLER), 0);
         assertEq(
             erc20Token.balanceOf(FULFILLER_TWO),
-            (
-                considerationItems[0].startAmount + considerationItems[1].startAmount
-                    + considerationItems[2].startAmount + considerationItems[3].startAmount
-            ) / 2
+            (considerationItems[0].startAmount
+                    + considerationItems[1].startAmount
+                    + considerationItems[2].startAmount
+                    + considerationItems[3].startAmount) / 2
         );
         assertEq(erc20Token.balanceOf(PROTOCOL_FEE_RECEIVER), considerationItems[1].startAmount);
         assertEq(erc20Token.balanceOf(ROYALTY_FEE_RECEIVER), considerationItems[2].startAmount);
@@ -898,4 +895,4 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test, SigningTestHelper 
     }
 }
 
-// solhint-enable func-name-mixedcase, private-vars-leading-underscore
+// forge-lint: disable-end(erc20-unchecked-transfer)

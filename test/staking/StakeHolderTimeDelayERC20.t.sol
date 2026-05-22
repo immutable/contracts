@@ -10,32 +10,38 @@ import {ERC1967Proxy} from "openzeppelin-contracts-4.9.3/proxy/ERC1967/ERC1967Pr
 import {StakeHolderBaseV2} from "../../contracts/staking/StakeHolderBaseV2.sol";
 
 contract StakeHolderERC20V3a is StakeHolderERC20V2 {
-    function upgradeStorage(bytes memory /* _data */) external override(StakeHolderBaseV2) {
+    function upgradeStorage(
+        bytes memory /* _data */
+    )
+        external
+        override(StakeHolderBaseV2)
+    {
         version = 3;
     }
 }
 
-
 contract StakeHolderTimeDelayERC20Test is StakeHolderTimeDelayBaseTest {
-
     function setUp() public override {
         super.setUp();
         deployERC20();
 
         StakeHolderERC20 impl = new StakeHolderERC20();
         bytes memory initData = abi.encodeWithSelector(
-            StakeHolderERC20.initialize.selector, address(stakeHolderTimeDelay), address(stakeHolderTimeDelay), 
-                distributeAdmin, address(erc20)
+            StakeHolderERC20.initialize.selector,
+            address(stakeHolderTimeDelay),
+            address(stakeHolderTimeDelay),
+            distributeAdmin,
+            address(erc20)
         );
         ERC1967Proxy proxy = new ERC1967Proxy(address(impl), initData);
         stakeHolder = IStakeHolder(address(proxy));
     }
 
-    function _deployV2() internal override returns(IStakeHolder) {
+    function _deployV2() internal override returns (IStakeHolder) {
         return IStakeHolder(address(new StakeHolderERC20V2()));
     }
 
-    function _deployV3() internal override returns(IStakeHolder) {
+    function _deployV3() internal override returns (IStakeHolder) {
         return IStakeHolder(address(new StakeHolderERC20V3a()));
     }
 }

@@ -1,10 +1,7 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache-2
-
-// solhint-disable-next-line compiler-version
 pragma solidity ^0.8.17;
 
-// solhint-disable-next-line no-global-import
 import {Test} from "forge-std/Test.sol";
 
 abstract contract SigningTestHelper is Test {

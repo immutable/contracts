@@ -5,7 +5,7 @@ pragma solidity >=0.8.19 <0.8.29;
 import {StakeHolderBaseTest} from "./StakeHolderBase.t.sol";
 
 abstract contract StakeHolderInitBaseTest is StakeHolderBaseTest {
-    function testGetVersion() public virtual view {
+    function testGetVersion() public view virtual {
         uint256 ver = stakeHolder.version();
         assertEq(ver, 0, "Expect initial version of storage layout to be V0");
     }

@@ -20,12 +20,10 @@ contract MockWalletFactory {
     // slither-disable-next-line locked-ether
     function deploy(address _mainModule, bytes32 _salt) public payable returns (address _contract) {
         bytes memory code = abi.encodePacked(WALLET_CREATION_CODE, uint256(uint160(_mainModule)));
-        // solhint-disable-next-line no-inline-assembly
         assembly ("memory-safe") {
             _contract := create2(callvalue(), add(code, 32), mload(code), _salt)
         }
         // check deployment success
-        // solhint-disable-next-line custom-errors
         require(_contract != address(0), "WalletFactory: deployment failed");
     }
 }

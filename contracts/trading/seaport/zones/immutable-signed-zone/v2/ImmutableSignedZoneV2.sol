@@ -1,7 +1,6 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache-2
 
-// solhint-disable-next-line compiler-version
 pragma solidity 0.8.20;
 
 import {AccessControlEnumerable} from "openzeppelin-contracts-5.0.2/access/extensions/AccessControlEnumerable.sol";
@@ -36,33 +35,21 @@ contract ImmutableSignedZoneV2 is
     SIP7Interface
 {
     /// @dev The EIP-712 domain type hash.
-    bytes32 private constant _EIP_712_DOMAIN_TYPEHASH =
-        keccak256(
-            abi.encodePacked(
-                "EIP712Domain(",
-                "string name,",
-                "string version,",
-                "uint256 chainId,",
-                "address verifyingContract",
-                ")"
-            )
-        );
+    bytes32 private constant _EIP_712_DOMAIN_TYPEHASH = keccak256(
+        abi.encodePacked(
+            "EIP712Domain(", "string name,", "string version,", "uint256 chainId,", "address verifyingContract", ")"
+        )
+    );
 
     /// @dev The EIP-712 domain version value.
     bytes32 private constant _VERSION_HASH = keccak256(bytes("2.0"));
 
     /// @dev The EIP-712 signed order type hash.
-    bytes32 private constant _SIGNED_ORDER_TYPEHASH =
-        keccak256(
-            abi.encodePacked(
-                "SignedOrder(",
-                "address fulfiller,",
-                "uint64 expiration,",
-                "bytes32 orderHash,",
-                "bytes context",
-                ")"
-            )
-        );
+    bytes32 private constant _SIGNED_ORDER_TYPEHASH = keccak256(
+        abi.encodePacked(
+            "SignedOrder(", "address fulfiller,", "uint64 expiration,", "bytes32 orderHash,", "bytes context", ")"
+        )
+    );
 
     /// @dev The chain ID on which the contract was deployed.
     uint256 private immutable _CHAIN_ID = block.chainid;
@@ -74,13 +61,11 @@ contract ImmutableSignedZoneV2 is
     uint8 private constant _ACCEPTED_SIP6_VERSION = 0;
 
     /// @dev The name for this zone returned in getSeaportMetadata().
-    // solhint-disable-next-line var-name-mixedcase
     string private _ZONE_NAME;
 
     bytes32 private immutable _NAME_HASH;
 
     /// @dev The allowed signers.
-    // solhint-disable-next-line named-parameters-mapping
     mapping(address => SignerInfo) private _signers;
 
     /// @dev The API endpoint where orders for this zone can be signed.
@@ -99,12 +84,9 @@ contract ImmutableSignedZoneV2 is
      * @param owner            The address of the owner of this contract. Specified in the
      *                         constructor to be CREATE2 / CREATE3 compatible.
      */
-    constructor(
-        string memory zoneName,
-        string memory apiEndpoint,
-        string memory documentationURI,
-        address owner
-    ) ZoneAccessControl(owner) {
+    constructor(string memory zoneName, string memory apiEndpoint, string memory documentationURI, address owner)
+        ZoneAccessControl(owner)
+    {
         // Set the zone name.
         _ZONE_NAME = zoneName;
 
@@ -148,7 +130,7 @@ contract ImmutableSignedZoneV2 is
         }
 
         // Set the signer info.
-        _signers[signer] = SignerInfo(true, true);
+        _signers[signer] = SignerInfo({active: true, previouslyActive: true});
 
         // Emit an event that the signer was added.
         emit SignerAdded(signer);
@@ -208,12 +190,8 @@ contract ImmutableSignedZoneV2 is
         // supported SIP (7)
         schemas = new Schema[](1);
         schemas[0].id = 7;
-        schemas[0].metadata = abi.encode(
-            _domainSeparator(),
-            _apiEndpoint,
-            _getSupportedSubstandards(),
-            _documentationURI
-        );
+        schemas[0].metadata =
+            abi.encode(_domainSeparator(), _apiEndpoint, _getSupportedSubstandards(), _documentationURI);
     }
 
     /**
@@ -254,9 +232,12 @@ contract ImmutableSignedZoneV2 is
      * @return validOrderMagicValue A magic value indicating if the order is
      *                              currently valid.
      */
-    function validateOrder(
-        ZoneParameters calldata zoneParameters
-    ) external view override returns (bytes4 validOrderMagicValue) {
+    function validateOrder(ZoneParameters calldata zoneParameters)
+        external
+        view
+        override
+        returns (bytes4 validOrderMagicValue)
+    {
         // Put the extraData and orderHash on the stack for cheaper access.
         bytes calldata extraData = zoneParameters.extraData;
         bytes32 orderHash = zoneParameters.orderHash;
@@ -295,9 +276,7 @@ contract ImmutableSignedZoneV2 is
         bytes calldata context = extraData[93:];
 
         // Revert if expired.
-        // solhint-disable-next-line not-rely-on-time
         if (block.timestamp > expiration) {
-            // solhint-disable-next-line not-rely-on-time
             revert SignatureExpired(block.timestamp, expiration, orderHash);
         }
 
@@ -340,14 +319,14 @@ contract ImmutableSignedZoneV2 is
      *
      * @param interfaceId The interface ID to check for support.
      */
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view override(ERC165, ZoneInterface, AccessControlEnumerable) returns (bool) {
-        return
-            interfaceId == type(ZoneInterface).interfaceId ||
-            interfaceId == type(SIP5Interface).interfaceId ||
-            interfaceId == type(SIP7Interface).interfaceId ||
-            super.supportsInterface(interfaceId);
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC165, ZoneInterface, AccessControlEnumerable)
+        returns (bool)
+    {
+        return interfaceId == type(ZoneInterface).interfaceId || interfaceId == type(SIP5Interface).interfaceId
+            || interfaceId == type(SIP7Interface).interfaceId || super.supportsInterface(interfaceId);
     }
 
     /**
@@ -393,16 +372,14 @@ contract ImmutableSignedZoneV2 is
      * @param context          The optional variable-length context.
      * @return signedOrderHash The signedOrder hash.
      */
-    function _deriveSignedOrderHash(
-        address fulfiller,
-        uint64 expiration,
-        bytes32 orderHash,
-        bytes calldata context
-    ) internal pure returns (bytes32 signedOrderHash) {
+    function _deriveSignedOrderHash(address fulfiller, uint64 expiration, bytes32 orderHash, bytes calldata context)
+        internal
+        pure
+        returns (bytes32 signedOrderHash)
+    {
         // Derive the signed order hash.
-        signedOrderHash = keccak256(
-            abi.encode(_SIGNED_ORDER_TYPEHASH, fulfiller, expiration, orderHash, keccak256(context))
-        );
+        signedOrderHash =
+            keccak256(abi.encode(_SIGNED_ORDER_TYPEHASH, fulfiller, expiration, orderHash, keccak256(context)));
     }
 
     /**
@@ -448,10 +425,11 @@ contract ImmutableSignedZoneV2 is
      * @param zoneParameters The zone parameters.
      * @return               Length of substandard segment.
      */
-    function _validateSubstandard3(
-        bytes calldata context,
-        ZoneParameters calldata zoneParameters
-    ) internal pure returns (uint256) {
+    function _validateSubstandard3(bytes calldata context, ZoneParameters calldata zoneParameters)
+        internal
+        pure
+        returns (uint256)
+    {
         if (uint8(context[0]) != 3) {
             return 0;
         }
@@ -477,10 +455,11 @@ contract ImmutableSignedZoneV2 is
      * @param zoneParameters The zone parameters.
      * @return               Length of substandard segment.
      */
-    function _validateSubstandard4(
-        bytes calldata context,
-        ZoneParameters calldata zoneParameters
-    ) internal pure returns (uint256) {
+    function _validateSubstandard4(bytes calldata context, ZoneParameters calldata zoneParameters)
+        internal
+        pure
+        returns (uint256)
+    {
         if (uint8(context[0]) != 4) {
             return 0;
         }
@@ -511,10 +490,11 @@ contract ImmutableSignedZoneV2 is
      * @param zoneParameters The zone parameters.
      * @return               Length of substandard segment.
      */
-    function _validateSubstandard6(
-        bytes calldata context,
-        ZoneParameters calldata zoneParameters
-    ) internal pure returns (uint256) {
+    function _validateSubstandard6(bytes calldata context, ZoneParameters calldata zoneParameters)
+        internal
+        pure
+        returns (uint256)
+    {
         if (uint8(context[0]) != 6) {
             return 0;
         }
@@ -539,15 +519,11 @@ contract ImmutableSignedZoneV2 is
         // from context) amounts of the first offer item.
         if (
             _deriveReceivedItemsHash(
-                zoneParameters.consideration,
-                originalFirstOfferItemAmount,
-                zoneParameters.offer[0].amount
-            ) != expectedReceivedItemsHash
+                    zoneParameters.consideration, originalFirstOfferItemAmount, zoneParameters.offer[0].amount
+                ) != expectedReceivedItemsHash
         ) {
             revert Substandard6Violation(
-                zoneParameters.offer[0].amount,
-                originalFirstOfferItemAmount,
-                zoneParameters.orderHash
+                zoneParameters.offer[0].amount, originalFirstOfferItemAmount, zoneParameters.orderHash
             );
         }
 
@@ -592,10 +568,11 @@ contract ImmutableSignedZoneV2 is
      * @param values      Values array.
      * @return            True if all elements in values exist in sourceArray.
      */
-    function _bytes32ArrayIncludes(
-        bytes32[] calldata sourceArray,
-        bytes32[] memory values
-    ) internal pure returns (bool) {
+    function _bytes32ArrayIncludes(bytes32[] calldata sourceArray, bytes32[] memory values)
+        internal
+        pure
+        returns (bool)
+    {
         // cache the length in memory for loop optimisation
         uint256 sourceArraySize = sourceArray.length;
         uint256 valuesSize = values.length;
@@ -607,10 +584,10 @@ contract ImmutableSignedZoneV2 is
         }
 
         // Iterate through each element and compare them
-        for (uint256 i = 0; i < valuesSize; ) {
+        for (uint256 i = 0; i < valuesSize;) {
             bool found = false;
             bytes32 item = values[i];
-            for (uint256 j = 0; j < sourceArraySize; ) {
+            for (uint256 j = 0; j < sourceArraySize;) {
                 if (item == sourceArray[j]) {
                     // if item from values is in sourceArray, break
                     found = true;

@@ -3,7 +3,9 @@
 pragma solidity >=0.8.19 <0.8.29;
 
 import {IERC20Upgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/token/ERC20/IERC20Upgradeable.sol";
-import {SafeERC20Upgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import {
+    SafeERC20Upgradeable
+} from "openzeppelin-contracts-upgradeable-4.9.3/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {IStakeHolder, StakeHolderBase} from "./StakeHolderBase.sol";
 
 /**
@@ -23,12 +25,10 @@ contract StakeHolderERC20 is StakeHolderBase {
      * @param _distributeAdmin the address to grant `DISTRIBUTE_ROLE` to.
      * @param _token the token to use for staking.
      */
-    function initialize(
-        address _roleAdmin,
-        address _upgradeAdmin,
-        address _distributeAdmin,
-        address _token
-    ) public initializer {
+    function initialize(address _roleAdmin, address _upgradeAdmin, address _distributeAdmin, address _token)
+        public
+        initializer
+    {
         __StakeHolderERC20_init(_roleAdmin, _upgradeAdmin, _distributeAdmin, _token);
     }
 
@@ -68,7 +68,6 @@ contract StakeHolderERC20 is StakeHolderBase {
 
     /// @notice storage gap for additional variables for upgrades
     // slither-disable-start unused-state
-    // solhint-disable-next-line var-name-mixedcase
     uint256[50] private __StakeHolderERC20Gap;
     // slither-disable-end unused-state
 }

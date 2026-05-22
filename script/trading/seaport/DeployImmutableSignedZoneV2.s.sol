@@ -1,11 +1,11 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache-2
-// solhint-disable-next-line compiler-version
 pragma solidity 0.8.20;
 
 import {Test} from "forge-std/Test.sol";
-import {ImmutableSignedZoneV2} from
-    "../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/ImmutableSignedZoneV2.sol";
+import {
+    ImmutableSignedZoneV2
+} from "../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/ImmutableSignedZoneV2.sol";
 
 /**
  * @title IDeployer Interface
@@ -63,10 +63,8 @@ contract DeployImmutableSignedZoneV2 is Test {
         );
         assertEq(
             true,
-            (
-                keccak256(abi.encodePacked(documentationURI))
-                    == keccak256(abi.encodePacked(zoneDeploymentArgs.documentationURI))
-            )
+            (keccak256(abi.encodePacked(documentationURI))
+                    == keccak256(abi.encodePacked(zoneDeploymentArgs.documentationURI)))
         );
     }
 
@@ -81,8 +79,9 @@ contract DeployImmutableSignedZoneV2 is Test {
 
         DeploymentArgs memory deploymentArgs = DeploymentArgs({signer: signer, factory: factory, salt: salt});
 
-        ZoneDeploymentArgs memory zoneDeploymentArgs =
-            ZoneDeploymentArgs({owner: owner, apiEndpoint: apiEndpoint, documentationURI: documentationURI, name: name});
+        ZoneDeploymentArgs memory zoneDeploymentArgs = ZoneDeploymentArgs({
+            owner: owner, apiEndpoint: apiEndpoint, documentationURI: documentationURI, name: name
+        });
 
         _deploy(deploymentArgs, zoneDeploymentArgs);
     }

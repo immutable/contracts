@@ -8,7 +8,6 @@ import {TimelockController} from "openzeppelin-contracts-4.9.3/governance/Timelo
 import {UUPSUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/proxy/utils/UUPSUpgradeable.sol";
 import {StakeHolderBase} from "../../contracts/staking/StakeHolderBase.sol";
 
-
 abstract contract StakeHolderTimeDelayBaseTest is StakeHolderBaseTest {
     TimelockController stakeHolderTimeDelay;
 
@@ -31,7 +30,6 @@ abstract contract StakeHolderTimeDelayBaseTest is StakeHolderBaseTest {
         stakeHolderTimeDelay = new TimelockController(delay, proposers, executors, address(0));
     }
 
-
     function testTimeLockControllerDeployment() public view {
         assertEq(stakeHolderTimeDelay.getMinDelay(), delay, "Incorrect time delay");
     }
@@ -40,8 +38,8 @@ abstract contract StakeHolderTimeDelayBaseTest is StakeHolderBaseTest {
         IStakeHolder v2Impl = _deployV2();
 
         bytes memory callData = abi.encodeWithSelector(StakeHolderBase.upgradeStorage.selector, bytes(""));
-        bytes memory upgradeCall = abi.encodeWithSelector(
-            UUPSUpgradeable.upgradeToAndCall.selector, address(v2Impl), callData);
+        bytes memory upgradeCall =
+            abi.encodeWithSelector(UUPSUpgradeable.upgradeToAndCall.selector, address(v2Impl), callData);
 
         address target = address(stakeHolder);
         uint256 value = 0;
@@ -53,8 +51,7 @@ abstract contract StakeHolderTimeDelayBaseTest is StakeHolderBaseTest {
         uint256 timeNow = block.timestamp;
 
         vm.prank(adminProposer);
-        stakeHolderTimeDelay.schedule(
-            target, value, data, predecessor, salt, theDelay);
+        stakeHolderTimeDelay.schedule(target, value, data, predecessor, salt, theDelay);
 
         vm.warp(timeNow + delay);
 
@@ -71,8 +68,8 @@ abstract contract StakeHolderTimeDelayBaseTest is StakeHolderBaseTest {
         IStakeHolder v3Impl = _deployV3();
 
         bytes memory callData = abi.encodeWithSelector(StakeHolderBase.upgradeStorage.selector, bytes(""));
-        bytes memory upgradeCall = abi.encodeWithSelector(
-            UUPSUpgradeable.upgradeToAndCall.selector, address(v3Impl), callData);
+        bytes memory upgradeCall =
+            abi.encodeWithSelector(UUPSUpgradeable.upgradeToAndCall.selector, address(v3Impl), callData);
 
         address target = address(stakeHolder);
         uint256 value = 0;
@@ -84,8 +81,7 @@ abstract contract StakeHolderTimeDelayBaseTest is StakeHolderBaseTest {
         uint256 timeNow = block.timestamp;
 
         vm.prank(adminProposer);
-        stakeHolderTimeDelay.schedule(
-            target, value, data, predecessor, salt, theDelay);
+        stakeHolderTimeDelay.schedule(target, value, data, predecessor, salt, theDelay);
 
         vm.warp(timeNow + delay);
 
@@ -96,13 +92,12 @@ abstract contract StakeHolderTimeDelayBaseTest is StakeHolderBaseTest {
         assertEq(ver, 3, "Upgrade did not upgrade version 3");
     }
 
-
     function testTooShortDelay() public {
         IStakeHolder v2Impl = _deployV2();
 
         bytes memory initData = abi.encodeWithSelector(StakeHolderBase.upgradeStorage.selector, bytes(""));
-        bytes memory upgradeCall = abi.encodeWithSelector(
-            UUPSUpgradeable.upgradeToAndCall.selector, address(v2Impl), initData);
+        bytes memory upgradeCall =
+            abi.encodeWithSelector(UUPSUpgradeable.upgradeToAndCall.selector, address(v2Impl), initData);
 
         address target = address(stakeHolder);
         uint256 value = 0;
@@ -113,16 +108,15 @@ abstract contract StakeHolderTimeDelayBaseTest is StakeHolderBaseTest {
 
         vm.expectRevert(abi.encodePacked("TimelockController: insufficient delay"));
         vm.prank(adminProposer);
-        stakeHolderTimeDelay.schedule(
-            target, value, data, predecessor, salt, theDelay);
+        stakeHolderTimeDelay.schedule(target, value, data, predecessor, salt, theDelay);
     }
 
     function testExecuteEarly() public {
         IStakeHolder v2Impl = _deployV2();
 
         bytes memory initData = abi.encodeWithSelector(StakeHolderBase.upgradeStorage.selector, bytes(""));
-        bytes memory upgradeCall = abi.encodeWithSelector(
-            UUPSUpgradeable.upgradeToAndCall.selector, address(v2Impl), initData);
+        bytes memory upgradeCall =
+            abi.encodeWithSelector(UUPSUpgradeable.upgradeToAndCall.selector, address(v2Impl), initData);
 
         address target = address(stakeHolder);
         uint256 value = 0;
@@ -134,8 +128,7 @@ abstract contract StakeHolderTimeDelayBaseTest is StakeHolderBaseTest {
         uint256 timeNow = block.timestamp;
 
         vm.prank(adminProposer);
-        stakeHolderTimeDelay.schedule(
-            target, value, data, predecessor, salt, theDelay);
+        stakeHolderTimeDelay.schedule(target, value, data, predecessor, salt, theDelay);
 
         vm.expectRevert(abi.encodePacked("TimelockController: operation is not ready"));
         vm.warp(timeNow + delay - 1); // Too early
@@ -144,6 +137,6 @@ abstract contract StakeHolderTimeDelayBaseTest is StakeHolderBaseTest {
         stakeHolderTimeDelay.execute(target, value, data, predecessor, salt);
     }
 
-    function _deployV2() internal virtual returns(IStakeHolder);
-    function _deployV3() internal virtual returns(IStakeHolder);
+    function _deployV2() internal virtual returns (IStakeHolder);
+    function _deployV3() internal virtual returns (IStakeHolder);
 }

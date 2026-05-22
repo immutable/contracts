@@ -11,7 +11,6 @@ interface IERC4494 is IERC165 {
     /// ERC165 bytes to add to interface array - set in parent contract
     ///
     /// _INTERFACE_ID_ERC4494 = 0x5604e225
-
     /// @notice Function to approve by way of owner signature
     /// @param spender the address to approve
     /// @param tokenId the index of the NFT to approve the spender on
@@ -26,6 +25,5 @@ interface IERC4494 is IERC165 {
 
     /// @notice Returns the domain separator used in the encoding of the signature for permits, as defined by EIP-712
     /// @return the bytes32 domain separator
-    // solhint-disable-next-line func-name-mixedcase
     function DOMAIN_SEPARATOR() external view returns (bytes32);
 }

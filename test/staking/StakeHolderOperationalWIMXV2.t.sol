@@ -10,7 +10,7 @@ import {StakeHolderOperationalWIMXTest} from "./StakeHolderOperationalWIMX.t.sol
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
 contract StakeHolderOperationalWIMXTestV2 is StakeHolderOperationalWIMXTest, StakeHolderOperationalBaseTestV2 {
-    function setUp() public override (StakeHolderOperationalWIMXTest, StakeHolderBaseTest) {
+    function setUp() public override(StakeHolderOperationalWIMXTest, StakeHolderBaseTest) {
         StakeHolderOperationalWIMXTest.setUp();
         upgradeToStakeHolderWIMXV2();
     }
@@ -24,9 +24,13 @@ contract StakeHolderOperationalWIMXTestV2 is StakeHolderOperationalWIMXTest, Sta
         Address.sendValue(payable(address(stakeHolder)), amount);
     }
 
-
-    function _stakeFor(address _distributor, uint256 _total, IStakeHolder.AccountAmount[] memory _accountAmounts, 
-        bool _hasError, bytes memory _error) internal override {
+    function _stakeFor(
+        address _distributor,
+        uint256 _total,
+        IStakeHolder.AccountAmount[] memory _accountAmounts,
+        bool _hasError,
+        bytes memory _error
+    ) internal override {
         if (_hasError) {
             vm.expectRevert(_error);
         }

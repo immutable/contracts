@@ -8,24 +8,28 @@ import {StakeHolderBase} from "../../contracts/staking/StakeHolderBase.sol";
 import {StakeHolderConfigBaseTest} from "./StakeHolderConfigBase.t.sol";
 
 contract StakeHolderWIMXV2a is StakeHolderWIMX {
-    function upgradeStorage(bytes memory /* _data */) external override(StakeHolderBase) {
+    function upgradeStorage(
+        bytes memory /* _data */
+    )
+        external
+        override(StakeHolderBase)
+    {
         version = 2;
     }
 }
 
 contract StakeHolderConfigWIMXTest is StakeHolderConfigBaseTest {
-
     function setUp() public override {
         super.setUp();
         deployWIMX();
         deployStakeHolderWIMXV1();
     }
 
-    function _deployV1() internal override returns(IStakeHolder) {
+    function _deployV1() internal override returns (IStakeHolder) {
         return IStakeHolder(address(new StakeHolderWIMX()));
     }
 
-    function _deployV2() internal override returns(IStakeHolder) {
+    function _deployV2() internal override returns (IStakeHolder) {
         return IStakeHolder(address(new StakeHolderWIMXV2a()));
     }
 }

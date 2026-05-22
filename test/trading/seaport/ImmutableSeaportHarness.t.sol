@@ -1,12 +1,9 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache-2
-
-// solhint-disable-next-line compiler-version
 pragma solidity ^0.8.17;
 
 import {ImmutableSeaport} from "../../../contracts/trading/seaport/ImmutableSeaport.sol";
 
-// solhint-disable func-name-mixedcase
 
 contract ImmutableSeaportHarness is ImmutableSeaport {
     constructor(address conduitController, address owner) ImmutableSeaport(conduitController, owner) {}
@@ -24,4 +21,3 @@ contract ImmutableSeaportHarness is ImmutableSeaport {
     }
 }
 
-// solhint-enable func-name-mixedcase

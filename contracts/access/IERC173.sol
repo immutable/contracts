@@ -1,5 +1,4 @@
 //SPDX-License-Identifier: Apache 2.0
-// solhint-disable compiler-version
 pragma solidity ^0.8.0;
 
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";

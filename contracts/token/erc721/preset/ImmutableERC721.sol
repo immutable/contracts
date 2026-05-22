@@ -6,7 +6,6 @@ import {ImmutableERC721HybridBase} from "../abstract/ImmutableERC721HybridBase.s
 
 contract ImmutableERC721 is ImmutableERC721HybridBase {
     ///     =====   Constructor  =====
-
     /**
      * @notice Grants `DEFAULT_ADMIN_ROLE` to the supplied `owner` address
      * @param owner_ The address to grant the `DEFAULT_ADMIN_ROLE` to
@@ -30,14 +29,7 @@ contract ImmutableERC721 is ImmutableERC721HybridBase {
         uint96 feeNumerator_
     )
         ImmutableERC721HybridBase(
-            owner_,
-            name_,
-            symbol_,
-            baseURI_,
-            contractURI_,
-            operatorAllowlist_,
-            royaltyReceiver_,
-            feeNumerator_
+            owner_, name_, symbol_, baseURI_, contractURI_, operatorAllowlist_, royaltyReceiver_, feeNumerator_
         )
     {}
 

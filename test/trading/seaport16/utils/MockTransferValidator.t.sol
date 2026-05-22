@@ -1,7 +1,5 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache-2
-
-// solhint-disable-next-line compiler-version
 pragma solidity ^0.8.17;
 
 import {ITransferValidator} from "@limitbreak/creator-token-standards/src/interfaces/ITransferValidator.sol";
@@ -81,7 +79,13 @@ contract MockTransferValidator is ITransferValidator {
         _revertValidateTransferWithTokenIdTokenId = tokenId;
     }
 
-    function revertValidateTransferWithTokenIdAndAmount(address caller, address from, address to, uint256 tokenId, uint256 amount) public {
+    function revertValidateTransferWithTokenIdAndAmount(
+        address caller,
+        address from,
+        address to,
+        uint256 tokenId,
+        uint256 amount
+    ) public {
         _shouldRevertValidateTransferWithTokenIdAndAmount = true;
         _revertValidateTransferWithTokenIdAndAmountCaller = caller;
         _revertValidateTransferWithTokenIdAndAmountFrom = from;
@@ -90,7 +94,9 @@ contract MockTransferValidator is ITransferValidator {
         _revertValidateTransferWithTokenIdAndAmountAmount = amount;
     }
 
-    function revertBeforeAuthorizedTransferWithOperatorAndTokenId(address operator, address token, uint256 tokenId) public {
+    function revertBeforeAuthorizedTransferWithOperatorAndTokenId(address operator, address token, uint256 tokenId)
+        public
+    {
         _shouldRevertBeforeAuthorizedTransferWithOperatorAndTokenId = true;
         _revertBeforeAuthorizedTransferWithOperatorAndTokenIdOperator = operator;
         _revertBeforeAuthorizedTransferWithOperatorAndTokenIdToken = token;
@@ -135,10 +141,8 @@ contract MockTransferValidator is ITransferValidator {
 
     function applyCollectionTransferPolicy(address caller, address from, address to) external view override {
         if (
-            _shouldRevertApplyCollectionTransferPolicy &&
-            caller == _revertApplyCollectionTransferPolicyCaller &&
-            from == _revertApplyCollectionTransferPolicyFrom &&
-            to == _revertApplyCollectionTransferPolicyTo
+            _shouldRevertApplyCollectionTransferPolicy && caller == _revertApplyCollectionTransferPolicyCaller
+                && from == _revertApplyCollectionTransferPolicyFrom && to == _revertApplyCollectionTransferPolicyTo
         ) {
             revert MockTransferValidatorRevert("applyCollectionTransferPolicy(address caller, address from, address to)");
         }
@@ -146,10 +150,8 @@ contract MockTransferValidator is ITransferValidator {
 
     function validateTransfer(address caller, address from, address to) external view override {
         if (
-            _shouldRevertValidateTransfer &&
-            caller == _revertValidateTransferCaller &&
-            from == _revertValidateTransferFrom &&
-            to == _revertValidateTransferTo
+            _shouldRevertValidateTransfer && caller == _revertValidateTransferCaller
+                && from == _revertValidateTransferFrom && to == _revertValidateTransferTo
         ) {
             revert MockTransferValidatorRevert("validateTransfer(address caller, address from, address to)");
         }
@@ -157,24 +159,26 @@ contract MockTransferValidator is ITransferValidator {
 
     function validateTransfer(address caller, address from, address to, uint256 tokenId) external view override {
         if (
-            _shouldRevertValidateTransferWithTokenId &&
-            caller == _revertValidateTransferWithTokenIdCaller &&
-            from == _revertValidateTransferWithTokenIdFrom &&
-            to == _revertValidateTransferWithTokenIdTo &&
-            tokenId == _revertValidateTransferWithTokenIdTokenId
+            _shouldRevertValidateTransferWithTokenId && caller == _revertValidateTransferWithTokenIdCaller
+                && from == _revertValidateTransferWithTokenIdFrom && to == _revertValidateTransferWithTokenIdTo
+                && tokenId == _revertValidateTransferWithTokenIdTokenId
         ) {
             revert MockTransferValidatorRevert("validateTransfer(address caller, address from, address to, uint256 tokenId)");
         }
     }
 
-    function validateTransfer(address caller, address from, address to, uint256 tokenId, uint256 amount) external view override {
+    function validateTransfer(address caller, address from, address to, uint256 tokenId, uint256 amount)
+        external
+        view
+        override
+    {
         if (
-            _shouldRevertValidateTransferWithTokenIdAndAmount &&
-            caller == _revertValidateTransferWithTokenIdAndAmountCaller &&
-            from == _revertValidateTransferWithTokenIdAndAmountFrom &&
-            to == _revertValidateTransferWithTokenIdAndAmountTo &&
-            tokenId == _revertValidateTransferWithTokenIdAndAmountTokenId &&
-            amount == _revertValidateTransferWithTokenIdAndAmountAmount
+            _shouldRevertValidateTransferWithTokenIdAndAmount
+                && caller == _revertValidateTransferWithTokenIdAndAmountCaller
+                && from == _revertValidateTransferWithTokenIdAndAmountFrom
+                && to == _revertValidateTransferWithTokenIdAndAmountTo
+                && tokenId == _revertValidateTransferWithTokenIdAndAmountTokenId
+                && amount == _revertValidateTransferWithTokenIdAndAmountAmount
         ) {
             revert MockTransferValidatorRevert("validateTransfer(address caller, address from, address to, uint256 tokenId, uint256 amount)");
         }
@@ -182,10 +186,10 @@ contract MockTransferValidator is ITransferValidator {
 
     function beforeAuthorizedTransfer(address operator, address token, uint256 tokenId) external view override {
         if (
-            _shouldRevertBeforeAuthorizedTransferWithOperatorAndTokenId &&
-            operator == _revertBeforeAuthorizedTransferWithOperatorAndTokenIdOperator &&
-            token == _revertBeforeAuthorizedTransferWithOperatorAndTokenIdToken &&
-            tokenId == _revertBeforeAuthorizedTransferWithOperatorAndTokenIdTokenId
+            _shouldRevertBeforeAuthorizedTransferWithOperatorAndTokenId
+                && operator == _revertBeforeAuthorizedTransferWithOperatorAndTokenIdOperator
+                && token == _revertBeforeAuthorizedTransferWithOperatorAndTokenIdToken
+                && tokenId == _revertBeforeAuthorizedTransferWithOperatorAndTokenIdTokenId
         ) {
             revert MockTransferValidatorRevert("beforeAuthorizedTransfer(address operator, address token, uint256 tokenId)");
         }
@@ -193,9 +197,8 @@ contract MockTransferValidator is ITransferValidator {
 
     function afterAuthorizedTransfer(address token, uint256 tokenId) external view override {
         if (
-            _shouldRevertAfterAuthorizedTransferWithTokenId &&
-            token == _revertAfterAuthorizedTransferWithTokenIdToken &&
-            tokenId == _revertAfterAuthorizedTransferWithTokenIdTokenId
+            _shouldRevertAfterAuthorizedTransferWithTokenId && token == _revertAfterAuthorizedTransferWithTokenIdToken
+                && tokenId == _revertAfterAuthorizedTransferWithTokenIdTokenId
         ) {
             revert MockTransferValidatorRevert("afterAuthorizedTransfer(address token, uint256 tokenId)");
         }
@@ -203,28 +206,24 @@ contract MockTransferValidator is ITransferValidator {
 
     function beforeAuthorizedTransfer(address operator, address token) external view override {
         if (
-            _shouldRevertBeforeAuthorizedTransferWithOperator &&
-            operator == _revertBeforeAuthorizedTransferWithOperatorOperator &&
-            token == _revertBeforeAuthorizedTransferWithOperatorToken
+            _shouldRevertBeforeAuthorizedTransferWithOperator
+                && operator == _revertBeforeAuthorizedTransferWithOperatorOperator
+                && token == _revertBeforeAuthorizedTransferWithOperatorToken
         ) {
             revert MockTransferValidatorRevert("beforeAuthorizedTransfer(address operator, address token)");
         }
     }
 
     function afterAuthorizedTransfer(address token) external view override {
-        if (
-            _shouldRevertAfterAuthorizedTransfer &&
-            token == _revertAfterAuthorizedTransferToken
-        ) {
+        if (_shouldRevertAfterAuthorizedTransfer && token == _revertAfterAuthorizedTransferToken) {
             revert MockTransferValidatorRevert("afterAuthorizedTransfer(address token)");
         }
     }
 
     function beforeAuthorizedTransfer(address token, uint256 tokenId) external view override {
         if (
-            _shouldRevertBeforeAuthorizedTransferWithTokenId &&
-            token == _revertBeforeAuthorizedTransferWithTokenIdToken &&
-            tokenId == _revertBeforeAuthorizedTransferWithTokenIdTokenId
+            _shouldRevertBeforeAuthorizedTransferWithTokenId && token == _revertBeforeAuthorizedTransferWithTokenIdToken
+                && tokenId == _revertBeforeAuthorizedTransferWithTokenIdTokenId
         ) {
             revert MockTransferValidatorRevert("beforeAuthorizedTransfer(address token, uint256 tokenId)");
         }
@@ -232,10 +231,9 @@ contract MockTransferValidator is ITransferValidator {
 
     function beforeAuthorizedTransferWithAmount(address token, uint256 tokenId, uint256 amount) external view override {
         if (
-            _shouldRevertBeforeAuthorizedTransferWithAmount &&
-            token == _revertBeforeAuthorizedTransferWithAmountToken &&
-            tokenId == _revertBeforeAuthorizedTransferWithAmountTokenId &&
-            amount == _revertBeforeAuthorizedTransferWithAmountAmount
+            _shouldRevertBeforeAuthorizedTransferWithAmount && token == _revertBeforeAuthorizedTransferWithAmountToken
+                && tokenId == _revertBeforeAuthorizedTransferWithAmountTokenId
+                && amount == _revertBeforeAuthorizedTransferWithAmountAmount
         ) {
             revert MockTransferValidatorRevert("beforeAuthorizedTransferWithAmount(address token, uint256 tokenId, uint256 amount)");
         }
@@ -243,9 +241,8 @@ contract MockTransferValidator is ITransferValidator {
 
     function afterAuthorizedTransferWithAmount(address token, uint256 tokenId) external view override {
         if (
-            _shouldRevertAfterAuthorizedTransferWithAmount &&
-            token == _revertAfterAuthorizedTransferWithAmountToken &&
-            tokenId == _revertAfterAuthorizedTransferWithAmountTokenId
+            _shouldRevertAfterAuthorizedTransferWithAmount && token == _revertAfterAuthorizedTransferWithAmountToken
+                && tokenId == _revertAfterAuthorizedTransferWithAmountTokenId
         ) {
             revert MockTransferValidatorRevert("afterAuthorizedTransferWithAmount(address token, uint256 tokenId)");
         }

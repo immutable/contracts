@@ -2,14 +2,18 @@
 pragma solidity ^0.8.13;
 
 import {ImmutableSeaportBaseTest} from "./ImmutableSeaportBase.t.sol";
-
-
-import {Test} from "forge-std/Test.sol";
 import {ImmutableSeaportTestHelper} from "./ImmutableSeaportTestHelper.t.sol";
 import {ImmutableSeaport} from "../../../contracts/trading/seaport16/ImmutableSeaport.sol";
-import {SIP7EventsAndErrors} from "../../../contracts/trading/seaport16/zones/immutable-signed-zone/v3/interfaces/SIP7EventsAndErrors.sol";
+import {
+    SIP7EventsAndErrors
+} from "../../../contracts/trading/seaport16/zones/immutable-signed-zone/v3/interfaces/SIP7EventsAndErrors.sol";
 
-import {OrderParameters, OrderComponents, AdvancedOrder, CriteriaResolver} from "seaport-types-16/src/lib/ConsiderationStructs.sol";
+import {
+    OrderParameters,
+    OrderComponents,
+    AdvancedOrder,
+    CriteriaResolver
+} from "seaport-types-16/src/lib/ConsiderationStructs.sol";
 import {OrderType} from "seaport-types-16/src/lib/ConsiderationEnums.sol";
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
@@ -31,16 +35,32 @@ contract SellerWallet {
     bytes4 private constant SELECTOR_ERC1271_BYTES_BYTES = 0x20c13b0b;
     bytes4 private constant SELECTOR_ERC1271_BYTES32_BYTES = 0x1626ba7e;
 
-    function isValidSignature(bytes calldata /*_data */, bytes calldata /*_signatures*/) external pure returns (bytes4) {
-//        if (_signatureValidationInternal(_subDigest(keccak256(_data)), _signatures)) {
-            return SELECTOR_ERC1271_BYTES_BYTES;
+    function isValidSignature(
+        bytes calldata,
+        /*_data */
+        bytes calldata /*_signatures*/
+    )
+        external
+        pure
+        returns (bytes4)
+    {
+        //        if (_signatureValidationInternal(_subDigest(keccak256(_data)), _signatures)) {
+        return SELECTOR_ERC1271_BYTES_BYTES;
         // }
         // return 0;
     }
 
-    function isValidSignature(bytes32 /*_hash*/, bytes calldata /*_signatures*/) external pure returns (bytes4) {
+    function isValidSignature(
+        bytes32,
+        /*_hash*/
+        bytes calldata /*_signatures*/
+    )
+        external
+        pure
+        returns (bytes4)
+    {
         // if (_signatureValidationInternal(_subDigest(_hash), _signatures)) {
-            return SELECTOR_ERC1271_BYTES32_BYTES;
+        return SELECTOR_ERC1271_BYTES32_BYTES;
         // }
         // return 0;
     }
@@ -49,11 +69,8 @@ contract SellerWallet {
         ERC721(_erc721).setApprovalForAll(_seaport, true);
     }
 
-    receive() external payable { }
+    receive() external payable {}
 }
-
-
-
 
 contract ImmutableSeaportOperationalTest is ImmutableSeaportBaseTest, ImmutableSeaportTestHelper {
     SellerWallet public sellerWallet;
@@ -67,7 +84,6 @@ contract ImmutableSeaportOperationalTest is ImmutableSeaportBaseTest, ImmutableS
         nftId = 1;
         vm.deal(buyer, 10 ether);
     }
-
 
     function testFulfillFullRestrictedOrder() public {
         _checkFulfill(OrderType.FULL_RESTRICTED);
@@ -91,7 +107,9 @@ contract ImmutableSeaportOperationalTest is ImmutableSeaportBaseTest, ImmutableS
         AdvancedOrder memory order = _prepareCheckFulfill(OrderType.FULL_OPEN);
 
         vm.prank(buyer);
-        vm.expectRevert(abi.encodeWithSelector(ImmutableSeaport.OrderNotRestricted.selector, uint8(OrderType.FULL_OPEN)));
+        vm.expectRevert(
+            abi.encodeWithSelector(ImmutableSeaport.OrderNotRestricted.selector, uint8(OrderType.FULL_OPEN))
+        );
         immutableSeaport.fulfillAdvancedOrder{value: 10 ether}(order, new CriteriaResolver[](0), conduitKey, buyer);
     }
 
@@ -131,7 +149,6 @@ contract ImmutableSeaportOperationalTest is ImmutableSeaportBaseTest, ImmutableS
         immutableSeaport.fulfillAdvancedOrder{value: 10 ether}(order, new CriteriaResolver[](0), conduitKey, buyer);
     }
 
-
     function _checkFulfill(OrderType _orderType) internal {
         AdvancedOrder memory order = _prepareCheckFulfill(_orderType);
 
@@ -150,13 +167,13 @@ contract ImmutableSeaportOperationalTest is ImmutableSeaportBaseTest, ImmutableS
     }
 
     function _prepareCheckFulfill() internal returns (AdvancedOrder memory) {
-        return _prepareCheckFulfill(OrderType.PARTIAL_RESTRICTED, address(immutableSignedZone), immutableSignerPkey, false);
+        return
+            _prepareCheckFulfill(OrderType.PARTIAL_RESTRICTED, address(immutableSignedZone), immutableSignerPkey, false);
     }
 
     function _prepareCheckFulfill(OrderType _orderType) internal returns (AdvancedOrder memory) {
         return _prepareCheckFulfill(_orderType, address(immutableSignedZone), immutableSignerPkey, false);
     }
-
 
     function _prepareCheckFulfill(address _zone) internal returns (AdvancedOrder memory) {
         return _prepareCheckFulfill(OrderType.PARTIAL_RESTRICTED, _zone, immutableSignerPkey, false);
@@ -167,11 +184,14 @@ contract ImmutableSeaportOperationalTest is ImmutableSeaportBaseTest, ImmutableS
     }
 
     function _prepareCheckFulfillWithBadExtraData() internal returns (AdvancedOrder memory) {
-        return _prepareCheckFulfill(OrderType.PARTIAL_RESTRICTED, address(immutableSignedZone), immutableSignerPkey, true);
+        return
+            _prepareCheckFulfill(OrderType.PARTIAL_RESTRICTED, address(immutableSignedZone), immutableSignerPkey, true);
     }
 
-
-    function _prepareCheckFulfill(OrderType _orderType, address _zone, uint256 _signer, bool _useBadExtraData) internal returns (AdvancedOrder memory) {
+    function _prepareCheckFulfill(OrderType _orderType, address _zone, uint256 _signer, bool _useBadExtraData)
+        internal
+        returns (AdvancedOrder memory)
+    {
         // Deploy test ERC721
         erc721 = new TestERC721();
         erc721.mint(address(sellerWallet), nftId);
@@ -208,14 +228,17 @@ contract ImmutableSeaportOperationalTest is ImmutableSeaportBaseTest, ImmutableS
         });
 
         bytes32 orderHash = immutableSeaport.getOrderHash(orderComponents);
-        bytes memory extraData = _generateSip7Signature(orderHash, buyer, _signer, expiration, orderParams.consideration);
+        bytes memory extraData =
+            _generateSip7Signature(orderHash, buyer, _signer, expiration, orderParams.consideration);
         if (_useBadExtraData) {
             orderParams.consideration[0].recipient = payable(buyer);
             extraData = _generateSip7Signature(orderHash, buyer, _signer, expiration, orderParams.consideration);
         }
         bytes memory signature = _signOrder(sellerPkey, orderHash);
 
-        AdvancedOrder memory order = AdvancedOrder(orderParams, 1, 1, signature, extraData );
+        AdvancedOrder memory order = AdvancedOrder({
+            parameters: orderParams, numerator: 1, denominator: 1, signature: signature, extraData: extraData
+        });
         return order;
     }
 }

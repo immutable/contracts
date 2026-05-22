@@ -23,7 +23,7 @@ abstract contract ERC721PsiBurnableV2 is ERC721PsiV2 {
         uint256 groupNumber;
         uint256 groupOffset;
         address owner;
-        (groupNumber, groupOffset, , owner) = _tokenInfo(_tokenId);
+        (groupNumber, groupOffset,, owner) = _tokenInfo(_tokenId);
 
         _beforeTokenTransfers(owner, address(0), _tokenId, 1);
 

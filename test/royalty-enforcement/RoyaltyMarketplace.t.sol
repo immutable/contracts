@@ -8,19 +8,18 @@ import {MockMarketplace} from "./MockMarketplace.sol";
 import {OperatorAllowlistUpgradeable} from "../../contracts/allowlist/OperatorAllowlistUpgradeable.sol";
 import {DeployOperatorAllowlist} from "../utils/DeployAllowlistProxy.sol";
 
-
 contract RoyaltyMarketplaceTest is Test {
     ImmutableERC721MintByID public erc721;
     OperatorAllowlistUpgradeable public operatorAllowlist;
     MockMarketplace public mockMarketplace;
-    
+
     address public owner;
     address public minter;
     address public registrar;
     address public royaltyRecipient;
     address public buyer;
     address public seller;
-    
+
     string public constant BASE_URI = "https://baseURI.com/";
     string public constant CONTRACT_URI = "https://contractURI.com";
     string public constant NAME = "ERC721Preset";
@@ -35,23 +34,16 @@ contract RoyaltyMarketplaceTest is Test {
         royaltyRecipient = makeAddr("royaltyRecipient");
         buyer = makeAddr("buyer");
         seller = makeAddr("seller");
-        
+
         // Deploy operator Allowlist
         DeployOperatorAllowlist deployScript = new DeployOperatorAllowlist();
         address proxyAddr = deployScript.run(owner, owner, registrar);
         operatorAllowlist = OperatorAllowlistUpgradeable(proxyAddr);
-        
+
         // Deploy ERC721 contract
         vm.prank(owner);
         erc721 = new ImmutableERC721MintByID(
-            owner,
-            NAME,
-            SYMBOL,
-            BASE_URI,
-            CONTRACT_URI,
-            address(operatorAllowlist),
-            royaltyRecipient,
-            ROYALTY
+            owner, NAME, SYMBOL, BASE_URI, CONTRACT_URI, address(operatorAllowlist), royaltyRecipient, ROYALTY
         );
 
         // Deploy mock marketplace
@@ -61,7 +53,7 @@ contract RoyaltyMarketplaceTest is Test {
         vm.prank(owner);
         erc721.grantMinterRole(minter);
     }
-    
+
     function test_AllowlistMarketplace() public {
         address[] memory marketPlaces = new address[](1);
         marketPlaces[0] = address(mockMarketplace);
@@ -97,12 +89,7 @@ contract RoyaltyMarketplaceTest is Test {
         // Execute trade
         vm.deal(buyer, salePrice);
         vm.prank(buyer);
-        mockMarketplace.executeTransferRoyalties{value: salePrice}(
-            seller,
-            buyer,
-            tokenId,
-            salePrice
-        );
+        mockMarketplace.executeTransferRoyalties{value: salePrice}(seller, buyer, tokenId, salePrice);
 
         // Check if buyer received NFT
         assertEq(erc721.ownerOf(tokenId), buyer, "Buyer does not have NFT");
@@ -113,4 +100,4 @@ contract RoyaltyMarketplaceTest is Test {
         // Check if seller has increased balance
         assertEq(seller.balance, sellerBal + (salePrice - royaltyAmount), "Seller balance not correct");
     }
-} 
+}

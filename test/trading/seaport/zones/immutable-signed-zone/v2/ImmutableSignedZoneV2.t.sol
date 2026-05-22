@@ -1,28 +1,28 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache-2
-
-// solhint-disable-next-line compiler-version
 pragma solidity ^0.8.17;
 
-// solhint-disable-next-line no-global-import
 import {Test} from "forge-std/Test.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {ItemType} from "seaport-types/src/lib/ConsiderationEnums.sol";
 import {ReceivedItem, Schema, SpentItem, ZoneParameters} from "seaport-types/src/lib/ConsiderationStructs.sol";
-import {ImmutableSignedZoneV2} from
-    "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/ImmutableSignedZoneV2.sol";
-import {SIP5EventsAndErrors} from
-    "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/SIP5EventsAndErrors.sol";
-import {SIP6EventsAndErrors} from
-    "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/SIP6EventsAndErrors.sol";
-import {SIP7EventsAndErrors} from
-    "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/SIP7EventsAndErrors.sol";
-import {ZoneAccessControlEventsAndErrors} from
-    "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/ZoneAccessControlEventsAndErrors.sol";
+import {
+    ImmutableSignedZoneV2
+} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/ImmutableSignedZoneV2.sol";
+import {
+    SIP5EventsAndErrors
+} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/SIP5EventsAndErrors.sol";
+import {
+    SIP6EventsAndErrors
+} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/SIP6EventsAndErrors.sol";
+import {
+    SIP7EventsAndErrors
+} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/SIP7EventsAndErrors.sol";
+import {
+    ZoneAccessControlEventsAndErrors
+} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/ZoneAccessControlEventsAndErrors.sol";
 import {SigningTestHelper} from "../../../utils/SigningTestHelper.t.sol";
 import {ImmutableSignedZoneV2Harness} from "./ImmutableSignedZoneV2Harness.t.sol";
-
-// solhint-disable func-name-mixedcase
 
 contract ImmutableSignedZoneV2Test is
     Test,
@@ -32,13 +32,11 @@ contract ImmutableSignedZoneV2Test is
     SIP6EventsAndErrors,
     SIP7EventsAndErrors
 {
-    // solhint-disable private-vars-leading-underscore
     address private immutable OWNER = makeAddr("owner");
     address private immutable FULFILLER = makeAddr("fulfiller");
     address private immutable OFFERER = makeAddr("offerer");
     address private immutable SIGNER;
     uint256 private immutable SIGNER_PRIVATE_KEY;
-    // solhint-enable private-vars-leading-underscore
 
     // OpenZeppelin v5 access/IAccessControl.sol
     error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);
@@ -528,11 +526,7 @@ contract ImmutableSignedZoneV2Test is
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x4),
-            identifier: 0,
-            amount: 20,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x4), identifier: 0, amount: 20, recipient: payable(address(0x3))
         });
         receivedItems[0] = receivedItem;
 
@@ -583,11 +577,7 @@ contract ImmutableSignedZoneV2Test is
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x4),
-            identifier: 0,
-            amount: 20,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x4), identifier: 0, amount: 20, recipient: payable(address(0x3))
         });
         receivedItems[0] = receivedItem;
 
@@ -634,11 +624,7 @@ contract ImmutableSignedZoneV2Test is
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x4),
-            identifier: 0,
-            amount: 20,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x4), identifier: 0, amount: 20, recipient: payable(address(0x3))
         });
         receivedItems[0] = receivedItem;
 
@@ -773,11 +759,7 @@ contract ImmutableSignedZoneV2Test is
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x2),
-            identifier: 222,
-            amount: 10,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x2), identifier: 222, amount: 10, recipient: payable(address(0x3))
         });
         receivedItems[0] = receivedItem;
 
@@ -837,11 +819,7 @@ contract ImmutableSignedZoneV2Test is
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         receivedItems[0] = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x2),
-            identifier: 222,
-            amount: 10,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x2), identifier: 222, amount: 10, recipient: payable(address(0x3))
         });
 
         ZoneParameters memory zoneParameters = ZoneParameters({
@@ -869,11 +847,7 @@ contract ImmutableSignedZoneV2Test is
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x2),
-            identifier: 222,
-            amount: 10,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x2), identifier: 222, amount: 10, recipient: payable(address(0x3))
         });
         receivedItems[0] = receivedItem;
 
@@ -909,11 +883,7 @@ contract ImmutableSignedZoneV2Test is
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x4),
-            identifier: 0,
-            amount: 20,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x4), identifier: 0, amount: 20, recipient: payable(address(0x3))
         });
         receivedItems[0] = receivedItem;
 
@@ -946,11 +916,7 @@ contract ImmutableSignedZoneV2Test is
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x4),
-            identifier: 0,
-            amount: 20,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x4), identifier: 0, amount: 20, recipient: payable(address(0x3))
         });
         receivedItems[0] = receivedItem;
 
@@ -986,11 +952,7 @@ contract ImmutableSignedZoneV2Test is
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x2),
-            identifier: 222,
-            amount: 10,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x2), identifier: 222, amount: 10, recipient: payable(address(0x3))
         });
         receivedItems[0] = receivedItem;
 
@@ -1076,11 +1038,7 @@ contract ImmutableSignedZoneV2Test is
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x2),
-            identifier: 222,
-            amount: 10,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x2), identifier: 222, amount: 10, recipient: payable(address(0x3))
         });
         receivedItems[0] = receivedItem;
 
@@ -1108,11 +1066,7 @@ contract ImmutableSignedZoneV2Test is
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         ReceivedItem memory receivedItem = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x2),
-            identifier: 222,
-            amount: 10,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x2), identifier: 222, amount: 10, recipient: payable(address(0x3))
         });
         receivedItems[0] = receivedItem;
 
@@ -1302,11 +1256,7 @@ contract ImmutableSignedZoneV2Test is
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         receivedItems[0] = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x2),
-            identifier: 222,
-            amount: 10,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x2), identifier: 222, amount: 10, recipient: payable(address(0x3))
         });
 
         ZoneParameters memory zoneParameters = ZoneParameters({
@@ -1338,11 +1288,7 @@ contract ImmutableSignedZoneV2Test is
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         receivedItems[0] = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x2),
-            identifier: 222,
-            amount: 10,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x2), identifier: 222, amount: 10, recipient: payable(address(0x3))
         });
 
         ZoneParameters memory zoneParameters = ZoneParameters({
@@ -1383,18 +1329,10 @@ contract ImmutableSignedZoneV2Test is
 
         ReceivedItem[] memory receivedItems = new ReceivedItem[](2);
         receivedItems[0] = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x2),
-            identifier: 222,
-            amount: 10,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x2), identifier: 222, amount: 10, recipient: payable(address(0x3))
         });
         receivedItems[1] = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x2),
-            identifier: 199,
-            amount: 10,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x2), identifier: 199, amount: 10, recipient: payable(address(0x3))
         });
 
         // console.logBytes32(zone.exposed_deriveReceivedItemsHash(receivedItems, 100, 10));
@@ -1406,11 +1344,7 @@ contract ImmutableSignedZoneV2Test is
         ImmutableSignedZoneV2Harness zone = _newZoneHarness(OWNER);
         ReceivedItem[] memory receivedItems = new ReceivedItem[](1);
         receivedItems[0] = ReceivedItem({
-            itemType: ItemType.ERC20,
-            token: address(0x2),
-            identifier: 222,
-            amount: 10,
-            recipient: payable(address(0x3))
+            itemType: ItemType.ERC20, token: address(0x2), identifier: 222, amount: 10, recipient: payable(address(0x3))
         });
 
         // console.logBytes32(zone.exposed_deriveReceivedItemsHash(receivedItems, type(uint256).max, 100));
@@ -1477,9 +1411,10 @@ contract ImmutableSignedZoneV2Test is
     /* helper functions */
 
     function _newZone(address owner) private returns (ImmutableSignedZoneV2) {
-        return new ImmutableSignedZoneV2(
-            "MyZoneName", "https://www.immutable.com", "https://www.immutable.com/docs", owner
-        );
+        return
+            new ImmutableSignedZoneV2(
+                "MyZoneName", "https://www.immutable.com", "https://www.immutable.com/docs", owner
+            );
     }
 
     function _newZoneHarness(address owner) private returns (ImmutableSignedZoneV2Harness) {
@@ -1501,7 +1436,9 @@ contract ImmutableSignedZoneV2Test is
             bytes1(0),
             fulfiller,
             expiration,
-            _signCompact(signerPrivateKey, ECDSA.toTypedDataHash(zone.exposed_domainSeparator(), eip712SignedOrderHash)),
+            _signCompact(
+                signerPrivateKey, ECDSA.toTypedDataHash(zone.exposed_domainSeparator(), eip712SignedOrderHash)
+            ),
             context
         );
         return extraData;
@@ -1526,4 +1463,3 @@ contract ImmutableSignedZoneV2Test is
     }
 }
 
-// solhint-enable func-name-mixedcase

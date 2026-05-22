@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19 <0.8.29;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 
 import {ImmutableERC20FixedSupplyNoBurn} from "contracts/token/erc20/preset/ImmutableERC20FixedSupplyNoBurn.sol";
 import {IImmutableERC20Errors} from "contracts/token/erc20/preset/Errors.sol";
@@ -25,7 +25,7 @@ contract ImmutableERC20FixedSupplyNoBurnTest is Test {
         erc20 = new ImmutableERC20FixedSupplyNoBurn(name, symbol, supply, treasurer, hubOwner);
     }
 
-    function testInit() public {
+    function testInit() public view {
         assertEq(erc20.name(), name, "name");
         assertEq(erc20.symbol(), symbol, "symbol");
         assertEq(erc20.totalSupply(), supply, "supply");

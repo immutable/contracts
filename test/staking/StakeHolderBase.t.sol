@@ -1,11 +1,11 @@
-// Copyright Immutable Pty Ltd 2018 - 2025
+// Copyright Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache 2.0
 // solhint-disable not-rely-on-time
 
 pragma solidity >=0.8.19 <0.8.29;
 
 // solhint-disable-next-line no-global-import
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {IStakeHolder} from "../../contracts/staking/IStakeHolder.sol";
 import {StakeHolderBaseV2} from "../../contracts/staking/StakeHolderBaseV2.sol";
 import {StakeHolderERC20} from "../../contracts/staking/StakeHolderERC20.sol";

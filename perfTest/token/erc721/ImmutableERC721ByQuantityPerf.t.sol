@@ -1,9 +1,9 @@
-// Copyright Immutable Pty Ltd 2018 - 2025
+// Copyright Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache 2.0
 
 pragma solidity >=0.8.19 <0.8.29;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {ERC721ByQuantityPerfTest} from "./ERC721ByQuantityPerf.t.sol";
 import {ImmutableERC721} from "../../../contracts/token/erc721/preset/ImmutableERC721.sol";
 import {IImmutableERC721ByQuantity} from "../../../contracts/token/erc721/interfaces/IImmutableERC721ByQuantity.sol";

@@ -1,4 +1,4 @@
-// Copyright Immutable Pty Ltd 2018 - 2023
+// Copyright Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
@@ -7,6 +7,8 @@ import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import {ERC721Psi, ERC721PsiBurnable} from "../erc721psi/ERC721PsiBurnable.sol";
 // Errors
 import {IImmutableERC721Errors} from "../../../errors/Errors.sol";
+
+// forge-lint: disable-start(pascal-case-struct)
 
 /*
 This contract allows for minting with one of two strategies:

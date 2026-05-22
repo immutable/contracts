@@ -1,4 +1,4 @@
-// Copyright Immutable Pty Ltd 2018 - 2025
+// Copyright Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
@@ -74,6 +74,7 @@ abstract contract ImmutableERC721HybridBaseV2 is
      * @notice sets the contract uri for the collection. Permissioned to only the admin role
      * @param _contractURI the new baseURI to set
      */
+    // solhint-disable-next-line mixed-case-function     
     function setContractURI(string memory _contractURI) public onlyRole(DEFAULT_ADMIN_ROLE) {
         contractURI = _contractURI;
     }

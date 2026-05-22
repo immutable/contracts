@@ -1,4 +1,4 @@
-// Copyright (c) Immutable Pty Ltd 2018 - 2023
+// Copyright (c) Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache-2
 
 // slither-disable-start missing-inheritance
@@ -164,7 +164,7 @@ contract ImmutableSignedZone is
         }
 
         // Set the signer info.
-        _signers[signer] = SignerInfo(true, true);
+        _signers[signer] = SignerInfo(active: true, previouslyActive: true);
 
         // Emit an event that the signer was added.
         emit SignerAdded(signer);

@@ -1,4 +1,4 @@
-// Copyright (c) Immutable Pty Ltd 2018 - 2024
+// Copyright (c) Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache-2
 
 // solhint-disable-next-line compiler-version
@@ -170,7 +170,7 @@ contract ImmutableSignedZoneV3 is
         }
 
         // Set the signer info.
-        _signers[signer] = SignerInfo(true, true);
+        _signers[signer] = SignerInfo(active: true, previouslyActive: true);
 
         // Emit an event that the signer was added.
         emit SignerAdded(signer);

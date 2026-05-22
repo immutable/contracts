@@ -6,16 +6,16 @@ import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import {IERC721Receiver} from "@openzeppelin/contracts/interfaces/IERC721Receiver.sol";
 
 contract MockEIP1271Wallet is IERC1271 {
-    address public immutable owner;
+    address public immutable OWNER;
 
     constructor(address _owner) {
         // slither-disable-next-line missing-zero-check
-        owner = _owner;
+        OWNER = _owner;
     }
 
     function isValidSignature(bytes32 hash, bytes memory signature) public view override returns (bytes4) {
         address recoveredAddress = ECDSA.recover(hash, signature);
-        if (recoveredAddress == owner) {
+        if (recoveredAddress == OWNER) {
             return this.isValidSignature.selector;
         } else {
             return 0;

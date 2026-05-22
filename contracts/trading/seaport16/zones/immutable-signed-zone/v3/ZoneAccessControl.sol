@@ -1,4 +1,4 @@
-// Copyright (c) Immutable Pty Ltd 2018 - 2024
+// Copyright (c) Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache-2
 
 // solhint-disable-next-line compiler-version
@@ -14,6 +14,7 @@ import {ZoneAccessControlEventsAndErrors} from "./interfaces/ZoneAccessControlEv
  */
 abstract contract ZoneAccessControl is AccessControlEnumerable, ZoneAccessControlEventsAndErrors {
     /// @dev Zone manager manages the zone.
+    // forge-lint: disable-next-line(unsafe-typecast)
     bytes32 public constant ZONE_MANAGER_ROLE = bytes32("ZONE_MANAGER");
 
     /**

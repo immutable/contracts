@@ -1,4 +1,4 @@
-// Copyright Immutable Pty Ltd 2018 - 2023
+// Copyright Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
@@ -6,6 +6,7 @@ import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessCont
 
 abstract contract MintingAccessControl is AccessControlEnumerable {
     /// @notice Role to mint tokens
+    // forge-lint: disable-next-line(unsafe-typecast)
     bytes32 public constant MINTER_ROLE = bytes32("MINTER_ROLE");
 
     /**

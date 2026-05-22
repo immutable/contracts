@@ -1,4 +1,4 @@
-// Copyright (c) Immutable Pty Ltd 2018 - 2025
+// Copyright (c) Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache 2
 pragma solidity >=0.8.19 <0.8.29;
 
@@ -18,9 +18,11 @@ abstract contract StakeHolderBase is
     ReentrancyGuardUpgradeable
 {
     /// @notice Only UPGRADE_ROLE can upgrade the contract
+    // forge-lint: disable-next-line(unsafe-typecast)    
     bytes32 public constant UPGRADE_ROLE = bytes32("UPGRADE_ROLE");
 
     /// @notice Only DISTRIBUTE_ROLE can call the distribute function
+    // forge-lint: disable-next-line(unsafe-typecast)
     bytes32 public constant DISTRIBUTE_ROLE = bytes32("DISTRIBUTE_ROLE");
 
     /// @notice Version 0 version number

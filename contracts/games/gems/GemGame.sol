@@ -1,4 +1,4 @@
-// Copyright (c) Immutable Pty Ltd 2018 - 2024
+// Copyright (c) Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache 2
 // solhint-disable not-rely-on-time
 

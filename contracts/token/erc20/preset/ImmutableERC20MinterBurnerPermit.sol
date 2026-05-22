@@ -1,4 +1,4 @@
-// Copyright (c) Immutable Pty Ltd 2018 - 2024
+// Copyright (c) Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19 <0.8.29;
 
@@ -19,6 +19,7 @@ import {IImmutableERC20Errors} from "./Errors.sol";
  */
 contract ImmutableERC20MinterBurnerPermit is ERC20Capped, ERC20Burnable, ERC20Permit, MintingAccessControl {
     /// @notice Role to mint tokens
+    // forge-lint: disable-next-line(unsafe-typecast)    
     bytes32 public constant HUB_OWNER_ROLE = bytes32("HUB_OWNER_ROLE");
 
     /**

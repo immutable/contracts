@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {Asset} from "../../../contracts/token/erc721/x/Asset.sol";
 
 contract AssetTest is Test {

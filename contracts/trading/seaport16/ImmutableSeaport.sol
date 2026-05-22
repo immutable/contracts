@@ -1,4 +1,4 @@
-// Copyright (c) Immutable Pty Ltd 2018 - 2023
+// Copyright (c) Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache-2
 // solhint-disable compiler-version
 pragma solidity ^0.8.24;

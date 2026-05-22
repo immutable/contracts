@@ -1,4 +1,4 @@
-// Copyright Immutable Pty Ltd 2018 - 2023
+// Copyright Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
@@ -12,6 +12,8 @@ import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnf
 // Utils
 import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import {AccessControlEnumerable, MintingAccessControl} from "../../../access/MintingAccessControl.sol";
+
+// forge-lint: disable-start(pascal-case-struct)
 
 /*
     ImmutableERC721Base is an abstract contract that offers minimum preset functionality without

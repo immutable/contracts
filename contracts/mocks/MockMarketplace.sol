@@ -7,16 +7,16 @@ import {IERC2981} from "@openzeppelin/contracts/interfaces/IERC2981.sol";
 contract MockMarketplace {
     error ZeroAddress();
 
-    IERC721 public immutable tokenAddress;
-    IERC2981 public immutable royaltyAddress;
+    IERC721 public immutable TOKEN_ADDRESS;
+    IERC2981 public immutable ROYALTY_ADDRESS;
 
     constructor(address _tokenAddress) {
-        tokenAddress = IERC721(_tokenAddress);
-        royaltyAddress = IERC2981(_tokenAddress);
+        TOKEN_ADDRESS = IERC721(_tokenAddress);
+        ROYALTY_ADDRESS = IERC2981(_tokenAddress);
     }
 
     function executeTransfer(address recipient, uint256 _tokenId) public {
-        tokenAddress.transferFrom(msg.sender, recipient, _tokenId);
+        TOKEN_ADDRESS.transferFrom(msg.sender, recipient, _tokenId);
     }
 
     /// @notice This code is only for testing purposes. Do not use similar
@@ -24,11 +24,11 @@ contract MockMarketplace {
     /// @dev For details see: https://github.com/crytic/slither/wiki/Detector-Documentation#arbitrary-from-in-transferfrom
     function executeTransferFrom(address from, address to, uint256 _tokenId) public {
         // slither-disable-next-line arbitrary-send-erc20
-        tokenAddress.transferFrom(from, to, _tokenId);
+        TOKEN_ADDRESS.transferFrom(from, to, _tokenId);
     }
 
     function executeApproveForAll(address operator, bool approved) public {
-        tokenAddress.setApprovalForAll(operator, approved);
+        TOKEN_ADDRESS.setApprovalForAll(operator, approved);
     }
 
     /// @notice This code is only for testing purposes. Do not use similar
@@ -40,7 +40,7 @@ contract MockMarketplace {
         }
         // solhint-disable-next-line custom-errors
         require(msg.value == price, "insufficient msg.value");
-        (address receiver, uint256 royaltyAmount) = royaltyAddress.royaltyInfo(_tokenId, price);
+        (address receiver, uint256 royaltyAmount) = ROYALTY_ADDRESS.royaltyInfo(_tokenId, price);
         if (receiver == address(0)) {
             revert ZeroAddress();
         }
@@ -48,6 +48,6 @@ contract MockMarketplace {
         payable(receiver).transfer(royaltyAmount);
         payable(from).transfer(sellerAmt);
         // slither-disable-next-line arbitrary-send-erc20
-        tokenAddress.transferFrom(from, recipient, _tokenId);
+        TOKEN_ADDRESS.transferFrom(from, recipient, _tokenId);
     }
 }

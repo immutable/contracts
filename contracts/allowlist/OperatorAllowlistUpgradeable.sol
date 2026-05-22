@@ -1,4 +1,4 @@
-// Copyright Immutable Pty Ltd 2018 - 2024
+// Copyright Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
@@ -34,9 +34,11 @@ contract OperatorAllowlistUpgradeable is
     ///     =====   State Variables  =====
 
     /// @notice Only REGISTRAR_ROLE can invoke white listing registration and removal
+    // forge-lint: disable-next-line(unsafe-typecast)
     bytes32 public constant REGISTRAR_ROLE = bytes32("REGISTRAR_ROLE");
 
     /// @notice Only UPGRADE_ROLE can upgrade the contract
+    // forge-lint: disable-next-line(unsafe-typecast)
     bytes32 public constant UPGRADE_ROLE = bytes32("UPGRADE_ROLE");
 
     /// @notice Mapping of Allowlisted addresses

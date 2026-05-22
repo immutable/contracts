@@ -1,4 +1,4 @@
-// Copyright (c) Immutable Pty Ltd 2018 - 2024
+// Copyright (c) Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache-2
 
 import {Script} from "forge-std/Script.sol";
@@ -18,6 +18,7 @@ contract DeployImmutableSignedZoneV2Dev is Script {
             "ImmutableSignedZone", "", "", address(0xC606830D8341bc9F5F5Dd7615E9313d2655B505D)
         );
 
+        // forge-lint: disable-next-line(unsafe-typecast)
         c.grantRole(bytes32("ZONE_MANAGER"), address(0xC606830D8341bc9F5F5Dd7615E9313d2655B505D));
 
         // set server side signer address

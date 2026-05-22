@@ -6,7 +6,7 @@
  * import { IMMUTABLE_SEAPORT, CHAIN_ID } from '@imtbl/contracts';
  *
  * // Get address for mainnet
- * const seaportMainnet = IMMUTABLE_SEAPORT[CHAIN_ID.MAINNET];
+ * const seaportMainnet = IMMUTABLE_SEAPORT[CHAIN_ID.IMMUTABLE_MAINNET];
  *
  * // Use with viem
  * const contract = getContract({

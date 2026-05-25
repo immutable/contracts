@@ -52,10 +52,7 @@ abstract contract OperatorAllowlistEnforced is OperatorAllowlistEnforcementError
         // Check for:
         // 1. caller is an EOA
         // 2. caller is Allowlisted or is the calling address bytecode is Allowlisted
-        if (
-            msg.sender != tx.origin 
-                && !operatorAllowlist.isAllowlisted(msg.sender)
-        ) {
+        if (msg.sender != tx.origin && !operatorAllowlist.isAllowlisted(msg.sender)) {
             revert CallerNotInAllowlist(msg.sender);
         }
 

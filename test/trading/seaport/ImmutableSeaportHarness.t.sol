@@ -4,7 +4,6 @@ pragma solidity ^0.8.17;
 
 import {ImmutableSeaport} from "../../../contracts/trading/seaport/ImmutableSeaport.sol";
 
-
 contract ImmutableSeaportHarness is ImmutableSeaport {
     constructor(address conduitController, address owner) ImmutableSeaport(conduitController, owner) {}
 

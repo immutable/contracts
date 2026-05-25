@@ -20,5 +20,26 @@ ignored_error_codes = [2424, 3860, 5574, 2394]
 # For list of linting rules see https://www.getfoundry.sh/forge/linting
 exclude_lints = ["mixed-case-function","mixed-case-variable","asm-keccak256"]
 
-# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+ignore = [  
+            # Ignore OwnableCreate3 related files so that the source code does not need 
+            # to change to remove linter warnings. Changing the source code would cause 
+            # the source code hash, stored in the contract metadata, to change. This would 
+            # cause the hash of the deployed contract to change, which in turn would alter 
+            # the behaviour of OwnableCreate3Deployer.sol.
+            "contracts/deployer/create/OwnableCreateDeploy.sol",
+            "contracts/deployer/create3/OwnableCreate3Address.sol",
+            "contracts/deployer/create3/OwnableCreate3Deployer.sol",
+            "contracts/deployer/create3/OwnableCreate3.sol",
 
+            # Ignore empty files that are used by the deployed Seaport, put have no 
+            # contents, so produce empty AST warnings.
+            "contracts/trading/seaport/validators/SeaportValidator.sol",
+            "contracts/trading/seaport/validators/SeaportValidatorHelper.sol",
+            "contracts/trading/seaport16/validators/SeaportValidator.sol",
+            "contracts/trading/seaport16/validators/SeaportValidatorHelper.sol",
+            "contracts/trading/seaport/validators/ReadOnlyOrderValidator.sol",
+            "contracts/trading/seaport16/validators/ReadOnlyOrderValidator.sol"
+        ]
+
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

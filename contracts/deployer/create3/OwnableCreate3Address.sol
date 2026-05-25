@@ -1,4 +1,4 @@
-// Copyright Immutable Pty Ltd 2018 - 2026
+// Copyright Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19 <0.8.29;
 
@@ -12,13 +12,13 @@ import {OwnableCreateDeploy} from "../create/OwnableCreateDeploy.sol";
  */
 abstract contract OwnableCreate3Address {
     /// @dev bytecode hash of the CreateDeploy helper contract
-    bytes32 internal immutable CREATE_DEPLOY_BYTECODE_HASH;
+    bytes32 internal immutable createDeployBytecodeHash;
 
     constructor() {
         // Slither is mistakenly seeing the expansion of type(OwnableCreateDeploy).creationCode
         // as a very large number.
         // slither-disable-next-line too-many-digits
-        CREATE_DEPLOY_BYTECODE_HASH = keccak256(type(OwnableCreateDeploy).creationCode);
+        createDeployBytecodeHash = keccak256(type(OwnableCreateDeploy).creationCode);
     }
 
     /**
@@ -29,7 +29,7 @@ abstract contract OwnableCreate3Address {
     function _create3Address(bytes32 deploySalt) internal view returns (address deployed) {
         address deployer = address(
             uint160(
-                uint256(keccak256(abi.encodePacked(hex"ff", address(this), deploySalt, CREATE_DEPLOY_BYTECODE_HASH)))
+                uint256(keccak256(abi.encodePacked(hex"ff", address(this), deploySalt, createDeployBytecodeHash)))
             )
         );
 

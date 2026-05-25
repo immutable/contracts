@@ -1,4 +1,4 @@
-// Copyright Immutable Pty Ltd 2018 - 2026
+// Copyright Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19 <0.8.29;
 
@@ -12,10 +12,10 @@ pragma solidity >=0.8.19 <0.8.29;
  */
 contract OwnableCreateDeploy {
     // Address that is authorised to call the deploy function.
-    address private immutable OWNER;
+    address private immutable owner;
 
     constructor() {
-        OWNER = msg.sender;
+        owner = msg.sender;
     }
 
     /**
@@ -24,8 +24,10 @@ contract OwnableCreateDeploy {
      */
     // slither-disable-next-line locked-ether
     function deploy(bytes memory bytecode) external payable {
-        require(msg.sender == OWNER, "CreateDeploy: caller is not the owner");
-        assembly ("memory-safe") {
+        // solhint-disable-next-line custom-errors, reason-string
+        require(msg.sender == owner, "CreateDeploy: caller is not the owner");
+        // solhint-disable no-inline-assembly
+        assembly {        
             if iszero(create(callvalue(), add(bytecode, 32), mload(bytecode))) {
                 revert(0, 0)
             }

@@ -28,9 +28,7 @@ abstract contract OwnableCreate3Address {
      */
     function _create3Address(bytes32 deploySalt) internal view returns (address deployed) {
         address deployer = address(
-            uint160(
-                uint256(keccak256(abi.encodePacked(hex"ff", address(this), deploySalt, createDeployBytecodeHash)))
-            )
+            uint160(uint256(keccak256(abi.encodePacked(hex"ff", address(this), deploySalt, createDeployBytecodeHash))))
         );
 
         deployed = address(uint160(uint256(keccak256(abi.encodePacked(hex"d694", deployer, hex"01")))));

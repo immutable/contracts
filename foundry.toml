@@ -41,5 +41,14 @@ ignore = [
             "contracts/trading/seaport16/validators/ReadOnlyOrderValidator.sol"
         ]
 
+[fmt]
+ignore = [  
+            # Ignore OwnableCreate3 related files so that they don't change due
+            # to reformatting.
+            "contracts/deployer/create/OwnableCreateDeploy.sol",
+            "contracts/deployer/create3/OwnableCreate3Address.sol",
+            "contracts/deployer/create3/OwnableCreate3Deployer.sol",
+            "contracts/deployer/create3/OwnableCreate3.sol",
+        ]
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

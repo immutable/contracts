@@ -17,7 +17,6 @@ contract OwnableCreateDeploy {
     constructor() {
         owner = msg.sender;
     }
-
     /**
      * @dev Deploys a new contract with the specified bytecode using the `CREATE` opcode.
      * @param bytecode The bytecode of the contract to be deployed
@@ -27,7 +26,7 @@ contract OwnableCreateDeploy {
         // solhint-disable-next-line custom-errors, reason-string
         require(msg.sender == owner, "CreateDeploy: caller is not the owner");
         // solhint-disable no-inline-assembly
-        assembly {        
+        assembly {
             if iszero(create(callvalue(), add(bytecode, 32), mload(bytecode))) {
                 revert(0, 0)
             }

@@ -464,3 +464,4 @@ contract ERC721Psi is Context, ERC165, IERC721, IERC721Metadata {
      */
     function _afterTokenTransfers(address from, address to, uint256 startTokenId, uint256 quantity) internal virtual {}
 }
+// forge-lint: disable-end(all)

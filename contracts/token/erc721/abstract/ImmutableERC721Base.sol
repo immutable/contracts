@@ -298,3 +298,4 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
         return baseURI;
     }
 }
+// forge-lint: disable-end(pascal-case-struct)

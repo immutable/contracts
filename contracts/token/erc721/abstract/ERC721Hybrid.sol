@@ -494,3 +494,4 @@ abstract contract ERC721Hybrid is ERC721PsiBurnable, ERC721, IImmutableERC721Err
         return ERC721._baseURI();
     }
 }
+// forge-lint: disable-end(pascal-case-struct)

@@ -34,3 +34,4 @@ interface IImmutableERC721Structs {
         uint256 quantity;
     }
 }
+// forge-lint: disable-end(pascal-case-struct)

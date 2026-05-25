@@ -91,4 +91,6 @@ abstract contract OperatorAllowlistEnforced is OperatorAllowlistEnforcementError
         operatorAllowlist = IOperatorAllowlist(_operatorAllowlist);
     }
 }
+
 // forge-lint: disable-end(unwrapped-modifier-logic)
+// slither-disable-end calls-loop

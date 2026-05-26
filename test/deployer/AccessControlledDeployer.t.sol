@@ -12,14 +12,12 @@ import {
     ERC20MintableBurnableInit
 } from "@axelar-network/axelar-gmp-sdk-solidity/contracts/test/token/ERC20MintableBurnableInit.sol";
 
-import {OwnableCreate2Deployer} from "../../contracts/deployer/create2/OwnableCreate2Deployer.sol";
 import {AccessControlledDeployer} from "../../contracts/deployer/AccessControlledDeployer.sol";
 import {OwnableCreate3Deployer} from "../../contracts/deployer/create3/OwnableCreate3Deployer.sol";
 
-import {Create2Utils} from "./create2/Create2Utils.sol";
 import {Create3Utils} from "./create3/Create3Utils.sol";
 
-contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
+contract AccessControlledDeployerTest is Test, Create3Utils {
     address private roleAdmin = makeAddr("admin");
     address private ownershipManager = makeAddr("ownershipManager");
     address private pauser = makeAddr("pauser");
@@ -108,47 +106,10 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
         assertFalse(rbacDeployer.hasRole(rbacDeployer.OWNERSHIP_MANAGER_ROLE(), ownershipManager));
     }
 
-    function test_RevertIf_TransferDeployerOwnership_ByNonAdmin() public {
-        OwnableCreate2Deployer create2Deployer = new OwnableCreate2Deployer(address(rbacDeployer));
-        vm.expectRevert();
-        rbacDeployer.transferOwnershipOfDeployer(create2Deployer, makeAddr("newOwner2"));
-    }
-
-    function test_RevertIf_TransferDeployerOwnership_ByRoleAdmin() public {
-        OwnableCreate2Deployer create2Deployer = new OwnableCreate2Deployer(address(rbacDeployer));
-        vm.startPrank(roleAdmin);
-        vm.expectRevert();
-        rbacDeployer.transferOwnershipOfDeployer(create2Deployer, makeAddr("newOwner2"));
-    }
-
-    function test_RevertIf_TransferDeployerOwnership_WithZeroOwnerAddress() public {
-        OwnableCreate2Deployer create2Deployer = new OwnableCreate2Deployer(address(rbacDeployer));
-        vm.startPrank(ownershipManager);
-        vm.expectRevert(ZeroAddress.selector);
-        rbacDeployer.transferOwnershipOfDeployer(create2Deployer, address(0));
-    }
-
-    function test_RevertIf_TransferDeployerOwnership_WhenNotCurrentOwner() public {
-        OwnableCreate2Deployer create2Deployer = new OwnableCreate2Deployer(makeAddr("currentOwner"));
-        vm.startPrank(ownershipManager);
-        vm.expectRevert(NotOwnerOfDeployer.selector);
-        rbacDeployer.transferOwnershipOfDeployer(create2Deployer, makeAddr("newOwner2"));
-    }
-
     function test_RevertIf_TransferDeployerOwnership_WithZeroDeployerAddress() public {
         vm.startPrank(ownershipManager);
         vm.expectRevert(ZeroAddress.selector);
         rbacDeployer.transferOwnershipOfDeployer(Ownable(address(0)), makeAddr("newOwner2"));
-    }
-
-    function test_TransferDeployerOwnership_ForOwnableCreate2Deployer() public {
-        OwnableCreate2Deployer create2Deployer = new OwnableCreate2Deployer(address(rbacDeployer));
-        assertTrue(create2Deployer.owner() == address(rbacDeployer));
-
-        address newOwner = makeAddr("newOwner");
-        vm.startPrank(ownershipManager);
-        rbacDeployer.transferOwnershipOfDeployer(create2Deployer, newOwner);
-        assertTrue(create2Deployer.owner() == newOwner);
     }
 
     function test_TransferDeployerOwnership_ForOwnableCreate3Deployer() public {
@@ -300,53 +261,6 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
         rbacDeployer.deploy(IDeployer(address(0)), new bytes(0), bytes32(0));
     }
 
-    function test_Deploy_UsingCreate2() public {
-        OwnableCreate2Deployer create2Deployer = new OwnableCreate2Deployer(address(rbacDeployer));
-        bytes memory erc20MintableBytecode =
-            abi.encodePacked(type(ERC20MintableBurnable).creationCode, abi.encode("Test Token", "TEST", 10));
-        bytes32 erc20MintableSalt = createSaltFromKey("erc20-mintable-burnable-v1", address(rbacDeployer));
-
-        address expectedAddress = predictCreate2Address(
-            erc20MintableBytecode, address(create2Deployer), address(rbacDeployer), erc20MintableSalt
-        );
-
-        vm.startPrank(authDeployers[0]);
-        vm.expectEmit();
-        emit Deployed(expectedAddress, address(rbacDeployer), erc20MintableSalt, keccak256(erc20MintableBytecode));
-        address deployedAddress = rbacDeployer.deploy(create2Deployer, erc20MintableBytecode, erc20MintableSalt);
-        ERC20MintableBurnable deployed = ERC20MintableBurnable(deployedAddress);
-
-        assertEq(deployedAddress, expectedAddress, "deployed address does not match expected");
-        assertEq(deployed.name(), "Test Token", "deployed contract does not match expected");
-        assertEq(deployed.symbol(), "TEST", "deployed contract does not match expected");
-        assertEq(deployed.decimals(), 10, "deployed contract does not match expected");
-    }
-
-    function test_DeployAndInit_UsingCreate2() public {
-        OwnableCreate2Deployer create2Deployer = new OwnableCreate2Deployer(address(rbacDeployer));
-        bytes memory mintableInitBytecode =
-            abi.encodePacked(type(ERC20MintableBurnableInit).creationCode, abi.encode(10));
-
-        bytes32 mintableInitSalt = createSaltFromKey("erc20-mintable-burnable-init-v1", address(rbacDeployer));
-
-        address expectedAddress = predictCreate2Address(
-            mintableInitBytecode, address(create2Deployer), address(rbacDeployer), mintableInitSalt
-        );
-
-        bytes memory initPayload = abi.encodeWithSelector(ERC20MintableBurnableInit.init.selector, "Test Token", "TEST");
-        vm.startPrank(authDeployers[0]);
-        vm.expectEmit();
-        emit Deployed(expectedAddress, address(rbacDeployer), mintableInitSalt, keccak256(mintableInitBytecode));
-        address deployedAddress =
-            rbacDeployer.deployAndInit(create2Deployer, mintableInitBytecode, mintableInitSalt, initPayload);
-        ERC20MintableBurnableInit deployed = ERC20MintableBurnableInit(deployedAddress);
-
-        assertEq(deployedAddress, expectedAddress, "deployed address does not match expected");
-        assertEq(deployed.name(), "Test Token", "deployed contract does not match expected");
-        assertEq(deployed.symbol(), "TEST", "deployed contract does not match expected");
-        assertEq(deployed.decimals(), 10, "deployed contract does not match expected");
-    }
-
     function test_Deploy_UsingCreate3() public {
         OwnableCreate3Deployer create3Deployer = new OwnableCreate3Deployer(address(rbacDeployer));
         bytes memory erc20MintableBytecode =
@@ -401,5 +315,9 @@ contract AccessControlledDeployerTest is Test, Create2Utils, Create3Utils {
 
         vm.expectRevert("Pausable: paused");
         rbacDeployer.deployAndInit(IDeployer(address(0)), new bytes(0), bytes32(0), new bytes(0));
+    }
+
+    function createSaltFromKey(string memory key, address owner) private pure returns (bytes32) {
+        return keccak256(abi.encode(address(owner), key));
     }
 }

@@ -5,14 +5,14 @@ pragma solidity >=0.8.19 <0.8.29;
 import {Test} from "forge-std/Test.sol";
 import {OperatorAllowlistUpgradeable} from "../../contracts/allowlist/OperatorAllowlistUpgradeable.sol";
 import {MockOperatorAllowlistUpgradeable} from "./MockOAL.sol";
-import {ImmutableERC721} from "../../contracts/token/erc721/preset/ImmutableERC721.sol";
+import {ImmutableERC721V2} from "../../contracts/token/erc721/preset/ImmutableERC721V2.sol";
 import {DeployOperatorAllowlist} from "../utils/DeployAllowlistProxy.sol";
 import {DeploySCWallet} from "../utils/DeploySCW.sol";
 import {IWalletProxy} from "../../contracts/allowlist/IWalletProxy.sol";
 
 contract OperatorAllowlistTest is Test, OperatorAllowlistUpgradeable {
     OperatorAllowlistUpgradeable public allowlist;
-    ImmutableERC721 public immutableERC721;
+    ImmutableERC721V2 public immutableERC721;
     MockOperatorAllowlistUpgradeable public oalV2;
     DeploySCWallet public deploySCWScript;
 
@@ -34,7 +34,7 @@ contract OperatorAllowlistTest is Test, OperatorAllowlistUpgradeable {
 
         allowlist = OperatorAllowlistUpgradeable(proxyAddr);
 
-        immutableERC721 = new ImmutableERC721(
+        immutableERC721 = new ImmutableERC721V2(
             admin, "test", "USDC", "test-base-uri", "test-contract-uri", address(allowlist), feeReceiver, 0
         );
 

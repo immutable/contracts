@@ -41,12 +41,6 @@
       "rev": "3d4c0d5741b131c231e558d7a6213392ab3672a5"
     }
   },
-  "lib/solidity-bits": {
-    "tag": {
-      "name": "v0.4.0",
-      "rev": "c243a888782b61542da380ac92e218c676427b50"
-    }
-  },
   "lib/solidity-bytes-utils": {
     "tag": {
       "name": "v0.8.0",

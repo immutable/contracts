@@ -23,22 +23,10 @@
       "rev": "ae061dc008105dd8d05937df9ad9a676f878cbf9"
     }
   },
-  "lib/immutable-seaport-1.6.0+im4": {
-    "tag": {
-      "name": "1.6.0+im4",
-      "rev": "e058101dbe69b403352598ed989c3afd845e9793"
-    }
-  },
   "lib/immutable-seaport-core-1.5.0+im1": {
     "tag": {
       "name": "1.5.0+im.1",
       "rev": "33e9030f308500b422926a1be12d7a1e4d6adc06"
-    }
-  },
-  "lib/immutable-seaport-core-1.6.0+im2": {
-    "tag": {
-      "name": "1.6.0+im2",
-      "rev": "9ad91d82609e937a9ba3ef330df396b05f384e44"
     }
   },
   "lib/openzeppelin-contracts-4.9.3": {

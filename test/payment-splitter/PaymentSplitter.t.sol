@@ -5,8 +5,9 @@ pragma solidity >=0.8.19 <0.8.29;
 import {Test} from "forge-std/Test.sol";
 import {PaymentSplitter} from "../../contracts/payment-splitter/PaymentSplitter.sol";
 import {MockERC20} from "./MockERC20.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {IERC20} from "openzeppelin-contracts-5/token/ERC20/IERC20.sol";
+import {Address} from "openzeppelin-contracts-5/utils/Address.sol";
+import {IAccessControl} from "openzeppelin-contracts-5/access/IAccessControl.sol";
 
 contract PaymentSplitterTest is Test {
     event PaymentReleased(address to, uint256 amount);
@@ -75,25 +76,18 @@ contract PaymentSplitterTest is Test {
     }
 
     function testInvalidPermissions() public {
+        vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, defaultAdmin, paymentSplitter.TOKEN_REGISTRAR_ROLE()));
         vm.prank(defaultAdmin);
-        vm.expectRevert(
-            "AccessControl: account 0x6fcb7bf6c32f0cd3bbc5fde0a55a80d3af6d0050 is missing role 0x544f4b454e5f5245474953545241525f524f4c45000000000000000000000000"
-        );
         paymentSplitter.addToAllowlist(erc20s);
 
         vm.startPrank(registrarAdmin);
-        vm.expectRevert(
-            "AccessControl: account 0xa4985bf934d639cba655d34733ebf617e7f82429 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
-        );
+        vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, registrarAdmin, paymentSplitter.DEFAULT_ADMIN_ROLE()));
         paymentSplitter.overridePayees(payees, shares);
-        vm.expectRevert(
-            "AccessControl: account 0xa4985bf934d639cba655d34733ebf617e7f82429 is missing role 0x0000000000000000000000000000000000000000000000000000000000000000"
-        );
+
+        vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, registrarAdmin, paymentSplitter.DEFAULT_ADMIN_ROLE()));
         paymentSplitter.revokeReleaseFundsRole(fundsAdmin);
 
-        vm.expectRevert(
-            "AccessControl: account 0xa4985bf934d639cba655d34733ebf617e7f82429 is missing role 0x52454c454153455f46554e44535f524f4c450000000000000000000000000000"
-        );
+        vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, registrarAdmin, paymentSplitter.RELEASE_FUNDS_ROLE()));
         paymentSplitter.releaseAll();
         vm.stopPrank();
     }

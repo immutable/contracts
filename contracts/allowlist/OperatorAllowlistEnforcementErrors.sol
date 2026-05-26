@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
-
 interface OperatorAllowlistEnforcementErrors {
     /// @dev Error thrown when the operatorAllowlist address does not implement the IOperatorAllowlist interface
     error AllowlistDoesNotImplementIOperatorAllowlist();

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
-import {IERC20} from "@openzeppelin-4/contracts/token/ERC20/IERC20.sol";
+import {IERC20} from "openzeppelin-contracts-4/token/ERC20/IERC20.sol";
 
 /*
  * @notice Interface for the Wrapped IMX (wIMX) contract.

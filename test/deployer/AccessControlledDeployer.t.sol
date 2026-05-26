@@ -3,7 +3,7 @@
 pragma solidity >=0.8.19 <0.8.29;
 
 import {Test} from "forge-std/Test.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable} from "openzeppelin-contracts-5/access/Ownable.sol";
 import {IDeployer} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/interfaces/IDeployer.sol";
 import {
     ERC20MintableBurnable

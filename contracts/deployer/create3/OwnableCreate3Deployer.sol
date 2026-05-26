@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
-import {Ownable} from "@openzeppelin-4/contracts/access/Ownable.sol";
+import {Ownable} from "openzeppelin-contracts-5/access/Ownable.sol";
 import {Deployer} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/deploy/Deployer.sol";
 
 import {OwnableCreate3} from "./OwnableCreate3.sol";
@@ -24,8 +24,7 @@ import {OwnableCreate3} from "./OwnableCreate3.sol";
  *      The intermediary contract is an instance of the {OwnableCreateDeploy} contract and can only be called by this contract.
  */
 contract OwnableCreate3Deployer is Ownable, OwnableCreate3, Deployer {
-    constructor(address owner) Ownable() {
-        transferOwnership(owner);
+    constructor(address owner) Ownable(owner) {
     }
 
     /**

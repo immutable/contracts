@@ -6,11 +6,11 @@ pragma solidity >=0.8.19 <0.8.29;
 import {ERC721Permit, ERC721, ERC721Burnable} from "./ERC721Permit.sol";
 
 // Allowlist
-import {ERC2981} from "@openzeppelin-4/contracts/token/common/ERC2981.sol";
+import {ERC2981} from "openzeppelin-contracts-4/token/common/ERC2981.sol";
 import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnforced.sol";
 
 // Utils
-import {BitMaps} from "@openzeppelin-4/contracts/utils/structs/BitMaps.sol";
+import {BitMaps} from "openzeppelin-contracts-4/utils/structs/BitMaps.sol";
 import {AccessControlEnumerable, MintingAccessControl} from "../../../access/MintingAccessControl.sol";
 
 // forge-lint: disable-start(pascal-case-struct)

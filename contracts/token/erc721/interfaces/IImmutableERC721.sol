@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
-import {IERC721Metadata} from "@openzeppelin-4/contracts/interfaces/IERC721Metadata.sol";
-import {IERC2981} from "@openzeppelin-4/contracts/interfaces/IERC2981.sol";
-import {IERC5267} from "@openzeppelin-4/contracts/interfaces/IERC5267.sol";
+import {IERC721Metadata} from "openzeppelin-contracts-4/interfaces/IERC721Metadata.sol";
+import {IERC2981} from "openzeppelin-contracts-4/interfaces/IERC2981.sol";
+import {IERC5267} from "openzeppelin-contracts-4/interfaces/IERC5267.sol";
 import {IERC4494} from "../abstract/IERC4494.sol";
 import {IMintingAccessControl} from "../../../access/IMintingAccessControl.sol";
 

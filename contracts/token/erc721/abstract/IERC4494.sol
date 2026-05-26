@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
-import {IERC165} from "@openzeppelin-4/contracts/interfaces/IERC165.sol";
+import {IERC165} from "openzeppelin-contracts-4/interfaces/IERC165.sol";
 
 ///
 /// @dev Interface for token permits for ERC721

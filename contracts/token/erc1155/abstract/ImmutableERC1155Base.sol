@@ -5,7 +5,7 @@ pragma solidity >=0.8.19 <0.8.29;
 import {ERC1155Permit, ERC1155} from "./ERC1155Permit.sol";
 
 // Allowlist
-import {ERC2981} from "@openzeppelin-4/contracts/token/common/ERC2981.sol";
+import {ERC2981} from "openzeppelin-contracts-4/token/common/ERC2981.sol";
 import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnforced.sol";
 
 import {AccessControlEnumerable, MintingAccessControl} from "../../../access/MintingAccessControl.sol";

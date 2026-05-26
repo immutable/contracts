@@ -3,9 +3,9 @@
 pragma solidity >=0.8.19 <0.8.29;
 
 import {IDeployer} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/interfaces/IDeployer.sol";
-import {Pausable} from "@openzeppelin-4/contracts/security/Pausable.sol";
-import {Ownable} from "@openzeppelin-4/contracts/access/Ownable.sol";
-import {AccessControlEnumerable} from "@openzeppelin-4/contracts/access/AccessControlEnumerable.sol";
+import {Pausable} from "openzeppelin-contracts-5/utils/Pausable.sol";
+import {Ownable} from "openzeppelin-contracts-5/access/Ownable.sol";
+import {AccessControlEnumerable} from "openzeppelin-contracts-5/access/extensions/AccessControlEnumerable.sol";
 
 /**
  * @title AccessControlledDeployer

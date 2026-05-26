@@ -8,7 +8,7 @@ import {
 } from "openzeppelin-contracts-upgradeable-4/access/AccessControlEnumerableUpgradeable.sol";
 
 // Introspection
-import {ERC165} from "@openzeppelin-4/contracts/utils/introspection/ERC165.sol";
+import {ERC165} from "openzeppelin-contracts-4/utils/introspection/ERC165.sol";
 
 // Interfaces
 import {IOperatorAllowlist} from "./IOperatorAllowlist.sol";

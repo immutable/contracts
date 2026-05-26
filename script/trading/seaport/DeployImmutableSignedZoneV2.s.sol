@@ -1,6 +1,6 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache-2
-pragma solidity 0.8.20;
+pragma solidity >=0.8.19 <0.8.29;
 
 import {Test} from "forge-std/Test.sol";
 import {

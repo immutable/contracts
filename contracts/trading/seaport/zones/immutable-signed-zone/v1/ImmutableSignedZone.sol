@@ -10,9 +10,9 @@ import {SIP7Interface} from "./interfaces/SIP7Interface.sol";
 import {SIP7EventsAndErrors} from "./interfaces/SIP7EventsAndErrors.sol";
 import {SIP6EventsAndErrors} from "./interfaces/SIP6EventsAndErrors.sol";
 import {SIP5Interface} from "./interfaces/SIP5Interface.sol";
-import {Ownable} from "@openzeppelin-4/contracts/access/Ownable.sol";
-import {ECDSA} from "@openzeppelin-4/contracts/utils/cryptography/ECDSA.sol";
-import {ERC165} from "@openzeppelin-4/contracts/utils/introspection/ERC165.sol";
+import {Ownable} from "openzeppelin-contracts-4/access/Ownable.sol";
+import {ECDSA} from "openzeppelin-contracts-4/utils/cryptography/ECDSA.sol";
+import {ERC165} from "openzeppelin-contracts-4/utils/introspection/ERC165.sol";
 
 /**
  * @title  ImmutableSignedZone

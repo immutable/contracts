@@ -4,7 +4,7 @@
 pragma solidity >=0.8.19 <0.8.29;
 
 import {IOperatorAllowlist} from "./IOperatorAllowlist.sol";
-import {IERC165} from "@openzeppelin-4/contracts/utils/introspection/ERC165.sol";
+import {IERC165} from "openzeppelin-contracts-5/utils/introspection/ERC165.sol";
 import {OperatorAllowlistEnforcementErrors} from "./OperatorAllowlistEnforcementErrors.sol";
 
 // Disable this code size warning as there is no plan to change this logic.

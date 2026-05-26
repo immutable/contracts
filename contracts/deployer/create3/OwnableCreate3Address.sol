@@ -1,6 +1,6 @@
 // Copyright Immutable Pty Ltd 2018 - 2024
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.19 <0.8.29;
+pragma solidity >=0.8.19 <=0.8.27;
 
 import {OwnableCreateDeploy} from "../create/OwnableCreateDeploy.sol";
 

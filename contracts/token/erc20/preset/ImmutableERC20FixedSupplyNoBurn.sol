@@ -1,6 +1,6 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.19 <0.8.29;
+pragma solidity >=0.8.19 <=0.8.27;
 
 import {Ownable} from "openzeppelin-contracts-4/access/Ownable.sol";
 import {ERC20} from "openzeppelin-contracts-4/token/ERC20/ERC20.sol";

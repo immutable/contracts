@@ -3,7 +3,7 @@
 /**
  * Inspired by ERC721Psi: https://github.com/estarriolvetch/ERC721Psi
  */
-pragma solidity >=0.8.19 <0.8.29;
+pragma solidity >=0.8.19 <=0.8.27;
 
 import {IERC721} from "openzeppelin-contracts-4/token/ERC721/IERC721.sol";
 import {IERC721Receiver} from "openzeppelin-contracts-4/token/ERC721/IERC721Receiver.sol";

@@ -1,11 +1,11 @@
 // Copyright Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache 2.0
-pragma solidity >=0.8.19 <0.8.29;
+pragma solidity >=0.8.19 <=0.8.27;
 
 import {Test} from "forge-std/Test.sol";
 import {console} from "forge-std/console.sol";
 import {IDeploy} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/interfaces/IDeploy.sol";
-import {ERC20Mock} from "openzeppelin-contracts-4/mocks/ERC20Mock.sol";
+import {ERC20Mock} from "openzeppelin-contracts-5/mocks/token/ERC20Mock.sol";
 import {Ownable} from "openzeppelin-contracts-5/access/Ownable.sol";
 import {
     ERC20MintableBurnable

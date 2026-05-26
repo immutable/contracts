@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.19 <0.8.29;
+pragma solidity >=0.8.19 <=0.8.27;
 
 import {Test} from "forge-std/Test.sol";
 
 import {ImmutableERC20FixedSupplyNoBurn} from "contracts/token/erc20/preset/ImmutableERC20FixedSupplyNoBurn.sol";
-import {IImmutableERC20Errors} from "contracts/token/erc20/preset/Errors.sol";
+import {IImmutableERC20Errors} from "contracts/token/erc20/preset/IImmutableERC20Errors.sol";
 
 contract ImmutableERC20FixedSupplyNoBurnTest is Test {
     ImmutableERC20FixedSupplyNoBurn public erc20;

@@ -1,6 +1,6 @@
 // Copyright Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache 2.0
-pragma solidity >=0.8.19 <0.8.29;
+pragma solidity >=0.8.19 <=0.8.27;
 
 import {IERC721, ERC721} from "openzeppelin-contracts-4/token/ERC721/ERC721.sol";
 import {BitMaps} from "openzeppelin-contracts-4/utils/structs/BitMaps.sol";

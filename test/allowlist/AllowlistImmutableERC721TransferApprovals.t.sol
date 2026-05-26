@@ -1,4 +1,4 @@
-pragma solidity >=0.8.19 <0.8.29;
+pragma solidity >=0.8.19 <=0.8.27;
 
 import {Test} from "forge-std/Test.sol";
 

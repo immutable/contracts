@@ -1,14 +1,14 @@
 // Copyright (c) Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache-2
 
-pragma solidity >=0.8.19 <0.8.29;
+pragma solidity >=0.8.19 <=0.8.27;
 
 import {AccessControl} from "openzeppelin-contracts-5/access/AccessControl.sol";
 import {IAccessControl} from "openzeppelin-contracts-5/access/IAccessControl.sol";
 import {AccessControlEnumerable} from "openzeppelin-contracts-5/access/extensions/AccessControlEnumerable.sol";
 import {
     ZoneAccessControlEventsAndErrors
-} from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/ZoneAccessControlEventsAndErrors.sol";
+} from "./interfaces/ZoneAccessControlEventsAndErrors.sol";
 
 /**
  * @notice ZoneAccessControl encapsulates access control functionality for the zone.

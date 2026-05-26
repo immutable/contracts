@@ -1,6 +1,6 @@
 // Copyright Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache 2.0
-pragma solidity >=0.8.19 <0.8.29;
+pragma solidity >=0.8.19 <=0.8.27;
 
 import {IStakeHolder} from "../../contracts/staking/IStakeHolder.sol";
 import {StakeHolderBaseTest} from "./StakeHolderBase.t.sol";
@@ -132,8 +132,10 @@ abstract contract StakeHolderTimeDelayBaseTest is StakeHolderBaseTest {
 
         bytes32 operationId = stakeHolderTimeDelay.hashOperation(target, value, data, predecessor, salt);
 
+        /// forge-lint: disable-next-line(incorrect-shift)
+        bytes32 stateMask = bytes32(1 << uint8(TimelockController.OperationState.Ready));
         vm.expectRevert(abi.encodeWithSelector(TimelockController.TimelockUnexpectedOperationState.selector, operationId, 
-            bytes32(1 << uint8(TimelockController.OperationState.Ready))));
+            stateMask));
         vm.warp(timeNow + delay - 1); // Too early
         vm.prank(adminExecutor);
         stakeHolderTimeDelay.execute(target, value, data, predecessor, salt);

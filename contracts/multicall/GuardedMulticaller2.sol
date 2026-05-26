@@ -1,6 +1,6 @@
 // Copyright Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.19 <0.8.29;
+pragma solidity >=0.8.19 <=0.8.27;
 
 import {SignatureChecker} from "openzeppelin-contracts-5/utils/cryptography/SignatureChecker.sol";
 import {AccessControlEnumerable} from "openzeppelin-contracts-5/access/extensions/AccessControlEnumerable.sol";

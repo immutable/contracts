@@ -1,9 +1,9 @@
 // Copyright Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity >=0.8.19 <0.8.29;
+pragma solidity >=0.8.19 <=0.8.27;
 
 import {IWIMX} from "./IWIMX.sol";
-import {Address} from "openzeppelin-contracts-4/utils/Address.sol";
+import {Address} from "openzeppelin-contracts-5/utils/Address.sol";
 
 /**
  * @notice WIMX is a wrapped IMX contract that allows users to wrap their native IMX.

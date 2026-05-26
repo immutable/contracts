@@ -48,7 +48,7 @@ Solidity imports use paths such as `@imtbl/contracts/contracts/...` (see [packag
 Once `@imtbl/contracts` is installed, use the Solidity files from the package by importing them:
 
 ```solidity
-pragma solidity >=0.8.19 <0.8.29;
+pragma solidity >=0.8.19 <=0.8.27;
 
 import "@imtbl/contracts/contracts/token/erc721/preset/ImmutableERC721.sol";
 

@@ -1,6 +1,6 @@
 // Copyright Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache 2.0
-pragma solidity >=0.8.19 <0.8.29;
+pragma solidity >=0.8.19 <=0.8.27;
 
 import {SafeERC20, IERC20} from "openzeppelin-contracts-5/token/ERC20/utils/SafeERC20.sol";
 import {Address} from "openzeppelin-contracts-5/utils/Address.sol";

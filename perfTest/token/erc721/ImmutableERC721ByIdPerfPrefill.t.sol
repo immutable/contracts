@@ -1,7 +1,7 @@
 // Copyright Immutable Pty Ltd 2018 - 2026
 // SPDX-License-Identifier: Apache 2.0
 
-pragma solidity >=0.8.19 <0.8.29;
+pragma solidity >=0.8.19 <=0.8.27;
 
 import {ImmutableERC721ByIdPerfTest} from "./ImmutableERC721ByIdPerf.t.sol";
 import {ImmutableERC721} from "../../../contracts/token/erc721/preset/ImmutableERC721.sol";

@@ -7,7 +7,7 @@ import {EIP712, ECDSA} from "@openzeppelin/contracts/utils/cryptography/EIP712.s
 import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 import {IERC1155Permit} from "./IERC1155Permit.sol";
-import {IImmutableERC1155Errors} from "../../../errors/Errors.sol";
+import {IImmutableERC1155Errors} from "../interfaces/IImmutableERC1155Errors.sol";
 
 abstract contract ERC1155Permit is ERC1155Burnable, EIP712, IERC1155Permit, IImmutableERC1155Errors {
     bytes32 private immutable _PERMIT_TYPEHASH =

@@ -9,7 +9,7 @@ import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 import {IERC4494} from "./IERC4494.sol";
 import {ERC721, ERC721Burnable, IERC165} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 // Errors
-import {IImmutableERC721Errors} from "../../../errors/Errors.sol";
+import {IImmutableERC721Errors} from "../interfaces/IImmutableERC721Errors.sol";
 
 /**
  * @title ERC721Permit: An extension of the ERC721Burnable NFT standard that supports off-chain approval via permits.

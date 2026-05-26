@@ -5,7 +5,7 @@ pragma solidity >=0.8.19 <0.8.29;
 
 import {IOperatorAllowlist} from "./IOperatorAllowlist.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-import {OperatorAllowlistEnforcementErrors} from "../errors/Errors.sol";
+import {OperatorAllowlistEnforcementErrors} from "./OperatorAllowlistEnforcementErrors.sol";
 
 // Disable this code size warning as there is no plan to change this logic.
 // forge-lint: disable-start(unwrapped-modifier-logic)

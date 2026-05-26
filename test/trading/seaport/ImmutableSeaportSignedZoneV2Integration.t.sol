@@ -34,7 +34,7 @@ contract ImmutableSeaportSignedZoneV2IntegrationTest is Test, SigningTestHelper 
     string private constant ERC1155_ARTIFACT = "./foundry-out/ImmutableERC1155.sol/ImmutableERC1155.json";
     string private constant ERC20_ARTIFACT =
         "./foundry-out/ImmutableERC20FixedSupplyNoBurn.sol/ImmutableERC20FixedSupplyNoBurn.json";
-    string private constant ERC721_ARTIFACT = "./foundry-out/ImmutableERC721.sol/ImmutableERC721.json";
+    string private constant ERC721_ARTIFACT = "./foundry-out/ImmutableERC721V2.sol/ImmutableERC721V2.json";
     string private constant ZONE_ARTIFACT =
         "./foundry-out/ImmutableSignedZoneV2Harness.t.sol/ImmutableSignedZoneV2Harness.json";
 

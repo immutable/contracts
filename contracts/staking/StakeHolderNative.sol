@@ -36,8 +36,7 @@ contract StakeHolderNative is StakeHolderBase {
             // Look for revert reason and bubble it up if present.
             // Revert reasons should contain an error selector, which is four bytes long.
             if (returndata.length >= 4) {
-                assembly ("memory-safe")
-                {
+                assembly ("memory-safe") {
                     let returndata_size := mload(returndata)
                     revert(add(32, returndata), returndata_size)
                 }

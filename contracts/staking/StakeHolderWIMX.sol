@@ -21,10 +21,9 @@ contract StakeHolderWIMX is StakeHolderNative {
      * @param _distributeAdmin the address to grant `DISTRIBUTE_ROLE` to
      * @param _wIMXToken The address of the WIMX contract.
      */
-    function initialize(address _roleAdmin, address _upgradeAdmin, address _distributeAdmin, address _wIMXToken
-    ) 
-        public 
-        initializer 
+    function initialize(address _roleAdmin, address _upgradeAdmin, address _distributeAdmin, address _wIMXToken)
+        public
+        initializer
     {
         __StakeHolderBase_init(_roleAdmin, _upgradeAdmin, _distributeAdmin);
         wIMX = IWIMX(_wIMXToken);

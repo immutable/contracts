@@ -8,7 +8,7 @@ import {
     IImmutableERC721,
     IImmutableERC721Errors
 } from "../../../contracts/token/erc721/interfaces/IImmutableERC721.sol";
-import {MockEIP1271Wallet} from "../../../contracts/mocks/MockEIP1271Wallet.sol";
+import {MockEIP1271Wallet} from "../../utils/mocks/MockEIP1271Wallet.sol";
 
 // Test the original ImmutableERC721 contract: Operational tests
 abstract contract ERC721OperationalByQuantityBaseTest is ERC721OperationalBaseTest {

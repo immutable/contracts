@@ -8,9 +8,9 @@ import {IImmutableERC1155Errors} from "../../../contracts/token/erc1155/interfac
 import {OperatorAllowlistUpgradeable} from "../../../contracts/allowlist/OperatorAllowlistUpgradeable.sol";
 import {Sign} from "../../utils/Sign.sol";
 import {DeployOperatorAllowlist} from "../../utils/DeployAllowlistProxy.sol";
-import {MockWallet} from "../../../contracts/mocks/MockWallet.sol";
-import {MockWalletFactory} from "../../../contracts/mocks/MockWalletFactory.sol";
-import {MockEIP1271Wallet} from "../../../contracts/mocks/MockEIP1271Wallet.sol";
+import {MockWallet} from "../../utils/mocks/MockWallet.sol";
+import {MockWalletFactory} from "../../utils/mocks/MockWalletFactory.sol";
+import {MockEIP1271Wallet} from "../../utils/mocks/MockEIP1271Wallet.sol";
 
 contract ImmutableERC1155Test is Test {
     ImmutableERC1155 public immutableERC1155;

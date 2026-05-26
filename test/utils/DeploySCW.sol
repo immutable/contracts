@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
-import {MockWallet} from "../../contracts/mocks/MockWallet.sol";
-import {MockWalletFactory} from "../../contracts/mocks/MockWalletFactory.sol";
+import {MockWallet} from "./mocks/MockWallet.sol";
+import {MockWalletFactory} from "./mocks/MockWalletFactory.sol";
 
 contract DeploySCWallet {
     MockWallet public mockWalletModule;

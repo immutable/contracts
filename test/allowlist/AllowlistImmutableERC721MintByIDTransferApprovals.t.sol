@@ -2,16 +2,16 @@ pragma solidity >=0.8.19 <0.8.29;
 
 import {Test} from "forge-std/Test.sol";
 
-import {MockWallet} from "../../contracts/mocks/MockWallet.sol";
-import {MockFactory} from "../../contracts/mocks/MockFactory.sol";
+import {MockWallet} from "../utils/mocks/MockWallet.sol";
+import {MockFactory} from "../utils/mocks/MockFactory.sol";
 import {ImmutableERC721MintByID} from "../../contracts/token/erc721/preset/ImmutableERC721MintByID.sol";
 import {OperatorAllowlistUpgradeable} from "../../contracts/allowlist/OperatorAllowlistUpgradeable.sol";
 import {DeployOperatorAllowlist} from "../utils/DeployAllowlistProxy.sol";
 import {DeploySCWallet} from "../utils/DeploySCW.sol";
 import {DeployMockMarketPlace} from "../utils/DeployMockMarketPlace.sol";
-import {MockMarketplace} from "../../contracts/mocks/MockMarketplace.sol";
-import {MockDisguisedEOA} from "../../contracts/mocks/MockDisguisedEOA.sol";
-import {MockOnReceive} from "../../contracts/mocks/MockOnReceive.sol";
+import {MockMarketplace} from "../utils/mocks/MockMarketplace.sol";
+import {MockDisguisedEOA} from "../utils/mocks/MockDisguisedEOA.sol";
+import {MockOnReceive} from "../utils/mocks/MockOnReceive.sol";
 
 contract AllowlistERC721TransferApprovals is Test {
     OperatorAllowlistUpgradeable public allowlist;

@@ -8,7 +8,7 @@ import {
     IImmutableERC721Structs,
     IImmutableERC721Errors
 } from "../../../contracts/token/erc721/interfaces/IImmutableERC721.sol";
-import {MockEIP1271Wallet} from "../../../contracts/mocks/MockEIP1271Wallet.sol";
+import {MockEIP1271Wallet} from "../../utils/mocks/MockEIP1271Wallet.sol";
 
 abstract contract ERC721OperationalBaseTest is ERC721BaseTest {
     function testMint() public {

@@ -7,7 +7,7 @@ import {ERC20Burnable} from "openzeppelin-contracts-4/token/ERC20/extensions/ERC
 import {ERC20Capped} from "openzeppelin-contracts-4/token/ERC20/extensions/ERC20Capped.sol";
 import {AccessControl, IAccessControl} from "openzeppelin-contracts-4/access/AccessControl.sol";
 import {MintingAccessControl} from "../../../access/MintingAccessControl.sol";
-import {IImmutableERC20Errors} from "./Errors.sol";
+import {IImmutableERC20Errors} from "./IImmutableERC20Errors.sol";
 
 /**
  * @notice ERC 20 contract that wraps Open Zeppelin's ERC 20 contract.

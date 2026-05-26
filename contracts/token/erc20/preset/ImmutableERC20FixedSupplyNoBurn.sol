@@ -4,7 +4,7 @@ pragma solidity >=0.8.19 <0.8.29;
 
 import {Ownable} from "openzeppelin-contracts-4/access/Ownable.sol";
 import {ERC20} from "openzeppelin-contracts-4/token/ERC20/ERC20.sol";
-import {IImmutableERC20Errors} from "./Errors.sol";
+import {IImmutableERC20Errors} from "./IImmutableERC20Errors.sol";
 
 /**
  * @notice ERC 20 contract that mints a fixed total supply of tokens when the contract

@@ -8,7 +8,6 @@ import {IERC1271} from "openzeppelin-contracts-4/interfaces/IERC1271.sol";
 import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 import {IERC4494} from "./IERC4494.sol";
 import {ERC721, ERC721Burnable, IERC165} from "openzeppelin-contracts-4/token/ERC721/extensions/ERC721Burnable.sol";
-// Errors
 import {IImmutableERC721Errors} from "../interfaces/IImmutableERC721Errors.sol";
 
 /**

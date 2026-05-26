@@ -4,6 +4,7 @@ pragma solidity >=0.8.19 <0.8.29;
 
 import {Test} from "forge-std/Test.sol";
 import {Ownable} from "openzeppelin-contracts-5/access/Ownable.sol";
+import {Pausable} from "openzeppelin-contracts-5/utils/Pausable.sol";
 import {IDeployer} from "@axelar-network/axelar-gmp-sdk-solidity/contracts/interfaces/IDeployer.sol";
 import {
     ERC20MintableBurnable
@@ -310,10 +311,10 @@ contract AccessControlledDeployerTest is Test, Create3Utils {
         rbacDeployer.pause();
         assertTrue(rbacDeployer.paused());
 
-        vm.expectRevert("Pausable: paused");
+        vm.expectRevert(abi.encodeWithSelector(Pausable.EnforcedPause.selector));
         rbacDeployer.deploy(IDeployer(address(0)), new bytes(0), bytes32(0));
 
-        vm.expectRevert("Pausable: paused");
+        vm.expectRevert(abi.encodeWithSelector(Pausable.EnforcedPause.selector));
         rbacDeployer.deployAndInit(IDeployer(address(0)), new bytes(0), bytes32(0), new bytes(0));
     }
 

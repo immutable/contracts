@@ -106,7 +106,7 @@ abstract contract StakeHolderTimeDelayBaseTest is StakeHolderBaseTest {
         bytes32 salt = bytes32(uint256(1));
         uint256 theDelay = delay - 1; // Too small
 
-        vm.expectRevert(abi.encodePacked("TimelockController: insufficient delay"));
+        vm.expectRevert(abi.encodeWithSelector(TimelockController.TimelockInsufficientDelay.selector, theDelay, delay));
         vm.prank(adminProposer);
         stakeHolderTimeDelay.schedule(target, value, data, predecessor, salt, theDelay);
     }
@@ -130,9 +130,11 @@ abstract contract StakeHolderTimeDelayBaseTest is StakeHolderBaseTest {
         vm.prank(adminProposer);
         stakeHolderTimeDelay.schedule(target, value, data, predecessor, salt, theDelay);
 
-        vm.expectRevert(abi.encodePacked("TimelockController: operation is not ready"));
-        vm.warp(timeNow + delay - 1); // Too early
+        bytes32 operationId = stakeHolderTimeDelay.hashOperation(target, value, data, predecessor, salt);
 
+        vm.expectRevert(abi.encodeWithSelector(TimelockController.TimelockUnexpectedOperationState.selector, operationId, 
+            bytes32(1 << uint8(TimelockController.OperationState.Ready))));
+        vm.warp(timeNow + delay - 1); // Too early
         vm.prank(adminExecutor);
         stakeHolderTimeDelay.execute(target, value, data, predecessor, salt);
     }

@@ -26,6 +26,3 @@
 	path = lib/axelar-gmp-sdk-solidity
 	url = https://github.com/axelarnetwork/axelar-gmp-sdk-solidity
 
-[submodule "lib/creator-token-standards"]
-	path = lib/creator-token-standards
-	url = https://github.com/limitbreakinc/creator-token-standards

@@ -5,12 +5,6 @@
       "rev": "3f6ae1a1d22590e1c9b6af66781adc72148ee447"
     }
   },
-  "lib/creator-token-standards": {
-    "tag": {
-      "name": "v5.0.0",
-      "rev": "980a63b33591d568b6e04b45f37deba05a55f787"
-    }
-  },
   "lib/forge-std": {
     "tag": {
       "name": "v1.11.0",

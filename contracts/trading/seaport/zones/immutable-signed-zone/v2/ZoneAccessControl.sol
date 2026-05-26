@@ -3,9 +3,9 @@
 
 pragma solidity 0.8.20;
 
-import {AccessControl} from "openzeppelin-contracts-5.0.2/access/AccessControl.sol";
-import {IAccessControl} from "openzeppelin-contracts-5.0.2/access/IAccessControl.sol";
-import {AccessControlEnumerable} from "openzeppelin-contracts-5.0.2/access/extensions/AccessControlEnumerable.sol";
+import {AccessControl} from "openzeppelin-contracts-5/access/AccessControl.sol";
+import {IAccessControl} from "openzeppelin-contracts-5/access/IAccessControl.sol";
+import {AccessControlEnumerable} from "openzeppelin-contracts-5/access/extensions/AccessControlEnumerable.sol";
 import {
     ZoneAccessControlEventsAndErrors
 } from "../../../../../../contracts/trading/seaport/zones/immutable-signed-zone/v2/interfaces/ZoneAccessControlEventsAndErrors.sol";

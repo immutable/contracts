@@ -29,10 +29,10 @@
       "rev": "fd81a96f01cc42ef1c9a5399364968d0e07e9e90"
     }
   },
-  "lib/openzeppelin-contracts-5.0.2": {
+  "lib/openzeppelin-contracts-5.6.1": {
     "tag": {
-      "name": "v5.0.2",
-      "rev": "dbb6104ce834628e473d2173bbc9d47f81a9eec3"
+      "name": "v5.6.1",
+      "rev": "5fd1781b1454fd1ef8e722282f86f9293cacf256"
     }
   },
   "lib/openzeppelin-contracts-upgradeable-4.9.3": {

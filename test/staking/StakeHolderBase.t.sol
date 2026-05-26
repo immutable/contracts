@@ -11,7 +11,7 @@ import {StakeHolderNativeV2} from "../../contracts/staking/StakeHolderNativeV2.s
 import {StakeHolderWIMX} from "../../contracts/staking/StakeHolderWIMX.sol";
 import {StakeHolderWIMXV2} from "../../contracts/staking/StakeHolderWIMXV2.sol";
 import {WIMX} from "../../contracts/staking/WIMX.sol";
-import {ERC1967Proxy} from "openzeppelin-contracts-4.9.3/proxy/ERC1967/ERC1967Proxy.sol";
+import {ERC1967Proxy} from "openzeppelin-contracts-4/proxy/ERC1967/ERC1967Proxy.sol";
 
 abstract contract StakeHolderBaseTest is Test {
     bytes32 public defaultAdminRole;

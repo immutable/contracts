@@ -23,10 +23,10 @@
       "rev": "33e9030f308500b422926a1be12d7a1e4d6adc06"
     }
   },
-  "lib/openzeppelin-contracts-4.9.3": {
+  "lib/openzeppelin-contracts-4.9.6": {
     "tag": {
-      "name": "v4.9.3",
-      "rev": "fd81a96f01cc42ef1c9a5399364968d0e07e9e90"
+      "name": "v4.9.6",
+      "rev": "dc44c9f1a4c3b10af99492eed84f83ed244203f6"
     }
   },
   "lib/openzeppelin-contracts-5.6.1": {
@@ -35,10 +35,10 @@
       "rev": "5fd1781b1454fd1ef8e722282f86f9293cacf256"
     }
   },
-  "lib/openzeppelin-contracts-upgradeable-4.9.3": {
+  "lib/openzeppelin-contracts-upgradeable-4.9.6": {
     "tag": {
-      "name": "v4.9.3",
-      "rev": "3d4c0d5741b131c231e558d7a6213392ab3672a5"
+      "name": "v4.9.6",
+      "rev": "2d081f24cac1a867f6f73d512f2022e1fa987854"
     }
   },
   "lib/solidity-bytes-utils": {

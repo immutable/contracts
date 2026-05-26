@@ -4,7 +4,7 @@ pragma solidity >=0.8.19 <0.8.29;
 
 import {
     IAccessControlEnumerableUpgradeable
-} from "openzeppelin-contracts-upgradeable-4.9.3/access/IAccessControlEnumerableUpgradeable.sol";
+} from "openzeppelin-contracts-upgradeable-4/access/IAccessControlEnumerableUpgradeable.sol";
 
 /**
  * @title IStakeHolder: Interface for staking system.

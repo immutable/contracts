@@ -4,12 +4,6 @@
 [submodule "lib/solidity-bytes-utils"]
 	path = lib/solidity-bytes-utils
 	url = https://github.com/GNSPS/solidity-bytes-utils
-[submodule "lib/openzeppelin-contracts-4.9.3"]
-	path = lib/openzeppelin-contracts-4.9.3
-	url = https://github.com/OpenZeppelin/openzeppelin-contracts
-[submodule "lib/openzeppelin-contracts-upgradeable-4.9.3"]
-	path = lib/openzeppelin-contracts-upgradeable-4.9.3
-	url = https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable
 [submodule "lib/immutable-seaport-1.5.0+im1.3"]
 	path = lib/immutable-seaport-1.5.0+im1.3
 	url = https://github.com/immutable/seaport
@@ -23,3 +17,9 @@
 [submodule "lib/openzeppelin-contracts-5.6.1"]
 	path = lib/openzeppelin-contracts-5.6.1
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "lib/openzeppelin-contracts-4.9.6"]
+	path = lib/openzeppelin-contracts-4.9.6
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "lib/openzeppelin-contracts-upgradeable-4.9.6"]
+	path = lib/openzeppelin-contracts-upgradeable-4.9.6
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable

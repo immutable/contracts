@@ -1,8 +1,8 @@
 forge-std/=lib/forge-std/src/
-@openzeppelin/contracts/=lib/openzeppelin-contracts-4.9.3/contracts/
+@openzeppelin/contracts/=lib/openzeppelin-contracts-4.9.6/contracts/
 openzeppelin-contracts-5=lib/openzeppelin-contracts-5.6.1/contracts/
-openzeppelin-contracts-upgradeable-4.9.3/=lib/openzeppelin-contracts-upgradeable-4.9.3/contracts/
-openzeppelin-contracts-4.9.3/=lib/openzeppelin-contracts-4.9.3/contracts/
+openzeppelin-contracts-upgradeable-4/=lib/openzeppelin-contracts-upgradeable-4.9.6/contracts/
+openzeppelin-contracts-4/=lib/openzeppelin-contracts-4.9.6/contracts/
 solidity-bytes-utils/=lib/solidity-bytes-utils/
 seaport/contracts/=lib/immutable-seaport-1.5.0+im1.3/contracts/
 seaport-core/=lib/immutable-seaport-core-1.5.0+im1/

@@ -2,13 +2,13 @@
 // SPDX-License-Identifier: Apache 2
 pragma solidity >=0.8.19 <0.8.29;
 
-import {UUPSUpgradeable} from "openzeppelin-contracts-upgradeable-4.9.3/proxy/utils/UUPSUpgradeable.sol";
+import {UUPSUpgradeable} from "openzeppelin-contracts-upgradeable-4/proxy/utils/UUPSUpgradeable.sol";
 import {
     AccessControlEnumerableUpgradeable
-} from "openzeppelin-contracts-upgradeable-4.9.3/access/AccessControlEnumerableUpgradeable.sol";
+} from "openzeppelin-contracts-upgradeable-4/access/AccessControlEnumerableUpgradeable.sol";
 import {
     ReentrancyGuardUpgradeable
-} from "openzeppelin-contracts-upgradeable-4.9.3/security/ReentrancyGuardUpgradeable.sol";
+} from "openzeppelin-contracts-upgradeable-4/security/ReentrancyGuardUpgradeable.sol";
 import {IStakeHolder} from "./IStakeHolder.sol";
 
 /**

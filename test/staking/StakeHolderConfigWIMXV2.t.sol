@@ -7,7 +7,7 @@ import {StakeHolderWIMXV2} from "../../contracts/staking/StakeHolderWIMXV2.sol";
 import {IStakeHolder} from "../../contracts/staking/IStakeHolder.sol";
 import {StakeHolderBaseV2} from "../../contracts/staking/StakeHolderBaseV2.sol";
 import {StakeHolderConfigBaseTestV2} from "./StakeHolderConfigBaseV2.t.sol";
-import {ERC1967Proxy} from "openzeppelin-contracts-4.9.3/proxy/ERC1967/ERC1967Proxy.sol";
+import {ERC1967Proxy} from "openzeppelin-contracts-4/proxy/ERC1967/ERC1967Proxy.sol";
 
 contract StakeHolderWIMXV3a is StakeHolderWIMXV2 {
     function upgradeStorage(

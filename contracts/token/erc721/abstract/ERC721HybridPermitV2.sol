@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
-import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
-import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
-import {IERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import {ECDSA} from "@openzeppelin-4/contracts/utils/cryptography/ECDSA.sol";
+import {EIP712} from "@openzeppelin-4/contracts/utils/cryptography/EIP712.sol";
+import {IERC1271} from "@openzeppelin-4/contracts/interfaces/IERC1271.sol";
+import {IERC165} from "@openzeppelin-4/contracts/utils/introspection/ERC165.sol";
 import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 import {IERC4494} from "./IERC4494.sol";
 import {ERC721HybridV2} from "./ERC721HybridV2.sol";

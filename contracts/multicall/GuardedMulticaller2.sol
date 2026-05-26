@@ -3,16 +3,16 @@
 pragma solidity >=0.8.19 <0.8.29;
 
 // Signature Validation
-import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
+import {SignatureChecker} from "@openzeppelin-4/contracts/utils/cryptography/SignatureChecker.sol";
 
 // Access Control
-import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {AccessControl} from "@openzeppelin-4/contracts/access/AccessControl.sol";
 
 // Reentrancy Guard
-import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {ReentrancyGuard} from "@openzeppelin-4/contracts/security/ReentrancyGuard.sol";
 
 // EIP-712 Typed Structs
-import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import {EIP712} from "@openzeppelin-4/contracts/utils/cryptography/EIP712.sol";
 
 /**
  *

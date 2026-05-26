@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
 import {console} from "forge-std/console.sol";
-import {TimelockController} from "openzeppelin-contracts-4/governance/TimelockController.sol";
+import {TimelockController} from "openzeppelin-contracts-5/governance/TimelockController.sol";
 import {UUPSUpgradeable} from "openzeppelin-contracts-upgradeable-4/proxy/utils/UUPSUpgradeable.sol";
 
 import {IStakeHolder} from "../../contracts/staking/IStakeHolder.sol";

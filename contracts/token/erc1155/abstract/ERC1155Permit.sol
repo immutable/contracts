@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
-import {ERC1155Burnable, ERC1155} from "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Burnable.sol";
-import {EIP712, ECDSA} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
-import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
+import {ERC1155Burnable, ERC1155} from "@openzeppelin-4/contracts/token/ERC1155/extensions/ERC1155Burnable.sol";
+import {EIP712, ECDSA} from "@openzeppelin-4/contracts/utils/cryptography/EIP712.sol";
+import {IERC1271} from "@openzeppelin-4/contracts/interfaces/IERC1271.sol";
 import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 import {IERC1155Permit} from "./IERC1155Permit.sol";
 import {IImmutableERC1155Errors} from "../interfaces/IImmutableERC1155Errors.sol";

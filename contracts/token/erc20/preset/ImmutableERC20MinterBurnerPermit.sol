@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19 <0.8.29;
 
-import {ERC20Permit, ERC20} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
-import {ERC20Burnable} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-import {ERC20Capped} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
-import {AccessControl, IAccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {ERC20Permit, ERC20} from "@openzeppelin-4/contracts/token/ERC20/extensions/ERC20Permit.sol";
+import {ERC20Burnable} from "@openzeppelin-4/contracts/token/ERC20/extensions/ERC20Burnable.sol";
+import {ERC20Capped} from "@openzeppelin-4/contracts/token/ERC20/extensions/ERC20Capped.sol";
+import {AccessControl, IAccessControl} from "@openzeppelin-4/contracts/access/AccessControl.sol";
 import {MintingAccessControl} from "../../../access/MintingAccessControl.sol";
 import {IImmutableERC20Errors} from "./Errors.sol";
 

@@ -5,13 +5,13 @@
  */
 pragma solidity >=0.8.19 <0.8.29;
 
-import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import {IERC721Metadata} from "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
-import {Context} from "@openzeppelin/contracts/utils/Context.sol";
-import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {IERC165, ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
-import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {IERC721} from "@openzeppelin-4/contracts/token/ERC721/IERC721.sol";
+import {IERC721Receiver} from "@openzeppelin-4/contracts/token/ERC721/IERC721Receiver.sol";
+import {IERC721Metadata} from "@openzeppelin-4/contracts/token/ERC721/extensions/IERC721Metadata.sol";
+import {Context} from "@openzeppelin-4/contracts/utils/Context.sol";
+import {Strings} from "@openzeppelin-4/contracts/utils/Strings.sol";
+import {IERC165, ERC165} from "@openzeppelin-4/contracts/utils/introspection/ERC165.sol";
+import {Address} from "@openzeppelin-4/contracts/utils/Address.sol";
 
 abstract contract ERC721PsiV2 is Context, ERC165, IERC721, IERC721Metadata {
     using Address for address;

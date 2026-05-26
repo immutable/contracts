@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
-import {ERC721, IERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {ERC721, IERC721} from "@openzeppelin-4/contracts/token/ERC721/ERC721.sol";
 import {AccessControlEnumerable, MintingAccessControl} from "../../../access/MintingAccessControl.sol";
-import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
+import {ERC2981} from "@openzeppelin-4/contracts/token/common/ERC2981.sol";
 import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnforced.sol";
 import {ERC721HybridPermitV2} from "./ERC721HybridPermitV2.sol";
 import {ERC721HybridV2} from "./ERC721HybridV2.sol";

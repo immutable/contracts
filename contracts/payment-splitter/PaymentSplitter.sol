@@ -2,11 +2,11 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
-import {SafeERC20, IERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {Address} from "@openzeppelin/contracts/utils/Address.sol";
-import {AccessControlEnumerable} from "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
+import {SafeERC20, IERC20} from "@openzeppelin-4/contracts/token/ERC20/utils/SafeERC20.sol";
+import {Address} from "@openzeppelin-4/contracts/utils/Address.sol";
+import {AccessControlEnumerable} from "@openzeppelin-4/contracts/access/AccessControlEnumerable.sol";
 import {IPaymentSplitterErrors} from "./PaymentSplitterErrors.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {ReentrancyGuard} from "@openzeppelin-4/contracts/security/ReentrancyGuard.sol";
 
 /**
  * @title PaymentSplitter

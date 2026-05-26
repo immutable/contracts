@@ -13,7 +13,7 @@ import {
     Order
 } from "seaport-types/src/lib/ConsiderationStructs.sol";
 import {OrderType} from "seaport-types/src/lib/ConsiderationEnums.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Ownable} from "@openzeppelin-4/contracts/access/Ownable.sol";
 import {ImmutableSeaportEvents} from "./interfaces/ImmutableSeaportEvents.sol";
 
 /**

@@ -3,7 +3,7 @@
 pragma solidity >=0.8.19 <0.8.29;
 
 import {IWIMX} from "./IWIMX.sol";
-import {Address} from "@openzeppelin/contracts/utils/Address.sol";
+import {Address} from "@openzeppelin-4/contracts/utils/Address.sol";
 
 /**
  * @notice WIMX is a wrapped IMX contract that allows users to wrap their native IMX.

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <0.8.29;
 
-import {IERC721, ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
+import {IERC721, ERC721} from "@openzeppelin-4/contracts/token/ERC721/ERC721.sol";
+import {BitMaps} from "@openzeppelin-4/contracts/utils/structs/BitMaps.sol";
 import {ERC721PsiV2, ERC721PsiBurnableV2} from "../erc721psi/ERC721PsiBurnableV2.sol";
 import {IImmutableERC721Errors} from "../interfaces/IImmutableERC721Errors.sol";
 import {IImmutableERC721Structs} from "../interfaces/IImmutableERC721Structs.sol";

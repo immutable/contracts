@@ -6,7 +6,7 @@ import {StakeHolderWIMX} from "../../contracts/staking/StakeHolderWIMX.sol";
 import {StakeHolderWIMXV2} from "../../contracts/staking/StakeHolderWIMXV2.sol";
 import {IStakeHolder} from "../../contracts/staking/IStakeHolder.sol";
 import {StakeHolderTimeDelayBaseTest} from "./StakeHolderTimeDelayBase.t.sol";
-import {ERC1967Proxy} from "openzeppelin-contracts-4/proxy/ERC1967/ERC1967Proxy.sol";
+import {ERC1967Proxy} from "openzeppelin-contracts-5/proxy/ERC1967/ERC1967Proxy.sol";
 import {StakeHolderBaseV2} from "../../contracts/staking/StakeHolderBaseV2.sol";
 
 contract StakeHolderWIMXV3a is StakeHolderWIMXV2 {

@@ -6,9 +6,7 @@ import {UUPSUpgradeable} from "openzeppelin-contracts-upgradeable-4/proxy/utils/
 import {
     AccessControlEnumerableUpgradeable
 } from "openzeppelin-contracts-upgradeable-4/access/AccessControlEnumerableUpgradeable.sol";
-import {
-    ReentrancyGuardUpgradeable
-} from "openzeppelin-contracts-upgradeable-4/security/ReentrancyGuardUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "openzeppelin-contracts-upgradeable-4/security/ReentrancyGuardUpgradeable.sol";
 import {IStakeHolder} from "./IStakeHolder.sol";
 
 /**

@@ -134,8 +134,9 @@ abstract contract StakeHolderTimeDelayBaseTest is StakeHolderBaseTest {
 
         /// forge-lint: disable-next-line(incorrect-shift)
         bytes32 stateMask = bytes32(1 << uint8(TimelockController.OperationState.Ready));
-        vm.expectRevert(abi.encodeWithSelector(TimelockController.TimelockUnexpectedOperationState.selector, operationId, 
-            stateMask));
+        vm.expectRevert(
+            abi.encodeWithSelector(TimelockController.TimelockUnexpectedOperationState.selector, operationId, stateMask)
+        );
         vm.warp(timeNow + delay - 1); // Too early
         vm.prank(adminExecutor);
         stakeHolderTimeDelay.execute(target, value, data, predecessor, salt);

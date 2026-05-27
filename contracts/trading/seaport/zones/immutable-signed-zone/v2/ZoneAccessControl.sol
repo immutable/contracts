@@ -6,9 +6,7 @@ pragma solidity >=0.8.19 <=0.8.27;
 import {AccessControl} from "openzeppelin-contracts-5/access/AccessControl.sol";
 import {IAccessControl} from "openzeppelin-contracts-5/access/IAccessControl.sol";
 import {AccessControlEnumerable} from "openzeppelin-contracts-5/access/extensions/AccessControlEnumerable.sol";
-import {
-    ZoneAccessControlEventsAndErrors
-} from "./interfaces/ZoneAccessControlEventsAndErrors.sol";
+import {ZoneAccessControlEventsAndErrors} from "./interfaces/ZoneAccessControlEventsAndErrors.sol";
 
 /**
  * @notice ZoneAccessControl encapsulates access control functionality for the zone.

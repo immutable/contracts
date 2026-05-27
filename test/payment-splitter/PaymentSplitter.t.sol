@@ -76,18 +76,42 @@ contract PaymentSplitterTest is Test {
     }
 
     function testInvalidPermissions() public {
-        vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, defaultAdmin, paymentSplitter.TOKEN_REGISTRAR_ROLE()));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
+                defaultAdmin,
+                paymentSplitter.TOKEN_REGISTRAR_ROLE()
+            )
+        );
         vm.prank(defaultAdmin);
         paymentSplitter.addToAllowlist(erc20s);
 
         vm.startPrank(registrarAdmin);
-        vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, registrarAdmin, paymentSplitter.DEFAULT_ADMIN_ROLE()));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
+                registrarAdmin,
+                paymentSplitter.DEFAULT_ADMIN_ROLE()
+            )
+        );
         paymentSplitter.overridePayees(payees, shares);
 
-        vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, registrarAdmin, paymentSplitter.DEFAULT_ADMIN_ROLE()));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
+                registrarAdmin,
+                paymentSplitter.DEFAULT_ADMIN_ROLE()
+            )
+        );
         paymentSplitter.revokeReleaseFundsRole(fundsAdmin);
 
-        vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, registrarAdmin, paymentSplitter.RELEASE_FUNDS_ROLE()));
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
+                registrarAdmin,
+                paymentSplitter.RELEASE_FUNDS_ROLE()
+            )
+        );
         paymentSplitter.releaseAll();
         vm.stopPrank();
     }

@@ -6,6 +6,7 @@
  */
 
 export {
+  GuardedMulticallerAbi,  
   GuardedMulticaller2Abi,
   ImmutableERC721Abi,
   ImmutableERC721MintByIdAbi,

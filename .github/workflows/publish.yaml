@@ -56,7 +56,6 @@ jobs:
       - name: Publish to NPM
         uses: JS-DevTools/npm-publish@0fd2f4369c5d6bcfcde6091a7c527d810b9b5c3f # v4.1.5
         with:
-          token: ${{ secrets.CONTRACTS_NPM_TOKEN }}
           registry: https://registry.npmjs.org/
           package: package.json
           tag: latest

@@ -11,7 +11,7 @@ import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnf
 
 // Utils
 import {BitMaps} from "openzeppelin-contracts-4/utils/structs/BitMaps.sol";
-import {AccessControlEnumerable, MintingAccessControl} from "../../../access/MintingAccessControl.sol";
+import {AccessControlEnumerable, MintingAccessControl} from "../../utils/MintingAccessControl.sol";
 
 // forge-lint: disable-start(pascal-case-struct)
 

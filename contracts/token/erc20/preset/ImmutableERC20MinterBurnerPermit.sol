@@ -6,7 +6,7 @@ import {ERC20Permit, ERC20} from "openzeppelin-contracts-4/token/ERC20/extension
 import {ERC20Burnable} from "openzeppelin-contracts-4/token/ERC20/extensions/ERC20Burnable.sol";
 import {ERC20Capped} from "openzeppelin-contracts-4/token/ERC20/extensions/ERC20Capped.sol";
 import {AccessControl, IAccessControl} from "openzeppelin-contracts-4/access/AccessControl.sol";
-import {MintingAccessControl} from "../../../access/MintingAccessControl.sol";
+import {MintingAccessControl} from "../../utils/MintingAccessControl.sol";
 import {IImmutableERC20Errors} from "./IImmutableERC20Errors.sol";
 
 /**

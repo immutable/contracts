@@ -25,14 +25,13 @@ import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
  */
 contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
     /// @dev Mapping of address to function selector to permitted status
-    // solhint-disable-next-line named-parameters-mapping
     mapping(address => mapping(bytes4 => bool)) private permittedFunctionSelectors;
 
     /// @dev Mapping of reference to executed status
-    // solhint-disable-next-line named-parameters-mapping
     mapping(bytes32 => bool) private replayProtection;
 
     /// @dev Only those with MULTICALL_SIGNER_ROLE can generate valid signatures for execute function.
+    // forge-lint: disable-next-line(unsafe-typecast)
     bytes32 public constant MULTICALL_SIGNER_ROLE = bytes32("MULTICALL_SIGNER_ROLE");
 
     /// @dev EIP712 typehash for execute function
@@ -101,7 +100,6 @@ contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
      * @param _name Name of the contract
      * @param _version Version of the contract
      */
-    // solhint-disable-next-line no-unused-vars
     constructor(address _owner, string memory _name, string memory _version) EIP712(_name, _version) {
         _grantRole(DEFAULT_ADMIN_ROLE, _owner);
     }
@@ -149,7 +147,6 @@ contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
      * @param _signature Signature of the multicall signer
      */
     // slither-disable-start low-level-calls,cyclomatic-complexity
-    // solhint-disable-next-line code-complexity
     function execute(
         address _multicallSigner,
         bytes32 _reference,
@@ -158,7 +155,6 @@ contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
         uint256 _deadline,
         bytes calldata _signature
     ) external nonReentrant {
-        // solhint-disable-next-line not-rely-on-time
         if (_deadline < block.timestamp) {
             revert Expired(_deadline);
         }
@@ -201,14 +197,12 @@ contract GuardedMulticaller is AccessControl, ReentrancyGuard, EIP712 {
 
         // Multicall
         for (uint256 i = 0; i < _targets.length; i++) {
-            // solhint-disable avoid-low-level-calls
             // slither-disable-next-line calls-loop
             (bool success, bytes memory returnData) = _targets[i].call(_data[i]);
             if (!success) {
                 if (returnData.length == 0) {
                     revert FailedCall(_targets[i], _data[i]);
                 }
-                // solhint-disable-next-line no-inline-assembly
                 assembly {
                     revert(add(returnData, 32), mload(returnData))
                 }

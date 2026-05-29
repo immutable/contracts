@@ -6,7 +6,7 @@ import {IERC721Metadata} from "openzeppelin-contracts-4/interfaces/IERC721Metada
 import {IERC2981} from "openzeppelin-contracts-4/interfaces/IERC2981.sol";
 import {IERC5267} from "openzeppelin-contracts-4/interfaces/IERC5267.sol";
 import {IERC4494} from "../abstract/IERC4494.sol";
-import {IMintingAccessControl} from "../../../access/IMintingAccessControl.sol";
+import {IMintingAccessControl} from "../../utils/IMintingAccessControl.sol";
 
 import {IImmutableERC721Structs} from "./IImmutableERC721Structs.sol";
 import {IImmutableERC721Errors} from "./IImmutableERC721Errors.sol";

@@ -45,7 +45,7 @@
     "test:coverage": "forge coverage",
     "format": "forge fmt",
     "format:check": "forge fmt --check",
-    "lint": "solhint 'contracts/**/*.sol'",
+    "lint": "forge lint",
     "clean": "node -e \"const fs=require('fs');['dist','foundry-out','cache','artifacts','broadcast'].forEach(p=>fs.rmSync(p,{recursive:true,force:true}))\""
   },
   "engines": {

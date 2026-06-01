@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <=0.8.27;
 
-import {IAccessControlEnumerable} from "openzeppelin-contracts-4/access/IAccessControlEnumerable.sol";
+import {IAccessControlEnumerable} from "openzeppelin-contracts-5/access/extensions/IAccessControlEnumerable.sol";
 
 interface IMintingAccessControl is IAccessControlEnumerable {
     /**

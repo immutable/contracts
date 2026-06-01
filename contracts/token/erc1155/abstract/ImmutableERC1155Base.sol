@@ -5,7 +5,7 @@ pragma solidity >=0.8.19 <=0.8.27;
 import {ERC1155Permit, ERC1155} from "./ERC1155Permit.sol";
 
 // Allowlist
-import {ERC2981} from "openzeppelin-contracts-4/token/common/ERC2981.sol";
+import {ERC2981} from "openzeppelin-contracts-5/token/common/ERC2981.sol";
 import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnforced.sol";
 
 import {AccessControlEnumerable, MintingAccessControl} from "../../utils/MintingAccessControl.sol";
@@ -176,23 +176,19 @@ abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Perm
     }
 
     /**
-     * @notice See Openzepplin ERC1155._beforeTokenTransfer.
-     * @param operator The address performing the transfer.
+     * @notice See Openzepplin ERC1155._update.
      * @param from The address from which the token is being transferred.
      * @param to The address to which the token is being transferred.
      * @param ids The token identifiers to transfer.
      * @param amounts The amounts to transfer per token id.
-     * @param data Additional data with no specified format, sent in call to `to`.
      */
-    function _beforeTokenTransfer(
-        address operator,
+    function _update(
         address from,
         address to,
         uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory data
+        uint256[] memory amounts
     ) internal virtual override {
-        super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
+        super._update(from, to, ids, amounts);
 
         if (from == address(0)) {
             for (uint256 i = 0; i < ids.length; ++i) {
@@ -214,36 +210,36 @@ abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Perm
     }
 
     /**
-     * @notice Override of _safeTransferFrom from {ERC1155}, with added Allowlist transfer validation
+     * @notice Override of safeTransferFrom from {ERC1155}, with added Allowlist transfer validation
      * @param from The current owner of the token.
      * @param to The new owner.
      * @param id The token identifier to transfer.
      * @param value The amount to transfer.
      * @param data Additional data with no specified format, sent in call to `to`.
      */
-    function _safeTransferFrom(address from, address to, uint256 id, uint256 value, bytes memory data)
-        internal
+    function safeTransferFrom(address from, address to, uint256 id, uint256 value, bytes memory data)
+        public
         override
         validateTransfer(from, to)
     {
-        super._safeTransferFrom(from, to, id, value, data);
+        super.safeTransferFrom(from, to, id, value, data);
     }
 
     /**
-     * @notice Override of _safeBatchTransferFrom from {ERC1155}, with added Allowlist transfer validation
+     * @notice Override of safeBatchTransferFrom from {ERC1155}, with added Allowlist transfer validation
      * @param from The current owner of the token.
      * @param to The new owner.
      * @param ids The token identifiers to transfer.
      * @param values The amounts to transfer per token id.
      * @param data Additional data with no specified format, sent in call to `to`.
      */
-    function _safeBatchTransferFrom(
+    function safeBatchTransferFrom(
         address from,
         address to,
         uint256[] memory ids,
         uint256[] memory values,
         bytes memory data
-    ) internal override validateTransfer(from, to) {
-        super._safeBatchTransferFrom(from, to, ids, values, data);
+    ) public override validateTransfer(from, to) {
+        super.safeBatchTransferFrom(from, to, ids, values, data);
     }
 }

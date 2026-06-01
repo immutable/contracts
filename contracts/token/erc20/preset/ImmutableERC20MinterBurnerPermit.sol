@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19 <=0.8.27;
 
-import {ERC20Permit, ERC20} from "openzeppelin-contracts-4/token/ERC20/extensions/ERC20Permit.sol";
-import {ERC20Burnable} from "openzeppelin-contracts-4/token/ERC20/extensions/ERC20Burnable.sol";
-import {ERC20Capped} from "openzeppelin-contracts-4/token/ERC20/extensions/ERC20Capped.sol";
-import {AccessControl, IAccessControl} from "openzeppelin-contracts-4/access/AccessControl.sol";
+import {ERC20Permit, ERC20} from "openzeppelin-contracts-5/token/ERC20/extensions/ERC20Permit.sol";
+import {ERC20Burnable} from "openzeppelin-contracts-5/token/ERC20/extensions/ERC20Burnable.sol";
+import {ERC20Capped} from "openzeppelin-contracts-5/token/ERC20/extensions/ERC20Capped.sol";
+import {AccessControl, IAccessControl} from "openzeppelin-contracts-5/access/AccessControl.sol";
 import {MintingAccessControl} from "../../utils/MintingAccessControl.sol";
 import {IImmutableERC20Errors} from "./IImmutableERC20Errors.sol";
 
@@ -66,10 +66,8 @@ contract ImmutableERC20MinterBurnerPermit is ERC20Capped, ERC20Burnable, ERC20Pe
         super.renounceRole(role, account);
     }
 
-    /**
-     * @dev Delegate to Open Zeppelin's ERC20Capped contract.
-     */
-    function _mint(address account, uint256 amount) internal override(ERC20, ERC20Capped) {
-        ERC20Capped._mint(account, amount);
-    }
+    /// @inheritdoc ERC20
+    function _update(address from, address to, uint256 value) internal virtual override (ERC20Capped, ERC20) {
+        ERC20Capped._update(from, to, value);
+    }    
 }

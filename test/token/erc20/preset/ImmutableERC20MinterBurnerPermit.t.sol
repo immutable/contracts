@@ -5,6 +5,8 @@ import {Test} from "forge-std/Test.sol";
 
 import {ImmutableERC20MinterBurnerPermit} from "contracts/token/erc20/preset/ImmutableERC20MinterBurnerPermit.sol";
 import {IImmutableERC20Errors} from "contracts/token/erc20/preset/IImmutableERC20Errors.sol";
+import {ERC20Capped} from "openzeppelin-contracts-5/token/ERC20/extensions/ERC20Capped.sol";
+import {IAccessControl} from "openzeppelin-contracts-5/access/IAccessControl.sol";
 
 contract ImmutableERC20MinterBurnerPermitTest is Test {
     ImmutableERC20MinterBurnerPermit public erc20;
@@ -83,10 +85,9 @@ contract ImmutableERC20MinterBurnerPermitTest is Test {
     function testOnlyMinterCanMint() public {
         address to = makeAddr("to");
         uint256 amount = 100;
+        bytes32 minterRole = erc20.MINTER_ROLE();
         vm.prank(hubOwner);
-        vm.expectRevert(
-            "AccessControl: account 0xa268ae5516b47694c3f15805a560258dbcdefd08 is missing role 0x4d494e5445525f524f4c45000000000000000000000000000000000000000000"
-        );
+        vm.expectRevert(abi.encodeWithSelector(IAccessControl.AccessControlUnauthorizedAccount.selector, hubOwner, minterRole));
         erc20.mint(to, amount);
     }
 
@@ -110,12 +111,14 @@ contract ImmutableERC20MinterBurnerPermitTest is Test {
 
     function testCanOnlyMintUpToMaxSupply() public {
         address to = makeAddr("to");
-        uint256 amount = 1000;
+        uint256 amount = maxSupply;
         vm.startPrank(minter);
         erc20.mint(to, amount);
-        assertEq(erc20.balanceOf(to), amount);
-        vm.expectRevert("ERC20Capped: cap exceeded");
-        erc20.mint(to, 1);
+        assertEq(erc20.balanceOf(to), amount, "Balance ");
+        assertEq(erc20.totalSupply(), amount, "Total supply");
+        uint256 extra = 1;
+        vm.expectRevert(abi.encodeWithSelector(ERC20Capped.ERC20ExceededCap.selector, (amount + extra), maxSupply));
+        erc20.mint(to, extra);
         vm.stopPrank();
     }
 
@@ -126,7 +129,7 @@ contract ImmutableERC20MinterBurnerPermitTest is Test {
         erc20.mint(tokenReceiver, amount);
         assertEq(erc20.balanceOf(tokenReceiver), 100);
         vm.prank(tokenReceiver);
-        erc20.increaseAllowance(operator, amount);
+        erc20.approve(operator, amount);
         vm.prank(operator);
         erc20.burnFrom(tokenReceiver, amount);
         assertEq(erc20.balanceOf(tokenReceiver), 0);

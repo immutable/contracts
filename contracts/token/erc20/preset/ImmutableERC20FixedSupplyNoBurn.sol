@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19 <=0.8.27;
 
-import {Ownable} from "openzeppelin-contracts-4/access/Ownable.sol";
-import {ERC20} from "openzeppelin-contracts-4/token/ERC20/ERC20.sol";
+import {Ownable} from "openzeppelin-contracts-5/access/Ownable.sol";
+import {ERC20} from "openzeppelin-contracts-5/token/ERC20/ERC20.sol";
 import {IImmutableERC20Errors} from "./IImmutableERC20Errors.sol";
 
 /**
@@ -26,10 +26,9 @@ contract ImmutableERC20FixedSupplyNoBurn is Ownable, ERC20 {
      * @param _hubOwner The account associated with Immutable Hub.
      */
     constructor(string memory _name, string memory _symbol, uint256 _totalSupply, address _treasurer, address _hubOwner)
-        ERC20(_name, _symbol)
+        ERC20(_name, _symbol) Ownable(_hubOwner)
     {
         _mint(_treasurer, _totalSupply);
-        _transferOwnership(_hubOwner);
     }
 
     /**

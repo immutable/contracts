@@ -87,7 +87,7 @@ interface IImmutableERC721 is
      * @notice Set the default royalty receiver address
      *  @param receiver the address to receive the royalty
      *  @param feeNumerator the royalty fee numerator
-     *  @dev This can only be called by the an admin. See ERC2981 for more details on _setDefaultRoyalty
+     *  @dev This can only be called by an admin. See ERC2981 for more details on _setDefaultRoyalty
      */
     function setDefaultRoyaltyReceiver(address receiver, uint96 feeNumerator) external;
 
@@ -96,7 +96,7 @@ interface IImmutableERC721 is
      *  @param tokenId the token to set the royalty for
      *  @param receiver the address to receive the royalty
      *  @param feeNumerator the royalty fee numerator
-     *  @dev This can only be called by the a minter. See ERC2981 for more details on _setTokenRoyalty
+     *  @dev This can only be called by a minter. See ERC2981 for more details on _setTokenRoyalty
      */
     function setNFTRoyaltyReceiver(uint256 tokenId, address receiver, uint96 feeNumerator) external;
 
@@ -105,7 +105,7 @@ interface IImmutableERC721 is
      *  @param tokenIds the list of tokens to set the royalty for
      *  @param receiver the address to receive the royalty
      *  @param feeNumerator the royalty fee numerator
-     *  @dev This can only be called by the a minter. See ERC2981 for more details on _setTokenRoyalty
+     *  @dev This can only be called by a minter. See ERC2981 for more details on _setTokenRoyalty
      */
     function setNFTRoyaltyReceiverBatch(uint256[] calldata tokenIds, address receiver, uint96 feeNumerator) external;
 

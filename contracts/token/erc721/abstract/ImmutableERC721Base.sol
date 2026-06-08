@@ -11,7 +11,7 @@ import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnf
 
 // Utils
 import {BitMaps} from "openzeppelin-contracts-4/utils/structs/BitMaps.sol";
-import {AccessControlEnumerable, MintingAccessControl} from "../../../access/MintingAccessControl.sol";
+import {AccessControlEnumerable, MintingAccessControlOz4} from "../../utils/MintingAccessControlOz4.sol";
 
 // forge-lint: disable-start(pascal-case-struct)
 
@@ -21,7 +21,7 @@ import {AccessControlEnumerable, MintingAccessControl} from "../../../access/Min
     own minting functionality to meet the needs of the inheriting contract.
 */
 
-abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAccessControl, ERC721Permit, ERC2981 {
+abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAccessControlOz4, ERC721Permit, ERC2981 {
     using BitMaps for BitMaps.BitMap;
     ///     =====   State Variables  =====
 

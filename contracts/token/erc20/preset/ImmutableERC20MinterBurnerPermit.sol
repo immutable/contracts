@@ -6,7 +6,7 @@ import {ERC20Permit, ERC20} from "openzeppelin-contracts-4/token/ERC20/extension
 import {ERC20Burnable} from "openzeppelin-contracts-4/token/ERC20/extensions/ERC20Burnable.sol";
 import {ERC20Capped} from "openzeppelin-contracts-4/token/ERC20/extensions/ERC20Capped.sol";
 import {AccessControl, IAccessControl} from "openzeppelin-contracts-4/access/AccessControl.sol";
-import {MintingAccessControl} from "../../../access/MintingAccessControl.sol";
+import {MintingAccessControlOz4} from "../../utils/MintingAccessControlOz4.sol";
 import {IImmutableERC20Errors} from "./IImmutableERC20Errors.sol";
 
 /**
@@ -17,7 +17,7 @@ import {IImmutableERC20Errors} from "./IImmutableERC20Errors.sol";
  *  The Immutable Hub uses this function to help associate the ERC 20 contract
  *  with a specific Immutable Hub account.
  */
-contract ImmutableERC20MinterBurnerPermit is ERC20Capped, ERC20Burnable, ERC20Permit, MintingAccessControl {
+contract ImmutableERC20MinterBurnerPermit is ERC20Capped, ERC20Burnable, ERC20Permit, MintingAccessControlOz4 {
     /// @notice Role to mint tokens
     // forge-lint: disable-next-line(unsafe-typecast)
     bytes32 public constant HUB_OWNER_ROLE = bytes32("HUB_OWNER_ROLE");

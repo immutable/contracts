@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity ^0.8.19;
 
-import "forge-std/Test.sol";
+import {Test} from "forge-std/Test.sol";
 import {GuardedMulticaller} from "../../contracts/multicall/GuardedMulticaller.sol";
 import {MockFunctions} from "./MockFunctions.sol";
 import {SigUtils} from "./SigUtils.t.sol";
@@ -327,13 +327,13 @@ contract GuardedMulticallerTest is Test {
         assertFalse(gmc.hasBeenExecuted(invalidRef));
     }
 
-    function testIsFunctionPermitted() public {
+    function testIsFunctionPermitted() public view {
         assertTrue(gmc.isFunctionPermitted(address(mock), MockFunctions.succeed.selector));
         assertTrue(gmc.isFunctionPermitted(address(mock), MockFunctions.revertWithNoReason.selector));
         assertFalse(gmc.isFunctionPermitted(address(mock), MockFunctions.notPermitted.selector));
     }
 
-    function testHashBytesArray() public {
+    function testHashBytesArray() public view {
         bytes[] memory data = new bytes[](2);
         data[0] = abi.encodeWithSignature("succeed()");
         data[1] = abi.encodeWithSignature("notSucceed()");

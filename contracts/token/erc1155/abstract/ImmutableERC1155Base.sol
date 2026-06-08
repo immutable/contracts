@@ -8,9 +8,9 @@ import {ERC1155Permit, ERC1155} from "./ERC1155Permit.sol";
 import {ERC2981} from "openzeppelin-contracts-4/token/common/ERC2981.sol";
 import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnforced.sol";
 
-import {AccessControlEnumerable, MintingAccessControl} from "../../../access/MintingAccessControl.sol";
+import {AccessControlEnumerable, MintingAccessControlOz4} from "../../utils/MintingAccessControlOz4.sol";
 
-abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Permit, ERC2981, MintingAccessControl {
+abstract contract ImmutableERC1155Base is OperatorAllowlistEnforced, ERC1155Permit, ERC2981, MintingAccessControlOz4 {
     /// @dev Contract level metadata
     string public contractURI;
 

@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <=0.8.27;
 
-import {IERC721, ERC721} from "openzeppelin-contracts-4/token/ERC721/ERC721.sol";
-import {BitMaps} from "openzeppelin-contracts-4/utils/structs/BitMaps.sol";
+import {IERC721, ERC721} from "openzeppelin-contracts-5/token/ERC721/ERC721.sol";
+import {BitMaps} from "openzeppelin-contracts-5/utils/structs/BitMaps.sol";
 import {ERC721PsiV2, ERC721PsiBurnableV2} from "../erc721psi/ERC721PsiBurnableV2.sol";
 import {IImmutableERC721Errors} from "../interfaces/IImmutableERC721Errors.sol";
 import {IImmutableERC721Structs} from "../interfaces/IImmutableERC721Structs.sol";
@@ -41,10 +41,18 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnableV2, ERC721, IImmutableERC72
      *  @param tokenId the id of the token to burn
      */
     function burn(uint256 tokenId) public virtual {
-        if (!_isApprovedOrOwner(_msgSender(), tokenId)) {
+        address owner = ownerOf(tokenId);
+        if (!_isAuthorized(owner, _msgSender(), tokenId)) {
             revert IImmutableERC721NotOwnerOrOperator(tokenId);
         }
-        _burn(tokenId);
+        if (tokenId < mintBatchByQuantityThreshold()) {
+            ERC721._burn(tokenId);
+            _burnedTokens.set(tokenId);
+            // slither-disable-next-line costly-loop
+            _idMintTotalSupply--;
+        } else {
+            ERC721PsiBurnableV2._burn(tokenId);
+        }
     }
 
     /**
@@ -105,13 +113,6 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnableV2, ERC721, IImmutableERC72
      */
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC721, ERC721PsiV2) returns (bool) {
         return ERC721.supportsInterface(interfaceId);
-    }
-
-    /**
-     * @inheritdoc ERC721
-     */
-    function safeTransferFrom(address from, address to, uint256 tokenId) public virtual override(IERC721, ERC721) {
-        safeTransferFrom(from, to, tokenId, "");
     }
 
     /**
@@ -308,52 +309,12 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnableV2, ERC721, IImmutableERC72
     /**
      * @notice refer to erc721 or erc721psi
      */
-    function _transfer(address from, address to, uint256 tokenId) internal virtual override(ERC721, ERC721PsiV2) {
+    function _update(address to, uint256 tokenId, address auth) internal virtual override(ERC721, ERC721PsiV2) returns (address) {
         if (tokenId < mintBatchByQuantityThreshold()) {
-            ERC721._transfer(from, to, tokenId);
+            return ERC721._update(to, tokenId, auth);
         } else {
-            ERC721PsiV2._transfer(from, to, tokenId);
+            return ERC721PsiV2._update(to, tokenId, auth);
         }
-    }
-
-    /**
-     * @notice burn a token by id, if the token is below the threshold it is burned via erc721
-     *  additional tracking is added for erc721 to prevent re-minting. Refer to erc721 or erc721psi
-     *  @param tokenId the id of the token to burn
-     */
-    function _burn(uint256 tokenId) internal virtual override(ERC721, ERC721PsiBurnableV2) {
-        if (tokenId < mintBatchByQuantityThreshold()) {
-            ERC721._burn(tokenId);
-            _burnedTokens.set(tokenId);
-            // slither-disable-next-line costly-loop
-            _idMintTotalSupply--;
-        } else {
-            ERC721PsiBurnableV2._burn(tokenId);
-        }
-    }
-
-    /**
-     * @notice refer to erc721 or erc721psi
-     */
-    function _approve(address to, uint256 tokenId) internal virtual override(ERC721, ERC721PsiV2) {
-        if (tokenId < mintBatchByQuantityThreshold()) {
-            return ERC721._approve(to, tokenId);
-        }
-        return ERC721PsiV2._approve(to, tokenId);
-    }
-
-    /**
-     * @notice refer to erc721 or erc721psi
-     */
-    function _safeTransfer(address from, address to, uint256 tokenId, bytes memory _data)
-        internal
-        virtual
-        override(ERC721, ERC721PsiV2)
-    {
-        if (tokenId < mintBatchByQuantityThreshold()) {
-            return ERC721._safeTransfer(from, to, tokenId, _data);
-        }
-        return ERC721PsiV2._safeTransfer(from, to, tokenId, _data);
     }
 
     /**
@@ -390,7 +351,7 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnableV2, ERC721, IImmutableERC72
     /**
      * @notice refer to erc721 or erc721psi
      */
-    function _isApprovedOrOwner(address spender, uint256 tokenId)
+    function _isAuthorized(address owner, address spender, uint256 tokenId)
         internal
         view
         virtual
@@ -398,9 +359,9 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnableV2, ERC721, IImmutableERC72
         returns (bool)
     {
         if (tokenId < mintBatchByQuantityThreshold()) {
-            return ERC721._isApprovedOrOwner(spender, tokenId);
+            return ERC721._isAuthorized(owner, spender, tokenId);
         }
-        return ERC721PsiV2._isApprovedOrOwner(spender, tokenId);
+        return ERC721PsiV2._isAuthorized(owner, spender, tokenId);
     }
 
     /**
@@ -412,4 +373,14 @@ abstract contract ERC721HybridV2 is ERC721PsiBurnableV2, ERC721, IImmutableERC72
         }
         return ERC721PsiV2._exists(tokenId);
     }
+
+    /**
+     * @notice refer to erc721 or erc721psi
+     */
+    function _approve(address to, uint256 tokenId, address auth, bool emitEvent) internal view virtual override(ERC721, ERC721PsiV2) {
+        if (tokenId < mintBatchByQuantityThreshold()) {
+            ERC721._approve(to, tokenId, auth, emitEvent);
+        }
+        return ERC721PsiV2._approve(to, tokenId, auth, emitEvent);
+    }    
 }

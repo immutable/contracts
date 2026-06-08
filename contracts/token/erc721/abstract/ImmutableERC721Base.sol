@@ -6,11 +6,11 @@ pragma solidity >=0.8.19 <=0.8.27;
 import {ERC721Permit, ERC721, ERC721Burnable} from "./ERC721Permit.sol";
 
 // Allowlist
-import {ERC2981} from "openzeppelin-contracts-4/token/common/ERC2981.sol";
+import {ERC2981} from "openzeppelin-contracts-5/token/common/ERC2981.sol";
 import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnforced.sol";
 
 // Utils
-import {BitMaps} from "openzeppelin-contracts-4/utils/structs/BitMaps.sol";
+import {BitMaps} from "openzeppelin-contracts-5/utils/structs/BitMaps.sol";
 import {AccessControlEnumerable, MintingAccessControl} from "../../utils/MintingAccessControl.sol";
 
 // forge-lint: disable-start(pascal-case-struct)
@@ -216,20 +216,21 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
      * @inheritdoc ERC721
      * @dev Note it will validate the to address in the allowlist
      */
-    function _approve(address to, uint256 tokenId) internal override(ERC721) validateApproval(to) {
-        super._approve(to, tokenId);
+    function _approve(address to, uint256 tokenId, address auth, bool emitEvent) internal override(ERC721) validateApproval(to) {
+        super._approve(to, tokenId, auth, emitEvent);
     }
 
     /**
      * @inheritdoc ERC721Permit
      * @dev Note it will validate the to and from address in the allowlist
      */
-    function _transfer(address from, address to, uint256 tokenId)
+    function _update(address to, uint256 tokenId, address auth)
         internal
         override(ERC721Permit)
-        validateTransfer(from, to)
+        returns (address)
     {
-        super._transfer(from, to, tokenId);
+        address previousOwner = super._update(to, tokenId, auth);
+        validateTransfer(previousOwner, to);
     }
 
     ///     =====  Internal functions  =====

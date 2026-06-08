@@ -65,16 +65,6 @@ implement interfaces. However, the preset contracts implement the following inte
 The contract hierarchy for the preset contracts is shown below. The _Base_ layer combines the ERC 721 capabilities with the operator allow list and access control. The _Permit_ layer adds in the Permit capability. The _Hybrid_ contracts combine mint by ID and mint by quantity capabilities. The _PSI_ contracts provide mint by quantity capability.
 
 ```
-ImmutableERC721
-|- ImmutableERC721HybridBase
-   |- OperatorAllowlistEnforced
-   |- MintingAccessControl
-   |- ERC721HybridPermit
-      |- ERC721Hybrid
-         |- ERC721PsiBurnable 
-         |  |- ERC721Psi
-         |- Open Zeppelin's ERC721
-
 ImmutableERC721V2
 |- ImmutableERC721HybridBaseV2
    |- OperatorAllowlistEnforced

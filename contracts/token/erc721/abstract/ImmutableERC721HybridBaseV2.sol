@@ -2,9 +2,9 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <=0.8.27;
 
-import {ERC721, IERC721} from "openzeppelin-contracts-4/token/ERC721/ERC721.sol";
+import {ERC721, IERC721} from "openzeppelin-contracts-5/token/ERC721/ERC721.sol";
 import {AccessControlEnumerable, MintingAccessControl} from "../../utils/MintingAccessControl.sol";
-import {ERC2981} from "openzeppelin-contracts-4/token/common/ERC2981.sol";
+import {ERC2981} from "openzeppelin-contracts-5/token/common/ERC2981.sol";
 import {OperatorAllowlistEnforced} from "../../../allowlist/OperatorAllowlistEnforced.sol";
 import {ERC721HybridPermitV2} from "./ERC721HybridPermitV2.sol";
 import {ERC721HybridV2} from "./ERC721HybridV2.sol";
@@ -99,21 +99,21 @@ abstract contract ImmutableERC721HybridBaseV2 is
      * @inheritdoc ERC721HybridV2
      * @dev Note it will validate the to address in the allowlist
      */
-    function _approve(address to, uint256 tokenId) internal virtual override(ERC721HybridV2) validateApproval(to) {
-        super._approve(to, tokenId);
+    function _approve(address to, uint256 tokenId, address auth, bool emitEvent) internal virtual override(ERC721HybridV2) validateApproval(to) {
+        super._approve(to, tokenId, auth, emitEvent);
     }
 
     /**
      * @inheritdoc ERC721HybridPermitV2
      * @dev Note it will validate the from and to address in the allowlist
      */
-    function _transfer(address from, address to, uint256 tokenId)
+    function _update(address to, uint256 tokenId, address auth)
         internal
         virtual
         override(ERC721HybridPermitV2)
-        validateTransfer(from, to)
     {
-        super._transfer(from, to, tokenId);
+        address previousOwner = super._update(to, tokenId, auth);
+        validateTransfer(previousOwner, to);
     }
 
     /**

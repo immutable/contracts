@@ -2,12 +2,13 @@
 // SPDX-License-Identifier: Apache 2.0
 pragma solidity >=0.8.19 <=0.8.27;
 
-import {ECDSA} from "openzeppelin-contracts-4/utils/cryptography/ECDSA.sol";
-import {EIP712} from "openzeppelin-contracts-4/utils/cryptography/EIP712.sol";
-import {IERC1271} from "openzeppelin-contracts-4/interfaces/IERC1271.sol";
+import {ECDSA} from "openzeppelin-contracts-5/utils/cryptography/ECDSA.sol";
+import {EIP712} from "openzeppelin-contracts-5/utils/cryptography/EIP712.sol";
+import {IERC1271} from "openzeppelin-contracts-5/interfaces/IERC1271.sol";
 import {BytesLib} from "solidity-bytes-utils/contracts/BytesLib.sol";
 import {IERC4494} from "./IERC4494.sol";
-import {ERC721, ERC721Burnable, IERC165} from "openzeppelin-contracts-4/token/ERC721/extensions/ERC721Burnable.sol";
+import {ERC721, ERC721Burnable} from "openzeppelin-contracts-5/token/ERC721/extensions/ERC721Burnable.sol";
+import {IERC165} from "openzeppelin-contracts-5/interfaces/IERC165.sol";
 import {IImmutableERC721Errors} from "../interfaces/IImmutableERC721Errors.sol";
 
 /**
@@ -69,14 +70,15 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
     }
 
     /**
-     * @notice Overrides the _transfer method from ERC721Hybrid to increment the nonce after a successful transfer.
-     * @param from The address from which the token is being transferred.
+     * @notice Overrides the _update method from ERC721Hybrid to increment the nonce after a successful transfer.
      * @param to The address to which the token is being transferred.
      * @param tokenId The ID of the token being transferred.
+     * @param auth The authorised spender.
+     * @return Previous owner.
      */
-    function _transfer(address from, address to, uint256 tokenId) internal virtual override(ERC721) {
+    function _update(address to, uint256 tokenId, address auth) internal virtual override(ERC721) returns (address) {
         _nonces[tokenId]++;
-        super._transfer(from, to, tokenId);
+        return super._update(to, tokenId, auth);
     }
 
     function _permit(address spender, uint256 tokenId, uint256 deadline, bytes memory sig) internal virtual {
@@ -88,7 +90,7 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
 
         // smart contract signature validation
         if (_isValidERC1271Signature(ownerOf(tokenId), digest, sig)) {
-            _approve(spender, tokenId);
+            _approve(spender, tokenId, spender, true);
             return;
         }
 
@@ -107,7 +109,7 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
         }
 
         if (_isValidEOASignature(recoveredSigner, tokenId)) {
-            _approve(spender, tokenId);
+            _approve(spender, tokenId, spender, true);
         } else {
             revert InvalidSignature();
         }
@@ -131,7 +133,8 @@ abstract contract ERC721Permit is ERC721Burnable, IERC4494, EIP712, IImmutableER
      * @return True if the signature is from an approved operator or owner, otherwise false.
      */
     function _isValidEOASignature(address recoveredSigner, uint256 tokenId) private view returns (bool) {
-        return recoveredSigner != address(0) && _isApprovedOrOwner(recoveredSigner, tokenId);
+        address owner = _ownerOf(tokenId);
+        return recoveredSigner != address(0) && _isAuthorized(owner, recoveredSigner, tokenId);
     }
 
     /**

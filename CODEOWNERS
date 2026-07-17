@@ -1,5 +1,5 @@
 # Global owner
-* @immutable/rollups
+* @immutable/ped-engineering-blockchain-list
 
 # Github actions
-/.github/ @immutable/rollups  @immutable/security
+/.github/ @immutable/ped-engineering-blockchain-list  @immutable/security

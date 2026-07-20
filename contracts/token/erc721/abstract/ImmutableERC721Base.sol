@@ -245,7 +245,7 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
         }
 
         // slither-disable-next-line costly-loop
-        _totalSupply = _totalSupply + mintRequest.tokenIds.length;
+        _totalSupply += mintRequest.tokenIds.length;
         for (uint256 j = 0; j < mintRequest.tokenIds.length; j++) {
             _mint(mintRequest.to, mintRequest.tokenIds[j]);
         }
@@ -264,7 +264,7 @@ abstract contract ImmutableERC721Base is OperatorAllowlistEnforced, MintingAcces
             _safeMint(mintRequest.to, mintRequest.tokenIds[j]);
         }
         // slither-disable-next-line costly-loop
-        _totalSupply = _totalSupply + mintRequest.tokenIds.length;
+        _totalSupply += mintRequest.tokenIds.length;
     }
 
     /**
